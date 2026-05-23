@@ -1,4 +1,4 @@
-"""Production-grade Pinecone托管向量库模块 v6.39
+"""Production-grade Pinecone托管向量库模块 V0.1
 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "pinecone"],
     "grade": "A",
-    "description": "Production-grade Pinecone托管向量库模块 v6.39 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标",
+    "description": "Production-grade Pinecone托管向量库模块 V0.1 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标",
 }
 import hashlib
 import logging

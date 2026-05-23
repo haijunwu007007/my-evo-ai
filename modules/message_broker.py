@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - MessageBroker 消息代理服务
+AUTO-EVO-AI V0.1 - MessageBroker 消息代理服务
 ===============================================
 企业级消息代理：Topic/Queue/PubSub/持久化/确认机制/消费者管理。
 支持：点对点队列、发布订阅、消息持久化、ACK/NACK、
@@ -33,7 +33,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "message"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - MessageBroker 消息代理服务 ===============================================",
+    "description": "AUTO-EVO-AI V0.1 - MessageBroker 消息代理服务 ===============================================",
 }
 import time
 import asyncio
@@ -331,7 +331,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             checks_run=6,
             error_rate=self.stats.error_rate,
             details=checks,
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

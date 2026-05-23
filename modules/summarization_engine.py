@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 摘要生成引擎
+AUTO-EVO-AI V0.1 — 摘要生成引擎
 Grade: A (生产级) | Category: AI能力
 职责：文本摘要、多文档摘要、关键信息提取、摘要质量评估
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["summarization", "engine", "adapter"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 摘要生成引擎 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — 摘要生成引擎 Grade: A (生产级) | Category: AI能力",
 }
 
 import os

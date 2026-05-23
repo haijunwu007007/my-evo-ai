@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 系统命令执行器
+AUTO-EVO-AI V0.1 — 系统命令执行器
 Grade: A (生产级) | Category: 工具链
 职责：安全执行系统命令、输出捕获、超时控制、命令历史、权限验证
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "system"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 系统命令执行器 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 系统命令执行器 Grade: A (生产级) | Category: 工具链",
 }
 
 import re

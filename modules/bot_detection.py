@@ -1,4 +1,4 @@
-"""Production-grade 机器人检测模块 v6.39
+"""Production-grade 机器人检测模块 V0.1
 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["bot", "engine"],
     "grade": "A",
-    "description": "Production-grade 机器人检测模块 v6.39 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分",
+    "description": "Production-grade 机器人检测模块 V0.1 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分",
 }
 import hashlib
 import logging

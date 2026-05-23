@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 模块管理器
+AUTO-EVO-AI V0.1 模块管理器
 统一管理所有功能模块的加载、调度和执行
 """
 

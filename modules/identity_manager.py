@@ -1,5 +1,5 @@
 """
-Identity Manager Module — AUTO-EVO-AI v6.38
+Identity Manager Module — AUTO-EVO-AI V0.1
 Enterprise-grade identity and authentication management.
 Multi-factor auth (MFA), SSO/SAML/OIDC, RBAC/ABAC, session management,
 password policy, identity federation, audit trail.
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "identity"],
     "grade": "A",
-    "description": "Identity Manager Module — AUTO-EVO-AI v6.38 Enterprise-grade identity and authentication management.",
+    "description": "Identity Manager Module — AUTO-EVO-AI V0.1 Enterprise-grade identity and authentication management.",
 }
 
 import hashlib

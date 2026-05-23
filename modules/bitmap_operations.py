@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 位图操作模块
+AUTO-EVO-AI V0.1 — 位图操作模块
 Grade: A (生产级) | Category: 数据结构
 职责：高效位图数据结构操作，支持位运算、统计、压缩、布隆过滤器集成
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["bitmap", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 位图操作模块 Grade: A (生产级) | Category: 数据结构",
+    "description": "AUTO-EVO-AI V0.1 — 位图操作模块 Grade: A (生产级) | Category: 数据结构",
 }
 
 import os
@@ -275,7 +275,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
     MODULE_ID = "bitmap_operations"
     MODULE_NAME = "位图操作"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

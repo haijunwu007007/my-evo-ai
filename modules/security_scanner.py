@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 安全扫描器
+AUTO-EVO-AI V0.1 — 安全扫描器
 Grade: A (生产级) | Category: 安全合规
 职责：漏洞扫描、代码安全审计、依赖安全、配置安全、合规检测
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "scanner", "security"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 安全扫描器 Grade: A (生产级) | Category: 安全合规",
+    "description": "AUTO-EVO-AI V0.1 — 安全扫描器 Grade: A (生产级) | Category: 安全合规",
 }
 
 import asyncio

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — ClickHouse OLAP管理模块
+AUTO-EVO-AI V0.1 — ClickHouse OLAP管理模块
 Grade: A (生产级) | Category: 数据存储
 职责：ClickHouse列式数据库连接管理、OLAP查询引擎、表引擎管理、数据写入/读取、聚合分析
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine", "clickhouse", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — ClickHouse OLAP管理模块 Grade: A (生产级) | Category: 数据存储",
+    "description": "AUTO-EVO-AI V0.1 — ClickHouse OLAP管理模块 Grade: A (生产级) | Category: 数据存储",
 }
 
 import asyncio

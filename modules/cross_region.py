@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 跨区域管理
+AUTO-EVO-AI V0.1 — 跨区域管理
 Grade: A (生产级) | Category: 基础设施
 职责：多区域管理、跨区域数据复制、流量调度、故障切换、延迟监控
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["cross", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 跨区域管理 Grade: A (生产级) | Category: 基础设施",
+    "description": "AUTO-EVO-AI V0.1 — 跨区域管理 Grade: A (生产级) | Category: 基础设施",
 }
 
 import os
@@ -116,7 +116,7 @@ class RoutingRule:
 class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "cross_region"
     MODULE_NAME = "cross_region"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

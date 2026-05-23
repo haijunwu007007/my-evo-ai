@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 扩展模块集
+AUTO-EVO-AI V0.1 扩展模块集
 继续实现剩余的核心模块
 """
 

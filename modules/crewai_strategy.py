@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — CrewAI 多智能体策略引擎
+AUTO-EVO-AI V0.1 — CrewAI 多智能体策略引擎
 Grade: A (生产级) | Category: 编排调度
 职责：管理多Agent协作策略，支持角色分配、任务分解、并行/串行执行、结果聚合
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "crewai", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — CrewAI 多智能体策略引擎 Grade: A (生产级) | Category: 编排调度",
+    "description": "AUTO-EVO-AI V0.1 — CrewAI 多智能体策略引擎 Grade: A (生产级) | Category: 编排调度",
 }
 
 import os

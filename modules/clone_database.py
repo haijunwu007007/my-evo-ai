@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 数据库克隆管理模块
+AUTO-EVO-AI V0.1 — 数据库克隆管理模块
 Grade: A (生产级) | Category: 数据存储
 职责：数据库克隆/快照管理，支持全量克隆、增量同步、环境复制、数据脱敏
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["clone", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 数据库克隆管理模块 Grade: A (生产级) | Category: 数据存储",
+    "description": "AUTO-EVO-AI V0.1 — 数据库克隆管理模块 Grade: A (生产级) | Category: 数据存储",
 }
 
 import asyncio

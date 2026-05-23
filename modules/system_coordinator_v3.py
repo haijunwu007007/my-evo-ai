@@ -3057,7 +3057,7 @@ class SystemCoordinatorV3(EnterpriseModule):
     - 向后兼容: 完全兼容 v2.0 API
     """
 
-    VERSION = "3.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, modules_dir: str = None):
         super().__init__()
@@ -3874,7 +3874,7 @@ class SystemCoordinatorV3(EnterpriseModule):
     def get_status(self) -> Dict:
         """获取系统状态"""
         return {
-            "version": f"v6.39 COORDINATED (v3.0)",
+            "version": f"V0.1 COORDINATED (v3.0)",
             "coordinator_version": self.VERSION,
             "status": self.status,
             "initialized": self.initialized,

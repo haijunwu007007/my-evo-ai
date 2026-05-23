@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v6.39 - Mobile Gateway
+        AUTO-EVO-AI V0.1 - Mobile Gateway
 Enterprise-grade mobile device communication gateway.
 Handles push notifications, device registration, message routing,
 bidirectional sync, and cross-platform mobile integration.
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["m50", "gateway"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - Mobile Gateway Enterprise-grade mobile device communication gateway.",
+    "description": "AUTO-EVO-AI V0.1 - Mobile Gateway Enterprise-grade mobile device communication gateway.",
 }
 
 import os
@@ -556,7 +556,7 @@ class MobileGateway:
     """
 
     MODULE_ID = "m50_mobile_gateway"
-    MODULE_VERSION = "6.39.0"
+    MODULE_VERSION = "V0.1"
     MODULE_CATEGORY = "communication"
 
     def __init__(self):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 日志分析引擎
+AUTO-EVO-AI V0.1 — 日志分析引擎
 Grade: A (生产级) | Category: 工具链
 职责：日志采集、解析、分析、异常检测、模式识别、报告生成
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["logging", "monitor", "log", "adapter"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 日志分析引擎 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 日志分析引擎 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

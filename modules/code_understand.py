@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 代码理解引擎
+AUTO-EVO-AI V0.1 — 代码理解引擎
 Grade: A (生产级) | Category: 开发工具
 职责：代码AST分析、依赖关系图、代码搜索、架构理解、复杂度计算
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["code", "developer", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 代码理解引擎 Grade: A (生产级) | Category: 开发工具",
+    "description": "AUTO-EVO-AI V0.1 — 代码理解引擎 Grade: A (生产级) | Category: 开发工具",
 }
 
 import os
@@ -294,7 +294,7 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     MODULE_ID = "code_understand"
     MODULE_NAME = "code_understand"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

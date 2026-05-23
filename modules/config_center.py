@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 配置中心模块（真实业务逻辑）
+AUTO-EVO-AI V0.1 — 配置中心模块（真实业务逻辑）
 Grade: A (生产级) | Category: 基础设施
 职责：配置集中管理、版本控制、动态刷新、环境隔离、加密存储、灰度发布
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 配置中心模块（真实业务逻辑） Grade: A (生产级) | Category: 基础设施",
+    "description": "AUTO-EVO-AI V0.1 — 配置中心模块（真实业务逻辑） Grade: A (生产级) | Category: 基础设施",
 }
 
 import os

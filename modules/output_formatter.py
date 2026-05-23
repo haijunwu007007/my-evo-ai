@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 | Enterprise Module
+AUTO-EVO-AI V0.1 | Enterprise Module
 output_formatter — 企业级输出格式化引擎
 多格式输出(JSON/YAML/XML/CSV/Markdown/HTML/Table)、模板系统、字段映射、
 条件渲染、嵌套格式化、数据验证、流式输出、字符编码管理
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "output"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 | Enterprise Module output_formatter — 企业级输出格式化引擎",
+    "description": "AUTO-EVO-AI V0.1 | Enterprise Module output_formatter — 企业级输出格式化引擎",
 }
 
 import json

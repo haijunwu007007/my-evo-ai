@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - DockerManager Docker容器编排管理
+AUTO-EVO-AI V0.1 - DockerManager Docker容器编排管理
 ===================================================
 企业级Docker管理：容器生命周期/镜像管理/网络/卷/Compose/多主机。
 支持：容器创建/启停/扩缩容、镜像构建/推送/清理、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "devops", "docker", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - DockerManager Docker容器编排管理 ===================================================",
+    "description": "AUTO-EVO-AI V0.1 - DockerManager Docker容器编排管理 ===================================================",
 }
 
 import time

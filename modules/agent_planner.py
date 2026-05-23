@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - Agent Planner 智能编排层
+AUTO-EVO-AI V0.1 - Agent Planner 智能编排层
 ====================================================
 核心能力：
   1. 自然语言意图理解 — 解析用户输入，识别任务类型和参数
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["multi-agent", "agent"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v7.0 - Agent Planner 智能编排层 ====================================================",
+    "description": "AUTO-EVO-AI V0.1 - Agent Planner 智能编排层 ====================================================",
 }
 
 import os
@@ -1507,9 +1507,26 @@ class IntentParser:
 
     def parse(self, message: str) -> Tuple[TaskType, Dict[str, Any]]:
         """
-        解析用户意图 — LLM优先，关键词fallback
+        解析用户意图 — 特化场景优先，LLM次之，关键词fallback
         返回: (task_type, extracted_params)
         """
+        message_lower = message.lower()
+
+        # 0. 高优先级特化检测 — 在LLM和关键词之前，确保不会因LLM返回错误类型而跳过
+        gh_keywords = [
+            "github trending", "github热门", "开源项目", "trending",
+            "今日ai", "ai开源", "AI开源", "今日热门", "潜力项目",
+            "热门开源", "流行项目", "开源推荐", "开源工具", "开源框架",
+            "github scanner", "github scan", "趋势项目", "热门ai",
+        ]
+        if any(kw in message_lower for kw in gh_keywords):
+            params = self._extract_params(message)
+            params["preferred_module"] = "githubtrending"
+            params["preferred_action"] = "trending"
+            params["preferred_desc"] = "GitHub Trending 扫描"
+            logger.info("[Planner] 检测到GitHub/Trending查询，直接重定向至 githubtrending.trending")
+            return TaskType.CUSTOM, params
+
         # 1. 尝试LLM解析
         if self._llm_available and len(message) > 5:
             try:
@@ -1520,7 +1537,6 @@ class IntentParser:
                 logger.debug(f"[Planner] LLM解析失败，回退关键词: {e}")
 
         # 2. 关键词fallback
-        message_lower = message.lower()
         best_type = TaskType.CUSTOM
         best_score = 0.0
         for task_type, keywords in self.INTENT_PATTERNS:
@@ -1533,6 +1549,7 @@ class IntentParser:
                 best_type = task_type
 
         params = self._extract_params(message)
+
         return best_type, params
 
     def _parse_with_llm(self, message: str) -> Tuple[TaskType, Dict[str, Any]]:
@@ -1627,6 +1644,14 @@ class IntentParser:
         根据任务类型生成执行计划
         优先使用LLM推荐的步骤，fallback到模板
         """
+        # 0. preferred_module 最高优先级 — 由 parse() 检测到特化场景时设定
+        preferred = params.get("preferred_module")
+        if preferred:
+            action = params.get("preferred_action", "status")
+            desc = params.get("preferred_desc", preferred)
+            logger.info(f"[Planner] 使用preferred_module: {preferred}.{action}")
+            return [{"module": preferred, "action": action, "desc": desc}]
+
         # 1. LLM推荐的步骤
         if params.get("llm_steps"):
             llm_steps = params["llm_steps"]
@@ -1791,7 +1816,7 @@ import math
 
 class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """
-    AUTO-EVO-AI v7.0 — Agent Planner 智能编排引擎（生产级）
+    AUTO-EVO-AI V0.1 — Agent Planner 智能编排引擎（生产级）
     ======================================================
     核心能力：
       1. 自然语言意图理解 — 解析用户输入，识别任务类型和参数
@@ -1842,7 +1867,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._plan_counter = 0
 
         # 模块执行器（通过HTTP调用API Server）
-        self._api_base = "http://localhost:8766"
+        self._api_base = "http://localhost:8765"
 
         # 对话上下文
         self._context: List[Dict[str, str]] = []
@@ -2230,6 +2255,18 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             task_type = TaskType(task)
         except ValueError:
             task_type = TaskType.CUSTOM
+            # 任务文本是自然语言（如"今日AI开源项目"），需要解析意图获取 preferred_module
+            if not params.get("preferred_module") and len(task) > 3:
+                try:
+                    _, parsed = self.intent_parser.parse(task)
+                    if parsed.get("preferred_module"):
+                        params = {**parsed, **params}
+                        logger.info(
+                            f"[Planner] 任务模式解析到preferred_module: "
+                            f"{params['preferred_module']}.{params.get('preferred_action','status')}"
+                        )
+                except Exception:
+                    pass
 
         steps_def = self.intent_parser.get_plan(task_type, params, self.registry)
         plan = await self._create_plan(task_type, f"task:{task}", steps_def, params, trace_id)

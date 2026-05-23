@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 大Key检测模块
+AUTO-EVO-AI V0.1 — 大Key检测模块
 Grade: A (生产级) | Category: 性能监控
 职责：检测缓存/数据库中的大Key，分析内存占用，提供优化建议
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "big", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 大Key检测模块 Grade: A (生产级) | Category: 性能监控",
+    "description": "AUTO-EVO-AI V0.1 — 大Key检测模块 Grade: A (生产级) | Category: 性能监控",
 }
 
 import os
@@ -232,7 +232,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
     MODULE_ID = "big_key_detection"
     MODULE_NAME = "大Key检测"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

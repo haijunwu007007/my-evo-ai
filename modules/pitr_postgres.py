@@ -1,4 +1,4 @@
-"""Production-grade PITR PostgreSQL模块 v6.39
+"""Production-grade PITR PostgreSQL模块 V0.1
 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["pitr", "engine", "manager"],
     "grade": "A",
-    "description": "Production-grade PITR PostgreSQL模块 v6.39 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理",
+    "description": "Production-grade PITR PostgreSQL模块 V0.1 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理",
 }
 import logging
 import time

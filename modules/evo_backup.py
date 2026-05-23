@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | EVO备份引擎
+AUTO-EVO-AI V0.1 | EVO备份引擎
 企业级备份系统 - 支持全量/增量/差异备份、压缩加密、定时调度
 
 功能特性:
@@ -42,7 +42,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["evo", "manager", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | EVO备份引擎 企业级备份系统 - 支持全量/增量/差异备份、压缩加密、定时调度",
+    "description": "AUTO-EVO-AI V0.1 | EVO备份引擎 企业级备份系统 - 支持全量/增量/差异备份、压缩加密、定时调度",
 }
 
 import os

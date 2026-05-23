@@ -1,4 +1,4 @@
-"""Production-grade 死信队列模块 v6.39
+"""Production-grade 死信队列模块 V0.1
 上市公司生产级实现 - 消息重试/退避策略/死信存储/告警/手动重放
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["dead"],
     "grade": "A",
-    "description": "Production-grade 死信队列模块 v6.39 上市公司生产级实现 - 消息重试/退避策略/死信存储/告警/手动重放",
+    "description": "Production-grade 死信队列模块 V0.1 上市公司生产级实现 - 消息重试/退避策略/死信存储/告警/手动重放",
 }
 import hashlib
 import json

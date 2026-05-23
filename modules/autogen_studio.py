@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — AutoGen Studio 多智能体编排模块
+AUTO-EVO-AI V0.1 — AutoGen Studio 多智能体编排模块
 Grade: A (生产级) | Category: AI智能体
 职责：管理AutoGen风格的多智能体对话编排、角色定义、消息路由、会话持久化
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["autogen", "manager", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — AutoGen Studio 多智能体编排模块 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — AutoGen Studio 多智能体编排模块 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os

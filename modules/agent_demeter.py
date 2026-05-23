@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Demeter AI智能体
+AUTO-EVO-AI V0.1 — Demeter AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：资源管理、配额分配、资源调度、容量规划、成本优化
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Demeter AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Demeter AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -101,7 +101,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "agent_demeter"
     MODULE_NAME = "Demeter智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

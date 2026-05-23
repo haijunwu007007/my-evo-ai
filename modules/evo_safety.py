@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v6.38 — Evolution Safety Controller
+        AUTO-EVO-AI V0.1 — Evolution Safety Controller
 Enterprise-grade safety guardrails for autonomous evolution processes.
 Monitors mutations, enforces constraints, and implements circuit-breakers
 to prevent unsafe autonomous behavior.
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["evo"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — Evolution Safety Controller Enterprise-grade safety guardrails for autonomous evolution processes.",
+    "description": "AUTO-EVO-AI V0.1 — Evolution Safety Controller Enterprise-grade safety guardrails for autonomous evolution processes.",
 }
 
 import time

@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - Agent安全防护（A级生产实现）
+AUTO-EVO-AI V0.1 - Agent安全防护（A级生产实现）
 ===============================================
 模块ID: agentguard-sec
 功能：AI Agent行为安全 — 输入过滤/输出审查/行为审计/危险操作拦截。
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "agentguard", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Agent安全防护（A级生产实现） ===============================================",
+    "description": "AUTO-EVO-AI V0.1 - Agent安全防护（A级生产实现） ===============================================",
 }
 
 import time
@@ -277,7 +277,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "agentguard-sec"
     MODULE_NAME = "Agent安全防护"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

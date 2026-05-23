@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Hecate AI智能体
+AUTO-EVO-AI V0.1 — Hecate AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：数据加密、隐私保护、敏感数据处理、数据脱敏、密钥生命周期管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Hecate AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Hecate AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -97,7 +97,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "agent_hecate"
     MODULE_NAME = "Hecate智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

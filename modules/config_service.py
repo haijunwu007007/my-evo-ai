@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - ConfigService 配置中心服务
+AUTO-EVO-AI V0.1 - ConfigService 配置中心服务
 ==============================================
 企业级配置中心：多环境/多命名空间/版本控制/热更新/加密/推送。
 支持：配置项CRUD、多环境隔离、命名空间管理、版本控制、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "service"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ConfigService 配置中心服务 ==============================================",
+    "description": "AUTO-EVO-AI V0.1 - ConfigService 配置中心服务 ==============================================",
 }
 
 import re

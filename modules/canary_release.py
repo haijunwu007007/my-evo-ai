@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - Canary Release Module (Grade: A Production)
+AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production)
 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "canary", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Canary Release Module (Grade: A Production) 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚",
+    "description": "AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production) 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚",
 }
 
 import os

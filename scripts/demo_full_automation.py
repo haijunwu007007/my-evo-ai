@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v7.0 — 全自动编排 Demo
+AUTO-EVO-AI V0.1 — 全自动编排 Demo
 =======================================
 上市公司生产级 —— 跑通完整事件驱动闭环
 
@@ -36,7 +36,7 @@ logger = logging.getLogger("demo")
 
 async def main():
     logger.info("=" * 60)
-    logger.info("AUTO-EVO-AI v7.0 全自动编排 Demo")
+    logger.info("AUTO-EVO-AI V0.1 全自动编排 Demo")
     logger.info("=" * 60)
 
     # ─── 1. 模块自动发现 ───

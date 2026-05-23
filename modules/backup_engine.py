@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 备份引擎（A级生产实现）
+AUTO-EVO-AI V0.1 - 备份引擎（A级生产实现）
 =========================================
 模块ID: backup-engine
 功能：全系统数据备份 — 增量/全量/定时/压缩/加密/验证/恢复。
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "backup", "resilience"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 备份引擎（A级生产实现） =========================================",
+    "description": "AUTO-EVO-AI V0.1 - 备份引擎（A级生产实现） =========================================",
 }
 
 import time
@@ -251,7 +251,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "backup-engine"
     MODULE_NAME = "备份引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

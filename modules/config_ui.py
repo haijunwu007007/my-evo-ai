@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 配置UI管理器
+AUTO-EVO-AI V0.1 — 配置UI管理器
 Grade: A (生产级) | Category: 配置管理
 职责：前端配置界面管理、主题切换、布局持久化、UI组件注册、实时配置推送
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 配置UI管理器 Grade: A (生产级) | Category: 配置管理",
+    "description": "AUTO-EVO-AI V0.1 — 配置UI管理器 Grade: A (生产级) | Category: 配置管理",
 }
 
 import os
@@ -179,7 +179,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "config_ui"
     MODULE_NAME = "config_ui"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

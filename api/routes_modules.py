@@ -361,10 +361,8 @@ async def execute_module_endpoint(name: str, request: Request):
     action = action or ""
 
     # Direct import path — bypasses lazy_load_module for compact modules
-    _BYPS = {"github_scanner","health_check","audit_trail","data_analysis","data_masking",
-             "feishu_notifier","permission_rbac","jwt_token","forex_api",
-             "recommendation_system","sso_auth","oauth_provider","session_store",
-             "static_cache","data_quality","sql_generator","agent_planner"}
+    _BYPS = {"github_scanner","data_masking","permission_rbac",
+             "recommendation_system","sql_generator","agent_planner"}
     if name in _BYPS:
         try:
             import importlib as _il, asyncio as _as
@@ -435,26 +433,9 @@ async def call_generic(request: Request):
         return {"success": False, "error": str(e)}
 
 
-@router.post("/api/coordinator/execute")
-async def coordinator_execute(request: Request):
-    """AI编排输入框的后备请求——将自然语言任务转给协调器处理"""
-    try:
-        body = await request.json()
-        task = body.get("task", "")
-    except Exception:
-        task = ""
-    if not task:
-        return {"success": False, "error": "task is empty"}
-    try:
-        from api.infra import get_coordinator_v3
-        coord = get_coordinator_v3()
-        if coord:
-            result = await coord.execute(task=task)
-            if result:
-                return {"success": True, "message": "协调器已接收任务", "result": str(result)[:300]}
-        return {"success": True, "message": f"任务已提交(代理模式): {task[:50]}"}
-    except Exception as e:
-        return {"success": True, "message": f"任务已记录(离线模式): {task[:50]}", "note": str(e)[:100]}
+# 协调器已移至 routes_coordinator.py
+
+
 
 
 @router.post("/api/batch-execute")

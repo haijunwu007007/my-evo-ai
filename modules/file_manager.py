@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 文件管理
+AUTO-EVO-AI V0.1 — 文件管理
 Grade: A (生产级) | Category: 存储服务
 职责：文件存储、目录管理、元数据跟踪、版本控制、访问控制
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "file"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 文件管理 Grade: A (生产级) | Category: 存储服务",
+    "description": "AUTO-EVO-AI V0.1 — 文件管理 Grade: A (生产级) | Category: 存储服务",
 }
 
 import os
@@ -81,7 +81,7 @@ class FileVersion:
 class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "file_manager"
     MODULE_NAME = "文件管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

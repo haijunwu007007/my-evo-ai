@@ -1,4 +1,4 @@
-"""Production-grade 图表引擎模块 v6.39
+"""Production-grade 图表引擎模块 V0.1
 上市公司生产级实现 - 多图表类型/数据聚合/主题管理/图表缓存/导出
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "chart", "manager"],
     "grade": "A",
-    "description": "Production-grade 图表引擎模块 v6.39 上市公司生产级实现 - 多图表类型/数据聚合/主题管理/图表缓存/导出",
+    "description": "Production-grade 图表引擎模块 V0.1 上市公司生产级实现 - 多图表类型/数据聚合/主题管理/图表缓存/导出",
 }
 import hashlib
 import json

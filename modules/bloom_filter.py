@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - BloomFilter 布隆过滤器引擎
+AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎
 ================================================
 上市公司级生产实现 — 高性能概率型数据结构
 
@@ -42,7 +42,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "bloom", "engine"],
     "grade": "B",
-    "description": "AUTO-EVO-AI v7.0 - BloomFilter 布隆过滤器引擎 ================================================",
+    "description": "AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎 ================================================",
 }
 
 import math
@@ -408,7 +408,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     MODULE_ID = "bloom_filter"
     MODULE_NAME = "布隆过滤器引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, *args, **kwargs):

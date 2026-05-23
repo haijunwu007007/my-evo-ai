@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — API版本管理
+AUTO-EVO-AI V0.1 — API版本管理
 Grade: A (生产级) | Category: API基础设施
 职责：API版本注册与路由、版本生命周期管理、兼容性检查、废弃策略、版本迁移
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["api", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — API版本管理 Grade: A (生产级) | Category: API基础设施",
+    "description": "AUTO-EVO-AI V0.1 — API版本管理 Grade: A (生产级) | Category: API基础设施",
 }
 
 import os
@@ -109,7 +109,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     MODULE_ID = "api_versioning"
     MODULE_NAME = "API版本管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

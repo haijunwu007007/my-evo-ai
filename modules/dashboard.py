@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 仪表盘管理
+AUTO-EVO-AI V0.1 — 仪表盘管理
 Grade: A (生产级) | Category: 监控展示
 职责：面板管理、组件布局、数据源绑定、实时刷新、权限控制
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["dashboard", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 仪表盘管理 Grade: A (生产级) | Category: 监控展示",
+    "description": "AUTO-EVO-AI V0.1 — 仪表盘管理 Grade: A (生产级) | Category: 监控展示",
 }
 
 import os
@@ -100,7 +100,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "dashboard"
     MODULE_NAME = "仪表盘管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 翻译服务
+AUTO-EVO-AI V0.1 — 翻译服务
 Grade: A (生产级) | Category: AI能力
 职责：多语言翻译、术语管理、翻译缓存、批量翻译、翻译记忆
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["translation", "adapter", "service"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 翻译服务 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — 翻译服务 Grade: A (生产级) | Category: AI能力",
 }
 
 import os

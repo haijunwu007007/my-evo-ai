@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 邮件自动化（A级生产实现）
+AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现）
 ============================================
 模块ID: email-automation
 功能：企业级邮件收发 — SMTP发送、IMAP收信、模板引擎、定时发送、附件管理。
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "email", "engine", "config"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 邮件自动化（A级生产实现） ============================================",
+    "description": "AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现） ============================================",
 }
 
 import time
@@ -210,7 +210,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "email-automation"
     MODULE_NAME = "邮件自动化"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

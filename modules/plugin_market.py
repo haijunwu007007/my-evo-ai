@@ -1,4 +1,4 @@
-"""Production-grade 插件市场模块 v6.39
+"""Production-grade 插件市场模块 V0.1
 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "plugin"],
     "grade": "A",
-    "description": "Production-grade 插件市场模块 v6.39 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核",
+    "description": "Production-grade 插件市场模块 V0.1 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核",
 }
 import hashlib
 import logging

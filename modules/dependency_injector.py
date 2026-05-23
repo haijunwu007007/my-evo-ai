@@ -3,7 +3,7 @@ from contextlib import contextmanager
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | 依赖注入容器引擎
+AUTO-EVO-AI V0.1 | 依赖注入容器引擎
 企业级IoC容器 - 控制反转与依赖注入管理
 
 功能特性:
@@ -42,7 +42,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["service", "dependency"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | 依赖注入容器引擎 企业级IoC容器 - 控制反转与依赖注入管理",
+    "description": "AUTO-EVO-AI V0.1 | 依赖注入容器引擎 企业级IoC容器 - 控制反转与依赖注入管理",
 }
 
 import os

@@ -1,4 +1,4 @@
-"""Production-grade 性能监控模块 v6.39
+"""Production-grade 性能监控模块 V0.1
 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算
 """
 
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["perf", "monitor"],
     "grade": "A",
-    "description": "Production-grade 性能监控模块 v6.39 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算",
+    "description": "Production-grade 性能监控模块 V0.1 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算",
 }
 import logging
 import math

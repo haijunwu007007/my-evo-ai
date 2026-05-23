@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - GitOps GitOps部署引擎
+AUTO-EVO-AI V0.1 - GitOps GitOps部署引擎
 ========================================
 企业级GitOps：Git仓库驱动部署/Drift检测/自动同步/回滚。
 支持：Git仓库管理、Manifest监控、Drift检测与自动修复、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["git"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - GitOps GitOps部署引擎 ========================================",
+    "description": "AUTO-EVO-AI V0.1 - GitOps GitOps部署引擎 ========================================",
 }
 import time
 import asyncio
@@ -355,7 +355,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "repos": len(self._repositories),
                 "resources": self._gitops_stats["resources_managed"],
             },
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

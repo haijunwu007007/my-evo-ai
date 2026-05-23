@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - ChaosEngineering 混沌工程实践平台
+AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台
 ====================================================
 企业级混沌工程实践：实验编排、故障注入、稳态验证、安全回收。
 支持：网络/进程/资源故障注入，渐进式爆炸半径控制，
@@ -33,7 +33,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["chaos", "engine", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ChaosEngineering 混沌工程实践平台 ====================================================",
+    "description": "AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台 ====================================================",
 }
 
 import os
@@ -50,11 +50,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
-if "E:\\AUTO-EVO-AI_v6.38" not in sys.path:
-    sys.path.insert(0, "E:\\AUTO-EVO-AI_v6.38")
 from modules._base.enterprise_module import EnterpriseModule
+from modules._base.enterprise_module import CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
-from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +161,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.module_name = "混沌工程实践平台"
         self.module_id = self.module_name
         self.module_id = "chaos_engineering"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self._initialized = False
 
         # 实验存储
@@ -232,7 +230,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "slos": len(self._slos),
             "templates": len(self._fault_templates),
             "safety_enabled": self._safety_enabled,
-            "version": "v7.0",
+            "version": "1.0.0",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

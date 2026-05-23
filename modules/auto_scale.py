@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 自动扩缩容
+AUTO-EVO-AI V0.1 — 自动扩缩容
 Grade: A (生产级) | Category: 弹性计算
 职责：自动伸缩策略、容量规划、实例管理、指标驱动扩缩、冷却控制
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "auto"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 自动扩缩容 Grade: A (生产级) | Category: 弹性计算",
+    "description": "AUTO-EVO-AI V0.1 — 自动扩缩容 Grade: A (生产级) | Category: 弹性计算",
 }
 
 import os
@@ -109,7 +109,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "auto_scale"
     MODULE_NAME = "自动扩缩容"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

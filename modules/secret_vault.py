@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 密钥保险库
+AUTO-EVO-AI V0.1 — 密钥保险库
 Grade: A (生产级) | Category: 安全合规
 职责：安全存储/管理/轮换/审计 密钥、凭证、证书
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "secret"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 密钥保险库 Grade: A (生产级) | Category: 安全合规",
+    "description": "AUTO-EVO-AI V0.1 — 密钥保险库 Grade: A (生产级) | Category: 安全合规",
 }
 
 import asyncio

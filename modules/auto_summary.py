@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Auto Summary (自动摘要引擎)
+AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎)
 =================================================
 企业级自动摘要引擎，支持文本摘要、多语言摘要、可控长度摘要、关键句提取。
 内置TextRank算法、TF-IDF关键词提取与摘要质量评估。
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "auto"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Auto Summary (自动摘要引擎) =================================================",
+    "description": "AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎) =================================================",
 }
 
 import time

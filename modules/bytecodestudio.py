@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - Bytecode Studio Module (Grade: A Production)
+AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production)
 字节码工作室：Python字节码分析、安全审计、优化建议、反编译辅助
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["bytecodestudio", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Bytecode Studio Module (Grade: A Production) 字节码工作室：Python字节码分析、安全审计、优化建议、反编译辅助",
+    "description": "AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production) 字节码工作室：Python字节码分析、安全审计、优化建议、反编译辅助",
 }
 
 import os

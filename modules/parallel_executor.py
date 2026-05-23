@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 | Enterprise Module
+AUTO-EVO-AI V0.1 | Enterprise Module
 parallel_executor — 企业级并行执行引擎
 线程池/进程池管理、ForkJoin分治、MapReduce、DAG依赖调度、
 资源限制、超时控制、结果聚合、重试策略、取消传播、进度追踪
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["parallel"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 | Enterprise Module parallel_executor — 企业级并行执行引擎",
+    "description": "AUTO-EVO-AI V0.1 | Enterprise Module parallel_executor — 企业级并行执行引擎",
 }
 
 import threading

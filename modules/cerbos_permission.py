@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Cerbos权限策略引擎模块
+AUTO-EVO-AI V0.1 — Cerbos权限策略引擎模块
 Grade: A (生产级) | Category: 安全与权限
 职责：基于策略的细粒度访问控制，支持ABAC/RBAC混合模型，资源级权限校验
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["cerbos", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Cerbos权限策略引擎模块 Grade: A (生产级) | Category: 安全与权限",
+    "description": "AUTO-EVO-AI V0.1 — Cerbos权限策略引擎模块 Grade: A (生产级) | Category: 安全与权限",
 }
 
 import os

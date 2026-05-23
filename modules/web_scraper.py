@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 智能网页采集器
+AUTO-EVO-AI V0.1 — 智能网页采集器
 Grade: A (生产级) | Category: 工具链
 职责：网页抓取、内容解析、反爬策略、数据提取、增量采集、去重
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "web"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 智能网页采集器 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 智能网页采集器 Grade: A (生产级) | Category: 工具链",
 }
 
 import os

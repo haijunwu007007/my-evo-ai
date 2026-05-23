@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Audio Transcription (音频转录引擎)
+AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎)
 ========================================================
 企业级音频转录引擎，支持语音转文字、多语言识别、说话人分离、实时流式转录。
 内置VAD静音检测、噪声抑制与音频预处理管线。
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["audio"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Audio Transcription (音频转录引擎) ========================================================",
+    "description": "AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎) ========================================================",
 }
 
 import time

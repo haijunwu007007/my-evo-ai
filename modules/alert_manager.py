@@ -1,4 +1,4 @@
-"""Production-grade 告警中心模块 v6.39
+"""Production-grade 告警中心模块 V0.1
 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["alert", "manager"],
     "grade": "A",
-    "description": "Production-grade 告警中心模块 v6.39 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理",
+    "description": "Production-grade 告警中心模块 V0.1 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理",
 }
 import logging
 import math

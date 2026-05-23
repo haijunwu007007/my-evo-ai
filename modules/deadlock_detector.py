@@ -1,4 +1,4 @@
-"""Production-grade 死锁检测模块 v6.39
+"""Production-grade 死锁检测模块 V0.1
 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["deadlock", "manager"],
     "grade": "A",
-    "description": "Production-grade 死锁检测模块 v6.39 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪",
+    "description": "Production-grade 死锁检测模块 V0.1 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪",
 }
 import logging
 import time

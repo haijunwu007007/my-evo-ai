@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.34 - 扩展守护进程模块
+AUTO-EVO-AI V0.1 - 扩展守护进程模块
 自动生成 203 个模块
 """
 from core.module_manager import ModuleBase

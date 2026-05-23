@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - ClawGateway API网关管理器
+AUTO-EVO-AI V0.1 - ClawGateway API网关管理器
 ============================================
 企业级API网关：路由管理、请求转发、负载均衡、认证授权、
 限流熔断、请求追踪、日志审计。
@@ -32,7 +32,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "claw", "manager", "gateway"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ClawGateway API网关管理器 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - ClawGateway API网关管理器 ============================================",
 }
 
 import os
@@ -51,8 +51,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
 
-if "E:\\AUTO-EVO-AI_v6.38" not in sys.path:
-    sys.path.insert(0, "E:\\AUTO-EVO-AI_v6.38")
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -156,7 +154,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.module_name = "API网关管理器"
         self.module_id = self.module_name
         self.module_id = "claw_gateway"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self._initialized = False
 
         self._routes: Dict[str, RouteConfig] = {}
@@ -252,7 +250,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "routes": len(self._routes),
             "upstreams": len(self._upstreams),
             "rate_limits": len(self._rate_limits),
-            "version": "v7.0",
+            "version": "1.0.0",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

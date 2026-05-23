@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-        AUTO-EVO-AI v7.0 - WebRemote 远程Web控制引擎
+        AUTO-EVO-AI V0.1 - WebRemote 远程Web控制引擎
 =============================================
 生产级远程Web操作控制系统，支持：
   1. 无头浏览器管理（Playwright/Selenium集成）
@@ -39,7 +39,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "m51", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - WebRemote 远程Web控制引擎 =============================================",
+    "description": "AUTO-EVO-AI V0.1 - WebRemote 远程Web控制引擎 =============================================",
 }
 
 import os
@@ -652,7 +652,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "web_remote"
     MODULE_NAME = "远程Web控制引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, *args, **kwargs):

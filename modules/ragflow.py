@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — RAGFlow Document Intelligence Engine
+AUTO-EVO-AI V0.1 — RAGFlow Document Intelligence Engine
 ========================================================
 Production-grade RAGFlow integration for intelligent document processing,
 knowledge extraction, and retrieval-augmented generation pipelines.
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "ragflow"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — RAGFlow Document Intelligence Engine ========================================================",
+    "description": "AUTO-EVO-AI V0.1 — RAGFlow Document Intelligence Engine ========================================================",
 }
 
 import asyncio

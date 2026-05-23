@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 知识库引擎
+AUTO-EVO-AI V0.1 — 知识库引擎
 Grade: A (生产级) | Category: 工具链
 职责：知识存储/检索/分类/标签/全文搜索/向量嵌入/版本管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "knowledge"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 知识库引擎 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 知识库引擎 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

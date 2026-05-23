@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 系统监控模块（真实业务逻辑）
+AUTO-EVO-AI V0.1 — 系统监控模块（真实业务逻辑）
 Grade: A (生产级) | Category: 监控运维
 职责：实时采集系统指标（CPU/内存/磁盘/网络/进程），提供告警和趋势分析
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["monitor", "system"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 系统监控模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维",
+    "description": "AUTO-EVO-AI V0.1 — 系统监控模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维",
 }
 
 import os

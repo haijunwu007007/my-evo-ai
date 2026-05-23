@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — MAS多智能体系统
+AUTO-EVO-AI V0.1 — MAS多智能体系统
 Grade: A (生产级) | Category: AI智能体
 职责：多智能体注册与发现、Agent角色分配、协作编排、消息总线、共识协议
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — MAS多智能体系统 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — MAS多智能体系统 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -177,7 +177,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "agent_mas"
     MODULE_NAME = "MAS多智能体系统"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

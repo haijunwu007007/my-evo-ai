@@ -18,6 +18,32 @@ from api.infra import app, registry, manager, _module_activity, _START_TIME, BAS
 logger = logging.getLogger("evo.api")
 
 
+def _mount_vue_frontend():
+    """挂载 Vue 3 前端静态文件 + SPA 404 兜底"""
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+
+    dist = BASE_DIR / "frontend" / "dist"
+    if dist.exists() and (dist / "index.html").exists():
+        app.mount("/assets", StaticFiles(directory=str(dist / "assets")), name="vue_assets")
+
+        @app.get("/dashboard", include_in_schema=False)
+        @app.get("/{vue_path:path}", include_in_schema=False)
+        async def serve_vue(vue_path: str = ""):
+            # 不要劫持 API 路由
+            if vue_path.startswith("api/") or vue_path.startswith("js/") or vue_path == "":
+                from fastapi.responses import JSONResponse
+                return JSONResponse({"error": "not found"}, status_code=404)
+            return FileResponse(str(dist / "index.html"), media_type="text/html")
+
+        logger.info(f"[VUE] 前端已挂载: {dist}")
+    else:
+        logger.info(
+            "[VUE] 前端 dist 不存在，使用开发模式: cd frontend && npm run dev"
+        )
+
+
 # ═══════════════════════════════════════════════════════
 # 启动事件
 # ═══════════════════════════════════════════════════════
@@ -38,6 +64,17 @@ async def startup():
     logger.info(
         f"启动耗时: {time.time()-t0:.1f}s — 首次调用模块时按需加载"
     )
+
+    # ── 挂载 Vue 前端（production 模式）──
+    _mount_vue_frontend()
+
+    # ── 启动核心引擎（调度器/事件引擎/任务队列）──
+    try:
+        from api.routes_scheduler import start_engines
+        asyncio.create_task(start_engines())
+        logger.info("[ENGINES] 调度器/事件引擎/任务队列 已启动")
+    except Exception as e:
+        logger.warning(f"[ENGINES] 引擎启动失败: {e}")
 
     asyncio.create_task(heartbeat_task())
     asyncio.create_task(activity_broadcast_task())
@@ -206,3 +243,17 @@ async def warmup_modules():
         except Exception:
             pass
     logger.info(f"[WARMUP] {ok}/{len(warmup_list)} 模块预热完成")
+
+# ═══════════════════════════════════════════════════════
+# 关闭事件 — 优雅停止引擎
+# ═══════════════════════════════════════════════════════
+
+@app.on_event("shutdown")
+async def shutdown():
+    logger.info("[SHUTDOWN] 正在关闭核心引擎...")
+    try:
+        from api.routes_scheduler import stop_engines
+        await stop_engines()
+        logger.info("[SHUTDOWN] 所有引擎已停止")
+    except Exception as e:
+        logger.warning(f"[SHUTDOWN] 引擎停止异常: {e}")

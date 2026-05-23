@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 - Cronus 智能体模块
+AUTO-EVO-AI V0.1 - Cronus 智能体模块
 =====================================
 时间管理与调度引擎 - 负责任务调度、时间窗口管理、周期性任务编排、
 超时监控和时间线分析。基于企业级任务调度框架，支持Cron表达式解析、
@@ -39,7 +39,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - Cronus 智能体模块 =====================================",
+    "description": "AUTO-EVO-AI V0.1 - Cronus 智能体模块 =====================================",
 }
 
 import time

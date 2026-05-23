@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — CDN内容分发网络管理模块
+AUTO-EVO-AI V0.1 — CDN内容分发网络管理模块
 Grade: A (生产级) | Category: 网络基础设施
 职责：管理CDN节点、缓存策略、内容分发、流量调度、性能监控与故障切换
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "cdn"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — CDN内容分发网络管理模块 Grade: A (生产级) | Category: 网络基础设施",
+    "description": "AUTO-EVO-AI V0.1 — CDN内容分发网络管理模块 Grade: A (生产级) | Category: 网络基础设施",
 }
 
 import os

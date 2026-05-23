@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 加密服务
+AUTO-EVO-AI V0.1 — 加密服务
 Grade: A (生产级) | Category: 安全合规
 职责：数据加密/解密、密钥管理、哈希生成、签名验证、安全随机数
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "encryption", "service"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 加密服务 Grade: A (生产级) | Category: 安全合规",
+    "description": "AUTO-EVO-AI V0.1 — 加密服务 Grade: A (生产级) | Category: 安全合规",
 }
 
 import re

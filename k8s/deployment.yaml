@@ -1,0 +1,191 @@
+# AUTO-EVO-AI V0.1 — K8s 部署配置
+# 上市公司级：多副本、资源限制、健康检查、配置映射
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+    app.kubernetes.io/version: "0.1.0"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evo-config
+  namespace: auto-evo-ai
+data:
+  config.yaml: |
+    app:
+      name: "AUTO-EVO-AI"
+      version: "0.1.0"
+    server:
+      host: "0.0.0.0"
+      port: 8765
+      workers: 4
+    log:
+      level: "INFO"
+      format: "json"
+    database:
+      path: "/data/evo.db"
+    security:
+      api_key: "${EVO_API_KEY}"
+      jwt_secret: "${EVO_JWT_SECRET}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evo-env
+  namespace: auto-evo-ai
+data:
+  EVO_DATA_DIR: "/data"
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  TZ: "Asia/Shanghai"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evo-data-pvc
+  namespace: auto-evo-ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evo-api
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+    app.kubernetes.io/component: api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: evo-api
+  template:
+    metadata:
+      labels:
+        app: evo-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8765"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: api
+          image: auto-evo-ai:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8765
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: evo-env
+          env:
+            - name: EVO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: evo-secrets
+                  key: api_key
+                  optional: true
+            - name: EVO_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: evo-secrets
+                  key: jwt_secret
+                  optional: true
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: 8765
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/diagnosis/system
+              port: 8765
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+          startupProbe:
+            httpGet:
+              path: /api/status
+              port: 8765
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 20
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: evo-data-pvc
+        - name: config
+          configMap:
+            name: evo-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evo-api-service
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8765
+      name: http
+      protocol: TCP
+  selector:
+    app: evo-api
+---
+# 可选：如需外部访问，取消注释
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: evo-ingress
+#   namespace: auto-evo-ai
+#   annotations:
+#     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: evo.your-domain.com
+#       http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: evo-api-service
+#                 port:
+#                   number: 80

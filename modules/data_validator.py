@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 数据验证器
+AUTO-EVO-AI V0.1 — 数据验证器
 Grade: A (生产级) | Category: 数据质量
 职责：数据校验、规则引擎、格式验证、完整性检查、异常检测
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["data"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 数据验证器 Grade: A (生产级) | Category: 数据质量",
+    "description": "AUTO-EVO-AI V0.1 — 数据验证器 Grade: A (生产级) | Category: 数据质量",
 }
 
 import os
@@ -113,7 +113,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "data_validator"
     MODULE_NAME = "数据验证器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

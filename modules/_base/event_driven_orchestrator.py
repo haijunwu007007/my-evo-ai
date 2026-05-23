@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 事件驱动编排层
+AUTO-EVO-AI V0.1 — 事件驱动编排层
 =====================================
 上市公司生产级实现 — EventBus ↔ TriggerEngine ↔ OrchestrationEngine 联动
 

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 集群分片管理模块
+AUTO-EVO-AI V0.1 — 集群分片管理模块
 Grade: A (生产级) | Category: 核心基础
 职责：管理数据分片策略、分片路由、分片迁移、分片健康监控
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["cluster", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 集群分片管理模块 Grade: A (生产级) | Category: 核心基础",
+    "description": "AUTO-EVO-AI V0.1 — 集群分片管理模块 Grade: A (生产级) | Category: 核心基础",
 }
 
 import os

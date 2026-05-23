@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 安全治理模块
+AUTO-EVO-AI V0.1 — 安全治理模块
 Grade: A (生产级) | Category: 安全监控
 职责：安全策略管理、合规检查、风险评估、安全审计、威胁检测
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "aegis", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 安全治理模块 Grade: A (生产级) | Category: 安全监控",
+    "description": "AUTO-EVO-AI V0.1 — 安全治理模块 Grade: A (生产级) | Category: 安全监控",
 }
 
 import os
@@ -99,7 +99,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
     MODULE_ID = "aegis_governance"
     MODULE_NAME = "安全治理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

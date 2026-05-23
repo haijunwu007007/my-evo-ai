@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.18 - Soul Identity Module
+AUTO-EVO-AI V0.1 - Soul Identity Module
 基于 Mercury Agent 的 Soul-Driven 身份系统
 
 Soul驱动身份系统允许每个AI Agent拥有独立的人格定义，
@@ -7,7 +7,7 @@ Soul驱动身份系统允许每个AI Agent拥有独立的人格定义，
 Token效率优化：每次请求仅注入约400 tokens。
 
 作者: AUTO-EVO-AI Team
-版本: v6.18.0
+版本: V0.1.0
 """
 
 __module_meta__ = {
@@ -32,7 +32,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager", "soul"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v6.18 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统",
+    "description": "AUTO-EVO-AI V0.1 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统",
 }
 
 import os
@@ -725,7 +725,7 @@ def quick_soul(soul_name: str) -> str:
 if __name__ == "__main__":
     # 示例用法
     print("=" * 60)
-    print("AUTO-EVO-AI v6.18 - Soul Identity Module")
+    print("AUTO-EVO-AI V0.1 - Soul Identity Module")
     print("=" * 60)
 
     # 创建管理器

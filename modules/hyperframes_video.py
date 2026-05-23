@@ -2,7 +2,7 @@ import time
 
 """
 Hyperframes 视频渲染集成 v2.0
-版本: v6.37 | HeyGen开源集成 + Pillow/numpy + ffmpeg
+版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg
 功能: HTML原生视频定义 + 真实视频渲染(多轨道合成、转场、文字叠加、图片序列、音频混合)
 降级: 无ffmpeg时输出GIF；无Pillow时仅输出HTML定义
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["hyperframes"],
     "grade": "C",
-    "description": "Hyperframes 视频渲染集成 v2.0 版本: v6.37 | HeyGen开源集成 + Pillow/numpy + ffmpeg",
+    "description": "Hyperframes 视频渲染集成 v2.0 版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg",
 }
 import os, json, logging, subprocess, shutil, tempfile, math
 from typing import Optional, Dict, Any, List, Tuple
@@ -268,7 +268,7 @@ class HyperframesVideo:
     - GSAP动画HTML预览
     """
 
-    VERSION = "2.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, output_dir: str = "./videos", ffmpeg_path: Optional[str] = None):
         super().__init__()

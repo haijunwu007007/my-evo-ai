@@ -1,4 +1,4 @@
-"""Production-grade 插件加载器模块 v6.39
+"""Production-grade 插件加载器模块 V0.1
 上市公司生产级实现 - 动态加载/依赖解析/生命周期管理/沙箱隔离/版本兼容
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "plugin"],
     "grade": "A",
-    "description": "Production-grade 插件加载器模块 v6.39 上市公司生产级实现 - 动态加载/依赖解析/生命周期管理/沙箱隔离/版本兼容",
+    "description": "Production-grade 插件加载器模块 V0.1 上市公司生产级实现 - 动态加载/依赖解析/生命周期管理/沙箱隔离/版本兼容",
 }
 import importlib
 import importlib.util

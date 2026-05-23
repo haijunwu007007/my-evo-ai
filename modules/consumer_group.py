@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 消费者组管理器
+AUTO-EVO-AI V0.1 — 消费者组管理器
 Grade: A (生产级) | Category: 消息中间件
 职责：Kafka消费者组管理、分区分配、偏移量跟踪、再平衡、消费延迟监控
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["consumer", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 消费者组管理器 Grade: A (生产级) | Category: 消息中间件",
+    "description": "AUTO-EVO-AI V0.1 — 消费者组管理器 Grade: A (生产级) | Category: 消息中间件",
 }
 
 import os
@@ -79,7 +79,7 @@ class TopicPartition:
 class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "consumer_group"
     MODULE_NAME = "consumer_group"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

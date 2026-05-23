@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 任务调度
+AUTO-EVO-AI V0.1 — 任务调度
 Grade: A (生产级) | Category: 调度编排
 职责：定时任务管理、Cron表达式、并发控制、失败重试、任务依赖
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["job"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 任务调度 Grade: A (生产级) | Category: 调度编排",
+    "description": "AUTO-EVO-AI V0.1 — 任务调度 Grade: A (生产级) | Category: 调度编排",
 }
 
 import os
@@ -102,7 +102,7 @@ class JobExecution:
 class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "job_scheduler"
     MODULE_NAME = "任务调度"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

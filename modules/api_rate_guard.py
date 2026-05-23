@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — API限流守卫
+AUTO-EVO-AI V0.1 — API限流守卫
 Grade: A (生产级) | Category: API基础设施
 职责：API请求限流、滑动窗口、令牌桶、客户端配额、限流统计、动态调整
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "api", "client", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — API限流守卫 Grade: A (生产级) | Category: API基础设施",
+    "description": "AUTO-EVO-AI V0.1 — API限流守卫 Grade: A (生产级) | Category: API基础设施",
 }
 
 import os
@@ -111,7 +111,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "api_rate_guard"
     MODULE_NAME = "API限流守卫"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 代码模板管理器
+AUTO-EVO-AI V0.1 — 代码模板管理器
 Grade: A (生产级) | Category: 开发工具
 职责：代码模板管理、项目脚手架、代码片段库、模板变量渲染
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["code", "developer", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 代码模板管理器 Grade: A (生产级) | Category: 开发工具",
+    "description": "AUTO-EVO-AI V0.1 — 代码模板管理器 Grade: A (生产级) | Category: 开发工具",
 }
 
 import os
@@ -111,7 +111,7 @@ class CodeTemplateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "code_template"
     MODULE_NAME = "code_template"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

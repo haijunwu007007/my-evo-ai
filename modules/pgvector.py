@@ -1,4 +1,4 @@
-"""Production-grade PGVector向量存储模块 v6.39
+"""Production-grade PGVector向量存储模块 V0.1
 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "pgvector"],
     "grade": "A",
-    "description": "Production-grade PGVector向量存储模块 v6.39 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理",
+    "description": "Production-grade PGVector向量存储模块 V0.1 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理",
 }
 import logging
 import math

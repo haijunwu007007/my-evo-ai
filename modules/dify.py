@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Dify LLM应用平台集成模块
+AUTO-EVO-AI V0.1 — Dify LLM应用平台集成模块
 Grade: A (生产级) | Category: AI集成
 职责：对接Dify开源LLM应用平台，管理应用创建、知识库、Agent编排、工作流
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["dify", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Dify LLM应用平台集成模块 Grade: A (生产级) | Category: AI集成",
+    "description": "AUTO-EVO-AI V0.1 — Dify LLM应用平台集成模块 Grade: A (生产级) | Category: AI集成",
 }
 
 import os

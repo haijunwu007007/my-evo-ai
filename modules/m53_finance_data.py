@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - m53 FinanceData 金融数据采集引擎
+AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎
 ================================================================
 A级企业级模块 — 继承 EnterpriseModule
 
@@ -42,7 +42,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "m53"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - m53 FinanceData 金融数据采集引擎 ================================================================",
+    "description": "AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎 ================================================================",
 }
 
 import time
@@ -952,7 +952,7 @@ class FinanceDataModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     MODULE_ID = "m53_finance_data"
     MODULE_NAME = "金融数据采集引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     # 支持的action清单

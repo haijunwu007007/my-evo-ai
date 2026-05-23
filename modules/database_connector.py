@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 数据库连接器
+AUTO-EVO-AI V0.1 — 数据库连接器
 Grade: A (生产级) | Category: 数据存储
 职责：连接管理、查询执行、事务控制、连接池、慢查询检测
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["database"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 数据库连接器 Grade: A (生产级) | Category: 数据存储",
+    "description": "AUTO-EVO-AI V0.1 — 数据库连接器 Grade: A (生产级) | Category: 数据存储",
 }
 
 import os
@@ -157,7 +157,7 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     MODULE_ID = "database_connector"
     MODULE_NAME = "数据库连接器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

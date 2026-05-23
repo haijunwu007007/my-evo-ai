@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 日志采集模块（真实业务逻辑）
+AUTO-EVO-AI V0.1 — 日志采集模块（真实业务逻辑）
 Grade: A (生产级) | Category: 监控运维
 职责：采集、解析、存储、搜索系统日志和应用日志，支持多源采集和实时过滤
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["logging", "monitor", "log", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 日志采集模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维",
+    "description": "AUTO-EVO-AI V0.1 — 日志采集模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维",
 }
 
 import os

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 消息队列模块（真实业务逻辑）
+AUTO-EVO-AI V0.1 — 消息队列模块（真实业务逻辑）
 Grade: A (生产级) | Category: 工作流
 职责：内存消息队列、发布/订阅、Topic管理、消息持久化、死信队列
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "message"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 消息队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
+    "description": "AUTO-EVO-AI V0.1 — 消息队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
 }
 
 import os

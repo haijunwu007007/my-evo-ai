@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 机器学习管道
+AUTO-EVO-AI V0.1 — 机器学习管道
 Grade: A (生产级) | Category: AI能力
 职责：ML管道编排、特征工程、模型训练/评估/部署、实验管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "config", "ml"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 机器学习管道 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — 机器学习管道 Grade: A (生产级) | Category: AI能力",
 }
 
 import asyncio

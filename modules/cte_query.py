@@ -1,4 +1,4 @@
-"""Production-grade CTE查询引擎模块 v6.39
+"""Production-grade CTE查询引擎模块 V0.1
 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["cte", "engine"],
     "grade": "A",
-    "description": "Production-grade CTE查询引擎模块 v6.39 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存",
+    "description": "Production-grade CTE查询引擎模块 V0.1 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存",
 }
 import logging
 import re

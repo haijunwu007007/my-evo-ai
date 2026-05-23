@@ -35,6 +35,7 @@ import urllib.parse
 import json
 import re
 import threading
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -556,12 +557,12 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("初始化githubtrending", level="info")
         if self._initialized:
             return
-        self._fetch_trending_live()
+        # 直接调用 Search API（_fetch_trending_live 的 HTML 解析不稳定且星标=0）
         self._initialized = True
-        logger.info("GithubTrending initialized with %d repos", len(self._repos))
+        logger.info("GithubTrending 初始化完成 (on-demand via Search API)")
 
-    def _fetch_trending_live(self) -> None:
-        """从 GitHub Trending 页面实时抓取热门仓库"""
+    def _fetch_trending_live(self) -> bool:
+        """从 GitHub Trending 页面实时抓取热门仓库。返回是否成功"""
         try:
             req = urllib.request.Request(
                 "https://github.com/trending",
@@ -570,19 +571,24 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             with urllib.request.urlopen(req, timeout=15) as resp:
                 html = resp.read().decode("utf-8", errors="replace")
             self._parse_trending_html(html)
-            logger.info("GithubTrending 从GitHub实时抓取 %d 个仓库", len(self._repos))
+            ok = len(self._repos) > 0
+            if ok:
+                logger.info("GithubTrending 从GitHub实时抓取 %d 个仓库", len(self._repos))
+            else:
+                logger.warning("GithubTrending 实时抓取解析到 0 个仓库")
+            return ok
         except Exception as e:
-            logger.warning("GithubTrending 实时抓取失败: %s, 使用备用数据", e)
-            self._seed_trending()
+            logger.warning("GithubTrending 实时抓取失败: %s", e)
+            return False
 
     def _parse_trending_html(self, html: str) -> None:
-        """解析 GitHub Trending HTML 页面，提取仓库信息"""
-        # 匹配每个仓库条目：<article class="Box-row">
+        """解析 GitHub Trending HTML 页面（2026新版），提取仓库信息"""
+        # 2026新版：每行 <article class="Box-row"> ... h2 > a > repo名 ... SVG+数字(星/分叉)
+        # 星标跟随 octicon-star SVG，fork 跟随 octicon-repo-forked SVG
         articles = re.findall(r'<article[^>]*class="Box-row"[^>]*>(.*?)</article>', html, re.DOTALL)
         for idx, article in enumerate(articles):
             try:
-                pass
-                #仓库名: /owner/repo
+                # 仓库名: <h2>...<a href="/owner/repo">
                 href_m = re.search(r'<h2[^>]*>.*?<a[^>]*href="(/[^"]+)"', article, re.DOTALL)
                 if not href_m:
                     continue
@@ -590,29 +596,46 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 if "/" not in full_name:
                     continue
 
-                # 描述
+                # 描述: <p class="col-9...">...</p>
                 desc_m = re.search(r'<p[^>]*class="[^"]*col-9[^"]*"[^>]*>(.*?)</p>', article, re.DOTALL)
-                description = ""
-                if desc_m:
-                    description = re.sub(r"<[^>]+>", "", desc_m.group(1)).strip()
+                description = re.sub(r"<[^>]+>", "", desc_m.group(1)).strip() if desc_m else ""
 
-                # 语言
+                # 语言: itemprop="programmingLanguage"
                 lang_m = re.search(r'itemprop="programmingLanguage">([^<]+)</span>', article)
                 language = lang_m.group(1).strip() if lang_m else ""
 
-                # 总星
-                stars_m = re.search(r'<a[^>]*href="/[^/]+/[^/]+/stargazers"[^>]*>\s*([\d,]+)\s*</a>', article, re.DOTALL)
-                stars = int(stars_m.group(1).replace(",", "")) if stars_m else 0
+                # 总星标：octicon-star SVG 后面的数字（2026新版无 /stargazers 链接）
+                stars = 0
+                stars_m = re.search(
+                    r'octicon-star[^>]*>.*?</svg>\s*([\d,]+)\s*</a>',
+                    article, re.DOTALL
+                )
+                if stars_m:
+                    stars = int(stars_m.group(1).replace(",", ""))
+                else:
+                    # 备用：找纯数字紧跟 star.svg
+                    stars_m2 = re.search(r'aria-label="(\d[\d,]*) star', article)
+                    if stars_m2:
+                        stars = int(stars_m2.group(1).replace(",", ""))
 
-                # 今日新增星
-                today_m = re.search(r'([\d,]+)\s*stars\s*(?:today|today-ago)', article)
+                # 今日新增星: "X stars today"
+                today_m = re.search(r'([\d,]+)\s*stars?\s*today', article)
                 stars_today = int(today_m.group(1).replace(",", "")) if today_m else 0
 
-                # Forks
-                forks_m = re.search(r'<a[^>]*href="/[^/]+/[^/]+/forks"[^>]*>\s*([\d,]+)\s*</a>', article, re.DOTALL)
-                forks = int(forks_m.group(1).replace(",", "")) if forks_m else 0
+                # Forks：octicon-repo-forked SVG 后面的数字
+                forks = 0
+                forks_m = re.search(
+                    r'octicon-repo-forked[^>]*>.*?</svg>\s*([\d,]+)\s*</a>',
+                    article, re.DOTALL
+                )
+                if forks_m:
+                    forks = int(forks_m.group(1).replace(",", ""))
+                else:
+                    forks_m2 = re.search(r'aria-label="(\d[\d,]*) fork', article)
+                    if forks_m2:
+                        forks = int(forks_m2.group(1).replace(",", ""))
 
-                # Topics
+                # Topics: class="topic-tag"
                 topic_m = re.findall(r'<a[^>]*class="topic-tag[^"]*"[^>]*>([^<]+)</a>', article)
                 topics = [t.strip() for t in topic_m]
 
@@ -638,61 +661,127 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._velocity_calc.rank_velocity(self._repos)
         self._stats["repos_tracked"] = len(self._repos)
 
-    def _seed_trending(self):
-        """备用种子数据（仅在实时拉取失败时使用）"""
-        seeds = [
-            ("microsoft/phi-3", "Python", "Phi-3 mini language model", 15000, 1200, 3800),
-            ("meta-llama/llama3", "Python", "Llama 3 model", 120000, 8500, 25000),
-            ("anthropics/claude-code", "Python", "Claude coding assistant", 35000, 2800, 9500),
-            ("openai/chatgpt-retrieval", "Python", "RAG implementation", 8000, 900, 3200),
-            ("deepseek-ai/deepseek-coder", "Python", "DeepSeek Coder model", 25000, 1800, 7000),
-            ("langgenius/dify", "TypeScript", "Open-source LLM app dev platform", 42000, 3200, 12000),
-            ("shadcn-ui/ui", "TypeScript", "Beautifully designed components", 68000, 4500, 18000),
-            ("vercel/ai", "TypeScript", "AI SDK for building AI apps", 28000, 2100, 8500),
-            ("ollama/ollama", "Go", "Get up and running with LLMs", 92000, 5800, 22000),
-            ("localtunnel/localtunnel", "JavaScript", "Expose localhost to the world", 53000, 1200, 4500),
-        ]
-        for full_name, lang, desc, stars, today, week in seeds:
-            name = full_name.split("/")[1]
-            topics = []
-            if "llm" in desc.lower() or "model" in desc.lower() or "ai" in desc.lower():
-                topics = ["ai", "machine-learning", "llm"]
-            elif "ui" in desc.lower() or "component" in desc.lower():
-                topics = ["frontend", "ui", "react"]
-            category = self._classifier.classify(topics, desc, lang)
-            self._repos.append(
-                TrendingRepo(
-                    rank=0,
-                    full_name=full_name,
-                    language=lang,
-                    description=desc,
-                    stars=stars,
-                    forks=stars // 3,
-                    stars_today=today,
-                    stars_week=week,
-                    stars_month=week * 3,
-                    topics=topics,
-                    category=category,
-                )
-            )
-        self._velocity_calc.rank_velocity(self._repos)
-        self._stats["repos_tracked"] = len(self._repos)
+    # AI 关键词列表 — 用于"今日AI开源项目"等 AI 场景过滤
+    # 去掉裸 "ai"（会误匹配 "trading"、"main" 等无关词）
+    _AI_KEYWORDS = [
+        "artificial intelligence", "llm", "gpt", "transformer", "deep learning",
+        "machine learning", "neural network", "pytorch", "tensorflow", "openai", "langchain",
+        "rag", "agent", "chatbot", "nlp", "computer vision", "diffusion",
+        "stable diffusion", "generative", "finetuning", "fine-tuning", "embedding",
+        "vector database", "autogpt", "copilot", "claude", "gemini", "mistral",
+        "llama", "vlm", "multimodal", "foundation model", "reinforcement learning",
+        "yolo", "resnet", "vit", "attention", "tokenizer",
+        "large language model", "speech recognition", "text-to-speech",
+        "tts", "asr", "object detection", "segmentation", "pose estimation",
+        "image generation", "text generation", "code generation", "prompt",
+        "inference", "training", "fine tune", "rlhf", "ppo", "dpo",
+    ]
+
+    @staticmethod
+    def _is_ai_repo(repo) -> bool:
+        """判断仓库是否与 AI 相关（检查 name、description、topics）"""
+        text = (f"{repo.full_name} {repo.description} {' '.join(repo.topics)}").lower()
+        for kw in GithubTrending._AI_KEYWORDS:
+            if kw in text:
+                return True
+        return False
 
     def fetch_trending(
-        self, language: str = "", period: TrendPeriod = TrendPeriod.DAILY, limit: int = 25
+        self, language: str = "", period: TrendPeriod = TrendPeriod.DAILY, limit: int = 25,
+        ai_filter: bool = False
     ) -> Dict[str, Any]:
+        """获取热门项目
+        策略：1) 爬 github.com/trending（官方策展，质量最高）
+              2) Search API 兜底 — created:>30d + stars:>300（近一个月的热门项目，平衡时效性与质量）
+        """
         self._stats["scans_performed"] += 1
-        # 每次查询前尝试实时刷新（后台线程，不阻塞）
-        if time.time() - self._last_fetch > 300:  # 5分钟缓存
-            t = threading.Thread(target=self._refresh_repos, daemon=True)
-            t.start()
+        now = time.time()
+        period_key = period.value if hasattr(period, 'value') else str(period)
+
+        # 5 分钟缓存
+        if now - self._last_fetch < 300 and self._repos:
+            filtered = self._repos
+            if language:
+                filtered = [r for r in filtered if r.language.lower() == language.lower()]
+            if ai_filter:
+                filtered = [r for r in filtered if self._is_ai_repo(r)]
+            result = filtered[:limit]
+            return {
+                "success": True,
+                "period": period_key,
+                "language": language or "all",
+                "count": len(result),
+                "results": [r.to_dict() for r in result],
+            }
+
+        # 方案1: 爬 github.com/trending
+        if self._fetch_trending_live() and len(self._repos) >= 5:
+            logger.info("GitHub Trending 实时抓取成功: %d 个仓库", len(self._repos))
+            self._last_fetch = now
+            self._save_cache()
+        else:
+            # 方案2: Search API — created + stars 双过滤
+            logger.info("Trending 页面抓取失败，切换 Search API")
+            try:
+                from datetime import datetime, timedelta
+                # 按 period 设置合理的时间窗口和最低星标
+                period_config = {
+                    "daily":  {"days": 30, "min_stars": 300},
+                    "weekly": {"days": 90, "min_stars": 500},
+                    "monthly": {"days": 180, "min_stars": 1000},
+                }
+                cfg = period_config.get(period_key, period_config["daily"])
+                cutoff = (datetime.utcnow() - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
+                fetch_limit = max(limit * 2, 50)
+                q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
+                if language:
+                    q_parts.append(f"language:{language}")
+                q = "+".join(q_parts)
+                url = f"https://api.github.com/search/repositories?q={q}&sort=stars&order=desc&per_page={fetch_limit}"
+                req = urllib.request.Request(
+                    url,
+                    headers={"User-Agent": "AUTO-EVO-AI-V0.1", "Accept": "application/vnd.github.v3+json"},
+                )
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    data = json.loads(resp.read())
+                self._repos.clear()
+                for idx, item in enumerate(data.get("items", [])[:fetch_limit]):
+                    self._repos.append(TrendingRepo(
+                        rank=idx + 1,
+                        full_name=item.get("full_name", ""),
+                        language=item.get("language") or "",
+                        description=(item.get("description") or "")[:200],
+                        stars=item.get("stargazers_count", 0),
+                        forks=item.get("forks_count", 0),
+                        stars_today=0,
+                        stars_week=0,
+                        stars_month=0,
+                        topics=item.get("topics", []),
+                        category=self._classifier.classify(item.get("topics", []), item.get("description") or "", item.get("language") or ""),
+                    ))
+                self._velocity_calc.rank_velocity(self._repos)
+                self._stats["repos_tracked"] = len(self._repos)
+                self._last_fetch = now
+                logger.info("Search API 获取 %d 个仓库 (created>%sd, stars>%d)", len(self._repos), cfg["days"], cfg["min_stars"])
+            except Exception as e:
+                logger.error("Trending 页面和 Search API 均失败: %s", e)
+                return {"success": False, "error": f"数据获取失败: {e}", "results": [], "count": 0}
+
         filtered = self._repos
         if language:
             filtered = [r for r in filtered if r.language.lower() == language.lower()]
+        if ai_filter:
+            filtered = [r for r in filtered if self._is_ai_repo(r)]
+            if not filtered:
+                filtered = [r for r in self._repos if (
+                    " ai " in f" {r.description.lower()} " or
+                    "llm" in r.description.lower() or
+                    "gpt" in r.description.lower()
+                )]
         result = filtered[:limit]
         return {
             "success": True,
-            "period": period.value,
+            "period": period_key,
             "language": language or "all",
             "count": len(result),
             "results": [r.to_dict() for r in result],

@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - ResourceServer OAuth2资源服务器
+AUTO-EVO-AI V0.1 - ResourceServer OAuth2资源服务器
 ==================================================
 企业级OAuth2资源服务器：Token验证/Scope检查/API保护。
 支持：Bearer Token验证、Scope细粒度权限控制、
@@ -35,7 +35,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["resource"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ResourceServer OAuth2资源服务器 ==================================================",
+    "description": "AUTO-EVO-AI V0.1 - ResourceServer OAuth2资源服务器 ==================================================",
 }
 import time
 import asyncio
@@ -359,7 +359,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             checks_run=4,
             error_rate=self.stats.error_rate,
             details=checks,
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

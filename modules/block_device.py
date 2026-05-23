@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 块设备管理模块
+AUTO-EVO-AI V0.1 — 块设备管理模块
 Grade: A (生产级) | Category: 基础设施
 职责：块设备管理、磁盘分区、IO监控、存储池管理、快照管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "block"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 块设备管理模块 Grade: A (生产级) | Category: 基础设施",
+    "description": "AUTO-EVO-AI V0.1 — 块设备管理模块 Grade: A (生产级) | Category: 基础设施",
 }
 
 import os
@@ -123,7 +123,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "block_device"
     MODULE_NAME = "块设备管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - 熔断器 Mixin
+AUTO-EVO-AI V0.1 - 熔断器 Mixin
 =================================
 基于断路器模式（Circuit Breaker Pattern）的故障保护。
 防止级联故障，保护外部调用。

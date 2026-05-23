@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | Kafka生产者引擎
+AUTO-EVO-AI V0.1 | Kafka生产者引擎
 企业级消息生产者 - 分区策略、消息保证、批量发送
 
 功能特性:
@@ -41,7 +41,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "kafka"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | Kafka生产者引擎 企业级消息生产者 - 分区策略、消息保证、批量发送",
+    "description": "AUTO-EVO-AI V0.1 | Kafka生产者引擎 企业级消息生产者 - 分区策略、消息保证、批量发送",
 }
 
 import os

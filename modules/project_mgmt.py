@@ -2,7 +2,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 """
-AUTO-EVO-AI v6.39 | Enterprise Project Management Module
+AUTO-EVO-AI V0.1 | Enterprise Project Management Module
 Production-grade project lifecycle management with resource allocation, milestone tracking,
 risk assessment, and cross-team dependency orchestration.
 
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["project", "engine", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | Enterprise Project Management Module Production-grade project lifecycle management with resource allocation, milestone tracking,",
+    "description": "AUTO-EVO-AI V0.1 | Enterprise Project Management Module Production-grade project lifecycle management with resource allocation, milestone tracking,",
 }
 
 import asyncio

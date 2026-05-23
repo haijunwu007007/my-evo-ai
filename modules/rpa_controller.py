@@ -1,4 +1,4 @@
-"""Production-grade RPA机器人控制器模块 v6.39
+"""Production-grade RPA机器人控制器模块 V0.1
 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "controller", "automation", "rpa"],
     "grade": "A",
-    "description": "Production-grade RPA机器人控制器模块 v6.39 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度",
+    "description": "Production-grade RPA机器人控制器模块 V0.1 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度",
 }
 import hashlib
 import logging

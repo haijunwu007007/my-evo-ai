@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 亿群OS企业管理模块
+AUTO-EVO-AI V0.1 — 亿群OS企业管理模块
 Grade: A (生产级) | Category: 企业管理
 职责：企业组织架构管理、部门层级、员工档案、考勤、绩效评估
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "billion"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 亿群OS企业管理模块 Grade: A (生产级) | Category: 企业管理",
+    "description": "AUTO-EVO-AI V0.1 — 亿群OS企业管理模块 Grade: A (生产级) | Category: 企业管理",
 }
 
 import os
@@ -115,7 +115,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     MODULE_ID = "billion_group_os"
     MODULE_NAME = "亿群OS企业管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

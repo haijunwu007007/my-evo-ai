@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — CopilotKit AI助手集成
+AUTO-EVO-AI V0.1 — CopilotKit AI助手集成
 Grade: A (生产级) | Category: AI集成
 职责：CopilotKit对话管理、Agent编排、上下文管理、工具调用、对话历史
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["copilotkit", "manager", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — CopilotKit AI助手集成 Grade: A (生产级) | Category: AI集成",
+    "description": "AUTO-EVO-AI V0.1 — CopilotKit AI助手集成 Grade: A (生产级) | Category: AI集成",
 }
 
 import os
@@ -103,7 +103,7 @@ class ToolDefinition:
 class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "copilotkit"
     MODULE_NAME = "copilotkit"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

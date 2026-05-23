@@ -2,7 +2,7 @@ import time
 
 """
 Pixelle-Video AI短视频引擎 v2.0
-版本: v6.37 | 自研 + Pillow/numpy + ffmpeg
+版本: V0.1 | 自研 + Pillow/numpy + ffmpeg
 功能: 输入主题自动生成真实MP4视频(文字动画+背景+转场+配乐)
 降级: ffmpeg不可用时输出GIF；Pillow不可用时仅输出元数据
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["pixelle"],
     "grade": "C",
-    "description": "Pixelle-Video AI短视频引擎 v2.0 版本: v6.37 | 自研 + Pillow/numpy + ffmpeg",
+    "description": "Pixelle-Video AI短视频引擎 v2.0 版本: V0.1 | 自研 + Pillow/numpy + ffmpeg",
 }
 import os, json, logging, subprocess, shutil, tempfile, math, random
 from typing import Optional, Dict, Any, List
@@ -268,7 +268,7 @@ class PixelleVideo:
     - 输出 MP4(H.264) 或 GIF
     """
 
-    VERSION = "2.0.0"
+    VERSION = "V0.1"
 
     # 预设分辨率
     PRESETS = {

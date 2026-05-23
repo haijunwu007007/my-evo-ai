@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 - 访问控制引擎 (Access Control Engine)
+AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine)
 ==========================================================
 上市公司生产级实现 - RBAC/ABAC混合策略引擎
 
@@ -33,7 +33,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["access", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - 访问控制引擎 (Access Control Engine) ==========================================================",
+    "description": "AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine) ==========================================================",
 }
 
 import time

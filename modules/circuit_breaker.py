@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 熔断器
+AUTO-EVO-AI V0.1 — 熔断器
 Grade: A (生产级) | Category: 弹性容错
 职责：熔断状态管理、失败率检测、半开探测、降级策略、健康恢复
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["circuit", "manager", "config"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 熔断器 Grade: A (生产级) | Category: 弹性容错",
+    "description": "AUTO-EVO-AI V0.1 — 熔断器 Grade: A (生产级) | Category: 弹性容错",
 }
 
 import os
@@ -107,7 +107,7 @@ class CircuitBreakerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     MODULE_ID = "circuit_breaker"
     MODULE_NAME = "熔断器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 代码审查引擎
+AUTO-EVO-AI V0.1 — 代码审查引擎
 Grade: A (生产级) | Category: 工具链
 职责：自动化代码审查、质量评分、安全扫描、最佳实践检测、变更分析
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["code", "developer", "adapter"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 代码审查引擎 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 代码审查引擎 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

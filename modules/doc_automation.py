@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 文档自动化
+AUTO-EVO-AI V0.1 — 文档自动化
 Grade: A (生产级) | Category: 编排调度
 职责：自动化文档生成、模板管理、版本控制、多格式导出
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "doc"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 文档自动化 Grade: A (生产级) | Category: 编排调度",
+    "description": "AUTO-EVO-AI V0.1 — 文档自动化 Grade: A (生产级) | Category: 编排调度",
 }
 
 import re

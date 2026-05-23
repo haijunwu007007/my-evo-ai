@@ -1,4 +1,4 @@
-"""Production-grade 支付中心模块 v6.39
+"""Production-grade 支付中心模块 V0.1
 上市公司生产级实现 - 多渠道支付/订单管理/退款/对账/风控/分账
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "payment", "manager", "gateway"],
     "grade": "A",
-    "description": "Production-grade 支付中心模块 v6.39 上市公司生产级实现 - 多渠道支付/订单管理/退款/对账/风控/分账",
+    "description": "Production-grade 支付中心模块 V0.1 上市公司生产级实现 - 多渠道支付/订单管理/退款/对账/风控/分账",
 }
 import hashlib
 import time as tmod

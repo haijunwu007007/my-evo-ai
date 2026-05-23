@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 数据同步（A级生产实现）
+AUTO-EVO-AI V0.1 - 数据同步（A级生产实现）
 =========================================
 模块ID: data-sync
 功能：多源数据同步 — 文件/数据库/缓存/API 双向同步、冲突解决、增量同步。
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "data"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 数据同步（A级生产实现） =========================================",
+    "description": "AUTO-EVO-AI V0.1 - 数据同步（A级生产实现） =========================================",
 }
 
 import re
@@ -345,7 +345,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "data-sync"
     MODULE_NAME = "数据同步"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

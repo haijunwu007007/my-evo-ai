@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 内容管理服务
+AUTO-EVO-AI V0.1 — 内容管理服务
 Grade: A (生产级) | Category: 内容管理
 职责：内容CRUD、版本管理、多语言、分类标签、审批流程、发布管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["content", "service", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 内容管理服务 Grade: A (生产级) | Category: 内容管理",
+    "description": "AUTO-EVO-AI V0.1 — 内容管理服务 Grade: A (生产级) | Category: 内容管理",
 }
 
 import os
@@ -122,7 +122,7 @@ class ReviewRecord:
 class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "content_service"
     MODULE_NAME = "content_service"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 
@@ -155,7 +155,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         for i, (title, cat, tags) in enumerate(
             [
                 ("BGOS平台快速入门", "用户指南", ["入门", "教程"]),
-                ("API v7.0 接口文档", "API文档", ["API", "开发"]),
+                ("API V0.1 接口文档", "API文档", ["API", "开发"]),
                 ("系统架构设计说明", "技术文档", ["架构", "设计"]),
             ]
         ):

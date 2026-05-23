@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 合规审计器
+AUTO-EVO-AI V0.1 — 合规审计器
 Grade: A (生产级) | Category: 安全合规
 职责：合规策略管理、审计跟踪、合规检测、报告生成、整改跟踪
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "compliance"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 合规审计器 Grade: A (生产级) | Category: 安全合规",
+    "description": "AUTO-EVO-AI V0.1 — 合规审计器 Grade: A (生产级) | Category: 安全合规",
 }
 
 import asyncio

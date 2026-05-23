@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - CircuitBreakerPattern 熔断器模式引擎
+AUTO-EVO-AI V0.1 - CircuitBreakerPattern 熔断器模式引擎
 ========================================================
 企业级熔断器模式管理：多策略熔断、渐进式恢复、健康探测、
 自适应阈值、状态机管理、指标采集。
@@ -35,7 +35,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["circuit", "manager", "config"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - CircuitBreakerPattern 熔断器模式引擎 ========================================================",
+    "description": "AUTO-EVO-AI V0.1 - CircuitBreakerPattern 熔断器模式引擎 ========================================================",
 }
 
 import os
@@ -52,8 +52,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
 
-if "E:\\AUTO-EVO-AI_v6.38" not in sys.path:
-    sys.path.insert(0, "E:\\AUTO-EVO-AI_v6.38")
 from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -179,7 +177,7 @@ class CircuitBreakerPatternManager(
         self.module_name = "熔断器模式引擎"
         self.module_id = self.module_name
         self.module_id = "circuit_breaker_pattern"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self._initialized = False
 
         self._circuits: Dict[str, CircuitBreakerInstance] = {}
@@ -244,7 +242,7 @@ class CircuitBreakerPatternManager(
             "circuits": len(self._circuits),
             "open": open_count,
             "half_open": half_open_count,
-            "version": "v7.0",
+            "version": "1.0.0",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

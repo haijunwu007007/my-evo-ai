@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — Enterprise Label Manager Module
+AUTO-EVO-AI V0.1 — Enterprise Label Manager Module
 Production-grade label/tag management with hierarchy, ACL, audit trail, and auto-tagging.
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["label", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — Enterprise Label Manager Module Production-grade label/tag management with hierarchy, ACL, audit trail, and auto-tagging.",
+    "description": "AUTO-EVO-AI V0.1 — Enterprise Label Manager Module Production-grade label/tag management with hierarchy, ACL, audit trail, and auto-tagging.",
 }
 
 import time

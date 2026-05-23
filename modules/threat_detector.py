@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 威胁检测器
+AUTO-EVO-AI V0.1 — 威胁检测器
 Grade: A (生产级) | Category: 安全合规
 职责：实时威胁检测、异常行为识别、入侵检测、攻击模式匹配、告警
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "threat"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 威胁检测器 Grade: A (生产级) | Category: 安全合规",
+    "description": "AUTO-EVO-AI V0.1 — 威胁检测器 Grade: A (生产级) | Category: 安全合规",
 }
 
 import asyncio

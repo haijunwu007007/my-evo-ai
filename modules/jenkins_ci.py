@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - Jenkins CI/CD Module
+AUTO-EVO-AI V0.1 - Jenkins CI/CD Module
 Grade: A | Category: Deployment & Operations
 CI/CD pipeline management: build, test, deploy, artifacts, stages, triggers
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["jenkins"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Jenkins CI/CD Module Grade: A | Category: Deployment & Operations",
+    "description": "AUTO-EVO-AI V0.1 - Jenkins CI/CD Module Grade: A | Category: Deployment & Operations",
 }
 import os, time, logging, threading, hashlib, json, re, copy
 from typing import Any, Dict, List, Optional

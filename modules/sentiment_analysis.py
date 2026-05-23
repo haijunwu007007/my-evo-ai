@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 情感分析引擎
+AUTO-EVO-AI V0.1 — 情感分析引擎
 Grade: A (生产级) | Category: AI能力
 职责：文本情感分析、情感强度、观点提取、情感趋势
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "sentiment", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 情感分析引擎 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — 情感分析引擎 Grade: A (生产级) | Category: AI能力",
 }
 
 import os

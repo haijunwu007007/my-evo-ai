@@ -1,7 +1,7 @@
 import time
 
 """
-AUTO-EVO-AI - 股票数据API模块 (v6.37 真实版)
+AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版)
 数据源: AKShare / 腾讯自选股API
 功能: A股/港股/美股实时行情、K线、分钟线、财务数据、资金流向
 """
@@ -28,7 +28,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["stock"],
     "grade": "C",
-    "description": "AUTO-EVO-AI - 股票数据API模块 (v6.37 真实版) 数据源: AKShare / 腾讯自选股API",
+    "description": "AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版) 数据源: AKShare / 腾讯自选股API",
 }
 import json, os, time, logging
 from datetime import datetime, timedelta

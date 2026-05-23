@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — 数据血缘追踪模块
+AUTO-EVO-AI V0.1 — 数据血缘追踪模块
 Grade: A (生产级) | Category: 数据治理
 职责：追踪数据从源头到消费端的完整血缘关系，支持血缘图构建、影响分析、数据溯源
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["data", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — 数据血缘追踪模块 Grade: A (生产级) | Category: 数据治理",
+    "description": "AUTO-EVO-AI V0.1 — 数据血缘追踪模块 Grade: A (生产级) | Category: 数据治理",
 }
 
 import os

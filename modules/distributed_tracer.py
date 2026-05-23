@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - DistributedTracer 分布式追踪
+AUTO-EVO-AI V0.1 - DistributedTracer 分布式追踪
 ================================================
 企业级分布式追踪：Span/Trace/Baggage传播/采样/导出。
 支持：OpenTelemetry风格Span管理、Trace上下文传播、
@@ -35,7 +35,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine", "distributed", "service"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - DistributedTracer 分布式追踪 ================================================",
+    "description": "AUTO-EVO-AI V0.1 - DistributedTracer 分布式追踪 ================================================",
 }
 
 import time
@@ -376,7 +376,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 "services": len(self._topology),
                 "export_buffer": len(self._export_buffer),
             },
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

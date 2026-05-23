@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 慢查询分析（A级）"""
+"""AUTO-EVO-AI V0.1 - 慢查询分析（A级）"""
 __module_meta__ = {"id":"slow-query","name":"Slow Query","version":"1.0.0","group":"data","grade":"A",
     "tags":["data","sql","performance"],"description":"慢查询分析 - 分析/日志/报告/导出/配置"}
 import time, uuid, logging, re
@@ -7,7 +7,7 @@ from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.slow-query")
 class SlowQuery(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="slow-query";MODULE_NAME="慢查询分析";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="slow-query";MODULE_NAME="慢查询分析";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._queries=[];self._threshold_ms=1000
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)

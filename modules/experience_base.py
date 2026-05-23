@@ -1,5 +1,5 @@
 """
-经验库 - AUTO-EVO-AI v6.35
+经验库 - AUTO-EVO-AI V0.1
 基于历史的决策、经验复用、智能推荐
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["experience"],
     "grade": "C",
-    "description": "经验库 - AUTO-EVO-AI v6.35 基于历史的决策、经验复用、智能推荐",
+    "description": "经验库 - AUTO-EVO-AI V0.1 基于历史的决策、经验复用、智能推荐",
 }
 
 import time

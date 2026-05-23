@@ -2,7 +2,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.enterprise_module import ModuleStats
 
 """
-i18n Engine Module — AUTO-EVO-AI v6.38
+i18n Engine Module — AUTO-EVO-AI V0.1
 Production-grade internationalization/localization engine.
 Supports plural rules, interpolation, nested keys, locale negotiation, and hot-reload.
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine", "i18n"],
     "grade": "A",
-    "description": "i18n Engine Module — AUTO-EVO-AI v6.38 Production-grade internationalization/localization engine.",
+    "description": "i18n Engine Module — AUTO-EVO-AI V0.1 Production-grade internationalization/localization engine.",
 }
 
 import json

@@ -1,5 +1,5 @@
 """
-Idempotent Message Module — AUTO-EVO-AI v6.38
+Idempotent Message Module — AUTO-EVO-AI V0.1
 Enterprise-grade idempotent message processing.
 Deduplication, exactly-once semantics, message tracking,
 retry with exponential backoff, dead letter queue, ordering guarantees.
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "idempotent", "handler"],
     "grade": "A",
-    "description": "Idempotent Message Module — AUTO-EVO-AI v6.38 Enterprise-grade idempotent message processing.",
+    "description": "Idempotent Message Module — AUTO-EVO-AI V0.1 Enterprise-grade idempotent message processing.",
 }
 
 import hashlib

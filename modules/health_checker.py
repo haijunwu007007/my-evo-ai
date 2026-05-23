@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 健康检查器（A级）"""
-__module_meta__ = {"id":"health-checker","name":"Health Checker","version":"v7.1","group":"ops","grade":"A","tags":["ops","health","checker"],"description":"健康检查器-多检查项/历史/统计"}
+"""AUTO-EVO-AI V0.1 - 健康检查器（A级）"""
+__module_meta__ = {"id":"health-checker","name":"Health Checker","version":"V0.1","group":"ops","grade":"A","tags":["ops","health","checker"],"description":"健康检查器-多检查项/历史/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.health-checker")
 class HealthChecker(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="health-checker";MODULE_NAME="健康检查器";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="health-checker";MODULE_NAME="健康检查器";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._checks=[];self._results=[];self._alert_threshold=0.8
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)

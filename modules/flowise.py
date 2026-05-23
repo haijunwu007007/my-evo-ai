@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - Flowise 可视化流程编排（A级）
+AUTO-EVO-AI V0.1 - Flowise 可视化流程编排（A级）
 =================================================
 基于拖拽的流程编排平台，支持：
   1. 可视化流程编辑器数据模型
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "flowise"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Flowise 可视化流程编排（A级） =================================================",
+    "description": "AUTO-EVO-AI V0.1 - Flowise 可视化流程编排（A级） =================================================",
 }
 
 import os
@@ -387,7 +387,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "flowise"
     MODULE_NAME = "可视化流程编排"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | 地理位置搜索引擎
+AUTO-EVO-AI V0.1 | 地理位置搜索引擎
 企业级地理位置搜索与空间索引系统
 
 功能特性:
@@ -40,7 +40,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["geo"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | 地理位置搜索引擎 企业级地理位置搜索与空间索引系统",
+    "description": "AUTO-EVO-AI V0.1 | 地理位置搜索引擎 企业级地理位置搜索与空间索引系统",
 }
 
 import os

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - PR 管理器（A级）"""
+"""AUTO-EVO-AI V0.1 - PR 管理器（A级）"""
 __module_meta__ = {"id":"pr-manager","name":"PR Manager","version":"1.0.0","group":"devops","grade":"A","tags":["devops","pr","review"],"description":"PR 管理器 - 创建/审查/合并/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.pr-manager")
 class PrManager(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="pr-manager";MODULE_NAME="PR管理";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="pr-manager";MODULE_NAME="PR管理";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._prs=[];self._start=time.time()
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)

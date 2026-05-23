@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 智能代码生成器
+AUTO-EVO-AI V0.1 — 智能代码生成器
 Grade: A (生产级) | Category: 工具链
 职责：多语言代码生成、模板引擎、代码审查、重构建议、文档生成
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["code", "developer", "adapter"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 智能代码生成器 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 智能代码生成器 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

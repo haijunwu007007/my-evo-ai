@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 幂等保障（A级生产实现）
+AUTO-EVO-AI V0.1 - 幂等保障（A级生产实现）
 =========================================
 模块ID: idempotent
 功能：操作幂等性保证 — 重复请求去重/结果缓存/TTL过期/并发安全。
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "idempotent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 幂等保障（A级生产实现） =========================================",
+    "description": "AUTO-EVO-AI V0.1 - 幂等保障（A级生产实现） =========================================",
 }
 
 import re
@@ -205,7 +205,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "idempotent"
     MODULE_NAME = "幂等保障"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

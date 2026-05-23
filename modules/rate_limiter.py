@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 通用限流器（A级）"""
+"""AUTO-EVO-AI V0.1 - 通用限流器（A级）"""
 __module_meta__ = {"id":"rate-limiter-mod","name":"Rate Limiter","version":"1.0.0","group":"system","grade":"A","tags":["system","rate-limit","throttle"],"description":"通用限流器（多策略:令牌桶/滑动窗口/配置管理）"}
 import time, uuid, logging, threading
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.rate-limiter-mod")
 class RateLimiter(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="rate-limiter-mod";MODULE_NAME="通用限流器";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="rate-limiter-mod";MODULE_NAME="通用限流器";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._buckets:Dict[str,float]={};self._windows:Dict[str,list]={};self._lock=threading.Lock();self._configs:Dict[str,dict]={}
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

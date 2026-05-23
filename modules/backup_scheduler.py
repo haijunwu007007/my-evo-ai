@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 备份调度管理模块
+AUTO-EVO-AI V0.1 — 备份调度管理模块
 Grade: A (生产级) | Category: 数据保护
 职责：管理备份任务的定时调度、策略配置、执行编排、保留策略、通知告警
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["backup", "manager", "resilience"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 备份调度管理模块 Grade: A (生产级) | Category: 数据保护",
+    "description": "AUTO-EVO-AI V0.1 — 备份调度管理模块 Grade: A (生产级) | Category: 数据保护",
 }
 
 import os

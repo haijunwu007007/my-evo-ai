@@ -1,4 +1,4 @@
-"""Production-grade 时间点数据恢复模块 v6.39
+"""Production-grade 时间点数据恢复模块 V0.1
 上市公司生产级实现 - 快照管理/时间线追踪/数据版本/差异恢复/验证对比
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["point", "manager"],
     "grade": "A",
-    "description": "Production-grade 时间点数据恢复模块 v6.39 上市公司生产级实现 - 快照管理/时间线追踪/数据版本/差异恢复/验证对比",
+    "description": "Production-grade 时间点数据恢复模块 V0.1 上市公司生产级实现 - 快照管理/时间线追踪/数据版本/差异恢复/验证对比",
 }
 import copy
 import hashlib

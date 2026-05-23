@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 生命周期策略模块
+AUTO-EVO-AI V0.1 — 生命周期策略模块
 Grade: A (生产级) | Category: 核心基础
 职责：管理模块/服务的完整生命周期，包括启动、健康检查、优雅关闭、依赖管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础",
+    "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础",
 }
 
 import os
@@ -116,7 +116,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "agent_athena"
     MODULE_NAME = "生命周期策略管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

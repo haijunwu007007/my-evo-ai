@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - 多级缓存引擎（A级生产实现）
+AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现）
 ===============================================
 模块ID: cache-engine
 功能：L1内存+L2文件 双层缓存、TTL过期、LRU淘汰、缓存统计、命名空间隔离。
@@ -37,7 +37,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "cache", "manager", "engine"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v7.0 - 多级缓存引擎（A级生产实现） ===============================================",
+    "description": "AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现） ===============================================",
 }
 
 import time
@@ -425,7 +425,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "cache-engine"
     MODULE_NAME = "多级缓存引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

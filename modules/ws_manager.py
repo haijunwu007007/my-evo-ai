@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - WebSocketManager WebSocket连接管理器
+AUTO-EVO-AI V0.1 - WebSocketManager WebSocket连接管理器
 ========================================================
 企业级WebSocket管理：连接池/房间/广播/心跳/消息队列/重连。
 支持：多房间管理、连接状态追踪、心跳保活、
@@ -32,7 +32,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["ws", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - WebSocketManager WebSocket连接管理器 ========================================================",
+    "description": "AUTO-EVO-AI V0.1 - WebSocketManager WebSocket连接管理器 ========================================================",
 }
 import time
 import asyncio
@@ -321,7 +321,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             checks_run=5,
             error_rate=self.stats.error_rate,
             details=checks,
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

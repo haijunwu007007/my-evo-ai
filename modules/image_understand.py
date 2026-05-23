@@ -612,7 +612,7 @@ class ImageUnderstandModule:
             "AUTO-EVO-AI System Dashboard",
             "企业级AI自动化平台",
             "Production Grade Module",
-            "v6.38 Enterprise Edition",
+            "V0.1 Enterprise Edition",
             "Health Check: All Systems Normal",
             "性能监控中心",
         ]

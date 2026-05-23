@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Poseidon AI智能体
+AUTO-EVO-AI V0.1 — Poseidon AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：流量管理、负载均衡、限流熔断、服务发现、网关策略
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Poseidon AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Poseidon AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -96,7 +96,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     MODULE_ID = "agent_poseidon"
     MODULE_NAME = "Poseidon智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

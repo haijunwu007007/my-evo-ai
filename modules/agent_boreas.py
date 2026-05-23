@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v6.39 - Boreas智能体模块
+        AUTO-EVO-AI V0.1 - Boreas智能体模块
 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作
 
         上市公司生产级实现 - 完整业务逻辑
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - Boreas智能体模块 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作",
+    "description": "AUTO-EVO-AI V0.1 - Boreas智能体模块 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作",
 }
 
 import time

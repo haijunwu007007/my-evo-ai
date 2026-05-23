@@ -1,4 +1,4 @@
-"""Production-grade DDoS防护模块 v6.39
+"""Production-grade DDoS防护模块 V0.1
 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["ddos", "engine"],
     "grade": "A",
-    "description": "Production-grade DDoS防护模块 v6.39 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解",
+    "description": "Production-grade DDoS防护模块 V0.1 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解",
 }
 import logging
 import math

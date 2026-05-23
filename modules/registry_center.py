@@ -1,4 +1,4 @@
-"""Production-grade 服务注册中心模块 v6.39
+"""Production-grade 服务注册中心模块 V0.1
 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "service", "registry"],
     "grade": "A",
-    "description": "Production-grade 服务注册中心模块 v6.39 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡",
+    "description": "Production-grade 服务注册中心模块 V0.1 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡",
 }
 import hashlib
 import logging

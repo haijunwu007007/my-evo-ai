@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - 定时任务调度器（A级生产实现）
+AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现）
 ===============================================
 模块ID: cron-scheduler
 功能：Cron定时调度 — 任务注册/定时触发/并发控制/失败重试/执行历史。
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "cron"],
     "grade": "B",
-    "description": "AUTO-EVO-AI v7.0 - 定时任务调度器（A级生产实现） ===============================================",
+    "description": "AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现） ===============================================",
 }
 
 import time
@@ -342,7 +342,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "cron-scheduler"
     MODULE_NAME = "定时任务调度器"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Kafka Compaction Topic 管理器
+AUTO-EVO-AI V0.1 — Kafka Compaction Topic 管理器
 Grade: A (生产级) | Category: 消息中间件
 职责：Topic Compaction策略管理、分区日志清理、消息去重、消费者offset管理、压实监控
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "compaction"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Kafka Compaction Topic 管理器 Grade: A (生产级) | Category: 消息中间件",
+    "description": "AUTO-EVO-AI V0.1 — Kafka Compaction Topic 管理器 Grade: A (生产级) | Category: 消息中间件",
 }
 
 import os
@@ -126,7 +126,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
     MODULE_ID = "compaction_topic"
     MODULE_NAME = "compaction_topic"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

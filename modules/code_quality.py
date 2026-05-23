@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 代码质量管理模块
+AUTO-EVO-AI V0.1 — 代码质量管理模块
 Grade: A (生产级) | Category: 开发工具
 职责：代码复杂度分析、代码异味检测、技术债务追踪、质量评分
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["code", "developer", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 代码质量管理模块 Grade: A (生产级) | Category: 开发工具",
+    "description": "AUTO-EVO-AI V0.1 — 代码质量管理模块 Grade: A (生产级) | Category: 开发工具",
 }
 
 import os

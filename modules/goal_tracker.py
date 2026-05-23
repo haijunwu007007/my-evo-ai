@@ -1,5 +1,5 @@
 """
-目标追踪器 - AUTO-EVO-AI v6.35
+目标追踪器 - AUTO-EVO-AI V0.1
 管理多周期目标、进度追踪、可视化状态
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["goal"],
     "grade": "C",
-    "description": "目标追踪器 - AUTO-EVO-AI v6.35 管理多周期目标、进度追踪、可视化状态",
+    "description": "目标追踪器 - AUTO-EVO-AI V0.1 管理多周期目标、进度追踪、可视化状态",
 }
 
 import uuid
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     print("\n[1] 创建目标...")
     g1 = tracker.create_goal(
         "完成系统升级",
-        "将系统升级到v6.35",
+        "将系统升级到V0.1",
         priority=GoalPriority.HIGH.value,
         deadline=(datetime.now() + timedelta(days=7)).isoformat(),
     )

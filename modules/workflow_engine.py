@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - WorkflowEngine 工作流引擎
+AUTO-EVO-AI V0.1 - WorkflowEngine 工作流引擎
 ============================================
 企业级工作流引擎：BPMN建模/DAG执行/并行网关/子流程/补偿。
 支持：DAG工作流定义与执行、顺序/并行/条件网关、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "orchestration", "workflow"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - WorkflowEngine 工作流引擎 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - WorkflowEngine 工作流引擎 ============================================",
 }
 
 import time
@@ -314,7 +314,7 @@ class WorkflowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "running": self._wf_stats["instances_running"],
                 "active_tasks": len(self._active_tasks),
             },
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

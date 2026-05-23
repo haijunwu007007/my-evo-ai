@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Phoebus AI智能体
+AUTO-EVO-AI V0.1 — Phoebus AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：API网关管理、路由策略、限流熔断、API版本管理、流量染色
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["gateway", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Phoebus AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Phoebus AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -115,7 +115,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "agent_phoebus"
     MODULE_NAME = "Phoebus智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

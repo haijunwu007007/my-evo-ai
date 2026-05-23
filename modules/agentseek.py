@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — AgentSeek智能体搜索
+AUTO-EVO-AI V0.1 — AgentSeek智能体搜索
 Grade: A (生产级) | Category: AI智能体
 职责：智能体发现、能力检索、Agent推荐、匹配评估、生态目录
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "agentseek", "manager", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — AgentSeek智能体搜索 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — AgentSeek智能体搜索 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -264,7 +264,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "agentseek"
     MODULE_NAME = "AgentSeek"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

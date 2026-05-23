@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 统一通信网关（A级）"""
+"""AUTO-EVO-AI V0.1 - 统一通信网关（A级）"""
 __module_meta__ = {"id":"uni-comm-gateway","name":"Uni Comm Gateway","version":"1.0.0","group":"network","grade":"A","tags":["network","communication","gateway"],"description":"统一通信网关"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
 logger=logging.getLogger("evo.uni-comm")
 class UniCommGateway(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="uni-comm-gateway";MODULE_NAME="统一通信";VERSION="v7.0";MODULE_LEVEL="A"
+    MODULE_ID="uni-comm-gateway";MODULE_NAME="统一通信";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._channels={"sms":{"enabled":True},"email":{"enabled":True},"push":{"enabled":True}};self._history=[];self._setup_rate_limit(rate=100,burst=200)
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - RAG Pipeline Module
+AUTO-EVO-AI V0.1 - RAG Pipeline Module
 Grade: A | Category: AI/Pipeline
 Retrieval-Augmented Generation pipeline: document ingestion, chunking,
 embedding, vector search, context assembly, generation orchestration
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["rag"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - RAG Pipeline Module Grade: A | Category: AI/Pipeline",
+    "description": "AUTO-EVO-AI V0.1 - RAG Pipeline Module Grade: A | Category: AI/Pipeline",
 }
 import os, time, logging, threading, hashlib, json, re, math
 from typing import Any, Dict, List, Optional, Tuple

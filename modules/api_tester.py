@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — API测试器
+AUTO-EVO-AI V0.1 — API测试器
 Grade: A (生产级) | Category: 测试基础设施
 职责：API接口测试、测试用例管理、断言验证、测试报告、回归测试
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["api", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — API测试器 Grade: A (生产级) | Category: 测试基础设施",
+    "description": "AUTO-EVO-AI V0.1 — API测试器 Grade: A (生产级) | Category: 测试基础设施",
 }
 
 import os
@@ -134,7 +134,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "api_tester"
     MODULE_NAME = "API测试器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

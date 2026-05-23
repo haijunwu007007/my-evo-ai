@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v6.39 - Voice Notification Engine
+        AUTO-EVO-AI V0.1 - Voice Notification Engine
 Enterprise-grade voice notification and TTS system.
 Supports multi-language text-to-speech, voice scheduling,
 notification templates, priority routing, and delivery tracking.
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "m55"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - Voice Notification Engine Enterprise-grade voice notification and TTS system.",
+    "description": "AUTO-EVO-AI V0.1 - Voice Notification Engine Enterprise-grade voice notification and TTS system.",
 }
 
 import os
@@ -565,7 +565,7 @@ class VoiceNotifyEngine(object):
     """
 
     MODULE_ID = "m55_voice_notify"
-    MODULE_VERSION = "6.39.0"
+    MODULE_VERSION = "V0.1"
     MODULE_CATEGORY = "communication"
 
     def __init__(self):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-        AUTO-EVO-AI v6.39 | 延迟队列引擎
+        AUTO-EVO-AI V0.1 | 延迟队列引擎
 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略
 
         功能特性:
@@ -40,7 +40,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["handler", "manager", "delay"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | 延迟队列引擎 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略",
+    "description": "AUTO-EVO-AI V0.1 | 延迟队列引擎 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略",
 }
 
 import os

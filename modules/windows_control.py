@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.31 - m32 Windows原生控件操作模块
+AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块
 基于pywinauto封装，实现控件级精准操作（对标OpenClaw系统级操作）
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["windows"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v6.31 - m32 Windows原生控件操作模块 基于pywinauto封装，实现控件级精准操作（对标OpenClaw系统级操作）",
+    "description": "AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块 基于pywinauto封装，实现控件级精准操作（对标OpenClaw系统级操作）",
 }
 import time, logging, os
 from typing import Optional, List, Dict, Any, Tuple

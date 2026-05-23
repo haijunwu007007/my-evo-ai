@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 功能开关
+AUTO-EVO-AI V0.1 — 功能开关
 Grade: A (生产级) | Category: 配置管理
 职责：开关管理、灰度发布、A/B测试、规则引擎、变体分配
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "feature"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 功能开关 Grade: A (生产级) | Category: 配置管理",
+    "description": "AUTO-EVO-AI V0.1 — 功能开关 Grade: A (生产级) | Category: 配置管理",
 }
 
 import os
@@ -101,7 +101,7 @@ class FeatureFlagsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "feature_flags"
     MODULE_NAME = "功能开关"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

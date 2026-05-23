@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 分布式协调服务
+AUTO-EVO-AI V0.1 — 分布式协调服务
 Grade: A (生产级) | Category: 分布式基础
 职责：分布式锁、Leader选举、分布式Barrier、命名服务、会话管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["coordination", "service", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 分布式协调服务 Grade: A (生产级) | Category: 分布式基础",
+    "description": "AUTO-EVO-AI V0.1 — 分布式协调服务 Grade: A (生产级) | Category: 分布式基础",
 }
 
 import os
@@ -105,7 +105,7 @@ class CoordinationSession:
 class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "coordination"
     MODULE_NAME = "coordination"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

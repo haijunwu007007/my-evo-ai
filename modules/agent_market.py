@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Agent Market (智能体市场)
+AUTO-EVO-AI V0.1 — Agent Market (智能体市场)
 ============================================
 企业级智能体市场，负责技能/插件发布、版本管理、依赖解析、安全审计与安装部署。
 支持技能评分、搜索发现、权限控制与灰度发布。
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Agent Market (智能体市场) ============================================",
+    "description": "AUTO-EVO-AI V0.1 — Agent Market (智能体市场) ============================================",
 }
 
 import time

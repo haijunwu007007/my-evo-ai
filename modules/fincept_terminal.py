@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - Fincept 终端（A级）"""
+"""AUTO-EVO-AI V0.1 - Fincept 终端（A级）"""
 __module_meta__ = {"id":"fincept-terminal","name":"Fincept Terminal","version":"1.0.0","group":"data","grade":"A","tags":["finance","terminal","data"],"description":"Fincept 终端 - 行情搜索/数据查询/看板管理"}
 import time, uuid, logging, random
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.fincept")
 class FinceptTerminal(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="fincept-terminal";MODULE_NAME="Fincept终端";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="fincept-terminal";MODULE_NAME="Fincept终端";VERSION="V0.1";MODULE_LEVEL="A"
     _MOCK_DATA={"AAPL":{"name":"Apple","price":198.5,"sector":"Tech"},"MSFT":{"name":"Microsoft","price":425.3,"sector":"Tech"},
         "GOOGL":{"name":"Alphabet","price":175.2,"sector":"Tech"},"AMZN":{"name":"Amazon","price":185.8,"sector":"Consumer"},
         "TSLA":{"name":"Tesla","price":245.3,"sector":"Auto"}}

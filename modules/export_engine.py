@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 通用导出引擎
+AUTO-EVO-AI V0.1 — 通用导出引擎
 Grade: A (生产级) | Category: 编排调度
 职责：统一数据导出管道，支持多格式、批量导出、压缩、加密、存储后端
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "export"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 通用导出引擎 Grade: A (生产级) | Category: 编排调度",
+    "description": "AUTO-EVO-AI V0.1 — 通用导出引擎 Grade: A (生产级) | Category: 编排调度",
 }
 
 import asyncio

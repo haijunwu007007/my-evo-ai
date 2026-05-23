@@ -1,4 +1,4 @@
-"""Production-grade Outbox模式模块 v6.39
+"""Production-grade Outbox模式模块 V0.1
 上市公司生产级实现 - 事务性消息/双写一致性/轮询发布/幂等消费/状态追踪
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["outbox"],
     "grade": "A",
-    "description": "Production-grade Outbox模式模块 v6.39 上市公司生产级实现 - 事务性消息/双写一致性/轮询发布/幂等消费/状态追踪",
+    "description": "Production-grade Outbox模式模块 V0.1 上市公司生产级实现 - 事务性消息/双写一致性/轮询发布/幂等消费/状态追踪",
 }
 import hashlib
 import json

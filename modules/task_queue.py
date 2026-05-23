@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v7.0 — 任务队列模块（真实业务逻辑）
+        AUTO-EVO-AI V0.1 — 任务队列模块（真实业务逻辑）
 Grade: A (生产级) | Category: 工作流
 职责：优先级任务队列、延迟任务、重试机制、任务依赖、并发控制
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "task"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 任务队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
+    "description": "AUTO-EVO-AI V0.1 — 任务队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
 }
 
 import os

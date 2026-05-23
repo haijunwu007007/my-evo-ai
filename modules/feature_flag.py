@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - FeatureFlag 特性开关服务
+AUTO-EVO-AI V0.1 - FeatureFlag 特性开关服务
 ============================================
 企业级Feature Flag：灰度发布/A-B测试/条件规则/实时更新。
 支持：特性开关管理、多维度灰度（用户/百分比/属性/版本）、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["feature"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - FeatureFlag 特性开关服务 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - FeatureFlag 特性开关服务 ============================================",
 }
 
 import time
@@ -485,7 +485,7 @@ class FeatureFlag(EnterpriseModule):
             checks_run=3,
             error_rate=self.stats.error_rate,
             details={"flags": len(self._flags), "enabled": self._ff_stats["flags_enabled"]},
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

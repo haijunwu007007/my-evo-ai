@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - Prometheus 指标采集
+AUTO-EVO-AI V0.1 - Prometheus 指标采集
 =======================================
 轻量级 Prometheus 兼容指标系统。
 自动采集每个模块的：请求量、延迟、错误率、活跃连接数。

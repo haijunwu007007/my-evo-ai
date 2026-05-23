@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Composio工具集成管理器
+AUTO-EVO-AI V0.1 — Composio工具集成管理器
 Grade: A (生产级) | Category: 开源生态
 职责：Composio第三方服务集成，工具注册、执行、认证、授权、Webhook管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "composio", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Composio工具集成管理器 Grade: A (生产级) | Category: 开源生态",
+    "description": "AUTO-EVO-AI V0.1 — Composio工具集成管理器 Grade: A (生产级) | Category: 开源生态",
 }
 
 import os
@@ -150,7 +150,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     MODULE_ID = "composio_tools"
     MODULE_NAME = "composio_tools"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     # 预置工具集
     PRESET_TOOLS = [

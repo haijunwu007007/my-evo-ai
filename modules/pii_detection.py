@@ -1,4 +1,4 @@
-"""Production-grade PII检测模块 v6.39
+"""Production-grade PII检测模块 V0.1
 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["pii"],
     "grade": "A",
-    "description": "Production-grade PII检测模块 v6.39 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务",
+    "description": "Production-grade PII检测模块 V0.1 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务",
 }
 import logging
 import re

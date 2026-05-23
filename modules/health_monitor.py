@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 健康监控
+AUTO-EVO-AI V0.1 — 健康监控
 Grade: A (生产级) | Category: 运维监控
 职责：指标采集、健康检查、告警触发、趋势分析、SLA跟踪
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["health", "monitor"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 健康监控 Grade: A (生产级) | Category: 运维监控",
+    "description": "AUTO-EVO-AI V0.1 — 健康监控 Grade: A (生产级) | Category: 运维监控",
 }
 
 import os
@@ -140,7 +140,7 @@ class Alert:
 class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "health_monitor"
     MODULE_NAME = "健康监控"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

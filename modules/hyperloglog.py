@@ -2,7 +2,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.enterprise_module import ModuleStats
 
 """
-HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI v6.38
+HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI V0.1
 Production-grade probabilistic cardinality estimation for distributed systems.
 Supports sparse/dense representation, union, intersection estimation, and persistence.
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "hyperloglog", "manager"],
     "grade": "A",
-    "description": "HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI v6.38 Production-grade probabilistic cardinality estimation for distributed systems.",
+    "description": "HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI V0.1 Production-grade probabilistic cardinality estimation for distributed systems.",
 }
 
 import hashlib

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Agent Hephaestus (代码构建引擎)
+AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎)
 ====================================================
 企业级智能体，负责代码分析、构建编排、编译管理、依赖解析与代码质量门禁。
 支持多语言构建管线（Python/Node.js/Java/Go/Rust），内置构建缓存与增量编译优化。
@@ -30,7 +30,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Agent Hephaestus (代码构建引擎) ====================================================",
+    "description": "AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎) ====================================================",
 }
 
 import os

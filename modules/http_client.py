@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | HTTP客户端引擎
+AUTO-EVO-AI V0.1 | HTTP客户端引擎
 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器
 
 功能特性:
@@ -42,7 +42,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "client", "http"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | HTTP客户端引擎 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器",
+    "description": "AUTO-EVO-AI V0.1 | HTTP客户端引擎 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器",
 }
 
 import os

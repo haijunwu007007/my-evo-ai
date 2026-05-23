@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - ChaosEngine 混沌工程引擎
+AUTO-EVO-AI V0.1 - ChaosEngine 混沌工程引擎
 ============================================
 企业级混沌工程：故障注入/稳态验证/安全回收/实验管理。
 支持：故障注入（网络延迟/丢包/错误码/CPU/内存/Disk/进程 kill），
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["chaos", "engine", "config"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ChaosEngine 混沌工程引擎 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - ChaosEngine 混沌工程引擎 ============================================",
 }
 
 import os
@@ -52,8 +52,6 @@ import uuid
 
 import sys
 
-if "E:\\AUTO-EVO-AI_v6.38" not in sys.path:
-    sys.path.insert(0, "E:\\AUTO-EVO-AI_v6.38")
 from modules._base.enterprise_module import (
     EnterpriseModule,
     ModuleStatus,
@@ -222,7 +220,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.module_name = "混沌工程引擎"
         self.module_id = self.module_name
         self.module_id = "chaos_engine"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self._initialized = False
         self.config = config or {}
         # 实验存储
@@ -281,7 +279,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "active_faults": len(self._active_faults),
             "slos": len(self._slos),
             "guards": len(self._guard_rails),
-            "version": "v7.0",
+            "version": "1.0.0",
         }
 
     def shutdown(self) -> None:

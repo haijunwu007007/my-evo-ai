@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - RuleEngine 规则引擎
+AUTO-EVO-AI V0.1 - RuleEngine 规则引擎
 ======================================
 企业级规则引擎：条件匹配/规则评估/优先级/冲突解决/事实库。
 支持：IF-THEN规则定义、条件表达式解析、优先级排序、
@@ -32,7 +32,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["rule", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - RuleEngine 规则引擎 ======================================",
+    "description": "AUTO-EVO-AI V0.1 - RuleEngine 规则引擎 ======================================",
 }
 
 import time
@@ -377,7 +377,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "groups": len(self._rules_by_group),
                 "handlers": len(self._action_handlers),
             },
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-        AUTO EVO AI v6.28 - 智能体集群资源精细化管控模块
+        AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块
 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断
 命名空间: evo.resource.agent.*
 """
@@ -28,7 +28,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "monitor", "multi-agent", "agent"],
     "grade": "C",
-    "description": "AUTO EVO AI v6.28 - 智能体集群资源精细化管控模块 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断",
+    "description": "AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断",
 }
 
 import os
@@ -1456,7 +1456,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
     MODULE_ID = "evo.resource.agent"
     MODULE_NAME = "AgentResourceControl"
-    VERSION = "6.28.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 
@@ -1780,7 +1780,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
         __version__ = "6.28.0"
 
-VERSION = "6.28.0"
+VERSION = "V0.1"
 
 # ==================== 使用示例 ====================
 

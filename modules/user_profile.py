@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - UserProfile 用户画像服务
+AUTO-EVO-AI V0.1 - UserProfile 用户画像服务
 ============================================
 企业级用户画像：标签体系/行为采集/偏好建模/分群/RFM分析。
 支持：用户属性管理、标签体系（层级/规则/手动）、
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["user"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - UserProfile 用户画像服务 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - UserProfile 用户画像服务 ============================================",
 }
 
 import time
@@ -539,7 +539,7 @@ class UserProfile(EnterpriseModule):
             checks_run=3,
             error_rate=self.stats.error_rate,
             details={"users": len(self._profiles), "tags": len(self._tag_defs), "segments": len(self._segments)},
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

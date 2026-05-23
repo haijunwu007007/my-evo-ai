@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — 配额管理模块
+AUTO-EVO-AI V0.1 — 配额管理模块
 生产级实现：多维度配额控制、滑动窗口限速、分级告警、自动降级
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "quota", "manager", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — 配额管理模块 生产级实现：多维度配额控制、滑动窗口限速、分级告警、自动降级",
+    "description": "AUTO-EVO-AI V0.1 — 配额管理模块 生产级实现：多维度配额控制、滑动窗口限速、分级告警、自动降级",
 }
 
 import asyncio

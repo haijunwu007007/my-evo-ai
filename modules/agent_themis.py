@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Themis AI智能体
+AUTO-EVO-AI V0.1 — Themis AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：合规审计、策略执行、风险评估、漏洞扫描、安全基线检查、审计报告
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Themis AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Themis AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -317,7 +317,7 @@ class AgentThemisManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule
 
     MODULE_ID = "agent_themis"
     MODULE_NAME = "Themis智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

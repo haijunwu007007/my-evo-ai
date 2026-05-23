@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 核心模块 API 测试"""
-import sys, json, http.client
+import sys, json, http.client, pytest
 from pathlib import Path
 BASE = Path(__file__).parent.parent; sys.path.insert(0, str(BASE))
 HOST, PORT = "localhost", 8765
@@ -19,6 +19,15 @@ def po(p, b=None):
     try: return r.status, json.loads(r.read())
     except: return r.status, {}
 
+def _server_alive():
+    try:
+        c = http.client.HTTPConnection(HOST, PORT, timeout=2)
+        c.request("GET", "/")
+        return c.getresponse().status == 200
+    except Exception:
+        return False
+
+@pytest.mark.skipif(not _server_alive(), reason="API server not running")
 class TestSystemAPI:
     def test_scheduler_status(self):
         s, d = g("/api/scheduler/status"); assert s == 200

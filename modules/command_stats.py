@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 命令统计管理器
+AUTO-EVO-AI V0.1 — 命令统计管理器
 Grade: A (生产级) | Category: 运维工具
 职责：命令执行统计、历史记录、频率分析、安全审计、成本计算
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "command"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 命令统计管理器 Grade: A (生产级) | Category: 运维工具",
+    "description": "AUTO-EVO-AI V0.1 — 命令统计管理器 Grade: A (生产级) | Category: 运维工具",
 }
 
 import os
@@ -117,7 +117,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "command_stats"
     MODULE_NAME = "command_stats"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

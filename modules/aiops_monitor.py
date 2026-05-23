@@ -1,4 +1,4 @@
-"""Production-grade AIOps智能运维监控模块 v6.39
+"""Production-grade AIOps智能运维监控模块 V0.1
 上市公司生产级实现 - 异常检测/故障预测/自动修复/事件关联/容量预测
 """
 
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "aiops", "monitor"],
     "grade": "A",
-    "description": "Production-grade AIOps智能运维监控模块 v6.39 上市公司生产级实现 - 异常检测/故障预测/自动修复/事件关联/容量预测",
+    "description": "Production-grade AIOps智能运维监控模块 V0.1 上市公司生产级实现 - 异常检测/故障预测/自动修复/事件关联/容量预测",
 }
 import logging
 import math

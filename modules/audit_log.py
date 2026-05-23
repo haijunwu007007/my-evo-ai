@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - 审计日志（A级生产实现）
+AUTO-EVO-AI V0.1 - 审计日志（A级生产实现）
 =========================================
 模块ID: audit-log
 功能：企业级审计追踪 — 全操作记录/结构化存储/查询检索/合规报告/自动归档。
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "audit"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 审计日志（A级生产实现） =========================================",
+    "description": "AUTO-EVO-AI V0.1 - 审计日志（A级生产实现） =========================================",
 }
 
 import time
@@ -249,7 +249,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "audit-log"
     MODULE_NAME = "审计日志"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

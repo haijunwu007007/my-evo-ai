@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 基金数据 API（A级）"""
-__module_meta__ = {"id":"fund-api","name":"Fund API","version":"v7.1","group":"data","grade":"A",
+"""AUTO-EVO-AI V0.1 - 基金数据 API（A级）"""
+__module_meta__ = {"id":"fund-api","name":"Fund API","version":"V0.1","group":"data","grade":"A",
     "tags":["data","finance","fund"],"description":"基金数据 API - NAV/搜索/收益/排行"}
 import time, uuid, logging, random
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.fund-api")
 class FundApi(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="fund-api";MODULE_NAME="基金数据";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="fund-api";MODULE_NAME="基金数据";VERSION="V0.1";MODULE_LEVEL="A"
     _MOCK={"000001":{"name":"华夏成长","type":"混合型","nav":1.234},"000011":{"name":"华夏大盘","type":"混合型","nav":15.678},"110011":{"name":"易方达中小盘","type":"股票型","nav":5.432},"161725":{"name":"招商白酒","type":"指数型","nav":0.987},"008888":{"name":"华夏芯片ETF联接","type":"指数型","nav":1.345},"012345":{"name":"广发科技","type":"股票型","nav":2.567}}
     def __init__(self,config=None):super().__init__(config)
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - KubernetesOrchestrator K8s集群编排
+AUTO-EVO-AI V0.1 - KubernetesOrchestrator K8s集群编排
 =====================================================
 企业级Kubernetes编排：Deployment/Service/Ingress/Pod管理/HPA/监控。
 支持：Deployment创建/扩缩容/滚动更新、Service管理、
@@ -35,7 +35,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine", "kubernetes", "service"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - KubernetesOrchestrator K8s集群编排 =====================================================",
+    "description": "AUTO-EVO-AI V0.1 - KubernetesOrchestrator K8s集群编排 =====================================================",
 }
 
 import time
@@ -425,7 +425,7 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             checks_run=6,
             error_rate=self.stats.error_rate,
             details=checks,
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> Result:

@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - Chatwise 智能对话管理
+AUTO-EVO-AI V0.1 - Chatwise 智能对话管理
 ======================================
 企业级智能对话平台：多会话管理、上下文追踪、意图识别、
 对话路由、消息归档、会话分析。
@@ -32,7 +32,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "chatwise"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Chatwise 智能对话管理 ======================================",
+    "description": "AUTO-EVO-AI V0.1 - Chatwise 智能对话管理 ======================================",
 }
 
 import os
@@ -49,8 +49,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
 
-if "E:\\AUTO-EVO-AI_v6.38" not in sys.path:
-    sys.path.insert(0, "E:\\AUTO-EVO-AI_v6.38")
 from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
@@ -123,7 +121,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.module_name = "智能对话管理"
         self.module_id = self.module_name
         self.module_id = "chatwise"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self._initialized = False
 
         # 会话存储
@@ -167,7 +165,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "conversations": len(self._conversations),
             "active": active,
             "messages": self._stats["messages_total"],
-            "version": "v7.0",
+            "version": "1.0.0",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

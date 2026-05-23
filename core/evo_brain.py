@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 主编排器 - 系统大脑
+AUTO-EVO-AI V0.1 主编排器 - 系统大脑
 一句话完成复杂任务的智能调度中心
 """
 

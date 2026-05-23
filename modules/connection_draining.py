@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 连接排空管理器
+AUTO-EVO-AI V0.1 — 连接排空管理器
 Grade: A (生产级) | Category: 网络基础设施
 职责：优雅关闭时排空现有连接、超时控制、强制断开、连接状态跟踪
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["connection", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 连接排空管理器 Grade: A (生产级) | Category: 网络基础设施",
+    "description": "AUTO-EVO-AI V0.1 — 连接排空管理器 Grade: A (生产级) | Category: 网络基础设施",
 }
 
 import os
@@ -93,7 +93,7 @@ class DrainSession:
 class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "connection_draining"
     MODULE_NAME = "connection_draining"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

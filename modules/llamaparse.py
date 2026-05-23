@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — Enterprise LlamaParse Document Parser
+AUTO-EVO-AI V0.1 — Enterprise LlamaParse Document Parser
 Production-grade document parsing with multi-format support, chunking strategies,
 table extraction, OCR simulation, layout analysis, and metadata extraction for上市企业生产级标准.
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "engine", "llamaparse"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — Enterprise LlamaParse Document Parser Production-grade document parsing with multi-format support, chunking strategies,",
+    "description": "AUTO-EVO-AI V0.1 — Enterprise LlamaParse Document Parser Production-grade document parsing with multi-format support, chunking strategies,",
 }
 
 import time

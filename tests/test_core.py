@@ -4,6 +4,15 @@ AUTO-EVO-AI 核心模块单元测试
 """
 import os, sys, json, unittest, http.client, tempfile
 
+def _server_alive():
+    try:
+        c = http.client.HTTPConnection("localhost", 8765, timeout=2)
+        c.request("GET", "/")
+        r = c.getresponse()
+        return r.status == 200
+    except Exception:
+        return False
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 HOST = "localhost"
@@ -26,6 +35,7 @@ def _req(method, path, body=None):
         return r.status, {"raw": data[:200]}
 
 
+@unittest.skipIf(not _server_alive(), "API server not running")
 class TestSystemAPI(unittest.TestCase):
     """系统 API 测试"""
 
@@ -84,6 +94,7 @@ class TestSystemAPI(unittest.TestCase):
         self.assertEqual(status, 200)
 
 
+@unittest.skipIf(not _server_alive(), "API server not running")
 class TestSchedulerTasks(unittest.TestCase):
     """调度器任务测试"""
 

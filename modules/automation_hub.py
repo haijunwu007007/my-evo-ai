@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 自动化中心
+AUTO-EVO-AI V0.1 — 自动化中心
 Grade: A (生产级) | Category: 编排调度
 职责：统一管理自动化触发器、调度器、模板，支持事件驱动/定时/条件/手动触发
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "automation"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 自动化中心 Grade: A (生产级) | Category: 编排调度",
+    "description": "AUTO-EVO-AI V0.1 — 自动化中心 Grade: A (生产级) | Category: 编排调度",
 }
 
 import os

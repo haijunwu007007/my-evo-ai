@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.31 — m41 轻量调试面板
+AUTO-EVO-AI V0.1 — m41 轻量调试面板
 为RPA自动化提供可视化调试能力：步骤回放、变量监控、断点调试、执行轨迹记录。
 纯Python实现，通过HTTP提供调试API，前端集成到Dashboard。
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["debug", "manager", "handler"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v6.31 — m41 轻量调试面板 为RPA自动化提供可视化调试能力：步骤回放、变量监控、断点调试、执行轨迹记录。",
+    "description": "AUTO-EVO-AI V0.1 — m41 轻量调试面板 为RPA自动化提供可视化调试能力：步骤回放、变量监控、断点调试、执行轨迹记录。",
 }
 
 import time

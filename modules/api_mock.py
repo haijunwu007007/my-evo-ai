@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — API Mock服务
+AUTO-EVO-AI V0.1 — API Mock服务
 Grade: A (生产级) | Category: API基础设施
 职责：API模拟、Mock规则管理、请求匹配、响应模板、延迟模拟、状态码模拟
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["api", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — API Mock服务 Grade: A (生产级) | Category: API基础设施",
+    "description": "AUTO-EVO-AI V0.1 — API Mock服务 Grade: A (生产级) | Category: API基础设施",
 }
 
 import os
@@ -101,7 +101,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "api_mock"
     MODULE_NAME = "API Mock服务"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -684,7 +684,7 @@ class SystemCoordinator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     - 全模块互联：431模块通过事件总线和协调器真正互通
     """
 
-    VERSION = "2.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
         super().__init__()
@@ -1399,7 +1399,7 @@ class SystemCoordinator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def get_status(self) -> Dict:
         """获取系统状态"""
         status = {
-            "version": f"v6.37 COORDINATED",
+            "version": f"V0.1 COORDINATED",
             "coordinator_version": self.VERSION,
             "status": self.status,
             "initialized": self.initialized,

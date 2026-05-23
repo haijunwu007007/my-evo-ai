@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - FlowEngine 工作流引擎（A级）
+AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级）
 =================================================
 企业级DAG工作流引擎，支持：
   1. DAG有向无环图定义与校验
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "flow"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - FlowEngine 工作流引擎（A级） =================================================",
+    "description": "AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级） =================================================",
 }
 
 import re
@@ -273,7 +273,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "flow-engine"
     MODULE_NAME = "工作流引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

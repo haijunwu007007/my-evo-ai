@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | CLI交互式命令行接口引擎
+AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎
 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展
 
 功能特性:
@@ -39,7 +39,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["cli", "manager", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | CLI交互式命令行接口引擎 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展",
+    "description": "AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展",
 }
 
 import os
@@ -1214,7 +1214,7 @@ class CLIInterface(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """打印启动Banner"""
         banner = f"""
 {self._theme.colored("╔══════════════════════════════════════════════════╗", self._theme.header_color)}
-{self._theme.colored("║", self._theme.header_color)}  AUTO-EVO-AI v6.39  企业级AI自动化系统      {self._theme.colored("║", self._theme.header_color)}
+{self._theme.colored("║", self._theme.header_color)}  AUTO-EVO-AI V0.1  企业级AI自动化系统      {self._theme.colored("║", self._theme.header_color)}
 {self._theme.colored("║", self._theme.header_color)}  CLI交互式命令行接口                      {self._theme.colored("║", self._theme.header_color)}
 {self._theme.colored("║", self._theme.header_color)}  会话: {self._session_id}{" " * (32 - len(self._session_id))}{self._theme.colored("║", self._theme.header_color)}
 {self._theme.colored("╚══════════════════════════════════════════════════╝", self._theme.header_color)}

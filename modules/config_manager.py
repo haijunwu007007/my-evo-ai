@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v6.39 | 配置管理中心引擎
+AUTO-EVO-AI V0.1 | 配置管理中心引擎
 企业级动态配置管理 - 支持多源加载、热更新、版本回滚、加密存储
 
 功能特性:
@@ -40,7 +40,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 | 配置管理中心引擎 企业级动态配置管理 - 支持多源加载、热更新、版本回滚、加密存储",
+    "description": "AUTO-EVO-AI V0.1 | 配置管理中心引擎 企业级动态配置管理 - 支持多源加载、热更新、版本回滚、加密存储",
 }
 
 import os

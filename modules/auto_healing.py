@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 自动修复
+AUTO-EVO-AI V0.1 — 自动修复
 Grade: A (生产级) | Category: 自愈
 职责：故障诊断、自动修复策略、回滚机制、修复验证、修复审计
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "auto"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 自动修复 Grade: A (生产级) | Category: 自愈",
+    "description": "AUTO-EVO-AI V0.1 — 自动修复 Grade: A (生产级) | Category: 自愈",
 }
 
 import os
@@ -124,7 +124,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "auto_healing"
     MODULE_NAME = "自动修复"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 数据采集引擎
+AUTO-EVO-AI V0.1 — 数据采集引擎
 Grade: A (生产级) | Category: AI能力
 职责：网页抓取、数据解析、结构化提取、去重、存储
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "data"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 数据采集引擎 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — 数据采集引擎 Grade: A (生产级) | Category: AI能力",
 }
 
 import asyncio
@@ -408,7 +408,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     <body>
     <h1>Welcome to {domain}</h1>
     <p>This is a sample page content for scraping demonstration.</p>
-    <p>Auto-EVO-AI Data Scraping Engine v7.0 - Production Grade</p>
+    <p>Auto-EVO-AI Data Scraping Engine V0.1 - Production Grade</p>
     <div class="content">
   <p>The quick brown fox jumps over the lazy dog. AI automation at scale.</p>
   <p>Data extraction and web scraping capabilities for enterprise systems.</p>

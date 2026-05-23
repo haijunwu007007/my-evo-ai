@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 连接池管理
+AUTO-EVO-AI V0.1 — 连接池管理
 Grade: A (生产级) | Category: 基础设施
 职责：连接复用、池化调度、超时管理、泄漏检测、健康探测
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "connection"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 连接池管理 Grade: A (生产级) | Category: 基础设施",
+    "description": "AUTO-EVO-AI V0.1 — 连接池管理 Grade: A (生产级) | Category: 基础设施",
 }
 
 import os
@@ -124,7 +124,7 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "connection_pool"
     MODULE_NAME = "连接池管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

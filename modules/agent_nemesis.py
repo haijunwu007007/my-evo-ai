@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Nemesis AI智能体
+AUTO-EVO-AI V0.1 — Nemesis AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：异常检测、故障诊断、根因分析、自愈编排、混沌工程
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Nemesis AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Nemesis AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -138,7 +138,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "agent_nemesis"
     MODULE_NAME = "Nemesis智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

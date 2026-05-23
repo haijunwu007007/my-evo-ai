@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 搜索引擎（A级）"""
-__module_meta__ = {"id":"search-engine","name":"Search Engine","version":"v7.1","group":"network","grade":"A","tags":["network","search","index"],"description":"搜索引擎-索引/搜索/建议/导出"}
+"""AUTO-EVO-AI V0.1 - 搜索引擎（A级）"""
+__module_meta__ = {"id":"search-engine","name":"Search Engine","version":"V0.1","group":"network","grade":"A","tags":["network","search","index"],"description":"搜索引擎-索引/搜索/建议/导出"}
 import time, uuid, logging, re
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.search-engine")
 class SearchEngine(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="search-engine";MODULE_NAME="搜索引擎";VERSION="v7.1";MODULE_LEVEL="A"
+    MODULE_ID="search-engine";MODULE_NAME="搜索引擎";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._docs:Dict[str,str]={};self._index:Dict[str,list]={}
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"docs":len(self._docs),"index_terms":len(self._index)})

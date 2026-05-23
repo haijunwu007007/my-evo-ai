@@ -1,7 +1,7 @@
 from modules._base.circuit_breaker import CircuitBreakerMixin
 
 """
-AUTO-EVO-AI v7.0 — 性能优化引擎
+AUTO-EVO-AI V0.1 — 性能优化引擎
 Grade: A (生产级) | Category: 工具链
 职责：性能监控、瓶颈分析、优化建议、资源管理、基准测试
 """
@@ -28,7 +28,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["performance"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 性能优化引擎 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 性能优化引擎 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

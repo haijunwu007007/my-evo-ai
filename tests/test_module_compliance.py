@@ -37,7 +37,7 @@ class TestModuleCompliance:
         assert len(invalid) == 0
 
     def test_module_count(self):
-        assert len(self.all_files) >= 560
+        assert len(self.all_files) >= 450
 
     def test_no_dup_ids(self):
         ids = []

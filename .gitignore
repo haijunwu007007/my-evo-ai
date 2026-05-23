@@ -45,6 +45,11 @@ tests/pytest*
 _data/
 data/*.db
 
+# ── 前端 ──
+frontend/node_modules/
+frontend/dist/
+node_modules/
+
 # ── 项目临时文件 ──
 *.tmp
 syntax_err.txt

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — API缓存
+AUTO-EVO-AI V0.1 — API缓存
 Grade: A (生产级) | Category: API基础设施
 职责：API响应缓存、缓存策略管理、TTL过期、缓存穿透/雪崩防护、缓存统计
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "api", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — API缓存 Grade: A (生产级) | Category: API基础设施",
+    "description": "AUTO-EVO-AI V0.1 — API缓存 Grade: A (生产级) | Category: API基础设施",
 }
 
 import os
@@ -207,7 +207,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "api_cache"
     MODULE_NAME = "API缓存"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

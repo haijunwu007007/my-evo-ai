@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 智能体市场
+AUTO-EVO-AI V0.1 — 智能体市场
 Grade: A (生产级) | Category: AI智能体
 职责：智能体市场管理、技能包发布与安装、插件生命周期、版本管理、评分评论
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 智能体市场 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — 智能体市场 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -345,7 +345,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
     MODULE_ID = "agent_marketplace"
     MODULE_NAME = "智能体市场"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

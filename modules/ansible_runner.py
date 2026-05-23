@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Ansible自动化执行器
+AUTO-EVO-AI V0.1 — Ansible自动化执行器
 Grade: A (生产级) | Category: DevOps自动化
 职责：Ansible Playbook管理、主机清单、任务编排、执行审计、回滚管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["ansible", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Ansible自动化执行器 Grade: A (生产级) | Category: DevOps自动化",
+    "description": "AUTO-EVO-AI V0.1 — Ansible自动化执行器 Grade: A (生产级) | Category: DevOps自动化",
 }
 
 import os
@@ -116,7 +116,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     MODULE_ID = "ansible_runner"
     MODULE_NAME = "Ansible执行器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

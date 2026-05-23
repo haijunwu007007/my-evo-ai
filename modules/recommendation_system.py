@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 推荐系统（A级）"""
+"""AUTO-EVO-AI V0.1 - 推荐系统（A级）"""
 __module_meta__ = {"id":"recommendation-system","name":"Recommendation","version":"1.0.0","group":"system","grade":"A","tags":["system","recommend","ml"],"description":"推荐系统"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
 logger=logging.getLogger("evo.recommendation")
 class RecommendationSystem(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="recommendation-system";MODULE_NAME="推荐系统";VERSION="v7.0";MODULE_LEVEL="A"
+    MODULE_ID="recommendation-system";MODULE_NAME="推荐系统";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._users={};self._items={}
     def initialize(self)->None:
         import random as _rnd

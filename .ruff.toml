@@ -1,0 +1,18 @@
+# AUTO-EVO-AI V0.1 — Ruff 配置（替代 flake8 + isort + autoflake）
+target-version = "py314"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "SIM"]
+ignore = [
+    "E501",    # 行长度由 formatter 处理
+    "E402",    # 模块级 import 不在顶部的需求（本系统允许延迟加载）
+    "E731",    # lambda 赋值（本系统多处使用）
+    "S101",    # assert 用于测试
+    "SIM115",  # 文件打开未使用上下文管理器（sqlite3 连接模式）
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

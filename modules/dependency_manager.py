@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 依赖管理器
+AUTO-EVO-AI V0.1 — 依赖管理器
 Grade: A (生产级) | Category: 工具链
 职责：依赖扫描、版本管理、漏洞检测、兼容性分析、更新策略
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "dependency", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 依赖管理器 Grade: A (生产级) | Category: 工具链",
+    "description": "AUTO-EVO-AI V0.1 — 依赖管理器 Grade: A (生产级) | Category: 工具链",
 }
 
 import asyncio

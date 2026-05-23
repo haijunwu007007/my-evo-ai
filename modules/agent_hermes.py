@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Agent Hermes (消息路由与通信引擎)
+AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎)
 =====================================================
 企业级智能体，负责消息路由、多通道通信、消息队列管理、消息持久化与投递保障。
 支持同步/异步/广播/多播路由模式，内置死信队列与消息重试机制。
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Agent Hermes (消息路由与通信引擎) =====================================================",
+    "description": "AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎) =====================================================",
 }
 
 import time

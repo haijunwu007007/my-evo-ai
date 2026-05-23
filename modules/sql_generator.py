@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - SQL 生成器（A级）"""
+"""AUTO-EVO-AI V0.1 - SQL 生成器（A级）"""
 __module_meta__ = {"id":"sql-generator","name":"SQL Generator","version":"1.0.0","group":"data","grade":"A",
     "tags":["data","sql","generator"],"description":"SQL 生成器"}
 import time, uuid, logging
@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
 logger=logging.getLogger("evo.sql-generator")
 class SqlGenerator(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="sql-generator";MODULE_NAME="SQL生成器";VERSION="v7.0";MODULE_LEVEL="A"
+    MODULE_ID="sql-generator";MODULE_NAME="SQL生成器";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._templates={}
     def initialize(self)->None:
         self._templates={"select_all":"SELECT * FROM {table}","select_where":"SELECT {columns} FROM {table} WHERE {condition}","insert":"INSERT INTO {table} ({columns}) VALUES ({values})","update":"UPDATE {table} SET {set} WHERE {condition}","delete":"DELETE FROM {table} WHERE {condition}","count":"SELECT COUNT(*) as cnt FROM {table}"}

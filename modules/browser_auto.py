@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 浏览器自动化模块
+AUTO-EVO-AI V0.1 — 浏览器自动化模块
 Grade: A (生产级) | Category: 自动化
 职责：浏览器会话管理、页面操作、截图、表单填写、爬取调度、任务编排
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["browser", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 浏览器自动化模块 Grade: A (生产级) | Category: 自动化",
+    "description": "AUTO-EVO-AI V0.1 — 浏览器自动化模块 Grade: A (生产级) | Category: 自动化",
 }
 
 import os
@@ -100,7 +100,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "browser_auto"
     MODULE_NAME = "浏览器自动化"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

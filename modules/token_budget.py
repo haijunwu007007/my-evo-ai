@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.18 - Token Budget Control Module
+AUTO-EVO-AI V0.1 - Token Budget Control Module
 基于 Mercury Agent 的Token预算控制系统
 
 Token预算控制帮助管理AI API的使用成本：
@@ -9,7 +9,7 @@ Token预算控制帮助管理AI API的使用成本：
 - 使用量可视化
 
 作者: AUTO-EVO-AI Team
-版本: v6.18.0
+版本: V0.1.0
 """
 
 __module_meta__ = {
@@ -34,7 +34,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "token"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v6.18 - Token Budget Control Module 基于 Mercury Agent 的Token预算控制系统",
+    "description": "AUTO-EVO-AI V0.1 - Token Budget Control Module 基于 Mercury Agent 的Token预算控制系统",
 }
 
 import json
@@ -623,7 +623,7 @@ def reset_budget():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("AUTO-EVO-AI v6.18 - Token Budget Module")
+    print("AUTO-EVO-AI V0.1 - Token Budget Module")
     print("=" * 60)
 
     # 创建管理器

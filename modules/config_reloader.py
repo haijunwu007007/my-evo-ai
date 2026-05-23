@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 配置热重载管理器
+AUTO-EVO-AI V0.1 — 配置热重载管理器
 Grade: A (生产级) | Category: 配置管理
 职责：配置文件监听、热重载、变更检测、回滚、版本管理、差异对比
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 配置热重载管理器 Grade: A (生产级) | Category: 配置管理",
+    "description": "AUTO-EVO-AI V0.1 — 配置热重载管理器 Grade: A (生产级) | Category: 配置管理",
 }
 
 import os
@@ -112,7 +112,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     MODULE_ID = "config_reloader"
     MODULE_NAME = "config_reloader"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 media_content_agent.py - 新媒体内容 Agent
-AUTO-EVO-AI v6.28 P2 行业垂直模块
+AUTO-EVO-AI V0.1 P2 行业垂直模块
 
 统一命名空间: evo.vertical.media_content.*
 
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["media", "manager", "agent"],
     "grade": "C",
-    "description": "media_content_agent.py - 新媒体内容 Agent AUTO-EVO-AI v6.28 P2 行业垂直模块",
+    "description": "media_content_agent.py - 新媒体内容 Agent AUTO-EVO-AI V0.1 P2 行业垂直模块",
 }
 
 __version__ = "1.0.0"

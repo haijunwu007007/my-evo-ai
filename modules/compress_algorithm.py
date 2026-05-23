@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 压缩算法管理器
+AUTO-EVO-AI V0.1 — 压缩算法管理器
 Grade: A (生产级) | Category: 数据处理
 职责：数据压缩/解压缩、算法选择、压缩比分析、批量处理、归档管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["compress", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 压缩算法管理器 Grade: A (生产级) | Category: 数据处理",
+    "description": "AUTO-EVO-AI V0.1 — 压缩算法管理器 Grade: A (生产级) | Category: 数据处理",
 }
 
 import os
@@ -95,7 +95,7 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
 
     MODULE_ID = "compress_algorithm"
     MODULE_NAME = "compress_algorithm"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

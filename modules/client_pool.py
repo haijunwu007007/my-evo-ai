@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 客户端连接池管理模块
+AUTO-EVO-AI V0.1 — 客户端连接池管理模块
 Grade: A (生产级) | Category: 网络基础
 职责：HTTP/TCP/WS客户端连接池管理，连接复用、健康检查、负载均衡、超时控制
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "client", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 客户端连接池管理模块 Grade: A (生产级) | Category: 网络基础",
+    "description": "AUTO-EVO-AI V0.1 — 客户端连接池管理模块 Grade: A (生产级) | Category: 网络基础",
 }
 
 import asyncio

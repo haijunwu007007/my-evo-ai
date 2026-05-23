@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - System Monitor Module
+AUTO-EVO-AI V0.1 - System Monitor Module
 Grade: A | Category: Monitoring
 Comprehensive system monitoring: CPU, memory, disk, network, processes, services, environment
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["monitor", "service", "engine", "systemmonitor"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - System Monitor Module Grade: A | Category: Monitoring",
+    "description": "AUTO-EVO-AI V0.1 - System Monitor Module Grade: A | Category: Monitoring",
 }
 import time, logging, threading, os, platform, json, uuid
 from typing import Any, Dict, List, Optional

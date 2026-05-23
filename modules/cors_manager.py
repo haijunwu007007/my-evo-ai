@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — CORS运行时管理器
+AUTO-EVO-AI V0.1 — CORS运行时管理器
 Grade: A (生产级) | Category: 安全中间件
 职责：CORS中间件执行、请求拦截/响应注入、动态规则热更新、指标采集
 与cors_config模块互补：config负责策略配置，manager负责运行时执行
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "manager", "cors"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — CORS运行时管理器 Grade: A (生产级) | Category: 安全中间件",
+    "description": "AUTO-EVO-AI V0.1 — CORS运行时管理器 Grade: A (生产级) | Category: 安全中间件",
 }
 
 import os
@@ -90,7 +90,7 @@ class RouteConfig:
 class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "cors_manager"
     MODULE_NAME = "cors_manager"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self):
 

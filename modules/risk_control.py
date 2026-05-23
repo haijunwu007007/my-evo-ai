@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 风险控制（A级）"""
+"""AUTO-EVO-AI V0.1 - 风险控制（A级）"""
 __module_meta__ = {"id":"risk-control","name":"Risk Control","version":"1.0.0","group":"system","grade":"A","tags":["system","risk","security"],"description":"风险控制"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
 logger=logging.getLogger("evo.risk-control")
 class RiskControl(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="risk-control";MODULE_NAME="风险控制";VERSION="v7.0";MODULE_LEVEL="A"
+    MODULE_ID="risk-control";MODULE_NAME="风险控制";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._rules=[];self._blacklist=[];self._audit=[]
     def initialize(self)->None:
         self._rules=[{"name":"high_freq","threshold":100,"action":"block","window":60},{"name":"suspicious_ip","threshold":5,"action":"review","window":300}];self.status=ModuleStatus.RUNNING

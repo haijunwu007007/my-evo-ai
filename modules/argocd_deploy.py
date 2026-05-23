@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — ArgoCD部署管理
+AUTO-EVO-AI V0.1 — ArgoCD部署管理
 Grade: A (生产级) | Category: DevOps自动化
 职责：GitOps部署、应用同步、回滚管理、多集群管理、部署审计
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "argocd"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — ArgoCD部署管理 Grade: A (生产级) | Category: DevOps自动化",
+    "description": "AUTO-EVO-AI V0.1 — ArgoCD部署管理 Grade: A (生产级) | Category: DevOps自动化",
 }
 
 import os
@@ -113,7 +113,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "argocd_deploy"
     MODULE_NAME = "ArgoCD部署"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

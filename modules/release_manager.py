@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - ReleaseManager 发布管理器
+AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器
 ============================================
 企业级发布管理：版本管理/发布流程/灰度/金丝雀/蓝绿/回滚。
 支持：语义化版本管理、发布审批流程、灰度发布、
@@ -33,7 +33,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "release"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - ReleaseManager 发布管理器 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器 ============================================",
 }
 
 import time
@@ -256,7 +256,7 @@ class ReleaseWindow:
 class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "release_manager"
     MODULE_NAME = "发布管理器"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     """
@@ -338,7 +338,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             checks_run=3,
             error_rate=self.stats.error_rate,
             details={"releases": len(self._releases), "active": active, "projects": len(self._project_versions)},
-            version="v7.0",
+            version="V0.1",
         )
 
     def shutdown(self) -> None:

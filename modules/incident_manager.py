@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - IncidentManager 事件管理器
+AUTO-EVO-AI V0.1 - IncidentManager 事件管理器
 ============================================
 企业级事件管理：事件发现/分级/派发/升级/复盘/自动化。
 支持：事件全生命周期管理、多级严重度（P1-P5）、
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["incident", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - IncidentManager 事件管理器 ============================================",
+    "description": "AUTO-EVO-AI V0.1 - IncidentManager 事件管理器 ============================================",
 }
 
 import time
@@ -392,7 +392,7 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             checks_run=4,
             error_rate=self.stats.error_rate,
             details={"incidents": len(self._incidents), "active": active, "schedules": len(self._schedules)},
-            version="v7.0",
+            version="V0.1",
         )
 
     async def shutdown(self) -> Result:

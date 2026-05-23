@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 自动故障转移
+AUTO-EVO-AI V0.1 — 自动故障转移
 Grade: A (生产级) | Category: 高可用
 职责：故障检测、自动切换、健康探测、流量重路由、恢复验证
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "auto"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 自动故障转移 Grade: A (生产级) | Category: 高可用",
+    "description": "AUTO-EVO-AI V0.1 — 自动故障转移 Grade: A (生产级) | Category: 高可用",
 }
 
 import os
@@ -104,7 +104,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "auto_failover"
     MODULE_NAME = "自动故障转移"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

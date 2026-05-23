@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - 数据库客户端（A级生产实现）
+AUTO-EVO-AI V0.1 - 数据库客户端（A级生产实现）
 =============================================
 模块ID: database-client
 功能：统一数据库访问层 — SQLite/PostgreSQL/MySQL 多引擎适配、连接池、ORM封装。
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "engine", "database", "config"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v7.0 - 数据库客户端（A级生产实现） =============================================",
+    "description": "AUTO-EVO-AI V0.1 - 数据库客户端（A级生产实现） =============================================",
 }
 
 import time
@@ -371,7 +371,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "database-client"
     MODULE_NAME = "数据库客户端"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 独立模块加载器
+AUTO-EVO-AI V0.1 独立模块加载器
 动态加载 modules/ 目录下的所有功能模块
 """
 

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Minerva AI智能体
+AUTO-EVO-AI V0.1 — Minerva AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：智能决策、规则引擎、策略评估、AB测试、推荐引擎
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Minerva AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Minerva AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -142,7 +142,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     MODULE_ID = "agent_minerva"
     MODULE_NAME = "Minerva智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

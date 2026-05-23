@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — i18n_gateway
+AUTO-EVO-AI V0.1 — i18n_gateway
 国际化API网关：请求级语言协商、翻译缓存、动态资源加载、回退链、翻译质量监控。
 上市公司生产级标准。
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "i18n", "gateway"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — i18n_gateway 国际化API网关：请求级语言协商、翻译缓存、动态资源加载、回退链、翻译质量监控。",
+    "description": "AUTO-EVO-AI V0.1 — i18n_gateway 国际化API网关：请求级语言协商、翻译缓存、动态资源加载、回退链、翻译质量监控。",
 }
 
 import logging

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 图引擎
+AUTO-EVO-AI V0.1 — 图引擎
 Grade: A (生产级) | Category: 数据处理
 职责：图数据存储、节点/边管理、路径查找、图遍历、关系查询
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "graph"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 图引擎 Grade: A (生产级) | Category: 数据处理",
+    "description": "AUTO-EVO-AI V0.1 — 图引擎 Grade: A (生产级) | Category: 数据处理",
 }
 
 import os
@@ -79,7 +79,7 @@ class PathResult:
 class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "graph_engine"
     MODULE_NAME = "图引擎"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

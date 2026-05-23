@@ -1,4 +1,4 @@
-"""Production-grade 性能剖析模块 v6.39
+"""Production-grade 性能剖析模块 V0.1
 上市公司生产级实现 - 函数级耗时/调用链追踪/热点分析/内存剖析/火焰图数据
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["perf"],
     "grade": "A",
-    "description": "Production-grade 性能剖析模块 v6.39 上市公司生产级实现 - 函数级耗时/调用链追踪/热点分析/内存剖析/火焰图数据",
+    "description": "Production-grade 性能剖析模块 V0.1 上市公司生产级实现 - 函数级耗时/调用链追踪/热点分析/内存剖析/火焰图数据",
 }
 import logging
 import math

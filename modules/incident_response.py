@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - Incident Response Module
+AUTO-EVO-AI V0.1 - Incident Response Module
 Grade: A | Category: Deployment & Operations
 Incident lifecycle management: detection, triage, escalation, resolution, post-mortem
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "incident"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Incident Response Module Grade: A | Category: Deployment & Operations",
+    "description": "AUTO-EVO-AI V0.1 - Incident Response Module Grade: A | Category: Deployment & Operations",
 }
 import os, time, logging, threading, hashlib, json, re
 from typing import Any, Dict, List, Optional

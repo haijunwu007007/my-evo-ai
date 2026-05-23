@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 自动重启服务（A级生产实现）
+AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现）
 =============================================
 模块ID: auto-restart
 功能：模块故障自愈 — 检测故障模块并自动重启恢复。
@@ -37,7 +37,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "auto"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 自动重启服务（A级生产实现） =============================================",
+    "description": "AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现） =============================================",
 }
 
 import time
@@ -238,7 +238,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "auto-restart"
     MODULE_NAME = "自动重启服务"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

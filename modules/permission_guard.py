@@ -3,7 +3,7 @@ try:
 except ImportError:
     pass
 """
-AUTO-EVO-AI v6.18 - Permission Guard Module
+AUTO-EVO-AI V0.1 - Permission Guard Module
 基于 Mercury Agent 的权限加固系统
 
 权限加固系统提供企业级的安全保障：
@@ -13,7 +13,7 @@ AUTO-EVO-AI v6.18 - Permission Guard Module
 - 待审批流程
 
 作者: AUTO-EVO-AI Team
-版本: v6.18.0
+版本: V0.1.0
 """
 
 __module_meta__ = {
@@ -38,7 +38,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["permission"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.18 - Permission Guard Module 基于 Mercury Agent 的权限加固系统",
+    "description": "AUTO-EVO-AI V0.1 - Permission Guard Module 基于 Mercury Agent 的权限加固系统",
 }
 
 import os
@@ -973,7 +973,7 @@ def request_execution(command: str) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("AUTO-EVO-AI v6.18 - Permission Guard Module")
+    print("AUTO-EVO-AI V0.1 - Permission Guard Module")
     print("=" * 60)
 
     # 创建权限守卫

@@ -604,14 +604,14 @@ class CodeGenerator:
 
 class AtomCode(EnterpriseModule):
     """
-    AUTO-EVO-AI v6.39 - Atom Code
+    AUTO-EVO-AI V0.1 - Atom Code
     Enterprise intelligent code generation and refactoring engine with
     multi-language support, automated review, snippet management, and project scaffolding.
     """
 
     MODULE_ID = "atom_code"
     MODULE_NAME = "AtomCode"
-    VERSION = "1.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

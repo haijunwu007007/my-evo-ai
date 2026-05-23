@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - RBAC 权限管理（A级生产实现）
+AUTO-EVO-AI V0.1 - RBAC 权限管理（A级生产实现）
 ================================================
 模块ID: permission-rbac
 功能：角色 CRUD、权限绑定、用户角色分配、check_permission。
@@ -14,7 +14,7 @@ from modules._base.metrics import metrics_collector
 logger = logging.getLogger("evo.permission-rbac")
 
 class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
-    MODULE_ID="permission-rbac"; MODULE_NAME="RBAC权限"; VERSION="v7.0"; MODULE_LEVEL="A"
+    MODULE_ID="permission-rbac"; MODULE_NAME="RBAC权限"; VERSION = "V0.1"; MODULE_LEVEL="A"
     def __init__(self, config=None):
         super().__init__(config)
         self._roles: Dict[str, Dict] = {}  # role_id -> {name, permissions, description}

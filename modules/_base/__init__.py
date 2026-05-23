@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 基础设施层
+AUTO-EVO-AI V0.1 基础设施层
 ==========================
 EnterpriseModule基类 + 链路追踪 + Prometheus指标 + 审计日志 + 熔断器 + 限流器 + 模块注册器
 

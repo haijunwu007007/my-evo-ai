@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI v7.0 - EnterpriseModule 企业级模块基类
+AUTO-EVO-AI V0.1 - EnterpriseModule 企业级模块基类
 ====================================================
 所有生产级模块必须继承此基类。提供：
   1. 标准化生命周期: initialize() / health_check() / shutdown()
@@ -159,7 +159,7 @@ class HealthReport:
     error_rate: float = 0.0
     checks: Dict[str, Any] = field(default_factory=dict)
     details: Optional[Dict[str, Any]] = None
-    version: str = "v7.0"
+    version: str = "V0.1"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -223,7 +223,7 @@ class EnterpriseModule(ABC):
     # 子类必须覆盖的类属性
     MODULE_ID: str = ""
     MODULE_NAME: str = ""
-    VERSION: str = "v7.0"
+    VERSION: str = "V0.1"
     MODULE_LEVEL: str = "C"  # A / B / C
 
     def __init__(self, *args, **kwargs):
@@ -510,7 +510,7 @@ class EnterpriseModule(ABC):
             "version": self.version,
             "level": self.MODULE_LEVEL,
             "class": self.__class__.__name__,
-            "framework": "AUTO-EVO-AI EnterpriseModule v7.0",
+            "framework": "AUTO-EVO-AI EnterpriseModule V0.1",
         }
 
     def _action_stop(self, params: Dict[str, Any]) -> Dict[str, Any]:

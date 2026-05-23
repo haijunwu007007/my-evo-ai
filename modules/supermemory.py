@@ -1,4 +1,4 @@
-"""Production-grade 超级记忆引擎模块 v6.39
+"""Production-grade 超级记忆引擎模块 V0.1
 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "supermemory"],
     "grade": "A",
-    "description": "Production-grade 超级记忆引擎模块 v6.39 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计",
+    "description": "Production-grade 超级记忆引擎模块 V0.1 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计",
 }
 import hashlib
 import logging

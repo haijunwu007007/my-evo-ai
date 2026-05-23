@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""AUTO-EVO-AI v7.0 - 进程看门狗（A级）"""
+"""AUTO-EVO-AI V0.1 - 进程看门狗（A级）"""
 __module_meta__ = {"id":"process-watchdog","name":"Process Watchdog","version":"1.0.0","group":"ops","grade":"A","tags":["ops","watchdog","monitor"],"description":"进程看门狗"}
 import time, uuid, logging
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.process-watchdog")
 class ProcessWatchdog(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="process-watchdog";MODULE_NAME="进程看门狗";VERSION="v7.0";MODULE_LEVEL="A"
+    MODULE_ID="process-watchdog";MODULE_NAME="进程看门狗";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._targets={};self._alerts=[];self._history=[]
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 - 生产级模板注册中心
+AUTO-EVO-AI V0.1 - 生产级模板注册中心
 模块ID: template_registry
 级别: A级 (上市公司生产级)
 功能: 模板全生命周期管理、版本控制、依赖解析、渲染引擎、权限控制
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["template"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - 生产级模板注册中心 模块ID: template_registry",
+    "description": "AUTO-EVO-AI V0.1 - 生产级模板注册中心 模块ID: template_registry",
 }
 
 import json
@@ -299,7 +299,7 @@ class TemplateRegistry:
     """
 
     def __init__(self, config: Optional[Dict] = None):
-        self.version = "v6.39"
+        self.version = "V0.1"
         self.logger = logging.getLogger(__name__)
         self.config = config or self._default_config()
 
@@ -329,7 +329,7 @@ class TemplateRegistry:
         # 加载内置模板
         self._load_builtin_templates()
 
-        self.logger.info("TemplateRegistry v6.39 初始化完成")
+        self.logger.info("TemplateRegistry V0.1 初始化完成")
 
     def _default_config(self) -> Dict:
         """默认配置"""
@@ -630,7 +630,7 @@ class {{ class_name }}:
 
 ---
 
-*报告生成于 {{ generated_at }} by AUTO-EVO-AI v6.39*
+*报告生成于 {{ generated_at }} by AUTO-EVO-AI V0.1*
 """
         tpl.versions["1.0.0"] = TemplateVersion(
             version="1.0.0",

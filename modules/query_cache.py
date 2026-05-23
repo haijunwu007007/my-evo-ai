@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v7.0 — Query Cache Module
+        AUTO-EVO-AI V0.1 — Query Cache Module
 Grade: A (production) | Category: Cache
 SQL query result caching with automatic invalidation, TTL, and cache warming
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["query"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Query Cache Module Grade: A (production) | Category: Cache",
+    "description": "AUTO-EVO-AI V0.1 — Query Cache Module Grade: A (production) | Category: Cache",
 }
 
 import os

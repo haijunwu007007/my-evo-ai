@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - CDN Invalidation Module (Grade: A Production)
+AUTO-EVO-AI V0.1 - CDN Invalidation Module (Grade: A Production)
 CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["provider", "manager", "cdn"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - CDN Invalidation Module (Grade: A Production) CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控",
+    "description": "AUTO-EVO-AI V0.1 - CDN Invalidation Module (Grade: A Production) CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控",
 }
 
 import os

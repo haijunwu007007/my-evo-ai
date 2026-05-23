@@ -65,7 +65,7 @@ class TrendingPipeline:
 
     MODULE_ID = "trending_pipeline"
     MODULE_NAME = "TrendingPipeline"
-    VERSION = "1.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, **kwargs):
         self._config = self._load_config()
@@ -251,7 +251,9 @@ class TrendingPipeline:
             from modules.github_scanner import GithubScanner
 
             scanner = GithubScanner()
-            return scanner.execute("fetch_trending", {"language": language, "since": "daily"})
+            scanner.initialize()
+            repos = scanner._fetch_trending(language, "daily")
+            return {"success": True, "data": {"repos": repos}}
         except ImportError as e:
             logger.error(f"无法导入 GithubScanner: {e}")
             return {"success": False, "error": f"GithubScanner 模块不可用: {e}"}

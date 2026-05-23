@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 模块基类
+AUTO-EVO-AI V0.1 模块基类
 所有功能模块的抽象基类
 """
 

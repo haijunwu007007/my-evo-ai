@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AUTO-EVO-AI v6.34 核心模块实现
+AUTO-EVO-AI V0.1 核心模块实现
 """
 
 import asyncio

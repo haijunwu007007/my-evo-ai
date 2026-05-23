@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - 自进化引擎（A级生产实现）
+AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现）
 =============================================
 模块ID: evo-nexus-core
 功能：系统进化中枢 — 自我评估、策略优化、能力学习、版本演进。
@@ -44,7 +44,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["evo", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - 自进化引擎（A级生产实现） =============================================",
+    "description": "AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现） =============================================",
 }
 
 import time
@@ -161,7 +161,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     MODULE_ID = "evo-nexus-core"
     MODULE_NAME = "自进化引擎"
-    VERSION = "v7.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

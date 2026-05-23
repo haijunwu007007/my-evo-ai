@@ -1,6 +1,6 @@
 from __future__ import annotations
 """
-AUTO-EVO-AI v6.32 — m30 Agent Orchestrator 主编排器 (智能体大脑)
+AUTO-EVO-AI V0.1 — m30 Agent Orchestrator 主编排器 (智能体大脑)
 ================================================================
 功能：系统级智能编排中枢 —— 用户一句话，自动拆解→调度→执行→学习→改进
 
@@ -1961,7 +1961,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
     print("=" * 60)
-    print("AUTO-EVO-AI v6.32 — Agent Orchestrator 自测")
+    print("AUTO-EVO-AI V0.1 — Agent Orchestrator 自测")
     print("=" * 60)
 
     orch = AgentOrchestrator()

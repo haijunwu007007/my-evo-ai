@@ -1,5 +1,5 @@
 """
-        AUTO-EVO-AI v6.39 - Tunnel Manager
+        AUTO-EVO-AI V0.1 - Tunnel Manager
 Enterprise-grade secure tunnel management for network connectivity.
 Supports port forwarding, reverse tunnels, SOCKS proxies,
 load-balanced tunnel pools, and connection health monitoring.
@@ -27,7 +27,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["config", "m52", "manager", "monitor"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 - Tunnel Manager Enterprise-grade secure tunnel management for network connectivity.",
+    "description": "AUTO-EVO-AI V0.1 - Tunnel Manager Enterprise-grade secure tunnel management for network connectivity.",
 }
 
 import os
@@ -511,7 +511,7 @@ class TunnelManager(object):
     """
 
     MODULE_ID = "m52_tunnel_manager"
-    MODULE_VERSION = "6.39.0"
+    MODULE_VERSION = "V0.1"
     MODULE_CATEGORY = "networking"
 
     def __init__(self):

@@ -2,7 +2,7 @@ import time
 
 """
 AUTO-EVO-AI m69 - 数据管道引擎 v3.0
-版本: v6.37 | 自研 + pandas/openpyxl集成
+版本: V0.1 | 自研 + pandas/openpyxl集成
 功能: 真实ETL(CSV/JSON/Excel/API/DB)、SQL风格转换、聚合、透视、数据质量报告、管道模板
 降级: pandas不可用时使用内置列表操作
 """
@@ -22,14 +22,12 @@ __module_meta__ = {
     ],
     "outputs": [
         {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
     ],
     "triggers": [],
     "depends_on": [],
     "tags": ["data"],
     "grade": "C",
-    "description": "AUTO-EVO-AI m69 - 数据管道引擎 v3.0 版本: v6.37 | 自研 + pandas/openpyxl集成",
+    "description": "AUTO-EVO-AI m69 - 数据管道引擎 v3.0 版本: V0.1 | 自研 + pandas/openpyxl集成",
 }
 import json, os, csv, hashlib, time, traceback, io, re, logging
 from datetime import datetime
@@ -55,20 +53,16 @@ try:
 except ImportError:
     _HAS_OPENPYXL = False
 
-class DataPipelineAnalyzer(object):
+class DataPipelineAnalyzer:
     """data_pipeline 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
+    独立于 EnterpriseModule 的轻量分析器。
     """
 
     def __init__(self):
-        super().__init__()
-        EnterpriseModule.__init__(self)
-        CircuitBreakerMixin.__init__(self)
-        RateLimiterMixin.__init__(self)
         self.name = "data_pipeline"
         self.version = "1.0.0"
-        self._analyzer = DataPipelineAnalyzer()
         self._history = []
         self._max_history = 10000
 
@@ -219,7 +213,7 @@ class DataPipelineAnalyzer(object):
 class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """数据管道引擎 - 支持真实ETL"""
 
-    VERSION = "3.0.0"
+    VERSION = "V0.1"
     MAX_HISTORY = 5000
 
     # 支持的步骤类型
@@ -253,7 +247,8 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         os.makedirs(data_dir, exist_ok=True)
         self.pipelines: Dict[str, Dict] = {}
         self.history: List[Dict] = []
-        self._db_client = None  # 可注入的外部数据库客户端
+        self._db_client = None
+        self._analyzer = DataPipelineAnalyzer()  # 可注入的外部数据库客户端
 
     def set_db_client(self, client):
         """注入数据库客户端(用于db_read步骤)"""
@@ -660,10 +655,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     elif transform == "float":
                         try:
                             val = float(val)
-                        except Exception as e:
-                            pass
-                            pass
-                        except:
+                        except (ValueError, TypeError):
                             val = 0.0
                     elif transform == "strip":
                         val = str(val).strip()
@@ -876,6 +868,138 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def health_check(self) -> Dict:
         return {"healthy": True, "pipelines": len(self.pipelines), "version": self.VERSION}
 
+    async def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        action = action.lower().strip()
+        try:
+            # ─── 状态查询 ───
+            if action in ("status", "info", "stats"):
+                return self.health_check()
+
+            # ─── 管道运行 ───
+            if action == "run":
+                name = params.get("pipeline", "")
+                input_data = params.get("data")
+                if not name:
+                    return {"success": False, "error": "缺少 pipeline 名称参数"}
+                return self.run_pipeline(name, input_data)
+
+            # ─── 管道管理 ───
+            if action == "create":
+                name = params.get("name", "")
+                if not name:
+                    return {"success": False, "error": "缺少 name 参数"}
+                steps = params.get("steps")
+                config = params.get("config")
+                return self.create_pipeline(name, steps, config)
+
+            if action == "add_step":
+                return self.add_step(
+                    params.get("pipeline", ""),
+                    params.get("type", ""),
+                    params.get("config"),
+                    params.get("on_error", "stop"),
+                    params.get("retry_count", 0),
+                )
+
+            if action == "remove":
+                return self.remove_pipeline(params.get("name", ""))
+
+            if action == "get":
+                return self.get_pipeline(params.get("name", ""))
+
+            if action == "list":
+                return self.list_pipelines()
+
+            # ─── 分析 ───
+            if action == "analyze":
+                if self._analyzer:
+                    return self._analyzer.analyze(params)
+                return {"success": True, "action": "analyze", "module": "data_pipeline",
+                        "note": "analyzer 未初始化"}
+
+            if action == "quality":
+                data = params.get("data", [])
+                return self.data_quality_report(data)
+
+            # ─── 数据操作 ───
+            if action in ("csv_read", "json_read", "excel_read"):
+                step = {"type": action, "config": params}
+                data, _, _ = self._execute_single_step(step, None, None, False)
+                return {"success": True, "records": len(data) if isinstance(data, list) else 0, "data": data}
+
+            # ─── 模板 ───
+            if action == "template_csv_to_db":
+                return self.template_csv_to_db(
+                    params.get("name", "csv_to_db"),
+                    params.get("csv_path", ""),
+                    params.get("table", "imported_data"),
+                )
+
+            if action == "template_api_to_csv":
+                return self.template_api_to_csv(
+                    params.get("name", "api_to_csv"),
+                    params.get("api_url", ""),
+                    params.get("output_path", "output.csv"),
+                )
+
+            if action == "template_clean":
+                return self.template_clean_and_export(
+                    params.get("name", "clean_export"),
+                    params.get("input_path", ""),
+                    params.get("output_path", ""),
+                    params.get("read_type", "csv_read"),
+                    params.get("write_type", "csv_write"),
+                )
+
+            # ─── 定时调度 ───
+            if action == "_run_scheduled":
+                # 找状态为 draft 或 completed 的管道，选最近创建的跑
+                candidates = [
+                    (n, p) for n, p in self.pipelines.items()
+                    if p["status"] in ("draft", "completed") and p["steps"]
+                ]
+                if not candidates:
+                    return {
+                        "success": False,
+                        "error": "无可用管道",
+                        "pipelines": len(self.pipelines),
+                        "hint": "先调用 create 创建管道",
+                    }
+                name, _ = candidates[0]
+                result = self.run_pipeline(name)
+                return {"success": True, "pipeline": name, "result": result}
+
+            if action == "help":
+                return {
+                    "actions": [
+                        "status", "info", "stats",
+                        "run", "create", "add_step", "remove", "get", "list",
+                        "analyze", "quality",
+                        "csv_read", "json_read", "excel_read",
+                        "template_csv_to_db", "template_api_to_csv", "template_clean",
+                        "_run_scheduled",
+                    ],
+                    "module": "data_pipeline",
+                }
+
+            # ─── 未知动作 → 明确失败 ───
+            return {"success": False, "action": action, "error": f"未知动作: {action}",
+                    "hint": "调用 help 查看可用动作"}
+
+        except Exception as e:
+            logger.error(f"execute({action}) 失败: {e}", exc_info=True)
+            return {"success": False, "error": str(e)}
+
+    def shutdown(self) -> dict:
+        self._db_client = None
+        self.status = "stopped"
+        return {"success": True, "module": "data_pipeline"}
+
+    def initialize(self) -> dict:
+        self.status = "running"
+        return {"success": True, "module": "data_pipeline"}
+
 # ─── 便捷函数 ──────────────────────────────────────────
 _pipeline_instance = None
 
@@ -884,40 +1008,5 @@ def get_pipeline() -> DataPipeline:
     if _pipeline_instance is None:
         _pipeline_instance = DataPipeline()
     return _pipeline_instance
-
-    async def execute(self, action: str = "status", params: dict = None) -> dict:
-        params = params or {}
-        self.trace("data_pipeline.execute", "start", action=action)
-        self.metrics_collector.counter("data_pipeline.execute.total", 1)
-        try:
-            action = action.lower().strip()
-            if action in ("status", "info", "stats"):
-                result = self.health_check()
-            elif action == "analyze":
-                result = self._analyzer.analyze(params)
-            elif action == "help":
-                result = {"actions": ["status", "analyze", "help"], "module": "data_pipeline"}
-            else:
-                result = {"success": True, "action": action, "module": "data_pipeline"}
-            self.metrics_collector.counter("data_pipeline.execute.success", 1)
-            self.trace("data_pipeline.execute", "end")
-            return result
-        except Exception as e:
-            self.metrics_collector.counter("data_pipeline.execute.error", 1)
-            return {"success": False, "error": str(e)}
-
-    def shutdown(self) -> dict:
-        self.status = "stopped"
-        return {"success": True, "module": "data_pipeline"}
-
-    def health_check(self) -> dict:
-        return {"status": "healthy", "module": "data_pipeline", "version": getattr(self, "version", "1.0.0")}
-
-    def initialize(self) -> dict:
-        self.trace("data_pipeline.initialize", "start")
-        self.metrics_collector.gauge("data_pipeline.initialized", 1)
-        self.audit("初始化data_pipeline", level="info")
-        self.trace("data_pipeline.initialize", "end")
-        return {"success": True, "module": "data_pipeline"}
 
 module_class = DataPipeline

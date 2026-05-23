@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 批量处理器
+AUTO-EVO-AI V0.1 — 批量处理器
 Grade: A (生产级) | Category: 数据处理
 职责：批量任务编排、并行执行、进度跟踪、失败重试、结果聚合
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["batch"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 批量处理器 Grade: A (生产级) | Category: 数据处理",
+    "description": "AUTO-EVO-AI V0.1 — 批量处理器 Grade: A (生产级) | Category: 数据处理",
 }
 
 import os
@@ -114,7 +114,7 @@ class BatchProcessor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "batch_processor"
     MODULE_NAME = "批量处理器"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

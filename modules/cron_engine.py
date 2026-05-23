@@ -2,7 +2,7 @@ import time
 
 """
 AUTO-EVO-AI - Cron调度引擎 v3.0
-版本: v6.37 | 自研 + APScheduler集成
+版本: V0.1 | 自研 + APScheduler集成
 功能: 真实定时调度( cron / interval / date )、任务链、超时控制、错误回调、持久化
 降级: APScheduler不可用时自动切换到线程池手动轮询模式
 """
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "cron"],
     "grade": "C",
-    "description": "AUTO-EVO-AI - Cron调度引擎 v3.0 版本: v6.37 | 自研 + APScheduler集成",
+    "description": "AUTO-EVO-AI - Cron调度引擎 v3.0 版本: V0.1 | 自研 + APScheduler集成",
 }
 import json, os, re, time, threading, traceback, logging
 from datetime import datetime, timedelta
@@ -55,7 +55,7 @@ except ImportError:
 class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Cron调度引擎 - 支持真实定时调度"""
 
-    VERSION = "3.0.0"
+    VERSION = "V0.1"
     MODE_APSCHEDULER = "apscheduler"
     MODE_MANUAL = "manual"
 

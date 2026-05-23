@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — NLP引擎
+AUTO-EVO-AI V0.1 — NLP引擎
 Grade: A (生产级) | Category: AI能力
 职责：文本处理、实体识别、关键词提取、文本分类、相似度计算
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["adapter", "nlp", "engine"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — NLP引擎 Grade: A (生产级) | Category: AI能力",
+    "description": "AUTO-EVO-AI V0.1 — NLP引擎 Grade: A (生产级) | Category: AI能力",
 }
 
 import os

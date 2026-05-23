@@ -1,4 +1,4 @@
-"""Production-grade 决策引擎模块 v6.39
+"""Production-grade 决策引擎模块 V0.1
 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计
 """
 
@@ -24,7 +24,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "decision"],
     "grade": "A",
-    "description": "Production-grade 决策引擎模块 v6.39 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计",
+    "description": "Production-grade 决策引擎模块 V0.1 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计",
 }
 import hashlib
 import logging

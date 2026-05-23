@@ -1,7 +1,7 @@
 import time
 
 """
-AUTO-EVO-AI v6.18 - Second Brain Memory Module
+AUTO-EVO-AI V0.1 - Second Brain Memory Module
 基于 Mercury Agent 的第二大脑记忆系统
 
 第二大脑是一个革命性的记忆系统，模拟人类记忆的工作方式：
@@ -11,7 +11,7 @@ AUTO-EVO-AI v6.18 - Second Brain Memory Module
 - 自动整合和遗忘机制
 
 作者: AUTO-EVO-AI Team
-版本: v6.18.0
+版本: V0.1.0
 """
 
 __module_meta__ = {
@@ -36,7 +36,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["second"],
     "grade": "C",
-    "description": "AUTO-EVO-AI v6.18 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统",
+    "description": "AUTO-EVO-AI V0.1 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统",
 }
 
 import os
@@ -1336,7 +1336,7 @@ def recall(query: str, memory_types: Optional[List[str]] = None) -> str:
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("AUTO-EVO-AI v6.18 - Second Brain Memory Module")
+    print("AUTO-EVO-AI V0.1 - Second Brain Memory Module")
     print("=" * 60)
 
     # 创建第二大脑

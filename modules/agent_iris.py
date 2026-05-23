@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.39 — Agent Iris (视觉感知引擎)
+AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎)
 ===============================================
 企业级智能体，负责图像理解、OCR文字识别、目标检测、场景分类、视觉异常检测。
 支持多模态输入（图片/视频帧），内置特征提取管线与相似度匹配。
@@ -29,7 +29,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.39 — Agent Iris (视觉感知引擎) ===============================================",
+    "description": "AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎) ===============================================",
 }
 
 import time

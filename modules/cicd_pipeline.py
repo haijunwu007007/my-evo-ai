@@ -2,7 +2,7 @@
 # Grade: A
 
 """
-AUTO-EVO-AI v7.0 - CICDPipeline CI/CD流水线引擎
+AUTO-EVO-AI V0.1 - CICDPipeline CI/CD流水线引擎
 ==============================================
 企业级CI/CD流水线：构建/测试/部署/回滚/多环境/审批/通知。
 支持：Pipeline YAML定义、多阶段串并行执行、
@@ -35,7 +35,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["devops", "cicd"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - CICDPipeline CI/CD流水线引擎 ==============================================",
+    "description": "AUTO-EVO-AI V0.1 - CICDPipeline CI/CD流水线引擎 ==============================================",
 }
 
 import time
@@ -312,7 +312,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.module_name = "CI/CD流水线引擎"
         self.module_id = self.module_name
         self.module_id = "cicd_pipeline"
-        self.version = "v7.0"
+        self.version = "V0.1"
         self.config = config or {}
         # Pipeline定义注册
         self._pipelines: Dict[str, PipelineDefinition] = {}
@@ -368,7 +368,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "artifacts_count": len(self._artifacts),
             "environments": list(self._environments.keys()),
         }
-        return {"status": "running", "healthy": True, "version": "v7.0", **checks}
+        return {"status": "running", "healthy": True, "version": "1.0.0", **checks}
 
     def shutdown(self) -> None:
         for task in self._active_tasks.values():

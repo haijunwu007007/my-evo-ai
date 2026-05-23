@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Browser Use集成模块
+AUTO-EVO-AI V0.1 — Browser Use集成模块
 Grade: A (生产级) | Category: AI集成
 职责：AI驱动的浏览器操作、自然语言指令解析、页面元素理解、自动化工作流
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["browser", "manager", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Browser Use集成模块 Grade: A (生产级) | Category: AI集成",
+    "description": "AUTO-EVO-AI V0.1 — Browser Use集成模块 Grade: A (生产级) | Category: AI集成",
 }
 
 import os
@@ -100,7 +100,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     MODULE_ID = "browser_use"
     MODULE_NAME = "Browser Use AI"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

@@ -64,11 +64,15 @@ from api.routes_modules import router as modules_router
 from api.routes_services import router as services_router
 from api.routes_ws import router as ws_router
 from api.routes_auth_system import router as auth_system_router
+from api.routes_scheduler import router as scheduler_router
+from api.routes_coordinator import router as coordinator_router
 
 app.include_router(modules_router)
 app.include_router(services_router)
 app.include_router(ws_router)
 app.include_router(auth_system_router)
+app.include_router(scheduler_router)
+app.include_router(coordinator_router)
 
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"
@@ -258,6 +262,16 @@ async def prometheus_metrics():
     lines.append(f"evo_ws_connections_active {len(manager.active)}")
     lines.append(f"evo_cache_hits_total {_cache_hits}")
     lines.append(f"evo_cache_entries {len(_api_cache)}")
+
+    # 引擎指标
+    try:
+        from api.routes_scheduler import HAS_SCHEDULER, HAS_EVENTS, HAS_PIPELINE, HAS_QUEUE
+        lines.append(f'evo_engine_active{{engine="scheduler"}} {1 if HAS_SCHEDULER else 0}')
+        lines.append(f'evo_engine_active{{engine="events"}} {1 if HAS_EVENTS else 0}')
+        lines.append(f'evo_engine_active{{engine="pipeline"}} {1 if HAS_PIPELINE else 0}')
+        lines.append(f'evo_engine_active{{engine="queue"}} {1 if HAS_QUEUE else 0}')
+    except Exception:
+        pass
 
     text = "\n".join(lines)
     return JSONResponse(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")

@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 蓝绿部署模块
+AUTO-EVO-AI V0.1 — 蓝绿部署模块
 Grade: A (生产级) | Category: 部署管理
 职责：蓝绿部署策略管理、流量切换、回滚、健康验证、零停机发布
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "blue"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 蓝绿部署模块 Grade: A (生产级) | Category: 部署管理",
+    "description": "AUTO-EVO-AI V0.1 — 蓝绿部署模块 Grade: A (生产级) | Category: 部署管理",
 }
 
 import os
@@ -110,7 +110,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "blue_green"
     MODULE_NAME = "蓝绿部署"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

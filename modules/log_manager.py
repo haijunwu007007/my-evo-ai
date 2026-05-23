@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — Enterprise Log Manager
+AUTO-EVO-AI V0.1 — Enterprise Log Manager
 Production-grade centralized log management with structured logging,
 multi-sink routing, search, retention policies, alerting, and analytics for上市企业生产级标准.
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["logging", "monitor", "log", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — Enterprise Log Manager Production-grade centralized log management with structured logging,",
+    "description": "AUTO-EVO-AI V0.1 — Enterprise Log Manager Production-grade centralized log management with structured logging,",
 }
 
 import time

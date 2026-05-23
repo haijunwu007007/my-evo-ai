@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 备份管理
+AUTO-EVO-AI V0.1 — 备份管理
 Grade: A (生产级) | Category: 数据保护
 职责：备份调度、增量/全量备份、备份验证、恢复、备份生命周期管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["backup", "manager", "resilience"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 备份管理 Grade: A (生产级) | Category: 数据保护",
+    "description": "AUTO-EVO-AI V0.1 — 备份管理 Grade: A (生产级) | Category: 数据保护",
 }
 
 import os
@@ -107,7 +107,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     MODULE_ID = "backup_manager"
     MODULE_NAME = "备份管理"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):

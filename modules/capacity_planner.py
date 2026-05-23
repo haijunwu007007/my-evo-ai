@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 - Capacity Planner Module (Grade: A Production)
+AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production)
 容量规划：资源预测、负载分析、扩缩容建议、成本优化
 """
 
@@ -25,7 +25,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "capacity"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 - Capacity Planner Module (Grade: A Production) 容量规划：资源预测、负载分析、扩缩容建议、成本优化",
+    "description": "AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production) 容量规划：资源预测、负载分析、扩缩容建议、成本优化",
 }
 
 import os

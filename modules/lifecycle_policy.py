@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — Enterprise Lifecycle Policy Manager
+AUTO-EVO-AI V0.1 — Enterprise Lifecycle Policy Manager
 Production-grade resource lifecycle management with state machines, TTL enforcement,
 automated transitions, compliance gating, and audit trail for上市企业生产级标准.
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["lifecycle", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — Enterprise Lifecycle Policy Manager Production-grade resource lifecycle management with state machines, TTL enforcement,",
+    "description": "AUTO-EVO-AI V0.1 — Enterprise Lifecycle Policy Manager Production-grade resource lifecycle management with state machines, TTL enforcement,",
 }
 import time
 import json

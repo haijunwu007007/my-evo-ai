@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Bettafish预测分析模块
+AUTO-EVO-AI V0.1 — Bettafish预测分析模块
 Grade: A (生产级) | Category: 数据分析
 职责：时间序列预测、趋势分析、异常检测、预测模型管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["bettafish", "manager"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Bettafish预测分析模块 Grade: A (生产级) | Category: 数据分析",
+    "description": "AUTO-EVO-AI V0.1 — Bettafish预测分析模块 Grade: A (生产级) | Category: 数据分析",
 }
 
 import os
@@ -254,7 +254,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
 
     MODULE_ID = "bettafish_forecast"
     MODULE_NAME = "Bettafish预测引擎"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
 

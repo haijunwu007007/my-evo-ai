@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Redis缓存管理模块
+AUTO-EVO-AI V0.1 — Redis缓存管理模块
 Grade: A (生产级) | Category: 缓存
 职责：Redis键值缓存、过期策略、分布式锁、发布订阅、Lua脚本执行、集群管理
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "redis"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Redis缓存管理模块 Grade: A (生产级) | Category: 缓存",
+    "description": "AUTO-EVO-AI V0.1 — Redis缓存管理模块 Grade: A (生产级) | Category: 缓存",
 }
 
 import os

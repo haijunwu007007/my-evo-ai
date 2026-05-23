@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v6.38 — 商业分析师模块
+AUTO-EVO-AI V0.1 — 商业分析师模块
 Grade: A (生产级) | Category: 智能分析
 职责：商业智能分析、KPI追踪、营收预测、市场趋势分析、竞争情报、经营决策支持
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["manager", "business"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v6.38 — 商业分析师模块 Grade: A (生产级) | Category: 智能分析",
+    "description": "AUTO-EVO-AI V0.1 — 商业分析师模块 Grade: A (生产级) | Category: 智能分析",
 }
 
 import os

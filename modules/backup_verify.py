@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — 备份验证模块
+AUTO-EVO-AI V0.1 — 备份验证模块
 Grade: A (生产级) | Category: 数据保护
 职责：验证备份数据的完整性、一致性、可恢复性，支持校验比对和修复建议
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["backup", "manager", "resilience"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — 备份验证模块 Grade: A (生产级) | Category: 数据保护",
+    "description": "AUTO-EVO-AI V0.1 — 备份验证模块 Grade: A (生产级) | Category: 数据保护",
 }
 
 import os

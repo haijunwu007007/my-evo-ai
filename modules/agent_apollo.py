@@ -1,5 +1,5 @@
 """
-AUTO-EVO-AI v7.0 — Apollo AI智能体
+AUTO-EVO-AI V0.1 — Apollo AI智能体
 Grade: A (生产级) | Category: AI智能体
 职责：知识管理、文档索引、语义搜索、知识图谱、智能问答
 """
@@ -26,7 +26,7 @@ __module_meta__ = {
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
     "grade": "A",
-    "description": "AUTO-EVO-AI v7.0 — Apollo AI智能体 Grade: A (生产级) | Category: AI智能体",
+    "description": "AUTO-EVO-AI V0.1 — Apollo AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 
 import os
@@ -96,7 +96,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     MODULE_ID = "agent_apollo"
     MODULE_NAME = "Apollo智能体"
-    VERSION = "7.0.0"
+    VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
