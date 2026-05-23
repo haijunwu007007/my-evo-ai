@@ -29,11 +29,27 @@ Thumbs.db
 *.log
 _archive/
 
-# ── 测试 ──
+# ── 测试临时文件 ──
 .pytest_cache/
 .htmlcov/
 .coverage
+tests/*.txt
+tests/*.out
+tests/*.err
+tests/pytest*
+
+# ── 运行时数据 ──
+.evo_data/
+.chroma_data/
+.playwright-cli/
+_data/
+data/*.db
 
 # ── 项目临时文件 ──
 *.tmp
 syntax_err.txt
+*.db-shm
+*.db-wal
+api_stderr*.txt
+api_stdout*.txt
+test_out.txt

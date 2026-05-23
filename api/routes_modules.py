@@ -374,16 +374,13 @@ async def execute_module_endpoint(name: str, request: Request):
                 import inspect as _insp
                 _inst = _cls() if _insp.isclass(_cls) else _cls
                 if hasattr(_inst, 'initialize'): _inst.initialize()
-                # Special: agent_planner uses async_execute(task=) not execute(action=, params=)
+                # Special: agent_planner uses async_execute(task=) in async context
                 if name == "agent_planner":
                     task_text = params_dict.get("task", action) or action
                     _r = _inst.async_execute(task=task_text, params=params_dict)
-                    if hasattr(_r, '__await__') or hasattr(_r, 'send'):
-                        _raw = await _r
-                    else:
-                        _raw = _r
+                    _raw = await _r if hasattr(_r, '__await__') else _r
                     if isinstance(_raw, dict):
-                        if "status" in _raw and _raw["status"] == "error":
+                        if _raw.get("status") == "error":
                             return {"success": False, "error": _raw.get("error","unknown")}
                         return {"success": True, "result": _raw.get("result",_raw), "plan_id": _raw.get("plan_id")}
                 else:
