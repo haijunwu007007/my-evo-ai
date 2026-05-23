@@ -2152,14 +2152,36 @@
         if (!text) { showToast('请先输入任务描述', 'error'); return; }
         var area = document.getElementById('ai-result-area');
         area.style.display = 'block';
-        area.innerHTML = '<div style="display:flex;gap:8px;align-items:center;"><span class="spinner"></span> 🤖 正在理解任务 "' + text.substring(0,40) + '..." 请稍候...</div>';
+        area.innerHTML = '<div style="display:flex;gap:8px;align-items:center;"><span class="spinner"></span> 🤖 正在处理 "' + text.substring(0,40) + '..."</div>';
         _aiTaskHistory.push({text: text, time: new Date().toLocaleTimeString(), status: '执行中'});
 
-        var plannerName = 'agent_planner';
+        // 智能意图识别：根据关键词路由到对应模块
+        var lower = text.toLowerCase();
+        var moduleName = 'agent_planner';
+        var action = 'plan';
+        var params = {task: text, auto_execute: true};
+
+        if (lower.indexOf('github') >= 0 || lower.indexOf('trend') >= 0 || lower.indexOf('开源') >= 0 || lower.indexOf('趋势') >= 0) {
+            moduleName = 'github_scanner';
+            action = 'trending';
+            var lang = 'python';
+            if (lower.indexOf('all') >= 0 || lower.indexOf('全部') >= 0 || lower.indexOf('所有语言') >= 0) lang = '__all__';
+            else if (lower.indexOf('ai') >= 0 || lower.indexOf('人工智能') >= 0) lang = 'python';
+            else if (lower.indexOf('rust') >= 0 || lower.indexOf('go') >= 0 || lower.indexOf('js') >= 0 || lower.indexOf('java') >= 0) lang = lower.match(/rust|go|js|javascript|java/)[0];
+            params = {language: lang, since: 'daily'};
+        } else if (lower.indexOf('news') >= 0 || lower.indexOf('新闻') >= 0 || lower.indexOf('ai') >= 0) {
+            moduleName = 'trending_pipeline';
+            action = 'trending';
+        } else if (lower.indexOf('分析') >= 0 || lower.indexOf('data') >= 0 || lower.indexOf('数据') >= 0) {
+            moduleName = 'data_analysis';
+            action = 'describe';
+            params = {data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]};
+        }
+
         try {
-            var r = await fetch('/api/modules/' + plannerName + '/execute', {
+            var r = await fetch('/api/modules/' + moduleName + '/execute', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({action: 'plan', params: {task: text, auto_execute: true}})
+                body: JSON.stringify({action: action, params: params})
             });
             var d = await r.json();
             var resultArea = document.getElementById('ai-result-area');
@@ -2167,8 +2189,22 @@
                 var result = d.result || d;
                 var html = '<div style="display:flex;gap:8px;justify-content:space-between;align-items:center;">' +
                     '<span style="color:var(--success,#10b981);">✅ 任务完成</span>' +
-                    '<span style="font-size:11px;color:var(--text-muted);">' + new Date().toLocaleTimeString() + '</span></div>';
-                if (typeof result === 'object') {
+                    '<span style="font-size:11px;color:var(--text-muted);">' + new Date().toLocaleTimeString() + '</span>' +
+                    '<span style="font-size:10px;color:var(--text-muted);background:var(--bg);padding:2px 6px;border-radius:4px;">模块: ' + moduleName + '</span></div>';
+                // 对 GitHub trending 结果做美观格式化
+                var repoList = result.repos || result.repositories || result.data || [];
+                if (moduleName === 'github_scanner' && repoList.length > 0) {
+                    html += '<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">';
+                    repoList.forEach(function(repo) {
+                        html += '<div style="background:var(--bg);padding:8px 10px;border-radius:8px;font-size:12px;">' +
+                            '<div style="font-weight:600;color:#58a6ff;">' + (repo.owner || '') + '/' + (repo.name || '') + '</div>' +
+                            '<div style="margin-top:2px;color:var(--text-muted);font-size:11px;">' + (repo.description || '').substring(0,120) + '</div>' +
+                            (repo.stars ? '<div style="margin-top:2px;font-size:10px;color:var(--text-muted);">⭐ ' + repo.stars + ' · 🍴 ' + (repo.forks || 0) + (repo.period_stars ? ' · 📈 +' + repo.period_stars : '') + '</div>' : '') +
+                            '</div>';
+                    });
+                    html += '</div>';
+                    html += '<div style="margin-top:6px;text-align:right;font-size:10px;color:var(--text-muted);">来源: GitHub Trending · 数据缓存5分钟</div>';
+                } else if (typeof result === 'object') {
                     html += '<div style="margin-top:6px;background:var(--bg);padding:8px;border-radius:6px;font-size:12px;font-family:monospace;white-space:pre-wrap;overflow-x:auto;">' +
                         JSON.stringify(result, null, 2).substring(0, 500) + '</div>';
                 } else {
@@ -2176,10 +2212,28 @@
                 }
                 resultArea.innerHTML = html;
             } else {
-                resultArea.innerHTML = '<div style="color:var(--danger,#ef4444);">❌ 执行失败: ' + (d.error || '未知错误') + '</div>';
+                // Fallback: use agent_planner instead
+                try {
+                    var r2 = await fetch('/api/modules/agent_planner/execute', {
+                        method: 'POST', headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({action: 'plan', params: {task: text, auto_execute: true}})
+                    });
+                    var d2 = await r2.json();
+                    if (d2.success) {
+                        var html2 = '<div style="display:flex;gap:8px;justify-content:space-between;align-items:center;">' +
+                            '<span style="color:var(--success,#10b981);">✅ 任务完成</span>' +
+                            '<span style="font-size:11px;color:var(--text-muted);">' + new Date().toLocaleTimeString() + '</span></div>' +
+                            '<div style="margin-top:6px;font-size:12px;font-family:monospace;white-space:pre-wrap;">' +
+                            JSON.stringify(d2.result || d2, null, 2).substring(0, 500) + '</div>';
+                        resultArea.innerHTML = html2;
+                    } else {
+                        resultArea.innerHTML = '<div style="color:var(--danger,#ef4444);">❌ ' + (d2.error || '执行失败') + '</div>';
+                    }
+                } catch(e3) {
+                    resultArea.innerHTML = '<div style="color:var(--danger,#ef4444);">❌ 执行失败: ' + (d.error || '未知错误') + '</div>';
+                }
             }
         } catch(e) {
-            // Planner not available - fallback: call coordinator directly
             try {
                 var r2 = await fetch('/api/coordinator/execute', {
                     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -2190,7 +2244,7 @@
                 area2.innerHTML = '<div style="color:var(--success,#10b981);">✅ ' + (d2.message || '已提交') + '</div>' +
                     '<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">协调器已接收任务，可通过 "📋历史" 查看进度</div>';
             } catch(e2) {
-                document.getElementById('ai-result-area').innerHTML = '<div style="color:var(--danger);">❌ 协调器不可用: ' + e2.message + '</div>';
+                document.getElementById('ai-result-area').innerHTML = '<div style="color:var(--danger);">❌ 网络错误: ' + e2.message + '</div>';
             }
         }
         if (input) input.value = '';
