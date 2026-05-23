@@ -1,0 +1,17 @@
+# AUTO-EVO-AI V0.1 — 生产环境配置
+# 覆盖 config/defaults.yaml 中的值
+
+server:
+  host: "0.0.0.0"
+  cors_origins: "https://your-domain.com"
+
+security:
+  api_key_enabled: true
+  auth_enabled: true
+  rate_limit:
+    max_requests: 5000
+    window_seconds: 60
+
+logging:
+  level: "WARNING"
+  json_format: true

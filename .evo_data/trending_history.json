@@ -1,0 +1,172 @@
+[
+  {
+    "id": "d469388a0ee1b093",
+    "date": "2026-05-17",
+    "scanned_at": "2026-05-17T17:16:06.825607+08:00",
+    "language": "python",
+    "total_repos": 14,
+    "ai_repos": 10,
+    "repos": [
+      {
+        "rank": 1,
+        "name": "K-Dense-AI/scientific-agent-skills",
+        "url": "https://github.com/K-Dense-AI/scientific-agent-skills",
+        "stars": 23444,
+        "forks": 2510,
+        "today": 673,
+        "language": "Python",
+        "description": "A set of ready to use Agent Skills for research, science, engineering, analysis,"
+      },
+      {
+        "rank": 2,
+        "name": "anthropics/skills",
+        "url": "https://github.com/anthropics/skills",
+        "stars": 136006,
+        "forks": 16035,
+        "today": 900,
+        "language": "Python",
+        "description": "Public repository for Agent Skills"
+      },
+      {
+        "rank": 3,
+        "name": "awslabs/agent-plugins",
+        "url": "https://github.com/awslabs/agent-plugins",
+        "stars": 725,
+        "forks": 99,
+        "today": 5,
+        "language": "Shell",
+        "description": "Agent Plugins for AWS equip AI coding agents with the skills to help you archite"
+      },
+      {
+        "rank": 4,
+        "name": "HKUDS/CLI-Anything",
+        "url": "https://github.com/HKUDS/CLI-Anything",
+        "stars": 35183,
+        "forks": 3461,
+        "today": 333,
+        "language": "Python",
+        "description": "\"CLI-Anything: Making ALL Software Agent-Native\" -- CLI-Hub: https://clianything"
+      },
+      {
+        "rank": 5,
+        "name": "dograh-hq/dograh",
+        "url": "https://github.com/dograh-hq/dograh",
+        "stars": 1384,
+        "forks": 329,
+        "today": 287,
+        "language": "Python",
+        "description": "Open Source Voice Agent Platform"
+      },
+      {
+        "rank": 6,
+        "name": "cheahjs/free-llm-api-resources",
+        "url": "https://github.com/cheahjs/free-llm-api-resources",
+        "stars": 21687,
+        "forks": 2201,
+        "today": 71,
+        "language": "Python",
+        "description": "A list of free LLM inference resources accessible via API."
+      },
+      {
+        "rank": 7,
+        "name": "confident-ai/deepeval",
+        "url": "https://github.com/confident-ai/deepeval",
+        "stars": 15494,
+        "forks": 1437,
+        "today": 22,
+        "language": "Python",
+        "description": "The LLM Evaluation Framework"
+      },
+      {
+        "rank": 8,
+        "name": "NVIDIA-AI-Blueprints/video-search-and-summarization",
+        "url": "https://github.com/NVIDIA-AI-Blueprints/video-search-and-summarization",
+        "stars": 1308,
+        "forks": 276,
+        "today": 235,
+        "language": "Python",
+        "description": "Suite of reference architectures for building GPU-accelerated vision agents and "
+      },
+      {
+        "rank": 9,
+        "name": "BigBodyCobain/Shadowbroker",
+        "url": "https://github.com/BigBodyCobain/Shadowbroker",
+        "stars": 6652,
+        "forks": 1070,
+        "today": 165,
+        "language": "Python",
+        "description": "Open-source intelligence for the global theater. Track everything from the corpo"
+      },
+      {
+        "rank": 10,
+        "name": "luongnv89/claude-howto",
+        "url": "https://github.com/luongnv89/claude-howto",
+        "stars": 33228,
+        "forks": 4065,
+        "today": 165,
+        "language": "Python",
+        "description": "A visual, example-driven guide to Claude Code — from basic concepts to advanced "
+      }
+    ]
+  },
+  {
+    "id": "d10e7d9bb281ffb1",
+    "date": "2026-05-17",
+    "scanned_at": "2026-05-17T17:16:27.304053+08:00",
+    "language": "python",
+    "total_repos": 7,
+    "ai_repos": 5,
+    "repos": [
+      {
+        "rank": 1,
+        "name": "K-Dense-AI/scientific-agent-skills",
+        "url": "https://github.com/K-Dense-AI/scientific-agent-skills",
+        "stars": 23444,
+        "forks": 2510,
+        "today": 673,
+        "language": "Python",
+        "description": "A set of ready to use Agent Skills for research, science, engineering, analysis,"
+      },
+      {
+        "rank": 2,
+        "name": "anthropics/skills",
+        "url": "https://github.com/anthropics/skills",
+        "stars": 136006,
+        "forks": 16035,
+        "today": 900,
+        "language": "Python",
+        "description": "Public repository for Agent Skills"
+      },
+      {
+        "rank": 3,
+        "name": "awslabs/agent-plugins",
+        "url": "https://github.com/awslabs/agent-plugins",
+        "stars": 725,
+        "forks": 99,
+        "today": 5,
+        "language": "Shell",
+        "description": "Agent Plugins for AWS equip AI coding agents with the skills to help you archite"
+      },
+      {
+        "rank": 4,
+        "name": "HKUDS/CLI-Anything",
+        "url": "https://github.com/HKUDS/CLI-Anything",
+        "stars": 35183,
+        "forks": 3461,
+        "today": 333,
+        "language": "Python",
+        "description": "\"CLI-Anything: Making ALL Software Agent-Native\" -- CLI-Hub: https://clianything"
+      },
+      {
+        "rank": 5,
+        "name": "dograh-hq/dograh",
+        "url": "https://github.com/dograh-hq/dograh",
+        "stars": 1384,
+        "forks": 329,
+        "today": 287,
+        "language": "Python",
+        "description": "Open Source Voice Agent Platform"
+      }
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+# AUTO-EVO-AI V0.1 — 默认配置
+# 优先级: 环境变量 > 配置文件 > 此默认值
+# 环境变量: EVO_ENV=development | production | staging
+
+server:
+  host: "127.0.0.1"
+  port: 8765
+  cors_origins: "*"
+
+modules:
+  dir: "modules"
+  lazy_load: true
+  warmup_enabled: true
+  stub_threshold_bytes: 2048
+
+security:
+  api_key_enabled: true
+  auth_enabled: true
+  rate_limit:
+    max_requests: 1000
+    window_seconds: 60
+
+logging:
+  level: "INFO"
+  json_format: false
+  # json_format: true 时输出结构化 JSON 日志
+
+database:
+  type: "sqlite"
+  # type: "mysql" 或 "postgresql"
+
+notifications:
+  channels:
+    - dingtalk
+    - feishu
+    - wecom
+    # - telegram
+    # - slack

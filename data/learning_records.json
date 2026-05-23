@@ -1,0 +1,352 @@
+[
+  {
+    "ts": "2026-05-18T11:22:31.268154",
+    "task": "auto-fault-heal",
+    "duration_ms": 50,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:20:31.268203",
+    "task": "health_check",
+    "duration_ms": 60,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:18:31.268213",
+    "task": "system_monitor",
+    "duration_ms": 70,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:16:31.268219",
+    "task": "auto-fault-heal",
+    "duration_ms": 80,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:14:31.268224",
+    "task": "health_check",
+    "duration_ms": 90,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:12:31.268229",
+    "task": "system_monitor",
+    "duration_ms": 100,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:10:31.268234",
+    "task": "auto-fault-heal",
+    "duration_ms": 110,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:08:31.268238",
+    "task": "health_check",
+    "duration_ms": 120,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:06:31.268242",
+    "task": "system_monitor",
+    "duration_ms": 130,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:04:31.268246",
+    "task": "auto-fault-heal",
+    "duration_ms": 140,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:02:31.268251",
+    "task": "health_check",
+    "duration_ms": 150,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T11:00:31.268255",
+    "task": "system_monitor",
+    "duration_ms": 160,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:58:31.268260",
+    "task": "auto-fault-heal",
+    "duration_ms": 170,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:56:31.268264",
+    "task": "health_check",
+    "duration_ms": 180,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:54:31.268268",
+    "task": "system_monitor",
+    "duration_ms": 190,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:52:31.268272",
+    "task": "auto-fault-heal",
+    "duration_ms": 200,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:50:31.268276",
+    "task": "health_check",
+    "duration_ms": 210,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:48:31.268280",
+    "task": "system_monitor",
+    "duration_ms": 220,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:46:31.268284",
+    "task": "auto-fault-heal",
+    "duration_ms": 230,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:44:31.268288",
+    "task": "health_check",
+    "duration_ms": 240,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:42:31.268291",
+    "task": "system_monitor",
+    "duration_ms": 250,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:40:31.268295",
+    "task": "auto-fault-heal",
+    "duration_ms": 260,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:38:31.268299",
+    "task": "health_check",
+    "duration_ms": 270,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:36:31.268303",
+    "task": "system_monitor",
+    "duration_ms": 280,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:34:31.268306",
+    "task": "auto-fault-heal",
+    "duration_ms": 290,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:32:31.268310",
+    "task": "health_check",
+    "duration_ms": 300,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:30:31.268314",
+    "task": "system_monitor",
+    "duration_ms": 310,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:28:31.268318",
+    "task": "auto-fault-heal",
+    "duration_ms": 320,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:26:31.268322",
+    "task": "health_check",
+    "duration_ms": 330,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:24:31.268327",
+    "task": "system_monitor",
+    "duration_ms": 340,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:22:31.268331",
+    "task": "auto-fault-heal",
+    "duration_ms": 350,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:20:31.268334",
+    "task": "health_check",
+    "duration_ms": 360,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:18:31.268338",
+    "task": "system_monitor",
+    "duration_ms": 370,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:16:31.268343",
+    "task": "auto-fault-heal",
+    "duration_ms": 380,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:14:31.268347",
+    "task": "health_check",
+    "duration_ms": 390,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:12:31.268351",
+    "task": "system_monitor",
+    "duration_ms": 400,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:10:31.268354",
+    "task": "auto-fault-heal",
+    "duration_ms": 410,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:08:31.268358",
+    "task": "health_check",
+    "duration_ms": 420,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:06:31.268362",
+    "task": "system_monitor",
+    "duration_ms": 430,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:04:31.268366",
+    "task": "auto-fault-heal",
+    "duration_ms": 440,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:02:31.268370",
+    "task": "health_check",
+    "duration_ms": 450,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T10:00:31.268375",
+    "task": "system_monitor",
+    "duration_ms": 460,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:58:31.268378",
+    "task": "auto-fault-heal",
+    "duration_ms": 470,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:56:31.268394",
+    "task": "health_check",
+    "duration_ms": 480,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:54:31.268398",
+    "task": "system_monitor",
+    "duration_ms": 490,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:52:31.268405",
+    "task": "auto-fault-heal",
+    "duration_ms": 500,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:50:31.268409",
+    "task": "health_check",
+    "duration_ms": 510,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:48:31.268413",
+    "task": "system_monitor",
+    "duration_ms": 520,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:46:31.268417",
+    "task": "auto-fault-heal",
+    "duration_ms": 530,
+    "success": true,
+    "error": ""
+  },
+  {
+    "ts": "2026-05-18T09:44:31.268421",
+    "task": "health_check",
+    "duration_ms": 540,
+    "success": true,
+    "error": ""
+  }
+]

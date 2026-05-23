@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!-- AUTO-EVO-AI V0.1 Ops Panel (535模块) -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EVO 运营中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:16px}
+h1{font-size:18px;margin-bottom:12px;color:#6366f1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px}
+.card h3{font-size:13px;color:#94a3b8;margin-bottom:8px}
+.val{font-size:22px;font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn{background:#334155;border:1px solid #475569;border-radius:6px;padding:5px 12px;color:#e2e8f0;cursor:pointer;font-size:12px}
+.btn:hover{background:#6366f1}
+.btn-p{background:#6366f1;border:none}
+.btn-d{background:#ef4444;border:none}
+.btn-s{background:#10b981;border:none}
+input,select{background:#0f172a;border:1px solid #334155;border-radius:6px;padding:5px 8px;color:#e2e8f0;font-size:12px;width:100%;margin-bottom:6px}
+label{font-size:11px;color:#94a3b8;display:block;margin-top:6px}
+.log{font-size:11px;color:#94a3b8;max-height:200px;overflow-y:auto;font-family:monospace}
+.log div{padding:2px 0;border-bottom:1px solid #1e293b}
+.ok{color:#10b981}
+.err{color:#ef4444}
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;background:#1e293b;border:1px solid #334155}
+.tab:hover,.tab.a{background:#6366f1;border-color:#6366f1}
+.pane{display:none}
+.pane.a{display:block}
+</style>
+</head>
+<body>
+<h1>🎛️ EVO 运营中心</h1>
+<div class="tabs">
+<div class="tab a" onclick="sw(this,'overview')">总览</div>
+<div class="tab" onclick="sw(this,'config')">配置</div>
+<div class="tab" onclick="sw(this,'tasks')">任务</div>
+<div class="tab" onclick="sw(this,'notify')">通知</div>
+<div class="tab" onclick="sw(this,'logs')">日志</div>
+</div>
+<div id="overview" class="pane a"></div>
+<div id="config" class="pane"></div>
+<div id="tasks" class="pane"></div>
+<div id="notify" class="pane"></div>
+<div id="logs" class="pane"></div>
+
+<script>
+const AK = localStorage.getItem('evo_key')||'';
+const base = '/api';
+
+async function api(p,o){
+  const h={'Content-Type':'application/json'};
+  if(AK) h['X-API-Key']=AK;
+  try{
+    const r=await fetch(base+p,{...o,headers:{...h,...o?.headers}});
+    return await r.json();
+  }catch(e){return{error:e.message}}
+}
+
+function sw(el,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('a'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('a'));
+  el.classList.add('a');
+  document.getElementById(id).classList.add('a');
+  load(id);
+}
+
+async function load(tab){
+  const el=document.getElementById(tab);
+  if(tab==='overview') await loadOverview(el);
+  else if(tab==='config') await loadConfig(el);
+  else if(tab==='tasks') await loadTasks(el);
+  else if(tab==='notify') await loadNotify(el);
+  else if(tab==='logs') await loadLogs(el);
+}
+
+async function loadOverview(el){
+  const s=await api('/api/status');
+  const h=await api('/api/health');
+  const sc=await api('/api/scheduler/status');
+  const llm=await api('/api/llm/providers');
+  el.innerHTML='<div class="grid">'+
+    '<div class="card"><h3>系统</h3><div class="val">'+(s.system||'?')+'</div><div class="row">模块 '+(s.modules_total||0)+' | 已加载 '+(s.modules_loaded||0)+'</div></div>'+
+    '<div class="card"><h3>健康</h3><div class="val" style="color:'+(h.status==='healthy'?'#10b981':'#ef4444')+'">'+(h.status||'?')+'</div><div class="row">错误 '+(h.modules_error||0)+' | OK '+(h.modules_ok||0)+'</div></div>'+
+    '<div class="card"><h3>调度器</h3><div class="val" style="color:'+(sc.running?'#10b981':'#94a3b8')+'">'+(sc.running?'运行中':'已停止')+'</div><div class="row">'+(sc.active_tasks||0)+' 任务 | 今日 '+(sc.today_executions||0)+' 次</div></div>'+
+    '<div class="card"><h3>LLM</h3><div class="val">'+((llm.providers||[]).filter(p=>p.has_key).length||0)+' 已配置</div><div class="row">'+(llm.providers||[]).map(p=>p.name+(p.has_key?' ✅':'')).join(' | ')+'</div></div>'+
+    '</div>';
+}
+
+async function loadConfig(el){
+  const llm=await api('/api/llm/providers');
+  el.innerHTML='<div class="card"><h3>LLM 配置</h3>'+
+    (llm.providers||[]).map(p=>'<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334"><span>'+p.name+'</span><span>'+(p.has_key?'✅ 已配置':'❌ 未配置')+'</span></div>').join('')+
+    '<div class="row"><div style="flex:1"><label>model</label><input id="llm_model" value="glm-4-flash"></div><div style="flex:1"><label>provider</label><input id="llm_provider" value="zhipu"></div></div>'+
+    '<div class="row"><div style="flex:1"><label>api_key</label><input id="llm_key" placeholder="sk-..."></div><div style="flex:1"><label>base_url</label><input id="llm_url" placeholder="https://..."></div></div>'+
+    '<button class="btn btn-p" onclick="saveLLM()">保存 LLM 配置</button></div>';
+}
+
+async function saveLLM(){
+  const k=document.getElementById('llm_key').value;
+  const u=document.getElementById('llm_url').value;
+  const m=document.getElementById('llm_model').value;
+  const pv=document.getElementById('llm_provider').value;
+  const r=await api('/api/llm/providers/add',{method:'POST',body:JSON.stringify({name: pv,provider_type:'openai_compatible',base_url:u||'https://open.bigmodel.cn/api/paas/v4',api_key:k,models:[m],priority:5})});
+  alert(r.success?'已保存':'保存失败: '+r.error);
+  load('config');
+}
+
+async function loadTasks(el){
+  const s=await api('/api/scheduler/tasks');
+  const tasks=s.tasks||[];
+  el.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><h3>调度任务 ('+tasks.length+')</h3><button class="btn btn-s" onclick="refreshTasks()">刷新</button></div>'+
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">'+
+    '<tr style="color:#94a3b8"><th style="text-align:left;padding:4px">名称</th><th style="text-align:center">状态</th><th style="text-align:center">下次</th><th></th></tr>'+
+    tasks.map(t=>'<tr style="border-top:1px solid #334"><td style="padding:4px">'+(t.name||t.id||'?')+'</td>'+
+      '<td style="text-align:center"><span style="color:'+(t.status==='active'?'#10b981':'#ef4444')+'">'+(t.status||'')+'</span></td>'+
+      '<td style="text-align:center;color:#94a3b8">'+(t.next_run_at||'-')+'</td>'+
+      '<td style="text-align:center"><button class="btn" onclick="toggleTask(\''+(t.id||'')+'\')">切换</button></td></tr>').join('')+
+    '</table></div>';
+}
+
+async function refreshTasks(){load('tasks')}
+async function toggleTask(id){await api('/api/scheduler/tasks/'+id+'/toggle',{method:'POST'});load('tasks')}
+
+async function loadNotify(el){
+  const n=await api('/api/notify/channels');
+  el.innerHTML='<div class="card"><h3>通知通道</h3>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+    (n.channels||[]).map(c=>'<div style="padding:6px;border:1px solid #334;border-radius:6px;display:flex;justify-content:space-between">'+
+      '<span>'+c.name+'</span><span>'+(c.configured?'✅':'❌')+'</span></div>').join('')+
+    '</div>'+
+    '<div style="margin-top:8px"><label>Webhook URL</label><input id="wh_url" placeholder="https://..."><button class="btn btn-p" onclick="testNotify()" style="margin-top:4px">测试通知</button></div>'+
+    '<div id="ntest" style="font-size:11px;margin-top:4px"></div></div>';
+}
+
+async function testNotify(){
+  const url=document.getElementById('wh_url').value;
+  if(!url){document.getElementById('ntest').textContent='请输入 URL';return}
+  const r=await api('/api/notify/webhook',{method:'POST',body:JSON.stringify({url:url,data:JSON.stringify({msg:'EVO 测试通知'})})});
+  document.getElementById('ntest').innerHTML=r.success?'<span class="ok">发送成功</span>':'<span class="err">失败: '+r.error+'</span>';
+}
+
+async function loadLogs(el){
+  const l=await api('/api/execution-log');
+  const entries=l.log||[];
+  el.innerHTML='<div class="card"><h3>执行日志 ('+entries.length+')</h3><div class="log">'+
+    entries.slice().reverse().map(e=>'<div><span class="'+(e.status==='ok'?'ok':'err')+'">['+e.status+']</span> '+(e.module||'')+' '+(e.action||'')+' '+(e.duration_ms||'')+'ms '+(e.timestamp||'')+'</div>').join('')+
+    '</div></div>';
+}
+
+load('overview');
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Docker ignore — keep images lean
+.git
+.gitignore
+.github
+__pycache__
+*.pyc
+*.pyo
+*.log
+*.pid
+.env
+.env.*
+.venv
+venv
+_archive
+_*
+tests/
+docs/
+*.bat
+*.md
+Dockerfile
+.dockerignore

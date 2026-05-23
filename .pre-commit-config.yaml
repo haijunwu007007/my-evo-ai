@@ -1,0 +1,49 @@
+# ═══════════════════════════════════════════════════════
+# AUTO-EVO-AI V0.1 — Pre-commit 配置
+# 上市公司级代码质量门禁：每次 commit 自动执行
+# ═══════════════════════════════════════════════════════
+repos:
+  # ── 基础格式化 ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace          # 尾随空格
+      - id: end-of-file-fixer            # 文件末尾空行
+      - id: check-yaml                   # YAML 语法检查
+      - id: check-json                   # JSON 语法检查
+      - id: check-toml                   # TOML 语法检查
+      - id: check-added-large-files      # 大文件告警（>2MB）
+        args: ["--maxkb=2048"]
+      - id: check-merge-conflict         # 未解决的合并冲突
+      - id: detect-private-key           # 密钥泄露检测
+
+  # ── Python 代码格式化 (Ruff) ──
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        name: "ruff-lint (py311)"
+        args: [--fix, --line-length=120]
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: "ruff-format"
+        args: [--line-length=120]
+        types_or: [python, pyi]
+
+  # ── 安全扫描 ──
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        name: "bandit-security-scan"
+        args: ["-s", "B101,B301,B303,B311,B404,B603,B607", "-ll"]
+        additional_dependencies: ["bandit[toml]"]
+        exclude: ^tests/
+
+  # ── 类型检查 (可选, 慢) ──
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.11.0
+  #   hooks:
+  #     - id: mypy
+  #       args: [--ignore-missing-imports, --python-version=3.11]
+  #       exclude: ^tests/

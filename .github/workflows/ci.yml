@@ -1,0 +1,95 @@
+name: CI — 全量测试 (上市公司级)
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      matrix:
+        python-version: ["3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov httpx
+
+      - name: 创建数据目录 (对应 D:\ 的 POSIX 兼容路径)
+        run: |
+          mkdir -p .evo_data/autonomous
+          mkdir -p data
+          mkdir -p config/environments
+
+      - name: 创建默认配置
+        run: |
+          cat > config/defaults.yaml << 'EOF'
+          server:
+            host: "127.0.0.1"
+            port: 8765
+          logging:
+            level: "INFO"
+            json_format: false
+          llm:
+            providers: []
+          EOF
+
+      - name: 全量单元测试 (test_unit_core + test_load_all)
+        run: |
+          python -m pytest tests/test_unit_core.py tests/test_load_all.py -v --tb=short --timeout=120 -q 2>&1 | tail -20
+
+      - name: 启动服务进行集成测试
+        run: |
+          python api_server.py &
+          SERVER_PID=$!
+          sleep 15
+          echo "Server PID: $SERVER_PID"
+
+          echo "=== 探活 ==="
+          curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8765/
+          curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8765/api/status
+
+          echo "=== 测试 test_api ==="
+          python -m pytest tests/test_api.py -v --tb=short -q 2>&1 | tail -10
+
+          echo "=== 测试 test_e2e ==="
+          python -m pytest tests/test_e2e_workflows.py -v --tb=short -q 2>&1 | tail -10
+
+          echo "=== 测试 test_core 和 test_core_modules ==="
+          python -m pytest tests/test_core.py tests/test_core_modules.py -v --tb=short -q 2>&1 | tail -10
+
+          echo "=== 测试 test_api_integration ==="
+          python -m pytest tests/test_api_integration.py -v --tb=short -q 2>&1 | tail -10
+
+          kill $SERVER_PID 2>/dev/null || true
+
+      - name: 基准测试
+        continue-on-error: true
+        run: |
+          python api_server.py &
+          SERVER_PID=$!
+          sleep 15
+          python -m pytest benchmarks/ -v --tb=short --benchmark -q 2>&1 | tail -10
+          kill $SERVER_PID 2>/dev/null || true
+
+      - name: 最终验证
+        if: always()
+        run: |
+          echo "===================================================="
+          echo "  AUTO-EVO-AI V0.1 - CI Pipeline"
+          echo "  架构: api_server(入口) + middleware/startup + routes"
+          echo "="

@@ -1,0 +1,24 @@
+{
+  "name": "market-data-fetcher",
+  "version": "1.0.0",
+  "display_name": "实时行情数据采集",
+  "description": "从东方财富/新浪/Tushare采集A股实时行情、K线、财务数据",
+  "author": "AUTO-EVO-AI",
+  "license": "MIT",
+  "homepage": "",
+  "repository": "",
+  "module_class": "plugins.installed.market-data-fetcher.main",
+  "permissions": [
+    "network",
+    "file_write"
+  ],
+  "dependencies": {},
+  "tags": [
+    "金融",
+    "数据",
+    "行情"
+  ],
+  "min_evo_version": "0.1.0",
+  "icon": "",
+  "config_schema": {}
+}

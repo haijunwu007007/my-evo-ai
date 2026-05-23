@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-13T23:03:17.966683",
+  "plugins": {
+    "market-data-fetcher": {
+      "version": "1.0.0",
+      "status": "enabled",
+      "installed_at": "2026-05-13T23:03:17.931177",
+      "enabled_at": "2026-05-13T23:03:17.966667",
+      "error": "",
+      "config": {}
+    }
+  }
+}

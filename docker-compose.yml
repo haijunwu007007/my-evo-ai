@@ -1,0 +1,35 @@
+version: "3.8"
+# AUTO-EVO-AI V0.1 (535模块)
+
+services:
+  auto-evo-ai:
+    build: .
+    container_name: auto-evo-ai
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data:/app/data
+      - ./.api_key:/app/.api_key:ro
+    env_file:
+      - .env
+    environment:
+      - PYTHONIOENCODING=utf-8
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8765/api/status', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

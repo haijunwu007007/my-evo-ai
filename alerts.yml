@@ -1,0 +1,49 @@
+# AUTO-EVO-AI V0.1 Prometheus 告警规则
+groups:
+  - name: auto-evo-alerts
+    interval: 30s
+
+    rules:
+      - alert: ServiceDown
+        expr: up{job="auto-evo-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AUTO-EVO-AI API 服务宕机"
+          description: "API 服务已不可达超过 1 分钟"
+
+      - alert: HighModuleErrors
+        expr: evo_modules_error > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "模块错误率过高"
+          description: "有 {{ $value }} 个模块处于错误状态"
+
+      - alert: LowHealthRate
+        expr: evo_modules_healthy / evo_modules_total < 0.8
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "模块健康率低于 80%"
+          description: "健康率: {{ $value | humanizePercentage }}"
+
+      - alert: HighLatency
+        expr: evo_http_request_duration_ms > 5000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API 响应延迟过高"
+          description: "延迟 {{ $value }}ms，超过 5000ms"
+
+      - alert: NoHeartbeat
+        expr: time() - evo_system_uptime_seconds > 300
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "服务已运行超过 5 分钟无心跳"

@@ -1,0 +1,1 @@
+{"feishu_webhook_url": "", "dingtalk_webhook_url": "https://oapi.dingtalk.com/robot/send?access_token=c2h-hkzfbwlys", "wechat_webhook_url": "", "min_stars": 100, "max_repos": 10, "enabled": true}

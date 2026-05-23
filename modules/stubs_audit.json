@@ -1,0 +1,857 @@
+[
+  {
+    "name": "advanced_resilience",
+    "bytes": 1457,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "auto_setup_autonomous",
+    "bytes": 1449,
+    "lines": 20,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "auto_update",
+    "bytes": 1397,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "autonomous_agent",
+    "bytes": 1236,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "blockchain_web3",
+    "bytes": 1423,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "bot_handler",
+    "bytes": 1388,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "cloud_sync",
+    "bytes": 1924,
+    "lines": 22,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "crewai",
+    "bytes": 1259,
+    "lines": 19,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "data_encrypt",
+    "bytes": 1250,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "data_masking",
+    "bytes": 1843,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "data_quality",
+    "bytes": 1450,
+    "lines": 20,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "database_manager",
+    "bytes": 1970,
+    "lines": 22,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "distributed_lock",
+    "bytes": 1959,
+    "lines": 23,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "document_intelligence",
+    "bytes": 1439,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "ecommerce_agent",
+    "bytes": 1434,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "evo_engine_v2",
+    "bytes": 1396,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "evo_plugin_market",
+    "bytes": 1432,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "file_watcher",
+    "bytes": 1402,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "file_watcher_engine",
+    "bytes": 1460,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "finance_data",
+    "bytes": 1914,
+    "lines": 20,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "finance_legal_agent",
+    "bytes": 1762,
+    "lines": 20,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "fincept_terminal",
+    "bytes": 1635,
+    "lines": 20,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "firewall_rules",
+    "bytes": 1426,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "first_run_setup",
+    "bytes": 1748,
+    "lines": 21,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "form_engine",
+    "bytes": 1395,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "fts_query",
+    "bytes": 2016,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "game_simulation",
+    "bytes": 1423,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "gdpr_compliance",
+    "bytes": 1425,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "geo_index",
+    "bytes": 1380,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "geo_replication",
+    "bytes": 1422,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "github_scanner",
+    "bytes": 1909,
+    "lines": 24,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "grafana_monitor",
+    "bytes": 1416,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "guide_manager",
+    "bytes": 1398,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "health_dashboard",
+    "bytes": 1438,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "health_ping",
+    "bytes": 1957,
+    "lines": 23,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "heatmap_generator",
+    "bytes": 1434,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "help_docs",
+    "bytes": 1381,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "hermes_gateway",
+    "bytes": 1418,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "hermes_solo",
+    "bytes": 1395,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "hermes_webui",
+    "bytes": 1398,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "hot_key_detection",
+    "bytes": 1435,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "hotkey_events",
+    "bytes": 1411,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "icon_manager",
+    "bytes": 1402,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "image_engine",
+    "bytes": 1403,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "image_generation",
+    "bytes": 1431,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "industrial_ops_agent",
+    "bytes": 1259,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "iot_edge",
+    "bytes": 1367,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "lobehub_ui",
+    "bytes": 1382,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "log_aggregator",
+    "bytes": 1262,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "longterm_memory",
+    "bytes": 1426,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "m54_browser_auto",
+    "bytes": 2046,
+    "lines": 23,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "m56_scheduler_pro",
+    "bytes": 1893,
+    "lines": 22,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "macro_api",
+    "bytes": 1213,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "mano_predictor",
+    "bytes": 1256,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "masfactory_orch",
+    "bytes": 1270,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "materialized_view",
+    "bytes": 1292,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "mcp_client",
+    "bytes": 2024,
+    "lines": 22,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "mcp_integration",
+    "bytes": 1269,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "model_router",
+    "bytes": 1236,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "mongodb_nosql",
+    "bytes": 1259,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "object_storage",
+    "bytes": 1875,
+    "lines": 22,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "opa_policy_engine",
+    "bytes": 1264,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "open_interpreter_bridge",
+    "bytes": 1314,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "page_cache",
+    "bytes": 1389,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "postgres_db",
+    "bytes": 1401,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "praisonai_agent",
+    "bytes": 1415,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "priority_queue",
+    "bytes": 1423,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "project_manager",
+    "bytes": 1426,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "prometheus_metrics",
+    "bytes": 1443,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "rag_knowledge_engine",
+    "bytes": 1279,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "read_write_split",
+    "bytes": 1431,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "rebalance_protocol",
+    "bytes": 1441,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "replication_monitor",
+    "bytes": 1458,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "rpa_fault_tolerance",
+    "bytes": 1384,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "ruoyi_ai",
+    "bytes": 2041,
+    "lines": 25,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "scan_iterator",
+    "bytes": 2037,
+    "lines": 23,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "scheduler_pro",
+    "bytes": 1408,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "schema_evolution",
+    "bytes": 1434,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "self_evolving_engine",
+    "bytes": 1285,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "skill_marketplace",
+    "bytes": 1289,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "speech_to_text",
+    "bytes": 1421,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "static_cache",
+    "bytes": 1865,
+    "lines": 30,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "storage_encryption",
+    "bytes": 1429,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "storage_tiering",
+    "bytes": 1426,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "telegram_bridge",
+    "bytes": 1417,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "template_market",
+    "bytes": 1427,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "temporal_approval",
+    "bytes": 1292,
+    "lines": 18,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "tenant_isolation",
+    "bytes": 1438,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "three_d_ar",
+    "bytes": 1371,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "turix_cua_bridge",
+    "bytes": 1384,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "visual_rpa_core",
+    "bytes": 1386,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "voice_interaction",
+    "bytes": 1438,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "web_remote",
+    "bytes": 1943,
+    "lines": 23,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "webtoapp",
+    "bytes": 1372,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  },
+  {
+    "name": "whisper_asr",
+    "bytes": 1395,
+    "lines": 26,
+    "has_module_class": true,
+    "has_execute": true,
+    "has_enterprise": true,
+    "real_score": 8
+  }
+]

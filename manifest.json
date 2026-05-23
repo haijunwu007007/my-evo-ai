@@ -1,0 +1,29 @@
+{
+    "name": "AUTO-EVO-AI V0.1",
+    "short_name": "EVO-AI",
+    "description": "企业级AI自动化平台 — 535模块/16引擎/151+API",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "scope": "/",
+    "lang": "zh-CN",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["productivity", "developer tools", "utilities"],
+    "screenshots": [],
+    "prefer_related_applications": false
+}

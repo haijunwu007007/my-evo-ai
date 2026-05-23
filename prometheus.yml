@@ -1,0 +1,25 @@
+# AUTO-EVO-AI V0.1 Prometheus 采集配置
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'auto-evo-api'
+    scheme: http
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:8765']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'auto-evo-ai'
+
+  - job_name: 'auto-evo-self'
+    scheme: http
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:8765']
+
+# 告警规则
+rule_files:
+  - "alerts.yml"

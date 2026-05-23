@@ -1,0 +1,39 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg*/
+*.egg-info/
+dist/
+build/
+*.so
+*.pyd
+
+# ── 环境配置 ──
+.env
+.env.local
+*.key
+*.pem
+*.crt
+
+# ── IDE ──
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── 系统 ──
+.DS_Store
+Thumbs.db
+*.bak
+*.log
+_archive/
+
+# ── 测试 ──
+.pytest_cache/
+.htmlcov/
+.coverage
+
+# ── 项目临时文件 ──
+*.tmp
+syntax_err.txt

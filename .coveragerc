@@ -1,0 +1,6 @@
+[run]
+source = .
+omit = tests/*, _archive/*, .github/*, _fix_*.py, _debug_*.py, _tmp_*.py
+
+[report]
+exclude_lines = pragma: no cover, if __name__ == "__main__":, raise NotImplementedError, pass, def __repr__, def __str__

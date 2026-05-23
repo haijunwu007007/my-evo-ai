@@ -1,0 +1,572 @@
+# 570 模块清单
+
+- `access_control` PermissionEffect | PolicyType | ResourceType | cat= | execute=True
+- `advanced_resilience` AdvancedResilience | cat= | execute=True
+- `aegis_governance` RiskLevel | ComplianceStatus | SecurityPolicy | cat= | execute=True
+- `agency_swarm` AgencySwarmAnalyzer | AgentRole | Message | cat= | execute=True
+- `agent_apollo` DocType | KnowledgeDoc | QARecord | cat= | execute=True
+- `agent_athena` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `agent_boreas` AnomalySeverity | HealingAction | HealthMetric | cat= | execute=True
+- `agent_cronus` TaskPriority | TaskState | ExecutionMode | cat= | execute=True
+- `agent_demeter` ResourceType | ResourcePool | Allocation | cat= | execute=True
+- `agent_eros` RelationType | RelationStrength | Entity | cat= | execute=True
+- `agent_hecate` EncryptionAlgorithm | DataSensitivity | EncryptionRecord | cat= | execute=True
+- `agent_hephaestus` BuildStatus | Language | QualityGate | cat= | execute=True
+- `agent_hera` EmployeeStatus | PerformanceRating | Department | cat= | execute=True
+- `agent_hermes` MessagePriority | MessageStatus | ChannelType | cat= | execute=True
+- `agent_iris` ImageFormat | DetectionCategory | SceneType | cat= | execute=True
+- `agent_market` SkillStatus | SkillCategory | SecurityLevel | cat= | execute=True
+- `agent_marketplace` PackageStatus | PackageCategory | PackageVersion | cat= | execute=True
+- `agent_mas` AgentRole | AgentStatus | AgentNode | cat= | execute=True
+- `agent_minerva` DecisionType | DecisionOutcome | DecisionRule | cat= | execute=True
+- `agent_nemesis` Severity | IncidentStatus | Incident | cat= | execute=True
+- `agent_orchestrator` TaskStatus | TaskPriority | IntentCategory | cat= | execute=True
+- `agent_phoebus` RouteMatchType | RateLimitStrategy | APIRoute | cat= | execute=True
+- `agent_planner` TaskType | PlanStatus | ModuleCapability | cat= | execute=True
+- `agent_poseidon` LBStrategy | RouteRule | BackendInstance | cat= | execute=True
+- `agent_resource_control` AgentPoolType | AgentStatus | ResourcePriority | cat= | execute=True
+- `agent_themis` RiskLevel | AuditStatus | ComplianceFramework | cat= | execute=True
+- `agentguard_sec` _MetricsAdapter | ThreatLevel | SecurityEvent | cat= | execute=True
+- `agentseek` AgentCategory | AgentProfile | MatchResult | cat= | execute=True
+- `ai_gateway` AiGatewayAnalyzer | AIGateway | cat= | execute=True
+- `aiops_monitor` AnomalyDetector | EventCorrelator | FailurePredictor | cat= | execute=True
+- `alert_manager` AlertAggregator | EscalationPolicy | SilenceManager | cat= | execute=True
+- `ansible_runner` PlaybookStatus | HostStatus | InventoryHost | cat= | execute=True
+- `api_cache` EvictionPolicy | CacheLevel | CacheEntry | cat= | execute=True
+- `api_gateway` ApiGateway | cat= | execute=True
+- `api_mock` MatchStrategy | MockRule | MockLog | cat= | execute=True
+- `api_rate_guard` LimitAlgorithm | LimitScope | RateLimitConfig | cat= | execute=True
+- `api_rate_limiter` ApiRateLimiter | cat= | execute=True
+- `api_tester` HttpMethod | TestStatus | AssertionType | cat= | execute=True
+- `api_versioning` VersionStatus | ApiVersion | VersionRoute | cat= | execute=True
+- `argocd_deploy` SyncStatus | HealthStatus | DeploymentAction | cat= | execute=True
+- `atom_code` CodeLanguage | RefactorType | ReviewSeverity | cat= | execute=True
+- `audio_transcription` AudioFormat | TranscriptionMode | Language | cat= | execute=True
+- `audit_log` _MetricsAdapter | AuditCategory | AuditLevel | cat= | execute=True
+- `audit_trail` AuditTrail | cat= | execute=True
+- `auto_failover` NodeStatus | FailoverState | ClusterNode | cat= | execute=True
+- `auto_healing` Severity | FixStatus | RepairAction | cat= | execute=True
+- `auto_optimizer` AutoOptimizer | cat= | execute=True
+- `auto_recovery` AutoRecovery | cat= | execute=True
+- `auto_restart` _MetricsAdapter | RestartStrategy | RestartRecord | cat= | execute=True
+- `auto_scale` ScaleDirection | ScalePolicy | InstanceStatus | cat= | execute=True
+- `auto_setup_autonomous` AutoSetupAutonomous | cat= | execute=True
+- `auto_summary` SummaryStyle | SummaryLength | Keyword | cat= | execute=True
+- `auto_update` AutoUpdate | cat= | execute=True
+- `autogen_studio` AgentRole | ConversationStatus | TerminationCondition | cat= | execute=True
+- `automation_hub` _MetricsAdapter | TriggerType | ExecutionStatus | cat= | execute=True
+- `autonomous_agent` AutonomousAgent | cat= | execute=True
+- `autonomous_decision_engine` AutonomousDecisionEngine | cat= | execute=True
+- `autorecovery` RecoveryPlan | Checkpoint | RecoveryTask | cat= | execute=True
+- `autoskills` Skill | SkillExecution | SkillChain | cat= | execute=True
+- `awesome_design_md` DesignDocument | ReviewRequest | DocTemplate | cat= | execute=True
+- `backup_checksum` ChecksumRecord | BackupManifest | DiffResult | cat= | execute=True
+- `backup_engine` _MetricsAdapter | BackupRecord | BackupScheduler | cat= | execute=True
+- `backup_manager` BackupType | BackupStatus | StorageBackend | cat= | execute=True
+- `backup_redis` RedisBackup | RedisConnection | BackupPolicy | cat= | execute=True
+- `backup_scheduler` ScheduleFrequency | BackupType | RetentionPolicy | cat= | execute=True
+- `backup_verify` VerifyStatus | VerifyType | VerifyRule | cat= | execute=True
+- `batch_processor` TaskStatus | BatchStatus | BatchTask | cat= | execute=True
+- `bettafish_forecast` ForecastMethod | AnomalyType | TimeSeriesPoint | cat= | execute=True
+- `big_key_detection` KeyType | RiskLevel | KeyInfo | cat= | execute=True
+- `billion_group_os` EmployeeStatus | PerformanceLevel | Department | cat= | execute=True
+- `biometric_auth` BiometricAuth | cat= | execute=True
+- `bitmap_operations` Bitmap | BitmapOperation | BitmapOperationsManager | cat= | execute=True
+- `block_device` DeviceType | DeviceStatus | IOOpType | cat= | execute=True
+- `blockchain_web3` BlockchainWeb3 | cat= | execute=True
+- `bloom_filter` FilterType | FilterState | FilterConfig | cat= | execute=True
+- `blue_green` EnvColor | DeploymentState | Environment | cat= | execute=True
+- `bot_detection` BehavioralAnalyzer | FingerprintEngine | ChallengeEngine | cat= | execute=True
+- `bot_handler` BotHandler | cat= | execute=True
+- `browser_auto` BrowserType | SessionStatus | BrowserSession | cat= | execute=True
+- `browser_use` TaskStatus | NLAction | AgentStep | cat= | execute=True
+- `bucket_policy` Effect | PolicyViolationType | PolicyStatement | cat= | execute=True
+- `business_analyst` AnalysisType | InsightSeverity | KPIDefinition | cat= | execute=True
+- `bytecodestudio` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `cache_engine` _MetricsAdapter | CacheEntry | LRUCache | cat= | execute=True
+- `cache_manager` EvictionPolicy | CacheEntry | CacheStats | cat= | execute=True
+- `canary_release` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `capacity_planner` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `cdn_invalidate` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `cdn_manager` NodeStatus | CacheTier | OriginType | cat= | execute=True
+- `cerbos_permission` Effect | ConditionOp | Condition | cat= | execute=True
+- `chaos_engine` FaultType | ExperimentStatus | HypothesisStatus | cat= | execute=True
+- `chaos_engineering` FaultType | ExperimentStatus | BlastRadius | cat= | execute=True
+- `chart_engine` DataAggregator | ThemeManager | ChartRenderer | cat= | execute=True
+- `chatwise` MessageRole | ConversationStatus | IntentType | cat= | execute=True
+- `cicd_pipeline` Result | ModuleStatus | StageStatus | cat= | execute=True
+- `circuit_breaker` CircuitState | CircuitConfig | CallRecord | cat= | execute=True
+- `circuit_breaker_pattern` CircuitState | FailureType | RecoveryStrategy | cat= | execute=True
+- `claw_gateway` HttpMethod | AuthType | RouteMatch | cat= | execute=True
+- `cli_interface` CommandPermission | OutputFormat | CommandType | cat= | execute=True
+- `clickhouse_olap` TableEngine | QueryStatus | ColumnDef | cat= | execute=True
+- `client_pool` PoolType | ConnState | ConnConfig | cat= | execute=True
+- `clone_database` CloneStatus | CloneType | DatabaseSource | cat= | execute=True
+- `cloud_connector` CloudProvider | ResourceType | ConnectionState | cat= | execute=True
+- `cloud_sync` CloudSync | cat= | execute=True
+- `cluster_proxy` AuditLogger | LifecycleState | ShutdownPriority | cat= | execute=True
+- `cluster_shard` EnterpriseModule | AuditLogger | CircuitBreakerMixin | cat= | execute=True
+- `code_generator` _MetricsAdapter | Language | CodeQuality | cat= | execute=True
+- `code_quality` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `code_review` _MetricsAdapter | Severity | RuleCategory | cat= | execute=True
+- `code_sandbox` SandboxLanguage | SandboxStatus | SecurityLevel | cat= | execute=True
+- `code_template` TemplateVariable | CodeTemplate | GeneratedProject | cat= | execute=True
+- `code_understand` FunctionInfo | ClassInfo | ImportInfo | cat= | execute=True
+- `command_stats` CommandRecord | CommandStats | CostEstimate | cat= | execute=True
+- `compaction_topic` CompactionStrategy | CompactionState | CompactionTopic | cat= | execute=True
+- `compliance_auditor` _MetricsAdapter | ComplianceStatus | AuditSeverity | cat= | execute=True
+- `component_lib` ComponentLib | cat= | execute=True
+- `composio_tools` AuthType | ToolStatus | WebhookMethod | cat= | execute=True
+- `compress_algorithm` Algorithm | CompressionResult | ArchiveEntry | cat= | execute=True
+- `config_center` ConfigFormat | ConfigVersion | ConfigNamespace | cat= | execute=True
+- `config_manager` ConfigFormat | ConfigSource | ChangeType | cat= | execute=True
+- `config_reloader` ReloadStrategy | ConfigFormat | ConfigSource | cat= | execute=True
+- `config_service` ConfigFormat | ValueType | ChangeType | cat= | execute=True
+- `config_ui` WidgetConfig | UserProfile | ConfigUIManager | cat= | execute=True
+- `connection_draining` Connection | DrainPolicy | DrainSession | cat= | execute=True
+- `connection_pool` PoolUtilizationAnalyzer | ConnState | PooledConn | cat= | execute=True
+- `consumer_group` ConsumerInstance | TopicPartition | ConsumerGroupManager | cat= | execute=True
+- `content_service` ContentStatus | ContentType | ReviewAction | cat= | execute=True
+- `coordination` LockType | DistributedLock | ElectionRecord | cat= | execute=True
+- `copilotkit` AgentRole | CopilotAgent | Conversation | cat= | execute=True
+- `cors_config` CORSRule | PreflightRequest | CORSAuditEntry | cat= | execute=True
+- `cors_manager` MiddlewareAction | ResponseHeaders | RequestLog | cat= | execute=True
+- `cpu_profiler` ProfileSample | HotSpot | ProfileSession | cat= | execute=True
+- `crewai` Crewai | cat= | execute=True
+- `crewai_strategy` _MetricsAdapter | AgentRole | ExecutionMode | cat= | execute=True
+- `cron_engine` CronEngine | cat= | execute=True
+- `cron_scheduler` _MetricsAdapter | CronJob | ExecutionRecord | cat= | execute=True
+- `cross_platform_adapter` CrossPlatformAdapterAnalyzer | OSType | ShellType | cat= | execute=True
+- `cross_region` RegionStatus | ReplicationMode | Region | cat= | execute=True
+- `crypto_api` ModuleStatus | CryptoOpAnalyzer | CryptoApi | cat= | execute=True
+- `cte_query` CTEParser | RecursiveCTEEngine | WindowFunctionEngine | cat= | execute=True
+- `customer_chatbot` CustomerChatbotAnalyzer | IntentType | SessionState | cat= | execute=True
+- `daemon_controller` DaemonController | cat= | execute=True
+- `dashboard` WidgetType | PanelLayout | Widget | cat= | execute=True
+- `data_analysis` DataAnalysis | cat= | execute=True
+- `data_archival` ModuleStatus | EnterpriseModule | CircuitBreakerMixin | cat= | execute=True
+- `data_catalog` DataCatalog | cat= | execute=True
+- `data_encrypt` DataEncrypt | cat= | execute=True
+- `data_lineage` LineageNodeType | LineageChangeType | LineageNode | cat= | execute=True
+- `data_masking` DataMasking | cat= | execute=True
+- `data_pipeline` DataPipelineAnalyzer | DataPipeline | cat= | execute=True
+- `data_quality` DataQuality | cat= | execute=True
+- `data_scraping` _MetricsAdapter | ScrapingFormat | ScrapingStatus | cat= | execute=True
+- `data_sync` _MetricsAdapter | SyncDirection | ConflictStrategy | cat= | execute=True
+- `data_validator` RuleType | Severity | ValidationRule | cat= | execute=True
+- `data_visualizer` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `data_watermark` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `database_client` _MetricsAdapter | DBEngine | IsolationLevel | cat= | execute=True
+- `database_connector` QueryPerformanceAnalyzer | QueryPerfAnalyzer | DBType | cat= | execute=True
+- `database_manager` DatabaseManager | cat= | execute=True
+- `ddos_protection` TrafficAnalyzer | RateLimiter | IPRputationEngine | cat= | execute=True
+- `dead_letter` ModuleStatus | RetryPolicy | DLQAnalyzer | cat= | execute=True
+- `deadlock_detector` WaitGraph | DeadlockResolver | TimeoutManager | cat= | execute=True
+- `debug_panel` StepRecord | DebugPanelAnalyzer | BreakpointManager | cat= | execute=True
+- `decision_engine` RuleEngine | ScoringModel | ABTestEngine | cat= | execute=True
+- `delay_queue` MessagePriority | MessageState | QueueType | cat= | execute=True
+- `dependency_injector` Lifecycle | RegistrationMode | ServiceDescriptor | cat= | execute=True
+- `dependency_manager` _MetricsAdapter | VulnSeverity | DepStatus | cat= | execute=True
+- `dify` AppType | PublishStatus | DifyApp | cat= | execute=True
+- `distributed_counter` ConsistencyAnalyzer | CounterType | CounterValue | cat= | execute=True
+- `distributed_lock` DistributedLock | cat= | execute=True
+- `distributed_tracer` SpanKind | SpanStatus | SamplingStrategy | cat= | execute=True
+- `dns_manager` RecordType | RecordStatus | DNSRecord | cat= | execute=True
+- `dns_resolver` RecordType | DNSServerHealth | DNSRecord | cat= | execute=True
+- `doc_automation` _MetricsAdapter | DocFormat | DocStatus | cat= | execute=True
+- `docker_deploy` ContainerAnalyzer | ContainerStatus | DeployStrategy | cat= | execute=True
+- `docker_manager` ContainerStatus | ImageBuildStatus | RestartPolicy | cat= | execute=True
+- `document_automation` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `document_intelligence` DocumentIntelligence | cat= | execute=True
+- `document_qa` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `ecommerce_agent` EcommerceAgent | cat= | execute=True
+- `edge_agent` EdgeAgentAnalyzer | DeviceStatus | TaskPriority | cat= | execute=True
+- `elasticsearch_search` ElasticsearchSearch | cat= | execute=True
+- `email_automation` _MetricsAdapter | EmailPriority | EmailMessage | cat= | execute=True
+- `email_pro` EmailProAnalyzer | EmailStatus | MailPriority | cat= | execute=True
+- `embedding_huggingface` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `embedding_openai` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `encryption_service` _MetricsAdapter | EncryptionAlgorithm | HashAlgorithm | cat= | execute=True
+- `enterprise_notifier` EnterpriseNotifier | cat= | execute=True
+- `entity_extraction` AccuracyAnalyzer | EntityType | Entity | cat= | execute=True
+- `error_aggregator` ErrorPatternAnalyzer | ErrorSeverity | ErrorStatus | cat= | execute=True
+- `event_bus` EventBusAnalyzer | EventBus | DataFlow | cat= | execute=True
+- `event_bus_blinker` EventBusBlinkerAnalyzer | EventStatus | DeliveryGuarantee | cat= | execute=True
+- `event_bus_pro` EventBusPro | cat= | execute=True
+- `event_trigger` EventFlowAnalyzer | TriggerType | TriggerStatus | cat= | execute=True
+- `evo_adaptive` AdaptationAnalyzer | EvolutionStrategy | SelectionType | cat= | execute=True
+- `evo_backup` BackupMode | BackupStatus | CompressionType | cat= | execute=True
+- `evo_ecology` ModuleEcologyAnalyzer | SpeciesRole | Species | cat= | execute=True
+- `evo_engine_v2` EvoEngineV2 | cat= | execute=True
+- `evo_monitor` EvolutionAnalyzer | MetricType | AlertLevel | cat= | execute=True
+- `evo_nexus_core` EvolutionPhase | ModuleGrade | EvolutionReport | cat= | execute=True
+- `evo_plugin_market` EvoPluginMarket | cat= | execute=True
+- `evo_safety` EvoSafetyAnalyzer | SafetyLevel | SafetyAction | cat= | execute=True
+- `exactly_once` ExactlyOnceAnalyzer | ProcessingStatus | IdempotencyStrategy | cat= | execute=True
+- `excel_engine` ExcelEngine | cat= | execute=True
+- `experience_base` ExperienceBaseAnalyzer | ExperienceType | Experience | cat= | execute=True
+- `experience_bridge` ExperienceBridgeAnalyzer | EventType | MetricType | cat= | execute=True
+- `export_engine` _MetricsAdapter | ExportFormat | StorageBackend | cat= | execute=True
+- `external_executor` ExternalExecutor | cat= | execute=True
+- `fanout_queue` FanoutQueueAnalyzer | DeliveryGuarantee | SubState | cat= | execute=True
+- `fastagency` FastagencyAnalyzer | AgentState | WorkflowType | cat= | execute=True
+- `feature_flag` FeatureFlagAnalyzer | FlagStatus | ServingRuleType | cat= | execute=True
+- `feature_flags` FlagType | FlagStatus | FeatureFlag | cat= | execute=True
+- `feishu_notifier` FeishuNotifier | cat= | execute=True
+- `feishu_notify` FeishuNotifyAnalyzer | MsgType | CardTheme | cat= | execute=True
+- `file_manager` FileType | FileMetadata | FileVersion | cat= | execute=True
+- `file_system` FileSystemAnalyzer | FileType | Permission | cat= | execute=True
+- `file_watcher` FileWatcher | cat= | execute=True
+- `file_watcher_engine` FileWatcherEngine | cat= | execute=True
+- `finance_data` FinanceData | cat= | execute=True
+- `finance_legal_agent` FinanceLegalAgent | cat= | execute=True
+- `fincept_terminal` FinceptTerminal | cat= | execute=True
+- `firewall_rules` FirewallRules | cat= | execute=True
+- `first_run_setup` FirstRunSetup | cat= | execute=True
+- `flow_engine` _MetricsAdapter | NodeType | NodeStatus | cat= | execute=True
+- `flowise` _MetricsAdapter | CanvasMode | ExportFormat | cat= | execute=True
+- `forex_api` ForexApi | cat= | execute=True
+- `form_builder` FormValidationEngine | _NoOpMetrics | _NoOpAuditLogger | cat= | execute=True
+- `form_engine` FormEngine | cat= | execute=True
+- `fts_query` FtsQuery | cat= | execute=True
+- `fund_api` FundApi | cat= | execute=True
+- `futures_api` FuturesApi | cat= | execute=True
+- `game_simulation` GameSimulation | cat= | execute=True
+- `gdpr_compliance` GdprCompliance | cat= | execute=True
+- `geo_index` GeoIndex | cat= | execute=True
+- `geo_replication` GeoReplication | cat= | execute=True
+- `geo_search` GeoPoint | POI | GeoFence | cat= | execute=True
+- `git_ops` SyncStatus | HealthState | OperationPhase | cat= | execute=True
+- `github_scanner` GithubScanner | cat= | execute=True
+- `githubtrending` GithubtrendingAnalyzer | TrendPeriod | RepoCategory | cat= | execute=True
+- `gitlab_repo` GitlabRepoAnalyzer | RepoVisibility | MergeStatus | cat= | execute=True
+- `goal_tracker` GoalTrackerAnalyzer | GoalStatus | GoalPriority | cat= | execute=True
+- `goose_coder` GooseCoderAnalyzer | CodeLanguage | TaskType | cat= | execute=True
+- `grafana_monitor` GrafanaMonitor | cat= | execute=True
+- `graph_engine` GraphNode | GraphEdge | PathResult | cat= | execute=True
+- `graphql_gateway` OperationType | GraphQLErrorCode | GraphQLField | cat= | execute=True
+- `grpc_proxy` GrpcProxy | cat= | execute=True
+- `guide_manager` GuideManager | cat= | execute=True
+- `header_injector` HeaderInjector | cat= | execute=True
+- `health_check` HealthCheck | cat= | execute=True
+- `health_checker` HealthChecker | cat= | execute=True
+- `health_dashboard` HealthDashboard | cat= | execute=True
+- `health_monitor` HealthTrendAnalyzer | CheckStatus | HealthCheck | cat= | execute=True
+- `health_ping` HealthPing | cat= | execute=True
+- `heatmap_generator` HeatmapGenerator | cat= | execute=True
+- `help_docs` HelpDocs | cat= | execute=True
+- `hermes_gateway` HermesGateway | cat= | execute=True
+- `hermes_solo` HermesSolo | cat= | execute=True
+- `hermes_webui` HermesWebui | cat= | execute=True
+- `hot_key_detection` HotKeyDetection | cat= | execute=True
+- `hotkey_events` HotkeyEvents | cat= | execute=True
+- `http_client` HttpClientAnalyzer | HttpMethod | RequestConfig | cat= | execute=True
+- `hyperframes_video` HyperframesVideoAnalyzer | VideoTrack | VideoProject | cat= | execute=True
+- `hyperloglog` HLLPrecision | StorageMode | HLLConfig | cat= | execute=True
+- `i18n_engine` I18nConfig | TranslationKey | I18nStats | cat= | execute=True
+- `i18n_gateway` AcceptLanguage | I18NGatewayAnalyzer | TranslationQuality | cat= | execute=True
+- `icon_manager` IconManager | cat= | execute=True
+- `idempotent` _MetricsAdapter | IdempotentRecord | IdempotencyConflictDetector | cat= | execute=True
+- `idempotent_msg` IdempotentMsgAnalyzer | MsgStatus | RetryPolicy | cat= | execute=True
+- `identity_manager` AuthMethod | IdentityStatus | SessionStatus | cat= | execute=True
+- `image_engine` ImageEngine | cat= | execute=True
+- `image_generation` ImageGeneration | cat= | execute=True
+- `image_understand` ImageUnderstandAnalyzer | ImageFormat | DetectionLevel | cat= | execute=True
+- `incident_manager` IncidentSeverity | IncidentStatus | AlertSource | cat= | execute=True
+- `incident_response` EnterpriseModule | ModuleStatus | Severity | cat= | execute=True
+- `incremental_backup` BackupType | FileChangeType | FileSnapshot | cat= | execute=True
+- `index_advisor` IndexAdvisorAnalyzer | QueryPattern | IndexType | cat= | execute=True
+- `industrial_ops_agent` IndustrialOpsAgentAnalyzer | DeviceStatus | MaintenanceType | cat= | execute=True
+- `infra_as_code` InfraAsCodeAnalyzer | ResourceType | SyncStatus | cat= | execute=True
+- `instant_messaging` InstantMessagingAnalyzer | MessageType | ChatType | cat= | execute=True
+- `io_monitor` IoMonitorAnalyzer | IOType | Severity | cat= | execute=True
+- `iot_edge` IotEdge | cat= | execute=True
+- `ip_access_control` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `ip_whitelist` IpWhitelistAnalyzer | WhitelistStatus | MatchType | cat= | execute=True
+- `jenkins_ci` EnterpriseModule | ModuleStatus | PipelineAnalyzer | cat= | execute=True
+- `job_scheduler` JobStatus | JobType | ScheduledJob | cat= | execute=True
+- `json_store` JsonStore | cat= | execute=True
+- `jwt_token` JwtToken | cat= | execute=True
+- `k8s_orch` K8SOrchAnalyzer | ResourceType | PodPhase | cat= | execute=True
+- `kafka_producer` ThroughputAnalyzer | CompressionType | AckLevel | cat= | execute=True
+- `key_insights` InsightType | SeverityLevel | StatisticalAnalyzer | cat= | execute=True
+- `keyword_extract` KeywordExtractAnalyzer | ExtractAlgorithm | TokenType | cat= | execute=True
+- `knowledge_base` _MetricsAdapter | EntryType | SearchType | cat= | execute=True
+- `knowledge_graph` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `kubernetes_orchestrator` ResourceType | PodPhase | DeploymentStrategy | cat= | execute=True
+- `kv_cache` KvCacheAnalyzer | EvictionPolicy | CompressionType | cat= | execute=True
+- `label_manager` LabelType | ScopeType | Label | cat= | execute=True
+- `langfuse_monitor` ObservationType | LangfuseMonitor | TraceEngine | cat= | execute=True
+- `langgraph_decision` LanggraphDecisionAnalyzer | NodeStatus | EdgeType | cat= | execute=True
+- `lifecycle_policy` LifecycleState | TransitionTrigger | PolicyAction | cat= | execute=True
+- `litellm_gateway` LitellmGatewayAnalyzer | ProviderType | GatewayCircuitState | cat= | execute=True
+- `llamaparse` LlamaparseAnalyzer | ParseFormat | ChunkStrategy | cat= | execute=True
+- `llm_agent_framework` LlmAgentFrameworkAnalyzer | AgentState | ToolType | cat= | execute=True
+- `llm_claude` LlmClaudeAnalyzer | ClaudeModel | ClaudeCircuitState | cat= | execute=True
+- `llm_gemini` LlmGeminiAnalyzer | GeminiModel | GeminiCircuitState | cat= | execute=True
+- `llm_local` LlmLocalAnalyzer | LocalModelType | LocalModelStatus | cat= | execute=True
+- `llm_openai` LlmOpenaiAnalyzer | ModelProvider | TokenUsageType | cat= | execute=True
+- `load_balancer` LoadBalancerAnalyzer | LBAlgorithm | HealthStatus | cat= | execute=True
+- `lobehub_ui` LobehubUi | cat= | execute=True
+- `local_monitor` LocalMonitorAnalyzer | MetricType | AlertSeverity | cat= | execute=True
+- `log_aggregator` LogAggregator | cat= | execute=True
+- `log_analyzer` _MetricsAdapter | LogLevel | LogFormat | cat= | execute=True
+- `log_collector` LogLevel | LogEntry | LogSource | cat= | execute=True
+- `log_manager` LogLevel | SinkType | SearchOperator | cat= | execute=True
+- `longterm_memory` LongtermMemory | cat= | execute=True
+- `loongclaw` LoongclawAnalyzer | PluginState | PluginInfo | cat= | execute=True
+- `lua_script` LuaScriptAnalyzer | SandboxLevel | ScriptStatus | cat= | execute=True
+- `m49_push_notify` M49PushNotify | cat= | execute=True
+- `m50_mobile_gateway` M50MobileGatewayAnalyzer | DevicePlatform | MessageType | cat= | execute=True
+- `m51_web_remote` BrowserType | SelectorType | ProxyType | cat= | execute=True
+- `m52_tunnel_manager` M52TunnelManagerAnalyzer | TunnelType | TunnelStatus | cat= | execute=True
+- `m53_finance_data` CacheEntry | RateLimitBucket | RetryPolicy | cat= | execute=True
+- `m54_browser_auto` M54BrowserAuto | cat= | execute=True
+- `m55_voice_notify` M55VoiceNotifyAnalyzer | VoiceLanguage | VoiceGender | cat= | execute=True
+- `m56_scheduler_pro` M56SchedulerPro | cat= | execute=True
+- `macro_api` MacroApiAnalyzer | DataSource | IndicatorCategory | cat= | execute=True
+- `mano_predictor` ManoPredictorAnalyzer | PredictionMethod | PredictionHorizon | cat= | execute=True
+- `masfactory_orch` MasfactoryOrchAnalyzer | NodeStatus | EdgeType | cat= | execute=True
+- `materialized_view` MaterializedViewAnalyzer | RefreshStrategy | RefreshTrigger | cat= | execute=True
+- `mcp_client` McpClient | cat= | execute=True
+- `mcp_integration` McpIntegrationAnalyzer | TransportType | ServerStatus | cat= | execute=True
+- `mcp_servers` ServerStatus | TransportType | AuthType | cat= | execute=True
+- `media_content_agent` MediaContentAgentAnalyzer | Platform | ContentType | cat= | execute=True
+- `meeting_transcribe` MeetingTranscribe | cat= | execute=True
+- `mem0_memory` Mem0MemoryAnalyzer | MemoryType | MemoryStatus | cat= | execute=True
+- `memgpt` MemgptAnalyzer | MemoryTier | CompressionStrategy | cat= | execute=True
+- `memory_guard` MemoryGuardAnalyzer | AlertLevel | GCStrategy | cat= | execute=True
+- `memory_leak_detect` MemoryLeakDetectAnalyzer | Severity | DetectionMethod | cat= | execute=True
+- `memory_optimize` MemoryOptimizeAnalyzer | OptimizationType | PoolPolicy | cat= | execute=True
+- `memos` MemosAnalyzer | MemoStatus | MemoFormat | cat= | execute=True
+- `mercury_core` MercuryCoreAnalyzer | MessagePriority | MessageState | cat= | execute=True
+- `message_broker` MessageStatus | DeliveryMode | BrokerMessage | cat= | execute=True
+- `message_queue` DeliveryMode | Message | Topic | cat= | execute=True
+- `message_trace` MessageTraceAnalyzer | TraceStatus | RetryPolicy | cat= | execute=True
+- `metric_collector` MetricCollector | cat= | execute=True
+- `microservice_bus` MicroserviceBusAnalyzer | ServiceStatus | MessageType | cat= | execute=True
+- `migration_tool` MigrationToolAnalyzer | MigrationState | MigrationType | cat= | execute=True
+- `milvus_vector` MilvusVectorAnalyzer | IndexType | MetricType | cat= | execute=True
+- `mindmap_generator` MindmapGeneratorAnalyzer | LayoutType | ExportFormat | cat= | execute=True
+- `mindmapgenerator` MindmapgeneratorAnalyzer | NodeShape | ConnectionStyle | cat= | execute=True
+- `mirofish_analysis` MirofishAnalysisAnalyzer | StockStatus | FishingZone | cat= | execute=True
+- `mirror_maker` MirrorMakerAnalyzer | SyncDirection | ConflictStrategy | cat= | execute=True
+- `ml_intern` MlIntern | cat= | execute=True
+- `ml_pipeline` _MetricsAdapter | PipelineStage | ModelStatus | cat= | execute=True
+- `mobile_gateway` MobileGatewayAnalyzer | DevicePlatform | PushProvider | cat= | execute=True
+- `modal_manager` ModalType | ModalSize | TransitionType | cat= | execute=True
+- `model_deployment` ModelDeploymentAnalyzer | DeploymentEnv | DeploymentStrategy | cat= | execute=True
+- `model_evaluation` ModelEvaluationAnalyzer | EvalMetric | EvalStatus | cat= | execute=True
+- `model_registry` ModelRegistryAnalyzer | ModelStatus | ModelFormat | cat= | execute=True
+- `model_router` ModelRouter | cat= | execute=True
+- `model_tuning` ModelTuningAnalyzer | TuningMethod | TuningStatus | cat= | execute=True
+- `module_adapter` ModuleAdapterAnalyzer | StandardResult | ModuleAdapterRegistry | cat= | execute=True
+- `mongodb_nosql` MongodbNosql | cat= | execute=True
+- `monthly_report` MonthlyReportAnalyzer | ReportStatus | ExportFormat | cat= | execute=True
+- `multi_agent_crew` MultiAgentCrew | cat= | execute=True
+- `multica_team` MulticaTeamAnalyzer | AgentRole | AgentStatus | cat= | execute=True
+- `multipart_upload` MultipartUploadAnalyzer | UploadStatus | ChunkStatus | cat= | execute=True
+- `n8n` N8NAnalyzer | NodeStatus | WorkflowStatus | cat= | execute=True
+- `neo4j_graph` Neo4JGraphAnalyzer | ConstraintType | IndexType | cat= | execute=True
+- `network_healer` NetworkHealerAnalyzer | HealthState | FaultType | cat= | execute=True
+- `network_proxy` NetworkProxyAnalyzer | ProxyMode | LBStrategy | cat= | execute=True
+- `nlp_engine` _MetricsAdapter | TextPreprocessing | Entity | cat= | execute=True
+- `notification_center` NotificationCenterAnalyzer | ChannelType | NotificationPriority | cat= | execute=True
+- `notion_sync` NotionSyncAnalyzer | SyncDirection | ConflictStrategy | cat= | execute=True
+- `oauth_provider` OauthProvider | cat= | execute=True
+- `oauth_server` OauthServer | cat= | execute=True
+- `object_storage` ObjectStorage | cat= | execute=True
+- `obsidian_link` ObsidianLinkAnalyzer | NoteType | LinkType | cat= | execute=True
+- `ocr_engine` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `offset_commit` OffsetCommitAnalyzer | CommitStrategy | CommitMode | cat= | execute=True
+- `opa_policy_engine` OpaPolicyEngine | cat= | execute=True
+- `open_chronicle` OpenChronicleAnalyzer | EventCategory | EventSeverity | cat= | execute=True
+- `open_interpreter_bridge` OpenInterpreterBridgeAnalyzer | InterpreterBackend | SkillType | cat= | execute=True
+- `open_lovable` OpenLovable | cat= | execute=True
+- `openclaw_gateway` OpenclawGatewayAnalyzer | AgentStatus | GatewayMode | cat= | execute=True
+- `openhands_agent` OpenhandsAgent | cat= | execute=True
+- `openinterpreter` OpeninterpreterAnalyzer | LanguageType | ExecutionResult | cat= | execute=True
+- `opentelemetry_bridge` SpanKind | SpanStatus | MetricType | cat= | execute=True
+- `orchestrator_core` OrchestratorCore | cat= | execute=True
+- `outbox_pattern` ModuleStatus | OutboxStore | MessagePublisher | cat= | execute=True
+- `output_formatter` OutputFormat | FieldMapping | FormatTemplate | cat= | execute=True
+- `page_cache` PageCache | cat= | execute=True
+- `parallel_executor` ExecutorType | TaskSpec | TaskResult | cat= | execute=True
+- `payment_center` PaymentGateway | OrderManager | ReconciliationEngine | cat= | execute=True
+- `pdf_report` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `perf_monitor` SystemMetricsCollector | SLACalculator | BottleneckDetector | cat= | execute=True
+- `perf_profiler` ModuleStatus | FunctionProfiler | CallChainTracker | cat= | execute=True
+- `performance_optimizer` MetricType | SeverityLevel | PerformanceMetric | cat= | execute=True
+- `permission_guard` PermissionGuardAnalyzer | PermissionMode | ActionType | cat= | execute=True
+- `permission_rbac` PermissionRbac | cat= | execute=True
+- `pgvector` VectorIndex | CollectionManager | BulkOperations | cat= | execute=True
+- `pii_detection` PIIPatternLibrary | PIIDetector | DataMasker | cat= | execute=True
+- `pinecone_managed` IndexManager | VectorStore | PineconeManaged | cat= | execute=True
+- `pipeline_batch` PipelineBatchAnalyzer | PipelineStatus | TaskNode | cat= | execute=True
+- `pitr_postgres` WALArchive | BackupManager | RecoveryEngine | cat= | execute=True
+- `pixelle_video` PixelleVideoAnalyzer | VideoScene | PixelleVideo | cat= | execute=True
+- `plugin_loader` PluginDependencyResolver | PluginSandbox | PluginLifecycleManager | cat= | execute=True
+- `plugin_market` PluginRegistry | InstallManager | PluginMarket | cat= | execute=True
+- `point_time_recover` SnapshotManager | DataDiffer | RecoveryValidator | cat= | execute=True
+- `postgres_db` PostgresDb | cat= | execute=True
+- `pr_manager` PrManager | cat= | execute=True
+- `praisonai_agent` PraisonaiAgent | cat= | execute=True
+- `priority_queue` PriorityQueue | cat= | execute=True
+- `process_watchdog` ProcessWatchdog | cat= | execute=True
+- `project_manager` ProjectManager | cat= | execute=True
+- `project_mgmt` ProjectStatus | TaskPriority | RiskLevel | cat= | execute=True
+- `prometheus_metrics` PrometheusMetrics | cat= | execute=True
+- `pub_sub` PubSub | cat= | execute=True
+- `push_notify` PushNotifyAnalyzer | PushChannel | PushStatus | cat= | execute=True
+- `pushnotify` PushnotifyAnalyzer | ChannelType | NotifyStatus | cat= | execute=True
+- `qdrant_vector` DistanceMetric | IndexType | VectorPayload | cat= | execute=True
+- `query_cache` EnterpriseModule | ModuleStatus | CachedQuery | cat= | execute=True
+- `query_cache_layer` QueryCacheLayer | cat= | execute=True
+- `quota_manager` QuotaDimension | QuotaAction | TierLevel | cat= | execute=True
+- `rag_knowledge_engine` RagKnowledgeEngine | cat= | execute=True
+- `rag_pipeline` EnterpriseModule | ModuleStatus | Document | cat= | execute=True
+- `ragflow` DocumentFormat | ChunkingStrategy | RetrieverType | cat= | execute=True
+- `rate_limit_redis` RateLimitRedis | cat= | execute=True
+- `rate_limiter` RateLimiter | cat= | execute=True
+- `read_write_split` ReadWriteSplit | cat= | execute=True
+- `realtime_collaboration` RealtimeCollaboration | cat= | execute=True
+- `rebalance_protocol` RebalanceProtocol | cat= | execute=True
+- `recommendation_system` RecommendationSystem | cat= | execute=True
+- `redis_cache` EnterpriseModule | CircuitBreakerMixin | RateLimiterMixin | cat= | execute=True
+- `registry_center` ServiceInstance | HealthChecker | ServiceRegistry | cat= | execute=True
+- `release_manager` ReleasePhase | DeployStrategy | VersionBump | cat= | execute=True
+- `replication_cross` ModuleStatus | CrossDCAnalyzer | ReplicationCrossAnalyzer | cat= | execute=True
+- `replication_monitor` ReplicationMonitor | cat= | execute=True
+- `report_generator` ReportGenerator | cat= | execute=True
+- `reportgenerator` ModuleStatus | ReportAnalyzer | ReportgeneratorAnalyzer | cat= | execute=True
+- `request_id` ModuleStatus | TraceAnalyzer | RequestIdAnalyzer | cat= | execute=True
+- `request_tracing` ModuleStatus | LatencyAnalyzer | RequestTracingAnalyzer | cat= | execute=True
+- `rerank_cohere` RerankCohereAnalyzer | RerankModel | RerankCircuitState | cat= | execute=True
+- `resource_scheduler` ResourceSchedulerAnalyzer | TaskState | ResourceType | cat= | execute=True
+- `resource_server` AuthScheme | Permission | ApiResource | cat= | execute=True
+- `rest_proxy` ModuleStatus | ProxyAnalyzer | RestProxyAnalyzer | cat= | execute=True
+- `retention_policy` ModuleStatus | RetentionAnalyzer | RetentionPolicyAnalyzer | cat= | execute=True
+- `reverse_proxy` ModuleStatus | ProxyAnalyzer | ReverseProxyAnalyzer | cat= | execute=True
+- `risk_control` RiskControl | cat= | execute=True
+- `rollback_manager` RollbackStatus | RollbackPlanner | RollbackManager | cat= | execute=True
+- `rpa_control` ModuleStatus | RPATaskAnalyzer | RpaControlAnalyzer | cat= | execute=True
+- `rpa_controller` ScriptExecutionEngine | BrowserAutomator | DesktopAutomator | cat= | execute=True
+- `rpa_fault_tolerance` RpaFaultTolerance | cat= | execute=True
+- `rule_engine` ConflictStrategy | RuleStatus | Operator | cat= | execute=True
+- `ruoyi_ai` RuoyiAi | cat= | execute=True
+- `saga_pattern` ModuleStatus | SagaAnalyzer | SagaPatternAnalyzer | cat= | execute=True
+- `scan_iterator` ScanIterator | cat= | execute=True
+- `scheduler_pro` SchedulerPro | cat= | execute=True
+- `schema_evolution` SchemaEvolution | cat= | execute=True
+- `schema_registry` CompatibilityAnalyzer | CompatAnalyzer | SchemaRegistryAnalyzer | cat= | execute=True
+- `search_engine` SearchEngine | cat= | execute=True
+- `second_brain` SecondBrainAnalyzer | MemoryType | SecondBrainError | cat= | execute=True
+- `secret_manager` SecretType | SecretValidator | SecretManager | cat= | execute=True
+- `secret_vault` _MetricsAdapter | SecretType | AccessLevel | cat= | execute=True
+- `security_scanner` _MetricsAdapter | VulnLevel | ScanType | cat= | execute=True
+- `self_evolving_engine` SelfEvolvingEngine | cat= | execute=True
+- `self_healing` SelfHealingAnalyzer | ErrorSeverity | ErrorRecord | cat= | execute=True
+- `self_healing_v31` SelfHealingV31Analyzer | V31HealthState | V31RepairStrategy | cat= | execute=True
+- `sentiment_analysis` _MetricsAdapter | SentimentType | EmotionType | cat= | execute=True
+- `sentinel_mode` ModuleStatus | SentinelAnalyzer | SentinelModeAnalyzer | cat= | execute=True
+- `service_discovery` ModuleStatus | DiscoveryAnalyzer | ServiceDiscoveryAnalyzer | cat= | execute=True
+- `service_mesh` ModuleStatus | MeshAnalyzer | ServiceMeshAnalyzer | cat= | execute=True
+- `session_manager` SessionStoreManager | SessionManager | cat= | execute=True
+- `session_store` SessionStore | cat= | execute=True
+- `sharding_proxy` ModuleStatus | ShardAnalyzer | ShardingProxyAnalyzer | cat= | execute=True
+- `signed_url` ModuleStatus | URLAnalyzer | SignedUrlAnalyzer | cat= | execute=True
+- `skill_marketplace` SkillMarketplaceAnalyzer | ReviewStatus | SkillCategory | cat= | execute=True
+- `sla_monitor` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `slow_log` ModuleStatus | SlowQueryAnalyzer | SlowLogAnalyzer | cat= | execute=True
+- `slow_query` SlowQuery | cat= | execute=True
+- `smart_scheduler` TaskStatus | RetryStrategy | TaskDefinition | cat= | execute=True
+- `snapshot_volume` ModuleStatus | SnapshotAnalyzer | SnapshotVolumeAnalyzer | cat= | execute=True
+- `sort_set` ModuleStatus | RankingAnalyzer | SortSetAnalyzer | cat= | execute=True
+- `soul_identity` SoulIdentityError | SoulNotFoundError | InvalidSoulError | cat= | execute=True
+- `speech_to_text` SpeechToText | cat= | execute=True
+- `sql_generator` SqlGenerator | cat= | execute=True
+- `sse_stream` ModuleStatus | StreamAnalyzer | SseStreamAnalyzer | cat= | execute=True
+- `ssl_cert_manager` CertificateRecord | CertificateAnalyzer | SslCertManager | cat= | execute=True
+- `sso_auth` SsoAuth | cat= | execute=True
+- `stable_diffusion` StableDiffusionAnalyzer | SDModel | TaskStatus | cat= | execute=True
+- `state_machine` ModuleStatus | StateAnalyzer | StateMachineAnalyzer | cat= | execute=True
+- `static_cache` StaticCache | cat= | execute=True
+- `static_website` ModuleStatus | CDNAnalyzer | StaticWebsiteAnalyzer | cat= | execute=True
+- `stock_api` StockApiAnalyzer | StockAPI | cat= | execute=True
+- `storage_encryption` StorageEncryption | cat= | execute=True
+- `storage_tiering` StorageTiering | cat= | execute=True
+- `stream_process` ModuleStatus | StreamAnalyzer | StreamProcessAnalyzer | cat= | execute=True
+- `stream_replay` ModuleStatus | ReplayAnalyzer | StreamReplayAnalyzer | cat= | execute=True
+- `summarization_engine` _MetricsAdapter | SummaryType | SummaryLength | cat= | execute=True
+- `superagent` SuperagentAnalyzer | AgentCapability | ExecutionMode | cat= | execute=True
+- `supermemory` MemoryRetrievalEngine | MemoryVector | MemoryStore | cat= | execute=True
+- `system_command` _MetricsAdapter | CommandStatus | RiskLevel | cat= | execute=True
+- `system_coordinator` _MetricsAdapter | TaskType | SmartRouter | cat= | execute=True
+- `system_coordinator_v3` SystemCoordinatorV3Analyzer | ModuleCapabilityGraph | AutonomousLoop | cat= | execute=True
+- `system_monitor` MetricPoint | AlertRule | Alert | cat= | execute=True
+- `systemmonitor` EnterpriseModule | ModuleStatus | ServiceStatus | cat= | execute=True
+- `table_engine` SortDirection | SelectionMode | AlignType | cat= | execute=True
+- `table_partition` ModuleStatus | PartitionAnalyzer | TablePartitionAnalyzer | cat= | execute=True
+- `table_understand` ModuleStatus | TableAnalyzer | TableUnderstandAnalyzer | cat= | execute=True
+- `task_heatmap` ModuleStatus | TaskHeatmapAnalyzer | TaskRecord | cat= | execute=True
+- `task_queue` TaskPriority | TaskState | TaskItem | cat= | execute=True
+- `telegram_bridge` TelegramBridge | cat= | execute=True
+- `template_market` TemplateMarket | cat= | execute=True
+- `template_registry` TemplateRegistryAnalyzer | TemplateType | TemplateStatus | cat= | execute=True
+- `temporal_approval` TemporalApprovalAnalyzer | WorkflowStatus | Priority | cat= | execute=True
+- `tenant_isolation` TenantIsolation | cat= | execute=True
+- `terraform_iac` ModuleStatus | IaCDriftAnalyzer | TerraformIacAnalyzer | cat= | execute=True
+- `text_summarize` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `threat_detector` _MetricsAdapter | ThreatLevel | ThreatCategory | cat= | execute=True
+- `three_d_ar` ThreeDAr | cat= | execute=True
+- `time_series` ModuleStatus | TSAnalyzer | TimeSeriesAnalyzer | cat= | execute=True
+- `token_budget` BudgetMode | BudgetStatus | UsageRecord | cat= | execute=True
+- `transaction_warp` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `transfer_acceleration` ModuleStatus | TransferAnalyzer | TransferAccelerationAnalyzer | cat= | execute=True
+- `translation_service` _MetricsAdapter | Language | TranslationMemory | cat= | execute=True
+- `trendaradar_trend` ModuleStatus | TrendAnalyzer | TrendaradarTrendAnalyzer | cat= | execute=True
+- `trending_pipeline` TrendingReport | TrendingPipeline | cat= | execute=True
+- `trigger_engine` TriggerType | TriggerState | FireResult | cat= | execute=True
+- `ttl_manager` TtlPolicy | ExpirationScheduler | TtlManager | cat= | execute=True
+- `tts_elevenlabs` TtsElevenlabsAnalyzer | TTSModel | TaskStatus | cat= | execute=True
+- `tunnel_manager` TunnelProtocol | TunnelStatus | TunnelEndpoint | cat= | execute=True
+- `turix_cua_bridge` TurixCuaBridge | cat= | execute=True
+- `u_001` ModuleStatus | U001Analyzer | U001Analyzer | cat= | execute=True
+- `ui_renderer` _NoOpMetrics | _NoOpAuditLogger | RenderMode | cat= | execute=True
+- `ui_tars_bridge` UiTarsBridgeAnalyzer | ElementType | InteractionType | cat= | execute=True
+- `uni_comm_gateway` UniCommGateway | cat= | execute=True
+- `unified_api_adapter` UnifiedApiAdapter | cat= | execute=True
+- `unstructured` ModuleStatus | ParseAnalyzer | UnstructuredAnalyzer | cat= | execute=True
+- `usage_stats` ModuleStatus | UsageAnalyzer | UsageStatsAnalyzer | cat= | execute=True
+- `user_profile` UserProfileAnalyzer | TagSource | BehaviorType | cat= | execute=True
+- `verl` ModuleStatus | TrainingAnalyzer | VerlAnalyzer | cat= | execute=True
+- `versioning_object` ModuleStatus | VersionAnalyzer | VersioningObjectAnalyzer | cat= | execute=True
+- `video_engine` VideoEngineAnalyzer | VideoCodec | AudioCodec | cat= | execute=True
+- `vision_rpa` ModuleStatus | VisionAnalyzer | VisionRpaAnalyzer | cat= | execute=True
+- `visual_rpa_core` VisualRpaCore | cat= | execute=True
+- `voice_command` VoiceCommandAnalyzer | CommandCategory | CommandStatus | cat= | execute=True
+- `voice_interaction` VoiceInteraction | cat= | execute=True
+- `voice_notify` VoiceNotifyAnalyzer | VoiceEngine | AudioFormat | cat= | execute=True
+- `voice_recorder` VoiceRecorderAnalyzer | AudioFormat | SampleRate | cat= | execute=True
+- `voicerecorder` VoicerecorderAnalyzer | RecordState | RecordQuality | cat= | execute=True
+- `vpn_gateway` ModuleStatus | VPNAnalyzer | VpnGatewayAnalyzer | cat= | execute=True
+- `waf_web防火墙` ModuleStatus | WAFAnalyzer | WafWeb防火墙Analyzer | cat= | execute=True
+- `weaviate_new` ModuleStatus | VectorAnalyzer | WeaviateNewAnalyzer | cat= | execute=True
+- `weaviate_semantic` ModuleStatus | SemanticAnalyzer | WeaviateSemanticAnalyzer | cat= | execute=True
+- `web_remote` WebRemote | cat= | execute=True
+- `web_scraper` _MetricsAdapter | ScrapeMode | ContentType | cat= | execute=True
+- `webhook_dispatcher` WebhookDispatcher | cat= | execute=True
+- `webhook_handler` WebhookProtocol | SignatureAlgorithm | DeliveryState | cat= | execute=True
+- `webtoapp` Webtoapp | cat= | execute=True
+- `weekly_report` ModuleStatus | ReportAnalyzer | WeeklyReportAnalyzer | cat= | execute=True
+- `whisper_asr` WhisperAsr | cat= | execute=True
+- `win_control` ModuleStatus | WindowsAnalyzer | WinControlAnalyzer | cat= | execute=True
+- `window_function` ModuleStatus | WindowAnalyzer | WindowFunctionAnalyzer | cat= | execute=True
+- `window_manager` WindowState | WindowInfo | LayoutProfile | cat= | execute=True
+- `windows_control` WindowsControlAnalyzer | BackendMode | WindowInfo | cat= | execute=True
+- `workflow_bpmn` ModuleStatus | WorkflowBpmnAnalyzer | NodeType | cat= | execute=True
+- `workflow_engine` NodeType | NodeStatus | WorkflowStatus | cat= | execute=True
+- `workflow_manager` NodeState | WorkflowState | RetryPolicy | cat= | execute=True
+- `workflow_orchestrator` WorkflowOrchestrator | cat= | execute=True
+- `workflowmanager` LifecycleState | ShutdownPriority | ManagedComponent | cat= | execute=True
+- `ws_manager` ConnectionState | MessageType | WSConnection | cat= | execute=True
