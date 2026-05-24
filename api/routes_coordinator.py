@@ -285,13 +285,34 @@ async def coordinator_execute(body: dict = None):
         gw = AIGateway()
         gw.initialize()
         sys_prompt = """你是一个AI编排助手。根据用户的请求，选择最合适的模块组合，返回JSON数组。
-可用模块:
-- github_scanner: scan_trending(搜索语言), search(关键字)
-- report_generator: generate(生成报告,format=markdown)
+可用模块(共27个):
+- github_scanner: scan_trending(编程语言), search(关键词)
+- report_generator: generate(format=markdown/html)
 - permission_rbac: create_role, assign_role, check(权限校验)
-- data_masking: mask(脱敏,type=phone/email/idcard)
-- static_cache: set, get, delete
-- recommendation_system: recommend(推荐)
+- data_masking: mask(type=phone/email/idcard)
+- static_cache: set(key,value), get(key), delete(key)
+- recommendation_system: recommend(场景)
+- jwt_token: create(claims), verify(token), refresh(refresh_token), revoke(token_id)
+- audit_trail: query(type=security/operation), log(action,detail)
+- data_encrypt: encrypt(plaintext), decrypt(ciphertext), hash(data)
+- web_remote: exec(cmd), history, status
+- key_insights: describe(data), correlation(series_a,series_b), anomaly_detect(time_series)
+- oauth_provider: authorize(client_id,scope), token(code)
+- sso_auth: login(username,password), validate(session_id), logout(session_id)
+- scheduler_pro: create(name,cron,target), list, pause(task_id), resume(task_id)
+- file_watcher: watch(path), unwatch(path), status
+- postgres_db: query(sql), execute(sql), tables
+- forex_api: rate(from_currency,to_currency), rates(base=USD)
+- firewall_rules: list, add(rule), remove(rule_id), check(ip,port)
+- biometric_auth: enroll(user_id,data), verify(user_id,data), identify(data)
+- database_manager: backup, restore(path), optimize
+- auto_update: check, apply(version), rollback
+- cloud_sync: push(local_path,remote_path), pull(remote_path,local_path), status
+- oauth_server: register(client_name,redirect_uri), issue(client_id,user_id)
+- evo_plugin_market: search(keyword), install(plugin_id), uninstall(plugin_id), list
+- heatmap_generator: generate(data,width,height), stats
+- query_cache_layer: get(key), set(key,value,ttl), invalidate(pattern), stats
+- openinterpreter: run(code), install(package), analyze(file_path)
 
 返回格式(只返回JSON数组,不要其他文字):
 [{"module":"模块名","action":"action名","params":{}}]"""
@@ -306,35 +327,25 @@ async def coordinator_execute(body: dict = None):
     # ── 2. 执行计划 ──
     async def _exec_module(mod_name: str, params: dict) -> dict:
         try:
-            if mod_name == "github_scanner":
-                from modules.github_scanner import GithubScanner as _C
-            elif mod_name == "report_generator":
-                from modules.report_generator import ReportGenerator as _C
-            elif mod_name == "data_masking":
-                from modules.data_masking import DataMasking as _C
-            elif mod_name == "permission_rbac":
-                from modules.permission_rbac import PermissionRbac as _C
-            elif mod_name == "static_cache":
-                from modules.static_cache import StaticCache as _C
-            elif mod_name == "recommendation_system":
-                from modules.recommendation_system import RecommendationSystem as _C
-            else:
-                return {"module": mod_name, "error": f"unsupported module: {mod_name}"}
-
-            from modules._base.enterprise_module import Result as _R
+            import importlib as _il
+            _mod = _il.import_module(f'modules.{mod_name}')
+            if not hasattr(_mod, 'module_class'):
+                return {"module": mod_name, "error": f"module_class not found"}
+            _C = _mod.module_class
             _inst = _C()
             if hasattr(_inst, 'initialize'): _inst.initialize()
             _a = params.get("action", "")
             _inner = {k: v for k, v in params.items() if k != "action"}
+
             import sys as _sy, subprocess as _sp, json as _js
             _code = (
-                f"import asyncio;"
-                f"import sys;sys.path.insert(0,__import__('os').path.dirname(sys.modules['api.routes_coordinator'].__spec__.origin));"
+                "import asyncio;"
+                "import sys;sys.path.insert(0,__import__('os').path.dirname(sys.modules['api.routes_coordinator'].__spec__.origin));"
                 f"from modules.{mod_name} import module_class as _C;"
-                f"_i=_C();_i.initialize();"
+                "_i=_C();_i.initialize();"
                 f"_r=asyncio.run(_i.execute(action='{_a}',params={_inner}));"
-                f"d=_r.data if hasattr(_r,'data') else vars(_r).get('data',_r);"
-                f"print('RESULT:'+__import__('json').dumps({{'s':True,'d':str(d)[:300]}}))"
+                "d=_r.data if hasattr(_r,'data') else vars(_r).get('data',_r);"
+                "print('RESULT:'+__import__('json').dumps({'s':True,'d':str(d)[:300]}))"
             )
             _proc = await asyncio.create_subprocess_exec(
                 _sy.executable, "-c", _code,
@@ -362,8 +373,25 @@ async def coordinator_execute(body: dict = None):
     task_lower = task.lower()
     TASK_MAP = [
         ({"scan","github","trending"},"github_scanner",{"action":"scan_trending","language":"python"},"扫描 GitHub Trending"),
-        ({"data","analysis","analyze","分析"},"data_analysis",{"action":"describe"},"数据分析"),
-        ({"health","system","status","健康"},"health_check",{"action":"status"},"系统健康检查"),
+        ({"jwt","token","认证"},"jwt_token",{"action":"create","claims":{"sub":"user"}},"JWT令牌管理"),
+        ({"audit","security","审计","安全"},"audit_trail",{"action":"query","type":"security"},"安全审计"),
+        ({"encrypt","加密","解密","hash"},"data_encrypt",{"action":"encrypt"},"数据加密"),
+        ({"shell","cmd","命令","执行"},"web_remote",{"action":"exec","cmd":"echo ok"},"远程命令执行"),
+        ({"key","insight","分析"},"key_insights",{"action":"describe"},"关键洞察分析"),
+        ({"oauth","授权"},"oauth_provider",{"action":"authorize"},"OAuth授权"),
+        ({"sso","login","登录","认证"},"sso_auth",{"action":"validate"},"SSO单点登录"),
+        ({"scheduler","调度","定时"},"scheduler_pro",{"action":"list"},"调度管理"),
+        ({"file","watch","监听"},"file_watcher",{"action":"status"},"文件监听"),
+        ({"postgres","sql","数据库"},"postgres_db",{"action":"tables"},"PostgreSQL查询"),
+        ({"forex","汇率","外汇"},"forex_api",{"action":"rate","from_currency":"USD","to_currency":"CNY"},"外汇汇率"),
+        ({"firewall","防火墙"},"firewall_rules",{"action":"list"},"防火墙规则"),
+        ({"biometric","生物","指纹"},"biometric_auth",{"action":"status"},"生物认证"),
+        ({"backup","备份"},"database_manager",{"action":"backup"},"数据库备份"),
+        ({"update","upgrade","升级"},"auto_update",{"action":"status"},"自动更新"),
+        ({"sync","同步","cloud"},"cloud_sync",{"action":"status"},"云同步"),
+        ({"plugin","market","市场"},"evo_plugin_market",{"action":"list"},"插件市场"),
+        ({"heatmap","热力图"},"heatmap_generator",{"action":"stats"},"热力图生成"),
+        ({"cache","缓存"},"query_cache_layer",{"action":"stats"},"缓存管理"),
         ({"report","generate","报告"},"report_generator",{"action":"generate","format":"markdown"},"生成报告"),
         ({"notify","alert","通知","推送","消息"},"feishu_notifier",{"action":"send_text","text":task},"发送通知"),
     ]
