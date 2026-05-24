@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 上市公司级 AI Agent 自动化平台 — 535模块 · 151+ API · 16核心引擎 · 零配置启动
+> 上市公司级 AI Agent 自动化平台 — 535模块 · 154 API · 4核心引擎 · 15调度任务 · 零配置启动
 
 ## 快速开始
 
@@ -92,11 +92,11 @@ AUTO-EVO-AI V0.1/
 |------|------|
 | **Python 代码** | 722 文件 / 13.9 MB |
 | **功能模块** | 535 个（0 空壳，全部有真实 dispatch 逻辑） |
-| **API 端点** | 151+ 路由 |
-| **测试覆盖** | 3186 个测试，全部通过 |
-| **Git 提交** | 21 commits |
-| **CI 管道** | GitHub Actions（推代码自动跑 3186 测试） |
-| **模块平均 actions** | 8-10 个（58 个核心模块深度提升） |
+| **API 端点** | 154 路由 |
+| **测试覆盖** | 3208 个测试，全部通过，0 告警 |
+| **Git 提交** | 28 commits |
+| **CI 管道** | GitHub Actions（推代码自动跑 3208 测试） |
+| **模块平均 actions** | 8-10 个 |
 | **基础设施** | SQLite 数据层 / JWT 认证 / 消息总线 / JSON 日志 |
 
 ## 技术栈
@@ -104,7 +104,7 @@ AUTO-EVO-AI V0.1/
 - **后端**: Python 3.14 / FastAPI / Uvicorn / SQLite WAL / asyncio
 - **前端**: 原生 HTML/CSS/JS (零框架依赖, 57KB) / 响应式设计 / PWA
 - **AI**: 智谱 GLM-4-Flash (默认) / DeepSeek / OpenAI / Anthropic / Ollama
-- **测试**: pytest 9.x / 3186 测试 / GitHub Actions CI
+- **测试**: pytest 9.x / 3208 测试 / 0 告警 / GitHub Actions CI
 - **安全**: JWT / RBAC / 限流 / 熔断 / 链路追踪 / 审计
 
 ## 配置向导
