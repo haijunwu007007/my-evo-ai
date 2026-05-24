@@ -129,45 +129,7 @@
     }
     function wizardSave() { closeWizard(); }
 
-    /* ═══════════ i18n Language Switch ═══════════ */
-    var TRANSLATIONS = {
-        'Dashboard':'Dashboard','Modules':'Modules','Coordinator':'Coordinator','Settings':'Settings',
-        'Health Check':'Health Check','Execute':'Execute','View Code':'View Code','Actions':'Actions',
-        'Search modules...':'Search modules...','All Modules':'All Modules','Execute Module':'Execute Module',
-        'System Status':'System Status','Running':'Running','Active':'Active','Healthy':'Healthy',
-        'No results':'No results','Loading...':'Loading...','Error':'Error','Success':'Success',
-        'Close':'Close','Save':'Save','Cancel':'Cancel','Delete':'Delete','Edit':'Edit',
-        'Configuration':'Configuration','Monitoring':'Monitoring','Security':'Security',
-        'Backup':'Backup','Restore':'Restore','Plugins':'Plugins','Database':'Database',
-        'GitHub Scanner':'GitHub Scanner','WebSocket':'WebSocket','Scheduler':'Scheduler',
-        'Pipelines':'Pipelines','Events':'Events','Queue':'Queue','Logs':'Logs',
-        'Authentication':'Authentication','Users':'Users','API Keys':'API Keys',
-        'Language':'Language','English':'English','Chinese':'Chinese',
-        'Notifications':'Notifications','Real-time':'Real-time','Connected':'Connected',
-        'Disconnected':'Disconnected','Reconnecting':'Reconnecting',
-    };
-    var _currentLang = localStorage.getItem('evo_lang') || 'zh';
-    function switchLang() {
-        _currentLang = _currentLang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('evo_lang', _currentLang);
-        _applyI18n();
-        var btn = document.getElementById('lang-switch-btn');
-        if (btn) btn.textContent = _currentLang === 'zh' ? 'EN' : '中';
-    }
-    function _applyI18n() {
-        if (_currentLang === 'zh') return;
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            var key = el.getAttribute('data-i18n');
-            if (TRANSLATIONS[key]) el.textContent = TRANSLATIONS[key];
-        });
-        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-        var textNodes = [];
-        while (walker.nextNode()) textNodes.push(walker.currentNode);
-        textNodes.forEach(node => {
-            var t = node.textContent.trim();
-            if (t && TRANSLATIONS[t]) node.textContent = TRANSLATIONS[t];
-        });
-    }
+
 
     /* ═══════════ GitHub Scanner ═══════════ */
     function openGitHubScanner() {

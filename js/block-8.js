@@ -1,108 +1,5 @@
 
-// ═══════════════════════════════════════════════════════
-// i18n 国际化系统
-// ═══════════════════════════════════════════════════════
-var I18N = {
-    current: localStorage.getItem('evo-locale') || 'zh',
-    translations: {
-        zh: {
-            // 侧边栏
-            'nav.dashboard': '监控面板', 'nav.agents': 'Agent管理', 'nav.workflows': '工作流编排',
-            'nav.tasks': '任务中心', 'nav.memory': '记忆管理', 'nav.evolution': '进化中心',
-            'nav.routines': 'Routines', 'nav.tools': '工具集成', 'nav.config': '配置中心',
-            'nav.security': '安全治理', 'nav.perf': '性能监控', 'nav.alerts': '告警中心',
-            'nav.logs': '日志中心', 'nav.backup': '容灾备份', 'nav.audit': '安全审计',
-            'nav.users': '用户管理', 'nav.api': 'API管理', 'nav.settings': '系统设置',
-            'nav.github': 'GitHub扫描', 'nav.scheduler': '调度配置', 'nav.reports': '报告中心',
-            'nav.feedback': '用户反馈', 'nav.about': '关于系统',
-            // 状态
-            'status.online': '在线', 'status.offline': '离线', 'status.running': '运行中',
-            'status.idle': '空闲', 'status.error': '异常',
-            // 操作
-            'btn.execute': '执行', 'btn.stop': '停止', 'btn.restart': '重启',
-            'btn.configure': '配置', 'btn.delete': '删除', 'btn.save': '保存',
-            'btn.cancel': '取消', 'btn.refresh': '刷新', 'btn.export': '导出',
-            'btn.import': '导入', 'btn.search': '搜索',
-            // 通用
-            'common.modules': '模块', 'common.engines': '引擎', 'common.tasks': '任务',
-            'common.events': '事件', 'common.pipelines': '管线', 'common.schedules': '调度',
-            'common.total': '总计', 'common.active': '活跃', 'common.inactive': '未激活',
-            'common.loading': '加载中...', 'common.noData': '暂无数据',
-            'common.success': '操作成功', 'common.failed': '操作失败',
-            'common.confirm': '确认', 'common.warning': '警告',
-            // 实时推送
-            'ws.connected': '实时连接已建立', 'ws.disconnected': '实时连接断开',
-            'ws.reconnecting': '正在重新连接...', 'ws.moduleExecuted': '模块执行完成',
-            'ws.taskCompleted': '任务完成', 'ws.alertTriggered': '告警触发',
-            'ws.newEvent': '新事件',
-        },
-        en: {
-            'nav.dashboard': 'Dashboard', 'nav.agents': 'Agents', 'nav.workflows': 'Workflows',
-            'nav.tasks': 'Tasks', 'nav.memory': 'Memory', 'nav.evolution': 'Evolution',
-            'nav.routines': 'Routines', 'nav.tools': 'Tools', 'nav.config': 'Config Center',
-            'nav.security': 'Security', 'nav.perf': 'Performance', 'nav.alerts': 'Alerts',
-            'nav.logs': 'Logs', 'nav.backup': 'Backup', 'nav.audit': 'Audit',
-            'nav.users': 'Users', 'nav.api': 'API', 'nav.settings': 'Settings',
-            'nav.github': 'GitHub Scan', 'nav.scheduler': 'Scheduler', 'nav.reports': 'Reports',
-            'nav.feedback': 'Feedback', 'nav.about': 'About',
-            'status.online': 'Online', 'status.offline': 'Offline', 'status.running': 'Running',
-            'status.idle': 'Idle', 'status.error': 'Error',
-            'btn.execute': 'Execute', 'btn.stop': 'Stop', 'btn.restart': 'Restart',
-            'btn.configure': 'Configure', 'btn.delete': 'Delete', 'btn.save': 'Save',
-            'btn.cancel': 'Cancel', 'btn.refresh': 'Refresh', 'btn.export': 'Export',
-            'btn.import': 'Import', 'btn.search': 'Search',
-            'common.modules': 'Modules', 'common.engines': 'Engines', 'common.tasks': 'Tasks',
-            'common.events': 'Events', 'common.pipelines': 'Pipelines', 'common.schedules': 'Schedules',
-            'common.total': 'Total', 'common.active': 'Active', 'common.inactive': 'Inactive',
-            'common.loading': 'Loading...', 'common.noData': 'No Data',
-            'common.success': 'Success', 'common.failed': 'Failed',
-            'common.confirm': 'Confirm', 'common.warning': 'Warning',
-            'ws.connected': 'Realtime Connected', 'ws.disconnected': 'Realtime Disconnected',
-            'ws.reconnecting': 'Reconnecting...', 'ws.moduleExecuted': 'Module Executed',
-            'ws.taskCompleted': 'Task Completed', 'ws.alertTriggered': 'Alert Triggered',
-            'ws.newEvent': 'New Event',
-        }
-    },
-    t(key) {
-        return this.translations[this.current]?.[key] || this.translations['zh']?.[key] || key;
-    },
-    setLocale(lang) {
-        this.current = lang;
-        localStorage.setItem('evo-locale', lang);
-        this.applyTranslations();
-    },
-    applyTranslations() {
-        // 翻译所有带data-i18n属性的元素
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            var key = el.getAttribute('data-i18n');
-            var text = this.t(key);
-            if (text !== key) el.textContent = text;
-        });
-        // 翻译placeholder
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            var key = el.getAttribute('data-i18n-placeholder');
-            var text = this.t(key);
-            if (text !== key) el.placeholder = text;
-        });
-        // 更新语言按钮状态
-        document.querySelectorAll('.i18n-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === this.current);
-        });
-        // 更新页面标题
-        document.title = this.current === 'zh' ? 'AUTO-EVO-AI V0.1' : 'AUTO-EVO-AI V0.1';
-    }
-};
 
-// 语言切换器
-function initI18NSwitcher() {
-    var container = document.createElement('div');
-    container.className = 'i18n-switcher';
-    container.innerHTML = `
-        <button class="i18n-btn ${I18N.current==='zh'?'active':''}" data-lang="zh" onclick="I18N.setLocale('zh')">中文</button>
-        <button class="i18n-btn ${I18N.current==='en'?'active':''}" data-lang="en" onclick="I18N.setLocale('en')">EN</button>
-    `;
-    document.body.appendChild(container);
-}
 
 // ═══════════════════════════════════════════════════════
 // WebSocket 实时推送增强
@@ -253,12 +150,6 @@ function registerServiceWorker() {
 document.addEventListener('DOMContentLoaded', () => {
     // 注册PWA
     registerServiceWorker();
-    
-    // 初始化i18n（延迟1秒避免和Setup Wizard冲突）
-    setTimeout(() => {
-        initI18NSwitcher();
-        I18N.applyTranslations();
-    }, 2000);
     
     // 启动WebSocket实时推送（延迟3秒，等服务完全就绪）
     setTimeout(() => {
