@@ -1,0 +1,63 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\�⺣��\AppData\Local\Python\pythoncore-3.14-64\python.exe
+cachedir: .pytest_cache
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.33
+collecting ... collected 7 items
+
+tests/test_e2e_workflows.py::TestAuthWorkflow::test_full_jwt_flow FAILED [ 14%]
+tests/test_e2e_workflows.py::TestAuthWorkflow::test_rbac_full_flow FAILED [ 28%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_data_analysis FAILED [ 42%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_forex FAILED         [ 57%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_recommend PASSED     [ 71%]
+tests/test_e2e_workflows.py::TestSecurityWorkflow::test_audit_trail PASSED [ 85%]
+tests/test_e2e_workflows.py::TestSecurityWorkflow::test_rate_limiter PASSED [100%]
+
+================================== FAILURES ===================================
+_____________________ TestAuthWorkflow.test_full_jwt_flow _____________________
+tests\test_e2e_workflows.py:17: in test_full_jwt_flow
+    assert d1.get("success"), f"create failed: {d1}"
+E   AssertionError: create failed: {'success': False, 'error': 'Module jwt_token does not support action: create'}
+E   assert False
+E    +  where False = <built-in method get of dict object at 0x000002324D848500>('success')
+E    +    where <built-in method get of dict object at 0x000002324D848500> = {'success': False, 'error': 'Module jwt_token does not support action: create'}.get
+____________________ TestAuthWorkflow.test_rbac_full_flow _____________________
+tests\test_e2e_workflows.py:29: in test_rbac_full_flow
+    assert d1.get("has_permission"), f"check delete failed: {d1}"
+E   AssertionError: check delete failed: {'success': True, 'allowed': False, 'source': 'rbac'}
+E   assert None
+E    +  where None = <built-in method get of dict object at 0x000002324DC03E00>('has_permission')
+E    +    where <built-in method get of dict object at 0x000002324DC03E00> = {'success': True, 'allowed': False, 'source': 'rbac'}.get
+_____________________ TestDataWorkflow.test_data_analysis _____________________
+tests\test_e2e_workflows.py:36: in test_data_analysis
+    assert d.get("success"), f"analysis failed: {d}"
+E   AssertionError: analysis failed: {'detail': '�������ڲ�����', 'error': '[TypeError("\'coroutine\' object is not iterable"), TypeError(\'vars() argument must have __dict__ attribute\')]', 'path': '/api/modules/data_analysis/execute'}
+E   assert None
+E    +  where None = <built-in method get of dict object at 0x000002324DBF07C0>('success')
+E    +    where <built-in method get of dict object at 0x000002324DBF07C0> = {'detail': '\u670d\u52a1\u5668\u5185\u90e8\u9519\u8bef', 'error': '[TypeError("\'coroutine\' object is not iterable"), TypeError(\'vars() argument must have __dict__ attribute\')]', 'path': '/api/modules/data_analysis/execute'}.get
+_________________________ TestDataWorkflow.test_forex _________________________
+tests\test_e2e_workflows.py:42: in test_forex
+    assert d.get("success"), f"forex failed: {d}"
+E   AssertionError: forex failed: {'success': False, 'error': 'Module forex_api does not support action: quote'}
+E   assert False
+E    +  where False = <built-in method get of dict object at 0x000002324DBFA880>('success')
+E    +    where <built-in method get of dict object at 0x000002324DBFA880> = {'success': False, 'error': 'Module forex_api does not support action: quote'}.get
+=========================== short test summary info ===========================
+FAILED tests/test_e2e_workflows.py::TestAuthWorkflow::test_full_jwt_flow - AssertionError: create failed: {'success': False, 'error': 'Module jwt_token does not support action: create'}
+assert False
+ +  where False = <built-in method get of dict object at 0x000002324D848500>('success')
+ +    where <built-in method get of dict object at 0x000002324D848500> = {'success': False, 'error': 'Module jwt_token does not support action: create'}.get
+FAILED tests/test_e2e_workflows.py::TestAuthWorkflow::test_rbac_full_flow - AssertionError: check delete failed: {'success': True, 'allowed': False, 'source': 'rbac'}
+assert None
+ +  where None = <built-in method get of dict object at 0x000002324DC03E00>('has_permission')
+ +    where <built-in method get of dict object at 0x000002324DC03E00> = {'success': True, 'allowed': False, 'source': 'rbac'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_data_analysis - AssertionError: analysis failed: {'detail': '�������ڲ�����', 'error': '[TypeError("\'coroutine\' object is not iterable"), TypeError(\'vars() argument must have __dict__ attribute\')]', 'path': '/api/modules/data_analysis/execute'}
+assert None
+ +  where None = <built-in method get of dict object at 0x000002324DBF07C0>('success')
+ +    where <built-in method get of dict object at 0x000002324DBF07C0> = {'detail': '\u670d\u52a1\u5668\u5185\u90e8\u9519\u8bef', 'error': '[TypeError("\'coroutine\' object is not iterable"), TypeError(\'vars() argument must have __dict__ attribute\')]', 'path': '/api/modules/data_analysis/execute'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_forex - AssertionError: forex failed: {'success': False, 'error': 'Module forex_api does not support action: quote'}
+assert False
+ +  where False = <built-in method get of dict object at 0x000002324DBFA880>('success')
+ +    where <built-in method get of dict object at 0x000002324DBFA880> = {'success': False, 'error': 'Module forex_api does not support action: quote'}.get
+======================== 4 failed, 3 passed in 18.95s =========================

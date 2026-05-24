@@ -1,0 +1,247 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\Îâº£¾ü\AppData\Local\Python\pythoncore-3.14-64\python.exe
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.33
+collecting ... collected 52 items
+
+tests/test_module_compliance.py::TestModuleCompliance::test_all_have_module_class FAILED [  1%]
+tests/test_module_compliance.py::TestModuleCompliance::test_all_have_meta PASSED [  3%]
+tests/test_module_compliance.py::TestModuleCompliance::test_no_stubs_remain PASSED [  5%]
+tests/test_module_compliance.py::TestModuleCompliance::test_all_inherit_enterprise FAILED [  7%]
+tests/test_module_compliance.py::TestModuleCompliance::test_valid_syntax PASSED [  9%]
+tests/test_module_compliance.py::TestModuleCompliance::test_module_count PASSED [ 11%]
+tests/test_module_compliance.py::TestModuleCompliance::test_no_dup_ids PASSED [ 13%]
+tests/test_core_modules.py::TestJWTToken::test_create_token FAILED       [ 15%]
+tests/test_core_modules.py::TestJWTToken::test_verify_token FAILED       [ 17%]
+tests/test_core_modules.py::TestJWTToken::test_invalid_token PASSED      [ 19%]
+tests/test_core_modules.py::TestRBAC::test_assign_and_check FAILED       [ 21%]
+tests/test_core_modules.py::TestScheduler::test_scheduler_status PASSED  [ 23%]
+tests/test_core_modules.py::TestLLM::test_providers PASSED               [ 25%]
+tests/test_core_modules.py::TestConfig::test_config_read PASSED          [ 26%]
+tests/test_core_modules.py::TestHealth::test_health PASSED               [ 28%]
+tests/test_core_modules.py::TestNotify::test_channels PASSED             [ 30%]
+tests/test_core_modules.py::TestPipeline::test_pipeline_status FAILED    [ 32%]
+tests/test_core_modules.py::TestEvents::test_event_status FAILED         [ 34%]
+tests/test_e2e_workflows.py::TestAuthWorkflow::test_full_jwt_flow FAILED [ 36%]
+tests/test_e2e_workflows.py::TestAuthWorkflow::test_rbac_full_flow FAILED [ 38%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_data_analysis FAILED [ 40%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_data_masking FAILED  [ 42%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_forex FAILED         [ 44%]
+tests/test_e2e_workflows.py::TestDataWorkflow::test_recommend FAILED     [ 46%]
+tests/test_e2e_workflows.py::TestSecurityWorkflow::test_audit_trail FAILED [ 48%]
+tests/test_e2e_workflows.py::TestSecurityWorkflow::test_rate_limiter FAILED [ 50%]
+tests/test_api_integration.py::TestSystem::test_root PASSED              [ 51%]
+tests/test_api_integration.py::TestSystem::test_status PASSED            [ 53%]
+tests/test_api_integration.py::TestSystem::test_health PASSED            [ 55%]
+tests/test_api_integration.py::TestSystem::test_metrics PASSED           [ 57%]
+tests/test_api_integration.py::TestSystem::test_manifest PASSED          [ 59%]
+tests/test_api_integration.py::TestModules::test_list_modules FAILED     [ 61%]
+tests/test_api_integration.py::TestModules::test_module_search PASSED    [ 63%]
+tests/test_api_integration.py::TestModules::test_module_by_category PASSED [ 65%]
+tests/test_api_integration.py::TestModules::test_module_detail FAILED    [ 67%]
+tests/test_api_integration.py::TestConfig::test_get_config PASSED        [ 69%]
+tests/test_api_integration.py::TestConfig::test_update_config FAILED     [ 71%]
+tests/test_api_integration.py::TestScheduler::test_status PASSED         [ 73%]
+tests/test_api_integration.py::TestLLM::test_providers PASSED            [ 75%]
+tests/test_api_integration.py::TestLLM::test_quick_start FAILED          [ 76%]
+tests/test_api_integration.py::TestNotify::test_channels PASSED          [ 78%]
+tests/test_api_integration.py::TestNotify::test_quick_start FAILED       [ 80%]
+tests/test_api_integration.py::TestCICD::test_cicd_status FAILED         [ 82%]
+tests/test_api_integration.py::TestBrowser::test_browser_status PASSED   [ 84%]
+tests/test_api_integration.py::TestPlugins::test_plugin_list PASSED      [ 86%]
+tests/test_api_integration.py::TestGitHub::test_github_trending FAILED   [ 88%]
+tests/test_api_integration.py::TestDocs::test_docs_status FAILED         [ 90%]
+tests/test_api_integration.py::TestSetup::test_setup_report FAILED       [ 92%]
+tests/test_api_integration.py::TestDiagnosis::test_diagnosis FAILED      [ 94%]
+tests/test_api_integration.py::TestSecurity::test_security_status PASSED [ 96%]
+tests/test_api_integration.py::TestFrontend::test_dashboard PASSED       [ 98%]
+tests/test_api_integration.py::TestFrontend::test_i18n PASSED            [100%]
+
+================================== FAILURES ===================================
+_______________ TestModuleCompliance.test_all_have_module_class _______________
+tests\test_module_compliance.py:37: in test_all_have_module_class
+    assert len(missing) == 0, f"{len(missing)} missing: {missing[:5]}"
+E   AssertionError: 1 missing: ['nl_workflow.py']
+E   assert 1 == 0
+E    +  where 1 = len(['nl_workflow.py'])
+______________ TestModuleCompliance.test_all_inherit_enterprise _______________
+tests\test_module_compliance.py:60: in test_all_inherit_enterprise
+    assert len(bad) == 0, f"Not inherited: {bad[:5]}"
+E   AssertionError: Not inherited: ['nl_workflow.py', 'trending_pipeline.py']
+E   assert 2 == 0
+E    +  where 2 = len(['nl_workflow.py', 'trending_pipeline.py'])
+_______________________ TestJWTToken.test_create_token ________________________
+tests\test_core_modules.py:22: in test_create_token
+    assert s == 200; assert d.get("success"); assert "access_token" in d
+    ^^^^^^^^^^^^^^^
+E   assert 404 == 200
+_______________________ TestJWTToken.test_verify_token ________________________
+tests\test_core_modules.py:26: in test_verify_token
+    assert d2.get("valid")
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B3CB3C0>('valid')
+E    +    where <built-in method get of dict object at 0x000001989B3CB3C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: jwt-token'}.get
+_______________________ TestRBAC.test_assign_and_check ________________________
+tests\test_core_modules.py:36: in test_assign_and_check
+    assert d.get("has_permission")
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B364B40>('has_permission')
+E    +    where <built-in method get of dict object at 0x000001989B364B40> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: permission-rbac'}.get
+______________________ TestPipeline.test_pipeline_status ______________________
+tests\test_core_modules.py:60: in test_pipeline_status
+    s, d = g("/api/pipeline/status"); assert s == 200
+                                      ^^^^^^^^^^^^^^^
+E   assert 404 == 200
+________________________ TestEvents.test_event_status _________________________
+tests\test_core_modules.py:64: in test_event_status
+    s, d = g("/api/events/status"); assert s == 200
+                                    ^^^^^^^^^^^^^^^
+E   assert 404 == 200
+_____________________ TestAuthWorkflow.test_full_jwt_flow _____________________
+tests\test_e2e_workflows.py:16: in test_full_jwt_flow
+    assert d1.get("success"); token=d1["access_token"]; refresh=d1["refresh_token"]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B393A00>('success')
+E    +    where <built-in method get of dict object at 0x000001989B393A00> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: jwt-token'}.get
+____________________ TestAuthWorkflow.test_rbac_full_flow _____________________
+tests\test_e2e_workflows.py:26: in test_rbac_full_flow
+    assert d1.get("has_permission")
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B3C8040>('has_permission')
+E    +    where <built-in method get of dict object at 0x000001989B3C8040> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: permission-rbac'}.get
+_____________________ TestDataWorkflow.test_data_analysis _____________________
+tests\test_e2e_workflows.py:33: in test_data_analysis
+    assert d.get("success"); assert d.get("stats",{}).get("count")==10
+    ^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B4BABC0>('success')
+E    +    where <built-in method get of dict object at 0x000001989B4BABC0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: data-analysis'}.get
+_____________________ TestDataWorkflow.test_data_masking ______________________
+tests\test_e2e_workflows.py:36: in test_data_masking
+    assert d.get("success"); assert "****" in d.get("masked","")
+    ^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B3CB4C0>('success')
+E    +    where <built-in method get of dict object at 0x000001989B3CB4C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: data-masking'}.get
+_________________________ TestDataWorkflow.test_forex _________________________
+tests\test_e2e_workflows.py:39: in test_forex
+    assert d.get("success"); assert d.get("rate",0)>0
+    ^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B390280>('success')
+E    +    where <built-in method get of dict object at 0x000001989B390280> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: forex-api'}.get
+_______________________ TestDataWorkflow.test_recommend _______________________
+tests\test_e2e_workflows.py:42: in test_recommend
+    assert d.get("success"); assert len(d.get("recommendations",[]))>0
+    ^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B294080>('success')
+E    +    where <built-in method get of dict object at 0x000001989B294080> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: recommendation-system'}.get
+____________________ TestSecurityWorkflow.test_audit_trail ____________________
+tests\test_e2e_workflows.py:47: in test_audit_trail
+    assert d.get("success")
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B392B80>('success')
+E    +    where <built-in method get of dict object at 0x000001989B392B80> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: audit-trail'}.get
+___________________ TestSecurityWorkflow.test_rate_limiter ____________________
+tests\test_e2e_workflows.py:50: in test_rate_limiter
+    assert d.get("success")
+E   AssertionError: assert None
+E    +  where None = <built-in method get of dict object at 0x000001989B4BA0C0>('success')
+E    +    where <built-in method get of dict object at 0x000001989B4BA0C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: api-rate-limiter'}.get
+________________________ TestModules.test_list_modules ________________________
+tests\test_api_integration.py:43: in test_list_modules
+    assert s == 200; assert len(d) >= 560
+                     ^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 6 >= 560
+E    +  where 6 = len({'modules': [{'name': 'access_control', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'advanced_resilience', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'aegis_governance', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agency_swarm', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_apollo', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_athena', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_boreas', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_cronus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_demeter', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_eros', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hecate', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hephaestus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hera', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hermes', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_iris', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_market', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_marketplace', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_mas', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_minerva', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_nemesis', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_orchestrator', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_phoebus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_planner', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_poseidon', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_resource_control', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_themis', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agentguard_sec', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agentseek', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'ai_gateway', 'class': 'pending', 'category': 'ai', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'aiops_monitor', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'alert_manager', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'ansible_runner', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_cache', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_gateway', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_mock', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_rate_guard', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_rate_limiter', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_tester', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_versioning', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'argocd_deploy', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'atom_code', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audio_transcription', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audit_log', 'class': 'pending', 'category': 'logging', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audit_trail', 'class': 'pending', 'category': 'logging', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_failover', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_healing', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_optimizer', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_recovery', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_restart', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_scale', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_setup_autonomous', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_summary', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_update', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autogen_studio', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'automation_hub', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autonomous_agent', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autonomous_decision_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autorecovery', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autoskills', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'awesome_design_md', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_checksum', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_engine', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_manager', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_redis', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_scheduler', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_verify', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'batch_processor', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bettafish_forecast', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'big_key_detection', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'billion_group_os', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'biometric_auth', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bitmap_operations', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'block_device', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'blockchain_web3', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bloom_filter', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'blue_green', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bot_detection', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bot_handler', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'browser_auto', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'browser_use', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bucket_policy', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'business_analyst', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bytecodestudio', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cache_engine', 'class': 'pending', 'category': 'cache', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cache_manager', 'class': 'pending', 'category': 'cache', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'canary_release', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'capacity_planner', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cdn_invalidate', 'class': 'pending', 'category': 'network', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cdn_manager', 'class': 'pending', 'category': 'network', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cerbos_permission', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chaos_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chaos_engineering', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chart_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chatwise', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cicd_pipeline', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'circuit_breaker', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'circuit_breaker_pattern', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'claw_gateway', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cli_interface', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'clickhouse_olap', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}], 'count': 571, 'page': 1, 'limit': 100, 'total_pages': 6, 'categories': {'system': 441, 'agent': 22, 'data': 14, 'task': 10, 'ai': 9, 'backup': 7, 'config': 7, 'api': 7, 'network': 7, 'storage': 6, 'logging': 6, 'search': 6, 'notification': 6, 'crypto': 5, 'database': 5, 'auth': 4, 'security': 3, 'monitor': 3, 'cache': 2, 'messaging': 1}})
+_______________________ TestModules.test_module_detail ________________________
+tests\test_api_integration.py:55: in test_module_detail
+    assert s == 200
+E   assert 404 == 200
+________________________ TestConfig.test_update_config ________________________
+tests\test_api_integration.py:65: in test_update_config
+    assert s in (200, 201)
+E   assert 405 in (200, 201)
+__________________________ TestLLM.test_quick_start ___________________________
+tests\test_api_integration.py:80: in test_quick_start
+    assert s == 200
+E   assert 404 == 200
+_________________________ TestNotify.test_quick_start _________________________
+tests\test_api_integration.py:89: in test_quick_start
+    assert s == 200
+E   assert 404 == 200
+__________________________ TestCICD.test_cicd_status __________________________
+tests\test_api_integration.py:94: in test_cicd_status
+    assert s == 200
+E   assert 404 == 200
+_______________________ TestGitHub.test_github_trending _______________________
+tests\test_api_integration.py:109: in test_github_trending
+    assert s == 200
+E   assert 404 == 200
+__________________________ TestDocs.test_docs_status __________________________
+tests\test_api_integration.py:114: in test_docs_status
+    assert s == 200
+E   assert 404 == 200
+_________________________ TestSetup.test_setup_report _________________________
+tests\test_api_integration.py:119: in test_setup_report
+    assert s == 200
+E   assert 404 == 200
+________________________ TestDiagnosis.test_diagnosis _________________________
+tests\test_api_integration.py:124: in test_diagnosis
+    assert s == 200
+E   assert 404 == 200
+=========================== short test summary info ===========================
+FAILED tests/test_module_compliance.py::TestModuleCompliance::test_all_have_module_class - AssertionError: 1 missing: ['nl_workflow.py']
+assert 1 == 0
+ +  where 1 = len(['nl_workflow.py'])
+FAILED tests/test_module_compliance.py::TestModuleCompliance::test_all_inherit_enterprise - AssertionError: Not inherited: ['nl_workflow.py', 'trending_pipeline.py']
+assert 2 == 0
+ +  where 2 = len(['nl_workflow.py', 'trending_pipeline.py'])
+FAILED tests/test_core_modules.py::TestJWTToken::test_create_token - assert 404 == 200
+FAILED tests/test_core_modules.py::TestJWTToken::test_verify_token - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B3CB3C0>('valid')
+ +    where <built-in method get of dict object at 0x000001989B3CB3C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: jwt-token'}.get
+FAILED tests/test_core_modules.py::TestRBAC::test_assign_and_check - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B364B40>('has_permission')
+ +    where <built-in method get of dict object at 0x000001989B364B40> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: permission-rbac'}.get
+FAILED tests/test_core_modules.py::TestPipeline::test_pipeline_status - assert 404 == 200
+FAILED tests/test_core_modules.py::TestEvents::test_event_status - assert 404 == 200
+FAILED tests/test_e2e_workflows.py::TestAuthWorkflow::test_full_jwt_flow - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B393A00>('success')
+ +    where <built-in method get of dict object at 0x000001989B393A00> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: jwt-token'}.get
+FAILED tests/test_e2e_workflows.py::TestAuthWorkflow::test_rbac_full_flow - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B3C8040>('has_permission')
+ +    where <built-in method get of dict object at 0x000001989B3C8040> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: permission-rbac'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_data_analysis - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B4BABC0>('success')
+ +    where <built-in method get of dict object at 0x000001989B4BABC0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: data-analysis'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_data_masking - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B3CB4C0>('success')
+ +    where <built-in method get of dict object at 0x000001989B3CB4C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: data-masking'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_forex - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B390280>('success')
+ +    where <built-in method get of dict object at 0x000001989B390280> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: forex-api'}.get
+FAILED tests/test_e2e_workflows.py::TestDataWorkflow::test_recommend - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B294080>('success')
+ +    where <built-in method get of dict object at 0x000001989B294080> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: recommendation-system'}.get
+FAILED tests/test_e2e_workflows.py::TestSecurityWorkflow::test_audit_trail - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B392B80>('success')
+ +    where <built-in method get of dict object at 0x000001989B392B80> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: audit-trail'}.get
+FAILED tests/test_e2e_workflows.py::TestSecurityWorkflow::test_rate_limiter - AssertionError: assert None
+ +  where None = <built-in method get of dict object at 0x000001989B4BA0C0>('success')
+ +    where <built-in method get of dict object at 0x000001989B4BA0C0> = {'detail': '\u6a21\u5757\u4e0d\u5b58\u5728: api-rate-limiter'}.get
+FAILED tests/test_api_integration.py::TestModules::test_list_modules - AssertionError: assert 6 >= 560
+ +  where 6 = len({'modules': [{'name': 'access_control', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'advanced_resilience', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'aegis_governance', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agency_swarm', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_apollo', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_athena', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_boreas', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_cronus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_demeter', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_eros', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hecate', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hephaestus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hera', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_hermes', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_iris', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_market', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_marketplace', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_mas', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_minerva', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_nemesis', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_orchestrator', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_phoebus', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_planner', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_poseidon', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_resource_control', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agent_themis', 'class': 'pending', 'category': 'agent', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agentguard_sec', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'agentseek', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'ai_gateway', 'class': 'pending', 'category': 'ai', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'aiops_monitor', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'alert_manager', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'ansible_runner', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_cache', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_gateway', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_mock', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_rate_guard', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_rate_limiter', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_tester', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'api_versioning', 'class': 'pending', 'category': 'api', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'argocd_deploy', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'atom_code', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audio_transcription', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audit_log', 'class': 'pending', 'category': 'logging', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'audit_trail', 'class': 'pending', 'category': 'logging', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_failover', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_healing', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_optimizer', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_recovery', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_restart', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_scale', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_setup_autonomous', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_summary', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'auto_update', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autogen_studio', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'automation_hub', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autonomous_agent', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autonomous_decision_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autorecovery', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'autoskills', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'awesome_design_md', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_checksum', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_engine', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_manager', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_redis', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_scheduler', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'backup_verify', 'class': 'pending', 'category': 'backup', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'batch_processor', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bettafish_forecast', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'big_key_detection', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'billion_group_os', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'biometric_auth', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bitmap_operations', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'block_device', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'blockchain_web3', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bloom_filter', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'blue_green', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bot_detection', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bot_handler', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'browser_auto', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'browser_use', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bucket_policy', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'business_analyst', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'bytecodestudio', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cache_engine', 'class': 'pending', 'category': 'cache', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cache_manager', 'class': 'pending', 'category': 'cache', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'canary_release', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'capacity_planner', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cdn_invalidate', 'class': 'pending', 'category': 'network', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cdn_manager', 'class': 'pending', 'category': 'network', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cerbos_permission', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chaos_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chaos_engineering', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chart_engine', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'chatwise', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cicd_pipeline', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'circuit_breaker', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'circuit_breaker_pattern', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'claw_gateway', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'cli_interface', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}, {'name': 'clickhouse_olap', 'class': 'pending', 'category': 'system', 'status': 'pending_lazy', 'grade': 'lazy', 'initialized': False, 'methods': []}], 'count': 571, 'page': 1, 'limit': 100, 'total_pages': 6, 'categories': {'system': 441, 'agent': 22, 'data': 14, 'task': 10, 'ai': 9, 'backup': 7, 'config': 7, 'api': 7, 'network': 7, 'storage': 6, 'logging': 6, 'search': 6, 'notification': 6, 'crypto': 5, 'database': 5, 'auth': 4, 'security': 3, 'monitor': 3, 'cache': 2, 'messaging': 1}})
+FAILED tests/test_api_integration.py::TestModules::test_module_detail - assert 404 == 200
+FAILED tests/test_api_integration.py::TestConfig::test_update_config - assert 405 in (200, 201)
+FAILED tests/test_api_integration.py::TestLLM::test_quick_start - assert 404 == 200
+FAILED tests/test_api_integration.py::TestNotify::test_quick_start - assert 404 == 200
+FAILED tests/test_api_integration.py::TestCICD::test_cicd_status - assert 404 == 200
+FAILED tests/test_api_integration.py::TestGitHub::test_github_trending - assert 404 == 200
+FAILED tests/test_api_integration.py::TestDocs::test_docs_status - assert 404 == 200
+FAILED tests/test_api_integration.py::TestSetup::test_setup_report - assert 404 == 200
+FAILED tests/test_api_integration.py::TestDiagnosis::test_diagnosis - assert 404 == 200
+================== 25 failed, 27 passed in 126.98s (0:02:06) ==================

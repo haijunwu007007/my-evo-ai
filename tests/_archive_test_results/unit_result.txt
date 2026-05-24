@@ -1,0 +1,48 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\Œ‚∫£æ¸\AppData\Local\Python\pythoncore-3.14-64\python.exe
+cachedir: .pytest_cache
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.33, cov-7.1.0
+collecting ... collected 18 items
+
+tests/test_unit_business.py::TestJWTToken::test_module_structure PASSED  [  5%]
+tests/test_unit_business.py::TestJWTToken::test_health_check PASSED      [ 11%]
+tests/test_unit_business.py::TestJWTToken::test_status_response PASSED   [ 16%]
+tests/test_unit_business.py::TestJWTToken::test_module_initialization PASSED [ 22%]
+tests/test_unit_business.py::TestRBAC::test_role_creation PASSED         [ 27%]
+tests/test_unit_business.py::TestRBAC::test_check_permission_granted PASSED [ 33%]
+tests/test_unit_business.py::TestRBAC::test_health PASSED                [ 38%]
+tests/test_unit_business.py::TestDataAnalysis::test_describe_statistics PASSED [ 44%]
+tests/test_unit_business.py::TestDataAnalysis::test_describe_basic_stats PASSED [ 50%]
+tests/test_unit_business.py::TestDataAnalysis::test_correlation PASSED   [ 55%]
+tests/test_unit_business.py::TestDataAnalysis::test_anomaly_detection FAILED [ 61%]
+tests/test_unit_business.py::TestDataMasking::test_phone_masking PASSED  [ 66%]
+tests/test_unit_business.py::TestDataMasking::test_email_masking PASSED  [ 72%]
+tests/test_unit_business.py::TestDataMasking::test_idcard_masking PASSED [ 77%]
+tests/test_unit_business.py::TestForex::test_quote PASSED                [ 83%]
+tests/test_unit_business.py::TestForex::test_convert FAILED              [ 88%]
+tests/test_unit_business.py::TestAuditTrail::test_record_event PASSED    [ 94%]
+tests/test_unit_business.py::TestAuditTrail::test_query_events PASSED    [100%]
+
+================================== FAILURES ===================================
+___________________ TestDataAnalysis.test_anomaly_detection ___________________
+tests\test_unit_business.py:106: in test_anomaly_detection
+    assert r.success
+E   assert False
+E    +  where False = Result(success=False, data=None, error="UnboundLocalError: cannot access local variable 'x' where it is not associated with a value", module_id='data-analysis', trace_id='7cc0fd12-823', latency_ms=0.11372566223144531, timestamp='2026-05-21T15:33:01.761383').success
+------------------------------ Captured log call ------------------------------
+ERROR    evo.data-analysis:enterprise_module.py:777 [data-analysis] anomaly ß∞‹: UnboundLocalError: cannot access local variable 'x' where it is not associated with a value
+___________________________ TestForex.test_convert ____________________________
+tests\test_unit_business.py:155: in test_convert
+    assert r.success
+E   assert False
+E    +  where False = Result(success=False, data=None, error="UnboundLocalError: cannot access local variable 'pair' where it is not associated with a value", module_id='forex-api', trace_id='341cbe67-6d7', latency_ms=0.04649162292480469, timestamp='2026-05-21T15:33:02.298906').success
+------------------------------ Captured log call ------------------------------
+ERROR    evo.forex-api:enterprise_module.py:777 [forex-api] convert ß∞‹: UnboundLocalError: cannot access local variable 'pair' where it is not associated with a value
+=========================== short test summary info ===========================
+FAILED tests/test_unit_business.py::TestDataAnalysis::test_anomaly_detection - assert False
+ +  where False = Result(success=False, data=None, error="UnboundLocalError: cannot access local variable 'x' where it is not associated with a value", module_id='data-analysis', trace_id='7cc0fd12-823', latency_ms=0.11372566223144531, timestamp='2026-05-21T15:33:01.761383').success
+FAILED tests/test_unit_business.py::TestForex::test_convert - assert False
+ +  where False = Result(success=False, data=None, error="UnboundLocalError: cannot access local variable 'pair' where it is not associated with a value", module_id='forex-api', trace_id='341cbe67-6d7', latency_ms=0.04649162292480469, timestamp='2026-05-21T15:33:02.298906').success
+======================== 2 failed, 16 passed in 0.80s =========================
