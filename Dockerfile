@@ -36,7 +36,7 @@ COPY core/ core/
 COPY config.yaml .
 COPY api_server.py .
 COPY .env.example .
-COPY frontend/dist/ frontend/dist/ 2>/dev/null || true
+# 前端构建: cd frontend && npm run build（可选，不影响API服务）
 
 ENV \
     PYTHONIOENCODING=utf-8 \
