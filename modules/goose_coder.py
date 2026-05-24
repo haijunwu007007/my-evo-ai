@@ -32,7 +32,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -340,7 +340,7 @@ class GooseCoderModule:
             "language": lang,
             "context": context,
             "history": [],
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         return {"success": True, "session_id": sid, "language": lang}
 
@@ -367,7 +367,7 @@ class GooseCoderModule:
                 "language": language,
                 "lines": actual_lines,
                 "task_type": TaskType.GENERATE.value,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
             self._stats["total_tasks"] += 1
             self._stats["lines_generated"] += actual_lines

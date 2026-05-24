@@ -32,7 +32,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -401,7 +401,7 @@ class SelfHealingV31Module:
         else:
             actions = ["incident_resolved", "root_fixed", "monitoring_set"]
         svc["health"] = V31HealthState.HEALTHY
-        svc["last_repair"] = datetime.utcnow().isoformat()
+        svc["last_repair"] = datetime.now(timezone.utc).isoformat()
         svc["consecutive_alerts"] = 0
         svc["resilience_score"] = min(1.0, svc["resilience_score"] + 0.02)
         dur = int((time.time() - t0) * 1000)
@@ -414,7 +414,7 @@ class SelfHealingV31Module:
             "strategy": strat.value,
             "actions": actions,
             "duration_ms": dur,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self._repair_history.append(record)
         if len(self._repair_history) > 500:
@@ -442,7 +442,7 @@ class SelfHealingV31Module:
             "status": "completed",
             "system_recovered": (int(tmod.time()*1000000)%1000000/1000000) > 0.1,
             "recovery_time_ms": int((__import__('time').time()*1000)%(5000-500+1))+500,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["chaos_tests"] += 1
         if self._chaos_experiments[eid]["system_recovered"]:

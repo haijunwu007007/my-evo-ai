@@ -717,14 +717,14 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         # GitHub Search API（先直连，不通则走镜像代理）
         try:
-            from datetime import datetime, timedelta
+            from datetime import datetime, timedelta, timezone
             period_config = {
                 "daily":  {"days": 7, "min_stars": 50},
                 "weekly": {"days": 30, "min_stars": 100},
-                "monthly": {"days": 90, "min_stars": 300},
+                "monthly": {"days": 90, "min_stars": 200},
             }
             cfg = period_config.get(period_key, period_config["daily"])
-            cutoff = (datetime.utcnow() - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
             fetch_limit = max(limit * 2, 50)
             q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
             if language and language != "all":

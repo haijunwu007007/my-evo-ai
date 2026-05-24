@@ -604,6 +604,9 @@ class SchedulerEngine:
 
         if exec_.status == "failed":
             self._store.update_task(task.id, fail_count=task.fail_count + 1)
+            logger.warning("[SCHEDULER FAIL] 任务 '%s' 失败: %s | 目标: %s | 耗时%dms",
+                           task.name, error_msg or str(result.get("error",""))[:200],
+                           task.target_id, exec_.duration_ms)
 
         # 触发回调
         for cb in self._callbacks:

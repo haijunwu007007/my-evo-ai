@@ -31,7 +31,7 @@ import logging
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -327,7 +327,7 @@ class FastagencyModule:
                 "tools": tools,
                 "state": AgentState.IDLE,
                 "description": f"{name} with {len(tools)} tools",
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
         self._stats["total_agents"] = len(self._agents)
 
@@ -362,7 +362,7 @@ class FastagencyModule:
             "name": name,
             "tools": tools,
             "state": AgentState.IDLE,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["total_agents"] += 1
         return {"success": True, "agent_id": aid, "name": name}
@@ -391,7 +391,7 @@ class FastagencyModule:
             "name": name,
             "workflow_type": wt,
             "steps": steps,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["total_workflows"] += 1
         return {"success": True, "workflow_id": wid, "name": name, "type": wt.value, "steps": len(steps)}
@@ -411,7 +411,7 @@ class FastagencyModule:
             "state": AgentState.RUNNING,
             "steps_completed": 0,
             "results": [],
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["total_executions"] += 1
         t0 = time.time()

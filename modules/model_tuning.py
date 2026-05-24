@@ -32,7 +32,7 @@ import os
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -373,7 +373,7 @@ class ModelTuningModule:
             "dataset": dataset,
             "hyperparams": default_hp,
             "status": TuningStatus.QUEUED,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "progress": 0.0,
             "metrics": {},
             "output_dir": os.path.join(self._output_dir, job_id),
@@ -397,7 +397,7 @@ class ModelTuningModule:
         if job["status"] not in (TuningStatus.QUEUED, TuningStatus.FAILED):
             return {"success": False, "error": f"Cannot start job in status: {job['status']}"}
         job["status"] = TuningStatus.PREPARING
-        job["started_at"] = datetime.utcnow().isoformat()
+        job["started_at"] = datetime.now(timezone.utc).isoformat()
         t0 = time.time()
         try:
             job["status"] = TuningStatus.TRAINING
@@ -414,7 +414,7 @@ class ModelTuningModule:
                         "epoch": epoch + 1,
                         "path": os.path.join(job["output_dir"], f"checkpoint-{epoch + 1}"),
                         "train_loss": job["metrics"][f"epoch_{epoch + 1}"]["train_loss"],
-                        "created_at": datetime.utcnow().isoformat(),
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                     }
                 )
             job["status"] = TuningStatus.EVALUATING
@@ -424,7 +424,7 @@ class ModelTuningModule:
             job["status"] = TuningStatus.COMPLETED
             duration_h = (time.time() - t0) / 3600
             job["duration_hours"] = round(duration_h, 2)
-            job["completed_at"] = datetime.utcnow().isoformat()
+            job["completed_at"] = datetime.now(timezone.utc).isoformat()
             self._stats["completed_jobs"] += 1
             self._stats["total_training_hours"] += duration_h
             return {

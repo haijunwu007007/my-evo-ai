@@ -24,20 +24,16 @@ def _mount_vue_frontend():
     from fastapi.responses import FileResponse
     from pathlib import Path
 
-    dist = BASE_DIR / "frontend" / "dist"
-    if dist.exists() and (dist / "index.html").exists():
-        app.mount("/assets", StaticFiles(directory=str(dist / "assets")), name="vue_assets")
-
+    # Vue 前端部署（由 frontend/ 目录下的独立开发服务器运行）
+    # 生产环境下，前端由前端服务器（Vite Dev Server）提供服务
+    # 根目录 index.html 保持不变，用于 API 服务器自带的 Dashboard
+    html_path = BASE_DIR / "index.html"
+    if html_path.exists():
         @app.get("/dashboard", include_in_schema=False)
-        @app.get("/{vue_path:path}", include_in_schema=False)
-        async def serve_vue(vue_path: str = ""):
-            # 不要劫持 API 路由
-            if vue_path.startswith("api/") or vue_path.startswith("js/") or vue_path == "":
-                from fastapi.responses import JSONResponse
-                return JSONResponse({"error": "not found"}, status_code=404)
-            return FileResponse(str(dist / "index.html"), media_type="text/html")
-
-        logger.info(f"[VUE] 前端已挂载: {dist}")
+        async def serve_dashboard():
+            from fastapi.responses import FileResponse
+            return FileResponse(str(html_path), media_type="text/html")
+        logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
     else:
         logger.info(
             "[VUE] 前端 dist 不存在，使用开发模式: cd frontend && npm run dev"

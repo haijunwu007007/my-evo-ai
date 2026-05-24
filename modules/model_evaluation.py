@@ -32,7 +32,7 @@ import random
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -381,7 +381,7 @@ class ModelEvaluationModule:
             "metrics": metrics,
             "sample_size": sample_size,
             "status": EvalStatus.PENDING,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "results": {},
             "score": 0.0,
         }
@@ -395,7 +395,7 @@ class ModelEvaluationModule:
             return {"success": False, "error": f"Evaluation {eval_id} not found"}
         ev = self._evaluations[eval_id]
         ev["status"] = EvalStatus.RUNNING
-        ev["started_at"] = datetime.utcnow().isoformat()
+        ev["started_at"] = datetime.now(timezone.utc).isoformat()
         t0 = time.time()
         try:
             benchmark = ev.get("benchmark", "mmlu")
@@ -419,7 +419,7 @@ class ModelEvaluationModule:
             ev["test_cases_run"] = sample_size
             ev["duration_ms"] = int((time.time() - t0) * 1000)
             ev["status"] = EvalStatus.COMPLETED
-            ev["completed_at"] = datetime.utcnow().isoformat()
+            ev["completed_at"] = datetime.now(timezone.utc).isoformat()
             self._stats["completed_evals"] += 1
             self._stats["total_test_cases"] += sample_size
             self._results_history.append(
@@ -428,7 +428,7 @@ class ModelEvaluationModule:
                     "model": ev["model"],
                     "score": ev["score"],
                     "results": results,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
             return {"success": True, "eval_id": eval_id, "score": ev["score"], "results": results}

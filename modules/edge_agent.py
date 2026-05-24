@@ -32,7 +32,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -317,7 +317,7 @@ class EdgeAgentModule:
                 "cpu_usage": round(((__import__('time').time()*1000)%(90-10))+10, 1),
                 "memory_usage": round(((__import__('time').time()*1000)%(85-20))+20, 1),
                 "disk_usage": round(((__import__('time').time()*1000)%(70-15))+15, 1),
-                "last_heartbeat": datetime.utcnow().isoformat(),
+                "last_heartbeat": datetime.now(timezone.utc).isoformat(),
                 "capabilities": ["inference", "data_collection"],
                 "firmware_version": "2.1.0",
             }
@@ -339,7 +339,7 @@ class EdgeAgentModule:
             "cpu_usage": 0.0,
             "memory_usage": 0.0,
             "disk_usage": 0.0,
-            "last_heartbeat": datetime.utcnow().isoformat(),
+            "last_heartbeat": datetime.now(timezone.utc).isoformat(),
             "capabilities": capabilities,
             "firmware_version": "1.0.0",
         }
@@ -392,7 +392,7 @@ class EdgeAgentModule:
             "estimated_latency_ms": est_latency,
             "priority": params.get("priority", "medium"),
             "status": "running",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["total_tasks"] += 1
         self._stats["offloaded_tasks"] += 1
@@ -421,7 +421,7 @@ class EdgeAgentModule:
             "direction": direction,
             "data_types": data_types,
             "size_mb": round(synced, 2),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self._sync_records.append(record)
         if len(self._sync_records) > 5000:
@@ -463,7 +463,7 @@ class EdgeAgentModule:
             "deployed": deployed,
             "failed": failed,
             "status": "completed",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         return {"success": True, "deployment_id": did, "deployed": len(deployed), "failed": len(failed)}
 

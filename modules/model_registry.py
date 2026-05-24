@@ -31,7 +31,7 @@ import logging
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -332,8 +332,8 @@ class ModelRegistryModule:
                 "max_context": ctx,
                 "latest_version": version,
                 "tags": [provider],
-                "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
                 "downloads": 0,
                 "size_mb": 0,
             }
@@ -341,7 +341,7 @@ class ModelRegistryModule:
                 {
                     "version": version,
                     "status": ModelStatus.ACTIVE,
-                    "released_at": datetime.utcnow().isoformat(),
+                    "released_at": datetime.now(timezone.utc).isoformat(),
                     "changelog": "Initial release",
                 }
             )
@@ -372,8 +372,8 @@ class ModelRegistryModule:
             "max_context": max_context,
             "latest_version": version,
             "tags": tags,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
             "downloads": 0,
             "size_mb": size_mb,
         }
@@ -381,7 +381,7 @@ class ModelRegistryModule:
             {
                 "version": version,
                 "status": ModelStatus.ACTIVE,
-                "released_at": datetime.utcnow().isoformat(),
+                "released_at": datetime.now(timezone.utc).isoformat(),
                 "changelog": "Initial registration",
             }
         )
@@ -390,7 +390,7 @@ class ModelRegistryModule:
         self._stats["total_models"] = len(self._models)
         self._stats["active_models"] += 1
         self._stats["registrations_today"] += 1
-        self._audit_log.append({"action": "register", "model": name, "timestamp": datetime.utcnow().isoformat()})
+        self._audit_log.append({"action": "register", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
         return {"success": True, "model": name, "version": version, "provider": provider}
 
     def update_model(self, params: dict) -> dict:
@@ -402,13 +402,13 @@ class ModelRegistryModule:
         for k in ("description", "status", "max_context", "size_mb", "tags"):
             if k in params:
                 model[k] = params[k]
-        model["updated_at"] = datetime.utcnow().isoformat()
+        model["updated_at"] = datetime.now(timezone.utc).isoformat()
         self._audit_log.append(
             {
                 "action": "update",
                 "model": name,
                 "fields": list(params.keys()),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
         return {"success": True, "model": name, "updated_fields": list(params.keys())}
@@ -419,9 +419,9 @@ class ModelRegistryModule:
         if not name or name not in self._models:
             return {"success": False, "error": f"Model {name} not found"}
         self._models[name]["status"] = ModelStatus.DEPRECATED
-        self._models[name]["updated_at"] = datetime.utcnow().isoformat()
+        self._models[name]["updated_at"] = datetime.now(timezone.utc).isoformat()
         self._stats["active_models"] = sum(1 for m in self._models.values() if m.get("status") == ModelStatus.ACTIVE)
-        self._audit_log.append({"action": "deprecate", "model": name, "timestamp": datetime.utcnow().isoformat()})
+        self._audit_log.append({"action": "deprecate", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
         return {"success": True, "model": name, "status": "deprecated"}
 
     def delete_model(self, params: dict) -> dict:
@@ -432,7 +432,7 @@ class ModelRegistryModule:
         self._models[name]["status"] = ModelStatus.ARCHIVED
         self._stats["total_models"] = sum(1 for m in self._models.values() if m.get("status") != ModelStatus.ARCHIVED)
         self._stats["active_models"] = sum(1 for m in self._models.values() if m.get("status") == ModelStatus.ACTIVE)
-        self._audit_log.append({"action": "delete", "model": name, "timestamp": datetime.utcnow().isoformat()})
+        self._audit_log.append({"action": "delete", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
         return {"success": True, "model": name, "status": "archived"}
 
     def add_version(self, params: dict) -> dict:
@@ -448,12 +448,12 @@ class ModelRegistryModule:
             {
                 "version": version,
                 "status": ModelStatus.ACTIVE,
-                "released_at": datetime.utcnow().isoformat(),
+                "released_at": datetime.now(timezone.utc).isoformat(),
                 "changelog": changelog,
             }
         )
         self._models[name]["latest_version"] = version
-        self._models[name]["updated_at"] = datetime.utcnow().isoformat()
+        self._models[name]["updated_at"] = datetime.now(timezone.utc).isoformat()
         self._stats["total_versions"] = sum(len(v) for v in self._versions.values())
         return {"success": True, "model": name, "version": version}
 

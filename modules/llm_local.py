@@ -33,7 +33,7 @@ import subprocess
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -439,7 +439,7 @@ class LlmLocalModule:
             }
         info["status"] = LocalModelStatus.LOADING
         info["config"] = {"gpu_layers": gpu_layers, "quantization": quantization, "context_size": ctx_size}
-        info["loaded_at"] = datetime.utcnow().isoformat()
+        info["loaded_at"] = datetime.now(timezone.utc).isoformat()
         self._stats["gpu_memory_used_mb"] += mem_needed
         info["status"] = LocalModelStatus.LOADED
         return {
@@ -508,7 +508,7 @@ class LlmLocalModule:
                     "output_tokens": out_tok,
                     "latency_ms": latency,
                     "tokens_per_second": round(out_tok / max(latency / 1000, 0.001), 2),
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -565,7 +565,7 @@ class LlmLocalModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_model = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": []})
         for r in recent:

@@ -30,7 +30,7 @@ import logging
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -413,7 +413,7 @@ class RerankCohereModule:
                     "query_length": len(query),
                     "doc_count": len(documents),
                     "latency_ms": latency,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -438,7 +438,7 @@ class RerankCohereModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         total_docs = sum(r["doc_count"] for r in recent)
         avg_lat = sum(r["latency_ms"] for r in recent) / len(recent) if recent else 0

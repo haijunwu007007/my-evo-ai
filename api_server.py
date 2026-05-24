@@ -29,7 +29,7 @@ sys.path.insert(0, str(BASE_DIR / "modules"))
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -130,22 +130,9 @@ async def system_status():
 
 
 # ═══════════════════════════════════════════════════════
-# i18n 及 PWA 静态资源
+# i18n 及 PWA 静态资源（由 api/startup.py 中 _mount_vue_frontend()
+# 挂载 Vue SPA 前端 + /assets 静态文件 + 路由兜底）
 # ═══════════════════════════════════════════════════════
-
-@app.get("/dashboard")
-async def dashboard():
-    """返回 Dashboard 前端页面（优先 frontend/ 独立目录）"""
-    for candidate in [
-        BASE_DIR / "frontend" / "dashboard" / "index.html",
-        BASE_DIR / "frontend" / "index.html",
-        BASE_DIR / "index.html",
-        _ORIGINAL_BASE / "index.html",
-    ]:
-        if candidate.exists():
-            return FileResponse(str(candidate))
-    return {"error": "前端文件不存在"}
-
 
 @app.get("/manifest.json")
 async def get_manifest():
@@ -285,6 +272,7 @@ if __name__ == "__main__":
     # 从配置系统读取 host/port，环境变量可覆盖
     port = int(get_config_value(_EVO_CONFIG, "server.port", 8765))
     host = get_config_value(_EVO_CONFIG, "server.host", "127.0.0.1")
+    reload = os.environ.get("EVO_RELOAD", "").lower() in ("1", "true", "yes")
     _frozen = getattr(sys, 'frozen', False)
 
     # 启动时预热
@@ -322,4 +310,4 @@ if __name__ == "__main__":
             webbrowser.open(f"http://localhost:{port}/dashboard")
         threading.Thread(target=_open_browser, daemon=True).start()
 
-    uvicorn.run(app, host=host, port=port, log_level="info")
+    uvicorn.run(app, host=host, port=port, log_level="info", reload=reload)

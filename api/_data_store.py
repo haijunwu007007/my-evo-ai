@@ -111,7 +111,7 @@ _TASK_TEMPLATES = {
     "github_trending": {
         "name": "📊 GitHub Trending 分析",
         "desc": "扫描GitHub热门项目→AI分析→推送到钉钉",
-        "steps": [{"module":"github_scanner","action":"scan","params":{"language":"python"}},{"module":"data_analysis","action":"analyze","params":{"type":"trending"}},{"module":"feishu_notifier","action":"send","params":{"title":"今日GitHub趋势"}}],
+        "steps": [{"module":"githubtrending","action":"scan_trending","params":{"language":"python","period":"daily"}},{"module":"data_analysis","action":"analyze","params":{"type":"trending"}},{"module":"feishu_notifier","action":"send","params":{"title":"今日GitHub趋势"}}],
     },
     "health_report": {
         "name": "🩺 系统健康报告",

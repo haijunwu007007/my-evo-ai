@@ -42,7 +42,7 @@ import threading
 import time
 import uuid
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
@@ -724,7 +724,7 @@ class WorkflowBPMN:
         return handler(variables)
 
     def _log_history(self, action: str, **kwargs):
-        self._history.append({"action": action, "timestamp": datetime.utcnow().isoformat(), **kwargs})
+        self._history.append({"action": action, "timestamp": datetime.now(timezone.utc).isoformat(), **kwargs})
         if len(self._history) > 10000:
             self._history = self._history[-5000:]
 
