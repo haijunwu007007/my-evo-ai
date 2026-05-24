@@ -2763,7 +2763,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 try:
                     r = execute_fn(*call_args)
                     if is_async and hasattr(r, "__await__"):
-                        r = r
+                        r = await r
                     if isinstance(r, dict) and r:
                         return r
                 except TypeError:
@@ -2777,12 +2777,12 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             try:
                 r = handler()
                 if asyncio.iscoroutine(r):
-                    r = r
+                    r = await r
                 return r if isinstance(r, dict) else {"status": "ok", "result": str(r)[:200]}
             except TypeError:
                 r = handler(step.params)
                 if asyncio.iscoroutine(r):
-                    r = r
+                    r = await r
                 return r if isinstance(r, dict) else {"status": "ok", "result": str(r)[:200]}
             except Exception as e:
                 return {"status": "handler_error", "error": str(e)[:100]}
@@ -2792,7 +2792,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             try:
                 r = execute_fn(fallback)
                 if is_async and hasattr(r, "__await__"):
-                    r = r
+                    r = await r
                 if isinstance(r, dict):
                     return {"status": "partial", "fallback_action": fallback, "original_action": step.action, **r}
             except Exception:

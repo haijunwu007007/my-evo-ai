@@ -345,7 +345,10 @@ async def coordinator_execute(body: dict = None):
                 "_i=_C();_i.initialize();"
                 f"_r=asyncio.run(_i.execute(action='{_a}',params={_inner}));"
                 "d=_r.data if hasattr(_r,'data') else vars(_r).get('data',_r);"
-                "print('RESULT:'+__import__('json').dumps({'s':True,'d':str(d)[:300]}))"
+                "top5=[];rs=d.get('results',d.get('repos',[]));"
+                "for r in rs[:]: top5.append({'name':r.get('full_name',''),'lang':r.get('language',''),'stars':r.get('stars',0),'desc':(r.get('description','') or '')[:80]});"
+                "d['top_repos']=top5;d['total_count']=len(rs);"
+                "print('RESULT:'+__import__('json').dumps({'s':d.get('success',True),'count':d.get('count',len(rs)),'total':len(rs),'top':top5},ensure_ascii=False))"
             )
             _proc = await asyncio.create_subprocess_exec(
                 _sy.executable, "-c", _code,
@@ -355,7 +358,9 @@ async def coordinator_execute(body: dict = None):
                 return {"module": mod_name, "error": _e.decode('utf8','replace')[:200]}
             _out = _o.decode('utf8','replace')
             _d = _js.loads(_out.split('RESULT:')[-1].strip())
-            return {"module": mod_name, "success": _d.get('s', True), "summary": _d.get('d', _out[:200])[:200]}
+            top_repos = _d.get('top', [])
+            summary = "; ".join([f"#{i+1} {r['name']}({r['stars']}⭐)" for i, r in enumerate(top_repos)]) if top_repos else _d.get('error', 'done')
+            return {"module": mod_name, "success": _d.get('s', True), "summary": summary, "total_count": _d.get('total', 0), "count": _d.get('count', 0)}
         except Exception as e:
             return {"module": mod_name, "error": f"{type(e).__name__}:{str(e)[:120]}"}
 
