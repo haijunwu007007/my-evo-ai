@@ -108,13 +108,28 @@ async def scheduler_status():
 
 @router.get("/api/scheduler/tasks")
 async def scheduler_tasks():
-    if HAS_SCHEDULER and _scheduler_instance:
-        try:
-            tasks = [t.to_dict() if hasattr(t, 'to_dict') else t for t in _scheduler_instance.list_tasks()]
-            items = sorted(tasks, key=lambda t: t.get("created_at", ""), reverse=True)
-            return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "core"}
-        except Exception:
-            pass
+    # 优先从引擎SQLite读（有15个持久化任务）
+    try:
+        import sqlite3, json
+        _db = Path(".evo_data/scheduler/scheduler.db")
+        if _db.exists():
+            conn = sqlite3.connect(str(_db))
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT * FROM scheduled_tasks ORDER BY created_at DESC").fetchall()
+            conn.close()
+            if rows:
+                items = []
+                for r in rows:
+                    d = dict(r)
+                    d['target_params'] = json.loads(d.get('target_params') or '{}')
+                    items.append(d)
+                    # 同步到内存字典
+                    if d.get('id') not in _scheduler_tasks_db:
+                        _scheduler_tasks_db[d['id']] = d
+                return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "dict"}
+    except Exception:
+        pass
+    # 字典兜底
     items = sorted(_scheduler_tasks_db.values(), key=lambda t: t.get("created_at", ""), reverse=True)
     return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "dict"}
 
