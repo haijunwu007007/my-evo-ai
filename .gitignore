@@ -58,3 +58,4 @@ syntax_err.txt
 api_stderr*.txt
 api_stdout*.txt
 test_out.txt
+.gitignore
