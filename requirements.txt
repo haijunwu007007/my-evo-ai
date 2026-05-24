@@ -1,4 +1,5 @@
 # AUTO-EVO-AI V0.1 — Python 依赖
+# Python 版本要求: >=3.11 (推荐 3.11 或 3.12)
 # 使用方式: pip install -r requirements.txt
 # 或: uv pip install -r requirements.txt
 

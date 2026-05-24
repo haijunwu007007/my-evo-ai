@@ -506,13 +506,9 @@ class SchedulerEngine:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
-                await self._task
-            except asyncio.CancelledError:
-                pass
         logger.info("[Scheduler] 调度器已停止")
 
-    def _tick_loop(self) -> Any:
+    async def _tick_loop(self) -> Any:
         """主循环: 每秒检查一次"""
         while self._running:
             try:
@@ -552,7 +548,7 @@ class SchedulerEngine:
             # 分发执行
             asyncio.create_task(self._execute_task(task))
 
-    def _execute_task(self, task: ScheduledTask) -> Any:
+    async def _execute_task(self, task: ScheduledTask) -> Any:
         """执行单个调度任务"""
         now = datetime.now()
         exec_ = TaskExecution(
@@ -618,7 +614,7 @@ class SchedulerEngine:
         logger.info("[Scheduler] 任务 %s 执行完成: %s (%dms)",
                      task.name, exec_.status, exec_.duration_ms)
 
-    def _execute_task_with_retry(self, task: ScheduledTask, exec_: TaskExecution) -> Any:
+    async def _execute_task_with_retry(self, task: ScheduledTask, exec_: TaskExecution) -> Any:
         """重试执行"""
         now = datetime.now()
         exec_.started_at = now.isoformat()

@@ -445,10 +445,6 @@ class FileWatcher:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
-                await self._task
-            except asyncio.CancelledError:
-                pass
 
     def _poll_loop(self) -> Any:
         while self._running:
@@ -551,7 +547,7 @@ class EventEngine:
 
     def stop(self) -> None:
         self._running = False
-        await self._file_watcher.stop()
+        self._file_watcher.stop()
         self.emit(Event(type=EventType.SYSTEM_SHUTDOWN, source="event_engine", priority=2))
         logger.info("[EventEngine] 已停止")
 
