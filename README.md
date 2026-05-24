@@ -4,30 +4,36 @@
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
-## 快速开始
+## 🚀 5分钟启动
 
-### Windows (推荐)
-
+### 已有依赖
 ```bash
+git clone https://github.com/haijunwu007007/my-evo-ai.git
+cd my-evo-ai
+pip install -r requirements.txt
 python api_server.py
 ```
+打开 http://127.0.0.1:8765/dashboard
 
-浏览器打开 http://127.0.0.1:8765/dashboard
-
-### 手动启动
-
+### 从头开始
 ```bash
+git clone https://github.com/haijunwu007007/my-evo-ai.git
+cd my-evo-ai
 python -m venv venv
-venv\Scripts\activate
+# Windows: venv\Scripts\activate  |  Linux/Mac: source venv/bin/activate
 pip install -r requirements.txt
 python api_server.py
 ```
 
-浏览器访问：http://127.0.0.1:8765/dashboard
+### Docker
+```bash
+git clone https://github.com/haijunwu007007/my-evo-ai.git
+cd my-evo-ai
+docker compose up -d
+```
 
 ### 手机访问
-
-确保手机和电脑在同一 WiFi 下，访问：`http://<电脑IP>:8765/dashboard`
+电脑和手机同一WiFi：`http://<电脑IP>:8765/dashboard`
 
 ## 系统架构
 
