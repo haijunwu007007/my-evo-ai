@@ -159,38 +159,36 @@ window.I18N = {
 
     // 切换 (block-9 风格)
     toggle: function() {
-        this.setLocale(this.current === 'zh' ? 'en' : 'zh');
+        var next = this.current === 'zh' ? 'en' : 'zh';
+        this.current = next;
+        localStorage.setItem(LANG_KEY, next);
+        this.applyTranslations();
     },
 
     // 应用到DOM
     applyTranslations: function() {
-        // data-i18n 属性翻译 (key模式)
-        document.querySelectorAll('[data-i18n]').forEach(function(el) {
-            var key = el.getAttribute('data-i18n');
-            if (!key) return;
-            var text = window.I18N.t(key);
-            if (text !== key) el.textContent = text;
-        });
-        // data-i18n-placeholder
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
-            var key = el.getAttribute('data-i18n-placeholder');
-            if (!key) return;
-            var text = window.I18N.t(key);
-            if (text !== key) el.placeholder = text;
-        });
-        // TreeWalker 全文替换: 遍历所有文本节点匹配LOOKUP
-        if (this.current === 'en') {
-            document.querySelectorAll('.nav-item .nav-text, .nav-item span:last-child, .sidebar a span, [class*="nav"] span:last-child').forEach(function(el) {
-                var t = el.textContent.trim();
-                if (t && LOOKUP[t]) el.textContent = LOOKUP[t];
-            });
-        }
-        // 更新切换按钮文本
+        // 1) 先更新按钮文本（最基础的反馈）
         var label = this.current === 'zh' ? 'EN / 中' : '中 / EN';
         var btn1 = document.getElementById('lang-toggle-btn');
         var btn2 = document.getElementById('lang-switch');
-        if (btn1) btn1.textContent = label;
-        if (btn2) btn2.textContent = label;
+        if (btn1) { btn1.textContent = label; }
+        if (btn2) { btn2.textContent = label; }
+        // 2) data-i18n 属性翻译
+        var lang = this.current;
+        var isEn = lang === 'en';
+        document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            var key = el.getAttribute('data-i18n');
+            if (!key) return;
+            var text = isEn ? (EN[key] || key) : (ZH[key] || key);
+            if (text !== key) el.textContent = text;
+        });
+        // 3) 导航侧边栏文字替换
+        if (isEn) {
+            document.querySelectorAll('.nav-item span, .sidebar a span, [class*="sidebar"] li a, .nav-label, [class*="nav-text"]').forEach(function(el) {
+                var t = (el.textContent || '').trim();
+                if (t && LOOKUP[t]) el.textContent = LOOKUP[t];
+            });
+        }
         document.title = 'AUTO-EVO-AI V0.1';
     },
 
