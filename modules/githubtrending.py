@@ -715,7 +715,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "results": [r.to_dict() for r in result],
             }
 
-        # GitHub Search API（快速、准确、支持语言过滤）
+        # GitHub Search API（先直连，不通则走镜像代理）
         try:
             from datetime import datetime, timedelta
             period_config = {
@@ -730,13 +730,29 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if language and language != "all":
                 q_parts.append(f"language:{language}")
             q = "+".join(q_parts)
-            url = f"https://api.github.com/search/repositories?q={q}&sort=stars&order=desc&per_page={fetch_limit}"
-            req = urllib.request.Request(
-                url,
-                headers={"User-Agent": "AUTO-EVO-AI-V0.1", "Accept": "application/vnd.github.v3+json"},
-            )
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read())
+            query_path = f"/search/repositories?q={q}&sort=stars&order=desc&per_page={fetch_limit}"
+            # 候选URL：直连(快) → ghproxy(国内可用) → kgithub(备用)
+            _urls = [
+                ("直连", f"https://api.github.com{query_path}", 5),
+                # 国内镜像（大部分已不可用，保留注释待恢复）
+                # ("ghproxy.net", f"https://ghproxy.net/https://api.github.com{query_path}", 10),
+            ]
+            data = None
+            _last_err = None
+            for _label, url, _timeout in _urls:
+                try:
+                    req = urllib.request.Request(
+                        url,
+                        headers={"User-Agent": "AUTO-EVO-AI-V0.1", "Accept": "application/vnd.github.v3+json"},
+                    )
+                    with urllib.request.urlopen(req, timeout=_timeout) as resp:
+                        data = json.loads(resp.read())
+                    break
+                except Exception as e:
+                    _last_err = e
+                    continue
+            if data is None:
+                raise _last_err or Exception("所有API通道均不可用")
             self._repos.clear()
             for idx, item in enumerate(data.get("items", [])[:fetch_limit]):
                 self._repos.append(TrendingRepo(

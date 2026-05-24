@@ -97,11 +97,13 @@ async def stop_engines():
 @router.get("/api/scheduler/status")
 async def scheduler_status():
     if HAS_SCHEDULER and _scheduler_instance:
-        info = _scheduler_instance.store() if hasattr(_scheduler_instance, 'store') else {}
-        tasks = info.get('tasks', {}) if isinstance(info, dict) else {}
-        active = sum(1 for t in tasks.values() if isinstance(t, dict) and t.get("status") == "running")
-        return {"success": True, "running": True, "active_tasks": active, "total_tasks": len(tasks),
-                "engine": "core.scheduler_engine"}
+        try:
+            tasks = {t.id: t.to_dict() if hasattr(t, 'to_dict') else t for t in _scheduler_instance.list_tasks()}
+            active = sum(1 for t in tasks.values() if isinstance(t, dict) and t.get("status") in ("active", "running"))
+            return {"success": True, "running": True, "active_tasks": active, "total_tasks": len(tasks),
+                    "engine": "core.scheduler_engine"}
+        except Exception as e:
+            logger.warning(f"[SCHEDULER] engine 读取失败: {e}, 回退字典")
     active = sum(1 for t in _scheduler_tasks_db.values() if isinstance(t, dict) and t.get("status") == "running")
     return {"success": True, "running": True, "active_tasks": active, "total_tasks": len(_scheduler_tasks_db),
             "engine": "dict"}
@@ -109,10 +111,12 @@ async def scheduler_status():
 @router.get("/api/scheduler/tasks")
 async def scheduler_tasks():
     if HAS_SCHEDULER and _scheduler_instance:
-        info = _scheduler_instance.store() if hasattr(_scheduler_instance, 'store') else {}
-        tasks = info.get('tasks', {}) if isinstance(info, dict) else {}
-        items = sorted(tasks.values(), key=lambda t: t.get("created_at", ""), reverse=True) if tasks else []
-        return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "core"}
+        try:
+            tasks = [t.to_dict() if hasattr(t, 'to_dict') else t for t in _scheduler_instance.list_tasks()]
+            items = sorted(tasks, key=lambda t: t.get("created_at", ""), reverse=True)
+            return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "core"}
+        except Exception as e:
+            logger.warning(f"[SCHEDULER] tasks 读取失败: {e}, 回退字典")
     tasks = sorted(_scheduler_tasks_db.values(), key=lambda t: t.get("created_at", ""), reverse=True)
     return {"success": True, "tasks": tasks, "count": len(tasks), "running": True, "engine": "dict"}
 
@@ -129,9 +133,9 @@ async def scheduler_create(body: dict = None):
     }
     if HAS_SCHEDULER and _scheduler_instance:
         try:
-            _scheduler_instance.store(("tasks", tid, task))
+            _scheduler_tasks_db[tid] = task; _save_all()
         except Exception as e:
-            logger.warning(f"[ENGINE] scheduler.store 失败: {e}, 回退到字典")
+            logger.warning(f"[ENGINE] scheduler 写入失败: {e}")
             _scheduler_tasks_db[tid] = task; _save_all()
     else:
         _scheduler_tasks_db[tid] = task; _save_all()
