@@ -93,7 +93,7 @@ class Event:
     timestamp: str = ""
     priority: int = 5                   # 1(最高) - 10(最低)
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if not self.id:
             self.id = hashlib.md5(
                 f"{self.type}:{self.source}:{time.time()}".encode()
@@ -133,7 +133,7 @@ class EventRule:
     created_at: str = ""
     updated_at: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if not self.id:
             import secrets
             self.id = secrets.token_hex(8)
@@ -187,7 +187,7 @@ class EventRule:
 class EventStore:
     """SQLite事件存储"""
 
-    def __init__(self, data_dir: str = ".evo_data/events"):
+    def __init__(self, data_dir: str = ".evo_data/events") -> None:
         self._dir = Path(data_dir)
         self._dir.mkdir(parents=True, exist_ok=True)
         self._db_path = self._dir / "events.db"
@@ -199,7 +199,7 @@ class EventStore:
         conn.execute("PRAGMA journal_mode=WAL")
         return conn
 
-    def _init_db(self):
+    def _init_db(self) -> Any:
         conn = self._get_conn()
         try:
             conn.executescript("""
@@ -235,7 +235,7 @@ class EventStore:
         finally:
             conn.close()
 
-    def save_event(self, event: Event):
+    def save_event(self, event: Event) -> None:
         conn = self._get_conn()
         try:
             conn.execute("""
@@ -395,7 +395,7 @@ class EventStore:
 class FileWatcher:
     """目录文件变化监听 (基于轮询, 跨平台兼容)"""
 
-    def __init__(self, emit_callback: Callable[[Event], None]):
+    def __init__(self, emit_callback: Callable[[Event], None]) -> None:
         self._emit = emit_callback
         self._watches: Dict[str, dict] = {}  # path -> {mtime_map, patterns, recursive}
         self._running = False
@@ -419,7 +419,7 @@ class FileWatcher:
     def unwatch(self, directory: str):
         self._watches.pop(str(Path(directory).resolve()), None)
 
-    def _snapshot(self, abs_path: str):
+    def _snapshot(self, abs_path: str) -> Any:
         """记录当前文件快照"""
         watch = self._watches.get(abs_path)
         if not watch:
@@ -434,14 +434,14 @@ class FileWatcher:
                     except OSError:
                         pass
 
-    async def start(self):
+    def start(self) -> None:
         if self._running:
             return
         self._running = True
         self._task = asyncio.create_task(self._poll_loop())
         logger.info("[FileWatcher] 已启动, 监听 %d 个目录", len(self._watches))
 
-    async def stop(self):
+    def stop(self) -> None:
         self._running = False
         if self._task:
             self._task.cancel()
@@ -450,7 +450,7 @@ class FileWatcher:
             except asyncio.CancelledError:
                 pass
 
-    async def _poll_loop(self):
+    def _poll_loop(self) -> Any:
         while self._running:
             try:
                 self._check_all()
@@ -458,14 +458,14 @@ class FileWatcher:
                 logger.error("[FileWatcher] 检查异常: %s", e)
             await asyncio.sleep(self._check_interval)
 
-    def _check_all(self):
+    def _check_all(self) -> Any:
         for abs_path, watch in list(self._watches.items()):
             try:
                 self._check_directory(abs_path, watch)
             except Exception as e:
                 logger.error("[FileWatcher] 检查 %s 异常: %s", abs_path, e)
 
-    def _check_directory(self, abs_path: str, watch: dict):
+    def _check_directory(self, abs_path: str, watch: dict) -> Any:
         root = Path(abs_path)
         if not root.exists():
             return
@@ -520,7 +520,7 @@ class EventEngine:
     事件驱动引擎 — 上市公司级事件总线
     """
 
-    def __init__(self, data_dir: str = ".evo_data/events"):
+    def __init__(self, data_dir: str = ".evo_data/events") -> None:
         self._store = EventStore(data_dir)
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)  # type → [callbacks]
         self._global_subscribers: List[Callable] = []
@@ -540,7 +540,7 @@ class EventEngine:
 
     # ─── 生命周期 ───
 
-    async def start(self):
+    def start(self) -> None:
         if self._running:
             return
         self._running = True
@@ -549,7 +549,7 @@ class EventEngine:
                        data={"version": "V0.1"}, priority=2))
         logger.info("[EventEngine] 已启动")
 
-    async def stop(self):
+    def stop(self) -> None:
         self._running = False
         await self._file_watcher.stop()
         self.emit(Event(type=EventType.SYSTEM_SHUTDOWN, source="event_engine", priority=2))
@@ -598,7 +598,7 @@ class EventEngine:
 
     # ─── 规则引擎 ───
 
-    def _process_rules(self, event: Event):
+    def _process_rules(self, event: Event) -> Any:
         for rule in self._rules:
             if rule.matches(event):
                 rule.match_count += 1
@@ -607,7 +607,7 @@ class EventEngine:
                 # 异步执行动作
                 asyncio.create_task(self._execute_rule_action(rule, event))
 
-    async def _execute_rule_action(self, rule: EventRule, event: Event):
+    def _execute_rule_action(self, rule: EventRule, event: Event) -> Any:
         """执行规则动作"""
         try:
             action = rule.action_type

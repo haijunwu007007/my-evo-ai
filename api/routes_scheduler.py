@@ -67,7 +67,7 @@ except Exception as e:
     logger.warning(f"[ENGINE] TaskQueue 不可用: {e}")
 
 
-async def start_engines():
+def start_engines() -> None:
     """启动所有已加载引擎的后台循环"""
     global _engine_tasks
     if HAS_SCHEDULER and hasattr(_scheduler_instance, 'start'):
@@ -79,7 +79,7 @@ async def start_engines():
     logger.info("[ENGINES] 调度器/事件引擎/任务队列 已启动")
 
 
-async def stop_engines():
+def stop_engines() -> None:
     """停止所有引擎的后台循环"""
     for t in _engine_tasks:
         t.cancel()

@@ -305,7 +305,7 @@ if __name__ == "__main__":
 
     if _frozen:
         import threading, webbrowser
-        def _open_browser():
+        def _open_browser() -> Any:
             time.sleep(2)
             webbrowser.open(f"http://localhost:{port}/dashboard")
         threading.Thread(target=_open_browser, daemon=True).start()

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class PipelineEngine:
-    def __init__(self):
+    def __init__(self) -> None:
         self._history: List[dict] = []
         self._max_history = 100
 
@@ -94,7 +94,7 @@ class PipelineEngine:
 
         return pipeline_record
 
-    def _load_module(self, name: str):
+    def _load_module(self, name: str) -> Any:
         """动态加载模块"""
         import importlib
         mod_path = f"modules.{name}"
@@ -136,35 +136,35 @@ def get_pipeline() -> PipelineEngine:
         _engine = PipelineEngine()
     return _engine
 
-def get_pipeline_engine():
+def get_pipeline_engine() -> Any:
     """旧版兼容别名"""
     return get_pipeline()
 
-def get_pipeline_store():
+def get_pipeline_store() -> Any:
     """旧版兼容：存储层"""
     global _pipeline_store
     if _pipeline_store is None:
         class PipelineStore:
-            def get_execution_stats(self):
+            def get_execution_stats(self) -> Any:
                 e = get_pipeline()
                 stats = e.get_stats()
                 stats["running"] = 0
                 stats["completed"] = stats["success"]
                 return stats
-            def list_executions(self, pipeline_id="", limit=10, offset=0):
+            def list_executions(self, pipeline_id="", limit=10, offset=0) -> list:
                 e = get_pipeline()
                 return e.get_history(limit)
-            def get_execution(self, exec_id):
+            def get_execution(self, exec_id) -> Any:
                 e = get_pipeline()
                 for h in e._history:
                     if h.get("id") == exec_id:
                         return h
                 return None
-            def list_pipelines(self, tag="", active_only=False):
+            def list_pipelines(self, tag="", active_only=False) -> list:
                 return []
-            def get_pipeline(self, pipeline_id):
+            def get_pipeline(self, pipeline_id) -> Any:
                 return None
-            def get_pipeline_versions(self, pipeline_id):
+            def get_pipeline_versions(self, pipeline_id) -> Any:
                 return []
             def delete_pipeline(self, pipeline_id):
                 return True

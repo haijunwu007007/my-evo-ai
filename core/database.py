@@ -29,7 +29,7 @@ def get_connection() -> sqlite3.Connection:
 
 
 @contextmanager
-def transaction():
+def transaction() -> Any:
     """事务上下文管理器 — 自动提交/回滚"""
     conn = get_connection()
     try:
@@ -40,7 +40,7 @@ def transaction():
         raise
 
 
-def initialize():
+def initialize() -> sqlite3.Connection:
     """创建或升级数据库 schema"""
     conn = get_connection()
     cur = conn.execute("PRAGMA user_version")

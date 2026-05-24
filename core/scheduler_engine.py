@@ -88,7 +88,7 @@ class ScheduledTask:
     run_count: int = 0
     fail_count: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if not self.id:
             import secrets
             self.id = secrets.token_hex(8)
@@ -113,7 +113,7 @@ class TaskExecution:
     retry_count: int = 0
     scheduled_at: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if not self.id:
             import secrets
             self.id = secrets.token_hex(12)
@@ -259,7 +259,7 @@ class CronParser:
 class ScheduleStore:
     """调度持久化"""
 
-    def __init__(self, data_dir: str = ".evo_data/scheduler"):
+    def __init__(self, data_dir: str = ".evo_data/scheduler") -> None:
         self._dir = Path(data_dir)
         self._dir.mkdir(parents=True, exist_ok=True)
         self._db_path = self._dir / "scheduler.db"
@@ -272,7 +272,7 @@ class ScheduleStore:
         conn.execute("PRAGMA synchronous=NORMAL")
         return conn
 
-    def _init_db(self):
+    def _init_db(self) -> Any:
         conn = self._get_conn()
         try:
             conn.executescript("""
@@ -471,7 +471,7 @@ class SchedulerEngine:
     定时调度引擎 — 上市公司级任务调度
     """
 
-    def __init__(self, data_dir: str = ".evo_data/scheduler"):
+    def __init__(self, data_dir: str = ".evo_data/scheduler") -> None:
         self._store = ScheduleStore(data_dir)
         self._running = False
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -486,7 +486,7 @@ class SchedulerEngine:
 
     # ─── 生命周期 ───
 
-    async def start(self):
+    def start(self) -> None:
         """启动调度器 (在FastAPI lifespan中调用)"""
         if self._running:
             return
@@ -501,7 +501,7 @@ class SchedulerEngine:
         self._task = self._loop.create_task(self._tick_loop())
         logger.info("[Scheduler] 调度器已启动 | 活跃任务: %d", len(tasks))
 
-    async def stop(self):
+    def stop(self) -> None:
         """停止调度器"""
         self._running = False
         if self._task:
@@ -512,7 +512,7 @@ class SchedulerEngine:
                 pass
         logger.info("[Scheduler] 调度器已停止")
 
-    async def _tick_loop(self):
+    def _tick_loop(self) -> Any:
         """主循环: 每秒检查一次"""
         while self._running:
             try:
@@ -521,7 +521,7 @@ class SchedulerEngine:
                 logger.error("[Scheduler] tick异常: %s", e)
             await asyncio.sleep(1)
 
-    async def _check_and_dispatch(self):
+    def _check_and_dispatch(self) -> Any:
         """检查到时任务并分发执行"""
         now = datetime.now()
         active_tasks = self._store.list_tasks(status="active")
@@ -552,7 +552,7 @@ class SchedulerEngine:
             # 分发执行
             asyncio.create_task(self._execute_task(task))
 
-    async def _execute_task(self, task: ScheduledTask):
+    def _execute_task(self, task: ScheduledTask) -> Any:
         """执行单个调度任务"""
         now = datetime.now()
         exec_ = TaskExecution(
@@ -618,7 +618,7 @@ class SchedulerEngine:
         logger.info("[Scheduler] 任务 %s 执行完成: %s (%dms)",
                      task.name, exec_.status, exec_.duration_ms)
 
-    async def _execute_task_with_retry(self, task: ScheduledTask, exec_: TaskExecution):
+    def _execute_task_with_retry(self, task: ScheduledTask, exec_: TaskExecution) -> Any:
         """重试执行"""
         now = datetime.now()
         exec_.started_at = now.isoformat()
@@ -745,7 +745,7 @@ class SchedulerEngine:
 
     # ─── 时间计算 ───
 
-    def _update_next_run(self, task: ScheduledTask):
+    def _update_next_run(self, task: ScheduledTask) -> Any:
         """更新任务的next_run_at"""
         now = datetime.now()
         if task.schedule_type == "cron":

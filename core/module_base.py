@@ -14,7 +14,7 @@ import json
 class ModuleBase(ABC):
     """模块基类"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None):
+    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
         self.id = module_id
         self.config = config or {}
         self.enabled = True
@@ -73,7 +73,7 @@ class ModuleBase(ABC):
 class CompositeModule(ModuleBase):
     """组合模块 - 包含多个子模块"""
 
-    def __init__(self, module_id: str, sub_modules: List[ModuleBase], config: Optional[Dict] = None):
+    def __init__(self, module_id: str, sub_modules: List[ModuleBase], config: Optional[Dict] = None) -> None:
         super().__init__(module_id, config)
         self.sub_modules = {m.id: m for m in sub_modules}
 
@@ -98,7 +98,7 @@ class CompositeModule(ModuleBase):
 class AsyncModule(ModuleBase):
     """异步模块 - 支持长时间运行任务"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None):
+    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
         super().__init__(module_id, config)
         self.task = None
         self.progress = 0
@@ -132,7 +132,7 @@ class AsyncModule(ModuleBase):
 class StreamingModule(ModuleBase):
     """流式模块 - 支持流式输出"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None):
+    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
         super().__init__(module_id, config)
         self.queue = asyncio.Queue()
 
@@ -147,7 +147,7 @@ class StreamingModule(ModuleBase):
             self.status = "error"
             return {"success": False, "error": str(e)}
 
-    async def _stream_task(self, params: Dict[str, Any]):
+    def _stream_task(self, params: Dict[str, Any]) -> Any:
         """流式任务"""
         try:
             async for chunk in self._generate_stream(params):
@@ -174,7 +174,7 @@ class StreamingModule(ModuleBase):
 class ToolModule(ModuleBase):
     """工具类模块 - 提供工具能力"""
 
-    def __init__(self, module_id: str, tools: List[Dict], config: Optional[Dict] = None):
+    def __init__(self, module_id: str, tools: List[Dict], config: Optional[Dict] = None) -> None:
         super().__init__(module_id, config)
         self.tools = {t["name"]: t for t in tools}
 

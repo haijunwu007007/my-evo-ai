@@ -28,7 +28,7 @@ _PERSISTENT_DBS = {
     "rules": (_rules_db, dict),
 }
 
-def _save_all():
+def _save_all() -> Any:
     for name, (db, _) in _PERSISTENT_DBS.items():
         try:
             with open(DATA_DIR / f"{name}.json", "w", encoding="utf-8") as f:
@@ -36,7 +36,7 @@ def _save_all():
         except Exception as e:
             logger.warning(f"保存 {name}.json 失败: {e}")
 
-def _load_all():
+def _load_all() -> Any:
     for name, (db, dtype) in _PERSISTENT_DBS.items():
         path = DATA_DIR / f"{name}.json"
         if path.exists():
@@ -61,10 +61,10 @@ try:
 except ImportError:
     _CONFIG_PATH = DATA_DIR / "config.json"
     class _ConfigCenter:
-        def __init__(self):
+        def __init__(self) -> None:
             self._data = {}
             self._load()
-        def _load(self):
+        def _load(self) -> Any:
             if _CONFIG_PATH.exists():
                 try: self._data = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
                 except: self._data = {}
@@ -72,7 +72,7 @@ except ImportError:
                 try:
                     import yaml
                     cfg = yaml.safe_load((BASE_DIR / "config.yaml").read_text(encoding="utf-8")) or {}
-                    def _flatten(d, prefix="", out=None):
+                    def _flatten(d, prefix="", out=None) -> Any:
                         if out is None: out = {}
                         for k, v in d.items():
                             key = f"{prefix}.{k}" if prefix else k
@@ -88,13 +88,13 @@ except ImportError:
         def delete(self, k): self._data.pop(k, None); self._persist(); return True
         def save(self): self._persist(); return True
         def reload(self): self._load(); return True
-        def _persist(self):
+        def _persist(self) -> Any:
             _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
             _CONFIG_PATH.write_text(json.dumps(self._data, ensure_ascii=False, indent=2), encoding="utf-8")
     def get_config_center(): return _ConfigCenter()
 
 # ── 局域网 IP ──
-def _get_lan_ip():
+def _get_lan_ip() -> Any:
     try:
         s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
         s.settimeout(0.1)
