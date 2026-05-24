@@ -147,7 +147,7 @@ class StreamingModule(ModuleBase):
             self.status = "error"
             return {"success": False, "error": str(e)}
 
-    def _stream_task(self, params: Dict[str, Any]) -> Any:
+    async def _stream_task(self, params: Dict[str, Any]) -> Any:
         """流式任务"""
         try:
             async for chunk in self._generate_stream(params):

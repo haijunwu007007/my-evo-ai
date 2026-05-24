@@ -66,6 +66,7 @@ from api.routes_ws import router as ws_router
 from api.routes_auth_system import router as auth_system_router
 from api.routes_scheduler import router as scheduler_router
 from api.routes_coordinator import router as coordinator_router
+from api.routes_insights import router as insights_router
 
 app.include_router(modules_router)
 app.include_router(services_router)
@@ -73,6 +74,7 @@ app.include_router(ws_router)
 app.include_router(auth_system_router)
 app.include_router(scheduler_router)
 app.include_router(coordinator_router)
+app.include_router(insights_router)
 
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"

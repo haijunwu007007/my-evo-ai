@@ -116,11 +116,21 @@ _TASK_TEMPLATES = {
     "health_report": {
         "name": "🩺 系统健康报告",
         "desc": "检查全部模块健康状态→生成报告→推送到通知",
-        "steps": [{"module":"health_check","action":"check_all","params":{}},{"module":"report_generator","action":"html","params":{"type":"health"}},{"module":"feishu_notifier","action":"send","params":{"title":"系统健康报告"}}],
+        "steps": [{"module":"system_health","action":"check_all","params":{}},{"module":"report_generator","action":"report","params":{"type":"health"}},{"module":"notification_center","action":"send","params":{"title":"系统健康报告"}}],
     },
     "data_backup": {
         "name": "💾 数据备份通知",
         "desc": "执行数据备份→生成摘要→发送通知",
-        "steps": [{"module":"object_storage","action":"backup","params":{}},{"module":"report_generator","action":"summary","params":{"type":"backup"}},{"module":"enterprise_notifier","action":"send","params":{"title":"备份完成"}}],
+        "steps": [{"module":"object_storage","action":"backup","params":{}},{"module":"report_generator","action":"report","params":{"type":"backup"}},{"module":"notification_center","action":"send","params":{"title":"备份完成"}}],
+    },
+    "daily_self_evolution": {
+        "name": "🧬 每日自我进化",
+        "desc": "扫描GitHub趋势→代码分析→GLM-4解读→进化报告",
+        "steps": [
+            {"module":"githubtrending","action":"scan_trending","params":{"language":"all","period":"daily"}},
+            {"module":"githubtrending","action":"analyze","params":{}},
+            {"module":"evo_engine","action":"evolve","params":{"type":"daily_analysis"}},
+        ],
+        "cron": "0 9 * * *",
     },
 }
