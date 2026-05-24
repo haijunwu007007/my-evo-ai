@@ -568,7 +568,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "https://github.com/trending",
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
             )
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            with urllib.request.urlopen(req, timeout=6) as resp:
                 html = resp.read().decode("utf-8", errors="replace")
             self._parse_trending_html(html)
             ok = len(self._repos) > 0
@@ -698,11 +698,12 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         now = time.time()
         period_key = period.value if hasattr(period, 'value') else str(period)
 
-        # 5 分钟缓存
-        if now - self._last_fetch < 300 and self._repos:
-            filtered = self._repos
-            if language:
-                filtered = [r for r in filtered if r.language.lower() == language.lower()]
+        # 1 分钟缓存（language='all' 时使用完整缓存不过滤）
+        if now - self._last_fetch < 60 and self._repos:
+            if language and language != "all":
+                filtered = [r for r in self._repos if r.language.lower() == language.lower()]
+            else:
+                filtered = list(self._repos)
             if ai_filter:
                 filtered = [r for r in filtered if self._is_ai_repo(r)]
             result = filtered[:limit]
@@ -714,61 +715,51 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "results": [r.to_dict() for r in result],
             }
 
-        # 方案1: 爬 github.com/trending
-        if self._fetch_trending_live() and len(self._repos) >= 5:
-            logger.info("GitHub Trending 实时抓取成功: %d 个仓库", len(self._repos))
+        # GitHub Search API（快速、准确、支持语言过滤）
+        try:
+            from datetime import datetime, timedelta
+            period_config = {
+                "daily":  {"days": 7, "min_stars": 50},
+                "weekly": {"days": 30, "min_stars": 100},
+                "monthly": {"days": 90, "min_stars": 300},
+            }
+            cfg = period_config.get(period_key, period_config["daily"])
+            cutoff = (datetime.utcnow() - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
+            fetch_limit = max(limit * 2, 50)
+            q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
+            if language and language != "all":
+                q_parts.append(f"language:{language}")
+            q = "+".join(q_parts)
+            url = f"https://api.github.com/search/repositories?q={q}&sort=stars&order=desc&per_page={fetch_limit}"
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "AUTO-EVO-AI-V0.1", "Accept": "application/vnd.github.v3+json"},
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read())
+            self._repos.clear()
+            for idx, item in enumerate(data.get("items", [])[:fetch_limit]):
+                self._repos.append(TrendingRepo(
+                    rank=idx + 1,
+                    full_name=item.get("full_name", ""),
+                    language=item.get("language") or "",
+                    description=(item.get("description") or "")[:200],
+                    stars=item.get("stargazers_count", 0),
+                    forks=item.get("forks_count", 0),
+                    stars_today=0, stars_week=0, stars_month=0,
+                    topics=item.get("topics", []),
+                    category=self._classifier.classify(item.get("topics", []), item.get("description") or "", item.get("language") or ""),
+                ))
+            self._velocity_calc.rank_velocity(self._repos)
+            self._stats["repos_tracked"] = len(self._repos)
             self._last_fetch = now
-            self._save_cache()
-        else:
-            # 方案2: Search API — created + stars 双过滤
-            logger.info("Trending 页面抓取失败，切换 Search API")
-            try:
-                from datetime import datetime, timedelta
-                # 按 period 设置合理的时间窗口和最低星标
-                period_config = {
-                    "daily":  {"days": 30, "min_stars": 300},
-                    "weekly": {"days": 90, "min_stars": 500},
-                    "monthly": {"days": 180, "min_stars": 1000},
-                }
-                cfg = period_config.get(period_key, period_config["daily"])
-                cutoff = (datetime.utcnow() - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
-                fetch_limit = max(limit * 2, 50)
-                q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
-                if language:
-                    q_parts.append(f"language:{language}")
-                q = "+".join(q_parts)
-                url = f"https://api.github.com/search/repositories?q={q}&sort=stars&order=desc&per_page={fetch_limit}"
-                req = urllib.request.Request(
-                    url,
-                    headers={"User-Agent": "AUTO-EVO-AI-V0.1", "Accept": "application/vnd.github.v3+json"},
-                )
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    data = json.loads(resp.read())
-                self._repos.clear()
-                for idx, item in enumerate(data.get("items", [])[:fetch_limit]):
-                    self._repos.append(TrendingRepo(
-                        rank=idx + 1,
-                        full_name=item.get("full_name", ""),
-                        language=item.get("language") or "",
-                        description=(item.get("description") or "")[:200],
-                        stars=item.get("stargazers_count", 0),
-                        forks=item.get("forks_count", 0),
-                        stars_today=0,
-                        stars_week=0,
-                        stars_month=0,
-                        topics=item.get("topics", []),
-                        category=self._classifier.classify(item.get("topics", []), item.get("description") or "", item.get("language") or ""),
-                    ))
-                self._velocity_calc.rank_velocity(self._repos)
-                self._stats["repos_tracked"] = len(self._repos)
-                self._last_fetch = now
-                logger.info("Search API 获取 %d 个仓库 (created>%sd, stars>%d)", len(self._repos), cfg["days"], cfg["min_stars"])
-            except Exception as e:
-                logger.error("Trending 页面和 Search API 均失败: %s", e)
-                return {"success": False, "error": f"数据获取失败: {e}", "results": [], "count": 0}
+            logger.info("Search API 获取 %d 个仓库 (created>%sd, stars>%d)", len(self._repos), cfg["days"], cfg["min_stars"])
+        except Exception as e:
+            logger.error("Search API 失败: %s", e)
+            return {"success": False, "error": f"数据获取失败: {e}", "results": [], "count": 0}
 
         filtered = self._repos
-        if language:
+        if language and language != "all":
             filtered = [r for r in filtered if r.language.lower() == language.lower()]
         if ai_filter:
             filtered = [r for r in filtered if self._is_ai_repo(r)]
@@ -886,7 +877,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         action_lower = action.lower() if action else ""
 
-        if action_lower in ("trending", "fetch_trending", "analyze"):
+        if action_lower in ("trending", "fetch_trending", "scan_trending", "analyze"):
             return self.fetch_trending(
                 kwargs.get("language", ""), TrendPeriod(kwargs.get("period", "daily")), kwargs.get("limit", 25)
             )
@@ -905,9 +896,9 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         elif action_lower in ("status", "info", "ping"):
             return {"success": True, "status": "running", "repos": len(self._repos)}
         elif action_lower in ("help", "list_actions", "actions"):
-            return {"success": True, "actions": ["trending", "fetch_trending", "analyze", "category", "languages", "snapshot", "history", "search", "stats"], "module": "githubtrending"}
+            return {"success": True, "actions": ["trending", "fetch_trending", "scan_trending", "analyze", "category", "languages", "snapshot", "history", "search", "stats"], "module": "githubtrending"}
         else:
-            return {"success": False, "error": f"Unknown action: {action}", "available": ["trending", "fetch_trending", "analyze", "category", "languages", "snapshot", "history", "search", "stats", "help"]}
+            return {"success": False, "error": f"Unknown action: {action}", "available": ["trending", "fetch_trending", "scan_trending", "analyze", "category", "languages", "snapshot", "history", "search", "stats", "help"]}
 
     def health_check(self) -> Dict[str, Any]:
         self.trace("githubtrending.health_check", "start")
