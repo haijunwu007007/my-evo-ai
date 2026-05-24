@@ -1,50 +1,65 @@
 {
-  "apiVersion": 1,
+  "__inputs": [],
+  "__requires": [],
+  "title": "AUTO-EVO-AI V0.1 系统监控",
+  "version": 1,
+  "timezone": "browser",
+  "schemaVersion": 27,
+  "tags": ["auto-evo-ai", "monitoring"],
   "panels": [
     {
-      "title": "API 请求速率",
-      "type": "graph",
-      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8},
-      "targets": [{"expr": "rate(request_count_total[5m])", "legendFormat": "rpm"}]
-    },
-    {
-      "title": "API 延迟",
-      "type": "graph",
-      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8},
-      "targets": [{"expr": "request_latency_seconds_sum / request_latency_seconds_count", "legendFormat": "avg_latency"}]
-    },
-    {
-      "title": "错误率",
-      "type": "graph",
-      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8},
-      "targets": [{"expr": "rate(error_count_total[5m])", "legendFormat": "errors"}]
-    },
-    {
-      "title": "模块健康状态",
-      "type": "table",
-      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
-      "targets": [{"expr": "module_health_status", "legendFormat": ""}]
-    },
-    {
-      "title": "系统资源 (CPU)",
-      "type": "gauge",
-      "gridPos": {"x": 0, "y": 16, "w": 8, "h": 8},
-      "targets": [{"expr": "cpu_percent"}]
-    },
-    {
-      "title": "系统资源 (内存)",
-      "type": "gauge",
-      "gridPos": {"x": 8, "y": 16, "w": 8, "h": 8},
-      "targets": [{"expr": "memory_percent"}]
-    },
-    {
-      "title": "活跃引擎",
+      "title": "系统运行时间",
       "type": "stat",
-      "gridPos": {"x": 16, "y": 16, "w": 8, "h": 8},
-      "targets": [{"expr": "engine_active{engine=~\"scheduler|events|queue\"}", "legendFormat": "{{engine}}"}]
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
+      "targets": [{"expr": "evo_system_uptime_seconds", "legendFormat": "运行秒数"}],
+      "fieldConfig": {"defaults": {"unit": "s", "color": {"mode": "green"}}}
+    },
+    {
+      "title": "模块总数",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
+      "targets": [{"expr": "evo_modules_total", "legendFormat": "模块数"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "green"}}}
+    },
+    {
+      "title": "引擎状态",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "targets": [{"expr": "evo_engine_active{engine=\"scheduler\"}", "legendFormat": "调度器"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "green"}}}
+    },
+    {
+      "title": "HTTP 请求速率",
+      "type": "graph",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [{"expr": "rate(evo_http_requests_total[5m])", "legendFormat": "{{endpoint}}"}]
+    },
+    {
+      "title": "HTTP 错误数",
+      "type": "graph",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [{"expr": "rate(evo_http_errors_total[5m])", "legendFormat": "{{endpoint}}"}]
+    },
+    {
+      "title": "请求延迟 (P99)",
+      "type": "graph",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [{"expr": "evo_http_request_duration_ms", "legendFormat": "{{endpoint}}"}]
+    },
+    {
+      "title": "WebSocket 连接数",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 20},
+      "targets": [{"expr": "evo_ws_connections_active", "legendFormat": "WS连接"}]
+    },
+    {
+      "title": "缓存命中率",
+      "type": "graph",
+      "gridPos": {"h": 6, "w": 8, "x": 4, "y": 20},
+      "targets": [
+        {"expr": "rate(evo_cache_hits_total[5m])", "legendFormat": "命中"},
+        {"expr": "rate(evo_cache_miss_total[5m])", "legendFormat": "未命中"}
+      ]
     }
-  ],
-  "title": "AUTO-EVO-AI 监控面板",
-  "tags": ["auto-evo-ai", "production"],
-  "timezone": "browser"
+  ]
 }

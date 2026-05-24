@@ -1,0 +1,38 @@
+# ═══════════════════════════════════════════════════════
+# AUTO-EVO-AI V0.1 — 监控栈 (Prometheus + Grafana)
+# 启动: docker compose -f docker-compose.monitoring.yml up -d
+# 访问: http://localhost:3000 (admin/admin)
+# ═══════════════════════════════════════════════════════
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: evo-prometheus
+    volumes:
+      - ./k8s/prometheus.yml:/etc/prometheus/prometheus.yml
+      - evo-prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: evo-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - evo-grafana-data:/var/lib/grafana
+      - ./k8s/grafana-dashboard.json:/etc/grafana/provisioning/dashboards/auto-evo-ai.json
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=
+    restart: unless-stopped
+
+volumes:
+  evo-prometheus-data:
+  evo-grafana-data:
