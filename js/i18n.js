@@ -3,7 +3,7 @@
 // 合并自 block-2.js / block-8.js / block-9.js
 // 一套数据、一套API、一个localStorage键
 // ═══════════════════════════════════════════════════════
-(function(){
+
 var LANG_KEY = 'evo_lang';
 
 // ── 统一翻译字典 ──
@@ -93,28 +93,26 @@ var EN = {
 
 // ── 直接短文本映射（block-2 风格: 中文→英文） ──
 var LOOKUP = {
-    // block-9 式 (中文→英文)
     '监控面板':'Dashboard','Agent管理':'Agent Mgmt','工作流编排':'Workflow','任务中心':'Task Center',
     '记忆管理':'Memory','进化中心':'Evolution','工具集成':'Tools','安全治理':'Security','性能监控':'Performance',
     '告警中心':'Alerts','日志中心':'Logs','系统设置':'Settings','集成配置':'Integrations','用户管理':'Users',
     'API管理':'API Mgmt','配置中心':'Config Center','调度配置':'Scheduler','报告中心':'Reports',
     '用户反馈':'Feedback','关于系统':'About','GitHub扫描':'GitHub Scan','数据备份':'Backup',
-    '插件市场':'Plugins','数据库':'Database',
-    '运行中':'Running','已停止':'Stopped','正常':'OK','异常':'Error',
+    '插件市场':'Plugins','数据库':'Database','运行中':'Running','已停止':'Stopped','正常':'OK','异常':'Error',
     '在线':'Online','离线':'Offline','空闲':'Idle','执行中':'Executing','成功':'Success','失败':'Failed',
     '等待中':'Pending','已暂停':'Paused','执行':'Execute','停止':'Stop','重启':'Restart','删除':'Delete',
     '保存':'Save','取消':'Cancel','确认':'Confirm','返回概览':'Back','查看详情':'Details','刷新':'Refresh',
     '搜索':'Search','导出':'Export','导入':'Import','复制':'Copy','下载':'Download','上传':'Upload',
     '系统概览':'System Overview','核心指标':'Key Metrics','模块状态':'Module Status','最近活动':'Recent Activity',
-    '快速操作':'Quick Actions','暂无数据':'No Data','加载中':'Loading...',
+    '快速操作':'Quick Actions','暂无数据':'No Data','加载中':'Loading...','操作成功':'Success','操作失败':'Failed',
     '配置向导':'Setup Wizard','开始配置':'Start Setup','下一步':'Next','上一步':'Previous','完成':'Done','跳过':'Skip',
     '登录':'Login','登出':'Logout','创建备份':'Create Backup','恢复':'Restore','备份列表':'Backup List',
     '安装':'Install','启用':'Enable','禁用':'Disable','卸载':'Uninstall','扫描':'Scan',
     '热门发现':'Trending','依赖检查':'Dep Check','实时状态':'Realtime Status','已连接':'Connected','已断开':'Disconnected',
     '数据统计':'DB Stats','压缩数据库':'Vacuum DB','迁移数据':'Migrate','清理过期':'Cleanup',
-    // block-2 式 (英文→英文 身份映射)
+    // block-2 identity mapping
     'Dashboard':'Dashboard','Modules':'Modules','Coordinator':'Coordinator','Settings':'Settings',
-    'Health Check':'Health Check','View Code':'View Code','Actions':'Actions',
+    'Health Check':'Health Check','Execute':'Execute','View Code':'View Code','Actions':'Actions',
     'Search modules...':'Search modules...','All Modules':'All Modules','Execute Module':'Execute Module',
     'System Status':'System Status','Active':'Active','Healthy':'Healthy',
     'No results':'No results','Error':'Error',
@@ -126,7 +124,14 @@ var LOOKUP = {
     'Language':'Language','English':'English','Chinese':'Chinese',
     'Notifications':'Notifications','Real-time':'Real-time','Connected':'Connected',
     'Disconnected':'Disconnected','Reconnecting':'Reconnecting',
+    // block-evo.js 系统洞察
+    '系统状态':'System Status','调度任务':'Scheduler','自动化评分':'Score',
 };
+// 生成反向映射 (英文→中文)
+var LOOKUP_REV = {};
+(function() {
+    for (var k in LOOKUP) LOOKUP_REV[LOOKUP[k]] = k;
+})();
 
 // ── I18N 全局对象 ──
 window.I18N = {
@@ -142,7 +147,7 @@ window.I18N = {
     tr: function(text) {
         if (!text) return text;
         if (this.current === 'zh') return text;
-        return LOOKUP[text] || text;
+        return LOOKUP[text] || LOOKUP_REV[text] || text;
     },
 
     // 设置语言
@@ -163,34 +168,29 @@ window.I18N = {
         document.querySelectorAll('[data-i18n]').forEach(function(el) {
             var key = el.getAttribute('data-i18n');
             if (!key) return;
-            var text = I18N.t(key);
+            var text = window.I18N.t(key);
             if (text !== key) el.textContent = text;
         });
         // data-i18n-placeholder
         document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
             var key = el.getAttribute('data-i18n-placeholder');
             if (!key) return;
-            var text = I18N.t(key);
+            var text = window.I18N.t(key);
             if (text !== key) el.placeholder = text;
         });
-        // TreeWalker 全文替换 (block-2 风格: 只替换lookup表里的中文→英文)
+        // TreeWalker 全文替换: 遍历所有文本节点匹配LOOKUP
         if (this.current === 'en') {
-            var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-            var nodes = [];
-            while (walker.nextNode()) nodes.push(walker.currentNode);
-            nodes.forEach(function(node) {
-                var t = node.textContent.trim();
-                if (t && LOOKUP[t]) node.textContent = LOOKUP[t];
+            document.querySelectorAll('.nav-item .nav-text, .nav-item span:last-child, .sidebar a span, [class*="nav"] span:last-child').forEach(function(el) {
+                var t = el.textContent.trim();
+                if (t && LOOKUP[t]) el.textContent = LOOKUP[t];
             });
         }
-        // 更新切换按钮状态
-        document.querySelectorAll('.i18n-btn').forEach(function(btn) {
-            btn.classList.toggle('active', btn.dataset.lang === this.current);
-        }.bind(this));
-        // 语言开关按钮文本
+        // 更新切换按钮文本
         var label = this.current === 'zh' ? 'EN / 中' : '中 / EN';
-        document.getElementById('lang-toggle-btn') && (document.getElementById('lang-toggle-btn').textContent = label);
-        document.getElementById('lang-switch') && (document.getElementById('lang-switch').textContent = label);
+        var btn1 = document.getElementById('lang-toggle-btn');
+        var btn2 = document.getElementById('lang-switch');
+        if (btn1) btn1.textContent = label;
+        if (btn2) btn2.textContent = label;
         document.title = 'AUTO-EVO-AI V0.1';
     },
 
@@ -200,8 +200,9 @@ window.I18N = {
         var c = document.createElement('div');
         c.id = 'evo-i18n-switcher';
         c.className = 'i18n-switcher';
-        c.innerHTML = '<button class="i18n-btn '+(this.current==='zh'?'active':'')+'" data-lang="zh" onclick="I18N.setLocale(\'zh\')">中文</button>'+
-                      '<button class="i18n-btn '+(this.current==='en'?'active':'')+'" data-lang="en" onclick="I18N.setLocale(\'en\')">EN</button>';
+        c.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:99999;display:flex;gap:4px;';
+        c.innerHTML = '<button class="i18n-btn '+(this.current==='zh'?'active':'')+'" data-lang="zh" onclick="I18N.setLocale(\'zh\')" style="padding:4px 10px;border-radius:6px;border:1px solid #444;background:'+(this.current==='zh'?'#667eea':'transparent')+';color:#fff;cursor:pointer;font-size:12px;">中文</button>'+
+                      '<button class="i18n-btn '+(this.current==='en'?'active':'')+'" data-lang="en" onclick="I18N.setLocale(\'en\')" style="padding:4px 10px;border-radius:6px;border:1px solid #444;background:'+(this.current==='en'?'#667eea':'transparent')+';color:#fff;cursor:pointer;font-size:12px;">EN</button>';
         document.body.appendChild(c);
     }
 };
@@ -216,4 +217,3 @@ if (document.readyState === 'loading') {
     window.I18N.initLocaleUI();
     window.I18N.applyTranslations();
 }
-})();
