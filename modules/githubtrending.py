@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "githubtrending",
     "name": "Githubtrending",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},
@@ -539,7 +539,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         super().__init__(
             config={
                 "module_id": "githubtrending",
-                "version": "1.0.0",
+                "version": "V0.1",
                 "description": "GitHub趋势追踪 - 生产级实现：趋势仓库采集、语言分类、增速计算",
             }
         )

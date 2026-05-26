@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 语音处理器（A级）"""
-__module_meta__ = {"id":"voice-processor","name":"Voice Processor","version":"v1.1","group":"media","grade":"A",
+__module_meta__ = {"id":"voice-processor","name":"Voice Processor","version":"V0.1","group":"media","grade":"A",
     "tags":["media","voice","speech","asr","tts"],"description":"Unified voice processing: ASR, TTS, sessions, stats"}
 import time, uuid, logging, json
 from typing import Any, Dict

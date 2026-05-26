@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - GraphQL 网关（A级）"""
-__module_meta__ = {"id":"graphql-gateway","name":"GraphQL Gateway","version":"1.0.0","group":"network","grade":"A","tags":["network","graphql","api"],"description":"GraphQL 网关 - schema管理/查询/内省/统计"}
+__module_meta__ = {"id":"graphql-gateway","name":"GraphQL Gateway","version":"V0.1","group":"network","grade":"A","tags":["network","graphql","api"],"description":"GraphQL 网关 - schema管理/查询/内省/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

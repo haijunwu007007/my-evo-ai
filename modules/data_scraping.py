@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI能力
 __module_meta__ = {
     "id": "data-scraping",
     "name": "Data Scraping",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

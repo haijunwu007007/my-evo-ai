@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Hermes 连接器（A级）
 合并 hermes_gateway + hermes_solo + hermes_webui → 统一 Hermes 连接"""
-__module_meta__ = {"id":"hermes-connector","name":"Hermes Connector","version":"1.0.0","group":"intelligence","grade":"A",
+__module_meta__ = {"id":"hermes-connector","name":"Hermes Connector","version":"V0.1","group":"intelligence","grade":"A",
     "tags":["intelligence","hermes","connector","messaging"],"description":"Hermes protocol connector - channel/send/receive/admin"}
 import time, uuid, logging, json
 from typing import Any, Dict

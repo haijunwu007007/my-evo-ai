@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "customer-chatbot",
     "name": "Customer Chatbot",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "business",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

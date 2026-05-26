@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 多智能体协作（A级）"""
-__module_meta__ = {"id":"multi-agent-crew","name":"Multi Agent Crew","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"multi-agent-crew","name":"Multi Agent Crew","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","multi-agent","collaboration"],"description":"多智能体协作"}
 import time, uuid, logging
 from typing import Any, Dict, Optional

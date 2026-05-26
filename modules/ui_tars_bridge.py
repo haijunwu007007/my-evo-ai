@@ -6,7 +6,7 @@ UI TARS桥接模块 - 企业级UI自动化智能代理
 __module_meta__ = {
     "id": "ui-tars-bridge",
     "name": "Ui Tars Bridge",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ui",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

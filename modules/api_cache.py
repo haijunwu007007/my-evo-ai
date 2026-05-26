@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: API基础设施
 __module_meta__ = {
     "id": "api-cache",
     "name": "Api Cache",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "api",
     "inputs": [
         {"name": "task_id", "type": "string", "required": True, "description": ""},

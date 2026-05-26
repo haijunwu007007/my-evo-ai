@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "ttl-manager",
     "name": "Ttl Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "default_ttl_seconds", "type": "string", "required": True, "description": ""},

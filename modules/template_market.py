@@ -2,7 +2,7 @@
 
 桥接到 TemplateRegistry，查询/注册/使用自动化模板。
 """
-__module_meta__ = {"id":"template-market","name":"Template Market","version":"1.0.0","group":"templates","grade":"A",
+__module_meta__ = {"id":"template-market","name":"Template Market","version":"V0.1","group":"templates","grade":"A",
     "tags":["templates","market"],"description":"模板市场 — 自动化模板注册与查询"}
 import time, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

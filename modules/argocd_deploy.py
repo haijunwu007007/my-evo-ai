@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: DevOps自动化
 __module_meta__ = {
     "id": "argocd-deploy",
     "name": "Argocd Deploy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

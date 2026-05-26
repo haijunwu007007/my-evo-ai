@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - CORS 配置（A级）"""
-__module_meta__ = {"id":"cors-config","name":"CORS Config","version":"1.0.0","group":"network","grade":"A","tags":["network","cors","security"],"description":"CORS 配置"}
+__module_meta__ = {"id":"cors-config","name":"CORS Config","version":"V0.1","group":"network","grade":"A","tags":["network","cors","security"],"description":"CORS 配置"}
 import time,uuid,logging
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

@@ -5,7 +5,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "snapshot-volume",
     "name": "Snapshot Volume",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

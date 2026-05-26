@@ -3,7 +3,7 @@
 
 合并 static_cache + page_cache → 统一缓存管理层
 支持多级缓存（内存+TTL）、统计导出"""
-__module_meta__ = {"id":"cache-manager","name":"Cache Manager","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"cache-manager","name":"Cache Manager","version":"V0.1","group":"system","grade":"A",
     "tags":["system","cache","manager"],"description":"Unified cache manager with TTL and stats"}
 import time, uuid, logging, json
 from typing import Any, Dict, Optional

@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "bot-detection",
     "name": "Bot Detection",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "window_size", "type": "string", "required": True, "description": ""},

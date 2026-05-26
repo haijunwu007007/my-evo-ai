@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "deadlock-detector",
     "name": "Deadlock Detector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "txn_id", "type": "string", "required": True, "description": ""},

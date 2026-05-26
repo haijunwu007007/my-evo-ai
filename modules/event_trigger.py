@@ -5,7 +5,7 @@ Event triggers, condition matching, action dispatching, webhook integration, eve
 __module_meta__ = {
     "id": "event-trigger",
     "name": "Event Trigger",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

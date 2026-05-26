@@ -7,7 +7,7 @@ task delegation, communication protocols, and consensus mechanisms.
 __module_meta__ = {
     "id": "multica-team",
     "name": "Multica Team",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

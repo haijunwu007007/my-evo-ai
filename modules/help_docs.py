@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 帮助文档引擎（A级）
 
 文档索引、搜索、分类管理"""
-__module_meta__ = {"id":"help-docs","name":"Help Docs","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"help-docs","name":"Help Docs","version":"V0.1","group":"system","grade":"A",
     "tags":["system","help","docs","search","knowledge"],"description":"Help documentation index and search engine"}
 import time, uuid, logging, re
 from typing import Any, Dict, List, Optional

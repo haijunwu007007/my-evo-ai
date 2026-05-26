@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Redis 限流器模拟（A级）"""
-__module_meta__ = {"id":"rate-limit-redis","name":"Rate Limit Redis","version":"1.0.0","group":"storage","grade":"A","tags":["storage","redis","rate-limit"],"description":"Redis 限流器 - incr/check/expire/管理"}
+__module_meta__ = {"id":"rate-limit-redis","name":"Rate Limit Redis","version":"V0.1","group":"storage","grade":"A","tags":["storage","redis","rate-limit"],"description":"Redis 限流器 - incr/check/expire/管理"}
 import time,uuid,logging
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

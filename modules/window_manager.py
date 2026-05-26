@@ -6,7 +6,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "window-manager",
     "name": "Window Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "rpa",
     "inputs": [
         {"name": "windows", "type": "string", "required": True, "description": ""},

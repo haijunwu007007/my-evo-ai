@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "outbox-pattern",
     "name": "Outbox Pattern",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "max_size", "type": "string", "required": True, "description": ""},

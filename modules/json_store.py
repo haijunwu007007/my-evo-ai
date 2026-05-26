@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - JSON 持久化存储（A级）"""
-__module_meta__ = {"id":"json-store","name":"JSON Store","version":"1.0.0","group":"storage","grade":"A","tags":["storage","json","persistence"],"description":"JSON 持久化存储"}
+__module_meta__ = {"id":"json-store","name":"JSON Store","version":"V0.1","group":"storage","grade":"A","tags":["storage","json","persistence"],"description":"JSON 持久化存储"}
 import time,uuid,logging,json,os,shutil
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

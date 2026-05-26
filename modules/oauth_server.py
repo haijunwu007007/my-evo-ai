@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - OAuth2 资源服务器（A级生产实现）
 功能：Bearer Token 验证、Scope 校验、权限拦截。
 """
 __module_meta__ = {
-    "id": "oauth-server", "name": "OAuth2 Resource Server", "version": "1.0.0",
+    "id": "oauth-server", "name": "OAuth2 Resource Server", "version": "V0.1",
     "group": "security",
     "inputs": [{"name": "action", "type": "string", "required": True}],
     "outputs": [{"name": "result", "type": "dict"}],

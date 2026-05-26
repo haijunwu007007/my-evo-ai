@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 对象存储（A级）"""
-__module_meta__ = {"id":"object-storage","name":"ObjectStorage","version":"1.0.0","group":"storage","grade":"A",
+__module_meta__ = {"id":"object-storage","name":"ObjectStorage","version":"V0.1","group":"storage","grade":"A",
     "tags":["storage","object","file","persistence"],"description":"基于DataEngine SQLite的对象存储"}
 import time, uuid, logging, os, json
 from pathlib import Path

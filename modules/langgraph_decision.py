@@ -6,7 +6,7 @@ langgraph_decision — LangGraph决策引擎
 __module_meta__ = {
     "id": "langgraph-decision",
     "name": "Langgraph Decision",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

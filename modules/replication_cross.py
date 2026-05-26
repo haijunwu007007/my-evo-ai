@@ -5,7 +5,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "replication-cross",
     "name": "Replication Cross",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

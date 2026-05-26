@@ -8,7 +8,7 @@ AUTO-EVO-AI V0.1 - 生产级模板注册中心
 __module_meta__ = {
     "id": "template-registry",
     "name": "Template Registry",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "marketplace",
     "inputs": [
         {"name": "action", "type": "string", "required": True, "description": ""},

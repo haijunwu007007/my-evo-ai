@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 报告生成器（A级）"""
-__module_meta__ = {"id":"report-generator","name":"Report Generator","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"report-generator","name":"Report Generator","version":"V0.1","group":"data","grade":"A",
     "tags":["data","report","document"],"description":"报告生成器 - 模板/生成/HTML/统计"}
 import time, uuid, logging, json
 from typing import Any, Dict

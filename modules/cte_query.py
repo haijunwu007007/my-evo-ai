@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "cte-query",
     "name": "Cte Query",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "sql", "type": "string", "required": True, "description": ""},

@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "file-system",
     "name": "File System",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

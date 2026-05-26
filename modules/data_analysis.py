@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据分析引擎（A级）"""
-__module_meta__ = {"id":"data-analysis","name":"Data Analysis","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"data-analysis","name":"Data Analysis","version":"V0.1","group":"data","grade":"A",
     "tags":["data","analysis","statistics"],"description":"数据分析引擎 - 统计/相关性/异常检测"}
 import time, uuid, logging, math
 from typing import Any, Dict, Optional

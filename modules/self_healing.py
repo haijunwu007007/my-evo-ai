@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "self-healing",
     "name": "Self Healing",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "evolution",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},
@@ -24,7 +24,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "self"],
-    "grade": "C",
+    "grade": "B",
     "description": "自我修复机制 - AUTO-EVO-AI V0.1 异常捕获、自动恢复、熔断保护",
 }
 
@@ -39,10 +39,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
 
-try:
-    import t
-except ImportError:
-    pass
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector, threading
 

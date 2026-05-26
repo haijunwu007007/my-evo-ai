@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 企业通知器（A级）"""
-__module_meta__ = {"id":"enterprise-notifier","name":"Enterprise Notifier","version":"1.0.0","group":"notify","grade":"A","tags":["notify","enterprise","multi-channel"],"description":"企业通知器 - 多通道/模板/广播"}
+__module_meta__ = {"id":"enterprise-notifier","name":"Enterprise Notifier","version":"V0.1","group":"notify","grade":"A","tags":["notify","enterprise","multi-channel"],"description":"企业通知器 - 多通道/模板/广播"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

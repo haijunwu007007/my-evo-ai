@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 消息中间件
 __module_meta__ = {
     "id": "compaction-topic",
     "name": "Compaction Topic",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "topic", "type": "string", "required": True, "description": ""},

@@ -8,7 +8,7 @@ UI渲染引擎 — 生产级A级模块
 __module_meta__ = {
     "id": "ui-renderer",
     "name": "Ui Renderer",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ui",
     "inputs": [
         {"name": "key", "type": "string", "required": True, "description": ""},

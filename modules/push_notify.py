@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "push-notify",
     "name": "Push Notify",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "communication",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -23,7 +23,7 @@ AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎
 __module_meta__ = {
     "id": "bloom-filter",
     "name": "Bloom Filter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "hash_count", "type": "string", "required": True, "description": ""},

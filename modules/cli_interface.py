@@ -20,7 +20,7 @@ AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎
 __module_meta__ = {
     "id": "cli-interface",
     "name": "Cli Interface",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "text", "type": "string", "required": True, "description": ""},

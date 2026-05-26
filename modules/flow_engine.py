@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级）
 __module_meta__ = {
     "id": "flow-engine",
     "name": "Flow Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "workflow",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 运维监控
 __module_meta__ = {
     "id": "health-monitor",
     "name": "Health Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

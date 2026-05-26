@@ -31,7 +31,7 @@
 __module_meta__ = {
     "id": "module-adapter",
     "name": "Module Adapter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "coordinator", "type": "string", "required": True, "description": ""},

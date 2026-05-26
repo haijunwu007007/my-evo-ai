@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 基础设施
 __module_meta__ = {
     "id": "connection-pool",
     "name": "Connection Pool",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

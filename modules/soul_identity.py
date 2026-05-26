@@ -13,7 +13,7 @@ Token效率优化：每次请求仅注入约400 tokens。
 __module_meta__ = {
     "id": "soul-identity",
     "name": "Soul Identity",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "soul_name", "type": "string", "required": True, "description": ""},
@@ -30,8 +30,8 @@ __module_meta__ = {
     ],
     "triggers": [],
     "depends_on": [],
-    "tags": ["config", "manager", "soul"],
-    "grade": "C",
+    "tags": ["identity", "soul"],
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统",
 }
 
@@ -50,7 +50,7 @@ SOUL_FILES = ["soul.md", "persona.md", "taste.md", "heartbeat.md"]
 DEFAULT_SOUL_DIR = "~/.workbuddy/souls"
 TOKEN_BUDGET_PER_REQUEST = 400  # 每次请求仅注入400 tokens
 
-class SoulIdentityError(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Exception):
+class SoulIdentityError(Exception):
     """Soul身份系统异常"""
 
     pass

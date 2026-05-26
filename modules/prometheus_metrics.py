@@ -2,7 +2,7 @@
 
 桥接到 DataEngine SQLite，暴露自定义业务指标注册 + 采集 + 快照。
 """
-__module_meta__ = {"id":"prometheus-metrics","name":"Prometheus Metrics","version":"2.0.0","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"prometheus-metrics","name":"Prometheus Metrics","version":"V0.1","group":"monitoring","grade":"A",
     "tags":["monitoring","prometheus","metrics"],"description":"Prometheus 业务指标桥接 (DataEngine)"}
 import time, logging
 from typing import Any, Dict

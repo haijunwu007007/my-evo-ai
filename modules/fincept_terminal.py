@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Fincept 终端（A级）"""
-__module_meta__ = {"id":"fincept-terminal","name":"Fincept Terminal","version":"1.0.0","group":"data","grade":"A","tags":["finance","terminal","data"],"description":"Fincept 终端 - 行情搜索/数据查询/看板管理"}
+__module_meta__ = {"id":"fincept-terminal","name":"Fincept Terminal","version":"V0.1","group":"data","grade":"A","tags":["finance","terminal","data"],"description":"Fincept 终端 - 行情搜索/数据查询/看板管理"}
 import time, uuid, logging, random
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

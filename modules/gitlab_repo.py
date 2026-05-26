@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "gitlab-repo",
     "name": "Gitlab Repo",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -17,7 +17,7 @@ Architectural Standards:
 __module_meta__ = {
     "id": "project-mgmt",
     "name": "Project Mgmt",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "cls", "type": "string", "required": True, "description": ""},

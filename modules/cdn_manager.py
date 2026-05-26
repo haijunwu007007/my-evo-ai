@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 网络基础设施
 __module_meta__ = {
     "id": "cdn-manager",
     "name": "Cdn Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cdn",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

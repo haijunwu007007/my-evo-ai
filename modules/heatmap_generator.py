@@ -2,7 +2,7 @@
 
 从系统事件/模块调用数据生成 JSON 格式热力图数据，供前端渲染。
 """
-__module_meta__ = {"id":"heatmap-generator","name":"Heatmap Generator","version":"1.0.0","group":"analytics","grade":"A",
+__module_meta__ = {"id":"heatmap-generator","name":"Heatmap Generator","version":"V0.1","group":"analytics","grade":"A",
     "tags":["analytics","heatmap"],"description":"热力图生成 — 模块调用频率/系统事件"}
 import time, random, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

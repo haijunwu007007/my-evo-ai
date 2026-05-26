@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "pitr-postgres",
     "name": "Pitr Postgres",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "max_segments", "type": "string", "required": True, "description": ""},

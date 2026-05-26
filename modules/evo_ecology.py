@@ -5,7 +5,7 @@ Ecological simulation, species management, resource competition, food chain, eco
 __module_meta__ = {
     "id": "evo-ecology",
     "name": "Evo Ecology",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "evolution",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

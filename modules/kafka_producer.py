@@ -22,7 +22,7 @@ AUTO-EVO-AI V0.1 | Kafka生产者引擎
 __module_meta__ = {
     "id": "kafka-producer",
     "name": "Kafka Producer",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

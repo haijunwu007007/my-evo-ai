@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 开发工具
 __module_meta__ = {
     "id": "code-understand",
     "name": "Code Understand",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "file_path", "type": "string", "required": True, "description": ""},

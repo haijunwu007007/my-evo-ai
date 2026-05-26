@@ -10,7 +10,7 @@ Supports sparse/dense representation, union, intersection estimation, and persis
 __module_meta__ = {
     "id": "hyperloglog",
     "name": "Hyperloglog",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "precision", "type": "string", "required": True, "description": ""},
@@ -626,7 +626,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "healthy": True,
             "status": "healthy",
             "module": "hyperloglog",
-            "version": "1.0.0",
+            "version": "V0.1",
             "uptime_seconds": time.time() - self._created_at,
             "total_keys": s.total_keys,
             "total_memory_bytes": s.total_memory_bytes,

@@ -6,7 +6,7 @@ Index Advisor — 企业级数据库索引优化顾问
 __module_meta__ = {
     "id": "index-advisor",
     "name": "Index Advisor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "search",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

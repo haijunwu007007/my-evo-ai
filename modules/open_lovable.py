@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Open Lovable 集成（A级）"""
-__module_meta__ = {"id":"open-lovable","name":"Open Lovable","version":"1.0.0","group":"system","grade":"A","tags":["system","builder","ui"],"description":"Open Lovable 集成 - 项目/组件/代码生成"}
+__module_meta__ = {"id":"open-lovable","name":"Open Lovable","version":"V0.1","group":"system","grade":"A","tags":["system","builder","ui"],"description":"Open Lovable 集成 - 项目/组件/代码生成"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

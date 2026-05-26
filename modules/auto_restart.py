@@ -18,7 +18,7 @@ AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现）
 __module_meta__ = {
     "id": "auto-restart",
     "name": "Auto Restart",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "resilience",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

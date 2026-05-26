@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 工作流
 __module_meta__ = {
     "id": "task-queue",
     "name": "Task Queue",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "task_id", "type": "string", "required": True, "description": ""},

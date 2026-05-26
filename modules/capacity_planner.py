@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production)
 __module_meta__ = {
     "id": "capacity-planner",
     "name": "Capacity Planner",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "sample", "type": "string", "required": True, "description": ""},

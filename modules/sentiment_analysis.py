@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI能力
 __module_meta__ = {
     "id": "sentiment-analysis",
     "name": "Sentiment Analysis",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ai",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

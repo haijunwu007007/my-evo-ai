@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 开发工具
 __module_meta__ = {
     "id": "code-quality",
     "name": "Code Quality",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "function_body", "type": "string", "required": True, "description": ""},

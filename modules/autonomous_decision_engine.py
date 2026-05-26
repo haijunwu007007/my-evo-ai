@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 自主决策引擎（A级）"""
-__module_meta__ = {"id":"autonomous-decision-engine","name":"Decision Engine","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"autonomous-decision-engine","name":"Decision Engine","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","decision","engine"],"description":"自主决策引擎"}
 import time, uuid, logging
 from typing import Any, Dict, Optional

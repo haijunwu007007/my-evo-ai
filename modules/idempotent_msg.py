@@ -8,7 +8,7 @@ retry with exponential backoff, dead letter queue, ordering guarantees.
 __module_meta__ = {
     "id": "idempotent-msg",
     "name": "Idempotent Msg",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},
@@ -453,7 +453,7 @@ class IdempotentMsgHandler:
             "healthy": True,
             "status": "healthy",
             "module": "idempotent_msg",
-            "version": "1.0.0",
+            "version": "V0.1",
             "uptime_seconds": round(time.time() - self._created_at, 2),
             "total_received": stats["total_received"],
             "unique_processed": stats["unique_processed"],

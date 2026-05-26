@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - SQL 生成器（A级）"""
-__module_meta__ = {"id":"sql-generator","name":"SQL Generator","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"sql-generator","name":"SQL Generator","version":"V0.1","group":"data","grade":"A",
     "tags":["data","sql","generator"],"description":"SQL 生成器"}
 import time, uuid, logging
 from typing import Any, Dict, Optional

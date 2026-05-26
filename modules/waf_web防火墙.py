@@ -5,7 +5,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "waf-web防火墙",
     "name": "Waf Web防火墙",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

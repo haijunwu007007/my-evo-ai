@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 编排调度
 __module_meta__ = {
     "id": "doc-automation",
     "name": "Doc Automation",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "documents",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

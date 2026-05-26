@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "plugin-loader",
     "name": "Plugin Loader",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "plugin",
     "inputs": [
         {"name": "plugin_id", "type": "string", "required": True, "description": ""},

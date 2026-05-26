@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - ML 实习生（A级）"""
-__module_meta__ = {"id":"ml-intern","name":"ML Intern","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"ml-intern","name":"ML Intern","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","ml","data-science"],"description":"ML 实习生 - 数据探索/特征/训练/预测/评估/管理"}
 import time, uuid, logging, math, random
 from typing import Any, Dict

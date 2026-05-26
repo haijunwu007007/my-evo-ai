@@ -7,7 +7,7 @@ conflict resolution, real-time streaming, and disaster recovery.
 __module_meta__ = {
     "id": "mirror-maker",
     "name": "Mirror Maker",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

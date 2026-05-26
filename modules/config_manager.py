@@ -21,7 +21,7 @@ AUTO-EVO-AI V0.1 | 配置管理中心引擎
 __module_meta__ = {
     "id": "config-manager",
     "name": "Config Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "config",
     "inputs": [
         {"name": "key", "type": "string", "required": True, "description": ""},

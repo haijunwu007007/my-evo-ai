@@ -7,7 +7,7 @@ Webhook Handler - 企业级Webhook管理引擎
 __module_meta__ = {
     "id": "webhook-handler",
     "name": "Webhook Handler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "webhook",
     "inputs": [
         {"name": "payload", "type": "string", "required": True, "description": ""},

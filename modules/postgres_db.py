@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - PostgreSQL 连接器（A级）
 
 PostgreSQL 专用连接器，支持连接池和 SQL 转发"""
-__module_meta__ = {"id":"postgres-db","name":"PostgreSQL Connector","version":"1.0.0","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"postgres-db","name":"PostgreSQL Connector","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","database","postgresql","sql"],"description":"PostgreSQL database connector"}
 import time, logging, sqlite3
 from typing import Any, Dict, Optional

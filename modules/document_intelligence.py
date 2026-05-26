@@ -2,7 +2,7 @@
 
 桥接到 {core/external_services, core/document_generator}，暴露文档处理能力。
 """
-__module_meta__ = {"id":"document-intelligence","name":"Document Intelligence","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"document-intelligence","name":"Document Intelligence","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","document"],"description":"文档智能 — PDF/Word/Excel 处理"}
 import time, logging
 from pathlib import Path

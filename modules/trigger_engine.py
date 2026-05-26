@@ -7,7 +7,7 @@ Trigger Engine - 企业级事件触发引擎
 __module_meta__ = {
     "id": "trigger-engine",
     "name": "事件触发引擎",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "workflow",
     "inputs": [
         {"name": "trigger_def", "type": "dict", "required": True, "description": "触发器定义"},

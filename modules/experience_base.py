@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "experience-base",
     "name": "Experience Base",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

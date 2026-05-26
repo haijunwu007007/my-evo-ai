@@ -2,7 +2,7 @@
 
 系统版本检查和更新管理，使用 git 查看版本和拉取更新。
 """
-__module_meta__ = {"id":"auto-update","name":"Auto Update","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"auto-update","name":"Auto Update","version":"V0.1","group":"system","grade":"A",
     "tags":["system","update"],"description":"自动更新检查与管理"}
 import time, subprocess, logging
 from pathlib import Path

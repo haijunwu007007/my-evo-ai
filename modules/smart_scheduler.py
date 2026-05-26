@@ -7,7 +7,7 @@ Smart Scheduler - 智能任务调度引擎
 __module_meta__ = {
     "id": "smart-scheduler",
     "name": "Smart Scheduler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "scheduler",
     "inputs": [
         {"name": "expression", "type": "string", "required": True, "description": ""},

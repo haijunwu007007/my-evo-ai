@@ -13,7 +13,7 @@ Production features:
 __module_meta__ = {
     "id": "loongclaw",
     "name": "Loongclaw",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

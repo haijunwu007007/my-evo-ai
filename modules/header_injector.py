@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Header 注入器（A级）"""
-__module_meta__ = {"id":"header-injector","name":"Header Injector","version":"1.0.0","group":"network","grade":"A","tags":["network","header","security"],"description":"Header 注入器"}
+__module_meta__ = {"id":"header-injector","name":"Header Injector","version":"V0.1","group":"network","grade":"A","tags":["network","header","security"],"description":"Header 注入器"}
 import time, uuid, logging
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

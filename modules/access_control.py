@@ -14,7 +14,7 @@ AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine)
 __module_meta__ = {
     "id": "access-control",
     "name": "Access Control",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "other", "type": "string", "required": True, "description": ""},

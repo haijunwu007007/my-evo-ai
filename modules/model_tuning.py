@@ -3,7 +3,7 @@
 __module_meta__ = {
     "id": "model-tuning",
     "name": "Model Tuning",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "llm",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

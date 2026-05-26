@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "data-archival",
     "name": "Data Archival",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

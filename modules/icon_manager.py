@@ -2,7 +2,7 @@
 
 查询系统内置 SVG/Font Awesome 图标列表与搜索。
 """
-__module_meta__ = {"id":"icon-manager","name":"Icon Manager","version":"1.0.0","group":"ui","grade":"A",
+__module_meta__ = {"id":"icon-manager","name":"Icon Manager","version":"V0.1","group":"ui","grade":"A",
     "tags":["ui","icons"],"description":"图标管理 — SVG/FA 图标查询"}
 import time, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

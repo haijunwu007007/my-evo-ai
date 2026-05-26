@@ -20,7 +20,7 @@
 __module_meta__ = {
     "id": "m51-web-remote",
     "name": "M51 Web Remote",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "selector", "type": "string", "required": True, "description": ""},

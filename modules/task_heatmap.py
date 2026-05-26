@@ -15,7 +15,7 @@ Features:
 __module_meta__ = {
     "id": "task-heatmap",
     "name": "Task Heatmap",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

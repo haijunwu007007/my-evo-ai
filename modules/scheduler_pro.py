@@ -3,7 +3,7 @@
 
 合并 scheduler_pro + m56_scheduler_pro → 统一高级调度
 支持 cron 表达式、任务链、重试策略、暂停/恢复"""
-__module_meta__ = {"id":"scheduler-pro","name":"Scheduler Pro","version":"v1.1","group":"system","grade":"A",
+__module_meta__ = {"id":"scheduler-pro","name":"Scheduler Pro","version":"V0.1","group":"system","grade":"A",
     "tags":["system","scheduler","pro"],"description":"Advanced scheduler with cron, retry, pause/resume"}
 import time, uuid, logging, heapq, threading
 from datetime import datetime, timedelta

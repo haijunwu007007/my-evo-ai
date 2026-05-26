@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - 生物认证网关（A级生产实现）
 功能：生物特征注册、验证、状态管理（模拟实现）。
 """
 __module_meta__ = {
-    "id": "biometric-auth", "name": "Biometric Auth", "version": "1.0.0",
+    "id": "biometric-auth", "name": "Biometric Auth", "version": "V0.1",
     "group": "security", "grade": "A",
     "tags": ["security", "biometric", "auth"],
     "description": "生物认证网关 - 指纹/人脸抽象接口",

@@ -5,7 +5,7 @@ Error collection, aggregation, deduplication, root cause analysis, trend trackin
 __module_meta__ = {
     "id": "error-aggregator",
     "name": "Error Aggregator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

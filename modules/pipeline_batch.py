@@ -6,7 +6,7 @@ pipeline_batch - 批处理流水线引擎（上市生产级）
 __module_meta__ = {
     "id": "pipeline-batch",
     "name": "Pipeline Batch",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "pipeline",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

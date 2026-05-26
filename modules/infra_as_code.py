@@ -6,7 +6,7 @@ Infrastructure as Code — 企业级IaC管理引擎
 __module_meta__ = {
     "id": "infra-as-code",
     "name": "Infra As Code",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -3,7 +3,7 @@
 
 MongoDB 风格的文档存储引擎，基于内存 dict 实现
 支持文档 CRUD、索引、聚合查询"""
-__module_meta__ = {"id":"mongodb-nosql","name":"MongoDB NoSQL","version":"1.0.0","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"mongodb-nosql","name":"MongoDB NoSQL","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","database","nosql","mongodb","document"],"description":"MongoDB-style document store engine"}
 import time, uuid, logging, json, copy
 from typing import Any, Dict, List, Optional

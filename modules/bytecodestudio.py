@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production)
 __module_meta__ = {
     "id": "bytecodestudio",
     "name": "Bytecodestudio",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "code_obj", "type": "string", "required": True, "description": ""},

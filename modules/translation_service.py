@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI能力
 __module_meta__ = {
     "id": "translation-service",
     "name": "Translation Service",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "international",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

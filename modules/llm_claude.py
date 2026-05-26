@@ -3,7 +3,7 @@
 __module_meta__ = {
     "id": "llm-claude",
     "name": "Llm Claude",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "llm",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

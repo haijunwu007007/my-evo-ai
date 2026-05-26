@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 编排核心（A级）"""
-__module_meta__ = {"id":"orchestrator-core","name":"Orchestrator Core","version":"1.0.0","group":"system","grade":"A","tags":["system","orchestrator","workflow"],"description":"编排核心"}
+__module_meta__ = {"id":"orchestrator-core","name":"Orchestrator Core","version":"V0.1","group":"system","grade":"A","tags":["system","orchestrator","workflow"],"description":"编排核心"}
 import time, uuid, logging
 from typing import Any, Dict, Optional, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

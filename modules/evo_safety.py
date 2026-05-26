@@ -10,7 +10,7 @@ to prevent unsafe autonomous behavior.
 __module_meta__ = {
     "id": "evo-safety",
     "name": "Evo Safety",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

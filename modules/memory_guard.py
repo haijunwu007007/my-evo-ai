@@ -7,7 +7,7 @@ threshold alerting, GC management, and OOM prevention.
 __module_meta__ = {
     "id": "memory-guard",
     "name": "Memory Guard",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

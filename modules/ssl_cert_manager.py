@@ -6,7 +6,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "ssl-cert-manager",
     "name": "Ssl Cert Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "certs", "type": "string", "required": True, "description": ""},

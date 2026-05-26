@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 基础设施
 __module_meta__ = {
     "id": "block-device",
     "name": "Block Device",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

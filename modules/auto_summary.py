@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎)
 __module_meta__ = {
     "id": "auto-summary",
     "name": "Auto Summary",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "damping", "type": "string", "required": True, "description": ""},

@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎)
 __module_meta__ = {
     "id": "agent-hermes",
     "name": "Agent Hermes",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "max_messages", "type": "string", "required": True, "description": ""},

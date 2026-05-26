@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据结构
 __module_meta__ = {
     "id": "bitmap-operations",
     "name": "Bitmap Operations",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "size", "type": "string", "required": True, "description": ""},

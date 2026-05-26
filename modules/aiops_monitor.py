@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "aiops-monitor",
     "name": "Aiops Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "window_size", "type": "string", "required": True, "description": ""},

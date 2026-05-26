@@ -5,7 +5,7 @@ Atomic counters with TTL, rate limiting, sliding window, and consistent hashing.
 __module_meta__ = {
     "id": "distributed-counter",
     "name": "Distributed Counter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

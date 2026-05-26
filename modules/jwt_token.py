@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - JWT 令牌管理（A级生产实现）
 功能：JWT 令牌生成、验证、刷新、吊销，支持 HS256 算法。
 """
 __module_meta__ = {
-    "id": "jwt-token", "name": "JWT Token", "version": "1.0.0",
+    "id": "jwt-token", "name": "JWT Token", "version": "V0.1",
     "group": "security",
     "inputs": [{"name": "action", "type": "string", "required": True, "description": "create/verify/refresh/revoke"}],
     "outputs": [{"name": "result", "type": "dict", "description": "操作结果"}],

@@ -2,7 +2,7 @@
 
 桥接到 Grafana HTTP API，暴露 dashboard/datasource/annotation/alert 查询。
 """
-__module_meta__ = {"id":"grafana-monitor","name":"Grafana Monitor","version":"1.0.0","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"grafana-monitor","name":"Grafana Monitor","version":"V0.1","group":"monitoring","grade":"A",
     "tags":["monitoring","grafana","observability"],"description":"Grafana 监控 API 桥接"}
 import time, json, logging, urllib.request, urllib.error
 from typing import Any, Dict

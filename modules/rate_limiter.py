@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 通用限流器（A级）"""
-__module_meta__ = {"id":"rate-limiter-mod","name":"Rate Limiter","version":"1.0.0","group":"system","grade":"A","tags":["system","rate-limit","throttle"],"description":"通用限流器（多策略:令牌桶/滑动窗口/配置管理）"}
+__module_meta__ = {"id":"rate-limiter-mod","name":"Rate Limiter","version":"V0.1","group":"system","grade":"A","tags":["system","rate-limit","throttle"],"description":"通用限流器（多策略:令牌桶/滑动窗口/配置管理）"}
 import time, uuid, logging, threading
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

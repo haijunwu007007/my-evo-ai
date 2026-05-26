@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "voice-recorder",
     "name": "Voice Recorder",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "voice",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

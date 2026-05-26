@@ -7,7 +7,7 @@ AUTO-EVO-AI - 事件总线 / 数据流引擎
 __module_meta__ = {
     "id": "event-bus",
     "name": "事件总线",
-    "version": "6.3.4",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "event_type", "type": "string", "required": True, "description": "事件类型"},

@@ -5,7 +5,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "rest-proxy",
     "name": "Rest Proxy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

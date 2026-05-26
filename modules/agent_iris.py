@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎)
 __module_meta__ = {
     "id": "agent-iris",
     "name": "Agent Iris",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "feature_dim", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ auto-scaling, model monitoring, and multi-environment support.
 __module_meta__ = {
     "id": "model-deployment",
     "name": "Model Deployment",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "llm",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

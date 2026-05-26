@@ -5,7 +5,7 @@ AUTO-EVO-AI V0.1 - 审计追踪（A级生产实现）
 模块ID: audit-trail
 功能：操作记录、查询搜索、合规报告、JSON 导出。
 """
-__module_meta__ = {"id":"audit-trail","name":"Audit Trail","version":"1.0.0","group":"security","grade":"A",
+__module_meta__ = {"id":"audit-trail","name":"Audit Trail","version":"V0.1","group":"security","grade":"A",
     "tags":["security","audit","compliance"],"description":"审计追踪 - 全操作记录/查询/导出"}
 import time, json, uuid, logging
 from datetime import datetime

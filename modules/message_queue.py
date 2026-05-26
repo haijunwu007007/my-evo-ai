@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 工作流
 __module_meta__ = {
     "id": "message-queue",
     "name": "Message Queue",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "topic_pattern", "type": "string", "required": True, "description": ""},

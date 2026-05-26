@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 表单引擎（A级）
 
 动态表单生成与验证引擎"""
-__module_meta__ = {"id":"form-engine","name":"Form Engine","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"form-engine","name":"Form Engine","version":"V0.1","group":"system","grade":"A",
     "tags":["system","form","validation","builder"],"description":"Dynamic form generation and validation engine"}
 import time, uuid, logging, re
 from typing import Any, Dict, List, Optional

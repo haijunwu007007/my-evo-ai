@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - gRPC 代理（A级）"""
-__module_meta__ = {"id":"grpc-proxy","name":"gRPC Proxy","version":"1.0.0","group":"network","grade":"A","tags":["network","grpc","proxy"],"description":"gRPC 代理 - 服务注册/调用/后端管理/统计"}
+__module_meta__ = {"id":"grpc-proxy","name":"gRPC Proxy","version":"V0.1","group":"network","grade":"A","tags":["network","grpc","proxy"],"description":"gRPC 代理 - 服务注册/调用/后端管理/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

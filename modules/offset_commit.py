@@ -7,7 +7,7 @@ group management, rebalance handling, and checkpoint persistence.
 __module_meta__ = {
     "id": "offset-commit",
     "name": "Offset Commit",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

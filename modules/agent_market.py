@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Agent Market (智能体市场)
 __module_meta__ = {
     "id": "agent-market",
     "name": "Agent Market",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "source_code", "type": "string", "required": True, "description": ""},

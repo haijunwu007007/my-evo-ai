@@ -13,7 +13,7 @@ AUTO-EVO-AI V0.1 - ClawGateway API网关管理器
 __module_meta__ = {
     "id": "claw-gateway",
     "name": "Claw Gateway",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},
@@ -250,7 +250,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "routes": len(self._routes),
             "upstreams": len(self._upstreams),
             "rate_limits": len(self._rate_limits),
-            "version": "1.0.0",
+            "version": "V0.1",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

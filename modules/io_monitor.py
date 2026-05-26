@@ -6,7 +6,7 @@ I/O Monitor — 企业级I/O性能监控引擎
 __module_meta__ = {
     "id": "io-monitor",
     "name": "Io Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ AUTO-EVO-AI V0.1 — m41 轻量调试面板
 __module_meta__ = {
     "id": "debug-panel",
     "name": "Debug Panel",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "action", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 存储服务
 __module_meta__ = {
     "id": "file-manager",
     "name": "File Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

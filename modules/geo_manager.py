@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 地理位置管理器（A级）"""
-__module_meta__ = {"id":"geo-manager","name":"Geo Manager","version":"v1.1","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"geo-manager","name":"Geo Manager","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","geo","location","replication"],"description":"Geographic manager-index/nearest/distance/regions"}
 import time, math, logging, json
 from typing import Any, Dict, List, Optional

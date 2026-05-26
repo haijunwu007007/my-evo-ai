@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - 审计日志（A级生产实现）
 __module_meta__ = {
     "id": "audit-log",
     "name": "Audit Log",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "logging",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

@@ -18,7 +18,7 @@ AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现）
 __module_meta__ = {
     "id": "cache-engine",
     "name": "Cache Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cache",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

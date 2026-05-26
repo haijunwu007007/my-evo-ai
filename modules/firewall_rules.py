@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 防火墙规则引擎（A级）
 
 访问控制规则引擎，支持 IP、路径、方法级别 ACL"""
-__module_meta__ = {"id":"firewall-rules","name":"Firewall Rules","version":"1.0.0","group":"security","grade":"A",
+__module_meta__ = {"id":"firewall-rules","name":"Firewall Rules","version":"V0.1","group":"security","grade":"A",
     "tags":["security","firewall","acl","access-control"],"description":"Access control rules engine with IP and path ACL"}
 import time, uuid, logging, re
 from typing import Any, Dict, List

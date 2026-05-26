@@ -6,7 +6,7 @@ autorecovery.py - 自动恢复管理模块
 __module_meta__ = {
     "id": "autorecovery",
     "name": "Autorecovery",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "resilience",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

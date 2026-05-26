@@ -6,7 +6,7 @@ Production-grade implementation for OpenClaw AI agent gateway management.
 __module_meta__ = {
     "id": "openclaw-gateway",
     "name": "Openclaw Gateway",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ backlink tracking, graph view, tag management, and search.
 __module_meta__ = {
     "id": "obsidian-link",
     "name": "Obsidian Link",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "documents",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

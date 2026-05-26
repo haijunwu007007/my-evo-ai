@@ -1,0 +1,12 @@
+# AUTO-EVO-AI V0.1 — LLM / AI 可选依赖
+# 将 requirements.txt 中的 LLM 依赖提取到此文件
+# 使用方式: pip install -r requirements-llm.txt
+# 或: uv pip install -r requirements-llm.txt
+# 
+# 注意: modules/ 下 LLM 模块（llm_openai.py / llm_claude.py / llm_gemini.py 等）
+# 使用通用 HTTP 调用动态路由，不直接 import 这些 SDK。此文件仅用于
+# 需要直接使用 SDK 的非核心场景（如 ai_gateway.py 的某些集成路径）。
+
+openai>=1.0.0
+anthropic>=0.30.0
+google-generativeai>=0.8.0

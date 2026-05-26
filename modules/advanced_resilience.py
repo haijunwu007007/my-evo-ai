@@ -2,7 +2,7 @@
 
 桥接到 CircuitBreakerMixin/RateLimiterMixin，暴露熔断/限流/重试状态和配置。
 """
-__module_meta__ = {"id":"advanced-resilience","name":"Advanced Resilience","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"advanced-resilience","name":"Advanced Resilience","version":"V0.1","group":"system","grade":"A",
     "tags":["system","resilience"],"description":"高级弹性 — 熔断/限流/重试状态"}
 import time, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

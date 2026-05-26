@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 运维工具
 __module_meta__ = {
     "id": "command-stats",
     "name": "Command Stats",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "cmd", "type": "string", "required": True, "description": ""},

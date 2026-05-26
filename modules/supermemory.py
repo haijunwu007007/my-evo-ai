@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "supermemory",
     "name": "Supermemory",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "memory_id", "type": "string", "required": True, "description": ""},

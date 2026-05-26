@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - API 网关（A级）"""
-__module_meta__ = {"id":"api-gateway","name":"API Gateway","version":"1.0.0","group":"network","grade":"A","tags":["network","gateway","api"],"description":"API 网关 - 路由/限流/鉴权/监控"}
+__module_meta__ = {"id":"api-gateway","name":"API Gateway","version":"V0.1","group":"network","grade":"A","tags":["network","gateway","api"],"description":"API 网关 - 路由/限流/鉴权/监控"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

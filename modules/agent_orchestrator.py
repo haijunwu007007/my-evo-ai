@@ -32,7 +32,7 @@ AUTO-EVO-AI V0.1 — m30 Agent Orchestrator 主编排器 (智能体大脑)
 __module_meta__ = {
     "id": "agent-orchestrator",
     "name": "Agent主编排器",
-    "version": "6.3.2",
+    "version": "V0.1",
     "group": "orchestrator",
     "inputs": [
         {"name": "goal", "type": "string", "required": True, "description": "用户目标描述"},

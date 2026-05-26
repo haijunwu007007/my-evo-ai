@@ -7,7 +7,7 @@ auto-summarization, and multi-tier storage (core/archival/recall).
 __module_meta__ = {
     "id": "memgpt",
     "name": "Memgpt",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

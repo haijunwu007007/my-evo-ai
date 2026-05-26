@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - Second Brain Memory Module
 __module_meta__ = {
     "id": "second-brain",
     "name": "Second Brain",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "content", "type": "string", "required": True, "description": ""},
@@ -34,8 +34,8 @@ __module_meta__ = {
     ],
     "triggers": [],
     "depends_on": [],
-    "tags": ["second"],
-    "grade": "C",
+    "tags": ["memory", "second-brain"],
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统",
 }
 
@@ -50,10 +50,6 @@ from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime, timedelta
 from enum import Enum
 
-try:
-    import h
-except ImportError:
-    pass
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 import hashlib

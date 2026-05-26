@@ -7,7 +7,7 @@ Cypher-like query support, graph algorithms, and path finding.
 __module_meta__ = {
     "id": "neo4j-graph",
     "name": "Neo4j Graph",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 期货数据 API（A级）"""
-__module_meta__ = {"id":"futures-api","name":"Futures API","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"futures-api","name":"Futures API","version":"V0.1","group":"data","grade":"A",
     "tags":["data","finance","futures"],"description":"期货数据 API - 行情/保证金/持仓/历史"}
 import time, uuid, logging, random
 from typing import Any, Dict

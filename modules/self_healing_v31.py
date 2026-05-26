@@ -3,7 +3,7 @@
 __module_meta__ = {
     "id": "self-healing-v31",
     "name": "Self Healing V31",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "evolution",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

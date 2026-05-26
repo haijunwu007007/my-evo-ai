@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 调度编排
 __module_meta__ = {
     "id": "job-scheduler",
     "name": "Job Scheduler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "scheduler",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

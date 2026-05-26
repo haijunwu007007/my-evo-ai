@@ -6,7 +6,7 @@ backup_redis.py - Redis备份管理模块
 __module_meta__ = {
     "id": "backup-redis",
     "name": "Backup Redis",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

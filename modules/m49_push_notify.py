@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 推送通知（A级）"""
-__module_meta__ = {"id":"m49-push-notify","name":"Push Notify","version":"1.0.0","group":"notify","grade":"A",
+__module_meta__ = {"id":"m49-push-notify","name":"Push Notify","version":"V0.1","group":"notify","grade":"A",
     "tags":["notify","push","multi-channel"],"description":"多通道推送通知 - 发送/广播/模板/统计"}
 import time, uuid, logging, os
 from typing import Any, Dict

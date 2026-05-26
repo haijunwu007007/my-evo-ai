@@ -23,7 +23,7 @@ A级企业级模块 — 继承 EnterpriseModule
 __module_meta__ = {
     "id": "m53-finance-data",
     "name": "M53 Finance Data",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "finance",
     "inputs": [
         {"name": "params", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ AUTO-EVO-AI V0.1 — openinterpreter
 __module_meta__ = {
     "id": "openinterpreter",
     "name": "Openinterpreter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ai",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

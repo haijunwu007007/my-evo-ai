@@ -7,7 +7,7 @@ with circuit breakers, retry policies, and degradation strategies.
 __module_meta__ = {
     "id": "network-healer",
     "name": "Network Healer",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

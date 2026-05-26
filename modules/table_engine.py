@@ -8,7 +8,7 @@
 __module_meta__ = {
     "id": "table-engine",
     "name": "Table Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎)
 __module_meta__ = {
     "id": "audio-transcription",
     "name": "Audio Transcription",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "sample_rate", "type": "string", "required": True, "description": ""},

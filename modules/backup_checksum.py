@@ -6,7 +6,7 @@ backup_checksum.py - 备份校验模块
 __module_meta__ = {
     "id": "backup-checksum",
     "name": "Backup Checksum",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

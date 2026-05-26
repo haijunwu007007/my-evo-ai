@@ -8,7 +8,7 @@ Grade: A (生产级) | Category: 安全中间件
 __module_meta__ = {
     "id": "cors-manager",
     "name": "Cors Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "api",
     "inputs": [
         {"name": "method", "type": "string", "required": True, "description": ""},

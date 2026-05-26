@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "email-pro",
     "name": "Email Pro",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

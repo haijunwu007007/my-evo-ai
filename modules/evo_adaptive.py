@@ -5,7 +5,7 @@ Adaptive evolution, strategy evaluation, parameter tuning, fitness scoring, popu
 __module_meta__ = {
     "id": "evo-adaptive",
     "name": "Evo Adaptive",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "evolution",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

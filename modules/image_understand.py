@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "image-understand",
     "name": "Image Understand",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

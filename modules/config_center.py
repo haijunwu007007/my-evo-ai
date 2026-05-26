@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 基础设施
 __module_meta__ = {
     "id": "config-center",
     "name": "Config Center",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "config",
     "inputs": [
         {"name": "base", "type": "string", "required": True, "description": ""},

@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "rpa-controller",
     "name": "Rpa Controller",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "rpa",
     "inputs": [
         {"name": "script_id", "type": "string", "required": True, "description": ""},

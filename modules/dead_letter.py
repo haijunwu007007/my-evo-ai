@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "dead-letter",
     "name": "Dead Letter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "strategy", "type": "string", "required": True, "description": ""},

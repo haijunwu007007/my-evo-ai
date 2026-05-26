@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI智能体
 __module_meta__ = {
     "id": "agent-marketplace",
     "name": "Agent Marketplace",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "package_id", "type": "string", "required": True, "description": ""},

@@ -91,7 +91,7 @@ class NLWorkflow:
         return "unknown"
 
 __module_meta__ = {
-    "version": "1.0.0",
+    "version": "V0.1",
     "category": "intelligence",
     "description": "自然语言业务链—说人话做事情"
 }

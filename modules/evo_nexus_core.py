@@ -25,7 +25,7 @@ AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现）
 __module_meta__ = {
     "id": "evo-nexus-core",
     "name": "Evo Nexus Core",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "github",
     "inputs": [
         {"name": "plugin_id", "type": "string", "required": True, "description": ""},

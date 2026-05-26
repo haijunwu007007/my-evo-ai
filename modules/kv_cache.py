@@ -6,7 +6,7 @@ Production-grade key-value caching with LRU/LFU eviction, TTL, compression, and 
 __module_meta__ = {
     "id": "kv-cache",
     "name": "Kv Cache",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cache",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

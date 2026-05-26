@@ -21,7 +21,7 @@ AUTO-EVO-AI V0.1 | DNS解析器引擎
 __module_meta__ = {
     "id": "dns-resolver",
     "name": "Dns Resolver",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "max_size", "type": "string", "required": True, "description": ""},

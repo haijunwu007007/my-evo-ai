@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 — 配额管理模块
 __module_meta__ = {
     "id": "quota-manager",
     "name": "Quota Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "window_seconds", "type": "string", "required": True, "description": ""},

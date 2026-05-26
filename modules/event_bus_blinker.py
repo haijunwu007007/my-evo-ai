@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "event-bus-blinker",
     "name": "Event Bus Blinker",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

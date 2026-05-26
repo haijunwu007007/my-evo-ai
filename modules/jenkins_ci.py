@@ -7,7 +7,7 @@ CI/CD pipeline management: build, test, deploy, artifacts, stages, triggers
 __module_meta__ = {
     "id": "jenkins-ci",
     "name": "Jenkins Ci",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

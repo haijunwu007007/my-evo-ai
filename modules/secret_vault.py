@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 安全合规
 __module_meta__ = {
     "id": "secret-vault",
     "name": "Secret Vault",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "crypto",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

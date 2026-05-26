@@ -5,7 +5,7 @@ DNS record management, caching, TTL tracking, health probing, zone management.
 __module_meta__ = {
     "id": "dns-manager",
     "name": "Dns Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "domain", "type": "string", "required": True, "description": ""},

@@ -10,7 +10,7 @@ AUTO-EVO-AI m69 - 数据管道引擎 v3.0
 __module_meta__ = {
     "id": "data-pipeline",
     "name": "Data Pipeline",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

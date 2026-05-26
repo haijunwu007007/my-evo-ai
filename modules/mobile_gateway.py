@@ -7,7 +7,7 @@ API versioning, rate limiting, and offline sync support.
 __module_meta__ = {
     "id": "mobile-gateway",
     "name": "Mobile Gateway",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

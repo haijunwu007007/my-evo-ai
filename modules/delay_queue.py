@@ -21,7 +21,7 @@
 __module_meta__ = {
     "id": "delay-queue",
     "name": "Delay Queue",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "attempt", "type": "string", "required": True, "description": ""},

@@ -6,7 +6,7 @@ CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控
 __module_meta__ = {
     "id": "cdn-invalidate",
     "name": "Cdn Invalidate",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cdn",
     "inputs": [
         {"name": "batch_id", "type": "string", "required": True, "description": ""},

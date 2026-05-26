@@ -7,7 +7,7 @@ Comprehensive system monitoring: CPU, memory, disk, network, processes, services
 __module_meta__ = {
     "id": "systemmonitor",
     "name": "Systemmonitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "current_value", "type": "string", "required": True, "description": ""},

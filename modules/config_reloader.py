@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 配置管理
 __module_meta__ = {
     "id": "config-reloader",
     "name": "Config Reloader",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "config",
     "inputs": [
         {"name": "source_id", "type": "string", "required": True, "description": ""},

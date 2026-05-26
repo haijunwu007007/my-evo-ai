@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 内容管理
 __module_meta__ = {
     "id": "content-service",
     "name": "Content Service",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "query", "type": "string", "required": True, "description": ""},

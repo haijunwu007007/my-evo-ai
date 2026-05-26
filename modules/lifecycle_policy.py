@@ -7,7 +7,7 @@ automated transitions, compliance gating, and audit trail for上市企业生产�
 __module_meta__ = {
     "id": "lifecycle-policy",
     "name": "Lifecycle Policy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "action", "type": "string", "required": True, "description": ""},

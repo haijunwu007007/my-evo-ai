@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "ddos-protection",
     "name": "Ddos Protection",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "window_seconds", "type": "string", "required": True, "description": ""},

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - PR 管理器（A级）"""
-__module_meta__ = {"id":"pr-manager","name":"PR Manager","version":"1.0.0","group":"devops","grade":"A","tags":["devops","pr","review"],"description":"PR 管理器 - 创建/审查/合并/统计"}
+__module_meta__ = {"id":"pr-manager","name":"PR Manager","version":"V0.1","group":"devops","grade":"A","tags":["devops","pr","review"],"description":"PR 管理器 - 创建/审查/合并/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

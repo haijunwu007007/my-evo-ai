@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据保护
 __module_meta__ = {
     "id": "backup-manager",
     "name": "Backup Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

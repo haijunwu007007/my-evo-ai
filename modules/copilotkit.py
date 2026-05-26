@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI集成
 __module_meta__ = {
     "id": "copilotkit",
     "name": "Copilotkit",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "agent_config", "type": "string", "required": True, "description": ""},

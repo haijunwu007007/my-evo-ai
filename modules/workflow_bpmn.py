@@ -14,7 +14,7 @@
 __module_meta__ = {
     "id": "workflow-bpmn",
     "name": "Workflow Bpmn",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "workflow",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

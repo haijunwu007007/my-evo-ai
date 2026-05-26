@@ -6,7 +6,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "tunnel-manager",
     "name": "Tunnel Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "tunnel", "type": "string", "required": True, "description": ""},

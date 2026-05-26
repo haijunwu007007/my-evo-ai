@@ -7,7 +7,7 @@ index building, hybrid search, and similarity ranking.
 __module_meta__ = {
     "id": "milvus-vector",
     "name": "Milvus Vector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "a", "type": "string", "required": True, "description": ""},

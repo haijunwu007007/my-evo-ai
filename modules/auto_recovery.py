@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 自动恢复（A级）"""
-__module_meta__ = {"id":"auto-recovery","name":"Auto Recovery","version":"1.0.0","group":"system","grade":"A","tags":["system","recovery","fault"],"description":"自动恢复"}
+__module_meta__ = {"id":"auto-recovery","name":"Auto Recovery","version":"V0.1","group":"system","grade":"A","tags":["system","recovery","fault"],"description":"自动恢复"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

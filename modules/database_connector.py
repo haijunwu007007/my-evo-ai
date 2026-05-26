@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据存储
 __module_meta__ = {
     "id": "database-connector",
     "name": "Database Connector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

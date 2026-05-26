@@ -8,7 +8,7 @@
 __module_meta__ = {
     "id": "agent-boreas",
     "name": "Agent Boreas",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "buffer_size", "type": "string", "required": True, "description": ""},

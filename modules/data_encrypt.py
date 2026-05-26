@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 数据加密引擎（A级）
 
 对称加密/解密、哈希签名、Base64 编解码"""
-__module_meta__ = {"id":"data-encrypt","name":"Data Encrypt","version":"1.0.0","group":"security","grade":"A",
+__module_meta__ = {"id":"data-encrypt","name":"Data Encrypt","version":"V0.1","group":"security","grade":"A",
     "tags":["security","encryption","crypto","hash"],"description":"Symmetric encryption, hashing, and encoding"}
 import time, hashlib, logging, base64, os
 from typing import Any, Dict

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 缓存
 __module_meta__ = {
     "id": "redis-cache",
     "name": "Redis Cache",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cache",
     "inputs": [
         {"name": "ttl", "type": "string", "required": True, "description": ""},

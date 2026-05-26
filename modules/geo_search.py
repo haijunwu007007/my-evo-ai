@@ -21,7 +21,7 @@ AUTO-EVO-AI V0.1 | 地理位置搜索引擎
 __module_meta__ = {
     "id": "geo-search",
     "name": "Geo Search",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "international",
     "inputs": [
         {"name": "latitude", "type": "string", "required": True, "description": ""},

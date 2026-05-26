@@ -7,7 +7,7 @@ priority queues, backpressure, and exactly-once semantics.
 __module_meta__ = {
     "id": "mercury-core",
     "name": "Mercury Core",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "crypto-api",
     "name": "Crypto Api",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "crypto",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

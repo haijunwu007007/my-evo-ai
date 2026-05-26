@@ -3,7 +3,7 @@
 __module_meta__ = {
     "id": "edge-agent",
     "name": "Edge Agent",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "iot",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

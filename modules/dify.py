@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI集成
 __module_meta__ = {
     "id": "dify",
     "name": "Dify",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "nocode",
     "inputs": [
         {"name": "days", "type": "string", "required": True, "description": ""},

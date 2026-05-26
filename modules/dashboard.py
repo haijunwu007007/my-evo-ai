@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 监控展示
 __module_meta__ = {
     "id": "dashboard",
     "name": "Dashboard",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ui",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

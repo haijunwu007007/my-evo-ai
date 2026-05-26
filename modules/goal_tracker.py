@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "goal-tracker",
     "name": "Goal Tracker",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -17,7 +17,7 @@ Enterprise features:
 __module_meta__ = {
     "id": "ragflow",
     "name": "Ragflow",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ai",
     "inputs": [
         {"name": "title", "type": "string", "required": True, "description": ""},

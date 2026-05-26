@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 监控运维
 __module_meta__ = {
     "id": "system-monitor",
     "name": "System Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "cpu_percent", "type": "string", "required": True, "description": ""},

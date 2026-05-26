@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 P2 行业垂直模块
 __module_meta__ = {
     "id": "media-content-agent",
     "name": "Media Content Agent",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

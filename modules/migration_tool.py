@@ -7,7 +7,7 @@ rollback support, dry-run, and change tracking.
 __module_meta__ = {
     "id": "migration-tool",
     "name": "Migration Tool",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

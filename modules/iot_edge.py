@@ -2,7 +2,7 @@
 
 抽象物联网关接口：模拟设备注册/遥测/命令。
 """
-__module_meta__ = {"id":"iot-edge","name":"IoT Edge","version":"1.0.0","group":"iot","grade":"A",
+__module_meta__ = {"id":"iot-edge","name":"IoT Edge","version":"V0.1","group":"iot","grade":"A",
     "tags":["iot","edge"],"description":"IoT 边缘网关 — 设备注册/遥测/命令"}
 import time, json, logging
 from pathlib import Path

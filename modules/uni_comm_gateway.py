@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 统一通信网关（A级）"""
-__module_meta__ = {"id":"uni-comm-gateway","name":"Uni Comm Gateway","version":"1.0.0","group":"network","grade":"A","tags":["network","communication","gateway"],"description":"统一通信网关"}
+__module_meta__ = {"id":"uni-comm-gateway","name":"Uni Comm Gateway","version":"V0.1","group":"network","grade":"A","tags":["network","communication","gateway"],"description":"统一通信网关"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

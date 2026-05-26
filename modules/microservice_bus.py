@@ -7,7 +7,7 @@ service discovery, circuit breaker, and dead letter handling.
 __module_meta__ = {
     "id": "microservice-bus",
     "name": "Microservice Bus",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

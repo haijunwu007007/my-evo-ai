@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "session-manager",
     "name": "Session Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "auth",
     "inputs": [
         {"name": "default_ttl", "type": "string", "required": True, "description": ""},

@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "plugin-market",
     "name": "Plugin Market",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "plugin",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

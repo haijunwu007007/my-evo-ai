@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - Cronus 智能体模块
 __module_meta__ = {
     "id": "agent-cronus",
     "name": "Agent Cronus",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "expr", "type": "string", "required": True, "description": ""},

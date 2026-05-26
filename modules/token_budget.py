@@ -15,7 +15,7 @@ Token预算控制帮助管理AI API的使用成本：
 __module_meta__ = {
     "id": "token-budget",
     "name": "Token Budget",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "auth",
     "inputs": [
         {"name": "tokens", "type": "string", "required": True, "description": ""},

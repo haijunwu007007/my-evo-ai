@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 分布式基础
 __module_meta__ = {
     "id": "coordination",
     "name": "Coordination",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "lock_key", "type": "string", "required": True, "description": ""},

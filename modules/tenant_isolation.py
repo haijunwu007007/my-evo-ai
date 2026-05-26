@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 租户隔离（A级）
 
 多租户上下文管理，数据隔离与 API Key 管理"""
-__module_meta__ = {"id":"tenant-isolation","name":"Tenant Isolation","version":"1.0.0","group":"security","grade":"A",
+__module_meta__ = {"id":"tenant-isolation","name":"Tenant Isolation","version":"V0.1","group":"security","grade":"A",
     "tags":["security","tenant","multi-tenant","isolation"],"description":"Multi-tenant context management and data isolation"}
 import time, uuid, logging, hashlib
 from typing import Any, Dict, Optional

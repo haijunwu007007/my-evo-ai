@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "decision-engine",
     "name": "Decision Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "workflow",
     "inputs": [
         {"name": "rule", "type": "string", "required": True, "description": ""},

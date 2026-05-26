@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "secret-manager",
     "name": "Secret Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "crypto",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

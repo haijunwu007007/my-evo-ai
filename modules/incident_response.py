@@ -7,7 +7,7 @@ Incident lifecycle management: detection, triage, escalation, resolution, post-m
 __module_meta__ = {
     "id": "incident-response",
     "name": "Incident Response",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "playbook_id", "type": "string", "required": True, "description": ""},

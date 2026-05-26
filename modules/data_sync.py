@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - 数据同步（A级生产实现）
 __module_meta__ = {
     "id": "data-sync",
     "name": "Data Sync",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

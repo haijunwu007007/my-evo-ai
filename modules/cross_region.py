@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 基础设施
 __module_meta__ = {
     "id": "cross-region",
     "name": "Cross Region",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "from_region", "type": "string", "required": True, "description": ""},

@@ -10,7 +10,7 @@ AUTO-EVO-AI V0.1 — Agent Hera (人力资源管理引擎)
 __module_meta__ = {
     "id": "agent-hera",
     "name": "Agent Hera",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "emp_id", "type": "string", "required": True, "description": ""},

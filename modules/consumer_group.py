@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 消息中间件
 __module_meta__ = {
     "id": "consumer-group",
     "name": "Consumer Group",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "group_id", "type": "string", "required": True, "description": ""},

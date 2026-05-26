@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 慢查询分析（A级）"""
-__module_meta__ = {"id":"slow-query","name":"Slow Query","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"slow-query","name":"Slow Query","version":"V0.1","group":"data","grade":"A",
     "tags":["data","sql","performance"],"description":"慢查询分析 - 分析/日志/报告/导出/配置"}
 import time, uuid, logging, re
 from typing import Any, Dict

@@ -7,7 +7,7 @@ multi-sink routing, search, retention policies, alerting, and analytics forä¸Šå¸
 __module_meta__ = {
     "id": "log-manager",
     "name": "Log Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "logging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

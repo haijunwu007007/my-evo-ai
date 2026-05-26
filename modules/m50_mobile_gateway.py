@@ -8,7 +8,7 @@ bidirectional sync, and cross-platform mobile integration.
 __module_meta__ = {
     "id": "m50-mobile-gateway",
     "name": "M50 Mobile Gateway",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

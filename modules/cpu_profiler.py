@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 性能监控
 __module_meta__ = {
     "id": "cpu-profiler",
     "name": "Cpu Profiler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "count", "type": "string", "required": True, "description": ""},

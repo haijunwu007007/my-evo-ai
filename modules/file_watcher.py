@@ -3,7 +3,7 @@
 
 合并 file_watcher + file_watcher_engine → 统一文件监听
 支持目录监控、事件检测、回调通知"""
-__module_meta__ = {"id":"file-watcher","name":"File Watcher","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"file-watcher","name":"File Watcher","version":"V0.1","group":"system","grade":"A",
     "tags":["system","file","module","watch"],"description":"File Watcher with directory monitoring"}
 import os, time, hashlib, logging, threading
 from typing import Any, Dict, List, Optional

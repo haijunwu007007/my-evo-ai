@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - CrewAI 编排（A级）"""
-__module_meta__ = {"id":"crewai","name":"CrewAI","version":"1.0.0","group":"system","grade":"A","tags":["ai","crewai"],"description":"CrewAI 编排 - 多智能体协同/任务管理"}
+__module_meta__ = {"id":"crewai","name":"CrewAI","version":"V0.1","group":"system","grade":"A","tags":["ai","crewai"],"description":"CrewAI 编排 - 多智能体协同/任务管理"}
 import time, uuid, logging, random
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

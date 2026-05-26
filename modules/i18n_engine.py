@@ -10,7 +10,7 @@ Supports plural rules, interpolation, nested keys, locale negotiation, and hot-r
 __module_meta__ = {
     "id": "i18n-engine",
     "name": "I18n Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "international",
     "inputs": [
         {"name": "locale", "type": "string", "required": True, "description": ""},
@@ -564,7 +564,7 @@ class I18nEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "healthy": True,
             "status": "healthy",
             "module": "i18n_engine",
-            "version": "1.0.0",
+            "version": "V0.1",
             "uptime_seconds": time.time() - self._created_at,
             "default_locale": self._config.default_locale,
             "supported_locales": len(self._config.supported_locales),

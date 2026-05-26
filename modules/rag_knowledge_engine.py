@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - RAG 知识引擎（A级）
 
 基于内存向量检索的知识引擎，支持文档索引和语义搜索"""
-__module_meta__ = {"id":"rag-knowledge-engine","name":"RAG Knowledge Engine","version":"1.0.0","group":"intelligence","grade":"A",
+__module_meta__ = {"id":"rag-knowledge-engine","name":"RAG Knowledge Engine","version":"V0.1","group":"intelligence","grade":"A",
     "tags":["intelligence","rag","knowledge","search","embedding"],"description":"RAG knowledge engine with vector search"}
 import time, uuid, logging, json, math
 from typing import Any, Dict, List, Optional

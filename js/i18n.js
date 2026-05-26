@@ -192,17 +192,8 @@ window.I18N = {
         document.title = 'AUTO-EVO-AI V0.1';
     },
 
-    // 创建语言切换器DOM
-    initLocaleUI: function() {
-        if (document.getElementById('evo-i18n-switcher')) return;
-        var c = document.createElement('div');
-        c.id = 'evo-i18n-switcher';
-        c.className = 'i18n-switcher';
-        c.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:99999;display:flex;gap:4px;';
-        c.innerHTML = '<button class="i18n-btn '+(this.current==='zh'?'active':'')+'" data-lang="zh" onclick="I18N.setLocale(\'zh\')" style="padding:4px 10px;border-radius:6px;border:1px solid #444;background:'+(this.current==='zh'?'#667eea':'transparent')+';color:#fff;cursor:pointer;font-size:12px;">中文</button>'+
-                      '<button class="i18n-btn '+(this.current==='en'?'active':'')+'" data-lang="en" onclick="I18N.setLocale(\'en\')" style="padding:4px 10px;border-radius:6px;border:1px solid #444;background:'+(this.current==='en'?'#667eea':'transparent')+';color:#fff;cursor:pointer;font-size:12px;">EN</button>';
-        document.body.appendChild(c);
-    }
+    // 禁用动态注入浮动按钮
+    initLocaleUI: function() {}
 };
 
 // 就绪后初始化

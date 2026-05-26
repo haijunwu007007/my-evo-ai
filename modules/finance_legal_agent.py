@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 金融法务（A级）"""
-__module_meta__ = {"id":"finance-legal","name":"Finance Legal","version":"1.0.0","group":"data","grade":"A","tags":["finance","legal","compliance"],"description":"金融法务 - 合规检查/风险评估/法规管理"}
+__module_meta__ = {"id":"finance-legal","name":"Finance Legal","version":"V0.1","group":"data","grade":"A","tags":["finance","legal","compliance"],"description":"金融法务 - 合规检查/风险评估/法规管理"}
 import time, uuid, logging, random
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

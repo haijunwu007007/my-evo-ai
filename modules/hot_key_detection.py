@@ -3,7 +3,7 @@
 
 合并 hot_key_detection + hotkey_events → 统一快捷键管理
 支持热键注册、事件分发、冲突检测"""
-__module_meta__ = {"id":"hotkey-manager","name":"Hotkey Manager","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"hotkey-manager","name":"Hotkey Manager","version":"V0.1","group":"system","grade":"A",
     "tags":["system","hotkey","shortcut"],"description":"Hotkey manager with event dispatch"}
 import time, logging
 from typing import Any, Dict, List, Optional

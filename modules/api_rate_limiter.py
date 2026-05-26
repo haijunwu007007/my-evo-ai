@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - API 限流器（A级）"""
-__module_meta__ = {"id":"api-rate-limiter","name":"API Rate Limiter","version":"1.0.0","group":"network","grade":"A","tags":["network","rate-limit","api"],"description":"API 限流器"}
+__module_meta__ = {"id":"api-rate-limiter","name":"API Rate Limiter","version":"V0.1","group":"network","grade":"A","tags":["network","rate-limit","api"],"description":"API 限流器"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

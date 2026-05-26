@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Web 远程控制（A级）"""
-__module_meta__ = {"id":"web-remote","name":"WebRemote","version":"1.0.0","group":"network","grade":"A",
+__module_meta__ = {"id":"web-remote","name":"WebRemote","version":"V0.1","group":"network","grade":"A",
     "tags":["network","remote","control","execution"],"description":"基于 subprocess 的真实远程命令执行"}
 import time, uuid, logging, os, subprocess, base64
 from pathlib import Path

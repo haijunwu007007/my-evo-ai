@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据保护
 __module_meta__ = {
     "id": "backup-verify",
     "name": "Backup Verify",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "result", "type": "string", "required": True, "description": ""},

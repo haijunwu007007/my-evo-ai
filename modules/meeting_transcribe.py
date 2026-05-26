@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 会议转录（A级）"""
-__module_meta__ = {"id":"meeting-transcribe","name":"Meeting Transcribe","version":"1.0.0","group":"notify","grade":"A","tags":["meeting","transcribe","audio"],"description":"会议转录"}
+__module_meta__ = {"id":"meeting-transcribe","name":"Meeting Transcribe","version":"V0.1","group":"notify","grade":"A","tags":["meeting","transcribe","audio"],"description":"会议转录"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

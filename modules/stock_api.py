@@ -9,7 +9,7 @@ AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版)
 __module_meta__ = {
     "id": "stock-api",
     "name": "Stock Api",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "finance",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},
@@ -38,7 +38,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = logging.getLogger("evo.stock")
 
-__version__ = "6.37.0"
+__version__ = "V0.1"
 
 class StockApiAnalyzer(object):
     """stock_api 分析引擎 - 运营分析核心组件"""

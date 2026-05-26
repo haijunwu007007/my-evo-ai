@@ -7,7 +7,7 @@ trigger management, execution scheduling, and webhook handling.
 __module_meta__ = {
     "id": "n8n",
     "name": "N8n",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "nocode",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

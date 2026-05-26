@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据目录（A级）"""
-__module_meta__ = {"id":"data-catalog","name":"Data Catalog","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"data-catalog","name":"Data Catalog","version":"V0.1","group":"data","grade":"A",
     "tags":["data","catalog","metadata"],"description":"数据目录 - 元数据/字段字典/血缘"}
 import time, uuid, logging
 from typing import Any, Dict, Optional

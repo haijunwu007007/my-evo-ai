@@ -5,7 +5,7 @@ NER entity extraction, pattern matching, dictionary-based extraction, entity lin
 __module_meta__ = {
     "id": "entity-extraction",
     "name": "Entity Extraction",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ai",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

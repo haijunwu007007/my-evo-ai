@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 企业管理
 __module_meta__ = {
     "id": "billion-group-os",
     "name": "Billion Group Os",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

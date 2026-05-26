@@ -3,7 +3,7 @@
 聚合系统健康状态：模块健康/API状态/资源用量/告警摘要。
 桥接到 modules/health_checker 和 modules/health_monitor。
 """
-__module_meta__ = {"id":"health-dashboard","name":"Health Dashboard","version":"1.0.0","group":"ops","grade":"A",
+__module_meta__ = {"id":"health-dashboard","name":"Health Dashboard","version":"V0.1","group":"ops","grade":"A",
     "tags":["ops","health","dashboard"],"description":"健康仪表盘 — 聚合系统健康数据"}
 import time, logging
 from typing import Any, Dict

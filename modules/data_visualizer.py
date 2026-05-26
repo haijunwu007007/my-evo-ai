@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 核心基础
 __module_meta__ = {
     "id": "data-visualizer",
     "name": "Data Visualizer",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "component_id", "type": "string", "required": True, "description": ""},

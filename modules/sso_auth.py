@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - SSO 单点登录（A级生产实现）
 功能：Session 创建/验证/销毁，跨域令牌交换，Session 共享。
 """
 __module_meta__ = {
-    "id": "sso-auth", "name": "SSO Auth", "version": "1.0.0",
+    "id": "sso-auth", "name": "SSO Auth", "version": "V0.1",
     "group": "security",
     "inputs": [{"name": "action", "type": "string", "required": True}],
     "outputs": [{"name": "result", "type": "dict"}],

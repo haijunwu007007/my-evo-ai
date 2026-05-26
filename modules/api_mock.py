@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: API基础设施
 __module_meta__ = {
     "id": "api-mock",
     "name": "Api Mock",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "api",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

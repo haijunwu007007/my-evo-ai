@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "pinecone-managed",
     "name": "Pinecone Managed",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "default_dim", "type": "string", "required": True, "description": ""},

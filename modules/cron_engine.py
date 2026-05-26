@@ -10,7 +10,7 @@ AUTO-EVO-AI - Cron调度引擎 v3.0
 __module_meta__ = {
     "id": "cron-engine",
     "name": "Cron Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "scheduler",
     "inputs": [
         {"name": "data_dir", "type": "string", "required": True, "description": ""},

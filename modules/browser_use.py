@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI集成
 __module_meta__ = {
     "id": "browser-use",
     "name": "Browser Use",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "browser",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

@@ -10,7 +10,7 @@ Hyperframes 视频渲染集成 v2.0
 __module_meta__ = {
     "id": "hyperframes-video",
     "name": "Hyperframes Video",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "title", "type": "string", "required": True, "description": ""},

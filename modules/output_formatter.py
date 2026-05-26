@@ -8,7 +8,7 @@ output_formatter — 企业级输出格式化引擎
 __module_meta__ = {
     "id": "output-formatter",
     "name": "Output Formatter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "value", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI智能体
 __module_meta__ = {
     "id": "agent-minerva",
     "name": "Agent Minerva",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

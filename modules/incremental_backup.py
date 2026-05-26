@@ -22,7 +22,7 @@ AUTO-EVO-AI V0.1 | 增量备份引擎
 __module_meta__ = {
     "id": "incremental-backup",
     "name": "Incremental Backup",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "path", "type": "string", "required": True, "description": ""},

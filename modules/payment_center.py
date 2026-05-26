@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "payment-center",
     "name": "Payment Center",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "finance",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

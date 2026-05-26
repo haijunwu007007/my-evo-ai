@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "rollback-manager",
     "name": "Rollback Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "max_checkpoints", "type": "string", "required": True, "description": ""},

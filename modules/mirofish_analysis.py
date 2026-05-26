@@ -7,7 +7,7 @@ catch monitoring, ecosystem analysis, and regulatory compliance.
 __module_meta__ = {
     "id": "mirofish-analysis",
     "name": "Mirofish Analysis",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "finance",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

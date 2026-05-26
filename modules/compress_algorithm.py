@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据处理
 __module_meta__ = {
     "id": "compress-algorithm",
     "name": "Compress Algorithm",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "sample_data", "type": "string", "required": True, "description": ""},

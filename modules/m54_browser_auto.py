@@ -7,7 +7,7 @@
 __module_meta__ = {
     "id": "m54-browser-auto",
     "name": "Browser Automation Engine",
-    "version": "3.0.0",
+    "version": "V0.1",
     "group": "automation",
     "grade": "A",
     "tags": ["browser", "automation", "rpa", "scraping", "playwright"],

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Session 存储（A级）"""
-__module_meta__ = {"id":"session-store","name":"Session Store","version":"1.0.0","group":"storage","grade":"A","tags":["storage","session","auth"],"description":"Session 存储"}
+__module_meta__ = {"id":"session-store","name":"Session Store","version":"V0.1","group":"storage","grade":"A","tags":["storage","session","auth"],"description":"Session 存储"}
 import time,uuid,logging
 from typing import Any,Dict,Optional
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin,Result)

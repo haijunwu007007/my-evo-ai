@@ -7,7 +7,7 @@
 __module_meta__ = {
     "id": "data-masking",
     "name": "Data Masking Engine",
-    "version": "3.0.0",
+    "version": "V0.1",
     "group": "security",
     "grade": "A",
     "tags": ["security", "masking", "pii", "compliance"],

@@ -11,7 +11,7 @@ AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎)
 __module_meta__ = {
     "id": "agent-hephaestus",
     "name": "Agent Hephaestus",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "cache_dir", "type": "string", "required": True, "description": ""},

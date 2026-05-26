@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 — Qdrant 向量数据库管理模块
 __module_meta__ = {
     "id": "qdrant-vector",
     "name": "Qdrant Vector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "default_model", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@
 __module_meta__ = {
     "id": "workflow-manager",
     "name": "工作流管理引擎",
-    "version": "6.5.0",
+    "version": "V0.1",
     "group": "workflow",
     "inputs": [
         {"name": "workflow_def", "type": "dict", "required": True, "description": "工作流JSON定义"},

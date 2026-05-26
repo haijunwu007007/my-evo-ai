@@ -8,7 +8,7 @@ trend-based anomaly detection.
 __module_meta__ = {
     "id": "memory-leak-detect",
     "name": "Memory Leak Detect",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

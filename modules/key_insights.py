@@ -13,7 +13,7 @@ AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎
 __module_meta__ = {
     "id": "key-insights",
     "name": "Key Insights",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "db_path", "type": "string", "required": True, "description": ""},

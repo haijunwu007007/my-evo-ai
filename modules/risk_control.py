@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 风险控制（A级）"""
-__module_meta__ = {"id":"risk-control","name":"Risk Control","version":"1.0.0","group":"system","grade":"A","tags":["system","risk","security"],"description":"风险控制"}
+__module_meta__ = {"id":"risk-control","name":"Risk Control","version":"V0.1","group":"system","grade":"A","tags":["system","risk","security"],"description":"风险控制"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

@@ -20,7 +20,7 @@ AUTO-EVO-AI V0.1 | 多云服务连接器引擎
 __module_meta__ = {
     "id": "cloud-connector",
     "name": "Cloud Connector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "data_dir", "type": "string", "required": True, "description": ""},

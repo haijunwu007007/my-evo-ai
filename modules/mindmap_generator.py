@@ -7,7 +7,7 @@ multi-branch support, export formats, and collaborative editing.
 __module_meta__ = {
     "id": "mindmap-generator",
     "name": "Mindmap Generator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "reports",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

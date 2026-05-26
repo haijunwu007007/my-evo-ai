@@ -2,7 +2,7 @@
 
 桥接到 plugins/ 注册中心和已安装插件列表。
 """
-__module_meta__ = {"id":"evo-plugin-market","name":"Evo Plugin Market","version":"1.0.0","group":"plugins","grade":"A",
+__module_meta__ = {"id":"evo-plugin-market","name":"Evo Plugin Market","version":"V0.1","group":"plugins","grade":"A",
     "tags":["plugins","market"],"description":"插件市场 — 已安装插件列表与注册"}
 import time, json, logging
 from pathlib import Path

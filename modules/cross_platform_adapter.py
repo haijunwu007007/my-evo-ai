@@ -18,7 +18,7 @@ AUTO-EVO-AI V0.1 — 跨平台兼容转译层 (Cross-Platform Adapter)
 __module_meta__ = {
     "id": "cross-platform-adapter",
     "name": "Cross Platform Adapter",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

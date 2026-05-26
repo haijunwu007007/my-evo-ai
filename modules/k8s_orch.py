@@ -6,7 +6,7 @@ K8s Orchestrator — 企业级Kubernetes编排管理引擎
 __module_meta__ = {
     "id": "k8s-orch",
     "name": "K8s Orch",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "s", "type": "string", "required": True, "description": ""},

@@ -16,7 +16,7 @@ AUTO-EVO-AI V0.1 - CircuitBreakerPattern 熔断器模式引擎
 __module_meta__ = {
     "id": "circuit-breaker-pattern",
     "name": "Circuit Breaker Pattern",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "resilience",
     "inputs": [
         {"name": "circuit_id", "type": "string", "required": True, "description": ""},
@@ -242,7 +242,7 @@ class CircuitBreakerPatternManager(
             "circuits": len(self._circuits),
             "open": open_count,
             "half_open": half_open_count,
-            "version": "1.0.0",
+            "version": "V0.1",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

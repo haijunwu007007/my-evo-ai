@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - Flowise 可视化流程编排（A级）
 __module_meta__ = {
     "id": "flowise",
     "name": "Flowise",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "nocode",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

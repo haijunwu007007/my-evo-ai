@@ -3,7 +3,7 @@
 
 合并 image_engine + image_generation → 统一图像处理
 支持图像生成模拟、基础变换、元数据提取、批量转换"""
-__module_meta__ = {"id":"image-processor","name":"Image Processor","version":"1.0.0","group":"media","grade":"A",
+__module_meta__ = {"id":"image-processor","name":"Image Processor","version":"V0.1","group":"media","grade":"A",
     "tags":["media","image","generation","processing"],"description":"Unified image processing and generation"}
 import time, hashlib, logging
 from typing import Any, Dict

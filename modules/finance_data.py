@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 金融数据引擎（A级）
 
 股票行情、财务数据、市场指标查询引擎"""
-__module_meta__ = {"id":"finance-data","name":"Finance Data","version":"1.0.0","group":"data","grade":"A",
+__module_meta__ = {"id":"finance-data","name":"Finance Data","version":"V0.1","group":"data","grade":"A",
     "tags":["data","finance","stock","market","quote"],"description":"Stock market and financial data query engine"}
 import time, logging, json, urllib.request, urllib.parse
 from typing import Any, Dict, List, Optional

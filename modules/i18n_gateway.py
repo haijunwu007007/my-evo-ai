@@ -7,7 +7,7 @@ AUTO-EVO-AI V0.1 — i18n_gateway
 __module_meta__ = {
     "id": "i18n-gateway",
     "name": "I18n Gateway",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "international",
     "inputs": [
         {"name": "header", "type": "string", "required": True, "description": ""},

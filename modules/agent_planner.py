@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - Agent Planner 智能编排层
 __module_meta__ = {
     "id": "agent-planner",
     "name": "Agent Planner",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},
@@ -37,7 +37,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_planner.task.request"}}],
     "depends_on": [],
     "tags": ["multi-agent", "agent"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - Agent Planner 智能编排层 ====================================================",
 }
 

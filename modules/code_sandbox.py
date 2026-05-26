@@ -20,7 +20,7 @@ AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎
 __module_meta__ = {
     "id": "code-sandbox",
     "name": "Code Sandbox",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "allowed", "type": "string", "required": True, "description": ""},

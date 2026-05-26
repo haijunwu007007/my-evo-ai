@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 部署管理
 __module_meta__ = {
     "id": "blue-green",
     "name": "Blue Green",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

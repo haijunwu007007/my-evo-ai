@@ -8,7 +8,7 @@ notification templates, priority routing, and delivery tracking.
 __module_meta__ = {
     "id": "m55-voice-notify",
     "name": "M55 Voice Notify",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "voice",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 核心基础
 __module_meta__ = {
     "id": "cluster-shard",
     "name": "Cluster Shard",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "key", "type": "string", "required": True, "description": ""},

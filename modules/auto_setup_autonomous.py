@@ -2,7 +2,7 @@
 
 桥接到 core/autonomous_agent，提供首次配置/依赖检查/就绪状态。
 """
-__module_meta__ = {"id":"auto-setup-autonomous","name":"AutoSetup","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"auto-setup-autonomous","name":"AutoSetup","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","setup"],"description":"自主智能体首次设置"}
 import time, os, logging
 from pathlib import Path

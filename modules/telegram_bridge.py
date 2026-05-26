@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - Telegram 桥接器（A级）
 
 Telegram Bot API 客户端，支持消息发送、命令处理"""
-__module_meta__ = {"id":"telegram-bridge","name":"Telegram Bridge","version":"1.0.0","group":"communication","grade":"A",
+__module_meta__ = {"id":"telegram-bridge","name":"Telegram Bridge","version":"V0.1","group":"communication","grade":"A",
     "tags":["communication","telegram","bot","messaging"],"description":"Telegram Bot API bridge for messaging"}
 import time, logging, json, urllib.request, urllib.parse
 from typing import Any, Dict, Optional

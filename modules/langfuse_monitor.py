@@ -6,7 +6,7 @@ Provides trace management, observation logging, score tracking, and dashboard in
 __module_meta__ = {
     "id": "langfuse-monitor",
     "name": "Langfuse Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "action", "type": "string", "required": True, "description": ""},

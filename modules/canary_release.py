@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production)
 __module_meta__ = {
     "id": "canary-release",
     "name": "Canary Release",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "canary_id", "type": "string", "required": True, "description": ""},

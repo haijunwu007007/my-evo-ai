@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "alert-manager",
     "name": "Alert Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "dedup_window", "type": "string", "required": True, "description": ""},

@@ -6,7 +6,7 @@ AUTO-EVO-AI m63 - AI多模型网关 (真实实现版)
 __module_meta__ = {
     "id": "ai-gateway",
     "name": "AI多模型网关",
-    "version": "6.3.0",
+    "version": "V0.1",
     "group": "ai",
     "inputs": [
         {"name": "model", "type": "string", "required": True, "description": "模型名称"},

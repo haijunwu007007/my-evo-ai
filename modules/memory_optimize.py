@@ -7,7 +7,7 @@ string interning, lazy loading, and memory-mapped I/O.
 __module_meta__ = {
     "id": "memory-optimize",
     "name": "Memory Optimize",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

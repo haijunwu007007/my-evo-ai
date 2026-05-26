@@ -2,7 +2,7 @@
 
 基于 DataEngine SQLite 的倒排索引全文搜索，支持中文/英文分词、TF-IDF 评分。
 """
-__module_meta__ = {"id":"fts-query","name":"FtsQuery","version":"2.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"fts-query","name":"FtsQuery","version":"V0.1","group":"system","grade":"A",
     "tags":["search","fts","fulltext","index"],"description":"基于 DataEngine SQLite 的全文搜索引擎"}
 import time, uuid, logging, re, math, json
 from pathlib import Path

@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 数据库管理器（A级）
 
 统一数据库连接管理，支持 SQLite/PostgreSQL/MySQL 连接池"""
-__module_meta__ = {"id":"database-manager","name":"Database Manager","version":"1.0.0","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"database-manager","name":"Database Manager","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","database","connection","pool"],"description":"Unified database connection manager"}
 import time, logging, sqlite3, os, threading
 from typing import Any, Dict, Optional, List

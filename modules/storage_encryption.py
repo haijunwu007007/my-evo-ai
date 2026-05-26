@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 存储加密层（A级）
 
 透明文件加密/解密层，支持写入加密、读取解密"""
-__module_meta__ = {"id":"storage-encryption","name":"Storage Encryption","version":"1.0.0","group":"security","grade":"A",
+__module_meta__ = {"id":"storage-encryption","name":"Storage Encryption","version":"V0.1","group":"security","grade":"A",
     "tags":["security","storage","encryption","crypto"],"description":"Transparent storage encryption layer"}
 import os, time, logging, base64, tempfile
 from typing import Any, Dict

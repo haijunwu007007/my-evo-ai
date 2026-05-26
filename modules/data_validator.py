@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据质量
 __module_meta__ = {
     "id": "data-validator",
     "name": "Data Validator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

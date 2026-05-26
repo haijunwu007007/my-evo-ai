@@ -7,7 +7,7 @@ chart generation, template system, and multi-format export.
 __module_meta__ = {
     "id": "monthly-report",
     "name": "Monthly Report",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "reports",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

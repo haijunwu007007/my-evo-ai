@@ -7,7 +7,7 @@ SSL/TLS termination, rate limiting, and request transformation.
 __module_meta__ = {
     "id": "network-proxy",
     "name": "Network Proxy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

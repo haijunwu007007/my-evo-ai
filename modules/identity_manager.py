@@ -8,7 +8,7 @@ password policy, identity federation, audit trail.
 __module_meta__ = {
     "id": "identity-manager",
     "name": "Identity Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "auth",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},
@@ -564,7 +564,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "healthy": True,
             "status": "healthy",
             "module": "identity_manager",
-            "version": "1.0.0",
+            "version": "V0.1",
             "uptime_seconds": round(time.time() - self._created_at, 2),
             "total_identities": stats["total_identities"],
             "active_identities": stats["active_identities"],

@@ -7,7 +7,7 @@ collaborative real-time editing, and rich export capabilities.
 __module_meta__ = {
     "id": "mindmapgenerator",
     "name": "Mindmapgenerator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "reports",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

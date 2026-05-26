@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 自动化
 __module_meta__ = {
     "id": "browser-auto",
     "name": "Browser Auto",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "browser",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

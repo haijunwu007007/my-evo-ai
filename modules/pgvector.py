@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "pgvector",
     "name": "Pgvector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "dim", "type": "string", "required": True, "description": ""},

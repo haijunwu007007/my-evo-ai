@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据分析
 __module_meta__ = {
     "id": "bettafish-forecast",
     "name": "Bettafish Forecast",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "finance",
     "inputs": [
         {"name": "data_points", "type": "string", "required": True, "description": ""},

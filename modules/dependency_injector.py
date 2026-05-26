@@ -23,7 +23,7 @@ AUTO-EVO-AI V0.1 | 依赖注入容器引擎
 __module_meta__ = {
     "id": "dependency-injector",
     "name": "Dependency Injector",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "key", "type": "string", "required": True, "description": ""},

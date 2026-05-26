@@ -8,7 +8,7 @@ embedding, vector search, context assembly, generation orchestration
 __module_meta__ = {
     "id": "rag-pipeline",
     "name": "Rag Pipeline",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "search",
     "inputs": [
         {"name": "metric", "type": "string", "required": True, "description": ""},

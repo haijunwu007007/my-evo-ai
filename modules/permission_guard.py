@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - Permission Guard Module
 __module_meta__ = {
     "id": "permission-guard",
     "name": "Permission Guard",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "command", "type": "string", "required": True, "description": ""},

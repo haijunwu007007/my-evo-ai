@@ -14,7 +14,7 @@ AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台
 __module_meta__ = {
     "id": "chaos-engineering",
     "name": "Chaos Engineering",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "chaos",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},
@@ -230,7 +230,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "slos": len(self._slos),
             "templates": len(self._fault_templates),
             "safety_enabled": self._safety_enabled,
-            "version": "1.0.0",
+            "version": "V0.1",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

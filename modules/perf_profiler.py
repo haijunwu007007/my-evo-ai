@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "perf-profiler",
     "name": "Perf Profiler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "max_traces", "type": "string", "required": True, "description": ""},

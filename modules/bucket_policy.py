@@ -14,7 +14,7 @@ Bucket Policy Manager - 对象存储桶策略管理
 __module_meta__ = {
     "id": "bucket-policy",
     "name": "Bucket Policy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "storage",
     "inputs": [
         {"name": "cls", "type": "string", "required": True, "description": ""},

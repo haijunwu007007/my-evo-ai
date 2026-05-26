@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Elasticsearch 搜索（A级）"""
-__module_meta__ = {"id":"elasticsearch-search","name":"ES Search","version":"1.0.0","group":"network","grade":"A","tags":["network","search","elasticsearch"],"description":"Elasticsearch 搜索 - 索引/文档/搜索/管理"}
+__module_meta__ = {"id":"elasticsearch-search","name":"ES Search","version":"V0.1","group":"network","grade":"A","tags":["network","search","elasticsearch"],"description":"Elasticsearch 搜索 - 索引/文档/搜索/管理"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

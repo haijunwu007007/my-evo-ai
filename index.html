@@ -734,7 +734,7 @@
             </div>
 
             <nav class="nav-groups" id="navGroups">
-    <button onclick="I18N.toggle()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;backdrop-filter:blur(10px);margin-left:8px;" id="lang-toggle-btn">EN / 中</button>
+    <button onclick="if(window.I18N){I18N.toggle()}else if(window.__EVO_ZH2EN){var d=__EVO_ZH2EN;for(var i=0;i<d.length;i++)document.body.innerHTML=document.body.innerHTML.split(d[i][0]).join(d[i][1]);}" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;backdrop-filter:blur(10px);margin-left:8px;" id="lang-toggle-btn">EN / 中</button>
 </nav>
 
             <div class="sidebar-footer">
@@ -991,6 +991,9 @@
 
 
 
+    <!-- i18n: Unified Internationalization Engine -->
+<script src="js/i18n.js"></script>
+
     <script src="js/block-1.js"></script>
 
 <!-- AUTO-EVO-AI V0.1 API Bridge -->
@@ -1020,7 +1023,7 @@
             <span class="mobile-nav-icon">📖</span>
             <span>文档</span>
         </div>
-            <div id="lang-switch" onclick="I18N.toggle()" style="cursor:pointer;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.08);color:#a5b4fc;font-size:13px;font-weight:600;letter-spacing:0.5px;transition:all 0.2s;user-select:none;" onmouseover="this.style.background='rgba(99,102,241,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">EN / 中</div>
+            <div id="lang-switch" onclick="if(window.I18N){I18N.toggle()}else if(window.__EVO_ZH2EN){var d=__EVO_ZH2EN;for(var i=0;i<d.length;i++)document.body.innerHTML=document.body.innerHTML.split(d[i][0]).join(d[i][1]);}" style="cursor:pointer;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.08);color:#a5b4fc;font-size:13px;font-weight:600;letter-spacing:0.5px;transition:all 0.2s;user-select:none;" onmouseover="this.style.background='rgba(99,102,241,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">EN / 中</div>
 
     </nav>
 
@@ -1112,9 +1115,6 @@
 
 <script src="js/block-4.js"></script>
 
-<!-- i18n Internationalization - AUTO-EVO-AI V0.1 -->
-<script src="js/block-5.js"></script>
-
 
 <!-- Auth Login -->
 <div id="login-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:99998;backdrop-filter:blur(30px);overflow-y:auto;">
@@ -1197,6 +1197,8 @@
 </style>
 
 <script src="js/block-8.js"></script>
-<script src="js/i18n.js"></script>
+<!-- i18n: 已迁移至 evo-i18n.js，旧 i18n.js 不再加载 -->
 <script src="js/block-9.js"></script>
 <script src="js/block-evo.js"></script>
+<!-- i18n: 终极独立引擎 — capture阶段拦截，无人能覆盖 -->
+<script>document.title='I18N_RUNNING';var __EB=document.body.innerHTML;if(localStorage.getItem('EL')==='en'){var d=window.__EVO_ZH2EN;if(d&&d.length){var h=document.body.innerHTML;for(var i=0;i<d.length;i++){h=h.split(d[i][0]).join(d[i][1]);}h=h.split('I18N.toggle()').join('__TT()');document.body.innerHTML=h;}}window.__TT=function(){var l=localStorage.getItem('EL')==='en'?'zh':'en';localStorage.setItem('EL',l);if(!document.body)return;if(l==='en'){var h=document.body.innerHTML;for(var i=0;i<window.__EVO_ZH2EN.length;i++){h=h.split(window.__EVO_ZH2EN[i][0]).join(window.__EVO_ZH2EN[i][1]);}h=h.split('I18N.toggle()').join('__TT()');document.body.innerHTML=h;}else{var ob=__EB;if(ob)document.body.innerHTML=ob;}}</script>

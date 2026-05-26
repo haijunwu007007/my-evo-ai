@@ -6,7 +6,7 @@ MCP Servers Management — 上市公司级MCP服务器生命周期管理
 __module_meta__ = {
     "id": "mcp-servers",
     "name": "Mcp Servers",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "mcp",
     "inputs": [
         {"name": "max_requests", "type": "string", "required": True, "description": ""},

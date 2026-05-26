@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 网络基础
 __module_meta__ = {
     "id": "client-pool",
     "name": "Client Pool",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "pool_name", "type": "string", "required": True, "description": ""},

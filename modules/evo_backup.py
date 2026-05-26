@@ -23,7 +23,7 @@ AUTO-EVO-AI V0.1 | EVO备份引擎
 __module_meta__ = {
     "id": "evo-backup",
     "name": "Evo Backup",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "path", "type": "string", "required": True, "description": ""},

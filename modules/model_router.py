@@ -2,7 +2,7 @@
 
 桥接到 core/llm_gateway，暴露 LLM 提供商/模型路由/切换。
 """
-__module_meta__ = {"id":"model-router","name":"Model Router","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"model-router","name":"Model Router","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","llm","router"],"description":"模型路由 — LLM 提供商/模型切换"}
 import time, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "point-time-recover",
     "name": "Point Time Recover",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "max_snapshots", "type": "string", "required": True, "description": ""},

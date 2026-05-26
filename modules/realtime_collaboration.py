@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 实时协作（A级）"""
-__module_meta__ = {"id":"realtime-collaboration","name":"Real-time Collab","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"realtime-collaboration","name":"Real-time Collab","version":"V0.1","group":"system","grade":"A",
     "tags":["system","collaboration","realtime"],"description":"实时协作 - 文档/编辑/会话/统计"}
 import time, uuid, logging
 from typing import Any, Dict

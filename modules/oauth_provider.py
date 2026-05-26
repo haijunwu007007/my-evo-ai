@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - OAuth2 授权服务器（A级生产实现）
 功能：OAuth2 授权码、客户端凭证、密码、刷新令牌四种模式。
 """
 __module_meta__ = {
-    "id": "oauth-provider", "name": "OAuth2 Provider", "version": "1.0.0",
+    "id": "oauth-provider", "name": "OAuth2 Provider", "version": "V0.1",
     "group": "security",
     "inputs": [{"name": "action", "type": "string", "required": True, "description": "authorize/token/refresh/revoke"}],
     "outputs": [{"name": "result", "type": "dict", "description": "OAuth2 响应"}],

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据处理
 __module_meta__ = {
     "id": "graph-engine",
     "name": "Graph Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

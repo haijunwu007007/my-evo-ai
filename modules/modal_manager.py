@@ -7,7 +7,7 @@ accessibility, focus trapping, keyboard navigation, and state persistence.
 __module_meta__ = {
     "id": "modal-manager",
     "name": "Modal Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ui",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

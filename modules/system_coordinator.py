@@ -14,7 +14,7 @@ AUTO-EVO-AI 系统核心协调器 v2.0
 __module_meta__ = {
     "id": "system-coordinator",
     "name": "System Coordinator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

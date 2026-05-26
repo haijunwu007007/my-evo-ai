@@ -6,7 +6,7 @@ IP Whitelist Manager — 企业级IP白名单策略引擎
 __module_meta__ = {
     "id": "ip-whitelist",
     "name": "Ip Whitelist",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

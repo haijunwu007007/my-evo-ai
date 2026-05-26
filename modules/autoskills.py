@@ -6,7 +6,7 @@ autoskills.py - 自动技能管理模块
 __module_meta__ = {
     "id": "autoskills",
     "name": "Autoskills",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "skills",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

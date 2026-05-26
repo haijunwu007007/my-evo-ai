@@ -7,7 +7,7 @@ disk I/O, network stats, memory analysis, alerting, and historical metrics forä¸
 __module_meta__ = {
     "id": "local-monitor",
     "name": "Local Monitor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

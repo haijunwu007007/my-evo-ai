@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: AI智能体
 __module_meta__ = {
     "id": "autogen-studio",
     "name": "Autogen Studio",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},

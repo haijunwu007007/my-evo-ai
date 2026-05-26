@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 统一 API 适配器（A级）"""
-__module_meta__ = {"id":"unified-api-adapter","name":"Unified API","version":"1.0.0","group":"network","grade":"A","tags":["network","api","adapter"],"description":"统一 API 适配器"}
+__module_meta__ = {"id":"unified-api-adapter","name":"Unified API","version":"V0.1","group":"network","grade":"A","tags":["network","api","adapter"],"description":"统一 API 适配器"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

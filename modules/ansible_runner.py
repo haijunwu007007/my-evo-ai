@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: DevOps自动化
 __module_meta__ = {
     "id": "ansible-runner",
     "name": "Ansible Runner",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "playbook_path", "type": "string", "required": True, "description": ""},

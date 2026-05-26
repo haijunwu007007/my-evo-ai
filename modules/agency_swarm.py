@@ -11,7 +11,7 @@ Agency Swarm - 多Agent协作框架
 __module_meta__ = {
     "id": "agency-swarm",
     "name": "Agency Swarm",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

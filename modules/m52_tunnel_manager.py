@@ -8,7 +8,7 @@ load-balanced tunnel pools, and connection health monitoring.
 __module_meta__ = {
     "id": "m52-tunnel-manager",
     "name": "M52 Tunnel Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

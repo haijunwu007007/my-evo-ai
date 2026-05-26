@@ -10,7 +10,7 @@ Pixelle-Video AI短视频引擎 v2.0
 __module_meta__ = {
     "id": "pixelle-video",
     "name": "Pixelle Video",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "media",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ preferences, batching, scheduling, and delivery tracking.
 __module_meta__ = {
     "id": "notification-center",
     "name": "Notification Center",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "notification",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

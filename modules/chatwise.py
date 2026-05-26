@@ -13,7 +13,7 @@ AUTO-EVO-AI V0.1 - Chatwise 智能对话管理
 __module_meta__ = {
     "id": "chatwise",
     "name": "Chatwise",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "communication",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},
@@ -165,7 +165,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "conversations": len(self._conversations),
             "active": active,
             "messages": self._stats["messages_total"],
-            "version": "1.0.0",
+            "version": "V0.1",
         }
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - GitHub 扫描器（A级）
 
 GitHub Trending 扫描、仓库分析、Stars/Forks 追踪"""
-__module_meta__ = {"id":"github-scanner","name":"GitHub Scanner","version":"1.0.0","group":"devops","grade":"A",
+__module_meta__ = {"id":"github-scanner","name":"GitHub Scanner","version":"V0.1","group":"devops","grade":"A",
     "tags":["devops","github","scanner","trending"],"description":"GitHub trending scanner and repository analyzer"}
 import time, logging, json, urllib.request, re
 from typing import Any, Dict, List, Optional

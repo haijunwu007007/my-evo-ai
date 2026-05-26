@@ -23,7 +23,7 @@ AUTO-EVO-AI V0.1 | HTTP客户端引擎
 __module_meta__ = {
     "id": "http-client",
     "name": "Http Client",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现）
 __module_meta__ = {
     "id": "email-automation",
     "name": "Email Automation",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

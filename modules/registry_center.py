@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "registry-center",
     "name": "Registry Center",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "service_name", "type": "string", "required": True, "description": ""},

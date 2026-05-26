@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 发布订阅（A级）"""
-__module_meta__ = {"id":"pub-sub","name":"Pub/Sub","version":"1.0.0","group":"notify","grade":"A","tags":["notify","pubsub","messaging"],"description":"发布订阅"}
+__module_meta__ = {"id":"pub-sub","name":"Pub/Sub","version":"V0.1","group":"notify","grade":"A","tags":["notify","pubsub","messaging"],"description":"发布订阅"}
 import time,uuid,logging
 from typing import Any,Dict,List
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 事件总线 Pro（A级）"""
-__module_meta__ = {"id":"event-bus-pro","name":"Event Bus Pro","version":"1.0.0","group":"notify","grade":"A","tags":["event","bus","pubsub"],"description":"事件总线 Pro"}
+__module_meta__ = {"id":"event-bus-pro","name":"Event Bus Pro","version":"V0.1","group":"notify","grade":"A","tags":["event","bus","pubsub"],"description":"事件总线 Pro"}
 import time, uuid, logging
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

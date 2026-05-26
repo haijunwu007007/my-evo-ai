@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 编排调度
 __module_meta__ = {
     "id": "automation-hub",
     "name": "Automation Hub",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "marketplace",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

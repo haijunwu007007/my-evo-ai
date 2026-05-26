@@ -2,7 +2,7 @@
 
 桥接到 skills/ 目录，查询/管理已安装技能。
 """
-__module_meta__ = {"id":"skill-marketplace","name":"Skill Marketplace","version":"1.0.0","group":"skills","grade":"A",
+__module_meta__ = {"id":"skill-marketplace","name":"Skill Marketplace","version":"V0.1","group":"skills","grade":"A",
     "tags":["skills","market"],"description":"技能市场 — 查询已安装技能"}
 import time, json, logging
 from pathlib import Path

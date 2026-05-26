@@ -5,7 +5,7 @@
 __module_meta__ = {
     "id": "chart-engine",
     "name": "Chart Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "reports",
     "inputs": [
         {"name": "data", "type": "string", "required": True, "description": ""},

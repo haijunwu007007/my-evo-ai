@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 性能监控
 __module_meta__ = {
     "id": "big-key-detection",
     "name": "Big Key Detection",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "key", "type": "string", "required": True, "description": ""},

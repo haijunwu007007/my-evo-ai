@@ -8,7 +8,7 @@ parallel_executor — 企业级并行执行引擎
 __module_meta__ = {
     "id": "parallel-executor",
     "name": "Parallel Executor",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "max_memory_mb", "type": "string", "required": True, "description": ""},

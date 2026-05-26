@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 安全合规
 __module_meta__ = {
     "id": "security-scanner",
     "name": "Security Scanner",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ SQL query result caching with automatic invalidation, TTL, and cache warming
 __module_meta__ = {
     "id": "query-cache",
     "name": "Query Cache",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "cache",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

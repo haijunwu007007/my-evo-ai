@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - OpenHands 编码智能体（A级）"""
-__module_meta__ = {"id":"openhands-agent","name":"OpenHands Agent","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"openhands-agent","name":"OpenHands Agent","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","coding","agent","codegen"],"description":"编码智能体 - 代码生成/审查/重构/会话"}
 import time, uuid, logging
 from typing import Any, Dict

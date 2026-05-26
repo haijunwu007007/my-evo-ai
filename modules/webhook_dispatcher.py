@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Webhook 调度器（A级）"""
-__module_meta__ = {"id":"webhook-dispatcher","name":"Webhook Dispatcher","version":"1.0.0","group":"notify","grade":"A","tags":["notify","webhook","callback"],"description":"Webhook 调度器 - 注册/分发/重试/统计"}
+__module_meta__ = {"id":"webhook-dispatcher","name":"Webhook Dispatcher","version":"V0.1","group":"notify","grade":"A","tags":["notify","webhook","callback"],"description":"Webhook 调度器 - 注册/分发/重试/统计"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

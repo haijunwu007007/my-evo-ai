@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - 备份引擎（A级生产实现）
 __module_meta__ = {
     "id": "backup-engine",
     "name": "Backup Engine",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

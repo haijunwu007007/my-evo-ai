@@ -7,7 +7,7 @@ snippet management, and multi-language code analysis.
 __module_meta__ = {
     "id": "atom-code",
     "name": "Atom Code",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "snippet_id", "type": "string", "required": True, "description": ""},

@@ -6,7 +6,7 @@ Production-grade label/tag management with hierarchy, ACL, audit trail, and auto
 __module_meta__ = {
     "id": "label-manager",
     "name": "Label Manager",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "value", "type": "string", "required": True, "description": ""},

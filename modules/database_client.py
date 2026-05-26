@@ -17,7 +17,7 @@ AUTO-EVO-AI V0.1 - 数据库客户端（A级生产实现）
 __module_meta__ = {
     "id": "database-client",
     "name": "Database Client",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

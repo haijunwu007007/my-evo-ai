@@ -6,7 +6,7 @@
 __module_meta__ = {
     "id": "first-run-setup",
     "name": "First Run Setup",
-    "version": "3.0.0",
+    "version": "V0.1",
     "group": "system",
     "grade": "A",
     "tags": ["system", "setup", "init", "bootstrap"],

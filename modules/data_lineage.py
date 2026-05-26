@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据治理
 __module_meta__ = {
     "id": "data-lineage",
     "name": "Data Lineage",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "data",
     "inputs": [
         {"name": "prefix", "type": "string", "required": True, "description": ""},

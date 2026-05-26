@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 健康检查（A级）"""
-__module_meta__ = {"id":"health-check-mod","name":"Health Check","version":"1.0.0","group":"ops","grade":"A","tags":["ops","health","monitor"],"description":"健康检查基础模块"}
+__module_meta__ = {"id":"health-check-mod","name":"Health Check","version":"V0.1","group":"ops","grade":"A","tags":["ops","health","monitor"],"description":"健康检查基础模块"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

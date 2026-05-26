@@ -6,7 +6,7 @@ Mem0 Memory Layer — 上市公司生产级实现
 __module_meta__ = {
     "id": "mem0-memory",
     "name": "Mem0 Memory",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "memory",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

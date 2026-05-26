@@ -3,7 +3,7 @@
 
 合并 mcp_client + mcp_integration → 统一 MCP 协议桥接
 支持工具发现、调用转发、服务注册"""
-__module_meta__ = {"id":"mcp-bridge","name":"MCP Bridge","version":"1.0.0","group":"intelligence","grade":"A",
+__module_meta__ = {"id":"mcp-bridge","name":"MCP Bridge","version":"V0.1","group":"intelligence","grade":"A",
     "tags":["intelligence","mcp","bridge","protocol"],"description":"MCP protocol bridge for tool discovery and invocation"}
 import time, uuid, logging, json
 from typing import Any, Dict, List, Optional

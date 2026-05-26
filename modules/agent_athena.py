@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 核心基础
 __module_meta__ = {
     "id": "agent-athena",
     "name": "Agent Athena",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

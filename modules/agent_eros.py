@@ -11,7 +11,7 @@ AUTO-EVO-AI V0.1 — Agent Eros (关系管理引擎)
 __module_meta__ = {
     "id": "agent-eros",
     "name": "Agent Eros",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "custom_weights", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 工具链
 __module_meta__ = {
     "id": "code-generator",
     "name": "Code Generator",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "developer",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

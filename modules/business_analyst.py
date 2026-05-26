@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 智能分析
 __module_meta__ = {
     "id": "business-analyst",
     "name": "Business Analyst",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "business",
     "inputs": [
         {"name": "metric_name", "type": "string", "required": True, "description": ""},

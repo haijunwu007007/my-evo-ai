@@ -6,7 +6,7 @@ Production-level IP whitelist/blacklist, rate limiting, geo-blocking, and access
 __module_meta__ = {
     "id": "ip-access-control",
     "name": "Ip Access Control",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "security",
     "inputs": [
         {"name": "allowed", "type": "string", "required": True, "description": ""},

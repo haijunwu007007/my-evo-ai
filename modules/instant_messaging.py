@@ -6,7 +6,7 @@ Instant Messaging — 企业级即时通讯引擎
 __module_meta__ = {
     "id": "instant-messaging",
     "name": "Instant Messaging",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "messaging",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

@@ -6,7 +6,7 @@ Enterprise OpenTelemetry Bridge Module
 __module_meta__ = {
     "id": "opentelemetry-bridge",
     "name": "Opentelemetry Bridge",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "monitor",
     "inputs": [
         {"name": "status", "type": "string", "required": True, "description": ""},

@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据保护
 __module_meta__ = {
     "id": "backup-scheduler",
     "name": "Backup Scheduler",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "backup",
     "inputs": [
         {"name": "policy", "type": "string", "required": True, "description": ""},

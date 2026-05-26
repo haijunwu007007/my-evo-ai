@@ -12,7 +12,7 @@ AUTO-EVO-AI 系统核心协调器 v3.0 — 全模块自动协调
 __module_meta__ = {
     "id": "system-coordinator-v3",
     "name": "System Coordinator V3",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "modules_dir", "type": "string", "required": True, "description": ""},
@@ -29,8 +29,8 @@ __module_meta__ = {
     ],
     "triggers": [],
     "depends_on": [],
-    "tags": ["system"],
-    "grade": "C",
+    "tags": ["system", "coordinator"],
+    "grade": "A",
     "description": "AUTO-EVO-AI 系统核心协调器 v3.0 — 全模块自动协调 ===============================================",
 }
 

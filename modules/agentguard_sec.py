@@ -19,7 +19,7 @@ AUTO-EVO-AI V0.1 - Agent安全防护（A级生产实现）
 __module_meta__ = {
     "id": "agentguard-sec",
     "name": "Agentguard Sec",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "agent",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

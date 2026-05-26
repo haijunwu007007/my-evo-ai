@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 指标采集器（A级）"""
-__module_meta__ = {"id":"metric-collector","name":"Metric Collector","version":"1.0.0","group":"ops","grade":"A","tags":["ops","metrics","monitor"],"description":"指标采集器"}
+__module_meta__ = {"id":"metric-collector","name":"Metric Collector","version":"V0.1","group":"ops","grade":"A","tags":["ops","metrics","monitor"],"description":"指标采集器"}
 import time,uuid,logging,random
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

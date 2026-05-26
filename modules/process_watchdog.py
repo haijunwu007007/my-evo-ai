@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 进程看门狗（A级）"""
-__module_meta__ = {"id":"process-watchdog","name":"Process Watchdog","version":"1.0.0","group":"ops","grade":"A","tags":["ops","watchdog","monitor"],"description":"进程看门狗"}
+__module_meta__ = {"id":"process-watchdog","name":"Process Watchdog","version":"V0.1","group":"ops","grade":"A","tags":["ops","watchdog","monitor"],"description":"进程看门狗"}
 import time, uuid, logging
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

@@ -8,7 +8,7 @@ JSON Schema驱动表单生成、20+字段类型、验证引擎、条件逻辑、
 __module_meta__ = {
     "id": "form-builder",
     "name": "Form Builder",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "documents",
     "inputs": [
         {"name": "field", "type": "string", "required": True, "description": ""},

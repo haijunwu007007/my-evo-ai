@@ -2,7 +2,7 @@
 
 桥接到 modules/help_docs 和 frontend 内置指南，提供模块搜索/分类导航。
 """
-__module_meta__ = {"id":"guide-manager","name":"Guide Manager","version":"1.0.0","group":"system","grade":"A",
+__module_meta__ = {"id":"guide-manager","name":"Guide Manager","version":"V0.1","group":"system","grade":"A",
     "tags":["system","guide","help"],"description":"指南管理器 — 用户指南与帮助导航"}
 import time, logging, json
 from pathlib import Path

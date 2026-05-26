@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 弹性容错
 __module_meta__ = {
     "id": "circuit-breaker",
     "name": "Circuit Breaker",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "resilience",
     "inputs": [
         {"name": "config", "type": "string", "required": True, "description": ""},

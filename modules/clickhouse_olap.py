@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 数据存储
 __module_meta__ = {
     "id": "clickhouse-olap",
     "name": "Clickhouse Olap",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "database",
     "inputs": [
         {"name": "action", "type": "string", "required": True, "description": ""},

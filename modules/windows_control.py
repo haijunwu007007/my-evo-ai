@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块
 __module_meta__ = {
     "id": "windows-control",
     "name": "Windows Control",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "network",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

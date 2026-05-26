@@ -2,7 +2,7 @@
 
 基于 DataEngine SQLite 的任务看板 — 项目/任务/状态管理。
 """
-__module_meta__ = {"id":"project-manager","name":"Project Manager","version":"2.0.0","group":"productivity","grade":"A",
+__module_meta__ = {"id":"project-manager","name":"Project Manager","version":"V0.1","group":"productivity","grade":"A",
     "tags":["productivity","project"],"description":"项目管理 — DataEngine SQLite 任务看板"}
 import time, logging
 from typing import Any, Dict

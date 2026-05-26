@@ -7,7 +7,7 @@ table extraction, OCR simulation, layout analysis, and metadata extraction forä¸
 __module_meta__ = {
     "id": "llamaparse",
     "name": "Llamaparse",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "llm",
     "inputs": [
         {"name": "context", "type": "string", "required": True, "description": ""},

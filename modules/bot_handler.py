@@ -2,7 +2,7 @@
 
 桥接到通知通道系统，提供统一的通道状态/send/health 入口。
 """
-__module_meta__ = {"id":"bot-handler","name":"Bot Handler","version":"1.0.0","group":"notification","grade":"A",
+__module_meta__ = {"id":"bot-handler","name":"Bot Handler","version":"V0.1","group":"notification","grade":"A",
     "tags":["notification","bot"],"description":"机器人处理 — 桥接到通知通道"}
 import time, logging
 from typing import Any, Dict

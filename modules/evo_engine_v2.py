@@ -2,7 +2,7 @@
 
 桥接到 core/autonomous_loop + coordinator，暴露引擎状态和心跳。
 """
-__module_meta__ = {"id":"evo-engine-v2","name":"Evo Engine V2","version":"1.0.0","group":"core","grade":"A",
+__module_meta__ = {"id":"evo-engine-v2","name":"Evo Engine V2","version":"V0.1","group":"core","grade":"A",
     "tags":["core","engine"],"description":"引擎 V2 — 桥接到自主循环与协调器"}
 import time, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

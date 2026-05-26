@@ -6,7 +6,7 @@ keyword_extract — 关键词提取引擎
 __module_meta__ = {
     "id": "keyword-extract",
     "name": "Keyword Extract",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "search",
     "inputs": [
         {"name": "data", "type": "string", "required": True, "description": ""},

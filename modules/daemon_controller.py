@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 守护进程控制器（A级）"""
-__module_meta__ = {"id":"daemon-controller","name":"Daemon Controller","version":"1.0.0","group":"ops","grade":"A","tags":["ops","daemon","process"],"description":"守护进程控制器"}
+__module_meta__ = {"id":"daemon-controller","name":"Daemon Controller","version":"V0.1","group":"ops","grade":"A","tags":["ops","daemon","process"],"description":"守护进程控制器"}
 import time, uuid, logging
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 logger=logging.getLogger("evo.daemon-controller")

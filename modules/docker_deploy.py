@@ -5,7 +5,7 @@ Container lifecycle, image management, orchestration, health monitoring, deploym
 __module_meta__ = {
     "id": "docker-deploy",
     "name": "Docker Deploy",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "devops",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

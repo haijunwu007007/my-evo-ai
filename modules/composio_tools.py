@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 开源生态
 __module_meta__ = {
     "id": "composio-tools",
     "name": "Composio Tools",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "plugin",
     "inputs": [
         {"name": "tool", "type": "string", "required": True, "description": ""},

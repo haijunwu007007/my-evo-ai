@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 外部执行器（A级）"""
-__module_meta__ = {"id":"external-executor","name":"External Executor","version":"1.0.0","group":"system","grade":"A","tags":["system","executor","sandbox"],"description":"外部执行器"}
+__module_meta__ = {"id":"external-executor","name":"External Executor","version":"V0.1","group":"system","grade":"A","tags":["system","executor","sandbox"],"description":"外部执行器"}
 import time,uuid,logging
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

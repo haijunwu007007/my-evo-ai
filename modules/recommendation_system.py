@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 推荐系统（A级）"""
-__module_meta__ = {"id":"recommendation-system","name":"Recommendation","version":"1.0.0","group":"system","grade":"A","tags":["system","recommend","ml"],"description":"推荐系统"}
+__module_meta__ = {"id":"recommendation-system","name":"Recommendation","version":"V0.1","group":"system","grade":"A","tags":["system","recommend","ml"],"description":"推荐系统"}
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)

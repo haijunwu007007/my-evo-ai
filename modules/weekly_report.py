@@ -5,7 +5,7 @@ EnterpriseModule implementation with real business logic.
 __module_meta__ = {
     "id": "weekly-report",
     "name": "Weekly Report",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "reports",
     "inputs": [
         {"name": "operations", "type": "string", "required": True, "description": ""},

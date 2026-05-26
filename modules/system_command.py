@@ -7,7 +7,7 @@ Grade: A (生产级) | Category: 工具链
 __module_meta__ = {
     "id": "system-command",
     "name": "System Command",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "system",
     "inputs": [
         {"name": "name", "type": "string", "required": True, "description": ""},

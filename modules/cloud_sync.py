@@ -2,7 +2,7 @@
 """AUTO-EVO-AI V0.1 - 云同步引擎（A级）
 
 本地目录同步管理器，支持增量备份和恢复"""
-__module_meta__ = {"id":"cloud-sync","name":"Cloud Sync","version":"1.0.0","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"cloud-sync","name":"Cloud Sync","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","sync","backup","cloud"],"description":"Directory sync engine with incremental backup"}
 import os, time, hashlib, logging, json, shutil
 from typing import Any, Dict, List, Optional

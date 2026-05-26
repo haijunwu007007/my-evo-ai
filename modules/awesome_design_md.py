@@ -6,7 +6,7 @@ awesome_design_md.py - 设计文档管理模块
 __module_meta__ = {
     "id": "awesome-design-md",
     "name": "Awesome Design Md",
-    "version": "1.0.0",
+    "version": "V0.1",
     "group": "ui",
     "inputs": [
         {"name": "operation", "type": "string", "required": True, "description": ""},
@@ -240,7 +240,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         )
         doc.versions.append(
             {
-                "version": "1.0.0",
+                "version": "V0.1",
                 "content": content,
                 "author": doc.author,
                 "timestamp": time.time(),
@@ -253,7 +253,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         for tag in doc.tags:
             self._tag_index.setdefault(tag, []).append(doc_id)
         self._build_text_index(doc_id, content)
-        return {"doc_id": doc_id, "version": "1.0.0", "word_count": word_count}
+        return {"doc_id": doc_id, "version": "V0.1", "word_count": word_count}
 
     def _build_text_index(self, doc_id: str, content: str):
         words = set(re.findall(r"[a-zA-Z]{2,}|[\u4e00-\u9fff]{1,}", content.lower()))

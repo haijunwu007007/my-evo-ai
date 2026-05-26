@@ -2,7 +2,7 @@
 
 桥接到 core/experience.py 和 core/memory_engine 的经验/记忆存储。
 """
-__module_meta__ = {"id":"longterm-memory","name":"LongTerm Memory","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"longterm-memory","name":"LongTerm Memory","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","memory","persistence"],"description":"长期记忆 — 桥接到经验库与记忆引擎"}
 import time, logging
 from typing import Any, Dict

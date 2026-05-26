@@ -3,7 +3,7 @@
 桥接到 core/autonomous_agent.AutonomousAgent，
 暴露核心引擎的 state/start/stop/stats/decisions 控制面。
 """
-__module_meta__ = {"id":"autonomous-agent","name":"AutoAgent","version":"1.0.0","group":"ai","grade":"A",
+__module_meta__ = {"id":"autonomous-agent","name":"AutoAgent","version":"V0.1","group":"ai","grade":"A",
     "tags":["ai","agent","autonomous"],"description":"自主智能体桥接 — 代理 core/autonomous_agent"}
 import time, logging
 from typing import Any, Dict

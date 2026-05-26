@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 自动优化器（A级）"""
-__module_meta__ = {"id":"auto-optimizer","name":"Auto Optimizer","version":"1.0.0","group":"system","grade":"A","tags":["system","optimization","auto"],"description":"自动优化器"}
+__module_meta__ = {"id":"auto-optimizer","name":"Auto Optimizer","version":"V0.1","group":"system","grade":"A","tags":["system","optimization","auto"],"description":"自动优化器"}
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
