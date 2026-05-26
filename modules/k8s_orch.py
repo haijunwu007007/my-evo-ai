@@ -29,11 +29,10 @@ __module_meta__ = {
 }
 
 import time
-import time as tmod
 import logging
 import hashlib
-import time as tmod
 import threading
+import json
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Optional
@@ -41,6 +40,14 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
+
+try:
+    from kubernetes import client, config as k8s_config
+    _HAS_K8S = True
+except ImportError:
+    _HAS_K8S = False
+    client = None
+    k8s_config = None
 
 logger = logging.getLogger(__name__)
 
@@ -387,7 +394,7 @@ class K8sOrchestrator:
 
     def __init__(self):
         self.module_name = "k8s_orch"
-        self.module_version = "6.38.0"
+        self.module_version = "V0.1"
         self._pods: dict[str, Pod] = {}  # key = f"{ns}/{name}"
         self._deployments: dict[str, dict] = {}  # key = f"{ns}/{name}"
         self._services: dict[str, dict] = {}
@@ -401,6 +408,21 @@ class K8sOrchestrator:
         self._lock = threading.Lock()
         self._initialized = False
         self._total_ops = 0
+        # 真实K8s客户端（可选）
+        self._k8s_client = None
+        self._k8s_apps = None
+        if _HAS_K8S:
+            try:
+                k8s_config.load_kube_config()
+                self._k8s_client = client.CoreV1Api()
+                self._k8s_apps = client.AppsV1Api()
+            except Exception:
+                try:
+                    k8s_config.load_incluster_config()
+                    self._k8s_client = client.CoreV1Api()
+                    self._k8s_apps = client.AppsV1Api()
+                except Exception:
+                    pass
 
     def initialize(self) -> None:
         self._init_default_resources()
@@ -681,7 +703,7 @@ class K8sOrchestrator:
         pods_by_phase = defaultdict(int)
         for pod in self._pods.values():
             pods_by_phase[pod.status.phase.value] += 1
-        return {
+        result = {
             "namespaces": len(self._namespaces),
             "nodes": len(self._scheduler.get_node_status()),
             "pods": {"total": len(self._pods), "by_phase": dict(pods_by_phase)},
@@ -690,7 +712,22 @@ class K8sOrchestrator:
             "hpa_configs": len(self._hpa_configs),
             "total_operations": self._total_ops,
             "events": len(self._events),
+            "k8s_client": self._k8s_client is not None,
         }
+        # 如果有真实K8s客户端，返回真实集群状态
+        if self._k8s_client:
+            try:
+                nodes = self._k8s_client.list_node().items
+                result["nodes"] = len(nodes)
+                pods = self._k8s_client.list_pod_for_all_namespaces().items
+                result["pods"]["total"] = len(pods)
+                result["pods"]["real_cluster"] = True
+                if self._k8s_apps:
+                    deps = self._k8s_apps.list_deployment_for_all_namespaces().items
+                    result["deployments"] = len(deps)
+            except Exception:
+                pass
+        return result
 
     def get_events(self, resource_type: str = "", limit: int = 50) -> list[dict]:
         events = self._events

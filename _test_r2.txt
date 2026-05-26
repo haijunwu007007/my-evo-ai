@@ -1,0 +1,213 @@
+test_001_create_user (test_core_engines.TestAuthEngine.test_001_create_user)
+�����û� ... FAIL
+test_002_login (test_core_engines.TestAuthEngine.test_002_login)
+��¼��ȡ token ... ok
+test_003_verify_access_token (test_core_engines.TestAuthEngine.test_003_verify_access_token)
+��֤ access token ... ok
+test_004_invalid_token_rejected (test_core_engines.TestAuthEngine.test_004_invalid_token_rejected)
+��Ч token �ܾ� ... FAIL
+test_005_check_permission (test_core_engines.TestAuthEngine.test_005_check_permission)
+Ȩ�޼�� ... ok
+test_006_list_users (test_core_engines.TestAuthEngine.test_006_list_users)
+�г��û� ... ok
+test_007_hash_password (test_core_engines.TestAuthEngine.test_007_hash_password)
+�����ϣ ... ok
+test_008_get_stats (test_core_engines.TestAuthEngine.test_008_get_stats)
+ͳ�� ... ok
+test_001_create_instance (test_core_engines.TestEnterpriseModule.test_001_create_instance) ... ok
+test_002_meta_exists (test_core_engines.TestEnterpriseModule.test_002_meta_exists)
+��֤ģ��Ԫ���������� ... ok
+test_001_emit_single (test_core_engines.TestEventEngine.test_001_emit_single)
+���������¼� ... ERROR
+test_002_emit_batch (test_core_engines.TestEventEngine.test_002_emit_batch)
+�������� ... ERROR
+test_003_subscribe_all (test_core_engines.TestEventEngine.test_003_subscribe_all)
+ȫ�ֶ��� ... ERROR
+test_004_unsubscribe (test_core_engines.TestEventEngine.test_004_unsubscribe)
+ȡ������ ... ERROR
+test_005_poll_loop_is_async (test_core_engines.TestEventEngine.test_005_poll_loop_is_async)
+poll_loop �� async def ... ok
+test_001_config_loader (test_core_engines.TestInfrastructure.test_001_config_loader) ... skipped 'ConfigLoader ������'
+test_002_db_writable (test_core_engines.TestInfrastructure.test_002_db_writable) ... ok
+test_001_save_definition (test_core_engines.TestPipelineEngine.test_001_save_definition)
+����ܵ����� ... ok
+test_002_list_pipelines (test_core_engines.TestPipelineEngine.test_002_list_pipelines)
+�г��ܵ� ... ok
+test_003_delete_definition (test_core_engines.TestPipelineEngine.test_003_delete_definition)
+ɾ������ ... ok
+test_004_get_status (test_core_engines.TestPipelineEngine.test_004_get_status)
+״̬ ... ok
+test_005_get_stats (test_core_engines.TestPipelineEngine.test_005_get_stats)
+ͳ�� ... ok
+test_001_store_available (test_core_engines.TestSchedulerEngine.test_001_store_available)
+���洴���� store ���� ... ERROR
+test_002_add_task (test_core_engines.TestSchedulerEngine.test_002_add_task)
+���Ӷ�ʱ���� ... ERROR
+test_003_list_tasks (test_core_engines.TestSchedulerEngine.test_003_list_tasks)
+�г�������������ӵ� ... ERROR
+test_004_remove_task (test_core_engines.TestSchedulerEngine.test_004_remove_task)
+�Ƴ����� ... FAIL
+test_005_toggle_task (test_core_engines.TestSchedulerEngine.test_005_toggle_task)
+��ͣ/�ָ����� ... FAIL
+test_006_stats (test_core_engines.TestSchedulerEngine.test_006_stats)
+����ͳ�� ... ok
+test_007_upcoming_runs (test_core_engines.TestSchedulerEngine.test_007_upcoming_runs)
+�ٴ�����ʱ����� ... ERROR
+test_001_enqueue (test_core_engines.TestTaskQueueEngine.test_001_enqueue)
+��� �� ʹ����ȷ API ... ok
+test_002_queue_size (test_core_engines.TestTaskQueueEngine.test_002_queue_size)
+���д�С ... ok
+test_003_enqueue_multiple (test_core_engines.TestTaskQueueEngine.test_003_enqueue_multiple)
+������ ... ok
+test_004_dequeue (test_core_engines.TestTaskQueueEngine.test_004_dequeue)
+���� ... ok
+test_005_clear (test_core_engines.TestTaskQueueEngine.test_005_clear)
+��� ... ok
+test_006_get_status (test_core_engines.TestTaskQueueEngine.test_006_get_status)
+״̬ ... ok
+
+======================================================================
+ERROR: test_001_emit_single (test_core_engines.TestEventEngine.test_001_emit_single)
+���������¼�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 97, in test_001_emit_single
+    self.engine.emit({"topic": "test.topic", "data": {"msg": "hello"}})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 560, in emit
+    self._store.save_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 244, in save_event
+    """, (event.id, event.type, event.source,
+          ^^^^^^^^
+AttributeError: 'dict' object has no attribute 'id'
+
+======================================================================
+ERROR: test_002_emit_batch (test_core_engines.TestEventEngine.test_002_emit_batch)
+��������
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 105, in test_002_emit_batch
+    self.engine.emit({"topic": "test.topic", "data": {"n": i}})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 560, in emit
+    self._store.save_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 244, in save_event
+    """, (event.id, event.type, event.source,
+          ^^^^^^^^
+AttributeError: 'dict' object has no attribute 'id'
+
+======================================================================
+ERROR: test_003_subscribe_all (test_core_engines.TestEventEngine.test_003_subscribe_all)
+ȫ�ֶ���
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 115, in test_003_subscribe_all
+    self.engine.emit({"topic": "global.x", "data": "y"})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 560, in emit
+    self._store.save_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 244, in save_event
+    """, (event.id, event.type, event.source,
+          ^^^^^^^^
+AttributeError: 'dict' object has no attribute 'id'
+
+======================================================================
+ERROR: test_004_unsubscribe (test_core_engines.TestEventEngine.test_004_unsubscribe)
+ȡ������
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 125, in test_004_unsubscribe
+    self.engine.emit({"topic": "temp", "data": "1"})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 560, in emit
+    self._store.save_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\event_engine.py", line 244, in save_event
+    """, (event.id, event.type, event.source,
+          ^^^^^^^^
+AttributeError: 'dict' object has no attribute 'id'
+
+======================================================================
+ERROR: test_001_store_available (test_core_engines.TestSchedulerEngine.test_001_store_available)
+���洴���� store ����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 31, in test_001_store_available
+    store = self.engine.store()
+TypeError: 'ScheduleStore' object is not callable
+
+======================================================================
+ERROR: test_002_add_task (test_core_engines.TestSchedulerEngine.test_002_add_task)
+���Ӷ�ʱ����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 44, in test_002_add_task
+    self.assertEqual(task.task_id, "test_hb")
+                     ^^^^^^^^^^^^
+AttributeError: 'ScheduledTask' object has no attribute 'task_id'
+
+======================================================================
+ERROR: test_003_list_tasks (test_core_engines.TestSchedulerEngine.test_003_list_tasks)
+�г�������������ӵ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 48, in test_003_list_tasks
+    store = self.engine.store()
+TypeError: 'ScheduleStore' object is not callable
+
+======================================================================
+ERROR: test_007_upcoming_runs (test_core_engines.TestSchedulerEngine.test_007_upcoming_runs)
+�ٴ�����ʱ�����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 75, in test_007_upcoming_runs
+    from core.scheduler_engine import CronExpression
+ImportError: cannot import name 'CronExpression' from 'core.scheduler_engine' (D:\AUTO-EVO-AI-V0.1\core\scheduler_engine.py)
+
+======================================================================
+FAIL: test_001_create_user (test_core_engines.TestAuthEngine.test_001_create_user)
+�����û�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 252, in test_001_create_user
+    self.assertIn("user_id", r, f"����ʧ��: {r}")
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'user_id' not found in {'success': True, 'user': {'username': 'new_user', 'role': 'user'}} : ����ʧ��: {'success': True, 'user': {'username': 'new_user', 'role': 'user'}}
+
+======================================================================
+FAIL: test_004_invalid_token_rejected (test_core_engines.TestAuthEngine.test_004_invalid_token_rejected)
+��Ч token �ܾ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 271, in test_004_invalid_token_rejected
+    self.assertIsNone(self.engine.verify_access_token("xxx.yyy.zzz"))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'valid': False, 'error': 'Invalid token'} is not None
+
+======================================================================
+FAIL: test_004_remove_task (test_core_engines.TestSchedulerEngine.test_004_remove_task)
+�Ƴ�����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 56, in test_004_remove_task
+    self.assertTrue(ok)
+    ~~~~~~~~~~~~~~~^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_005_toggle_task (test_core_engines.TestSchedulerEngine.test_005_toggle_task)
+��ͣ/�ָ�����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 64, in test_005_toggle_task
+    self.assertIsNotNone(toggled)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: unexpectedly None
+
+----------------------------------------------------------------------
+Ran 35 tests in 2.334s
+
+FAILED (failures=4, errors=8, skipped=1)

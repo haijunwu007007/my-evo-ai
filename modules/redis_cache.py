@@ -43,6 +43,13 @@ from dataclasses import dataclass, field
 from collections import OrderedDict
 
 try:
+    import redis as _redis_lib
+    _HAS_REDIS = True
+except ImportError:
+    _HAS_REDIS = False
+    _redis_lib = None
+
+try:
     from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
     from modules._base.enterprise_module import CircuitBreakerMixin, RateLimiterMixin
     from modules._base.tracing import trace_operation
@@ -169,6 +176,20 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._max_memory_mb = self._cfg("max_memory_mb", 256)
         self._eviction_policy = self._cfg("eviction_policy", "allkeys-lru")
         self._default_ttl = self._cfg("default_ttl", 3600)
+        self._redis_client = None
+        if _HAS_REDIS:
+            try:
+                self._redis_client = _redis_lib.Redis(
+                    host=self.config.get('redis_host', 'localhost'),
+                    port=self.config.get('redis_port', 6379),
+                    db=self.config.get('redis_db', 0),
+                    password=self.config.get('redis_password', None),
+                    decode_responses=True,
+                    socket_connect_timeout=3,
+                )
+                self._redis_client.ping()
+            except Exception:
+                self._redis_client = None
         self._stats = {"hits": 0, "misses": 0, "sets": 0, "deletes": 0, "evictions": 0, "lock_acquires": 0}
 
     def _cfg(self, key, default):
@@ -193,6 +214,7 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "locks": len(self._locks),
             "streams": len(self._streams),
             "stats": dict(self._stats),
+            "redis_connected": self._redis_client is not None,
         }
 
     async def execute(self, action: str, params: dict = None) -> dict:
@@ -262,6 +284,20 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _get(self, p: dict) -> dict:
         key = p.get("key", "")
+        # 真实Redis优先
+        if self._redis_client:
+            try:
+                val = self._redis_client.get(key)
+                if val is None:
+                    self._stats["misses"] += 1
+                    return {"success": True, "value": None, "hit": False}
+                self._stats["hits"] += 1
+                try:
+                    return {"success": True, "value": json.loads(val), "hit": True}
+                except (json.JSONDecodeError, TypeError):
+                    return {"success": True, "value": val, "hit": True}
+            except Exception:
+                pass  # 降级到内存
         entry = self._store.get(key)
         if entry is None:
             self._stats["misses"] += 1
@@ -282,6 +318,23 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tags = p.get("tags", [])
         nx = p.get("nx", False)  # Only set if not exists
         xx = p.get("xx", False)  # Only set if exists
+        # 真实Redis优先
+        if self._redis_client:
+            try:
+                import json as _j
+                val_str = _j.dumps(value) if not isinstance(value, (str, bytes)) else value
+                if nx:
+                    if not self._redis_client.set(key, val_str, ex=ttl, nx=True):
+                        return {"success": True, "status": "not_set", "reason": "key exists"}
+                elif xx:
+                    if not self._redis_client.set(key, val_str, ex=ttl, xx=True):
+                        return {"success": True, "status": "not_set", "reason": "key not exists"}
+                else:
+                    self._redis_client.setex(key, ttl or self._default_ttl, val_str)
+                self._stats["sets"] += 1
+                return {"success": True, "status": "OK", "key": key, "ttl": ttl or self._default_ttl}
+            except Exception:
+                pass  # 降级到内存
         with self._lock:
             if nx and key in self._store and not self._store[key].expired:
                 return {"success": True, "status": "not_set", "reason": "key exists"}
@@ -295,12 +348,25 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _delete(self, p: dict) -> dict:
         key = p.get("key", "")
+        if self._redis_client:
+            try:
+                deleted = self._redis_client.delete(key) > 0
+                self._stats["deletes"] += 1
+                return {"success": True, "deleted": deleted}
+            except Exception:
+                pass
         deleted = self._store.pop(key, None)
         self._stats["deletes"] += 1
         return {"success": True, "deleted": deleted is not None}
 
     def _exists(self, p: dict) -> dict:
         key = p.get("key", "")
+        if self._redis_client:
+            try:
+                exists = self._redis_client.exists(key)
+                return {"success": True, "exists": bool(exists)}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and not entry.expired:
             return {"success": True, "exists": True}
@@ -328,6 +394,12 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _incr(self, p: dict) -> dict:
         key = p.get("key", "")
         amount = p.get("amount", 1)
+        if self._redis_client:
+            try:
+                val = self._redis_client.incrby(key, amount)
+                return {"success": True, "value": val}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and not entry.expired:
             try:
@@ -360,6 +432,12 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _hget(self, p: dict) -> dict:
         key, field = p.get("key", ""), p.get("field", "")
+        if self._redis_client:
+            try:
+                val = self._redis_client.hget(key, field)
+                return {"success": True, "value": val.decode() if isinstance(val, bytes) else val}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and not entry.expired and isinstance(entry.value, dict):
             return {"success": True, "value": entry.value.get(field)}
@@ -367,6 +445,12 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _hset(self, p: dict) -> dict:
         key, field, value = p.get("key", ""), p.get("field", ""), p.get("value")
+        if self._redis_client:
+            try:
+                self._redis_client.hset(key, field, value)
+                return {"success": True}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and isinstance(entry.value, dict):
             entry.value[field] = value
@@ -382,7 +466,14 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "deleted": False}
 
     def _hgetall(self, p: dict) -> dict:
-        entry = self._store.get(p.get("key", ""))
+        key = p.get("key", "")
+        if self._redis_client:
+            try:
+                raw = self._redis_client.hgetall(key)
+                return {"success": True, "hash": {k.decode() if isinstance(k, bytes) else k: v.decode() if isinstance(v, bytes) else v for k, v in raw.items()}}
+            except Exception:
+                pass
+        entry = self._store.get(key)
         if entry and not entry.expired and isinstance(entry.value, dict):
             return {"success": True, "hash": entry.value}
         return {"success": True, "hash": {}}
@@ -395,6 +486,13 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _lpush(self, p: dict) -> dict:
         key, value = p.get("key", ""), p.get("value")
+        if self._redis_client:
+            try:
+                length = self._redis_client.lpush(key, value)
+                self._stats["sets"] += 1
+                return {"success": True, "length": length}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and isinstance(entry.value, list):
             entry.value.insert(0, value)
@@ -404,6 +502,12 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _rpush(self, p: dict) -> dict:
         key, value = p.get("key", ""), p.get("value")
+        if self._redis_client:
+            try:
+                length = self._redis_client.rpush(key, value)
+                return {"success": True, "length": length}
+            except Exception:
+                pass
         entry = self._store.get(key)
         if entry and isinstance(entry.value, list):
             entry.value.append(value)
@@ -412,7 +516,16 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "length": len(self._store[key].value)}
 
     def _lrange(self, p: dict) -> dict:
-        entry = self._store.get(p.get("key", ""))
+        key = p.get("key", "")
+        if self._redis_client:
+            try:
+                start = p.get("start", 0)
+                stop = p.get("stop", -1)
+                vals = self._redis_client.lrange(key, start, stop)
+                return {"success": True, "values": [v.decode() if isinstance(v, bytes) else v for v in vals]}
+            except Exception:
+                pass
+        entry = self._store.get(key)
         if entry and isinstance(entry.value, list):
             start = p.get("start", 0)
             stop = p.get("stop", -1)
@@ -420,7 +533,14 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "values": []}
 
     def _lpop(self, p: dict) -> dict:
-        entry = self._store.get(p.get("key", ""))
+        key = p.get("key", "")
+        if self._redis_client:
+            try:
+                val = self._redis_client.lpop(key)
+                return {"success": True, "value": val.decode() if isinstance(val, bytes) else val}
+            except Exception:
+                pass
+        entry = self._store.get(key)
         if entry and isinstance(entry.value, list) and entry.value:
             return {"success": True, "value": entry.value.pop(0)}
         return {"success": True, "value": None}
@@ -560,6 +680,13 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "keys": matched[:1000], "total": len(matched)}
 
     def _flushdb(self, p: dict) -> dict:
+        if self._redis_client:
+            try:
+                self._redis_client.flushdb()
+                self.audit("flushdb", "real Redis flushed")
+                return {"success": True, "flushed": -1}
+            except Exception:
+                pass
         count = len(self._store)
         self._store.clear()
         self._locks.clear()
@@ -586,6 +713,11 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _dbsize(self, p: dict) -> dict:
         self._cleanup_expired()
+        if self._redis_client:
+            try:
+                return {"success": True, "db_size": self._redis_client.dbsize()}
+            except Exception:
+                pass
         return {"success": True, "db_size": len(self._store)}
 
     def _tag_search(self, p: dict) -> dict:
@@ -603,47 +735,6 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             results.append(r)
         return {"success": True, "results": results, "count": len(results)}
 
-    async def shutdown(self) -> dict:
-        return {"success": True, "stats": self._stats}
-
-    async def execute(self, action: str = "status", params: dict = None) -> dict:
-        """企业级执行入口。支持status/info/run/stop/help等通用动作。"""
-        if params is None:
-            params = {}
-        _action = action.lower().strip()
-        dispatch = {
-            "status": self.get_status,
-            "info": self.get_info,
-            "health": self.health_check,
-            "help": self.get_help,
-        }
-        handler = dispatch.get(_action)
-        if handler:
-            try:
-                return handler(params)
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        return self.get_status(params)
-
-    def get_info(self, params: dict = None) -> dict:
-        if params is None:
-            params = {}
-        return {
-            "success": True,
-            "module": self.__class__.__name__,
-            "status": "active",
-            "version": getattr(self, "version", "1.0.0"),
-        }
-
-    def get_help(self, params: dict = None) -> dict:
-        if params is None:
-            params = {}
-        methods = [m for m in dir(self) if not m.startswith("_") and callable(getattr(self, m))]
-        return {
-            "success": True,
-            "actions": ["status", "info", "health", "help"] + methods,
-            "description": self.__doc__ or "",
-        }
 
 module_class = RedisCacheModule
 

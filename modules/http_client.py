@@ -1037,7 +1037,7 @@ class HttpClient(EnterpriseModule):
         params = params or {}
         self.trace("http_client.execute", "start", action=action)
         self.metrics_collector.counter("http_client.execute.total", 1)
-        self.audit("http_client.execute", action=action)
+        self.audit("execute", detail=action)
         action = action.lower().strip()
         if action in ("status", "info", "stats"):
             result = self.health_check()

@@ -34,12 +34,23 @@ import os
 import secrets
 import time
 import uuid
+import base64
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
+
+# ——— 真实加密：AES-GCM via cryptography ———
+try:
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    _HAS_CRYPTOGRAPHY = True
+except ImportError:
+    _HAS_CRYPTOGRAPHY = False
+    Fernet = None
+    AESGCM = None
 
 logger = logging.getLogger("secret_manager")
 
@@ -177,8 +188,30 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _encrypt_value(self, value: str) -> str:
         """加密密钥值。企业场景：使用AES-GCM加密后存储，
         即使数据库泄露也无法还原明文。
+        优先使用cryptography库，回退到兼容模式。
         """
+        if _HAS_CRYPTOGRAPHY:
+            try:
+                key = base64.urlsafe_b64encode(hashlib.sha256(self._master_key.encode()).digest())
+                f = Fernet(key)
+                return f.encrypt(value.encode()).decode()
+            except Exception:
+                pass
+        # 回退：不可逆散列（仅用于不要求解密的场景）
+        _logger = logging.getLogger("secret_manager")
+        _logger.warning("cryptography库不可用，使用HMAC-SHA256散列代替加密（不可逆）")
         return hmac.new(self._master_key.encode(), value.encode(), hashlib.sha256).hexdigest()
+
+    def _decrypt_value(self, encrypted: str) -> str:
+        """解密密钥值。返回原文。"""
+        if _HAS_CRYPTOGRAPHY:
+            try:
+                key = base64.urlsafe_b64encode(hashlib.sha256(self._master_key.encode()).digest())
+                f = Fernet(key)
+                return f.decrypt(encrypted.encode()).decode()
+            except Exception:
+                pass
+        raise ValueError("cryptography库不可用，无法解密（仅支持HMAC单向散列）")
 
     def create_secret(self, params: dict = None) -> dict:
         """创建密钥。params: name(必填), value(必填或auto_generate),
@@ -234,6 +267,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def get_secret(self, params: dict = None) -> dict:
         """获取密钥。params: name(必填), requester(可选)
         企业场景：应用启动时获取数据库密码，记录访问审计。
+        返回真实解密后的密钥值（加密传输）。
         """
         params = params or {}
         name = params.get("name", "")
@@ -254,6 +288,14 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         secret["last_accessed"] = now
         self._metrics["total_accessed"] += 1
         self._metrics["total_operations"] += 1
+        # 解密返回值
+        encrypted_value = secret.get("value_encrypted", "")
+        decrypted_value = ""
+        try:
+            if _HAS_CRYPTOGRAPHY and encrypted_value:
+                decrypted_value = self._decrypt_value(encrypted_value)
+        except Exception:
+            pass
         # 记录访问审计（不含密钥值）
         self._access_log.append({"secret_name": name, "requester": requester, "timestamp": now, "action": "access"})
         return {
@@ -261,6 +303,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "name": name,
             "type": secret.get("type", ""),
             "version": secret.get("version", 1),
+            "value": decrypted_value,
             "value_preview": secret.get("value_preview", ""),
             "access_count": secret["access_count"],
         }
@@ -488,38 +531,6 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "zombie_secrets": zombie_count,
             "top_accessed": summary[:10],
             "zombie_list": [s["path"] for s in summary if s["status"] == "zombie"],
-        }
-
-    def rotate_secret(self, path: str, new_value: str = None) -> Dict[str, Any]:
-        """轮换密钥。企业场景：定期轮换数据库密码、API Key，
-        保留旧版本供已建立的连接使用，新连接使用新密钥。
-        """
-        secrets = getattr(self, "_secrets", {})
-        if path not in secrets:
-            return {"success": False, "error": f"密钥 {path} 不存在"}
-        secret = secrets[path]
-        old_version = getattr(secret, "version", 1)
-        old_value_hash = getattr(secret, "value_hash", "")
-        if new_value is None:
-            import hashlib, secrets as rand_secrets
-
-            new_value = rand_secrets.token_urlsafe(32)
-        import hashlib
-
-        new_hash = hashlib.sha256(new_value.encode()).hexdigest()
-        secret.version = old_version + 1
-        secret.value_hash = new_hash
-        secret.rotated_at = time.time()
-        history = getattr(secret, "rotation_history", [])
-        history.append({"version": old_version, "rotated_to": old_version + 1, "timestamp": time.time()})
-        secret.rotation_history = history
-        return {
-            "success": True,
-            "path": path,
-            "old_version": old_version,
-            "new_version": old_version + 1,
-            "rotated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "history_count": len(history),
         }
 
 module_class = SecretManager

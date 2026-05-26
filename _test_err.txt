@@ -1,0 +1,176 @@
+test_001_generate_token (test_core_engines.TestAuthEngine.test_001_generate_token)
+���� JWT Token ... ERROR
+test_002_verify_token (test_core_engines.TestAuthEngine.test_002_verify_token)
+��֤ JWT Token ... ERROR
+test_003_invalid_token_rejected (test_core_engines.TestAuthEngine.test_003_invalid_token_rejected)
+��Ч Token ���ܾ� ... ERROR
+test_004_expired_token_rejected (test_core_engines.TestAuthEngine.test_004_expired_token_rejected)
+���� Token ���ܾ� ... ERROR
+test_005_api_key_validate (test_core_engines.TestAuthEngine.test_005_api_key_validate)
+API Key У�� ... ok
+test_006_has_permission (test_core_engines.TestAuthEngine.test_006_has_permission)
+Ȩ�޼�� ... ok
+test_001_create_instance (test_core_engines.TestEnterpriseModule.test_001_create_instance)
+���� EnterpriseModule ʵ�� ... ok
+test_002_module_meta_exists (test_core_engines.TestEnterpriseModule.test_002_module_meta_exists)
+ģ��Ԫ�����ֶ����� ... ok
+setUpClass (test_core_engines.TestEventEngine) ... ERROR
+test_001_config_loader (test_core_engines.TestInfrastructure.test_001_config_loader)
+���ü��������� ... skipped 'ConfigLoader ������'
+test_002_logging_configured (test_core_engines.TestInfrastructure.test_002_logging_configured)
+��־������ȷ ... skipped 'Logging ģ�鲻����'
+test_003_db_paths_valid (test_core_engines.TestInfrastructure.test_003_db_paths_valid)
+���ݿ�·����д ... ok
+test_001_create_pipeline (test_core_engines.TestPipelineEngine.test_001_create_pipeline)
+������ִ�м򵥹ܵ� ... ERROR
+test_002_execute_pipeline (test_core_engines.TestPipelineEngine.test_002_execute_pipeline)
+ִ�йܵ�����ȡ��� ... ERROR
+test_003_list_pipelines (test_core_engines.TestPipelineEngine.test_003_list_pipelines)
+�г����йܵ� ... ok
+test_004_delete_pipeline (test_core_engines.TestPipelineEngine.test_004_delete_pipeline)
+ɾ���ܵ� ... ERROR
+setUpClass (test_core_engines.TestSchedulerEngine) ... ERROR
+test_001_enqueue_dequeue (test_core_engines.TestTaskQueueEngine.test_001_enqueue_dequeue)
+��Ӻͳ��� ... ERROR
+test_002_queue_size (test_core_engines.TestTaskQueueEngine.test_002_queue_size)
+���д�Сͳ�� ... ok
+test_003_clear_queue (test_core_engines.TestTaskQueueEngine.test_003_clear_queue)
+��ն��� ... ERROR
+
+======================================================================
+ERROR: test_001_generate_token (test_core_engines.TestAuthEngine.test_001_generate_token)
+���� JWT Token
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 233, in test_001_generate_token
+    token = self.engine.generate_token(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AuthEngine' object has no attribute 'generate_token'
+
+======================================================================
+ERROR: test_002_verify_token (test_core_engines.TestAuthEngine.test_002_verify_token)
+��֤ JWT Token
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 244, in test_002_verify_token
+    token = self.engine.generate_token(user_id="verify_test", roles=["user"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AuthEngine' object has no attribute 'generate_token'
+
+======================================================================
+ERROR: test_003_invalid_token_rejected (test_core_engines.TestAuthEngine.test_003_invalid_token_rejected)
+��Ч Token ���ܾ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 251, in test_003_invalid_token_rejected
+    result = self.engine.verify_token("this.is.invalid.token.123")
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AuthEngine' object has no attribute 'verify_token'
+
+======================================================================
+ERROR: test_004_expired_token_rejected (test_core_engines.TestAuthEngine.test_004_expired_token_rejected)
+���� Token ���ܾ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 256, in test_004_expired_token_rejected
+    token = self.engine.generate_token(user_id="expired_test", roles=[], expire_hours=0)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AuthEngine' object has no attribute 'generate_token'
+
+======================================================================
+ERROR: setUpClass (test_core_engines.TestEventEngine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 90, in setUpClass
+    cls.engine.subscribe("test.topic", handler, "test_handler")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: EventEngine.subscribe() takes 3 positional arguments but 4 were given
+
+======================================================================
+ERROR: test_001_create_pipeline (test_core_engines.TestPipelineEngine.test_001_create_pipeline)
+������ִ�м򵥹ܵ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 151, in test_001_create_pipeline
+    pipe = self.engine.create_pipeline(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PipelineEngine' object has no attribute 'create_pipeline'
+
+======================================================================
+ERROR: test_002_execute_pipeline (test_core_engines.TestPipelineEngine.test_002_execute_pipeline)
+ִ�йܵ�����ȡ���
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 163, in test_002_execute_pipeline
+    pipe = self.engine.create_pipeline(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PipelineEngine' object has no attribute 'create_pipeline'
+
+======================================================================
+ERROR: test_004_delete_pipeline (test_core_engines.TestPipelineEngine.test_004_delete_pipeline)
+ɾ���ܵ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 180, in test_004_delete_pipeline
+    pipe = self.engine.create_pipeline(name="del_test", steps=[{"id": "x", "action": "noop"}])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PipelineEngine' object has no attribute 'create_pipeline'
+
+======================================================================
+ERROR: setUpClass (test_core_engines.TestSchedulerEngine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 23, in setUpClass
+    cls.engine.initialize()
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SchedulerEngine' object has no attribute 'initialize'
+
+======================================================================
+ERROR: test_001_enqueue_dequeue (test_core_engines.TestTaskQueueEngine.test_001_enqueue_dequeue)
+��Ӻͳ���
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 199, in test_001_enqueue_dequeue
+    enq = self.engine.enqueue(task)
+  File "D:\AUTO-EVO-AI-V0.1\core\task_queue_engine.py", line 436, in enqueue
+    self._store.save_task(task)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\task_queue_engine.py", line 178, in save_task
+    conn.execute("""
+    ~~~~~~~~~~~~^^^^
+        INSERT OR REPLACE INTO task_queue
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+        task.started_at, task.finished_at, task.created_at, task.updated_at
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ))
+    ^^
+sqlite3.ProgrammingError: Error binding parameter 2: type 'dict' is not supported
+
+======================================================================
+ERROR: test_003_clear_queue (test_core_engines.TestTaskQueueEngine.test_003_clear_queue)
+��ն���
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 214, in test_003_clear_queue
+    self.engine.enqueue({"id": f"clear_t{i}", "action": "noop"})
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\task_queue_engine.py", line 436, in enqueue
+    self._store.save_task(task)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\core\task_queue_engine.py", line 178, in save_task
+    conn.execute("""
+    ~~~~~~~~~~~~^^^^
+        INSERT OR REPLACE INTO task_queue
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+        task.started_at, task.finished_at, task.created_at, task.updated_at
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ))
+    ^^
+sqlite3.ProgrammingError: Error binding parameter 2: type 'dict' is not supported
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.497s
+
+FAILED (errors=11, skipped=2)

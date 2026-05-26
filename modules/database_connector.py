@@ -39,6 +39,28 @@ from enum import Enum
 from dataclasses import dataclass, field
 
 try:
+    import psycopg2
+    import psycopg2.pool
+    _HAS_PSYCOPG2 = True
+except ImportError:
+    _HAS_PSYCOPG2 = False
+try:
+    import pymysql
+    _HAS_PYMYSQL = True
+except ImportError:
+    _HAS_PYMYSQL = False
+try:
+    import pymongo
+    _HAS_PYMONGO = True
+except ImportError:
+    _HAS_PYMONGO = False
+try:
+    import redis as _redis_lib
+    _HAS_REDIS_CONN = True
+except ImportError:
+    _HAS_REDIS_CONN = False
+
+try:
     from modules._base.enterprise_module import (
         EnterpriseModule,
         CircuitBreakerMixin,
@@ -200,8 +222,6 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 self._audit.log("db_connector_initialized", {"connections": len(self._connections)})
             self.stats.success_count += 1
             logger.info("数据库连接器初始化完成")
-            # REMOVED: except Exception as e:
-            pass
         except Exception as e:
             logger.error(f"数据库连接器初始化失败: {e}")
             self.stats.error_count += 1
@@ -329,8 +349,6 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
             else:
                 return {"success": False, "error": f"Unknown action: {action}"}
-                # REMOVED: except Exception as e:
-                pass
         except Exception as e:
             err = str(e)
             return {"success": False, "error": err}
@@ -353,6 +371,36 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._query_history.clear()
         self._slow_queries.clear()
 
+    def _real_execute(self, conn_info: DBConnection, sql: str) -> tuple:
+        """对真实DB执行SQL（根据类型选驱动）"""
+        if conn_info.db_type == DBType.POSTGRESQL and _HAS_PSYCOPG2:
+            c = psycopg2.connect(host=conn_info.host, port=conn_info.port, dbname=conn_info.database)
+            cur = c.cursor()
+            cur.execute(sql)
+            if sql.strip().upper().startswith("SELECT"):
+                cols = [d[0] for d in cur.description]
+                rows = cur.fetchall()
+                c.close()
+                return cols, rows
+            c.commit()
+            affected = cur.rowcount
+            c.close()
+            return [], affected
+        if conn_info.db_type == DBType.MYSQL and _HAS_PYMYSQL:
+            c = pymysql.connect(host=conn_info.host, port=conn_info.port, database=conn_info.database)
+            cur = c.cursor()
+            cur.execute(sql)
+            if sql.strip().upper().startswith("SELECT"):
+                cols = [d[0] for d in cur.description]
+                rows = cur.fetchall()
+                c.close()
+                return cols, rows
+            c.commit()
+            affected = cur.rowcount
+            c.close()
+            return [], affected
+        raise NotImplementedError(f"不支持的真实DB类型: {conn_info.db_type.value}")
+
     def _execute_query(self, conn_id: str, sql: str) -> QueryResult:
         conn = self._connections.get(conn_id)
         if not conn:
@@ -369,9 +417,18 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         try:
             pass
-            # 模拟查询执行
+            # 尝试真实DB执行
+            real_result = self._real_execute(conn, sql)
+            cols, rows_or_affected = real_result
+            duration_ms = (time.time() - start) * 1000
+            if isinstance(rows_or_affected, int):
+                result = QueryResult(query_id=qid, sql=sql, status=QueryStatus.SUCCESS, rows_affected=rows_or_affected, duration_ms=duration_ms)
+            else:
+                result = QueryResult(query_id=qid, sql=sql, status=QueryStatus.SUCCESS, data=[dict(zip(cols, r)) for r in rows_or_affected], rows_affected=len(rows_or_affected), duration_ms=duration_ms)
+        except (ImportError, NotImplementedError):
+            # 降级到模拟
             sql_lower = sql.lower().strip()
-            duration = 5  # 基础延迟ms
+            duration = 5
             if "select" in sql_lower:
                 duration += 10
                 rows = 5
@@ -387,34 +444,24 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             else:
                 duration += 2
                 rows = 0
-
             time.sleep(duration / 1000)
             duration_ms = (time.time() - start) * 1000
+            result = QueryResult(query_id=qid, sql=sql, status=QueryStatus.SUCCESS, rows_affected=rows, duration_ms=duration_ms)
 
-            result = QueryResult(
-                query_id=qid, sql=sql, status=QueryStatus.SUCCESS, rows_affected=rows, duration_ms=duration_ms
+        if duration_ms > self._slow_threshold:
+            self._slow_queries.append(
+                SlowQuery(query_id=qid, sql=sql, duration_ms=duration_ms, threshold_ms=self._slow_threshold)
             )
+            if len(self._slow_queries) > 200:
+                self._slow_queries = self._slow_queries[-100:]
 
-            if duration_ms > self._slow_threshold:
-                self._slow_queries.append(
-                    SlowQuery(query_id=qid, sql=sql, duration_ms=duration_ms, threshold_ms=self._slow_threshold)
-                )
-                if len(self._slow_queries) > 200:
-                    self._slow_queries = self._slow_queries[-100:]
-
-            self.stats.success_count += 1
-            return result
-            # REMOVED: except Exception as e:
-            pass
-        except Exception as e:
-            return QueryResult(query_id=qid, sql=sql, status=QueryStatus.ERROR, error=str(e))
-        finally:
-            conn.active_conns = max(0, conn.active_conns - 1)
-            conn.idle_conns = min(conn.pool_size, conn.idle_conns + 1)
-
+        self.stats.success_count += 1
         self._query_history.append(result)
         if len(self._query_history) > 1000:
             self._query_history = self._query_history[-500:]
+        conn.active_conns = max(0, conn.active_conns - 1)
+        conn.idle_conns = min(conn.pool_size, conn.idle_conns + 1)
+        return result
 
     def _result_to_dict(self, r: QueryResult) -> Dict:
         return {
@@ -442,8 +489,6 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 else:
                     results.append({"op": op.get("action"), "success": False, "error": "method not found"})
                     failed += 1
-                    # REMOVED: except Exception as e:
-                    pass
             except Exception as e:
                 results.append({"op": op.get("action"), "success": False, "error": str(e)})
                 failed += 1
@@ -486,8 +531,6 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 else:
                     results.append({"op": op.get("action"), "success": False, "error": "not_found"})
                     failed += 1
-                    # REMOVED: except Exception as e:
-                    pass
             except Exception as e:
                 results.append({"op": op.get("action"), "success": False, "error": str(e)[:100]})
                 failed += 1
@@ -694,10 +737,8 @@ def batch_operation(self, operations: list) -> dict:
                 results.append({"op": op.get("action"), "success": True})
                 success += 1
             else:
-                results.append({"op": op.get("action"), "success": False})
-                failed += 1
-                # REMOVED: except Exception as e:
-                pass
+                    results.append({"op": op.get("action"), "success": False})
+                    failed += 1
         except Exception as e:
             results.append({"op": op.get("action"), "success": False, "error": str(e)[:100]})
             failed += 1

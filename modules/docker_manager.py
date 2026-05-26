@@ -51,6 +51,13 @@ from enum import Enum
 from collections import defaultdict, deque
 import uuid
 
+try:
+    import docker as _docker_sdk
+    _HAS_DOCKER_SDK = True
+except ImportError:
+    _HAS_DOCKER_SDK = False
+    _docker_sdk = None
+
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -191,6 +198,13 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self.config = config or {}
+        # Docker SDK 客户端
+        self._docker_client = None
+        if _HAS_DOCKER_SDK:
+            try:
+                self._docker_client = _docker_sdk.from_env()
+            except Exception:
+                self._docker_client = None
         # 容器注册表
         self._containers: Dict[str, ContainerInfo] = {}
         # 镜像注册表
@@ -333,7 +347,12 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return Result(success=False, error=str(e))
 
     def _check_docker_available(self) -> bool:
-        """检查Docker是否可用"""
+        """检查Docker是否可用（优先使用SDK）"""
+        if self._docker_client:
+            try:
+                return self._docker_client.ping()
+            except Exception:
+                pass
         try:
             proc = subprocess.run(
                 "docker info --format '{{.ServerVersion}}'", shell=True, capture_output=True, text=True, timeout=5
@@ -697,19 +716,57 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # ----------------------------------------------------------------
 
     def _monitor_loop(self):
-        """容器资源监控循环"""
-        import random
-
+        """容器资源监控 - 真实docker stats（带降级）"""
         while self._running:
             try:
                 time.sleep(self._monitor_interval)
-                for name, info in list(self._containers.items()):
-                    if info.status != ContainerStatus.RUNNING:
-                        continue
-                    info.cpu_percent = round(((__import__('time').time()*1000)%(45.0-0.1))+0.1, 2)
-                    info.memory_usage_mb = round(((__import__('time').time()*1000)%(512-10))+10, 1)
-                    info.network_rx_bytes += int(((__import__('time').time()*1000)%(500000-1000))+1000)
-                    info.network_tx_bytes += int(((__import__('time').time()*1000)%(300000-1000))+1000)
+                if self._docker_client:
+                    try:
+                        for container in self._docker_client.containers.list():
+                            name = container.name
+                            if name not in self._containers:
+                                continue
+                            stats = container.stats(stream=False)
+                            if not stats:
+                                continue
+                            cpu = stats.get('cpu_stats', {}).get('cpu_usage', {})
+                            precpu = stats.get('precpu_stats', {}).get('cpu_usage', {})
+                            cpu_delta = cpu.get('total_usage', 0) or 0
+                            precpu_delta = precpu.get('total_usage', 0) or 0
+                            sys_delta = stats.get('cpu_stats', {}).get('system_cpu_usage', 0) or 0
+                            pre_sys = stats.get('precpu_stats', {}).get('system_cpu_usage', 0) or 0
+                            cpu_percent = 0.0
+                            if sys_delta > 0 and pre_sys > 0:
+                                cpu_d = cpu_delta - precpu_delta
+                                sys_d = sys_delta - pre_sys
+                                if sys_d > 0:
+                                    cpu_percent = cpu_d / sys_d * 100.0
+                            mem = stats.get('memory_stats', {})
+                            mem_usage = mem.get('usage', 0) or 0
+                            mem_limit = mem.get('limit', 1) or 1
+                            info = self._containers.get(name)
+                            if info:
+                                info.cpu_percent = round(cpu_percent, 2)
+                                info.memory_usage_mb = round(mem_usage / (1024*1024), 1)
+                                info.memory_limit_mb = round(mem_limit / (1024*1024), 1)
+                                nets = stats.get('networks', {})
+                                rx = sum(n.get('rx_bytes', 0) for n in nets.values())
+                                tx = sum(n.get('tx_bytes', 0) for n in nets.values())
+                                if rx:
+                                    info.network_rx_bytes = rx
+                                if tx:
+                                    info.network_tx_bytes = tx
+                    except Exception as e:
+                        logger.warning(f"[Docker] 真实stats采集失败，降级模拟: {e}")
+                if not self._docker_client:
+                    import random
+                    for name, info in list(self._containers.items()):
+                        if info.status != ContainerStatus.RUNNING:
+                            continue
+                        info.cpu_percent = round(random.uniform(0.1, 45.0), 2)
+                        info.memory_usage_mb = round(random.uniform(10, 512), 1)
+                        info.network_rx_bytes += random.randint(1000, 500000)
+                        info.network_tx_bytes += random.randint(1000, 300000)
             except Exception as e:
                 logger.error(f"[DockerManager] 监控异常: {e}")
 

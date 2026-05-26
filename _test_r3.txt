@@ -1,0 +1,113 @@
+test_001_create_user (test_core_engines.TestAuthEngine.test_001_create_user)
+�����û� ... ok
+test_002_login (test_core_engines.TestAuthEngine.test_002_login)
+��¼��ȡ token ... ok
+test_003_verify_access_token (test_core_engines.TestAuthEngine.test_003_verify_access_token)
+��֤ access token ... ok
+test_004_invalid_token_rejected (test_core_engines.TestAuthEngine.test_004_invalid_token_rejected)
+��Ч token �ܾ� ... ok
+test_005_check_permission (test_core_engines.TestAuthEngine.test_005_check_permission)
+Ȩ�޼�� ... ok
+test_006_list_users (test_core_engines.TestAuthEngine.test_006_list_users)
+�г��û� ... ok
+test_007_hash_password (test_core_engines.TestAuthEngine.test_007_hash_password)
+�����ϣ ... ok
+test_008_get_stats (test_core_engines.TestAuthEngine.test_008_get_stats)
+ͳ�� ... ok
+test_001_create_instance (test_core_engines.TestEnterpriseModule.test_001_create_instance) ... ok
+test_002_meta_exists (test_core_engines.TestEnterpriseModule.test_002_meta_exists)
+��֤ģ��Ԫ���������� ... ok
+test_001_emit_single (test_core_engines.TestEventEngine.test_001_emit_single)
+���������¼� ... ok
+test_002_emit_batch (test_core_engines.TestEventEngine.test_002_emit_batch)
+�������� ... ok
+test_003_subscribe_all (test_core_engines.TestEventEngine.test_003_subscribe_all)
+ȫ�ֶ��� ... ok
+test_004_unsubscribe (test_core_engines.TestEventEngine.test_004_unsubscribe)
+ȡ������ ... ok
+test_005_poll_loop_is_async (test_core_engines.TestEventEngine.test_005_poll_loop_is_async)
+poll_loop �� async def ... ok
+test_001_config_loader (test_core_engines.TestInfrastructure.test_001_config_loader) ... skipped 'ConfigLoader ������'
+test_002_db_writable (test_core_engines.TestInfrastructure.test_002_db_writable) ... ok
+test_001_save_definition (test_core_engines.TestPipelineEngine.test_001_save_definition)
+����ܵ����� ... ok
+test_002_list_pipelines (test_core_engines.TestPipelineEngine.test_002_list_pipelines)
+�г��ܵ� ... ok
+test_003_delete_definition (test_core_engines.TestPipelineEngine.test_003_delete_definition)
+ɾ������ ... ok
+test_004_get_status (test_core_engines.TestPipelineEngine.test_004_get_status)
+״̬ ... ok
+test_005_get_stats (test_core_engines.TestPipelineEngine.test_005_get_stats)
+ͳ�� ... ok
+test_001_store_property (test_core_engines.TestSchedulerEngine.test_001_store_property)
+store ������ ... ok
+test_002_add_task (test_core_engines.TestSchedulerEngine.test_002_add_task)
+���Ӷ�ʱ���� ... FAIL
+test_003_list_tasks (test_core_engines.TestSchedulerEngine.test_003_list_tasks)
+�г�������������ӵ� ... FAIL
+test_004_remove_task (test_core_engines.TestSchedulerEngine.test_004_remove_task)
+�Ƴ����� ... FAIL
+test_005_toggle_task (test_core_engines.TestSchedulerEngine.test_005_toggle_task)
+��ͣ/�ָ����� ... FAIL
+test_006_stats (test_core_engines.TestSchedulerEngine.test_006_stats)
+����ͳ�� ... ok
+test_001_enqueue (test_core_engines.TestTaskQueueEngine.test_001_enqueue)
+��� �� ʹ����ȷ API ... ok
+test_002_queue_size (test_core_engines.TestTaskQueueEngine.test_002_queue_size)
+���д�С ... ok
+test_003_enqueue_multiple (test_core_engines.TestTaskQueueEngine.test_003_enqueue_multiple)
+������ ... ok
+test_004_dequeue (test_core_engines.TestTaskQueueEngine.test_004_dequeue)
+���� ... ok
+test_005_clear (test_core_engines.TestTaskQueueEngine.test_005_clear)
+��� ... ok
+test_006_get_status (test_core_engines.TestTaskQueueEngine.test_006_get_status)
+״̬ ... ok
+
+======================================================================
+FAIL: test_002_add_task (test_core_engines.TestSchedulerEngine.test_002_add_task)
+���Ӷ�ʱ����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 44, in test_002_add_task
+    self.assertEqual(task.id, "test_hb")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: '479e78577a951d2f' != 'test_hb'
+- 479e78577a951d2f
++ test_hb
+
+
+======================================================================
+FAIL: test_003_list_tasks (test_core_engines.TestSchedulerEngine.test_003_list_tasks)
+�г�������������ӵ�
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 50, in test_003_list_tasks
+    self.assertIn("test_hb", tids)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 'test_hb' not found in ['479e78577a951d2f']
+
+======================================================================
+FAIL: test_004_remove_task (test_core_engines.TestSchedulerEngine.test_004_remove_task)
+�Ƴ�����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 56, in test_004_remove_task
+    self.assertTrue(ok)
+    ~~~~~~~~~~~~~~~^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_005_toggle_task (test_core_engines.TestSchedulerEngine.test_005_toggle_task)
+��ͣ/�ָ�����
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\tests\test_core_engines.py", line 64, in test_005_toggle_task
+    self.assertIsNotNone(toggled)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: unexpectedly None
+
+----------------------------------------------------------------------
+Ran 34 tests in 2.413s
+
+FAILED (failures=4, skipped=1)

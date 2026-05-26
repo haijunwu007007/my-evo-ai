@@ -446,7 +446,7 @@ class FileWatcher:
         if self._task:
             self._task.cancel()
 
-    def _poll_loop(self) -> Any:
+    async def _poll_loop(self) -> Any:
         while self._running:
             try:
                 self._check_all()
@@ -536,11 +536,11 @@ class EventEngine:
 
     # ─── 生命周期 ───
 
-    def start(self) -> None:
+    async def start(self) -> None:
         if self._running:
             return
         self._running = True
-        await self._file_watcher.start()
+        self._file_watcher.start()
         self.emit(Event(type=EventType.SYSTEM_STARTUP, source="event_engine",
                        data={"version": "V0.1"}, priority=2))
         logger.info("[EventEngine] 已启动")
@@ -603,7 +603,7 @@ class EventEngine:
                 # 异步执行动作
                 asyncio.create_task(self._execute_rule_action(rule, event))
 
-    def _execute_rule_action(self, rule: EventRule, event: Event) -> Any:
+    async def _execute_rule_action(self, rule: EventRule, event: Event) -> Any:
         """执行规则动作"""
         try:
             action = rule.action_type

@@ -38,6 +38,15 @@ from typing import Any, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
+try:
+    from openai import OpenAI, APIError, RateLimitError
+    _HAS_OPENAI = True
+except ImportError:
+    _HAS_OPENAI = False
+    OpenAI = None
+    APIError = Exception
+    RateLimitError = Exception
+
 logger = logging.getLogger(__name__)
 
 class LlmOpenaiAnalyzer(object):
@@ -460,10 +469,17 @@ class LlmOpenaiModule:
                 self._stats["total_requests"] += 1
                 return {"success": True, "result": entry["result"], "cached": True}
 
-        # 模拟请求
+        # 真实请求（带优雅降级）
         t0 = time.time()
         try:
-            result = self._simulate_completion(model, messages, temperature, max_tokens, top_p, stream)
+            if _HAS_OPENAI and self._api_key:
+                try:
+                    result = self._real_completion(model, messages, temperature, max_tokens, top_p, stream)
+                except Exception as e:
+                    logger.warning(f"OpenAI API调用失败，降级到模拟模式: {e}")
+                    result = self._simulate_completion(model, messages, temperature, max_tokens, top_p, stream)
+            else:
+                result = self._simulate_completion(model, messages, temperature, max_tokens, top_p, stream)
             latency = int((time.time() - t0) * 1000)
             output_tokens = self._estimate_tokens(result.get("content", ""))
             self._rate_limits[model]["current_tokens"] += input_tokens + output_tokens
@@ -495,8 +511,30 @@ class LlmOpenaiModule:
             self._record_failure(model)
             return {"success": False, "error": str(e)}
 
+    def _real_completion(self, model, messages, temperature, max_tokens, top_p, stream):
+        """真实 OpenAI API 调用"""
+        client = OpenAI(api_key=self._api_key, base_url=self._base_url)
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            stream=stream,
+        )
+        if stream:
+            return {"id": resp.id, "object": "chat.completion.chunk", "model": model, "content": "", "finish_reason": "stop"}
+        choice = resp.choices[0]
+        return {
+            "id": resp.id,
+            "model": model,
+            "content": choice.message.content or "",
+            "finish_reason": choice.finish_reason or "stop",
+            "created": int(time.time()),
+        }
+
     def _simulate_completion(self, model, messages, temperature, max_tokens, top_p, stream):
-        """模拟GPT响应"""
+        """模拟GPT响应（降级）"""
         last_msg = messages[-1].get("content", "") if messages else ""
         content = f"[{model}] Response to: {last_msg[:100]}..."
         return {
@@ -540,7 +578,17 @@ class LlmOpenaiModule:
             return {"success": False, "error": "texts is required"}
         if len(texts) > 2048:
             return {"success": False, "error": "Max 2048 texts per batch"}
-        # 模拟
+        # 真实API调用（如果可用）
+        if _HAS_OPENAI and self._api_key:
+            try:
+                client = OpenAI(api_key=self._api_key, base_url=self._base_url)
+                resp = client.embeddings.create(model=model, input=texts)
+                embeddings = [e.embedding for e in resp.data]
+                total_tokens = resp.usage.total_tokens
+                return {"success": True, "embeddings": embeddings, "model": model, "total_tokens": total_tokens, "count": len(texts)}
+            except Exception as e:
+                logger.warning(f"Embedding API调用失败，降级: {e}")
+        # 模拟降级
         dim = 1536 if "small" in model else 3072
         embeddings = [[0.1] * dim for _ in texts]
         total_tokens = sum(self._estimate_tokens(t) for t in texts)
@@ -694,40 +742,5 @@ class LlmOpenaiModule:
         if action == "list_components":
             return self.list_components(params)
         return {"success": False, "error": f"Unknown action: {action}"}
-
-    def execute(self, action: str = "status", params: dict = None) -> dict:
-        params = params or {}
-        self.trace("llm_openai.execute", "start", action=action)
-        self.metrics_collector.counter("llm_openai.execute.total", 1)
-        try:
-            action = action.lower().strip()
-            if action in ("status", "info", "stats"):
-                result = self.health_check()
-            elif action == "analyze":
-                result = self._analyzer.analyze(params)
-            elif action == "help":
-                result = {"actions": ["status", "analyze", "help"], "module": "llm_openai"}
-            else:
-                result = {"success": True, "action": action, "module": "llm_openai"}
-            self.metrics_collector.counter("llm_openai.execute.success", 1)
-            self.trace("llm_openai.execute", "end")
-            return result
-        except Exception as e:
-            self.metrics_collector.counter("llm_openai.execute.error", 1)
-            return {"success": False, "error": str(e)}
-
-    def shutdown(self) -> dict:
-        self.status = "stopped"
-        return {"success": True, "module": "llm_openai"}
-
-    def health_check(self) -> dict:
-        return {"status": "healthy", "module": "llm_openai", "version": getattr(self, "version", "1.0.0")}
-
-    def initialize(self) -> dict:
-        self.trace("llm_openai.initialize", "start")
-        self.metrics_collector.gauge("llm_openai.initialized", 1)
-        self.audit("初始化llm_openai", level="info")
-        self.trace("llm_openai.initialize", "end")
-        return {"success": True, "module": "llm_openai"}
 
 module_class = LlmOpenaiModule

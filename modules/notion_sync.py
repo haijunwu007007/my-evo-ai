@@ -34,12 +34,19 @@ import hashlib
 import threading
 import time
 import uuid
+import json
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
+
+try:
+    import requests
+    _HAS_REQUESTS = True
+except ImportError:
+    _HAS_REQUESTS = False
 
 logger = logging.getLogger(__name__)
 
@@ -433,8 +440,24 @@ class NotionSync:
             return
         with self._lock:
             self._initialized = True
+            # 检查真实Notion API可用性
+            self._notion_api_ok = False
+            if _HAS_REQUESTS and self._config.api_key:
+                try:
+                    resp = requests.get(
+                        "https://api.notion.com/v1/users/me",
+                        headers={
+                            "Authorization": f"Bearer {self._config.api_key}",
+                            "Notion-Version": "2022-06-28",
+                        },
+                        timeout=5,
+                    )
+                    self._notion_api_ok = resp.status_code == 200
+                except Exception:
+                    self._notion_api_ok = False
             logger.info(
-                "NotionSync initialized: interval=%.0fs, batch=%d", self._config.sync_interval, self._config.batch_size
+                "NotionSync initialized: interval=%.0fs, batch=%d, notion_api=%s",
+                self._config.sync_interval, self._config.batch_size, self._notion_api_ok
             )
 
     def create_page(

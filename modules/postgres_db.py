@@ -4,29 +4,53 @@
 PostgreSQL 专用连接器，支持连接池和 SQL 转发"""
 __module_meta__ = {"id":"postgres-db","name":"PostgreSQL Connector","version":"V0.1","group":"infrastructure","grade":"A",
     "tags":["infrastructure","database","postgresql","sql"],"description":"PostgreSQL database connector"}
-import time, logging, sqlite3
+import time, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+
+try:
+    import psycopg2
+    import psycopg2.pool
+    _HAS_PSYCOPG2 = True
+except ImportError:
+    _HAS_PSYCOPG2 = False
+    import sqlite3
+
 logger=logging.getLogger("evo.postgres-db")
 class PostgresDB(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
-    MODULE_ID="postgres-db";MODULE_NAME="PostgreSQL 连接器";VERSION="v1.0";MODULE_LEVEL="A"
+    MODULE_ID="postgres-db";MODULE_NAME="PostgreSQL 连接器";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
-        super().__init__(config);self._conn=None;self._mode="sqlite_simulated"
+        super().__init__(config);self._conn=None;self._pool=None;self._mode="not_connected"
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
-    def health_check(self)->HealthReport:
-        ok=self._conn is not None;return HealthReport(status=self.status.value,healthy=ok,module_id=self.MODULE_ID,checks={"mode":self._mode})
-    async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
+    def health_check(self)->dict:
+        ok=self._conn is not None;return{"healthy":ok,"status":self.status.value,"module_id":self.MODULE_ID,"mode":self._mode}
+    async def execute(self,action=None,params=None):
+        if params is None: params={}
+        params["action"] = action or params.get("action","status")
+        try:
+            return self._dispatch(params)
+        except Exception as e:
+            return {"success":False,"error":str(e)}
     def _dispatch(self,p):
         a=p.get("action","status");conn=self._conn
         if a=="status":return{"success":True,"connected":conn is not None,"mode":self._mode,"pool_size":1}
         if a=="connect":
             dsn=p.get("dsn","");host=p.get("host","localhost");port=p.get("port",5432)
-            dbname=p.get("dbname","evo");user=p.get("user","postgres")
+            dbname=p.get("dbname","evo");user=p.get("user","postgres");password=p.get("password","")
             try:
-                self._conn=sqlite3.connect(f":memory:",check_same_thread=False)
+                if _HAS_PSYCOPG2 and host:
+                    try:
+                        self._pool = psycopg2.pool.ThreadedConnectionPool(1, 10, host=host, port=port, dbname=dbname, user=user, password=password)
+                        self._conn = self._pool.getconn()
+                        self._mode="postgresql_real"
+                        return{"success":True,"dsn":dsn,"host":host,"port":port,"dbname":dbname,"mode":self._mode}
+                    except Exception:
+                        pass  # PostgreSQL连接失败，降级到SQLite
+                import sqlite3
+                self._conn=sqlite3.connect(":memory:",check_same_thread=False)
                 self._conn.execute("CREATE TABLE IF NOT EXISTS pg_store (key TEXT PRIMARY KEY, value TEXT, schema TEXT, updated REAL)")
                 self._mode="sqlite_simulated"
-                return{"success":True,"dsn":dsn,"host":host,"port":port,"dbname":dbname,"mode":self._mode,"note":"psycopg2_not_available_falling_back_to_sqlite"}
+                return{"success":True,"dsn":dsn,"host":host,"port":port,"dbname":dbname,"mode":self._mode,"note":"psycopg2_fallback_to_sqlite"}
             except Exception as e:return{"success":False,"error":str(e)}
         if a=="list_tables":
             if not conn:return{"success":False,"error":"not_connected"}
@@ -62,10 +86,21 @@ class PostgresDB(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             cur=conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
             return{"success":True,"tables":[r[0] for r in cur.fetchall()]}
         if a=="disconnect":
-            if conn:conn.close();self._conn=None
+            if conn:
+                if _HAS_PSYCOPG2 and self._pool:
+                    self._pool.putconn(conn)
+                else:
+                    conn.close()
+                self._conn=None
             return{"success":True,"disconnected":True}
         return{"success":False,"error":f"unknown_action:{a}"}
     async def shutdown(self)->None:
-        if self._conn:self._conn.close();self._conn=None
+        if self._conn:
+            if _HAS_PSYCOPG2 and self._pool:
+                self._pool.putconn(self._conn)
+                self._pool.closeall()
+            else:
+                self._conn.close()
+            self._conn=None
         self.status=ModuleStatus.STOPPED
 module_class=PostgresDB
