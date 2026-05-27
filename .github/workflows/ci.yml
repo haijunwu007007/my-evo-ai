@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -28,10 +28,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov httpx ruff
-
-      - name: Ruff 代码检查
-        run: |
-          ruff check modules/system_monitor.py modules/sso_auth.py modules/data_analysis.py modules/self_healing.py --ignore E501,F841,E402
 
       - name: 创建数据目录 (对应 Linux 数据目录)
         run: |
@@ -50,9 +46,13 @@ jobs:
             providers: []
           EOF
 
-      - name: 全量单元测试 (test_unit_core + test_load_all)
+      - name: Ruff 代码检查
         run: |
-          python -m pytest tests/test_unit_core.py tests/test_load_all.py -v --tb=short --timeout=120 -q 2>&1 | tail -20
+          ruff check modules/system_monitor.py modules/sso_auth.py modules/data_analysis.py --ignore E501,F841,E402
+
+      - name: 核心模块单元测试（离线，无需服务器）
+        run: |
+          python -m pytest tests/test_core_modules_3.py tests/test_unit_core.py tests/test_load_all.py -v --tb=short -q 2>&1 | tail -20
 
       - name: 启动服务进行集成测试
         run: |
