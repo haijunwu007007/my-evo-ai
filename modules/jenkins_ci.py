@@ -28,7 +28,7 @@ __module_meta__ = {
     "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - Jenkins CI/CD Module Grade: A | Category: Deployment & Operations",
 }
-import os, time, logging, threading, hashlib, json, re, copy
+import os, time, logging, threading, hashlib, json, re, copy, urllib.request, base64
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from dataclasses import dataclass, field
@@ -171,8 +171,9 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._stats = {"total_builds": 0, "success": 0, "failed": 0, "aborted": 0}
 
     def _cfg(self, key, default):
-        if self._config and isinstance(self._config, dict):
-            return self._config.get(key, default)
+        cfg = getattr(self, "config", None) or getattr(self, "_config", None)
+        if cfg and isinstance(cfg, dict):
+            return cfg.get(key, default)
         return default
 
     def initialize(self) -> dict:
@@ -191,8 +192,27 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._jobs["sample-app"] = job
         return {"success": True, "jobs": len(self._jobs), "artifacts": len(self._artifacts)}
 
+    # ── 真实 Jenkins HTTP API ──
+    def _jenkins_request(self, method="GET", path="/"):
+        url = self._cfg("jenkins_url", "")
+        user = self._cfg("jenkins_user", "")
+        token = self._cfg("jenkins_token", "")
+        if not url:
+            return {"real": False, "error": "no jenkins_url configured"}
+        try:
+            req = urllib.request.Request(f"{url.rstrip('/')}/api/json{path}", method=method)
+            if user and token:
+                auth = base64.b64encode(f"{user}:{token}".encode()).decode()
+                req.add_header("Authorization", f"Basic {auth}")
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return {"real": True, "data": json.loads(resp.read().decode()), "status": resp.status}
+        except Exception as e:
+            return {"real": False, "error": str(e)}
+
     def health_check(self) -> dict:
         total = self._stats["total_builds"]
+        r = self._jenkins_request("GET", "/")
+        jenkins = r.get("real", False)
         return {
             "healthy": True,
             "jobs": len(self._jobs),
@@ -200,6 +220,8 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "success_rate": round(self._stats["success"] / max(1, total) * 100, 2),
             "queue": len(self._queue),
             "stats": self._stats,
+            "jenkins_connected": jenkins,
+            "jenkins_url": self._cfg("jenkins_url", "") if jenkins else "",
         }
 
     async def execute(self, action: str, params: dict = None) -> dict:
@@ -352,6 +374,10 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def _list_jobs(self, p: dict) -> dict:
+        r = self._jenkins_request("GET", "/jobs")
+        if r.get("real"):
+            jobs_raw = r.get("data", {}).get("jobs", [])
+            return {"success": True, "items": [{"name": j.get("name",""), "url": j.get("url",""), "color": j.get("color","")} for j in jobs_raw], "total": len(jobs_raw), "source": "jenkins"}
         items = [
             {
                 "name": j.name,
@@ -365,6 +391,9 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "items": items, "total": len(items)}
 
     def _trigger_build(self, p: dict) -> dict:
+        r = self._jenkins_request("POST", f"/job/{p.get('name','')}/build")
+        if r.get("real"):
+            return {"success": True, "queued": True, "source": "jenkins", "status": r.get("status")}
         name = p.get("name", "")
         job = self._jobs.get(name)
         if not job:
