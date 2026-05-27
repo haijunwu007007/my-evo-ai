@@ -70,6 +70,9 @@ const systemStatus = ref(null)
 
 const menuItems = [
   { path: '/dashboard', title: '监控面板', icon: 'Monitor' },
+  { path: '/sysmon', title: '系统监控', icon: 'TrendCharts' },
+  { path: '/sso-auth', title: 'SSO 管理', icon: 'User' },
+  { path: '/data-analysis', title: '数据分析', icon: 'DataAnalysis' },
   { path: '/coordinator', title: '协调中心', icon: 'Cpu' },
   { path: '/scheduler', title: '调度器', icon: 'Timer' },
   { path: '/events', title: '事件引擎', icon: 'Bell' },

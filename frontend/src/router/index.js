@@ -59,6 +59,24 @@ const routes = [
     component: () => import('@/views/Security.vue'),
     meta: { title: '安全中心', icon: 'Lock' },
   },
+  {
+    path: '/sysmon',
+    name: 'SysMon',
+    component: () => import('@/components/SystemMonitorDashboard.vue'),
+    meta: { title: '系统监控', icon: 'TrendCharts' },
+  },
+  {
+    path: '/sso-auth',
+    name: 'SsoAuth',
+    component: () => import('@/components/SsoAuthPanel.vue'),
+    meta: { title: 'SSO 管理', icon: 'User' },
+  },
+  {
+    path: '/data-analysis',
+    name: 'DataAnalysis',
+    component: () => import('@/components/DataAnalysisPanel.vue'),
+    meta: { title: '数据分析', icon: 'DataAnalysis' },
+  },
 ]
 
 const router = createRouter({

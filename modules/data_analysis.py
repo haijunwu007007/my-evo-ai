@@ -202,7 +202,7 @@ class DataAnalysis(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             if all(abs(new_centroids[i]-centroids[i]) < 1e-8 for i in range(k)):
                 break
             centroids = new_centroids
-        wcss = sum(sum((v-c)**2 for v in c) for c, c_val in zip(clusters, centroids) for v in c) if clusters else 0
+        wcss = sum(sum((v-centroids[i])**2 for v in c) for i, c in enumerate(clusters)) if clusters else 0
         return {"success": True, "k": k, "wcss": round(wcss, 4),
                 "clusters": [{"centroid": round(centroids[i], 4), "size": len(clusters[i]),
                               "min": round(min(clusters[i]), 4) if clusters[i] else None,

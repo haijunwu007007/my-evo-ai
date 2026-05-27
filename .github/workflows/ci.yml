@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,17 +27,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov httpx
+          pip install pytest pytest-asyncio pytest-cov httpx ruff
 
-      - name: 创建数据目录 (对应 D:\ 的 POSIX 兼容路径)
+      - name: Ruff 代码检查
         run: |
-          mkdir -p .evo_data/autonomous
+          ruff check modules/system_monitor.py modules/sso_auth.py modules/data_analysis.py modules/self_healing.py --ignore E501,F841,E402
+
+      - name: 创建数据目录 (对应 Linux 数据目录)
+        run: |
           mkdir -p data
-          mkdir -p config/environments
 
       - name: 创建默认配置
         run: |
-          cat > config/defaults.yaml << 'EOF'
+          cat > config.yaml << 'EOF'
           server:
             host: "127.0.0.1"
             port: 8765
@@ -70,7 +72,7 @@ jobs:
           python -m pytest tests/test_e2e_workflows.py -v --tb=short -q 2>&1 | tail -10
 
           echo "=== 测试 test_core 和 test_core_modules ==="
-          python -m pytest tests/test_core.py tests/test_core_modules.py -v --tb=short -q 2>&1 | tail -10
+          python -m pytest tests/test_core.py tests/test_core_modules.py tests/test_core_modules_3.py -v --tb=short -q 2>&1 | tail -10
 
           echo "=== 测试 test_api_integration ==="
           python -m pytest tests/test_api_integration.py -v --tb=short -q 2>&1 | tail -10

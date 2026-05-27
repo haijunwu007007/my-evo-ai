@@ -362,7 +362,7 @@ class SystemMonitorModule(EnterpriseModule):
                 self._alert_history.append(alert)
                 if len(self._alert_history) > 100:
                     self._alert_history = self._alert_history[-100:]
-                self.record_metric("sysmon_alerts_triggered", 1, rule_id=rule_id, severity=rule.severity)
+                self.record_metric("sysmon_alerts_triggered", 1, tags={"rule_id": rule_id, "severity": rule.severity})
                 logger.warning("告警触发: %s", alert.message)
                 # ── delegate 通知 ──
                 try:
@@ -542,9 +542,21 @@ class SystemMonitorModule(EnterpriseModule):
             "status": lambda: {"success": True, "status": "healthy", "module": "system_monitor"},
             "info": lambda: {"success": True, "module": self.__class__.__name__, "status": "active"},
             "health": self.health_check,
-            "help": lambda: {"success": True, "actions": ["status","info","health","get_metrics","get_cpu",
-                             "get_memory","get_disk","get_network","get_processes","get_alerts","get_trend",
-                             "list_alert_rules","add_alert_rule","ack_alert","query_db"],
+            "get_metrics": lambda: self.get_metrics(params),
+            "get_cpu": lambda: self.get_cpu(params),
+            "get_memory": lambda: self.get_memory(params),
+            "get_disk": lambda: self.get_disk(params),
+            "get_network": lambda: self.get_network(params),
+            "get_processes": lambda: self.get_processes(params),
+            "get_alerts": lambda: self.get_alerts(params),
+            "get_trend": lambda: self.get_trend(params),
+            "list_alert_rules": lambda: self.list_alert_rules(params),
+            "add_alert_rule": lambda: self.add_alert_rule(params),
+            "ack_alert": lambda: self.ack_alert(params),
+            "query_db": lambda: self.query_db(params),
+            "help": lambda: {"success": True, "actions": [
+                             "status","info","health","get_metrics","get_cpu","get_memory","get_disk","get_network",
+                             "get_processes","get_alerts","get_trend","list_alert_rules","add_alert_rule","ack_alert","query_db"],
                              "description": "系统监控 — psutil采集+SQLite持久化+告警通知+Prometheus推送"},
             "get_metrics": self.get_metrics,
             "get_cpu": self.get_cpu,
