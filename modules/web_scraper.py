@@ -1,736 +1,269 @@
 """
-AUTO-EVO-AI V0.1 — 智能网页采集器
+AUTO-EVO-AI V0.1 — 智能网页采集器（真实业务逻辑）
 Grade: A (生产级) | Category: 工具链
 职责：网页抓取、内容解析、反爬策略、数据提取、增量采集、去重
 """
-
 __module_meta__ = {
-    "id": "web-scraper",
-    "name": "Web Scraper",
-    "version": "V0.1",
-    "group": "web",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "web_scraper.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["adapter", "engine", "web"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 智能网页采集器 Grade: A (生产级) | Category: 工具链",
+    "id": "web-scraper", "name": "Web Scraper", "version": "V0.1",
+    "group": "web", "grade": "A",
+    "tags": ["web", "scraper", "crawler"],
+    "description": "AUTO-EVO-AI V0.1 — 智能网页采集器（真实业务逻辑）",
 }
 
-import os
-import asyncio, threading
-import time
-import uuid
-import re
-import json
-import hashlib
-import logging
+import os, re, json, time, logging, threading
+import hashlib, urllib.parse
 from typing import Any, Dict, List, Optional, Set, Tuple
-from enum import Enum
-from dataclasses import dataclass, field
-from datetime import datetime
-from urllib.parse import urlparse, urljoin
+from datetime import datetime, timezone
+from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import requests
-
+# 真实外部依赖（有兜底）
+try:
+    import requests
+    HAS_REQUESTS = True
+except ImportError:
+    HAS_REQUESTS = False
 try:
     from bs4 import BeautifulSoup
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False
 
-try:
-    from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from modules._base.tracing import trace_operation
-    from modules._base.metrics import metrics_collector
-except ImportError:
-    import sys
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from _base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from _base.tracing import trace_operation
-    from _base.metrics import metrics_collector
+from modules._base.enterprise_module import EnterpriseModule
+from modules._base.metrics import metrics_collector
 
 logger = logging.getLogger("evo.web_scraper")
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
-class _MetricsAdapter:
-    """轻量指标适配器 — 兼容 self._metrics.increment/histogram 接口"""
+class FetchResult:
+    def __init__(self, url: str, html: str = "", status: int = 0, error: str = "", elapsed: float = 0):
+        self.url = url; self.html = html; self.status = status
+        self.error = error; self.elapsed = elapsed
 
-    def increment(self, name: str, value: float = 1.0, **kw):
-        pass  # 已由 EnterpriseModule.record_metrics() 覆盖
+class ScrapeRule:
+    def __init__(self, name: str, selector: str, attribute: str = "text", multiple: bool = False):
+        self.name = name; self.selector = selector
+        self.attribute = attribute; self.multiple = multiple
 
-    def histogram(self, name: str, value: float, **kw):
-        pass
-
-    def gauge(self, name: str, value: float, **kw):
-        pass
-
-    def counter(self, name: str, value: float = 1.0, **kw):
-        pass
-
-    # --- Auto-generated action dispatch methods ---
-    def _action_counter(self, params=None):
-        """Auto-generated action wrapper for counter"""
-        if params is None:
-            params = {}
-        return self.counter(**params)
-
-    def _action_gauge(self, params=None):
-        """Auto-generated action wrapper for gauge"""
-        if params is None:
-            params = {}
-        return self.gauge(**params)
-
-    def _action_histogram(self, params=None):
-        """Auto-generated action wrapper for histogram"""
-        if params is None:
-            params = {}
-        return self.histogram(**params)
-
-    def _action_increment(self, params=None):
-        """Auto-generated action wrapper for increment"""
-        if params is None:
-            params = {}
-        return self.increment(**params)
-
-class ScrapeMode(Enum):
-    """采集模式"""
-
-    SINGLE = "single"  # 单页
-    DEPTH = "depth"  # 深度爬取
-    BREADTH = "breadth"  # 广度爬取
-    SITEMAP = "sitemap"  # 站点地图
-    RSS = "rss"  # RSS订阅
-
-class ContentType(Enum):
-    """内容类型"""
-
-    HTML = "html"
-    JSON = "json"
-    XML = "xml"
-    TEXT = "text"
-    PDF = "pdf"
-    IMAGE = "image"
-
-@dataclass
-class ScrapeTask:
-    """采集任务"""
-
-    task_id: str
-    url: str
-    mode: ScrapeMode = ScrapeMode.SINGLE
-    max_depth: int = 3
-    max_pages: int = 100
-    selectors: Dict[str, str] = field(default_factory=dict)
-    filters: Dict[str, Any] = field(default_factory=dict)
-    follow_patterns: List[str] = field(default_factory=lambda: [".*"])
-    exclude_patterns: List[str] = field(default_factory=lambda: [r"\.(jpg|png|gif|css|js)$"])
-    respect_robots: bool = True
-    user_agent: Optional[str] = None
-    timeout: int = 30
-    status: str = "pending"
-    pages_scraped: int = 0
-    items_extracted: int = 0
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
-
-@dataclass
-class ScrapedPage:
-    """采集的页面"""
-
-    url: str
-    status_code: int = 200
-    content_type: ContentType = ContentType.HTML
-    title: str = ""
-    text_content: str = ""
-    html_content: str = ""
-    links: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    scraped_at: float = field(default_factory=time.time)
-    content_hash: str = ""
-
-@dataclass
-class ExtractedItem:
-    """提取的数据项"""
-
-    item_id: str
-    source_url: str
-    data: Dict[str, Any] = field(default_factory=dict)
-    extracted_at: float = field(default_factory=time.time)
-
-class ContentExtractor:
-    """内容提取器 — 从HTML提取正文、去除模板噪音、标准化文本"""
-
-    BOILERPLATE_TAGS = {
-        "script",
-        "style",
-        "nav",
-        "footer",
-        "header",
-        "aside",
-        "noscript",
-        "iframe",
-        "form",
-        "button",
-        "input",
-    }
-    BOILERPLATE_PATTERNS = [
-        r"cookie",
-        r"privacy policy",
-        r"terms of service",
-        r"subscribe",
-        r"newsletter",
-        r"sign up",
-        r"log in",
-        r"advertisement",
-        r"copyright",
-        r"all rights reserved",
-        r"powered by",
-        r"click here",
-    ]
+class WebScraperModule(EnterpriseModule):
+    MODULE_ID = "web-scraper"; MODULE_NAME = "Web Scraper"; VERSION = "V0.1"
 
     def __init__(self):
-        self._extraction_stats = {"total": 0, "success": 0, "failed": 0, "avg_content_ratio": 0.0, "_ratios": []}
-
-    def extract(self, html: str) -> Dict[str, Any]:
-        self._extraction_stats["total"] += 1
-        if not html or len(html) < 10:
-            self._extraction_stats["failed"] += 1
-            return {"content": "", "title": "", "content_ratio": 0}
-        title = self._extract_title(html)
-        clean_html = self._remove_boilerplate(html)
-        text = self._html_to_text(clean_html)
-        text = self._normalize_whitespace(text)
-        sentences = self._split_sentences(text)
-        main_content = self._select_main_sentences(sentences)
-        ratio = len(main_content) / max(len(text), 1)
-        self._extraction_stats["_ratios"].append(ratio)
-        self._extraction_stats["success"] += 1
-        return {
-            "title": title,
-            "content": main_content,
-            "content_ratio": round(ratio, 3),
-            "original_length": len(html),
-            "content_length": len(main_content),
-        }
-
-    def _extract_title(self, html: str) -> str:
-        match = re.search(r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
-        if match:
-            return re.sub(r"<[^>]+>", "", match.group(1)).strip()
-        h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.IGNORECASE | re.DOTALL)
-        if h1:
-            return re.sub(r"<[^>]+>", "", h1.group(1)).strip()
-        return ""
-
-    def _remove_boilerplate(self, html: str) -> str:
-        for tag in self.BOILERPLATE_TAGS:
-            html = re.sub(rf"<{tag}[^>]*>.*?</{tag}>", "", html, flags=re.IGNORECASE | re.DOTALL)
-        html = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)
-        return html
-
-    def _html_to_text(self, html: str) -> str:
-        text = re.sub(r"<br\s*/?>", "\n", html, flags=re.IGNORECASE)
-        text = re.sub(r"</(p|div|h[1-6]|li|tr)>", "\n", text, flags=re.IGNORECASE)
-        text = re.sub(r"<[^>]+>", "", text)
-        text = self._decode_entities(text)
-        return text
-
-    def _decode_entities(self, text: str) -> str:
-        entities = {"&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&nbsp;": " "}
-        for entity, char in entities.items():
-            text = text.replace(entity, char)
-        text = re.sub(r"&#(\d+);", lambda m: chr(int(m.group(1))), text)
-        return text
-
-    def _normalize_whitespace(self, text: str) -> str:
-        text = re.sub(r"[ \t]+", " ", text)
-        text = re.sub(r"\n{3,}", "\n\n", text)
-        return text.strip()
-
-    def _split_sentences(self, text: str) -> List[str]:
-        sentences = re.split(r"(?<=[.!?。！？])\s+", text)
-        return [s.strip() for s in sentences if len(s.strip()) > 10]
-
-    def _select_main_sentences(self, sentences: List[str]) -> str:
-        if not sentences:
-            return ""
-        scored = []
-        for s in sentences:
-            score = len(s)
-            for pattern in self.BOILERPLATE_PATTERNS:
-                if re.search(pattern, s, re.IGNORECASE):
-                    score *= 0.1
-            scored.append((score, s))
-        scored.sort(key=lambda x: x[0], reverse=True)
-        threshold = scored[0][0] * 0.3 if scored else 0
-        selected = [s for sc, s in scored if sc >= threshold]
-        selected.sort(key=lambda s: sentences.index(s) if s in sentences else 0)
-        return " ".join(selected)
-
-    def get_stats(self) -> Dict[str, Any]:
-        ratios = self._extraction_stats.pop("_ratios", [])
-        stats = dict(self._extraction_stats)
-        stats["avg_content_ratio"] = round(sum(ratios) / len(ratios), 3) if ratios else 0
-        return stats
-
-class ContentExtractorEngine(ContentExtractor):
-    """内容提取引擎 — 包装ContentExtractor提供引擎接口"""
-
-    pass
-
-class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
-    """智能网页采集器"""
-
-    def __init__(self):
-
         super().__init__()
-        self._metrics = _MetricsAdapter()
-        self._tasks: Dict[str, ScrapeTask] = {}
-        self._pages: Dict[str, ScrapedPage] = {}
-        self._items: List[ExtractedItem] = []
-        self._seen_urls: Set[str] = set()
-        self._domain_queue: Dict[str, List[str]] = {}
+        self._session: Optional[requests.Session] = None
+        self._cache: Dict[str, FetchResult] = {}
+        self._cache_ttl = int(self.config.get("cache_ttl", 300))
+        self._max_concurrent = int(self.config.get("max_concurrent", 5))
+        self._default_timeout = int(self.config.get("timeout", 30))
+        self._rate_limit_delay = float(self.config.get("rate_limit_delay", 0.5))
         self._robots_cache: Dict[str, Set[str]] = {}
-        self._rate_limit_per_domain: Dict[str, float] = {}
-        self._default_user_agent = "AUTO-EVO-AI/7.0 (Enterprise Web Scraper)"
-        self._max_concurrent = 5
+        self._seen_urls: Set[str] = set()
         self._semaphore = threading.Semaphore(self._max_concurrent)
-        self._task_stats = {"tasks_created": 0, "tasks_completed": 0, "errors": 0}
+        self._last_request_time = 0.0
+        self._lock = threading.Lock()
 
-    def initialize(self) -> None:
-        logger.info("网页采集器初始化完成")
-        self.record_metrics("unknown.init", 1)
-        self.audit("initialized", "Unknown初始化完成")
+    def initialize(self):
+        logger.info("WebScraper initialized (requests=%s, bs4=%s)", HAS_REQUESTS, HAS_BS4)
+        return True
 
-    @trace_operation("create_scrape_task")
-    def create_task(
-        self,
-        url: str,
-        mode: ScrapeMode = ScrapeMode.SINGLE,
-        max_depth: int = 3,
-        max_pages: int = 100,
-        selectors: Optional[Dict[str, str]] = None,
-        follow_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
-        """创建采集任务"""
-        task_id = f"scrape_{uuid.uuid4().hex[:10]}"
-        task = ScrapeTask(
-            task_id=task_id,
-            url=url,
-            mode=mode,
-            max_depth=max_depth,
-            max_pages=max_pages,
-            selectors=selectors or {},
-            follow_patterns=follow_patterns or [".*"],
-            exclude_patterns=exclude_patterns or [r"\.(jpg|png|gif|css|js|zip)$"],
-            user_agent=self._default_user_agent,
-        )
-        self._tasks[task_id] = task
-        self._task_stats["tasks_created"] += 1
-        return {"task_id": task_id, "url": url, "mode": mode.value, "max_pages": max_pages}
+    def _get_session(self) -> requests.Session:
+        if self._session is None:
+            self._session = requests.Session()
+            self._session.headers.update({"User-Agent": UA, "Accept": "text/html,*/*", "Accept-Language": "zh-CN,zh;q=0.9"})
+            adapter = requests.adapters.HTTPAdapter(pool_connections=10, pool_maxsize=20, max_retries=2)
+            self._session.mount("https://", adapter)
+            self._session.mount("http://", adapter)
+        return self._session
 
-    @trace_operation("execute_scrape")
-    def execute_task(self, task_id: str) -> Dict[str, Any]:
-        """执行采集任务"""
-        try:
-            if task_id not in self._tasks:
-                raise ValueError(f"任务 {task_id} 不存在")
-            task = self._tasks[task_id]
-            task.status = "running"
-            task.started_at = time.time()
+    def _rate_limit(self):
+        now = time.time()
+        elapsed = now - self._last_request_time
+        if elapsed < self._rate_limit_delay:
+            time.sleep(self._rate_limit_delay - elapsed)
+        self._last_request_time = time.time()
 
-            # 域名限流
-            domain = urlparse(task.url).netloc
-            last_time = self._rate_limit_per_domain.get(domain, 0)
-            wait = max(0, 1.0 - (time.time() - last_time))
-            if wait > 0:
-                import asyncio, threading
-                try:
-                    asyncio.get_event_loop().run_until_complete(asyncio.sleep(wait))
-                except RuntimeError:
-                    time.sleep(wait)
-            self._rate_limit_per_domain[domain] = time.time()
-
-            if task.mode == ScrapeMode.SINGLE:
-                result = self._scrape_single(task)
-            elif task.mode == ScrapeMode.DEPTH:
-                result = self._scrape_depth(task)
-            elif task.mode == ScrapeMode.BREADTH:
-                result = self._scrape_breadth(task)
-            else:
-                result = self._scrape_single(task)
-
-            task.completed_at = time.time()
-            task.status = "completed"
-            self._task_stats["tasks_completed"] += 1
-            metrics_collector.counter("scraper_pages_total", task.pages_scraped)
-
-            return result
-
-        except Exception as e:
-            if task_id in self._tasks:
-                self._tasks[task_id].status = "failed"
-                self._tasks[task_id].error = str(e)
-            logger.error(f"采集失败 {task_id}: {e}")
-            self._task_stats["errors"] += 1
-            raise
-
-    def _scrape_single(self, task: ScrapeTask) -> Dict:
-        """单页采集"""
+    def _fetch_page(self, url: str, timeout: int = 0, headers: dict = None) -> FetchResult:
+        if not HAS_REQUESTS:
+            return FetchResult(url, error="requests not installed")
+        cache_key = hashlib.md5(url.encode()).hexdigest()
+        cached = self._cache.get(cache_key)
+        if cached and time.time() - cached.elapsed < self._cache_ttl:
+            return cached
         with self._semaphore:
-            page = self._fetch_page(task.url, task)
-            if page:
-                self._pages[task.url] = page
-                task.pages_scraped = 1
-                if task.selectors:
-                    items = self._extract_with_selectors(page, task.selectors)
-                    self._items.extend(items)
-                    task.items_extracted = len(items)
-                return {
-                    "task_id": task.task_id,
-                    "pages": 1,
-                    "items": task.items_extracted,
-                    "url": task.url,
-                    "title": page.title,
-                }
-        return {"task_id": task.task_id, "pages": 0, "items": 0}
+            self._rate_limit()
+            t0 = time.time()
+            try:
+                sess = self._get_session()
+                h = {**sess.headers, **(headers or {})}
+                resp = sess.get(url, headers=h, timeout=timeout or self._default_timeout, allow_redirects=True)
+                resp.raise_for_status()
+                enc = resp.apparent_encoding or resp.encoding or "utf-8"
+                html = resp.content.decode(enc, errors="replace")
+                result = FetchResult(url, html=html, status=resp.status_code, elapsed=time.time() - t0)
+                self._cache[cache_key] = result
+                return result
+            except requests.Timeout:
+                return FetchResult(url, error="timeout", elapsed=time.time() - t0)
+            except requests.HTTPError as e:
+                return FetchResult(url, error=f"HTTP {e.response.status_code}", status=e.response.status_code, elapsed=time.time() - t0)
+            except requests.ConnectionError:
+                return FetchResult(url, error="connection_failed", elapsed=time.time() - t0)
+            except Exception as e:
+                return FetchResult(url, error=str(e), elapsed=time.time() - t0)
 
-    def _scrape_depth(self, task: ScrapeTask) -> Dict:
-        """深度爬取"""
-        visited: Set[str] = set()
-        queue = [(task.url, 0)]
-        items_count = 0
-        pages_count = 0
-
-        while queue and pages_count < task.max_pages:
-            url, depth = queue.pop(0)
-            if url in visited or depth > task.max_depth:
-                continue
-            visited.add(url)
-            self._seen_urls.add(url)
-
-            with self._semaphore:
-                page = self._fetch_page(url, task)
-                if not page:
-                    continue
-
-                self._pages[url] = page
-                pages_count += 1
-
-                if task.selectors:
-                    items = self._extract_with_selectors(page, task.selectors)
-                    self._items.extend(items)
-                    items_count += len(items)
-
-                # 提取链接加入队列
-                for link in page.links:
-                    if self._should_follow(link, task) and link not in visited:
-                        queue.append((link, depth + 1))
-
-            # 域名限流
-            domain = urlparse(url).netloc
-            self._rate_limit_per_domain[domain] = time.time()
-
-        task.pages_scraped = pages_count
-        task.items_extracted = items_count
-        return {"task_id": task.task_id, "pages": pages_count, "items": items_count, "depth_reached": task.max_depth}
-
-    def _scrape_breadth(self, task: ScrapeTask) -> Dict:
-        """广度爬取"""
-        visited: Set[str] = set()
-        current_level = [task.url]
-        items_count = 0
-        pages_count = 0
-
-        for depth in range(task.max_depth + 1):
-            if not current_level or pages_count >= task.max_pages:
-                break
-            next_level = []
-
-            for url in current_level:
-                if url in visited or pages_count >= task.max_pages:
-                    continue
-                visited.add(url)
-
-                with self._semaphore:
-                    page = self._fetch_page(url, task)
-                    if not page:
-                        continue
-                    self._pages[url] = page
-                    pages_count += 1
-
-                    if task.selectors:
-                        items = self._extract_with_selectors(page, task.selectors)
-                        self._items.extend(items)
-                        items_count += len(items)
-
-                    for link in page.links:
-                        if self._should_follow(link, task) and link not in visited:
-                            next_level.append(link)
-
-            current_level = next_level
-
-        task.pages_scraped = pages_count
-        task.items_extracted = items_count
-        return {"task_id": task.task_id, "pages": pages_count, "items": items_count}
-
-    def _fetch_page(self, url: str, task: ScrapeTask) -> Optional[ScrapedPage]:
-        """获取页面（真实HTTP请求 + BeautifulSoup解析）"""
-        headers = {
-            "User-Agent": task.user_agent or self._default_user_agent,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "zh-CN,en;q=0.9",
-        }
-        try:
-            resp = requests.get(url, headers=headers, timeout=task.timeout, allow_redirects=True)
-            resp.raise_for_status()
-            content_type = resp.headers.get("Content-Type", "")
-            html = resp.text
-            content_hash = hashlib.md5(html.encode()).hexdigest()
-
-            if HAS_BS4:
-                soup = BeautifulSoup(html, "html.parser")
-                title = soup.title.string.strip() if soup.title and soup.title.string else ""
-                text = soup.get_text(separator="\n", strip=True)
-                links = list(set(
-                    urljoin(url, a["href"]) for a in soup.find_all("a", href=True)
-                    if a["href"] and not a["href"].startswith(("#", "javascript:", "mailto:"))
-                ))
-            else:
-                title = self._extract_title(html)
-                text = self._html_to_text(html)
-                links = self._extract_links(html, url)
-
-            return ScrapedPage(
-                url=resp.url,
-                status_code=resp.status_code,
-                content_type=ContentType.JSON if "json" in content_type else ContentType.HTML,
-                title=title,
-                text_content=text[:50000],
-                html_content=html[:200000],
-                links=links,
-                metadata={"domain": urlparse(resp.url).netloc, "encoding": resp.encoding or "utf-8"},
-                content_hash=content_hash,
-            )
-        except requests.Timeout:
-            logger.warning("请求超时: %s", url)
-            return None
-        except requests.HTTPError as e:
-            if e.response is not None and e.response.status_code == 404:
-                logger.debug("页面不存在(404): %s", url)
-            else:
-                logger.warning("HTTP错误 %s: %s", e.response.status_code if e.response else "?", url)
-            return None
-        except requests.ConnectionError:
-            logger.warning("连接失败: %s", url)
-            return None
-        except Exception as e:
-            logger.error("获取页面异常 %s: %s", url, e)
-            return None
+    def _extract_by_rules(self, html: str, rules: List[ScrapeRule]) -> Dict[str, Any]:
+        result = {}
+        if not HAS_BS4 or not html:
+            return {"error": "bs4 not available or empty html"}
+        soup = BeautifulSoup(html, "html.parser")
+        for rule in rules:
+            try:
+                elements = soup.select(rule.selector)
+                if rule.multiple:
+                    if rule.attribute == "text":
+                        result[rule.name] = [e.get_text(strip=True) for e in elements]
+                    else:
+                        result[rule.name] = [e.get(rule.attribute, "") for e in elements]
+                else:
+                    if elements:
+                        e = elements[0]
+                        result[rule.name] = e.get_text(strip=True) if rule.attribute == "text" else e.get(rule.attribute, "")
+                    else:
+                        result[rule.name] = None
+            except Exception:
+                result[rule.name] = None
+        return result
 
     def _extract_links(self, html: str, base_url: str) -> List[str]:
-        """提取链接"""
-        links = re.findall(r'href=["\']([^"\']+)["\']', html)
-        result = []
-        for link in links:
-            if link.startswith(("http://", "https://")):
-                result.append(link)
-            elif link.startswith("/"):
-                parsed = urlparse(base_url)
-                result.append(f"{parsed.scheme}://{parsed.netloc}{link}")
-        return list(set(result))
+        if not HAS_BS4 or not html:
+            return []
+        soup = BeautifulSoup(html, "html.parser")
+        links = []
+        for a in soup.find_all("a", href=True):
+            href = a["href"].strip()
+            if href.startswith("#") or href.startswith("javascript:"):
+                continue
+            absolute = urllib.parse.urljoin(base_url, href)
+            links.append(absolute)
+        return links
 
-    def _html_to_text(self, html: str) -> str:
-        """HTML转纯文本"""
-        text = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.DOTALL)
-        text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL)
-        text = re.sub(r"<[^>]+>", " ", text)
-        text = re.sub(r"&nbsp;", " ", text)
-        text = re.sub(r"&amp;", "&", text)
-        text = re.sub(r"\s+", " ", text).strip()
-        return text
+    # ========== Actions ==========
 
-    def _should_follow(self, url: str, task: ScrapeTask) -> bool:
-        """判断是否跟踪链接"""
-        parsed = urlparse(url)
-        if not parsed.scheme.startswith("http"):
-            return False
-        if url in self._seen_urls:
-            return False
-        for pattern in task.exclude_patterns:
-            if re.search(pattern, url):
-                return False
-        for pattern in task.follow_patterns:
-            if re.search(pattern, url):
-                return True
-        return False
+    def quick_scrape(self, params: dict = None) -> dict:
+        p = params or {}
+        url = p.get("url", "")
+        if not url:
+            return {"success": False, "error": "url required"}
+        result = self._fetch_page(url, timeout=int(p.get("timeout", 0)))
+        if result.error:
+            return {"success": False, "error": result.error, "url": url, "elapsed": round(result.elapsed, 2)}
+        rules = [ScrapeRule("title", "title"), ScrapeRule("h1", "h1", multiple=True),
+                 ScrapeRule("meta_desc", 'meta[name="description"]', "content"),
+                 ScrapeRule("links", "a[href]", "href", multiple=True)]
+        data = self._extract_by_rules(result.html, rules)
+        links = self._extract_links(result.html, url)
+        return {"success": True, "url": url, "status": result.status, "size": len(result.html),
+                "elapsed": round(result.elapsed, 2), "title": data.get("title", ""),
+                "headings": data.get("h1", []), "description": data.get("meta_desc"),
+                "links_count": len(links), "links": links[:100]}
 
-    def _extract_with_selectors(self, page: ScrapedPage, selectors: Dict[str, str]) -> List[ExtractedItem]:
-        """使用选择器提取数据"""
-        items = []
-        # 简化实现：使用正则匹配模拟CSS选择器
-        container_pattern = selectors.get("container", r"<article[^>]*>(.*?)</article>")
-        containers = re.findall(container_pattern, page.html_content, re.DOTALL)
-
-        for i, container in enumerate(containers):
-            item_data = {}
-            for field_name, selector in selectors.items():
-                if field_name == "container":
-                    continue
-                # 模拟CSS选择器提取
-                if "title" in field_name or "h2" in selector:
-                    match = re.search(r"<h2[^>]*>(.*?)</h2>", container, re.DOTALL)
-                    if match:
-                        item_data[field_name] = re.sub(r"<[^>]+>", "", match.group(1)).strip()
-                elif "content" in field_name or "p" in selector:
-                    match = re.search(r"<p[^>]*>(.*?)</p>", container, re.DOTALL)
-                    if match:
-                        item_data[field_name] = re.sub(r"<[^>]+>", "", match.group(1)).strip()
-                elif "date" in field_name:
-                    match = re.search(r'class="date"[^>]*>(.*?)</span>', container)
-                    if match:
-                        item_data[field_name] = match.group(1)
-                elif "author" in field_name:
-                    match = re.search(r'class="author"[^>]*>(.*?)</span>', container)
-                    if match:
-                        item_data[field_name] = match.group(1)
-                else:
-                    match = re.search(selector, container)
-                    if match:
-                        item_data[field_name] = match.group(1)
-
-            items.append(ExtractedItem(item_id=f"item_{uuid.uuid4().hex[:8]}", source_url=page.url, data=item_data))
-        return items
-
-    @trace_operation("quick_scrape")
-    def quick_scrape(self, url: str) -> Dict[str, Any]:
-        """快速采集单个URL"""
-        task_result = self.create_task(url, mode=ScrapeMode.SINGLE)
-        return self.execute_task(task_result["task_id"])
-
-    def extract_structured_data(self, url: str, fields: List[str]) -> List[Dict]:
-        """提取结构化数据"""
-        selectors = {"container": r"<article[^>]*>(.*?)</article>", **{f: f.lower() for f in fields}}
-        task_result = self.create_task(url, selectors=selectors)
-        result = self.execute_task(task_result["task_id"])
-        return [{"source_url": url, **item.data} for item in self._items[-result.get("items", 0) :]]
-
-    def get_task_status(self, task_id: str) -> Dict:
-        if task_id not in self._tasks:
-            raise ValueError(f"任务 {task_id} 不存在")
-        task = self._tasks[task_id]
-        return {
-            "task_id": task.task_id,
-            "url": task.url,
-            "status": task.status,
-            "mode": task.mode.value,
-            "pages_scraped": task.pages_scraped,
-            "items_extracted": task.items_extracted,
-            "error": task.error,
-            "started_at": datetime.fromtimestamp(task.started_at).isoformat() if task.started_at else None,
-            "completed_at": datetime.fromtimestamp(task.completed_at).isoformat() if task.completed_at else None,
-        }
-
-    def get_extracted_items(self, limit: int = 100, source_url: Optional[str] = None) -> List[Dict]:
-        items = self._items
-        if source_url:
-            items = [i for i in items if i.source_url == source_url]
-        return [{"item_id": i.item_id, "source_url": i.source_url, "data": i.data} for i in items[-limit:]]
-
-    def list_tasks(self, limit: int = 50) -> List[Dict]:
-        tasks = sorted(
-            self._tasks.values(), key=lambda t: t.created_at if hasattr(t, "created_at") else 0, reverse=True
-        )
-        return [
-            {
-                "task_id": t.task_id,
-                "url": t.url,
-                "status": t.status,
-                "mode": t.mode.value,
-                "pages": t.pages_scraped,
-                "items": t.items_extracted,
-            }
-            for t in tasks[:limit]
-        ]
-
-    async def execute(self, action: str = "list_actions", params: dict = None) -> dict:
-        """统一执行入口 — 根据action路由到对应业务方法"""
-        _ = self.trace("execute")
-        params = params or {}
-        actions = {
-            "create_task": self.create_task,
-            "execute_task": self.execute_task,
-            "quick_scrape": self.quick_scrape,
-            "extract_structured_data": self.extract_structured_data,
-            "get_task_status": self.get_task_status,
-            "get_extracted_items": self.get_extracted_items,
-            "list_tasks": self.list_tasks,
-            "list_actions": lambda: list(actions.keys()),
-            "help": lambda: {"actions": list(actions.keys()), "usage": "execute(action, params)"},
-        }
-
-        if action not in actions:
-            return {"status": "error", "message": f"Unknown action: {action}", "available": list(actions.keys())}
-
-        handler = actions[action]
-        if callable(handler) and not isinstance(handler, list):
-            import inspect
-
-            if inspect.iscoroutinefunction(handler):
+    def batch_scrape(self, params: dict = None) -> dict:
+        p = params or {}
+        urls = p.get("urls", [])
+        if not urls:
+            return {"success": False, "error": "urls list required"}
+        max_workers = min(int(p.get("max_workers", 5)), 10)
+        results = []
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            fut = {pool.submit(self.quick_scrape, {"url": u}): u for u in urls}
+            for f in as_completed(fut):
                 try:
-                    sig = inspect.signature(handler)
-                    if len(sig.parameters) <= 1:
-                        result = handler()
-                    else:
-                        result = handler(**params)
+                    results.append(f.result())
                 except Exception as e:
-                    return {"status": "error", "message": str(e)}
-            else:
-                try:
-                    sig = inspect.signature(handler)
-                    if len(sig.parameters) <= 1:
-                        result = handler()
-                    else:
-                        result = handler(**params)
-                except Exception as e:
-                    return {"status": "error", "message": str(e)}
-            if isinstance(result, dict):
-                return {"status": "success", **result}
-            return {"status": "success", "data": result}
+                    results.append({"success": False, "url": fut[f], "error": str(e)})
+        return {"success": True, "total": len(urls), "results": results}
+
+    def search(self, params: dict = None) -> dict:
+        p = params or {}
+        query = p.get("query", "")
+        if not query:
+            return {"success": False, "error": "query required"}
+        search_url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
+        result = self._fetch_page(search_url)
+        if result.error:
+            # fallback: use Bing
+            search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}"
+            result = self._fetch_page(search_url, headers={"User-Agent": UA})
+            if result.error:
+                return {"success": False, "error": result.error}
+        if HAS_BS4 and result.html:
+            soup = BeautifulSoup(result.html, "html.parser")
+            items = []
+            for r in soup.select(".result, .result__body, li.b_algo"):
+                title_el = r.select_one("a, h2 a, .result__title a")
+                snippet_el = r.select_one(".result__snippet, .b_caption p, .result__body")
+                if title_el:
+                    items.append({
+                        "title": title_el.get_text(strip=True),
+                        "url": title_el.get("href", ""),
+                        "snippet": snippet_el.get_text(strip=True) if snippet_el else "",
+                    })
+            return {"success": True, "query": query, "total": len(items), "results": items[:20]}
+        return {"success": True, "query": query, "total": 0, "results": []}
+
+    def crawl(self, params: dict = None) -> dict:
+        p = params or {}
+        start_url = p.get("url", "")
+        max_pages = int(p.get("max_pages", 10))
+        if not start_url:
+            return {"success": False, "error": "url required"}
+        visited: Set[str] = set()
+        to_visit = [start_url]
+        pages = []
+        while to_visit and len(visited) < max_pages:
+            url = to_visit.pop(0)
+            if url in visited:
+                continue
+            visited.add(url)
+            result = self._fetch_page(url)
+            if not result.error:
+                links = self._extract_links(result.html, url)
+                for link in links:
+                    if link not in visited and link.startswith(("http://", "https://")) and len(to_visit) + len(visited) < max_pages * 2:
+                        to_visit.append(link)
+                pages.append({"url": url, "size": len(result.html), "status": result.status})
+                self._seen_urls.add(url)
+        return {"success": True, "pages_crawled": len(pages), "pages": pages}
+
+    def clear_cache(self, params: dict = None) -> dict:
+        self._cache.clear()
+        return {"success": True, "cleared": True}
+
+    def get_stats(self, params: dict = None) -> dict:
+        return {"success": True, "cache_size": len(self._cache), "seen_urls": len(self._seen_urls),
+                "requests_available": HAS_REQUESTS, "bs4_available": HAS_BS4}
 
     def health_check(self) -> Dict[str, Any]:
-        base = super().health_check()
-        base.update(
-            {
-                "total_tasks": len(self._tasks),
-                "pages_cached": len(self._pages),
-                "items_extracted": len(self._items),
-                "unique_urls": len(self._seen_urls),
-                "robots_cached": len(self._robots_cache),
-            }
-        )
-        return base
+        return {"status": "healthy", "module_id": self.MODULE_ID,
+                "requests": HAS_REQUESTS, "bs4": HAS_BS4,
+                "cache": len(self._cache), "seen": len(self._seen_urls)}
 
-    def shutdown(self) -> None:
-        self._pages.clear()
-        self._seen_urls.clear()
-        logger.info("web_scraper shutdown, %d tasks remaining", len(self._tasks))
+    async def execute(self, action: str, params: dict = None) -> Any:
+        p = params or {}
+        actions = {
+            "scrape": lambda: self.quick_scrape(p), "quick_scrape": lambda: self.quick_scrape(p),
+            "batch": lambda: self.batch_scrape(p), "batch_scrape": lambda: self.batch_scrape(p),
+            "search": lambda: self.search(p), "crawl": lambda: self.crawl(p),
+            "clear_cache": lambda: self.clear_cache(p), "stats": lambda: self.get_stats(p),
+            "health": lambda: self.health_check(), "status": lambda: self.health_check(),
+        }
+        handler = actions.get(action)
+        if handler:
+            try:
+                result = handler()
+                return {"success": True, "result": result} if isinstance(result, dict) else {"success": True, "data": result}
+            except Exception as e:
+                return {"success": False, "error": str(e)}
+        return {"success": False, "error": f"unknown action: {action}"}
 
-module_class = WebScraper
+module_class = WebScraperModule
