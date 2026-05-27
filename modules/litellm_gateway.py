@@ -24,6 +24,7 @@ __module_meta__ = {
     "grade": "A",
     "description": "LiteLLM Gateway - 统一LLM网关代理模块（生产级）",
 }
+import os
 import asyncio
 import hashlib
 import json
@@ -35,6 +36,11 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
+import requests
+import httpx
+import json as _json
+from typing import Optional, List, Dict, Any
+
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = logging.getLogger(__name__)
@@ -223,6 +229,81 @@ class RoutingStrategy(str, Enum):
 
 class LitellmGatewayModule:
     def trace(self, name, *args, **kwargs):
+        pass
+
+    # ===== REAL LLM API METHODS =====
+    def _call_openai(self, model: str, messages: list, **kwargs) -> dict:
+        """Real OpenAI API call via httpx"""
+        api_key = self.config.get("openai_api_key", os.environ.get("OPENAI_API_KEY", ""))
+        if not api_key:
+            return {"success": False, "error": "no OPENAI_API_KEY configured", "model": model}
+        try:
+            resp = httpx.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": messages, **kwargs},
+                timeout=60
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return {
+                "success": True, "model": model,
+                "content": data["choices"][0]["message"]["content"],
+                "usage": data.get("usage", {}),
+                "finish_reason": data["choices"][0].get("finish_reason", ""),
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e), "model": model}
+
+    def _call_zhipu(self, model: str, messages: list, **kwargs) -> dict:
+        """Real Zhipu API call via requests"""
+        api_key = self.config.get("zhipu_api_key", os.environ.get("ZHIPU_API_KEY", ""))
+        if not api_key:
+            return {"success": False, "error": "no ZHIPU_API_KEY configured", "model": model}
+        try:
+            resp = requests.post(
+                "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": messages, **kwargs},
+                timeout=60
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return {
+                "success": True, "model": model,
+                "content": data["choices"][0]["message"]["content"],
+                "usage": data.get("usage", {}),
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e), "model": model}
+
+    def _call_llm(self, provider: str, model: str, messages: list, **kwargs) -> dict:
+        """Route to correct provider"""
+        if provider == "openai":
+            return self._call_openai(model, messages, **kwargs)
+        elif provider in ("zhipu", "glm"):
+            return self._call_zhipu(model, messages, **kwargs)
+        else:
+            return {"success": False, "error": f"unsupported provider: {provider}"}
+
+    async def chat(self, provider: str = "openai", model: str = "gpt-4o", messages: list = None, **kwargs) -> dict:
+        """Chat completion - real LLM API"""
+        if not messages:
+            return {"success": False, "error": "messages required"}
+        return self._call_llm(provider, model, messages, **kwargs)
+
+    async def complete(self, prompt: str, provider: str = "openai", model: str = "gpt-4o", **kwargs) -> dict:
+        """Simple completion"""
+        return self._call_llm(provider, model, [{"role": "user", "content": prompt}], **kwargs)
+
+    def list_models(self, provider: str = "openai") -> dict:
+        """List available models"""
+        models = {
+            "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
+            "zhipu": ["glm-4-plus", "glm-4-flash", "glm-4-air", "glm-4-long"],
+        }
+        return {"success": True, "provider": provider, "models": models.get(provider, models.get("openai"))}
+
 
         class _NS:
             def __enter__(self):
