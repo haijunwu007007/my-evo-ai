@@ -1,0 +1,8 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, langsmith-0.7.33, cov-7.1.0
+collected 0 items
+
+============================ no tests ran in 0.08s ============================

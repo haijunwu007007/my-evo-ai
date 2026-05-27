@@ -6,6 +6,18 @@ const routes = [
     redirect: '/dashboard',
   },
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { title: '登录', public: true },
+  },
+  {
+    path: '/oauth/callback',
+    name: 'OAuthCallback',
+    component: () => import('@/views/Login.vue'),
+    meta: { title: 'OAuth 回调', public: true },
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/Dashboard.vue'),
@@ -82,6 +94,19 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+// ── 路由守卫 ──
+router.beforeEach((to, from, next) => {
+  // 公开页面（登录/OAuth回调）直接放行
+  if (to.meta.public) return next()
+
+  // 检查登录态
+  const token = localStorage.getItem('evo_token')
+  if (token) return next()
+
+  // 未登录 → 跳转登录页，带 redirect 参数
+  next({ name: 'Login', query: { redirect: to.fullPath } })
 })
 
 export default router
