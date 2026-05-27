@@ -33,6 +33,8 @@ __module_meta__ = {
 }
 
 import asyncio
+import sys
+import subprocess
 import time
 import uuid
 import re
@@ -582,6 +584,13 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if scan_type in (ScanType.DEPENDENCY, ScanType.FULL):
                 self._scan_dependencies(target, report)
 
+            # 真实 bandit 扫描（Python 安全审计）
+            if scan_type in (ScanType.CODE, ScanType.FULL) and os.path.isdir(target):
+                self._run_bandit(target, report)
+            # 真实 safety 扫描（Python 依赖漏洞）
+            if scan_type in (ScanType.DEPENDENCY, ScanType.FULL):
+                self._run_safety(report)
+
             report.status = "completed"
             report.score = self._calculate_security_score(report.findings)
         except Exception as e:
@@ -667,6 +676,78 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                         report.findings.append(finding)
         except Exception as e:
             logger.warning(f"扫描文件失败 {filepath}: {e}")
+
+    def _run_bandit(self, target: str, report: ScanReport) -> None:
+        """调用真实 bandit 进行 Python 安全扫描"""
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "bandit", "-r", target, "-f", "json"],
+                capture_output=True, text=True, timeout=120
+            )
+            if not r.stdout:
+                return
+            import json as _json
+            data = _json.loads(r.stdout)
+            for issue in data.get("results", []):
+                try:
+                    report.findings.append(SecurityFinding(
+                        finding_id=f"bandit_{uuid.uuid4().hex[:8]}",
+                        scan_id=report.scan_id,
+                        title=f"Bandit: {issue.get('test_name','?')}",
+                        description=issue.get("issue_text",""),
+                        level=VulnLevel.HIGH if issue.get("issue_severity") == "HIGH" else
+                              VulnLevel.MEDIUM if issue.get("issue_severity") == "MEDIUM" else VulnLevel.LOW,
+                        category="code_security",
+                        file_path=issue.get("filename",""),
+                        line_number=issue.get("line_number",0),
+                        code_snippet=issue.get("code","")[:500],
+                        remediation=f"See: {issue.get('more_info','')}",
+                    ))
+                except Exception:
+                    pass
+            report.findings_count = len(report.findings)
+        except FileNotFoundError:
+            logger.info("bandit not installed, skipping real security scan")
+        except subprocess.TimeoutExpired:
+            logger.warning("bandit scan timed out")
+        except Exception as e:
+            logger.warning(f"bandit scan error: {e}")
+
+    def _run_safety(self, report: ScanReport) -> None:
+        """调用真实 safety 进行 Python 依赖漏洞扫描"""
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "safety", "check", "--json"],
+                capture_output=True, text=True, timeout=60
+            )
+            if not r.stdout:
+                return
+            import json as _json
+            data = _json.loads(r.stdout)
+            if not isinstance(data, list):
+                return
+            for vuln in data:
+                try:
+                    pkg = vuln.get("package_name", vuln.get("name", "?"))
+                    report.findings.append(SecurityFinding(
+                        finding_id=f"safety_{uuid.uuid4().hex[:8]}",
+                        scan_id=report.scan_id,
+                        title=f"Safety: {pkg} {vuln.get('installed_version','?')}",
+                        description=vuln.get("vulnerability", vuln.get("advisory","")),
+                        level=VulnLevel.HIGH if vuln.get("severity","").upper() == "HIGH" else
+                              VulnLevel.MEDIUM if vuln.get("severity","").upper() == "MEDIUM" else VulnLevel.LOW,
+                        category="dependency",
+                        remediation=f"Upgrade {pkg} to {vuln.get('fixed_version','latest')}",
+                    ))
+                except Exception:
+                    pass
+            report.findings_count = len(report.findings)
+        except FileNotFoundError:
+            logger.info("safety not installed, skipping dependency scan")
+        except subprocess.TimeoutExpired:
+            logger.warning("safety scan timed out")
+        except Exception as e:
+            logger.warning(f"safety scan error: {e}")
 
     def _scan_config(self, target: str, report: ScanReport) -> None:
         """配置安全扫描"""
