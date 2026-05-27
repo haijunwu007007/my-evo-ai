@@ -965,17 +965,63 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
 
     def _do_request(self, conn: CloudConnection, request: CloudRequest) -> CloudResponse:
-        """实际发送请求（模拟实现）"""
+        """通过 urllib 发送真实 HTTP 请求"""
         start = time.time()
-        # 企业级实现应使用 httpx/aiohttp 发送实际HTTP请求
-        # 此处为框架结构，返回模拟响应
-        time.sleep(0.01)  # 模拟网络延迟
-        return CloudResponse(
-            status_code=200,
-            body={"message": "request processed", "request_id": request.request_id},
-            request_id=request.request_id,
-            duration_ms=(time.time() - start) * 1000,
-        )
+        try:
+            import urllib.request, urllib.error
+            url = request.path
+            if not url.startswith("http"):
+                base = self._get_provider_base(conn.provider)
+                url = f"{base}{request.path}"
+            data = request.body.encode() if request.body else None
+            req = urllib.request.Request(
+                url, data=data,
+                method=request.method,
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": "AUTO-EVO-AI-CloudConnector/1.0",
+                    **{k: v for k, v in conn.headers.items() if k.lower() != "content-type"},
+                },
+            )
+            with urllib.request.urlopen(req, timeout=request.timeout) as resp:
+                body_bytes = resp.read()
+                try:
+                    body = json.loads(body_bytes)
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    body = {"raw": body_bytes.decode("utf-8", errors="replace")[:500]}
+                return CloudResponse(
+                    status_code=resp.status,
+                    headers=dict(resp.headers),
+                    body=body,
+                    request_id=request.request_id,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+        except urllib.error.HTTPError as e:
+            return CloudResponse(
+                status_code=e.code,
+                body={"error": str(e), "detail": e.read().decode("utf-8", errors="replace")[:200]},
+                request_id=request.request_id,
+                duration_ms=(time.time() - start) * 1000,
+            )
+        except (urllib.error.URLError, OSError) as e:
+            return CloudResponse(
+                status_code=0,
+                body={"error": f"Network error: {e}"},
+                request_id=request.request_id,
+                duration_ms=(time.time() - start) * 1000,
+            )
+
+    def _get_provider_base(self, provider: str) -> str:
+        """获取云厂商基础 URL"""
+        bases = {
+            "aws": "https://api.aws.com",
+            "azure": "https://management.azure.com",
+            "gcp": "https://www.googleapis.com",
+            "aliyun": "https://ecs.aliyuncs.com",
+            "tencent": "https://api.tencentcloud.com",
+            "huawei": "https://api.huaweicloud.com",
+        }
+        return bases.get(provider, f"https://{provider}.example.com/api")
 
     def _log_request(self, request: CloudRequest, response: CloudResponse, duration_ms: float) -> None:
         """记录请求日志"""
