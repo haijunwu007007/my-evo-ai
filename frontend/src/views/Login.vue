@@ -27,7 +27,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { authLogin } from '../api/modules'
+import api from '../api/modules'
 
 export default {
   name: 'LoginView',
@@ -44,7 +44,7 @@ export default {
 
     async function localLogin() {
       try {
-        const r = await authLogin({ username: username.value, password: password.value })
+        const r = await api.sso.login({ username: username.value, password: password.value })
         if (r && r.success) {
           localStorage.setItem('evo_token', r.session_token || r.token || '')
           ElMessage.success('登录成功')
