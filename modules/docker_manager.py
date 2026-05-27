@@ -58,7 +58,7 @@ except ImportError:
     _HAS_DOCKER_SDK = False
     _docker_sdk = None
 
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin, Result
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = logging.getLogger("evo.docker_manager")
@@ -176,7 +176,7 @@ class BuildContext:
 # DockerManager 主类
 # ============================================================================
 
-class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
+class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Result):
     """
     Docker容器编排管理
 
