@@ -14,7 +14,12 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-app.use(createPinia())
+const pinia = createPinia()
+if (import.meta.env.DEV) {
+  pinia.use((ctx) => { ctx.store.$id; })  // 激活 Vue DevTools Pinia 面板
+}
+
+app.use(pinia)
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
 app.mount('#app')

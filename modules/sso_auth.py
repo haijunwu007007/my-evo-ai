@@ -16,7 +16,8 @@ __module_meta__ = {
     "description": "SSO 单点登录 - JWT + PBKDF2 + SQLite持久化 + 票据交换",
 }
 
-import time, uuid, hmac, json, os, hashlib, logging, base64, sqlite3
+import time, uuid, hmac, json, os, hashlib, logging, base64, sqlite3, urllib
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from modules._base.enterprise_module import (
@@ -77,6 +78,34 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._session_ttl = int(self.config.get("session_ttl", 28800))
         self._ticket_ttl = int(self.config.get("ticket_ttl", 300))
         self._setup_rate_limit(rate=500, burst=1000)
+
+        # OAuth2 提供商配置 {provider: {client_id, client_secret, authorize_url, token_url, userinfo_url, scope}}
+        self._oauth_providers = {
+            "github": {
+                "authorize_url": "https://github.com/login/oauth/authorize",
+                "token_url": "https://github.com/login/oauth/access_token",
+                "userinfo_url": "https://api.github.com/user",
+                "scope": "read:user",
+                "client_id": self.config.get("oauth.github.client_id", ""),
+                "client_secret": self.config.get("oauth.github.client_secret", ""),
+            },
+            "google": {
+                "authorize_url": "https://accounts.google.com/o/oauth2/v2/auth",
+                "token_url": "https://oauth2.googleapis.com/token",
+                "userinfo_url": "https://www.googleapis.com/oauth2/v2/userinfo",
+                "scope": "openid email profile",
+                "client_id": self.config.get("oauth.google.client_id", ""),
+                "client_secret": self.config.get("oauth.google.client_secret", ""),
+            },
+            "wechat": {
+                "authorize_url": "https://open.weixin.qq.com/connect/qrconnect",
+                "token_url": "https://api.weixin.qq.com/sns/oauth2/access_token",
+                "userinfo_url": "https://api.weixin.qq.com/sns/userinfo",
+                "scope": "snsapi_login",
+                "client_id": self.config.get("oauth.wechat.client_id", ""),
+                "client_secret": self.config.get("oauth.wechat.client_secret", ""),
+            },
+        }
 
     def initialize(self) -> None:
         self._init_db()
@@ -207,6 +236,9 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "generate_jwt": self._generate_jwt,
             "verify_jwt": self._verify_jwt_action,
             "get_user": self._get_user,
+            "oauth_authorize": self._oauth_authorize,
+            "oauth_callback": self._oauth_callback,
+            "list_oauth_providers": self._list_oauth_providers,
         }
         handler = dispatch.get(action)
         if handler:
@@ -408,13 +440,131 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    # ==================== OAuth2 第三方登录 ====================
+
+    def _list_oauth_providers(self, params: Dict = None) -> Dict:
+        """列出已配置的 OAuth2 提供商"""
+        configured = {
+            name: {
+                "name": name,
+                "authorize_url": cfg["authorize_url"],
+                "scope": cfg["scope"],
+                "configured": bool(cfg.get("client_id")),
+            }
+            for name, cfg in self._oauth_providers.items()
+        }
+        return {"success": True, "providers": configured}
+
+    def _oauth_authorize(self, params: Dict) -> Dict:
+        """生成 OAuth2 授权跳转 URL"""
+        provider = params.get("provider", "").lower()
+        if provider not in self._oauth_providers:
+            return {"success": False, "error": f"unsupported provider: {provider}"}
+        cfg = self._oauth_providers[provider]
+        if not cfg.get("client_id"):
+            return {"success": False, "error": f"oauth.{provider}.client_id not configured"}
+        import uuid
+        state = hashlib.sha256(f"{uuid.uuid4()}{time.time()}".encode()).hexdigest()[:16]
+        redirect_uri = params.get("redirect_uri", "")
+        params_list = [
+            ("client_id", cfg["client_id"]),
+            ("redirect_uri", redirect_uri),
+            ("scope", cfg["scope"]),
+            ("state", state),
+            ("response_type", "code"),
+        ]
+        qs = "&".join(f"{k}={urllib.parse.quote(v)}" for k, v in params_list if v)
+        authorize_url = f"{cfg['authorize_url']}?{qs}"
+        return {
+            "success": True,
+            "authorize_url": authorize_url,
+            "state": state,
+            "provider": provider,
+        }
+
+    def _oauth_callback(self, params: Dict) -> Dict:
+        """处理 OAuth2 回调：用 code 交换 token + 获取用户信息"""
+        provider = params.get("provider", "").lower()
+        code = params.get("code", "")
+        redirect_uri = params.get("redirect_uri", "")
+        if provider not in self._oauth_providers:
+            return {"success": False, "error": f"unsupported provider: {provider}"}
+        cfg = self._oauth_providers[provider]
+        if not code:
+            return {"success": False, "error": "authorization code required"}
+        try:
+            import urllib.request, urllib.parse
+            # 1. code 交换 access_token
+            token_data = urllib.parse.urlencode({
+                "client_id": cfg["client_id"],
+                "client_secret": cfg["client_secret"],
+                "code": code,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            }).encode()
+            token_req = urllib.request.Request(cfg["token_url"], data=token_data,
+                headers={"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"})
+            with urllib.request.urlopen(token_req, timeout=10) as resp:
+                token_result = json.loads(resp.read().decode())
+            access_token = token_result.get("access_token", "")
+            if not access_token:
+                return {"success": False, "error": "failed to get access_token", "details": token_result}
+            # 2. 用 access_token 获取用户信息
+            userinfo_req = urllib.request.Request(cfg["userinfo_url"],
+                headers={"Authorization": f"Bearer {access_token}"})
+            with urllib.request.urlopen(userinfo_req, timeout=10) as resp:
+                userinfo = json.loads(resp.read().decode())
+            # 3. 提取用户标识
+            oauth_id = str(userinfo.get("id", userinfo.get("sub", "")))
+            username = userinfo.get("login", userinfo.get("name", userinfo.get("email", f"{provider}_{oauth_id}")))
+            avatar = userinfo.get("avatar_url", userinfo.get("picture", ""))
+            email = userinfo.get("email", "")
+            # 4. 创建或查找用户
+            user_key = f"oauth:{provider}:{oauth_id}"
+            user_id = f"oauth_{provider}_{oauth_id[:8]}"
+            existing = None
+            try:
+                cursor = self._get_db().execute("SELECT user_id FROM sso_users WHERE user_id=?", (user_id,))
+                existing = cursor.fetchone()
+            except Exception:
+                pass
+            if not existing:
+                try:
+                    self._get_db().execute(
+                        "INSERT OR IGNORE INTO sso_users (user_id, username, password_hash, roles) VALUES (?,?,?,?)",
+                        (user_id, username, f"oauth:{provider}", json.dumps(["user", f"oauth:{provider}"])),
+                    )
+                    self._get_db().commit()
+                except Exception:
+                    pass
+            # 5. 创建 session
+            now = time.time()
+            session_token = f"sso_{uuid.uuid4().hex}"
+            self._sessions[session_token] = {
+                "user_id": user_id, "created_at": now, "expires_at": now + self._session_ttl,
+                "attributes": {"username": username, "oauth_provider": provider, "avatar": avatar, "email": email},
+                "apps": [],
+            }
+            # 6. 签发 JWT
+            jwt_token = self._gen_jwt({"sub": user_id, "role": "user", "provider": provider})
+            return {
+                "success": True,
+                "session_token": session_token,
+                "jwt": jwt_token,
+                "user_id": user_id,
+                "username": username,
+                "avatar": avatar,
+                "email": email,
+                "provider": provider,
+                "expires_in": self._session_ttl,
+            }
+        except Exception as e:
+            return {"success": False, "error": f"oauth callback failed: {e}"}
+
     async def shutdown(self) -> None:
         self._sessions.clear()
         self._tickets.clear()
         self.status = ModuleStatus.STOPPED
 
-
-# 需要 datetime 用于格式化
-from datetime import datetime
 
 module_class = SsoAuth

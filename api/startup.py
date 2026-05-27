@@ -74,6 +74,7 @@ async def startup():
 
     asyncio.create_task(heartbeat_task())
     asyncio.create_task(activity_broadcast_task())
+    asyncio.create_task(sysmon_broadcast_task())
     asyncio.create_task(auto_heal_task())
     asyncio.create_task(hot_reload_task())
 
@@ -186,6 +187,23 @@ async def auto_heal_task():
                         logger.info(f"[AUTO-HEAL] 修复成功: {name}")
                 except Exception:
                     pass
+        except Exception:
+            pass
+
+
+async def sysmon_broadcast_task():
+    """每3秒通过 WebSocket 推送真实系统指标"""
+    while True:
+        await asyncio.sleep(3)
+        try:
+            mod_name = "system_monitor"
+            mod = registry.modules.get(mod_name)
+            if mod is None:
+                mod = await registry.lazy_load_module(mod_name)
+            if mod and hasattr(mod, "get_metrics"):
+                r = mod.get_metrics()
+                if isinstance(r, dict) and r.get("success"):
+                    await manager.broadcast({"type": "sysmon_metrics", "data": r["metrics"], "timestamp": datetime.now().isoformat()})
         except Exception:
             pass
 
