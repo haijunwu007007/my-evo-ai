@@ -25,9 +25,10 @@ LABEL \
 
 WORKDIR /app
 
-# 仅安装运行必需工具，清理 apt 缓存
+# 不安装 curl（Python 内建 HTTP 客户端足够 healthcheck）
+# 只用 ca-certificates 确保 SSL 证书链正常
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates && \
+    ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # 复用 builder 层的 Python 依赖
@@ -50,7 +51,7 @@ ENV \
     APP_VERSION="${BUILD_VERSION:-0.1.0}"
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -sf http://127.0.0.1:8765/api/status || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/api/status', timeout=5)" || exit 1
 
 EXPOSE 8765
 CMD ["python", "api_server.py"]
