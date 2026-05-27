@@ -268,6 +268,19 @@ class EnterpriseModule(ABC):
         # 初始化模块专属logger
         self._logger = logging.getLogger(f"evo.{self.module_id}")
 
+        # Module Delegate 模式 — 懒加载
+        self._delegate = None
+
+    # ── Module Delegate ──
+
+    @property
+    def delegate(self):
+        """获取 ModuleDelegate 实例（懒加载）"""
+        if self._delegate is None:
+            from core.module_delegate import ModuleDelegate
+            self._delegate = ModuleDelegate.get_instance()
+        return self._delegate
+
     # ── NoopTracer — 默认空追踪器，避免 self._tracer.trace() 报错 ──
     class _NoopTracer:
         """空追踪器，所有方法都是 no-op"""
