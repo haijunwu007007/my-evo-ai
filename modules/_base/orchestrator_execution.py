@@ -1,6 +1,6 @@
 """AUTO-EVO-AI -- 编排执行器（从 agent_orchestrator.py 提取）"""
 from __future__ import annotations
-import time, json, logging
+import time, json, logging, threading
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed

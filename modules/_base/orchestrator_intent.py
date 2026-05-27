@@ -2,7 +2,7 @@
 from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Tuple
-from modules._base.orchestrator_types import IntentCategory, ModuleCapability
+from modules._base.orchestrator_types import IntentCategory
 logger = logging.getLogger(__name__)
 class AIIntentAnalyzer(object):
     """

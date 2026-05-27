@@ -26,7 +26,7 @@ class TaskStatus(Enum):
 
 class TaskPriority(Enum):
     LOW = 0
-    NORMAL = 1
+    MEDIUM = 1
     HIGH = 2
     CRITICAL = 3
 
@@ -57,14 +57,7 @@ class IntentCategory(Enum):
     CUSTOM = "custom"
 
 
-@dataclass
-class ModuleCapability:
-    module_name: str
-    actions: List[str]
-    input_schema: Dict[str, Any] = field(default_factory=dict)
-    output_schema: Dict[str, Any] = field(default_factory=dict)
-    priority: int = 0
-    tags: List[str] = field(default_factory=list)
+
 
 
 @dataclass
