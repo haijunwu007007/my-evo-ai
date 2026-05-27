@@ -37,6 +37,8 @@ import os
 import ast
 import json
 import logging
+import subprocess
+import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 from enum import Enum
 from dataclasses import dataclass, field
@@ -939,5 +941,93 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             logger.error(f"[CodeReview] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
+
+    # ────────── 真实代码分析（AST + pylint）──────────
+
+    def review_code(self, params: dict) -> dict:
+        """真实代码审查：AST 结构分析 + pylint 静态检查"""
+        code = params.get("code", "")
+        filepath = params.get("filepath", "")
+        if not code and not filepath:
+            return {"success": False, "error": "code or filepath required"}
+        if filepath:
+            try:
+                with open(filepath, encoding="utf-8", errors="ignore") as f:
+                    code = f.read()
+            except Exception as e:
+                return {"success": False, "error": f"cannot read file: {e}"}
+        report = {"issues": [], "score": 100, "ast_analysis": {}, "pylint_output": ""}
+        # 1. AST 真实分析
+        try:
+            tree = ast.parse(code)
+            funcs = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+            classes = [n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+            imports = []
+            for n in ast.walk(tree):
+                if isinstance(n, ast.Import):
+                    for alias in n.names:
+                        imports.append(alias.name)
+                elif isinstance(n, ast.ImportFrom):
+                    imports.append(f"{n.module or ''}.{n.names[0].name if n.names else ''}")
+            report["ast_analysis"] = {
+                "func_count": len(funcs), "class_count": len(classes),
+                "import_count": len(imports), "line_count": len(code.splitlines()),
+                "functions": funcs[:20], "classes": classes[:10], "imports": imports[:10],
+            }
+            # 检测问题
+            for n in ast.walk(tree):
+                if isinstance(n, ast.FunctionDef) and len(n.body) == 1 and isinstance(n.body[0], ast.Pass):
+                    report["issues"].append({"type": "empty_function", "name": n.name, "line": n.lineno})
+                    report["score"] -= 5
+                if isinstance(n, ast.Try) and not n.handlers and not n.finalbody:
+                    report["issues"].append({"type": "bare_try", "line": n.lineno})
+                    report["score"] -= 3
+        except SyntaxError as e:
+            report["issues"].append({"type": "syntax_error", "error": str(e)})
+            report["score"] -= 20
+        # 2. pylint 真实调用
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as tmp:
+                tmp.write(code)
+                tmp_path = tmp.name
+            r = subprocess.run(
+                ["python", "-m", "pylint", tmp_path, "--score=y", "--output-format=text"],
+                capture_output=True, text=True, timeout=30
+            )
+            os.unlink(tmp_path)
+            report["pylint_output"] = r.stdout[:2000] + r.stderr[:500]
+            for line in r.stdout.split("\n"):
+                m = re.search(r"Your code has been rated at (-?\d+\.?\d*)", line)
+                if m:
+                    report["score"] = min(report["score"], float(m.group(1)))
+        except FileNotFoundError:
+            report["pylint_output"] = "pylint not installed, skipping"
+        except subprocess.TimeoutExpired:
+            report["issues"].append({"type": "pylint_timeout"})
+            report["score"] -= 5
+        report["score"] = max(0, min(100, report["score"]))
+        return {"success": True, "report": report}
+
+    def search_security_issues(self, params: dict) -> dict:
+        """真实安全扫描：AST 检测高危模式"""
+        code = params.get("code", "")
+        if not code:
+            return {"success": False, "error": "code required"}
+        try:
+            tree = ast.parse(code)
+        except SyntaxError:
+            return {"success": False, "error": "syntax error"}
+        findings = []
+        dangerous = ["eval", "exec", "__import__", "pickle.loads", "os.system", "subprocess.call", "subprocess.Popen"]
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+                call_str = f"{ast.unparse(n.func)}"
+                if call_str in dangerous:
+                    findings.append({"type": "dangerous_call", "name": call_str, "line": n.lineno})
+                if call_str in ["subprocess.call", "subprocess.Popen"]:
+                    findings.append({"type": "subprocess_risk", "name": call_str, "line": n.lineno})
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ("eval", "exec", "__import__"):
+                findings.append({"type": "dangerous_builtin", "name": n.func.id, "line": n.lineno})
+        return {"success": True, "findings": findings, "total": len(findings)}
 
 module_class = CodeReview
