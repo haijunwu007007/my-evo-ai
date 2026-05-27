@@ -33,32 +33,39 @@ __module_meta__ = {
 }
 
 import os
-import asyncio
+import asyncio, threading
 import time
 import uuid
 import re
+import json
 import hashlib
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 from enum import Enum
 from dataclasses import dataclass, field
 from datetime import datetime
 from urllib.parse import urlparse, urljoin
 
+import requests
+
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
+
 try:
     from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     from modules._base.tracing import trace_operation
-    from modules._base.metrics import MetricsCollector, metrics_collector
-    from modules._base.audit import AuditLogger
+    from modules._base.metrics import metrics_collector
 except ImportError:
     import sys
-
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from _base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     from _base.tracing import trace_operation
     from _base.metrics import metrics_collector
-    from _base.audit import AuditLogger
-logger = logging.getLogger("web_scraper")
+
+logger = logging.getLogger("evo.web_scraper")
 
 class _MetricsAdapter:
     """轻量指标适配器 — 兼容 self._metrics.increment/histogram 接口"""
@@ -303,7 +310,8 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._rate_limit_per_domain: Dict[str, float] = {}
         self._default_user_agent = "AUTO-EVO-AI/7.0 (Enterprise Web Scraper)"
         self._max_concurrent = 5
-        self._semaphore = asyncio.Semaphore(self._max_concurrent)
+        self._semaphore = threading.Semaphore(self._max_concurrent)
+        self._task_stats = {"tasks_created": 0, "tasks_completed": 0, "errors": 0}
 
     def initialize(self) -> None:
         logger.info("网页采集器初始化完成")
@@ -335,7 +343,7 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             user_agent=self._default_user_agent,
         )
         self._tasks[task_id] = task
-        self.stats["tasks_created"] += 1
+        self._task_stats["tasks_created"] += 1
         return {"task_id": task_id, "url": url, "mode": mode.value, "max_pages": max_pages}
 
     @trace_operation("execute_scrape")
@@ -353,7 +361,11 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             last_time = self._rate_limit_per_domain.get(domain, 0)
             wait = max(0, 1.0 - (time.time() - last_time))
             if wait > 0:
-                time.sleep(wait)
+                import asyncio, threading
+                try:
+                    asyncio.get_event_loop().run_until_complete(asyncio.sleep(wait))
+                except RuntimeError:
+                    time.sleep(wait)
             self._rate_limit_per_domain[domain] = time.time()
 
             if task.mode == ScrapeMode.SINGLE:
@@ -367,7 +379,7 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
             task.completed_at = time.time()
             task.status = "completed"
-            self.stats["tasks_completed"] += 1
+            self._task_stats["tasks_completed"] += 1
             metrics_collector.counter("scraper_pages_total", task.pages_scraped)
 
             return result
@@ -377,7 +389,7 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 self._tasks[task_id].status = "failed"
                 self._tasks[task_id].error = str(e)
             logger.error(f"采集失败 {task_id}: {e}")
-            self.stats["errors"] += 1
+            self._task_stats["errors"] += 1
             raise
 
     def _scrape_single(self, task: ScrapeTask) -> Dict:
@@ -480,67 +492,58 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"task_id": task.task_id, "pages": pages_count, "items": items_count}
 
     def _fetch_page(self, url: str, task: ScrapeTask) -> Optional[ScrapedPage]:
-        """获取页面（模拟）"""
+        """获取页面（真实HTTP请求 + BeautifulSoup解析）"""
+        headers = {
+            "User-Agent": task.user_agent or self._default_user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,en;q=0.9",
+        }
         try:
-            pass
-            # 模拟HTTP请求
-            time.sleep(0.1)
-
-            parsed = urlparse(url)
-            domain = parsed.netloc
-            path = parsed.path or "/"
-
-            # 模拟页面内容
-            html = self._generate_mock_html(url, domain, path)
+            resp = requests.get(url, headers=headers, timeout=task.timeout, allow_redirects=True)
+            resp.raise_for_status()
+            content_type = resp.headers.get("Content-Type", "")
+            html = resp.text
             content_hash = hashlib.md5(html.encode()).hexdigest()
 
-            # 提取链接
-            links = self._extract_links(html, url)
-
-            # 提取文本
-            text = self._html_to_text(html)
+            if HAS_BS4:
+                soup = BeautifulSoup(html, "html.parser")
+                title = soup.title.string.strip() if soup.title and soup.title.string else ""
+                text = soup.get_text(separator="\n", strip=True)
+                links = list(set(
+                    urljoin(url, a["href"]) for a in soup.find_all("a", href=True)
+                    if a["href"] and not a["href"].startswith(("#", "javascript:", "mailto:"))
+                ))
+            else:
+                title = self._extract_title(html)
+                text = self._html_to_text(html)
+                links = self._extract_links(html, url)
 
             return ScrapedPage(
-                url=url,
-                status_code=200,
-                content_type=ContentType.HTML,
-                title=f"Page - {path}",
-                text_content=text,
-                html_content=html,
+                url=resp.url,
+                status_code=resp.status_code,
+                content_type=ContentType.JSON if "json" in content_type else ContentType.HTML,
+                title=title,
+                text_content=text[:50000],
+                html_content=html[:200000],
                 links=links,
-                metadata={"domain": domain},
+                metadata={"domain": urlparse(resp.url).netloc, "encoding": resp.encoding or "utf-8"},
                 content_hash=content_hash,
             )
-        except Exception as e:
-            logger.warning(f"获取页面失败 {url}: {e}")
+        except requests.Timeout:
+            logger.warning("请求超时: %s", url)
             return None
-
-    def _generate_mock_html(self, url: str, domain: str, path: str) -> str:
-        """生成模拟HTML"""
-        return f"""<!DOCTYPE html>
-    <html><head><title>Page - {path}</title>
-    <meta name="description" content="Sample page at {path}">
-    </head><body>
-    <header><nav><a href="/">Home</a><a href="/about">About</a><a href="/contact">Contact</a></nav></header>
-    <main>
-    <h1>Welcome to {domain}</h1>
-    <p>This is a sample page at path: {path}</p>
-    <section class="content">
-    <article class="item" data-id="1">
-    <h2>Article 1</h2><p>Content for article 1 on {domain}. Contains useful information about the topic.</p>
-    <span class="date">2026-01-15</span><span class="author">Author A</span>
-    </article>
-    <article class="item" data-id="2">
-    <h2>Article 2</h2><p>Content for article 2. More detailed analysis and insights.</p>
-    <span class="date">2026-01-14</span><span class="author">Author B</span>
-    </article>
-    <article class="item" data-id="3">
-    <h2>Article 3</h2><p>Content for article 3. Summary and conclusions.</p>
-    <span class="date">2026-01-13</span><span class="author">Author A</span>
-    </article>
-    </section>
-    <footer><p>&copy; 2026 {domain}</p></footer>
-    </body></html>"""
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                logger.debug("页面不存在(404): %s", url)
+            else:
+                logger.warning("HTTP错误 %s: %s", e.response.status_code if e.response else "?", url)
+            return None
+        except requests.ConnectionError:
+            logger.warning("连接失败: %s", url)
+            return None
+        except Exception as e:
+            logger.error("获取页面异常 %s: %s", url, e)
+            return None
 
     def _extract_links(self, html: str, base_url: str) -> List[str]:
         """提取链接"""
@@ -728,8 +731,6 @@ class WebScraper(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         self._pages.clear()
         self._seen_urls.clear()
-        audit_logger.log(
-            action="module_shutdown", resource="web_scraper", details=f"关闭，共 {len(self._tasks)} 个任务"
-        )
+        logger.info("web_scraper shutdown, %d tasks remaining", len(self._tasks))
 
 module_class = WebScraper
