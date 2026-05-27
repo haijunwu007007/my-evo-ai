@@ -533,15 +533,23 @@ class SystemMonitorModule(EnterpriseModule):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    # ── EnterpriseModule 兼容 execute ──
+    # ── _safe_execute 统一接口 ──
 
-    async def execute(self, action: str = "status", params: dict = None) -> dict:
-        if params is None: params = {}
-        _action = action.lower().strip()
-        dispatch = {
-            "status": lambda: {"success": True, "status": "healthy", "module": "system_monitor"},
-            "info": lambda: {"success": True, "module": self.__class__.__name__, "status": "active"},
+    async def execute(self, action: str, params: dict = None) -> Any:
+        """通过 _safe_execute 代理到 _dispatch，返回 Result（与 sso_auth/data_analysis 一致）"""
+        return await self._safe_execute(action, params or {}, handler=self._dispatch)
+
+    def _dispatch(self, params: dict) -> dict:
+        """所有业务方法的路由中心，接收 params 字典，返回 dict"""
+        action = params.get("action", "status").lower().strip()
+        handlers = {
+            "status": lambda: {"success": True, "status": "healthy", "module": "system_monitor",
+                               "metrics_count": len(self._last_metrics), "alerts": len(self._active_alerts)},
+            "info": lambda: {"success": True, "module_id": "system_monitor", "name": "系统监控", "version": "V0.1"},
             "health": self.health_check,
+            "help": lambda: {"success": True, "actions": [
+                "status","info","health","get_metrics","get_cpu","get_memory","get_disk","get_network",
+                "get_processes","get_alerts","get_trend","list_alert_rules","add_alert_rule","ack_alert","query_db"]},
             "get_metrics": lambda: self.get_metrics(params),
             "get_cpu": lambda: self.get_cpu(params),
             "get_memory": lambda: self.get_memory(params),
@@ -554,33 +562,10 @@ class SystemMonitorModule(EnterpriseModule):
             "add_alert_rule": lambda: self.add_alert_rule(params),
             "ack_alert": lambda: self.ack_alert(params),
             "query_db": lambda: self.query_db(params),
-            "help": lambda: {"success": True, "actions": [
-                             "status","info","health","get_metrics","get_cpu","get_memory","get_disk","get_network",
-                             "get_processes","get_alerts","get_trend","list_alert_rules","add_alert_rule","ack_alert","query_db"],
-                             "description": "系统监控 — psutil采集+SQLite持久化+告警通知+Prometheus推送"},
-            "get_metrics": self.get_metrics,
-            "get_cpu": self.get_cpu,
-            "get_memory": self.get_memory,
-            "get_disk": self.get_disk,
-            "get_network": self.get_network,
-            "get_processes": self.get_processes,
-            "get_alerts": self.get_alerts,
-            "get_trend": self.get_trend,
-            "list_alert_rules": self.list_alert_rules,
-            "add_alert_rule": self.add_alert_rule,
-            "ack_alert": self.ack_alert,
-            "query_db": self.query_db,
         }
-        handler = dispatch.get(_action)
-        if handler:
-            try:
-                result = handler()
-                if asyncio.iscoroutine(result):
-                    result = await result
-                return result if isinstance(result, dict) else {"success": True, "result": result}
-            except Exception as e:
-                logger.error("system_monitor execute %s error: %s", action, e)
-                return {"success": False, "error": str(e)}
-        return self.get_status(params) if hasattr(self, "get_status") else {"success": True, "module": self.__class__.__name__}
+        h = handlers.get(action)
+        if h:
+            return h()
+        return {"success": False, "error": f"unknown action: {action}"}
 
 module_class = SystemMonitorModule

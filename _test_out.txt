@@ -1,6 +1,51 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    import sys; sys.path.insert(0,'.'); sys.stdout.reconfigure(encoding='utf-8'); exec(open('tests/test_core_engines.py',encoding='utf-8').read())
-                                                                                  ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<string>", line 10, in <module>
-NameError: name '__file__' is not defined. Did you mean: '__name__'?
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, langsmith-0.7.33, cov-7.1.0
+collected 16 items
+
+tests\test_system_monitor.py ............FFF.                            [100%]
+
+================================== FAILURES ===================================
+_______________ TestSystemMonitorCore.test_execute_get_metrics ________________
+tests\test_system_monitor.py:71: in test_execute_get_metrics
+    assert r["success"] is True
+           ^^^^^^^^^^^^
+E   TypeError: 'Result' object is not subscriptable
+----------------------------- Captured log setup ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:92.9, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: �ڴ� > 80% (��ǰ:82.7, ��ֵ:80)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:87.9, ��ֵ:75)
+_________________ TestSystemMonitorCore.test_execute_unknown __________________
+tests\test_system_monitor.py:75: in test_execute_unknown
+    assert r["success"] is False
+           ^^^^^^^^^^^^
+E   TypeError: 'Result' object is not subscriptable
+------------------------------ Captured log call ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 90% (��ǰ:93.1, ��ֵ:90)
+_____________________ TestSystemMonitorCore.test_shutdown _____________________
+tests\test_system_monitor.py:79: in test_shutdown
+    assert sm._collecting is False
+E   assert True is False
+E    +  where True = <SystemMonitorModule id= status=uninitialized uptime=0s>._collecting
+----------------------------- Captured log setup ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:93.1, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: �ڴ� > 80% (��ǰ:82.8, ��ֵ:80)
+============================== warnings summary ===============================
+tests/test_system_monitor.py::TestSystemMonitorCore::test_shutdown
+  D:\AUTO-EVO-AI-V0.1\tests\test_system_monitor.py:78: RuntimeWarning: coroutine 'SystemMonitorModule.shutdown' was never awaited
+    sm.shutdown()
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_execute_get_metrics
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_execute_unknown
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_shutdown - a...
+=================== 3 failed, 13 passed, 1 warning in 7.50s ===================
+�澯����: CPU > 75% (��ǰ:100.0, ��ֵ:75)
+�澯����: �ڴ� > 80% (��ǰ:82.8, ��ֵ:80)
+�澯����: CPU > 90% (��ǰ:100.0, ��ֵ:90)
+�澯����: CPU > 75% (��ǰ:100.0, ��ֵ:75)

@@ -1,0 +1,101 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0
+rootdir: D:\AUTO-EVO-AI-V0.1
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, langsmith-0.7.33, cov-7.1.0
+collected 63 items
+
+tests\test_system_monitor.py ............FFF.                            [ 25%]
+tests\test_sso_auth.py F...............FFFF..F..F                        [ 66%]
+tests\test_data_analysis.py .......FFF..F.....FF.                        [100%]
+
+================================== FAILURES ===================================
+E   TypeError: 'Result' object is not subscriptable
+----------------------------- Captured log setup ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: �ڴ� > 80% (��ǰ:83.2, ��ֵ:80)
+D:\AUTO-EVO-AI-V0.1\tests\test_system_monitor.py:71: TypeError: 'Result' object is not subscriptable
+E   TypeError: 'Result' object is not subscriptable
+----------------------------- Captured log setup ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: �ڴ� > 80% (��ǰ:83.2, ��ֵ:80)
+D:\AUTO-EVO-AI-V0.1\tests\test_system_monitor.py:75: TypeError: 'Result' object is not subscriptable
+E   assert True is False
+     +  where True = <SystemMonitorModule id= status=uninitialized uptime=0s>._collecting
+----------------------------- Captured log setup ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: �ڴ� > 80% (��ǰ:83.2, ��ֵ:80)
+D:\AUTO-EVO-AI-V0.1\tests\test_system_monitor.py:79: assert True is False
+E   AssertionError: assert 68 == 0
+     +  where 68 = len({'app_157601747c5c4f4db7066387b9f8d293': {'apps': ['app1'], 'attributes': {}, 'created_at': 1779857941.0603878, 'expir...d': {'apps': ['app1'], 'attributes': {}, 'created_at': 1779862893.6256828, 'expires_at': 1779891693.6256828, ...}, ...})
+     +    where {'app_157601747c5c4f4db7066387b9f8d293': {'apps': ['app1'], 'attributes': {}, 'created_at': 1779857941.0603878, 'expir...d': {'apps': ['app1'], 'attributes': {}, 'created_at': 1779862893.6256828, 'expires_at': 1779891693.6256828, ...}, ...} = <SsoAuth id=sso-auth status=running uptime=0s>._sessions
+D:\AUTO-EVO-AI-V0.1\tests\test_sso_auth.py:17: AssertionError: assert 68 == 0
+E   assert False is True
+D:\AUTO-EVO-AI-V0.1\tests\test_sso_auth.py:145: assert False is True
+E   sqlite3.OperationalError: database is locked
+------------------------------ Captured log call ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:76.0, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:87.5, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:85.7, ��ֵ:75)
+D:\AUTO-EVO-AI-V0.1\tests\..\modules\sso_auth.py:350: sqlite3.OperationalError: database is locked
+E   sqlite3.OperationalError: database is locked
+------------------------------ Captured log call ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 90% (��ǰ:94.6, ��ֵ:90)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 90% (��ǰ:96.3, ��ֵ:90)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:89.7, ��ֵ:75)
+D:\AUTO-EVO-AI-V0.1\tests\..\modules\sso_auth.py:350: sqlite3.OperationalError: database is locked
+E   sqlite3.OperationalError: database is locked
+------------------------------ Captured log call ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:83.3, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:83.3, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 90% (��ǰ:92.0, ��ֵ:90)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:92.0, ��ֵ:75)
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 90% (��ǰ:93.3, ��ֵ:90)
+D:\AUTO-EVO-AI-V0.1\tests\..\modules\sso_auth.py:350: sqlite3.OperationalError: database is locked
+E   AssertionError: assert ('token' in {'jwt': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiJhdXRvLWV2by1haSIsImlhdCI6MTc3OTg2MzIxNywiZXhwIjoxNzc5ODY2ODE3fQ.a744bffb0bcd5aa69dc5620fa2c5d824d92b7bd3dd4825f5b6a109a2d9a65e81', 'success': True, 'ttl': 3600} or None)
+     +  where None = <built-in method get of dict object at 0x000001DC3F530240>('token')
+     +    where <built-in method get of dict object at 0x000001DC3F530240> = {'jwt': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiJhdXRvLWV2by1haSIsImlhdCI6MTc3OTg2MzIxNywiZXhwIjoxNzc5ODY2ODE3fQ.a744bffb0bcd5aa69dc5620fa2c5d824d92b7bd3dd4825f5b6a109a2d9a65e81', 'success': True, 'ttl': 3600}.get
+D:\AUTO-EVO-AI-V0.1\tests\test_sso_auth.py:182: AssertionError: assert ('token' in {'jwt': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiJhdXRvLWV2by1haSIsImlhdCI6MTc3OTg2MzIxNywiZXhwIjoxNzc5ODY2ODE3fQ.a744bffb0bcd5aa69dc5620fa2c5d824d92b7bd3dd4825f5b6a109a2d9a65e81', 'success': True, 'ttl': 3600} or None)
+E   TypeError: 'Result' object is not subscriptable
+------------------------------ Captured log call ------------------------------
+WARNING  evo.system_monitor:system_monitor.py:366 �澯����: CPU > 75% (��ǰ:84.6, ��ֵ:75)
+ERROR    evo.sso-auth:enterprise_module.py:790 [sso-auth] executeʧ��: OperationalError: database is locked
+D:\AUTO-EVO-AI-V0.1\tests\test_sso_auth.py:198: TypeError: 'Result' object is not subscriptable
+E   KeyError: 'regression'
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:78: KeyError: 'regression'
+E   KeyError: 'regression'
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:88: KeyError: 'regression'
+E   AssertionError: assert 'iqr' == 'IQR'
+      
+      - IQR
+      + iqr
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:95: AssertionError: assert 'iqr' == 'IQR'
+E   KeyError: 'success'
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:118: KeyError: 'success'
+E   AssertionError: assert 'stats' in {'report': {'source': 'delegate.persistence', 'sysmon_summary': {'avg_cpu': 72.1, 'avg_memory': 79.5, 'records': 457}, 'tables_found': ['sysmon.db (direct)']}, 'success': True}
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:160: AssertionError: assert 'stats' in {'report': {'source': 'delegate.persistence', 'sysmon_summary': {'avg_cpu': 72.1, 'avg_memory': 79.5, 'records': 457}, 'tables_found': ['sysmon.db (direct)']}, 'success': True}
+E   KeyError: 'success'
+D:\AUTO-EVO-AI-V0.1\tests\test_data_analysis.py:165: KeyError: 'success'
+============================== warnings summary ===============================
+tests/test_system_monitor.py::TestSystemMonitorCore::test_shutdown
+  D:\AUTO-EVO-AI-V0.1\tests\test_system_monitor.py:78: RuntimeWarning: coroutine 'SystemMonitorModule.shutdown' was never awaited
+    sm.shutdown()
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_execute_get_metrics
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_execute_unknown
+FAILED tests/test_system_monitor.py::TestSystemMonitorCore::test_shutdown - a...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_init - AssertionError: a...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_register_user - assert F...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_authenticate - sqlite3.O...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_authenticate_wrong_password
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_get_user - sqlite3.Opera...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_generate_jwt_action - As...
+FAILED tests/test_sso_auth.py::TestSsoAuthCore::test_execute_register_user - ...
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_regression_linear
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_regression_no_variance
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_outliers_iqr
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_clustering_single_cluster
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_summarize - As...
+FAILED tests/test_data_analysis.py::TestDataAnalysisCore::test_export_csv - K...
+================== 16 failed, 47 passed, 1 warning in 40.58s ==================

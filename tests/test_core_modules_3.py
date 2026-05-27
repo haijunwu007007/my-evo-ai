@@ -86,13 +86,14 @@ class TestSystemMonitor:
         mod.initialize()
         import asyncio
         r = asyncio.run(mod.execute("status"))
-        assert r["success"] == True
+        # _safe_execute 返回 Result 对象，真实结果在 .data
+        assert r.data.get("success", False) == True
 
     def test_execute_metrics(self, mod):
         mod.initialize()
         import asyncio
         r = asyncio.run(mod.execute("get_metrics"))
-        assert r["success"] == True
+        assert r.data.get("success", False) == True
 
     def test_trend(self, mod):
         mod.initialize()
