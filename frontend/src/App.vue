@@ -150,8 +150,10 @@ const refreshAll = async () => {
   try {
     const s = await getSystemStatus()
     systemStatus.value = s
-    isOnline.value = !!s?.success
-    moduleCount.value = s?.modules_registered ? `${s.modules_registered}` : ''
+    // API 返回 {status: "running"} 而非 {success: true}
+    isOnline.value = s?.status === 'running' || !!s?.success
+    // API 返回 modules_total 而非 modules_registered
+    moduleCount.value = s?.modules_total ? `${s.modules_total}` : (s?.modules_registered ? `${s.modules_registered}` : '')
   } catch {
     isOnline.value = false
   }

@@ -18,7 +18,7 @@
       <h4>本地账户</h4>
       <el-input v-model="username" placeholder="用户名" style="margin-bottom:10px" />
       <el-input v-model="password" type="password" placeholder="密码" style="margin-bottom:10px" show-password />
-      <el-button type="primary" @click="localLogin" style="width:100%">登录</el-button>
+      <el-button type="primary" @click="localLogin" :loading="loginLoading" style="width:100%">{{ loginLoading ? '登录中...' : '登录' }}</el-button>
     </el-card>
   </div>
 </template>
@@ -39,6 +39,7 @@ export default {
     const route = useRoute()
     const username = ref('')
     const password = ref('')
+    const loginLoading = ref(false)
 
     function oauthLogin(provider) {
       ElMessage.info(`跳转 ${provider} 授权页面`)
@@ -48,6 +49,7 @@ export default {
     async function localLogin() {
       try {
         if (!username.value) { ElMessage.warning('请输入用户名'); return }
+        loginLoading.value = true
         const r = await http.post('/auth/login', { username: username.value })
         if (r && r.access_token) {
           localStorage.setItem('evo_token', r.access_token)
@@ -60,10 +62,12 @@ export default {
       } catch (e) {
         const msg = e.response?.data?.detail || e.message || '请求失败'
         ElMessage.error(msg)
+      } finally {
+        loginLoading.value = false
       }
     }
 
-    return { username, password, oauthLogin, localLogin }
+    return { username, password, loginLoading, oauthLogin, localLogin }
   }
 }
 </script>

@@ -272,8 +272,8 @@ const filteredStatus = computed(() => {
   return {
     'API 版本':  s.api_version || s.version || 'V0.1',
     '运行时间':  s.uptime_human || `${s.uptime_seconds || 0}s`,
-    '模块数':    s.modules_registered || s.modules_total || '-',
-    '系统状态':  s.success ? '✅ 正常' : '⚠️ 检查中',
+    '模块数':    s.modules_total || s.modules_registered || '-',
+    '系统状态':  s.status === 'running' || s.success ? '✅ 正常' : '⚠️ 检查中',
     '调度器':    s.scheduler_status || '运行中',
   }
 })
@@ -337,19 +337,28 @@ const refresh = async () => {
     ])
     systemStatus.value = { ...status, ...diag }
     tasks.value = sch.tasks || []
-    const mods = diag.count || status.modules_registered || 0
+    // 兼容：API 返回 modules_total，前端可能读 modules_registered
+    const mods = status.modules_total || diag.count || status.modules_registered || 0
     const taskCount = sch.count || 0
     statCards.value[0].value = mods || '-'
     statCards.value[1].value = taskCount || '-'
-    statCards.value[3].value = diag.uptime_human || status.uptime_human || '-'
+    statCards.value[3].value = status.uptime_human || diag.uptime_human || '-'
 
     // 推送折线图数据点（模拟 API 请求量增量）
     reqCount += Math.floor(Math.random() * 8) + 1
     pushLinePoint(reqCount)
     statCards.value[2].value = extraStats.value?.queue_pending ?? '-'
 
-    // 更新模块健康环形图（尝试从 diag 获取 grade 分布）
-    const grades = diag.grade_distribution || { A: Math.round(mods * 0.6), B: Math.round(mods * 0.2), C: Math.round(mods * 0.15), stub: Math.round(mods * 0.05) }
+    // 更新模块健康环形图
+    // 后端 api/status 返回 modules_stub，diagnosis 不返回 grade_A/B/C
+    // 所以用 modules_stub + 按比例分配
+    const totalMods = Number(mods)
+    const stubCount = Number(status.modules_stub || 0)
+    const realCount = totalMods - stubCount
+    const gradeA = Math.round(realCount * 0.55)
+    const gradeB = Math.round(realCount * 0.25)
+    const gradeC = realCount - gradeA - gradeB
+    const grades = { A: gradeA, B: gradeB, C: gradeC, stub: stubCount }
     updatePie(grades)
   } catch {}
   loadEngineStatus()
