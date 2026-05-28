@@ -5,7 +5,7 @@
 import api from './index'
 
 function execute(name, action, params = {}) {
-  return api.post(`/modules/${name}/execute`, { action, params })
+  return api.post(`/modules/${name}/execute`, { action, params }).then(r => r.result || r)
 }
 
 // ─── System Monitor ───
@@ -26,7 +26,7 @@ export const sysmon = {
 // ─── SSO Auth ───
 export const sso = {
   status:       () => execute('sso_auth', 'status'),
-  login:        (uid, un, attrs) => execute('sso_auth', 'login', { user_id: uid, username: un, attributes: attrs }),
+  login:        (params) => execute('sso_auth', 'login', { username: params?.username || '', password: params?.password || '', user_id: params?.user_id || '' }),
   validate:     (t) => execute('sso_auth', 'validate', { token: t }),
   logout:       (t, uid) => execute('sso_auth', 'logout', { token: t, user_id: uid }),
   registerUser: (un, pw, roles) => execute('sso_auth', 'register_user', { username: un, password: pw, roles: roles || ['user'] }),

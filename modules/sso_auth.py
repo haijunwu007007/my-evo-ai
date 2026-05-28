@@ -110,8 +110,26 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     def initialize(self) -> None:
         self._init_db()
         self._restore_sessions()
+        self._seed_default_users()
         self.status = ModuleStatus.RUNNING
         logger.info("SSO初始化完成, 恢复会话: %d", len(self._sessions))
+
+    def _seed_default_users(self):
+        """创建默认 admin 用户（仅当不存在时）"""
+        try:
+            conn = sqlite3.connect(_DB_PATH, timeout=5)
+            cur = conn.execute("SELECT COUNT(*) FROM sso_users WHERE username='admin'")
+            if cur.fetchone()[0] == 0:
+                admin_hash = self._hash_password("admin123")
+                conn.execute(
+                    "INSERT INTO sso_users(user_id,username,password_hash,roles,created_at) VALUES(?,?,?,?,?)",
+                    ("admin", "admin", admin_hash, json.dumps(["admin", "user"]), time.time())
+                )
+                conn.commit()
+                logger.info("SSO: 已创建默认 admin 用户")
+            conn.close()
+        except Exception as e:
+            logger.warning("SSO: 创建默认用户失败: %s", e)
 
     def _init_db(self):
         os.makedirs(os.path.dirname(_DB_PATH), exist_ok=True)
@@ -249,14 +267,31 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         user_id = params.get("user_id", "")
         username = params.get("username", "")
         password = params.get("password", "")
-        if user_id and password:
-            auth = self._authenticate({"username": username or user_id, "password": password})
+        # 优先用 username+password 做认证
+        if username and password:
+            auth = self._authenticate({"username": username, "password": password})
             if not auth.get("success"):
                 return auth
             user_id = auth["user_id"]
-        if not user_id:
-            user_id = f"user_{hashlib.md5(username.encode()).hexdigest()[:8]}"
-        attributes = params.get("attributes", {"username": username or user_id, "roles": ["user"]})
+            username = auth.get("username", username)
+        elif user_id and password:
+            auth = self._authenticate({"username": user_id, "password": password})
+            if not auth.get("success"):
+                return auth
+            user_id = auth["user_id"]
+        else:
+            return {"success": False, "error": "请输入用户名和密码"}
+        roles = ["user"]
+        try:
+            conn = sqlite3.connect(_DB_PATH, timeout=5)
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute("SELECT roles FROM sso_users WHERE user_id=?", (user_id,))
+            row = cur.fetchone()
+            conn.close()
+            if row:
+                roles = json.loads(row["roles"] or '["user"]')
+        except: pass
+        attributes = params.get("attributes", {"username": username or user_id, "roles": roles})
         now = time.time()
         session_token = f"sso_{uuid.uuid4().hex}"
         self._sessions[session_token] = {
@@ -266,7 +301,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
         self._save_session(session_token, self._sessions[session_token])
         metrics_collector.counter("sso_login", labels={"user_id": user_id[:8]})
-        jwt = self._gen_jwt({"sub": user_id, "roles": attributes.get("roles", ["user"])}, self._session_ttl)
+        jwt = self._gen_jwt({"sub": user_id, "roles": roles}, self._session_ttl)
         return {"success": True, "session_token": session_token, "user_id": user_id,
                 "jwt": jwt, "expires_in": self._session_ttl}
 

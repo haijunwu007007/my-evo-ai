@@ -27,7 +27,10 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import api from '../api/modules'
+import axios from 'axios'
+
+const http = axios.create({ baseURL: '/api', timeout: 15000, headers: { 'Content-Type': 'application/json' } })
+http.interceptors.response.use(r => r.data, e => { throw e })
 
 export default {
   name: 'LoginView',
@@ -44,17 +47,19 @@ export default {
 
     async function localLogin() {
       try {
-        const r = await api.sso.login({ username: username.value, password: password.value })
-        if (r && r.success) {
-          localStorage.setItem('evo_token', r.session_token || r.token || '')
+        if (!username.value) { ElMessage.warning('请输入用户名'); return }
+        const r = await http.post('/auth/login', { username: username.value })
+        if (r && r.access_token) {
+          localStorage.setItem('evo_token', r.access_token)
           ElMessage.success('登录成功')
           const redirect = route.query.redirect || '/dashboard'
-          router.push(redirect)
+          setTimeout(() => router.push(redirect), 100)
         } else {
-          ElMessage.error(r?.error || '登录失败')
+          ElMessage.error(r?.detail || '登录失败')
         }
       } catch (e) {
-        ElMessage.error('请求失败')
+        const msg = e.response?.data?.detail || e.message || '请求失败'
+        ElMessage.error(msg)
       }
     }
 
