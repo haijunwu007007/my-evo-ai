@@ -65,12 +65,8 @@ class SystemCoordinatorV3Analyzer(object):
 
     def __init__(self):
         super().__init__()
-        EnterpriseModule.__init__(self)
-        CircuitBreakerMixin.__init__(self)
-        RateLimiterMixin.__init__(self)
         self.name = "system_coordinator_v3"
         self.version = "1.0.0"
-        self._analyzer = SystemCoordinatorV3Analyzer()
         self._history = []
         self._max_history = 10000
 
@@ -3180,32 +3176,6 @@ class SystemCoordinatorV3(EnterpriseModule):
         loaded = 0
         skipped = 0
         base_dir = Path(__file__).parent.parent
-
-        # 加载 extended_daemon_modules.py
-        ext_daemon_path = base_dir / "core" / "extended_daemon_modules.py"
-        if ext_daemon_path.exists():
-            try:
-                spec = importlib.util.spec_from_file_location("_ext_daemon", str(ext_daemon_path))
-                ext_mod = importlib.util.module_from_spec(spec)
-                sys.modules["_ext_daemon"] = ext_mod
-                spec.loader.exec_module(ext_mod)
-
-                if hasattr(ext_mod, "EXTENDED_DAEMON_MODULES"):
-                    for module_id, module_class in ext_mod.EXTENDED_DAEMON_MODULES.items():
-                        if module_id in self.modules or module_id in self._module_instances:
-                            skipped += 1
-                            continue
-                        try:
-                            pass
-                            # 懒加载：只注册类，不立即实例化
-                            self._module_instances[module_id] = None  # 占位，首次调用时实例化
-                            self._ext_module_classes[module_id] = module_class
-                            self._module_health[module_id] = "healthy"
-                            loaded += 1
-                        except Exception as e:
-                            logger.debug(f"[ExtModule] {module_id} 注册失败: {e}")
-            except Exception as e:
-                logger.warning(f"[ExtModule] extended_daemon_modules 加载失败: {e}")
 
         # 加载 extension_modules.py
         ext_path = base_dir / "core" / "extension_modules.py"
