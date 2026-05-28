@@ -131,7 +131,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getModulesCategories, rescanModules } from '@/api'
+import { rescanModules } from '@/api'
+import api from '@/api'
 
 const cats = ref({})
 const search = ref('')
@@ -141,6 +142,7 @@ const viewMode = ref('card')
 const rescanning = ref(false)
 const drawerVisible = ref(false)
 const selectedMod = ref(null)
+const allModules = ref([])
 
 const allCats = computed(() => Object.keys(cats.value))
 
@@ -189,9 +191,10 @@ const flatModules = computed(() => {
 })
 
 const stats = computed(() => {
-  const total = flatModules.value.length
-  const A = flatModules.value.filter(m => (m.grade || '').toUpperCase() === 'A').length
-  const real = flatModules.value.filter(m => m.real_logic).length
+  const total = allModules.value.length
+  const A = allModules.value.filter(m => (m.grade || '').toUpperCase() === 'A').length
+  // API 返回 is_real，前端兼容两种字段名
+  const real = allModules.value.filter(m => m.is_real === true || m.real_logic === true).length
   const grps = Object.keys(cats.value).length
   return [
     { label: '总模块', val: total, color: '#6366f1' },
@@ -208,9 +211,21 @@ const selectModule = (m) => {
 
 const load = async () => {
   try {
-    const r = await getModulesCategories()
-    cats.value = r.categories || {}
-  } catch {}
+    // 从 /api/modules/list 获取全部模块（limit=500 不打分页）
+    const r = await api.get('/modules/list', { params: { limit: 500, offset: 0 } })
+    const mods = r.modules || []
+    allModules.value = mods
+    // 按 category 分组
+    const grouped = {}
+    for (const m of mods) {
+      const cat = m.category || '其他'
+      if (!grouped[cat]) grouped[cat] = []
+      grouped[cat].push(m)
+    }
+    cats.value = grouped
+  } catch (e) {
+    console.error('加载模块失败', e)
+  }
 }
 
 const rescan = async () => {

@@ -52,6 +52,24 @@ def _scan_modules() -> list[dict[str, Any]]:
         has_execute = "async def execute" in content or "def execute" in content
         has_class = "class module_class" in content or "class Module" in content
 
+        # 提取 grade（从 __module_meta__ 或文件注释）
+        grade_match = re.search(r'['"'"']grade['"'"']\s*:\s*['"'"'](\w)['"'"']', content)
+        grade = grade_match.group(1).upper() if grade_match else 'C'
+
+        # 提取 category（从文件名前缀或 __module_meta__）
+        meta_cat = re.search(r'['"'"']category['"'"']\s*:\s*['"'"']([\w_]+)['"'"']', content)
+        if meta_cat:
+            category = meta_cat.group(1)
+        else:
+            # fallback: 按文件名前缀分类
+            parts = f.name[:-3].split('_')
+            category = parts[0].upper() if len(parts) > 1 else f.name[:-3][:10].upper()
+
+        module_size = len(content)
+
+        # 判断是否真实逻辑（>2KB 或有 execute 方法）
+        real_logic = module_size > 2048 or has_execute
+
         # 提取 actions
         actions = []
         for pattern in [
@@ -60,8 +78,6 @@ def _scan_modules() -> list[dict[str, Any]]:
             r'"(\w+)"\s*,\s*#.*action',
         ]:
             actions.extend(re.findall(pattern, content))
-
-        module_size = len(content)
         modules.append(
             {
                 "name": f.name[:-3],
@@ -70,6 +86,9 @@ def _scan_modules() -> list[dict[str, Any]]:
                 "lines": len(lines),
                 "has_class": has_class,
                 "has_execute": has_execute,
+                "grade": grade,
+                "category": category,
+                "real_logic": real_logic,
                 "docstring": docstring[:200] if docstring else "",
                 "actions": sorted(set(actions))[:20],
             }
