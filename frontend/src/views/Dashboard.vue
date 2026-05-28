@@ -20,7 +20,7 @@
       <!-- 左列：图表 + 协调中心 -->
       <el-col :xs="24" :sm="15">
         <!-- 请求量折线图 -->
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel panel-accent-indigo" style="margin-bottom:16px">
           <div class="panel-header">
             <span class="panel-title">📈 实时请求趋势</span>
             <div class="header-actions">
@@ -32,7 +32,7 @@
         </div>
 
         <!-- 协调中心 -->
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel panel-accent-purple" style="margin-bottom:16px">
           <div class="panel-header">
             <span class="panel-title">🧠 协调中心</span>
             <el-button text type="primary" size="small" @click="$router.push('/coordinator')">进入 →</el-button>
@@ -64,7 +64,7 @@
         </div>
 
         <!-- 引擎状态网格 -->
-        <div class="panel">
+        <div class="panel panel-accent-emerald">
           <div class="panel-header">
             <span class="panel-title">⚙️ 引擎状态</span>
             <el-button text size="small" @click="loadEngineStatus">刷新</el-button>
@@ -88,7 +88,7 @@
       <!-- 右列：模块健康、系统状态、任务、告警 -->
       <el-col :xs="24" :sm="9">
         <!-- 模块健康环形图 -->
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel panel-accent-rose" style="margin-bottom:16px">
           <div class="panel-header">
             <span class="panel-title">🔬 模块健康分布</span>
           </div>
@@ -103,7 +103,7 @@
         </div>
 
         <!-- 系统状态 -->
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel panel-accent-amber" style="margin-bottom:16px">
           <div class="panel-header">
             <span class="panel-title">⚡ 系统状态</span>
             <el-button text size="small" @click="refresh">刷新</el-button>
@@ -118,7 +118,7 @@
         </div>
 
         <!-- 活跃任务 -->
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel panel-accent-cyan" style="margin-bottom:16px">
           <div class="panel-header">
             <span class="panel-title">📋 活跃任务</span>
             <el-button text size="small" @click="$router.push('/scheduler')">管理 →</el-button>
@@ -136,7 +136,7 @@
         </div>
 
         <!-- 队列/管线/事件统计 -->
-        <div class="panel">
+        <div class="panel panel-accent-orange">
           <div class="panel-header">
             <span class="panel-title">📊 基础设施指标</span>
           </div>
@@ -391,8 +391,8 @@ const onResize = () => { lineChart?.resize(); pieChart?.resize() }
 /* ── 指标卡片 ─────────────────────────────────────── */
 .stat-row { margin-bottom: 0; }
 .stat-card {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 1px solid #2d2d44;
+  background: linear-gradient(135deg, var(--bg-card) 0%, color-mix(in srgb, var(--bg-card) 80%, #000) 100%);
+  border: 1px solid var(--border-subtle);
   border-top: 3px solid var(--accent, #6366f1);
   border-radius: 12px;
   padding: 16px;
@@ -402,20 +402,23 @@ const onResize = () => { lineChart?.resize(); pieChart?.resize() }
   transition: transform 0.2s, box-shadow 0.2s;
   margin-bottom: 16px;
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+[data-theme="light"] .stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
 .stat-icon { font-size: 24px; opacity: 0.85; }
 .stat-body { flex: 1; }
 .stat-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
-.stat-label { font-size: 12px; color: #7b8fa1; margin-top: 2px; }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .stat-trend { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
 .stat-trend.up { color: #10b981; background: rgba(16,185,129,0.12); }
 .stat-trend.down { color: #ef4444; background: rgba(239,68,68,0.12); }
-.stat-trend.flat { color: #7b8fa1; background: rgba(123,143,161,0.12); }
+.stat-trend.flat { color: var(--text-muted); background: rgba(123,143,161,0.12); }
 
 /* ── 面板 ─────────────────────────────────────────── */
 .panel {
-  background: #1a1a2e;
-  border: 1px solid #2d2d44;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -424,10 +427,10 @@ const onResize = () => { lineChart?.resize(); pieChart?.resize() }
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #2d2d44;
+  border-bottom: 1px solid var(--border-subtle);
   background: rgba(99,102,241,0.04);
 }
-.panel-title { font-size: 13px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.3px; }
+.panel-title { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.3px; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
 
 /* ── 折线图 ───────────────────────────────────────── */
@@ -438,30 +441,30 @@ const onResize = () => { lineChart?.resize(); pieChart?.resize() }
 .grade-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 16px 14px; }
 .grade-item { display: flex; align-items: center; gap: 6px; }
 .grade-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.grade-name { font-size: 12px; color: #a0aec0; flex: 1; }
-.grade-val { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+.grade-name { font-size: 12px; color: var(--text-muted); flex: 1; }
+.grade-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 
 /* ── 协调中心 ─────────────────────────────────────── */
 .coordinator-box { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 .task-input :deep(.el-textarea__inner) {
-  background: #0f0f1a;
-  border-color: #2d2d44;
-  color: #e2e8f0;
+  background: var(--bg-sidebar);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
   font-size: 13px;
   resize: none;
 }
 .task-input :deep(.el-textarea__inner):focus { border-color: #6366f1; }
 .submit-btn { width: 100%; font-weight: 600; }
 .task-result {
-  background: #0d0d1a;
-  border: 1px solid #2d2d44;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 10px 12px;
   max-height: 180px;
   overflow: auto;
 }
 .task-result-header { display: flex; align-items: center; margin-bottom: 6px; }
-.task-result pre { font-size: 11px; color: #7b8fa1; white-space: pre-wrap; word-break: break-all; margin: 0; }
+.task-result pre { font-size: 11px; color: var(--text-muted); white-space: pre-wrap; word-break: break-all; margin: 0; }
 
 /* ── 引擎状态 ─────────────────────────────────────── */
 .engine-grid { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
@@ -470,40 +473,60 @@ const onResize = () => { lineChart?.resize(); pieChart?.resize() }
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  background: #0f0f1a;
+  background: var(--bg-sidebar);
   border-radius: 8px;
-  border: 1px solid #1f1f33;
+  border: 1px solid var(--border-color);
 }
 .engine-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .engine-dot.active { background: #10b981; box-shadow: 0 0 6px #10b981; }
 .engine-dot.inactive { background: #ef4444; }
 .engine-info { flex: 1; }
-.engine-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-.engine-detail { font-size: 11px; color: #4a5568; margin-top: 1px; }
+.engine-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.engine-detail { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
 
 /* ── 系统状态 ─────────────────────────────────────── */
 .status-list { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
-.status-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1f1f33; font-size: 13px; }
+.status-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
 .status-item:last-child { border-bottom: none; }
-.status-key { color: #7b8fa1; }
-.status-val { color: #e2e8f0; font-weight: 500; }
+.status-key { color: var(--text-muted); }
+.status-val { color: var(--text-primary); font-weight: 500; }
 
 /* ── 任务列表 ─────────────────────────────────────── */
 .task-list { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
-.task-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1f1f33; font-size: 13px; }
+.task-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
 .task-item:last-child { border-bottom: none; }
 .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .task-dot.running { background: #10b981; box-shadow: 0 0 4px #10b981; }
 .task-dot.failed { background: #ef4444; }
 .task-dot.pending { background: #f59e0b; }
-.task-dot.completed { background: #4a5568; }
-.task-name { flex: 1; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-dot.completed { background: var(--text-dim); }
+.task-name { flex: 1; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── 基础设施指标 ─────────────────────────────────── */
 .infra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px 14px; }
-.infra-item { background: #0f0f1a; border: 1px solid #1f1f33; border-radius: 8px; padding: 10px; text-align: center; }
+.infra-item { background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; }
 .infra-value { font-size: 22px; font-weight: 700; }
-.infra-label { font-size: 11px; color: #7b8fa1; margin-top: 2px; }
+.infra-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── 面板主题色 ─────────────────────────────────── */
+.panel-accent-indigo { border-top: 3px solid #6366f1; }
+.panel-accent-indigo .panel-header { background: linear-gradient(90deg, rgba(99,102,241,0.08) 0%, transparent 100%); }
+.panel-accent-purple { border-top: 3px solid #8b5cf6; }
+.panel-accent-purple .panel-header { background: linear-gradient(90deg, rgba(139,92,246,0.08) 0%, transparent 100%); }
+.panel-accent-emerald { border-top: 3px solid #10b981; }
+.panel-accent-emerald .panel-header { background: linear-gradient(90deg, rgba(16,185,129,0.08) 0%, transparent 100%); }
+.panel-accent-rose { border-top: 3px solid #f43f5e; }
+.panel-accent-rose .panel-header { background: linear-gradient(90deg, rgba(244,63,94,0.08) 0%, transparent 100%); }
+.panel-accent-amber { border-top: 3px solid #f59e0b; }
+.panel-accent-amber .panel-header { background: linear-gradient(90deg, rgba(245,158,11,0.08) 0%, transparent 100%); }
+.panel-accent-cyan { border-top: 3px solid #06b6d4; }
+.panel-accent-cyan .panel-header { background: linear-gradient(90deg, rgba(6,182,212,0.08) 0%, transparent 100%); }
+.panel-accent-orange { border-top: 3px solid #f97316; }
+.panel-accent-orange .panel-header { background: linear-gradient(90deg, rgba(249,115,22,0.08) 0%, transparent 100%); }
+
+/* ── 面板阴影增强 ───────────────────────────────── */
+.panel { transition: transform 0.2s, box-shadow 0.2s; }
+.panel:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
 
 /* ── 动画 ─────────────────────────────────────────── */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
