@@ -246,8 +246,13 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             else:
                 self.warning("SMTP连接测试失败，将使用队列模式")
 
-        self._bg_sender = asyncio.create_task(self._send_loop())
-        self._bg_checker = asyncio.create_task(self._check_loop())
+        try:
+            self._bg_sender = asyncio.create_task(self._send_loop())
+            self._bg_checker = asyncio.create_task(self._check_loop())
+        except RuntimeError:
+            self._bg_sender = None
+            self._bg_checker = None
+            self.warning("无运行中的事件循环，跳过后台任务创建")
         self.status = ModuleStatus.RUNNING
         self.stats.start_time = datetime.now()
         self.audit("initialize", f"smtp={self.email_config.smtp_host or '未配置'}")

@@ -287,6 +287,12 @@ class TestEmailAutomation(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        import asyncio
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         from modules.email_automation import EmailAutomation
         cls.email = EmailAutomation({
             "email": {
