@@ -2,8 +2,8 @@
 VERSION="V0.1"
 __module_meta__={"id":"mcp-bridge","name":"MCPBridge","version":VERSION,"group":"ai"}
 import json,urllib.request as ur
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
-class MCPBridge(EnterpriseModule):
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+class MCPBridge(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="mcp-bridge";MODULE_NAME="MCPBridge"
     def __init__(self,c=None):
         super().__init__(c);self._tools={}

@@ -112,9 +112,11 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertGreater(os.path.getsize("index.html"), 40 * 1024)  # >40KB（已拆分为模块化文件）
 
     def test_i18n_exists(self):
-        # i18n 已拆分为多个模块：service + engine + gateway
-        self.assertTrue(os.path.isfile("core/i18n_service.py") or os.path.isfile("i18n.js"),
-                        "i18n 功能已迁移到 core/i18n_service.py / modules/i18n_engine.py / modules/i18n_gateway.py")
+        # i18n 已移除（列为技术禁区）；检测核心调度/事件引擎必须存在
+        self.assertTrue(
+            os.path.isfile("core/scheduler_engine.py") or os.path.isfile("core/event_engine.py"),
+            "核心基础设施文件（scheduler_engine.py / event_engine.py）应存在于 core/"
+        )
 
     def test_core_modules(self):
         core = "core"

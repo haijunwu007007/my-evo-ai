@@ -2,7 +2,7 @@
 VERSION = "V0.1"
 __module_meta__ = {"id": "crewai", "name": "CrewAI", "version": VERSION, "group": "ai"}
 
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
 
 class CrewAIResult(dict):
     def __init__(self, success, data=None, error=None):
@@ -27,7 +27,7 @@ class TaskConfig:
         self.async_execution = async_execution
         self.context = context or []
 
-class CrewModule(EnterpriseModule):
+class CrewModule(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "crewai"; MODULE_NAME = "CrewAI"
 
     def __init__(self, config=None):

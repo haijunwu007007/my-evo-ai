@@ -29,7 +29,7 @@ try:
 except ImportError:
     HAS_BS4 = False
 
-from modules._base.enterprise_module import EnterpriseModule
+from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin
 from modules._base.metrics import metrics_collector
 
 logger = logging.getLogger("evo.web_scraper")
@@ -45,7 +45,7 @@ class ScrapeRule:
         self.name = name; self.selector = selector
         self.attribute = attribute; self.multiple = multiple
 
-class WebScraperModule(EnterpriseModule):
+class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "web-scraper"; MODULE_NAME = "Web Scraper"; VERSION = "V0.1"
 
     def __init__(self):

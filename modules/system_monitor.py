@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from collections import deque
 
-from modules._base.enterprise_module import EnterpriseModule
+from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin
 from modules._base.metrics import metrics_collector
 
 logger = logging.getLogger("evo.system_monitor")
@@ -181,7 +181,7 @@ class ResourceTrendAnalyzer:
         return anomalies
 
 
-class SystemMonitorModule(EnterpriseModule):
+class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
     """系统监控模块 - psutil采集 + SQLite持久化 + 告警通知 + Prometheus推送"""
 
     def __init__(self):

@@ -4,7 +4,7 @@ Grade: A (生产级) | Category: 安全
 职责：使用 cryptography.fernet 提供真实数据加密/解密
 """
 
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Result
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Result, CircuitBreakerMixin
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -36,7 +36,7 @@ __module_meta__ = {
 module_class = None
 
 
-class StorageEncryptionModule(EnterpriseModule):
+class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
     """存储加密模块——使用 cryptography.fernet 提供真实 AES 加密"""
 
     def __init__(self, config: Optional[Dict] = None):

@@ -7,8 +7,8 @@ def test_agent_planner_async_dispatch():
     """bug-3: agent_planner 不能有协程未等待"""
     from modules.agent_planner import AgentPlanner
     p = AgentPlanner()
-    from modules._base.enterprise_module import ExecutionStep
-    step = ExecutionStep(module_name="githubtrending", action="trending", params={"language":"python"})
+    from modules._base.planner_types import ExecutionStep
+    step = ExecutionStep(step_id=1, module_name="githubtrending", action="trending", params={"language":"python"})
     try:
         import asyncio
         r = asyncio.run(p._call_module_execute(None, step))

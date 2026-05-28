@@ -2,9 +2,9 @@
 VERSION = "V0.1"
 __module_meta__ = {"id": "auto-decision", "name": "DecisionEngine", "version": VERSION, "group": "ai"}
 import json, uuid, urllib.request as ur
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
 
-class DecisionEngine(EnterpriseModule):
+class DecisionEngine(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "auto-decision"; MODULE_NAME = "DecisionEngine"
     def __init__(self, c=None):
         super().__init__(c); self._decisions = {}

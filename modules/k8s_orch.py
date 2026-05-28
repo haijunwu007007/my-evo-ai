@@ -434,7 +434,8 @@ class K8sOrchestrator:
         self._create_namespace("production")
 
     def _generate_uid(self) -> str:
-        return hashlib.sha256(f"{time.time()}{(int(tmod.time()*1000000)%1000000/1000000)}".encode()).hexdigest()[:16]
+        import os
+        return hashlib.sha256(f"{time.time()}{os.getpid()}{id(self)}".encode()).hexdigest()[:16]
 
     def _record_event(
         self, event_type: str, resource_type: str, resource_name: str, namespace: str, message: str, reason: str = ""
@@ -758,15 +759,6 @@ class K8sOrchestrator:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-def _parse_selector(s: str) -> dict:
-    """Parse label selector like 'app=nginx,env=prod'."""
-    result = {}
-    for part in s.split(","):
-        if "=" in part:
-            k, v = part.strip().split("=", 1)
-            result[k.strip()] = v.strip()
-    return result
-
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}
         self.trace("k8s_orch.execute", "start", action=action)
@@ -793,7 +785,7 @@ def _parse_selector(s: str) -> dict:
         return {"success": True, "module": "k8s_orch"}
 
     def health_check(self) -> dict:
-        return {"status": "healthy", "module": "k8s_orch", "version": getattr(self, "version", "1.0.0")}
+        return {"healthy": True, "status": "healthy", "module": "k8s_orch", "version": getattr(self, "version", "V0.1")}
 
     def initialize(self) -> dict:
         self.trace("k8s_orch.initialize", "start")
@@ -801,5 +793,15 @@ def _parse_selector(s: str) -> dict:
         self.audit("初始化k8s_orch", level="info")
         self.trace("k8s_orch.initialize", "end")
         return {"success": True, "module": "k8s_orch"}
+
+
+def _parse_selector(s: str) -> dict:
+    """Parse label selector like 'app=nginx,env=prod'."""
+    result = {}
+    for part in s.split(","):
+        if "=" in part:
+            k, v = part.strip().split("=", 1)
+            result[k.strip()] = v.strip()
+    return result
 
 module_class = K8sOrchestrator

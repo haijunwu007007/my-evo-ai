@@ -9,6 +9,16 @@ from modules._base.planner_registry import ModuleRegistry
 from modules._base.planner_intent import IntentParser
 from modules._base.metrics import prometheus_timer, metrics_collector
 
+__module_meta__ = {
+    "id": "agent-planner",
+    "name": "Agent Planner",
+    "version": "V0.1",
+    "group": "agent",
+    "description": "智能任务规划引擎：意图解析、模块调度、多步执行计划生成",
+    "grade": "A",
+    "real_logic": True,
+}
+
 try:
     from core.auth_provider import check_role
 except ImportError:

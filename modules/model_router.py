@@ -2,8 +2,8 @@
 VERSION="V0.1"
 __module_meta__={"id":"model-router","name":"ModelRouter","version":VERSION,"group":"ai"}
 import json,urllib.request as ur
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
-class ModelRouter(EnterpriseModule):
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+class ModelRouter(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="model-router";MODULE_NAME="ModelRouter"
     def __init__(self,c=None):
         super().__init__(c);self._routes={};self._url=self.config.get("llm_url","http://127.0.0.1:8765/api/llm/chat")

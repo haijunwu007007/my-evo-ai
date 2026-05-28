@@ -2,8 +2,8 @@
 VERSION="V0.1"
 __module_meta__={"id":"hermes-connector","name":"HermesConnector","version":VERSION,"group":"ai"}
 import json,urllib.request as ur
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
-class HermesConnector(EnterpriseModule):
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+class HermesConnector(EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="hermes-connector";MODULE_NAME="HermesConnector"
     def __init__(self,c=None):
         super().__init__(c);self._connections={}
