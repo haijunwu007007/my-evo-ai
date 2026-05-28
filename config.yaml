@@ -85,7 +85,7 @@
   is_secret: false
   key: items/ollama_base_url
   label: items/ollama_base_url
-  updated_at: '2026-05-26T13:18:08.857086'
+  updated_at: '2026-05-26T23:26:27.473313'
   updated_by: api
   validation_pattern: ''
   value: http://127.0.0.1:11434

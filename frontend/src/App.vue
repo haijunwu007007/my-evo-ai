@@ -5,7 +5,7 @@
       <!-- Logo -->
       <div class="logo" @click="router.push('/dashboard')">
         <div class="logo-icon">
-          <el-icon :size="22" color="#6366f1"><Cpu /></el-icon>
+          <el-icon :size="22" color="white"><Cpu /></el-icon>
         </div>
         <transition name="logo-fade">
           <div v-show="!collapsed" class="logo-texts">
@@ -26,11 +26,10 @@
       <el-menu
         :default-active="route.path"
         :collapse="collapsed"
-        background-color="transparent"
-        text-color="#7b8fa1"
-        active-text-color="#6366f1"
         router
         class="nav-menu"
+        text-color="#7b8fa1"
+        active-text-color="#818cf8"
       >
         <el-menu-item-group v-if="!collapsed" title="核心功能">
           <el-menu-item v-for="item in coreMenu" :key="item.path" :index="item.path" class="nav-item">
@@ -230,6 +229,18 @@ html, body, #app { height: 100%; }
   flex-direction: column;
   transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
   overflow: hidden;
+  position: relative;
+}
+/* 侧边栏左侧紫色装饰条 */
+.app-aside::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 40%, #a855f7 70%, #6366f1 100%);
+  opacity: 0.6;
 }
 
 .logo {
@@ -240,68 +251,112 @@ html, body, #app { height: 100%; }
   padding: 0 14px;
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, transparent 60%);
   flex-shrink: 0;
 }
 .logo-icon {
   width: 36px;
   height: 36px;
-  background: rgba(99,102,241,0.15);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
 }
+.logo-icon .el-icon { color: #fff !important; }
 .logo-texts { display: flex; flex-direction: column; }
 .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; letter-spacing: 0.5px; }
+<<<<<<< HEAD
 .logo-sub { font-size: 10px; color: #6366f1; margin-top: 1px; }
+=======
+.logo-sub { font-size: 10px; color: #a78bfa; margin-top: 1px; font-weight: 500; }
+>>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
 .sys-pulse {
   display: flex;
   align-items: center;
   gap: 6px;
+<<<<<<< HEAD
   padding: 8px 14px;
+=======
+  padding: 10px 14px;
+>>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(99,102,241,0.03) 0%, transparent 100%);
 }
 .pulse-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.pulse-dot.online { background: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.2); animation: pulse 2s infinite; }
-.pulse-dot.offline { background: #ef4444; }
+.pulse-dot.online { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.25); animation: pulse 2s infinite; }
+.pulse-dot.offline { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(16,185,129,0.2); }
-  50% { box-shadow: 0 0 0 5px rgba(16,185,129,0.05); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(16,185,129,0.25); }
+  50% { box-shadow: 0 0 0 6px rgba(16,185,129,0.08); }
 }
+<<<<<<< HEAD
 .pulse-text { font-size: 11px; color: var(--text-muted); flex: 1; }
 .pulse-count { font-size: 10px; background: rgba(99,102,241,0.15); color: #6366f1; padding: 1px 6px; border-radius: 8px; }
+=======
+.pulse-text { font-size: 11px; color: var(--text-muted); flex: 1; font-weight: 500; }
+.pulse-count { font-size: 10px; background: rgba(99,102,241,0.15); color: #a78bfa; padding: 1px 8px; border-radius: 8px; font-weight: 600; }
+.pulse-count[data-theme="light"] { background: rgba(99,102,241,0.1); }
+>>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
-.nav-menu { border-right: none !important; flex: 1; overflow-y: auto; overflow-x: hidden; }
-.nav-menu :deep(.el-menu-item-group__title) {
+.nav-menu { border-right: none !important; flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: 4px; }
+.nav-menu .el-menu-item-group__title {
   font-size: 10px !important;
-  color: #3d3d5c !important;
-  padding: 12px 14px 4px !important;
-  letter-spacing: 1px;
+  color: #4a4a7a !important;
+  padding: 14px 14px 4px !important;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  font-weight: 700;
 }
-.nav-menu :deep(.el-menu-item) {
+[data-theme="light"] .nav-menu .el-menu-item-group__title { color: #94a3b8 !important; }
+.nav-menu .el-menu-item {
   height: 40px;
   line-height: 40px;
   margin: 1px 8px;
   border-radius: 8px;
   color: var(--text-muted);
   font-size: 13px;
+  position: relative;
 }
-.nav-menu :deep(.el-menu-item.is-active) {
-  background: rgba(99,102,241,0.12) !important;
-  color: #6366f1 !important;
+.nav-menu .el-menu-item .el-icon {
+  color: #818cf8;
+  transition: color 0.2s;
+  font-size: 16px;
+}
+.nav-menu .el-menu-item.is-active {
+  background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.05) 100%) !important;
+  color: #818cf8 !important;
   font-weight: 600;
 }
+<<<<<<< HEAD
 .nav-menu :deep(.el-menu-item:hover) { background: rgba(99,102,241,0.06) !important; color: var(--text-primary); }
+=======
+.nav-menu .el-menu-item.is-active .el-icon {
+  color: #818cf8 !important;
+}
+.nav-menu .el-menu-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  background: #818cf8;
+  border-radius: 0 2px 2px 0;
+}
+.nav-menu .el-menu-item:hover { background: rgba(99,102,241,0.08) !important; color: var(--text-primary); }
+.nav-menu .el-menu-item:hover .el-icon { color: #818cf8; }
+>>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
 .collapse-btn {
   height: 44px;
@@ -314,8 +369,10 @@ html, body, #app { height: 100%; }
   transition: all 0.2s;
   flex-shrink: 0;
   font-size: 13px;
+  gap: 4px;
+  background: linear-gradient(90deg, rgba(99,102,241,0.02) 0%, transparent 100%);
 }
-.collapse-btn:hover { color: #6366f1; background: rgba(99,102,241,0.06); }
+.collapse-btn:hover { color: #818cf8; background: rgba(99,102,241,0.08); }
 
 /* ── 顶部 Header ───────────────────────────────────── */
 .app-header {
