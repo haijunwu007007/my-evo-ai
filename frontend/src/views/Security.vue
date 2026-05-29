@@ -16,7 +16,7 @@
     </el-row>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAuthStatus, getSecurityStatus } from '@/api'
 const auth = ref({}); const sec = ref({})

@@ -30,7 +30,7 @@
     </el-dialog>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getEventsStats, getEventsRules, createEventRule, deleteEventRule } from '@/api'
 const stats = ref([{key:'total',label:'总事件',val:0,color:'#6366f1'},{key:'rules',label:'规则数',val:0,color:'#10b981'},{key:'hour',label:'最近1小时',val:0,color:'#f59e0b'}])

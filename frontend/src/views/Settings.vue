@@ -24,7 +24,7 @@
     </el-row>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getConfigEntries, deleteConfig, reloadConfig, getSystemMetrics, getDiagnosis } from '@/api'
 const entries = ref([])

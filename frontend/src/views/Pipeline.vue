@@ -26,7 +26,7 @@
     </el-dialog>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getPipelines, createPipeline, executePipeline, deletePipeline } from '@/api'
 const pipelines = ref([]); const showCreate = ref(false)

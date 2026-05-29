@@ -153,7 +153,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { getSystemStatus, getSchedulerTasks, getSchedulerStatus, executeTask, getDiagnosis, getQueueStats, getPipelines, getEventsStats } from '@/api'
 import * as echarts from 'echarts/core'

@@ -33,7 +33,7 @@
     </el-dialog>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getQueueStats, getQueueTasks, enqueueTask, cancelTask, retryTask } from '@/api'
 const stats = ref({}); const tasks = ref([])

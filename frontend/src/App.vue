@@ -110,7 +110,7 @@
   </el-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getSystemStatus } from '@/api'
@@ -118,12 +118,12 @@ import { getSystemStatus } from '@/api'
 const router = useRouter()
 const route = useRoute()
 const collapsed = ref(false)
-const systemStatus = ref(null)
+const systemStatus = ref<Record<string,any>|null>(null)
 const isOnline = ref(false)
 const moduleCount = ref('')
 const refreshing = ref(false)
 const darkMode = ref(true)
-let hTimer = null
+let hTimer: ReturnType<typeof setInterval>|null = null
 
 // ── 亮暗主题切换 ────────────────────────────────────
 const toggleTheme = () => {
@@ -268,21 +268,13 @@ html, body, #app { height: 100%; }
 .logo-icon .el-icon { color: #fff !important; }
 .logo-texts { display: flex; flex-direction: column; }
 .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; letter-spacing: 0.5px; }
-<<<<<<< HEAD
-.logo-sub { font-size: 10px; color: #6366f1; margin-top: 1px; }
-=======
 .logo-sub { font-size: 10px; color: #a78bfa; margin-top: 1px; font-weight: 500; }
->>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
 .sys-pulse {
   display: flex;
   align-items: center;
   gap: 6px;
-<<<<<<< HEAD
-  padding: 8px 14px;
-=======
   padding: 10px 14px;
->>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
   background: linear-gradient(90deg, rgba(99,102,241,0.03) 0%, transparent 100%);
@@ -299,14 +291,9 @@ html, body, #app { height: 100%; }
   0%, 100% { box-shadow: 0 0 0 3px rgba(16,185,129,0.25); }
   50% { box-shadow: 0 0 0 6px rgba(16,185,129,0.08); }
 }
-<<<<<<< HEAD
-.pulse-text { font-size: 11px; color: var(--text-muted); flex: 1; }
-.pulse-count { font-size: 10px; background: rgba(99,102,241,0.15); color: #6366f1; padding: 1px 6px; border-radius: 8px; }
-=======
 .pulse-text { font-size: 11px; color: var(--text-muted); flex: 1; font-weight: 500; }
 .pulse-count { font-size: 10px; background: rgba(99,102,241,0.15); color: #a78bfa; padding: 1px 8px; border-radius: 8px; font-weight: 600; }
 .pulse-count[data-theme="light"] { background: rgba(99,102,241,0.1); }
->>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
 .nav-menu { border-right: none !important; flex: 1; overflow-y: auto; overflow-x: hidden; padding-top: 4px; }
 .nav-menu .el-menu-item-group__title {
@@ -337,9 +324,6 @@ html, body, #app { height: 100%; }
   color: #818cf8 !important;
   font-weight: 600;
 }
-<<<<<<< HEAD
-.nav-menu :deep(.el-menu-item:hover) { background: rgba(99,102,241,0.06) !important; color: var(--text-primary); }
-=======
 .nav-menu .el-menu-item.is-active .el-icon {
   color: #818cf8 !important;
 }
@@ -356,7 +340,6 @@ html, body, #app { height: 100%; }
 }
 .nav-menu .el-menu-item:hover { background: rgba(99,102,241,0.08) !important; color: var(--text-primary); }
 .nav-menu .el-menu-item:hover .el-icon { color: #818cf8; }
->>>>>>> 1a6fbb1 (refactor: system_coordinator_v3 拆包 3951→6子模块 + Grade审计脚本 + 测试稳定化)
 
 .collapse-btn {
   height: 44px;
