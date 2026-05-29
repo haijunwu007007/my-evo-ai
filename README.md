@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 上市公司级 AI Agent 自动化平台 — 536模块 · 154 API · 4核心引擎 · 15调度任务
+> 上市公司级 AI Agent 自动化平台 — **451 模块** · **40+ API** · **4 核心引擎** · **42 测试通过**
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
@@ -14,6 +14,11 @@ pip install -r requirements.txt
 python api_server.py
 ```
 打开 http://127.0.0.1:8765/dashboard
+
+### 访问 API 文档
+- **Swagger UI**: http://127.0.0.1:8765/docs
+- **OpenAPI JSON**: http://127.0.0.1:8765/openapi.json
+- **前端 SPA**: http://127.0.0.1:5173 （需额外启动：`cd frontend && npx vite`）
 
 ### 从头开始
 ```bash

@@ -9,6 +9,7 @@ import os
 import re
 from pathlib import Path
 from typing import Any
+from api.category_map import normalize_category
 
 from fastapi import APIRouter, Query
 
@@ -53,17 +54,18 @@ def _scan_modules() -> list[dict[str, Any]]:
         has_class = "class module_class" in content or "class Module" in content
 
         # 提取 grade（从 __module_meta__ 或文件注释）
-        grade_match = re.search(r'['"'"']grade['"'"']\s*:\s*['"'"'](\w)['"'"']', content)
+        grade_match = re.search(r"""["']grade["']\s*:\s*["'](\w)["']""", content)
         grade = grade_match.group(1).upper() if grade_match else 'C'
 
         # 提取 category（从文件名前缀或 __module_meta__）
-        meta_cat = re.search(r'['"'"']category['"'"']\s*:\s*['"'"']([\w_]+)['"'"']', content)
+        meta_cat = re.search(r"""["']category["']\s*:\s*["']([\w_]+)["']""", content)
         if meta_cat:
-            category = meta_cat.group(1)
+            category = normalize_category(meta_cat.group(1))
         else:
             # fallback: 按文件名前缀分类
             parts = f.name[:-3].split('_')
-            category = parts[0].upper() if len(parts) > 1 else f.name[:-3][:10].upper()
+            raw_cat = parts[0].upper() if len(parts) > 1 else f.name[:-3][:10].upper()
+            category = normalize_category(raw_cat)
 
         module_size = len(content)
 
@@ -97,7 +99,8 @@ def _scan_modules() -> list[dict[str, Any]]:
 
 
 @router.get("/api/modules/list")
-async def modules_list(
+    """模块列表（分页/搜索/过滤）"""
+    async def modules_list(
     search: str = Query("", description="搜索关键词（名称或描述）"),
     has_execute: bool | None = Query(None, description="是否包含 execute 方法"),
     min_lines: int = Query(0, description="最小行数"),

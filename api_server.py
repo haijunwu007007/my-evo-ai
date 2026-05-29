@@ -28,6 +28,8 @@ sys.path.insert(0, str(BASE_DIR / "modules"))
 
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -87,6 +89,44 @@ frontend_static = BASE_DIR / "frontend" / "static"
 if frontend_static.exists():
     app.mount("/frontend/static", StaticFiles(directory=str(frontend_static)), name="frontend_static")
 
+
+# ═══════════════════════════════════════════════════════
+# 全局异常处理 — 统一 JSON 响应格式
+# ═══════════════════════════════════════════════════════
+
+def _error_response(status: int, error: str, message: str, detail: str = "") -> dict:
+    return {"success": False, "error": error, "message": message, "detail": detail, "status_code": status}
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=_error_response(exc.status_code, "http_error", str(exc.detail), exc.detail if isinstance(exc.detail, str) else ""),
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    tb = traceback.format_exc()
+    logger.error(f"[FATAL] {request.method} {request.url.path}: {exc}\n{tb[:2000]}")
+    return JSONResponse(
+        status_code=500,
+        content=_error_response(500, "internal_error", "服务器内部错误", str(exc)[:500]),
+    )
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=404,
+        content=_error_response(404, "not_found", f"资源不存在: {request.url.path}"),
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content=_error_response(422, "validation_error", "请求参数验证失败", str(exc.errors())[:500]),
+    )
 
 # ═══════════════════════════════════════════════════════
 # 根端点

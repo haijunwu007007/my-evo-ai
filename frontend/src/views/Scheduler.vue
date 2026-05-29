@@ -12,27 +12,32 @@
         </div>
       </template>
 
-      <el-table :data="tasks" stripe style="width:100%" v-if="tasks.length" :empty-text="'暂无调度任务'">
-        <el-table-column prop="name" label="任务名称" min-width="160" />
-        <el-table-column prop="target_id" label="目标" min-width="120" />
-        <el-table-column prop="cron" label="定时" width="120" />
-        <el-table-column prop="status" label="状态" width="90">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'running' ? 'success' : 'info'" size="small">{{ row.status }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="160" />
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="{ row }">
-            <el-button text size="small" @click="toggle(row.id)">{{ row.status === 'running' ? '暂停' : '恢复' }}</el-button>
-            <el-button text size="small" @click="trigger(row.id)">触发</el-button>
-            <el-popconfirm title="确定删除？" @confirm="remove(row.id)">
-              <template #reference><el-button text size="small" type="danger">删除</el-button></template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-empty v-else description="暂无调度任务" />
+      <el-skeleton :loading="loading" animated>
+        <template #default>
+          <el-table :data="tasks" stripe style="width:100%" v-if="tasks.length" :empty-text="'暂无调度任务'">
+            <el-table-column prop="name" label="任务名称" min-width="160" />
+            <el-table-column prop="target_id" label="目标" min-width="120" />
+            <el-table-column prop="cron" label="定时" width="120" />
+            <el-table-column prop="status" label="状态" width="90">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'running' ? 'success' : 'info'" size="small">{{ row.status }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="created_at" label="创建时间" width="160" />
+            <el-table-column label="操作" width="180" fixed="right">
+              <template #default="{ row }">
+                <el-button text size="small" @click="toggle(row.id)">{{ row.status === 'running' ? '暂停' : '恢复' }}</el-button>
+                <el-button text size="small" @click="trigger(row.id)">触发</el-button>
+                <el-popconfirm title="确定删除？" @confirm="remove(row.id)">
+                  <template #reference><el-button text size="small" type="danger">删除</el-button></template>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-else-if="!loadErr" description="暂无调度任务" />
+          <el-empty v-else description="加载失败"><template #extra><el-button size="small" @click="refresh">重试</el-button></template></el-empty>
+        </template>
+      </el-skeleton>
     </el-card>
 
     <!-- 新建任务对话框 -->
@@ -62,10 +67,14 @@ import { getSchedulerTasks, getSchedulerStatus, createSchedulerTask, toggleSched
 const tasks = ref([])
 const showCreate = ref(false)
 const form = ref({ name: '', target_type: 'module', target_id: '', cron: '' })
+const loading = ref(true)
+const loadErr = ref(false)
 
 const refresh = async () => {
+  loading.value = true; loadErr.value = false
   try { const r = await getSchedulerTasks(); tasks.value = r.tasks || [] }
-  catch {}
+  catch { loadErr.value = true }
+  finally { loading.value = false }
 }
 
 const toggle = async (id) => { await toggleSchedulerTask(id); refresh() }

@@ -22,23 +22,27 @@ router = APIRouter()
 
 # ─── 内网穿透 ──────────────────────────────────────
 @router.get("/api/tunnel/status")
-async def tunnel_status():
+    """Tunnel Status - GET /api/tunnel/status"""
+    async def tunnel_status():
     return {"success": True, "tunnel_enabled": False, "public_url": None}
 
 @router.post("/api/tunnel/register")
-async def tunnel_register(body: dict = None):
+    """Tunnel Register - POST /api/tunnel/register"""
+    async def tunnel_register(body: dict = None):
     global _TUNNEL_URL
     if body and "url" in body:
         _TUNNEL_URL = body["url"]
     return {"success": True, "url": _TUNNEL_URL}
 
 @router.get("/api/tunnel/url")
-async def tunnel_url():
+    """Tunnel Url - GET /api/tunnel/url"""
+    async def tunnel_url():
     return {"success": True, "url": _TUNNEL_URL, "has_tunnel": bool(_TUNNEL_URL)}
 
 # ─── 局域网 & 二维码 ──────────────────────────────
 @router.get("/api/local-url")
-async def local_url():
+    """Local Url - GET /api/local-url"""
+    async def local_url():
     return {
         "url": f"http://{_LAN_IP}:8765",
         "dashboard": f"http://{_LAN_IP}:8765/dashboard",
@@ -262,11 +266,13 @@ async def serve_js(file_path: str):
 
 # ─── 协调中心 ─────────────────────────────────────
 @router.get("/api/coordinator/status")
-async def coordinator_status():
+    """协调器状态"""
+    async def coordinator_status():
     t = len(registry.modules) if hasattr(registry, 'modules') else 0
     return {"modules": {"registered": t, "total": t, "loaded": 0}, "automation_score": 100, "execution_stats": {"total": 0}, "version": "V0.1"}
 @router.get("/api/coordinator/capabilities")
-async def coordinator_capabilities():
+    """协调器能力列表"""
+    async def coordinator_capabilities():
     return {"automation_score": 100, "capabilities": {"system":["scheduler","event_bus","config","health"],"ai":["planner","agent","llm"],"data":["analysis","quality","masking"],"security":["jwt","rbac","oauth"],"monitor":["metrics","tracing","audit"]}}
 
 @router.post("/api/coordinator/execute")

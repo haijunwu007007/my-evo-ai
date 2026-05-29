@@ -85,7 +85,7 @@ async def security_middleware(request: Request, call_next):
                 error_msg = "Invalid API Key"
                 return JSONResponse(
                     status_code=401,
-                    content={"detail": "无效的 API Key", "error": "unauthorized"},
+                    content={"success": False, "error": "unauthorized", "message": "无效的 API Key", "status_code": 401},
                 )
 
         # JWT 认证（环境变量 EVO_AUTH_ENABLED=true 时启用）
@@ -104,7 +104,7 @@ async def security_middleware(request: Request, call_next):
                     status_code = 401
                     return JSONResponse(
                         status_code=401,
-                        content={"detail": "缺少认证令牌", "error": "unauthorized"},
+                        content={"success": False, "error": "unauthorized", "message": "缺少认证令牌", "status_code": 401},
                     )
             else:
                 payload = verify_token(token)
@@ -112,9 +112,8 @@ async def security_middleware(request: Request, call_next):
                     status_code = 401
                     return JSONResponse(
                         status_code=401,
-                        content={"detail": "令牌无效或已过期", "error": "token_invalid"},
+                        content={"success": False, "error": "token_invalid", "message": "令牌无效或已过期", "status_code": 401},
                     )
-                # 将用户信息注入请求 state
                 request.state.user = payload
 
         # 限流检查
@@ -124,7 +123,7 @@ async def security_middleware(request: Request, call_next):
                 status_code = 429
                 return JSONResponse(
                     status_code=429,
-                    content={"detail": "请求过于频繁，请稍后重试", "error": "rate_limited"},
+                    content={"success": False, "error": "rate_limited", "message": "请求过于频繁，请稍后重试", "status_code": 429},
                     headers={"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": str(reset_at)},
                 )
 

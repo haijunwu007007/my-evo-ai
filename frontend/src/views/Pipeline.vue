@@ -2,20 +2,25 @@
   <div class="pipeline-page">
     <el-card shadow="never" class="page-card">
       <template #header>
-        <div class="card-header"><span>🔗 管线引擎</span><el-button size="small" type="primary" @click="showCreate=true">新建管线</el-button></div>
+        <div class="card-header"><span>🔗 管线引擎</span><el-button size="small" type="primary" @click="showCreate=true" :loading="loading">新建管线</el-button></div>
       </template>
-      <el-table :data="pipelines" stripe v-if="pipelines.length">
-        <el-table-column prop="name" label="管线名称" />
-        <el-table-column prop="description" label="描述" />
-        <el-table-column prop="status" label="状态" width="90"><template #default="{row}"><el-tag :type="row.status==='running'?'success':'info'" size="small">{{row.status}}</el-tag></template></el-table-column>
-        <el-table-column label="操作" width="160">
-          <template #default="{row}">
-            <el-button text size="small" @click="exec(row.id)">执行</el-button>
-            <el-popconfirm title="删除？" @confirm="remove(row.id)"><template #reference><el-button text type="danger" size="small">删除</el-button></template></el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-empty v-else description="无管线" />
+      <el-skeleton :loading="loading" animated>
+        <template #default>
+          <el-table :data="pipelines" stripe v-if="pipelines.length && !loadErr">
+            <el-table-column prop="name" label="管线名称" />
+            <el-table-column prop="description" label="描述" />
+            <el-table-column prop="status" label="状态" width="90"><template #default="{row}"><el-tag :type="row.status==='running'?'success':'info'" size="small">{{row.status}}</el-tag></template></el-table-column>
+            <el-table-column label="操作" width="160">
+              <template #default="{row}">
+                <el-button text size="small" @click="exec(row.id)">执行</el-button>
+                <el-popconfirm title="删除？" @confirm="remove(row.id)"><template #reference><el-button text type="danger" size="small">删除</el-button></template></el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-else-if="loadErr" description="加载失败"><template #extra><el-button size="small" @click="load">重试</el-button></template></el-empty>
+          <el-empty v-else description="无管线" />
+        </template>
+      </el-skeleton>
     </el-card>
     <el-dialog v-model="showCreate" title="新建管线" width="450px">
       <el-form :model="form" label-width="60px">
@@ -29,9 +34,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getPipelines, createPipeline, executePipeline, deletePipeline } from '@/api'
+const loading = ref(true); const loadErr = ref(false)
 const pipelines = ref([]); const showCreate = ref(false)
 const form = ref({name:'',description:''})
-const load = async () => { try { const r = await getPipelines(); pipelines.value = r.pipelines||[] } catch {} }
+const load = async () => {
+  loading.value = true; loadErr.value = false
+  try { const r = await getPipelines(); pipelines.value = r.pipelines||[] }
+  catch { loadErr.value = true }
+  finally { loading.value = false }
+}
 const create = async () => { await createPipeline(form.value); showCreate.value=false; load() }
 const exec = async (id) => { await executePipeline(id); load() }
 const remove = async (id) => { await deletePipeline(id); load() }

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os, sys, json, time, asyncio, importlib, inspect, hashlib, secrets
 from typing import Any, Dict, List, Optional
+from api.category_map import CATEGORY_MAP
 from datetime import datetime
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request, Query
@@ -35,14 +36,21 @@ router = APIRouter()
 # ═══════════════════════════════════════════════════════════════
 
 @router.get("/api/modules/categories")
-async def get_module_categories():
-    cats = registry.get_categories()
-    total = sum(cats.values())
-    return {"categories": cats, "total": total}
+    """Get Module Categories - GET /api/modules/categories"""
+    async def get_module_categories():
+    raw = registry.get_categories()
+    # 标准化分类名
+    normalized = {}
+    for raw_cat, count in raw.items():
+        key = CATEGORY_MAP.get(raw_cat.upper(), raw_cat.capitalize())
+        normalized[key] = normalized.get(key, 0) + count
+    total = sum(normalized.values())
+    return {"categories": normalized, "total": total}
 
 
 @router.get("/api/modules")
-async def list_modules(category: str = "", page: int = 1, limit: int = 100):
+    """List Modules - GET /api/modules"""
+    async def list_modules(category: str = "", page: int = 1, limit: int = 100):
     no_page = page <= 0 and limit <= 0
     base_data = None
 
@@ -127,7 +135,8 @@ async def list_modules(category: str = "", page: int = 1, limit: int = 100):
 
 
 @router.get("/api/search/modules")
-async def search_modules(q: str = "", status: str = "", limit: int = 50, offset: int = 0):
+    """Search Modules - GET /api/search/modules"""
+    async def search_modules(q: str = "", status: str = "", limit: int = 50, offset: int = 0):
     all_mods = await list_modules()
     mods = all_mods.get("modules", [])
     ql = q.lower().strip() if q else ""
@@ -153,7 +162,8 @@ async def search_modules(q: str = "", status: str = "", limit: int = 50, offset:
 # ═══════════════════════════════════════════════════════════════
 
 @router.post("/api/modules/install")
-async def install_module_api(request: Request):
+    """Install Module Api - POST /api/modules/install"""
+    async def install_module_api(request: Request):
     body = await request.json()
     code = body.get("code", "")
     name = body.get("name", "")
@@ -173,7 +183,8 @@ async def install_module_api(request: Request):
 
 
 @router.post("/api/modules/rescan")
-async def rescan_modules_api():
+    """Rescan Modules Api - POST /api/modules/rescan"""
+    async def rescan_modules_api():
     try:
         added = registry.rescan_modules("modules")
         return {"success": True, "new_modules": added, "total": registry.get_total_count()}
@@ -182,7 +193,8 @@ async def rescan_modules_api():
 
 
 @router.delete("/api/modules/{name}")
-async def uninstall_module_api(name: str):
+    """Uninstall Module Api - DELETE /api/modules/{name}"""
+    async def uninstall_module_api(name: str):
     if not name or name in ("modules", "health", "status"):
         return {"success": False, "error": "不能卸载核心模块"}
     try:
@@ -193,7 +205,8 @@ async def uninstall_module_api(name: str):
 
 
 @router.get("/api/modules/{name}/health")
-async def module_health(name: str):
+    """Module Health - GET /api/modules/{name}/health"""
+    async def module_health(name: str):
     mod = registry.modules.get(name)
     if not mod:
         mod = await registry.lazy_load_module(name)
@@ -231,7 +244,8 @@ async def module_health(name: str):
 
 
 @router.get("/api/modules/{name}/code")
-async def module_source_code(name: str, lines: int = 100):
+    """Module Source Code - GET /api/modules/{name}/code"""
+    async def module_source_code(name: str, lines: int = 100):
     mod = registry.modules.get(name)
     if not mod:
         mod = await registry.lazy_load_module(name)
@@ -270,7 +284,8 @@ async def module_source_code(name: str, lines: int = 100):
 
 
 @router.get("/api/modules/{name}")
-async def get_module_detail_api(name: str):
+    """Get Module Detail Api - GET /api/modules/{name}"""
+    async def get_module_detail_api(name: str):
     mod = registry.modules.get(name)
     if not mod:
         mod = await registry.lazy_load_module(name)
@@ -305,7 +320,8 @@ async def get_module_detail_api(name: str):
 # ═══════════════════════════════════════════════════════════════
 
 @router.get("/api/batches")
-async def list_batches():
+    """List Batches - GET /api/batches"""
+    async def list_batches():
     all_modules = list(registry._pending_modules.keys()) + list(registry.modules.keys())
     all_modules.sort()
     batch_size = 20
@@ -327,7 +343,8 @@ async def list_batches():
 
 
 @router.post("/api/modules/{name}/call/{method}")
-async def call_module_method(name: str, method: str, request: Request):
+    """Call Module Method - POST /api/modules/{name}/call/{method}"""
+    async def call_module_method(name: str, method: str, request: Request):
     body = await request.json()
     args = body.get("args", [])
     kwargs = body.get("kwargs", {})
@@ -350,7 +367,8 @@ async def call_module_method(name: str, method: str, request: Request):
 
 
 @router.post("/api/modules/{name}/execute")
-async def execute_module_endpoint(name: str, request: Request):
+    """Execute Module Endpoint - POST /api/modules/{name}/execute"""
+    async def execute_module_endpoint(name: str, request: Request):
     # Fast direct import path for compact modules (bypasses _execute_module_internal)
     try:
         body = await request.json()
@@ -412,7 +430,8 @@ async def execute_module_endpoint(name: str, request: Request):
 
 
 @router.post("/api/call")
-async def call_generic(request: Request):
+    """Call Generic - POST /api/call"""
+    async def call_generic(request: Request):
     body = await request.json()
     module = body.get("module", "")
     method = body.get("method", "")
@@ -439,7 +458,8 @@ async def call_generic(request: Request):
 
 
 @router.post("/api/batch-execute")
-async def batch_execute(request: Request):
+    """Batch Execute - POST /api/batch-execute"""
+    async def batch_execute(request: Request):
     body = await request.json()
     targets = body.get("targets", [])
     action = body.get("action", "status")
@@ -489,5 +509,6 @@ async def batch_execute(request: Request):
 
 
 @router.get("/api/execution-log")
-async def get_execution_log(limit: int = 50):
+    """Get Execution Log - GET /api/execution-log"""
+    async def get_execution_log(limit: int = 50):
     return {"log": _execution_log[-limit:], "total": len(_execution_log)}
