@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AUTO-EVO-AI V0.1</title>
+    <script>
+      var d=localStorage.getItem('evo_theme')!=='light',e=document.documentElement
+      e.setAttribute('data-theme',d?'dark':'light')
+      e.style.setProperty('--bg-sidebar',d?'#111127':'#ffffff')
+      e.style.setProperty('--bg-card',d?'#1a1a2e':'#ffffff')
+      e.style.setProperty('--border-subtle',d?'#2d2d44':'#cbd5e1')
+      e.style.setProperty('--text-primary',d?'#e2e8f0':'#1e293b')
+      e.style.setProperty('--bg-body',d?'#0d0d1a':'#f1f5f9')
+      // 调试标记
+      e.setAttribute('theme-loaded','1')
+    </script>
   </head>
   <body>
     <div id="app"></div>

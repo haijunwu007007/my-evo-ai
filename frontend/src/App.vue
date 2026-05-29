@@ -1,7 +1,7 @@
 <template>
-  <el-container class="app-container">
+  <el-container class="app-container" :style="{ background: darkMode ? '#0d0d1a' : '#f1f5f9' }">
     <!-- 侧边栏 -->
-    <el-aside :width="collapsed ? '64px' : '220px'" class="app-aside">
+    <el-aside :width="collapsed ? '64px' : '220px'" class="app-aside" :style="{ background: darkMode ? '#111127' : '#f8fafc', borderRightColor: darkMode ? '#1e1e3a' : '#e2e8f0' }">
       <!-- Logo -->
       <div class="logo" @click="router.push('/dashboard')">
         <div class="logo-icon">
@@ -126,16 +126,46 @@ const darkMode = ref(true)
 let hTimer: ReturnType<typeof setInterval>|null = null
 
 // ── 亮暗主题切换 ────────────────────────────────────
-const toggleTheme = () => {
-  darkMode.value = !darkMode.value
-  document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
-  localStorage.setItem('evo_theme', darkMode.value ? 'dark' : 'light')
+const setVars = (dark: boolean) => {
+  const el = document.documentElement
+  el.setAttribute('data-theme', dark ? 'dark' : 'light')
+  localStorage.setItem('evo_theme', dark ? 'dark' : 'light')
+  const vars: Record<string,string> = dark ? {
+    '--bg-body':'#0d0d1a','--bg-sidebar':'#111127','--bg-header':'#111127','--bg-main':'#0d0d1a',
+    '--bg-card':'#1a1a2e','--border-color':'#1e1e3a','--border-subtle':'#2d2d44',
+    '--text-primary':'#e2e8f0','--text-muted':'#7b8fa1','--text-dim':'#4a5568',
+  } : {
+    '--bg-body':'#f1f5f9','--bg-sidebar':'#f8fafc','--bg-header':'#ffffff','--bg-main':'#f1f5f9',
+    '--bg-card':'#ffffff','--border-color':'#e2e8f0','--border-subtle':'#cbd5e1',
+    '--text-primary':'#1e293b','--text-muted':'#64748b','--text-dim':'#94a3b8',
+  }
+  for (const [k,v] of Object.entries(vars)) el.style.setProperty(k, v)
+  console.log('[THEME] set to', dark ? 'dark' : 'light', 'bg-sidebar=', vars['--bg-sidebar'])
 }
-
+const toggleTheme = () => { darkMode.value = !darkMode.value; applyTheme(darkMode.value) }
+const applyTheme = (dark: boolean) => {
+  const d = dark ? 'dark' : 'light'
+  document.documentElement.setAttribute('data-theme', d)
+  localStorage.setItem('evo_theme', d)
+  const s = document.body.style
+  s.setProperty('--bg-body', dark ? '#0d0d1a' : '#f1f5f9')
+  s.setProperty('--bg-sidebar', dark ? '#111127' : '#ffffff')
+  s.setProperty('--bg-card', dark ? '#1a1a2e' : '#ffffff')
+  s.setProperty('--border-color', dark ? '#1e1e3a' : '#e2e8f0')
+  s.setProperty('--border-subtle', dark ? '#2d2d44' : '#cbd5e1')
+  s.setProperty('--text-primary', dark ? '#e2e8f0' : '#1e293b')
+  s.setProperty('--text-muted', dark ? '#7b8fa1' : '#64748b')
+  // 直接改 sidebar 背景（绕过 CSS 变量）
+  const aside = document.querySelector('.app-aside')
+  if (aside) aside.style.background = dark ? '#111127' : '#f8fafc'
+  document.querySelectorAll('.panel, .page-card, .stat-card, .section-card, .metric-card, .el-card').forEach(el => {
+    el.style.background = dark ? '#1a1a2e' : '#ffffff'
+  })
+}
 onMounted(() => {
   const saved = localStorage.getItem('evo_theme')
-  if (saved === 'light') { darkMode.value = false; document.documentElement.setAttribute('data-theme', 'light') }
-  else { document.documentElement.setAttribute('data-theme', 'dark') }
+  darkMode.value = saved !== 'light'
+  setTimeout(() => applyTheme(darkMode.value), 100)
 })
 
 const coreMenu = [
@@ -189,7 +219,7 @@ onUnmounted(() => clearInterval(hTimer))
 
 <style>
 /* ── CSS 变量主题系统 ────────────────────────────── */
-:root, [data-theme="dark"] {
+[data-theme="dark"] {
   --bg-body: #0d0d1a;
   --bg-sidebar: #111127;
   --bg-header: #111127;
@@ -213,8 +243,36 @@ onUnmounted(() => clearInterval(hTimer))
   --text-muted: #64748b;
   --text-dim: #94a3b8;
 }
-[data-theme="light"] .el-card { --el-card-bg-color: #ffffff; }
-[data-theme="light"] .el-table { --el-table-bg-color: #ffffff; --el-table-border-color: #e2e8f0; --el-table-header-bg-color: #f8fafc; color: #1e293b; }
+html[data-theme="light"] .el-card { background: #ffffff !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .el-table { --el-table-bg-color: #ffffff; --el-table-border-color: #e2e8f0; --el-table-header-bg-color: #f8fafc; color: #1e293b; }
+html[data-theme="light"] .el-input__wrapper { background: #ffffff !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .el-input__inner { color: #1e293b !important; }
+html[data-theme="light"] .el-skeleton { --el-skeleton-color: #e2e8f0; --el-skeleton-to-color: #f1f5f9; }
+html[data-theme="light"] .el-empty__description p { color: #64748b !important; }
+html[data-theme="light"] .el-table__header th { background: #f8fafc !important; color: #475569 !important; }
+/* ── 视图组件通用 light 主题覆盖 ──────────── */
+/* 增加html前缀提高特异性，压过scoped data-v属性 */
+html[data-theme="light"] .page-card,
+html[data-theme="light"] .stat-card,
+html[data-theme="light"] .section-card,
+html[data-theme="light"] .metric-card,
+html[data-theme="light"] .event-card,
+html[data-theme="light"] .events-page .stat-card { background: #ffffff !important; border-color: #e2e8f0 !important; color: #1e293b !important; }
+html[data-theme="light"] .module-card,
+html[data-theme="light"] .dashboard-card,
+html[data-theme="light"] .pipeline-page .page-card { background: #ffffff !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .stat-lbl,
+html[data-theme="light"] .metric-label,
+html[data-theme="light"] .card-header span { color: #475569 !important; }
+html[data-theme="light"] .stat-val { color: #1e293b !important; }
+html[data-theme="light"] .stat-card .stat-val { color: inherit !important; }
+/* 模块卡片列表项 */
+html[data-theme="light"] .cat-card,
+html[data-theme="light"] .filter-bar { background: #ffffff !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .mod-item { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .mod-name,
+html[data-theme="light"] .mod-cat { color: #1e293b !important; }
+html[data-theme="light"] .cat-title { color: #1e293b !important; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, #app { height: 100%; }
