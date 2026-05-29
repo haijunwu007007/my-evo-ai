@@ -99,8 +99,7 @@ def _scan_modules() -> list[dict[str, Any]]:
 
 
 @router.get("/api/modules/list")
-    """模块列表（分页/搜索/过滤）"""
-    async def modules_list(
+async def modules_list(
     search: str = Query("", description="搜索关键词（名称或描述）"),
     has_execute: bool | None = Query(None, description="是否包含 execute 方法"),
     min_lines: int = Query(0, description="最小行数"),
