@@ -1,21 +1,12 @@
-# AUTO-EVO-AI V0.1 .dockerignore
-.git/
-.gitignore
-_archive/
-_verify*.py
-_check*.py
-tests/
-benchmarks/
-*.md
-*.log
-*.bak
-data/_archive_empty/
-data/persistence/
-__pycache__/
+__pycache__
 *.pyc
+.git
+.gitignore
+_archive
+node_modules
 .env
-.env.prod
-frontend/node_modules/
-frontend/package-lock.json
-frontend/dist/
-frontend/src/  # API 不依赖前端源码
+*.md
+tests
+scripts
+frontend
+.github

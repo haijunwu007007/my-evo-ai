@@ -1,0 +1,11 @@
+#!/bin/sh
+# AUTO-EVO-AI V0.1 — Pre-commit: TS 编译校验
+echo "🔍 运行 TypeScript 编译校验..."
+cd frontend
+npx --yes vue-tsc --noEmit 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo "⚠️  vue-tsc 校验未通过。检查 TS 错误后重新提交。"
+  echo "   可以跳过: git commit --no-verify"
+  exit 1
+fi
+echo "✅ TypeScript 编译通过"
