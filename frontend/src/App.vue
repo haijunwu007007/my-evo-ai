@@ -1,7 +1,7 @@
 <template>
   <el-container class="app-container" :style="{ background: darkMode ? '#0d0d1a' : '#f1f5f9' }">
     <!-- 侧边栏 -->
-    <el-aside :width="collapsed ? '64px' : '220px'" class="app-aside" :style="{ background: darkMode ? '#111127' : '#f8fafc', borderRightColor: darkMode ? '#1e1e3a' : '#e2e8f0' }">
+    <el-aside :width="collapsed ? '64px' : '220px'" class="app-aside">
       <!-- Logo -->
       <div class="logo" @click="router.push('/dashboard')">
         <div class="logo-icon">
@@ -126,46 +126,15 @@ const darkMode = ref(true)
 let hTimer: ReturnType<typeof setInterval>|null = null
 
 // ── 亮暗主题切换 ────────────────────────────────────
-const setVars = (dark: boolean) => {
-  const el = document.documentElement
-  el.setAttribute('data-theme', dark ? 'dark' : 'light')
-  localStorage.setItem('evo_theme', dark ? 'dark' : 'light')
-  const vars: Record<string,string> = dark ? {
-    '--bg-body':'#0d0d1a','--bg-sidebar':'#111127','--bg-header':'#111127','--bg-main':'#0d0d1a',
-    '--bg-card':'#1a1a2e','--border-color':'#1e1e3a','--border-subtle':'#2d2d44',
-    '--text-primary':'#e2e8f0','--text-muted':'#7b8fa1','--text-dim':'#4a5568',
-  } : {
-    '--bg-body':'#f1f5f9','--bg-sidebar':'#f8fafc','--bg-header':'#ffffff','--bg-main':'#f1f5f9',
-    '--bg-card':'#ffffff','--border-color':'#e2e8f0','--border-subtle':'#cbd5e1',
-    '--text-primary':'#1e293b','--text-muted':'#64748b','--text-dim':'#94a3b8',
-  }
-  for (const [k,v] of Object.entries(vars)) el.style.setProperty(k, v)
-  console.log('[THEME] set to', dark ? 'dark' : 'light', 'bg-sidebar=', vars['--bg-sidebar'])
-}
-const toggleTheme = () => { darkMode.value = !darkMode.value; applyTheme(darkMode.value) }
-const applyTheme = (dark: boolean) => {
-  const d = dark ? 'dark' : 'light'
-  document.documentElement.setAttribute('data-theme', d)
-  localStorage.setItem('evo_theme', d)
-  const s = document.body.style
-  s.setProperty('--bg-body', dark ? '#0d0d1a' : '#f1f5f9')
-  s.setProperty('--bg-sidebar', dark ? '#111127' : '#ffffff')
-  s.setProperty('--bg-card', dark ? '#1a1a2e' : '#ffffff')
-  s.setProperty('--border-color', dark ? '#1e1e3a' : '#e2e8f0')
-  s.setProperty('--border-subtle', dark ? '#2d2d44' : '#cbd5e1')
-  s.setProperty('--text-primary', dark ? '#e2e8f0' : '#1e293b')
-  s.setProperty('--text-muted', dark ? '#7b8fa1' : '#64748b')
-  // 直接改 sidebar 背景（绕过 CSS 变量）
-  const aside = document.querySelector('.app-aside')
-  if (aside) aside.style.background = dark ? '#111127' : '#f8fafc'
-  document.querySelectorAll('.panel, .page-card, .stat-card, .section-card, .metric-card, .el-card').forEach(el => {
-    el.style.background = dark ? '#1a1a2e' : '#ffffff'
-  })
+const toggleTheme = () => {
+  darkMode.value = !darkMode.value
+  document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
+  localStorage.setItem('evo_theme', darkMode.value ? 'dark' : 'light')
 }
 onMounted(() => {
   const saved = localStorage.getItem('evo_theme')
   darkMode.value = saved !== 'light'
-  setTimeout(() => applyTheme(darkMode.value), 100)
+  document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
 })
 
 const coreMenu = [
@@ -219,31 +188,25 @@ onUnmounted(() => clearInterval(hTimer))
 
 <style>
 /* ── CSS 变量主题系统 ────────────────────────────── */
-[data-theme="dark"] {
-  --bg-body: #0d0d1a;
-  --bg-sidebar: #111127;
-  --bg-header: #111127;
-  --bg-main: #0d0d1a;
-  --bg-card: #1a1a2e;
-  --border-color: #1e1e3a;
-  --border-subtle: #2d2d44;
-  --text-primary: #e2e8f0;
-  --text-muted: #7b8fa1;
-  --text-dim: #4a5568;
+:root {
+  --bg-body: #0d0d1a; --bg-sidebar: #111127; --bg-header: #111127; --bg-main: #0d0d1a;
+  --bg-card: #1a1a2e; --border-color: #1e1e3a; --border-subtle: #2d2d44;
+  --text-primary: #e2e8f0; --text-muted: #7b8fa1; --text-dim: #4a5568;
+  /* Element Plus 菜单主题 */
+  --el-menu-bg-color: #111127; --el-menu-text-color: #7b8fa1;
+  --el-menu-hover-bg-color: #1a1a3a; --el-menu-active-color: #818cf8;
 }
-[data-theme="light"] {
-  --bg-body: #f1f5f9;
-  --bg-sidebar: #ffffff;
-  --bg-header: #ffffff;
-  --bg-main: #f1f5f9;
-  --bg-card: #ffffff;
-  --border-color: #e2e8f0;
-  --border-subtle: #cbd5e1;
-  --text-primary: #1e293b;
-  --text-muted: #64748b;
-  --text-dim: #94a3b8;
+html[data-theme="light"] {
+  --bg-body: #f1f5f9; --bg-sidebar: #ffffff; --bg-header: #ffffff; --bg-main: #f1f5f9;
+  --bg-card: #ffffff; --border-color: #e2e8f0; --border-subtle: #cbd5e1;
+  --text-primary: #1e293b; --text-muted: #64748b; --text-dim: #94a3b8;
+  --el-menu-bg-color: #ffffff; --el-menu-text-color: #475569;
+  --el-menu-hover-bg-color: #f1f5f9; --el-menu-active-color: #6366f1;
 }
+/* ── El-Plus 组件 light 覆盖 ── */
+html[data-theme="light"] .el-menu { --el-menu-bg-color: #ffffff !important; --el-menu-text-color: #475569 !important; --el-menu-hover-bg-color: #f1f5f9 !important; --el-menu-active-color: #6366f1 !important; }
 html[data-theme="light"] .el-card { background: #ffffff !important; border-color: #e2e8f0 !important; }
+html[data-theme="light"] .el-aside { background: #ffffff !important; border-color: #e2e8f0 !important; }
 html[data-theme="light"] .el-table { --el-table-bg-color: #ffffff; --el-table-border-color: #e2e8f0; --el-table-header-bg-color: #f8fafc; color: #1e293b; }
 html[data-theme="light"] .el-input__wrapper { background: #ffffff !important; border-color: #e2e8f0 !important; }
 html[data-theme="light"] .el-input__inner { color: #1e293b !important; }
