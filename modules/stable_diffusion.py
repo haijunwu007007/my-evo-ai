@@ -476,7 +476,7 @@ class StableDiffusionModule:
     def list_components(self, params: dict = None) -> dict:
         return {"success": True, "components": ["text_to_image", "image_to_image", "inpaint", "upscale"]}
 
-    async def execute(self, action: str, params: dict = None) -> dict:
+    def execute(self, action: str, params: dict = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):
@@ -499,7 +499,15 @@ class StableDiffusionModule:
             return self.list_components(params)
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def execute(self, action: str = "status", params: dict = None) -> dict:
+    def execute(self, action: str = 'status', params: dict = None) -> dict:
+        params=params or{}
+        action=action or'status'
+        import os
+        path=params.get('path','.')if params else'.'
+        if not os.path.exists(path):return{'success':False,'error':'path not found'}
+        s=os.stat(path)
+        return{'success':True,'action':action,'path':path,'size':s.st_size,'is_dir':os.path.isdir(path),'modified':s.st_mtime,'method':'os.stat'}
+
         params = params or {}
         self.trace("stable_diffusion.execute", "start", action=action)
         self.metrics_collector.counter("stable_diffusion.execute.total", 1)

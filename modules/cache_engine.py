@@ -465,7 +465,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"模式={l2_str}, L1最大={self.l1_max_size}, 默认TTL={self.default_ttl}s")
         self.info(f"缓存引擎就绪 ({l2_str})")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    def execute(self, action: str, params: Optional[Dict] = None) -> Result:
         _ = self.trace("execute")
         params = params or {}
         trace_id = f"cache-{action}-{int(time.time() * 1000)}"
