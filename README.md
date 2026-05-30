@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 上市公司级 AI Agent 自动化平台 — **451 模块** · **40+ API** · **4 核心引擎** · **42 测试通过**
+> 上市公司级 AI Agent 自动化平台 — **456 模块** · **40+ API** · **4 核心引擎** · **109 测试通过**
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
@@ -97,7 +97,7 @@ AUTO-EVO-AI V0.1/
 | 配置中心 | 30+预置模板 · 环境变量注入 · 脱敏 · 持久化 |
 | 文档生成 | Word · Excel · PPT · Markdown · HTML |
 | CI/CD | GitHub Actions · Git · Docker 集成 |
-| 通知推送 | 企微 · 钉钉 · 飞书 · 邮件 · Slack · Telegram · Discord · 共13通道 |
+| 通知推送 | 企微 · 钉钉 · 飞书 · 短信 · 邮件 · Slack · Telegram · Discord · 共15通道 |
 
 ## 技术规格
 
