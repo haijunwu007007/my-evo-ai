@@ -938,6 +938,54 @@ async def plugin_uninstall(name: str, remove_data: bool = False):
     return pm.uninstall_plugin(name, remove_data=remove_data)
 
 
+# ═══════════════════════════════════════════════════
+# MySQL CDC (Change Data Capture)
+# ═══════════════════════════════════════════════════
+from modules.mysql_cdc import execute as cdc_execute
+
+
+@router.get("/api/cdc/status")
+async def cdc_status():
+    """CDC 运行状态"""
+    return cdc_execute("status")
+
+
+@router.post("/api/cdc/start")
+async def cdc_start(config: dict = {}):
+    """启动 CDC"""
+    return cdc_execute("start", {"config": config})
+
+
+@router.post("/api/cdc/stop")
+async def cdc_stop():
+    """停止 CDC"""
+    return cdc_execute("stop")
+
+
+@router.post("/api/cdc/config")
+async def cdc_config(config: dict = {}):
+    """更新配置"""
+    return cdc_execute("config", config)
+
+
+@router.get("/api/cdc/events")
+async def cdc_events(limit: int = 100):
+    """获取变更事件"""
+    return cdc_execute("events", {"limit": limit})
+
+
+@router.get("/api/cdc/tables")
+async def cdc_tables():
+    """获取可监听表清单"""
+    return cdc_execute("tables")
+
+
+@router.post("/api/cdc/reset")
+async def cdc_reset():
+    """重置断点"""
+    return cdc_execute("reset")
+
+
 @router.post("/api/plugins/{name}/execute")
 async def plugin_execute(name: str, action: str = "status", params: dict = None):
     """执行插件操作"""
