@@ -105,6 +105,23 @@ class AdaptiveEngine:
                 );
                 CREATE INDEX IF NOT EXISTS idx_records_module ON evo_records(module);
                 CREATE INDEX IF NOT EXISTS idx_records_ts ON evo_records(ts);
+                CREATE TABLE IF NOT EXISTS evo_params (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    module TEXT NOT NULL, action TEXT DEFAULT '',
+                    params_json TEXT, total_calls INTEGER DEFAULT 0,
+                    total_success INTEGER DEFAULT 0, avg_latency_ms REAL DEFAULT 0,
+                    effectiveness REAL DEFAULT 0, last_used REAL DEFAULT (strftime('%%s','now')),
+                    UNIQUE(module, action, params_json)
+                );
+                CREATE TABLE IF NOT EXISTS evo_prompts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    module TEXT NOT NULL, strategy_id TEXT, prompt_template TEXT,
+                    total_calls INTEGER DEFAULT 0, total_success INTEGER DEFAULT 0,
+                    effectiveness REAL DEFAULT 0, is_active INTEGER DEFAULT 1,
+                    created REAL DEFAULT (strftime('%%s','now'))
+                );
+                CREATE INDEX IF NOT EXISTS idx_params_module ON evo_params(module,action);
+                CREATE INDEX IF NOT EXISTS idx_prompts_module ON evo_prompts(module);
             """)
             self._conn.commit()
             logger.info(f"[ADAPT] DB ready at {DB_PATH}")
@@ -348,6 +365,138 @@ class AdaptiveEngine:
 
     def module_info(self, module: str) -> Optional[Dict]:
         return self.module_detail(module)
+
+    # ════════════════════════════════════════════════════
+    # 参数自进化
+    # ════════════════════════════════════════════════════
+
+    def record_params(self, module: str, action: str, params: dict,
+                      success: bool, latency_ms: float):
+        """记录某次调用的参数组合及效果"""
+        key = (module, action, json.dumps(params, sort_keys=True))
+        if not self._conn:
+            return
+        try:
+            pj = json.dumps(params, sort_keys=True)
+            self._conn.execute("""
+                INSERT INTO evo_params(module,action,params_json,total_calls,total_success,avg_latency_ms,effectiveness,last_used)
+                VALUES(?,?,?,1,?,?,0,?)
+                ON CONFLICT(module,action,params_json) DO UPDATE SET
+                    total_calls=total_calls+1,
+                    total_success=total_success+?,
+                    avg_latency_ms=(avg_latency_ms*(total_calls-1)+?)/total_calls,
+                    last_used=?
+            """, (module, action, pj, 1 if success else 0, latency_ms, time.time(),
+                 1 if success else 0, latency_ms, time.time()))
+            self._conn.commit()
+            # 重新计算 effectiveness
+            self._recalc_param_effectiveness(module, action, pj)
+        except Exception as e:
+            logger.warning(f"[ADAPT] record_params error: {e}")
+
+    def _recalc_param_effectiveness(self, module: str, action: str, params_json: str):
+        """计算参数组合的有效性得分"""
+        try:
+            row = self._conn.execute(
+                "SELECT total_calls,total_success,avg_latency_ms FROM evo_params WHERE module=? AND action=? AND params_json=?",
+                (module, action, params_json)
+            ).fetchone()
+            if not row or row["total_calls"] < 2:
+                return
+            tc = row["total_calls"]
+            sr = row["total_success"] / max(tc, 1)
+            latency = row["avg_latency_ms"]
+            lat_score = max(0, 1.0 - latency / 5000.0)
+            eff = sr * 0.6 + lat_score * 0.4
+            self._conn.execute(
+                "UPDATE evo_params SET effectiveness=? WHERE module=? AND action=? AND params_json=?",
+                (round(eff, 4), module, action, params_json)
+            )
+            self._conn.commit()
+        except Exception as e:
+            logger.warning(f"[ADAPT] recalc eff error: {e}")
+
+    def suggest_params(self, module: str, action: str = "") -> Optional[dict]:
+        """返回该(module, action)下最高分的参数组合"""
+        if not self._conn:
+            return None
+        try:
+            rows = self._conn.execute(
+                "SELECT params_json,effectiveness,total_calls FROM evo_params "
+                "WHERE module=? AND action=? AND total_calls>=2 ORDER BY effectiveness DESC LIMIT 1",
+                (module, action)
+            ).fetchall()
+            if rows:
+                return {"params": json.loads(rows[0]["params_json"]),
+                        "effectiveness": rows[0]["effectiveness"],
+                        "total_calls": rows[0]["total_calls"]}
+            # 尝试不指定 action
+            if action:
+                rows = self._conn.execute(
+                    "SELECT params_json,effectiveness,total_calls FROM evo_params "
+                    "WHERE module=? AND total_calls>=2 ORDER BY effectiveness DESC LIMIT 1",
+                    (module,)
+                ).fetchall()
+                if rows:
+                    return {"params": json.loads(rows[0]["params_json"]),
+                            "effectiveness": rows[0]["effectiveness"],
+                            "total_calls": rows[0]["total_calls"]}
+        except Exception as e:
+            logger.warning(f"[ADAPT] suggest_params error: {e}")
+        return None
+
+    def get_param_profiles(self, module: str) -> List[Dict]:
+        """获取模块所有参数配置及其效果"""
+        if not self._conn:
+            return []
+        try:
+            rows = self._conn.execute(
+                "SELECT action,params_json,total_calls,total_success,avg_latency_ms,effectiveness "
+                "FROM evo_params WHERE module=? ORDER BY effectiveness DESC",
+                (module,)
+            ).fetchall()
+            return [{"action": r["action"], "params": json.loads(r["params_json"]),
+                      "calls": r["total_calls"], "success": r["total_success"],
+                      "latency": r["avg_latency_ms"], "score": r["effectiveness"]} for r in rows]
+        except Exception as e:
+            logger.warning(f"[ADAPT] get_params error: {e}")
+            return []
+
+    def evolve_params(self):
+        """参数进化：清除低效参数配置，保留高效变体"""
+        if not self._conn:
+            return
+        try:
+            # 清除 超过20次调用但 effectiveness<0.3 的配置
+            deleted = self._conn.execute(
+                "DELETE FROM evo_params WHERE total_calls>=20 AND effectiveness<0.3"
+            ).rowcount
+            if deleted:
+                self._conn.commit()
+                logger.info(f"[ADAPT] evolved: pruned {deleted} low-effectiveness param profiles")
+        except Exception as e:
+            logger.warning(f"[ADAPT] evolve error: {e}")
+
+    # ─── 进化循环 ───────────────────────────────────────
+
+    def start_evolution_loop(self, interval_sec: int = 600):
+        """启动参数进化循环（默认每10分钟）"""
+        if getattr(self, "_evo_active", False):
+            return
+        self._evo_active = True
+        def _loop():
+            while self._evo_active:
+                time.sleep(interval_sec)
+                try:
+                    self.evolve_params()
+                except Exception as e:
+                    logger.warning(f"[ADAPT] evolution loop error: {e}")
+        t = threading.Thread(target=_loop, daemon=True, name="evo-evolution")
+        t.start()
+        logger.info(f"[ADAPT] evolution loop started ({interval_sec}s)")
+
+    def stop_evolution_loop(self):
+        self._evo_active = False
 
 
 # ─── 全局单例 ──────────────────────────────────────────
