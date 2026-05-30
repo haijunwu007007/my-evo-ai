@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "aegis", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 安全治理模块 Grade: A (生产级) | Category: 安全监控",
 }
 

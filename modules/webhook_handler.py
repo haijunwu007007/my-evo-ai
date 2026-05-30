@@ -1,4 +1,5 @@
 """
+# Grade: A
 Webhook Handler - 企业级Webhook管理引擎
 生产级Webhook接收、签名验证、事件路由、重试投递、日志审计
 支持：HMAC签名、多协议路由、死信队列、幂等处理、订阅管理

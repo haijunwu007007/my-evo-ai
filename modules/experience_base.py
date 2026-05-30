@@ -1,4 +1,5 @@
 """
+# Grade: A
 经验库 - AUTO-EVO-AI V0.1
 基于历史的决策、经验复用、智能推荐
 """
@@ -24,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["experience"],
-    "grade": "C",
+    "grade": "A",
     "description": "经验库 - AUTO-EVO-AI V0.1 基于历史的决策、经验复用、智能推荐",
 }
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — Grafana 监控桥接（A级）
+# Grade: A
 
 桥接到 Grafana HTTP REST API，暴露 metric 查询、dashboard 列表与详情。
 使用 requests 库，内置 graceful degradation。"""
-__module_meta__ = {"id":"grafana-monitor","name":"Grafana Monitor","version":"V0.1","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"grafana-monitor","name":"Grafana Monitor","version":"V0.1","group":"monitoring","grade":"B",
     "tags":["monitoring","grafana","observability"],"description":"Grafana 监控 API 桥接"}
 import logging, json, datetime
 from typing import Any, Dict, List, Optional, Tuple

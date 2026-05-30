@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_athena.task.request"}}],
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础",
 }
 

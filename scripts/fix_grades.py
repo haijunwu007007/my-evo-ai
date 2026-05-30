@@ -44,11 +44,11 @@ def assess_grade(name: str, content: str) -> str:
     if n_bytes < 1000 and n_code < 30:
         return "S"
 
-    # A: 生产级
-    if n_code >= 150 and has_execute and (has_real_deps or n_code >= 400):
+    # A: 生产级 — 必须有真实第三方依赖 + >=200有效行 + execute方法
+    if has_real_deps and has_execute and n_code >= 200:
         return "A"
-    # B: 准生产级
-    if n_code >= 80 and has_execute:
+    # B: 准生产级 — 有 execute + 足够代码量
+    if has_execute and n_code >= 80:
         return "B"
     # C: 基础
     if n_code >= 20:

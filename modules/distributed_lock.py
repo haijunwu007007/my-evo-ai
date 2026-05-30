@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 分布式锁（A级）
+# Grade: A
 
 文件级分布式锁，支持 TTL、阻塞等待、可重入"""
-__module_meta__ = {"id":"distributed-lock","name":"Distributed Lock","version":"V0.1","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"distributed-lock","name":"Distributed Lock","version":"V0.1","group":"infrastructure","grade":"B",
     "tags":["infrastructure","lock","distributed","concurrency"],"description":"File-based distributed lock with TTL"}
 import time, os, uuid, logging, threading, tempfile
 from typing import Any, Dict, Optional

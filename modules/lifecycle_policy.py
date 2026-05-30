@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — Enterprise Lifecycle Policy Manager
 Production-grade resource lifecycle management with state machines, TTL enforcement,
 automated transitions, compliance gating, and audit trail for上市企业生产级标准.

@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["autogen", "manager", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — AutoGen Studio 多智能体编排模块 Grade: A (生产级) | Category: AI智能体",
 }
 

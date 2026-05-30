@@ -1,4 +1,5 @@
 """
+# Grade: A
 Memory Leak Detector Module - Enterprise Production Grade
 Advanced memory leak detection with object tracking,
 allocation profiling, reference chain analysis, and

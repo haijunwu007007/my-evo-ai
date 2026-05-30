@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["adapter", "crewai", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — CrewAI 多智能体策略引擎 Grade: A (生产级) | Category: 编排调度",
 }
 

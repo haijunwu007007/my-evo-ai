@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_poseidon.task.request"}}],
     "depends_on": [],
     "tags": ["manager", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — Poseidon AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 

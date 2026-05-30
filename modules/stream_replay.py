@@ -1,4 +1,5 @@
 """Production-grade module: 流消息回放
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

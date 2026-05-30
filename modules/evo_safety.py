@@ -1,4 +1,5 @@
 """
+# Grade: A
         AUTO-EVO-AI V0.1 — Evolution Safety Controller
 Enterprise-grade safety guardrails for autonomous evolution processes.
 Monitors mutations, enforces constraints, and implements circuit-breakers

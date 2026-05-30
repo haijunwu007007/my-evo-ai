@@ -1,4 +1,5 @@
 """Model Evaluation - 模型评估模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "model-evaluation",

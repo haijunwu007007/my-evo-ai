@@ -3,6 +3,12 @@ AUTO-EVO-AI V0.1 — 代码模板管理器
 Grade: A (生产级) | Category: 开发工具
 职责：代码模板管理、项目脚手架、代码片段库、模板变量渲染
 """
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any, Dict
+import functools
+import logging
+import threading
 
 __module_meta__ = {
     "id": "code-template",
@@ -275,9 +281,6 @@ CMD ["{{cmd}}"]
                 "language": "python",
                 "tags": ["test", "pytest", "testing"],
                 "content": '''"""{{description}}"""
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Any, Dict
 
 @pytest.fixture
 def sample_data():
@@ -343,8 +346,6 @@ class Test{{class_name}}:
                 "language": "python",
                 "tags": ["retry", "decorator", "resilience"],
                 "code": '''import time
-import functools
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -398,7 +399,6 @@ class MyClass(metaclass=Singleton):
                 "language": "python",
                 "tags": ["rate_limit", "token_bucket", "throttle"],
                 "code": '''import time
-import threading
 
 class TokenBucket:
     """令牌桶限流器"""

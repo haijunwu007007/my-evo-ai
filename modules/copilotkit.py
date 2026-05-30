@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["copilotkit", "manager", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — CopilotKit AI助手集成 Grade: A (生产级) | Category: AI集成",
 }
 

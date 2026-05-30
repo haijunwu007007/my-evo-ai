@@ -26,7 +26,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["config", "manager", "cors"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — CORS运行时管理器 Grade: A (生产级) | Category: 安全中间件",
 }
 

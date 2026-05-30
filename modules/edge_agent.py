@@ -1,4 +1,5 @@
 """Edge Agent - 边缘计算智能体模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "edge-agent",

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现）
 ===============================================
 模块ID: cron-scheduler
@@ -35,7 +36,7 @@ __module_meta__ = {
     "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
     "depends_on": [],
     "tags": ["adapter", "cron"],
-    "grade": "B",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现） ===============================================",
 }
 

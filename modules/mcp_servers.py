@@ -1,4 +1,5 @@
 """
+# Grade: A
 MCP Servers Management — 上市公司级MCP服务器生命周期管理
 支持服务器注册/发现/健康监控/负载均衡/配置热更新/安全鉴权
 """
@@ -24,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["config", "manager", "mcp"],
-    "grade": "C",
+    "grade": "A",
     "description": "MCP Servers Management — 上市公司级MCP服务器生命周期管理 支持服务器注册/发现/健康监控/负载均衡/配置热更新/安全鉴权",
 }
 import logging

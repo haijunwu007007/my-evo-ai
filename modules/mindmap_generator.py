@@ -1,4 +1,5 @@
 """
+# Grade: A
 Mindmap Generator Module - Enterprise Production Grade
 Generates structured mindmaps from text input with layout algorithms,
 multi-branch support, export formats, and collaborative editing.

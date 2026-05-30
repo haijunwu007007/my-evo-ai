@@ -1,4 +1,5 @@
 """Production-grade module: 分布式计数器
+# Grade: A
 Atomic counters with TTL, rate limiting, sliding window, and consistent hashing.
 """
 

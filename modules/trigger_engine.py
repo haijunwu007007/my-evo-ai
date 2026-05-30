@@ -1,4 +1,5 @@
 """
+# Grade: A
 Trigger Engine - 企业级事件触发引擎
 生产级Cron/Event/Condition/Webhook触发器管理
 支持：Cron表达式调度、事件条件匹配、链式触发、死信队列、幂等保证

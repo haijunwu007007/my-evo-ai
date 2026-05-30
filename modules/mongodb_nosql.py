@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - MongoDB NoSQL 存储（A级）
+# Grade: B
 
 真实 MongoDB (pymongo) + 内存降级"""
-__module_meta__ = {"id":"mongodb-nosql","name":"MongoDB NoSQL","version":"V0.1","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"mongodb-nosql","name":"MongoDB NoSQL","version":"V0.1","group":"infrastructure","grade":"B",
     "tags":["infrastructure","database","nosql","mongodb","document"],"description":"MongoDB-style document store engine"}
 import time, uuid, logging, json, copy
 from typing import Any, Dict, List, Optional

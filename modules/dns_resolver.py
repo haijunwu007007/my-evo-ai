@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | DNS解析器引擎
 企业级DNS解析与缓存系统 - 支持多DNS服务器、缓存、健康检查
 

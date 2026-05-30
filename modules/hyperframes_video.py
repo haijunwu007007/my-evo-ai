@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 Hyperframes 视频渲染集成 v2.0
 版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg
 功能: HTML原生视频定义 + 真实视频渲染(多轨道合成、转场、文字叠加、图片序列、音频混合)
@@ -28,7 +29,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["hyperframes"],
-    "grade": "C",
+    "grade": "A",
     "description": "Hyperframes 视频渲染集成 v2.0 版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg",
 }
 import os, json, logging, subprocess, shutil, tempfile, math

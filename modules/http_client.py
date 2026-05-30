@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — Http Client
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | HTTP客户端引擎
 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器
 

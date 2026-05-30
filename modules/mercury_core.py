@@ -1,4 +1,5 @@
 """
+# Grade: A
 Mercury Core Module - Enterprise Production Grade
 High-performance message processing engine with
 priority queues, backpressure, and exactly-once semantics.

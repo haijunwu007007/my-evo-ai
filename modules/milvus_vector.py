@@ -1,4 +1,5 @@
 """
+# Grade: A
 Milvus Vector Module - Enterprise Production Grade
 Vector database management with collection operations,
 index building, hybrid search, and similarity ranking.

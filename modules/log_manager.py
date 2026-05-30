@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — Enterprise Log Manager
 Production-grade centralized log management with structured logging,
 multi-sink routing, search, retention policies, alerting, and analytics for上市企业生产级标准.

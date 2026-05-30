@@ -1,4 +1,5 @@
 """Production-grade module: 窗口函数引擎
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

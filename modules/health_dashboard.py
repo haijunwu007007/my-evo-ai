@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 健康检查面板（A级）
+# Grade: B
 
 真实 HTTP 健康检查 + concurrent.futures 并行"""
-__module_meta__ = {"id":"health-dashboard","name":"Health Dashboard","version":"V0.1","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"health-dashboard","name":"Health Dashboard","version":"V0.1","group":"monitoring","grade":"C",
     "tags":["monitoring","health","dashboard","status"],"description":"Health check dashboard - HTTP/endpoint health aggregation"}
 import time, logging, json, concurrent.futures
 from typing import Any, Dict, List

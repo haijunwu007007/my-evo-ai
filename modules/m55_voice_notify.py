@@ -1,4 +1,5 @@
 """
+# Grade: A
         AUTO-EVO-AI V0.1 - Voice Notification Engine
 Enterprise-grade voice notification and TTS system.
 Supports multi-language text-to-speech, voice scheduling,

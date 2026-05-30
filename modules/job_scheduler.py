@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
     "depends_on": [],
     "tags": ["job"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 任务调度 Grade: A (生产级) | Category: 调度编排",
 }
 

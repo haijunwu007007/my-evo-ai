@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["bitmap", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 位图操作模块 Grade: A (生产级) | Category: 数据结构",
 }
 

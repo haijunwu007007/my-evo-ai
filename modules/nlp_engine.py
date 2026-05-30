@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["adapter", "nlp", "engine"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — NLP引擎 Grade: A (生产级) | Category: AI能力",
 }
 

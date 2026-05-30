@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — Delay Queue
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
         AUTO-EVO-AI V0.1 | 延迟队列引擎
 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略
 

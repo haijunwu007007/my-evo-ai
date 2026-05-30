@@ -1,4 +1,5 @@
 """Production-grade module: 视觉RPA
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

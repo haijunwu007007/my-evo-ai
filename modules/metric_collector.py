@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 指标收集器（A级）
+# Grade: B
 
 真实 psutil/requests + 内存降级"""
-__module_meta__ = {"id":"metric-collector","name":"Metric Collector","version":"V0.1","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"metric-collector","name":"Metric Collector","version":"V0.1","group":"monitoring","grade":"C",
     "tags":["monitoring","metrics","performance","collector"],"description":"System metrics collector - CPU/memory/disk/network"}
 import time, logging, json, threading, socket, os
 from typing import Any, Dict

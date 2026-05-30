@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "webhook", "config": {"path": "/hooks/data_scraping", "method": "POST"}}],
     "depends_on": [],
     "tags": ["adapter", "engine", "data"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 数据采集引擎 Grade: A (生产级) | Category: AI能力",
 }
 

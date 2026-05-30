@@ -1,4 +1,5 @@
 """
+# Grade: A
 目标追踪器 - AUTO-EVO-AI V0.1
 管理多周期目标、进度追踪、可视化状态
 """
@@ -24,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["goal"],
-    "grade": "C",
+    "grade": "A",
     "description": "目标追踪器 - AUTO-EVO-AI V0.1 管理多周期目标、进度追踪、可视化状态",
 }
 

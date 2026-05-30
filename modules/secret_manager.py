@@ -1,4 +1,5 @@
 """Production-grade module: 密钥管理器
+# Grade: A
 企业级密钥生命周期引擎 - 管理API Key、数据库密码、证书私钥等敏感凭证。
 典型场景: CI/CD凭证注入、数据库密码轮换、API Key发放与回收、密钥审计追溯。
 """

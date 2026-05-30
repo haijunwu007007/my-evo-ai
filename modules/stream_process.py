@@ -1,4 +1,5 @@
 """Production-grade module: 流处理引擎
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

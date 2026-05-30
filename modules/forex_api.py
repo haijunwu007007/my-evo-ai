@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 外汇汇率 API（A级）"""
-__module_meta__ = {"id":"forex-api","name":"Forex API","version":"V0.1","group":"data","grade":"A",
+# Grade: B
+__module_meta__ = {"id":"forex-api","name":"Forex API","version":"V0.1","group":"data","grade":"C",
     "tags":["data","finance","forex"],"description":"外汇汇率 API - 报价/换算/历史/统计"}
 import time, uuid, logging
 from typing import Any, Dict

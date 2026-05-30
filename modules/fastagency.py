@@ -1,4 +1,5 @@
 """FastAgency - AI Agent快速编排框架模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "fastagency",

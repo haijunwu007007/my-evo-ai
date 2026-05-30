@@ -1,4 +1,5 @@
 """Production-grade module: 签名URL
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

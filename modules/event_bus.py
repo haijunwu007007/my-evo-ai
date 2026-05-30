@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI - 事件总线 / 数据流引擎
 版本: V0.1
 功能: 模块间事件发布订阅、消息队列、数据流DAG编排、状态传递
@@ -21,7 +22,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["event", "bus", "messaging", "core"],
-    "grade": "S",
+    "grade": "A",
 }
 import asyncio
 import json

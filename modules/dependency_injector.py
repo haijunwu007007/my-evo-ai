@@ -3,6 +3,7 @@ from contextlib import contextmanager
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | 依赖注入容器引擎
 企业级IoC容器 - 控制反转与依赖注入管理
 

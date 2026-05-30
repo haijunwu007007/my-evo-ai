@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 查询缓存层（A级）"""
-__module_meta__ = {"id":"query-cache-layer","name":"Query Cache","version":"V0.1","group":"storage","grade":"A","tags":["storage","cache","query"],"description":"查询缓存层 - get/set/invalidate/管理"}
+# Grade: C
+__module_meta__ = {"id":"query-cache-layer","name":"Query Cache","version":"V0.1","group":"storage","grade":"C","tags":["storage","cache","query"],"description":"查询缓存层 - get/set/invalidate/管理"}
 import time,uuid,logging,hashlib
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)

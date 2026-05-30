@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 AUTO-EVO-AI - Cron调度引擎 v3.0
 版本: V0.1 | 自研 + APScheduler集成
 功能: 真实定时调度( cron / interval / date )、任务链、超时控制、错误回调、持久化
@@ -28,7 +29,7 @@ __module_meta__ = {
     "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
     "depends_on": [],
     "tags": ["engine", "cron"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI - Cron调度引擎 v3.0 版本: V0.1 | 自研 + APScheduler集成",
 }
 import json, os, re, time, threading, traceback, logging

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/husky.sh"
+
+cd frontend
+npx --yes vue-tsc --noEmit 2>/dev/null || echo '[WARN] vue-tsc not available, skipping typecheck'

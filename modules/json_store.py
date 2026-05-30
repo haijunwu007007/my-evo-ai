@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - JSON 持久化存储（A级） — 线程安全原子写入"""
+# Grade: A
 
 import json
 import os

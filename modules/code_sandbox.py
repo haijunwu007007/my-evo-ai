@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎
 企业级隔离执行环境 - 安全运行用户提交的代码片段
 

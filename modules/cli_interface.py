@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — CLI Interface — 命令行交互接口
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎
 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展
 

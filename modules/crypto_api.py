@@ -1,4 +1,5 @@
 """Production-grade module: 加密货币API网关
+# Grade: A
 聚合多源加密货币行情数据，提供统一查询接口、价格预警、行情订阅。
 """
 

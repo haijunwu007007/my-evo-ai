@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 健康探测（A级）
+# Grade: B
 
 TCP/HTTP 端点健康检查器，支持自定义探测策略/统计/历史"""
-__module_meta__ = {"id":"health-ping","name":"Health Ping","version":"V0.1","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"health-ping","name":"Health Ping","version":"V0.1","group":"monitoring","grade":"C",
     "tags":["monitoring","health","ping","tcp","http"],"description":"TCP/HTTP health checker with custom probes, stats, history"}
 import time, socket, urllib.request, urllib.parse, logging, json
 from typing import Any, Dict, Optional

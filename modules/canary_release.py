@@ -24,7 +24,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "canary", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production) 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚",
 }
 

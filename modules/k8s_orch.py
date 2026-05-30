@@ -1,4 +1,5 @@
 """
+# Grade: A
 K8s Orchestrator — 企业级Kubernetes编排管理引擎
 生产级实现：Pod/Deployment/Service CRUD、滚动更新、HPA自动伸缩、资源调度、事件审计
 """

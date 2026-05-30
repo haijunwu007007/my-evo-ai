@@ -1,4 +1,5 @@
 """
+# Grade: A
         AUTO-EVO-AI V0.1 - Tunnel Manager
 Enterprise-grade secure tunnel management for network connectivity.
 Supports port forwarding, reverse tunnels, SOCKS proxies,

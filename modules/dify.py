@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["dify", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — Dify LLM应用平台集成模块 Grade: A (生产级) | Category: AI集成",
 }
 

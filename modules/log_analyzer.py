@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["logging", "monitor", "log", "adapter"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 日志分析引擎 Grade: A (生产级) | Category: 工具链",
 }
 

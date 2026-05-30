@@ -1,4 +1,5 @@
 """
+# Grade: A
 Microservice Bus Module - Enterprise Production Grade
 Service mesh message bus with pub/sub, request/reply,
 service discovery, circuit breaker, and dead letter handling.

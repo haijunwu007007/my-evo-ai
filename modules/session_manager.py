@@ -1,4 +1,5 @@
 """Production-grade module: 会话管理器
+# Grade: A
 企业级Session生命周期引擎 - 管理用户登录会话、Token刷新、并发控制、安全审计。
 典型场景: Web应用Session管理、JWT Token续期、并发登录限制、异常登录检测。
 """

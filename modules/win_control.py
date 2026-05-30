@@ -1,4 +1,5 @@
 """Production-grade module: Windows窗口控制
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

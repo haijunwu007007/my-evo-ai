@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "vue-tsc --noEmit",
+    "prepare": "cd .. && husky frontend/.husky"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.0",

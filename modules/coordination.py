@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["coordination", "service", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 分布式协调服务 Grade: A (生产级) | Category: 分布式基础",
 }
 

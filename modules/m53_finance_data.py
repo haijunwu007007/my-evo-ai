@@ -1,5 +1,9 @@
+"""
+AUTO-EVO-AI V0.1 — M53 Finance Data
+"""
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎
 ================================================================
 A级企业级模块 — 继承 EnterpriseModule
@@ -41,7 +45,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "m53"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎 ================================================================",
 }
 

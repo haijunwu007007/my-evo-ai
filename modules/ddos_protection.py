@@ -1,4 +1,5 @@
 """Production-grade DDoS防护模块 V0.1
+# Grade: A
 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解
 """
 

@@ -1,4 +1,5 @@
 """
+# Grade: A
 Network Proxy Module - Enterprise Production Grade
 Reverse/forward proxy with load balancing, connection pooling,
 SSL/TLS termination, rate limiting, and request transformation.

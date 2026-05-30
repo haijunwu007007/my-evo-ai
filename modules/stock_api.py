@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版)
 数据源: AKShare / 腾讯自选股API
 功能: A股/港股/美股实时行情、K线、分钟线、财务数据、资金流向
@@ -27,7 +28,7 @@ __module_meta__ = {
     "triggers": [{"type": "webhook", "config": {"path": "/hooks/stock_api", "method": "POST"}}],
     "depends_on": [],
     "tags": ["stock"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版) 数据源: AKShare / 腾讯自选股API",
 }
 import json, os, time, logging

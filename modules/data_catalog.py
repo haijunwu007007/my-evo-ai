@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据目录（A级）"""
-__module_meta__ = {"id":"data-catalog","name":"Data Catalog","version":"V0.1","group":"data","grade":"A",
+# Grade: A
+__module_meta__ = {"id":"data-catalog","name":"Data Catalog","version":"V0.1","group":"data","grade":"B",
     "tags":["data","catalog","metadata"],"description":"数据目录 - 真实文件扫描/os.walk/fnmatch/元数据索引"}
 
 import os, fnmatch, logging, hashlib

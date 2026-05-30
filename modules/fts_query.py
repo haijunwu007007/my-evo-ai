@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 - 全文搜索引擎（A级）
+# Grade: A
 
 基于 DataEngine SQLite 的倒排索引全文搜索，支持中文/英文分词、TF-IDF 评分。
 """

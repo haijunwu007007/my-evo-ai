@@ -1,4 +1,5 @@
 """
+# Grade: A
 LoongClaw Integration - Enterprise-grade LoongClaw framework bridge.
 
 Production features:

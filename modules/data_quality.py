@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据质量引擎（A级）
+# Grade: B
 
 数据质量检查：完整性、唯一性、有效性、范围校验"""
-__module_meta__ = {"id":"data-quality","name":"Data Quality","version":"V0.1","group":"data","grade":"A",
+__module_meta__ = {"id":"data-quality","name":"Data Quality","version":"V0.1","group":"data","grade":"C",
     "tags":["data","quality","validation","profiling"],"description":"Data quality checks: completeness, uniqueness, validity"}
 import time, logging, re
 from typing import Any, Dict, List, Optional

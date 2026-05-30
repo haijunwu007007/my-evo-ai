@@ -1,4 +1,5 @@
 """Production-grade module: Web应用防火墙
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

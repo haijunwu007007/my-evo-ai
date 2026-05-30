@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - OAuth2 授权服务器（A级生产实现）
 ====================================================
 模块ID: oauth-provider
@@ -12,7 +13,7 @@ __module_meta__ = {
     "outputs": [{"name": "result", "type": "dict", "description": "OAuth2 响应"}],
     "triggers": [], "depends_on": [],
     "tags": ["security", "oauth2", "auth", "core"],
-    "grade": "A",
+    "grade": "B",
     "description": "OAuth2 授权服务器 - 4种授权模式",
 }
 

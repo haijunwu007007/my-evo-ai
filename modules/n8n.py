@@ -1,4 +1,5 @@
 """
+# Grade: A
 N8N Module - Enterprise Production Grade
 Workflow automation engine with visual node-based programming,
 trigger management, execution scheduling, and webhook handling.

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Elasticsearch 搜索（A级）
+# Grade: B
 
 真实 ES REST API + 内存降级"""
-__module_meta__ = {"id":"elasticsearch-search","name":"ES Search","version":"V0.1","group":"network","grade":"A",
+__module_meta__ = {"id":"elasticsearch-search","name":"ES Search","version":"V0.1","group":"network","grade":"C",
     "tags":["network","search","elasticsearch"],"description":"Elasticsearch 搜索 - 索引/文档/搜索/管理"}
 import time, uuid, logging
 from typing import Any, Dict

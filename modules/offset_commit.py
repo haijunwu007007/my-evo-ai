@@ -1,4 +1,5 @@
 """
+# Grade: A
 Offset Commit Module - Enterprise Production Grade
 Consumer offset tracking with exactly-once semantics,
 group management, rebalance handling, and checkpoint persistence.

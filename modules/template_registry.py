@@ -1,9 +1,13 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - 生产级模板注册中心
 模块ID: template_registry
 级别: A级 (上市公司生产级)
 功能: 模板全生命周期管理、版本控制、依赖解析、渲染引擎、权限控制
 """
+import logging
+from modules._base.enterprise_module import (
+from modules._base.metrics import prometheus_timer, metrics_collector
 
 __module_meta__ = {
     "id": "template-registry",
@@ -470,11 +474,8 @@ class TemplateRegistry:
 {{ module_description }}
 \"\"\"
 
-import logging
-from modules._base.enterprise_module import (
     EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 )
-from modules._base.metrics import prometheus_timer, metrics_collector
  {{ typing_imports | default("Dict, List, Optional, Any") }}
 
 logger = logging.getLogger(__name__)

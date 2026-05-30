@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 — 多Agent协作框架"""
+# Grade: B
 VERSION = "V0.1"
 __module_meta__ = {"id": "crewai", "name": "CrewAI", "version": VERSION, "group": "ai"}
 

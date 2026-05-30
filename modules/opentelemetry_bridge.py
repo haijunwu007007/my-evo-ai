@@ -1,4 +1,5 @@
 """
+# Grade: A
 Enterprise OpenTelemetry Bridge Module
 上市公司生产级 - 分布式链路追踪、指标采集、日志关联
 """

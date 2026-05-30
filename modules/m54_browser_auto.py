@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 浏览器自动化引擎（上市公司级）
+# Grade: A
 
 基于 Playwright 的浏览器 RPA 引擎，支持导航/截图/点击/文本提取/
 表单填写/Cookie 管理/会话管理/PDF 导出/等待策略。

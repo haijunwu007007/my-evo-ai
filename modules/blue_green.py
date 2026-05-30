@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "manager", "blue"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 蓝绿部署模块 Grade: A (生产级) | Category: 部署管理",
 }
 

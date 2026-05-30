@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - Token Budget Control Module
 基于 Mercury Agent 的Token预算控制系统
 
@@ -33,7 +34,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["manager", "token"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - Token Budget Control Module 基于 Mercury Agent 的Token预算控制系统",
 }
 

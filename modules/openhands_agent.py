@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 — OpenHands Agent集成"""
+# Grade: B
 VERSION="V0.1"
 __module_meta__={"id":"openhands-agent","name":"OpenHandsAgent","version":VERSION,"group":"ai"}
 import json,time,uuid,logging,urllib.request as ur

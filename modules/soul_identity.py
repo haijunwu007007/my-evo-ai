@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - Soul Identity Module
 基于 Mercury Agent 的 Soul-Driven 身份系统
 
@@ -31,7 +32,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["identity", "soul"],
-    "grade": "B",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统",
 }
 

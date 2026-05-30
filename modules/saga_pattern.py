@@ -1,4 +1,5 @@
 """Production-grade module: Saga分布式事务
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

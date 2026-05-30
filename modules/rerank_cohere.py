@@ -1,4 +1,5 @@
 """Rerank Cohere - Cohere重排序模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "rerank-cohere",

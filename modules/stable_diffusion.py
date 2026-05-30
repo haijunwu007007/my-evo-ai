@@ -1,4 +1,5 @@
 """Stable Diffusion - 图像生成模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "stable-diffusion",

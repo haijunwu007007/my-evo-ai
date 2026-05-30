@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 Pixelle-Video AI短视频引擎 v2.0
 版本: V0.1 | 自研 + Pillow/numpy + ffmpeg
 功能: 输入主题自动生成真实MP4视频(文字动画+背景+转场+配乐)
@@ -28,7 +29,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["pixelle"],
-    "grade": "C",
+    "grade": "A",
     "description": "Pixelle-Video AI短视频引擎 v2.0 版本: V0.1 | 自研 + Pillow/numpy + ffmpeg",
 }
 import os, json, logging, subprocess, shutil, tempfile, math, random

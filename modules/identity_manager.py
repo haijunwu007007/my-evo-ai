@@ -1,4 +1,5 @@
 """
+# Grade: A
 Identity Manager Module — AUTO-EVO-AI V0.1
 Enterprise-grade identity and authentication management.
 Multi-factor auth (MFA), SSO/SAML/OIDC, RBAC/ABAC, session management,

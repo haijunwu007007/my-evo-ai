@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 文件扫描迭代器（A级）"""
-__module_meta__ = {"id":"scan-iterator","name":"ScanIterator","version":"V0.1","group":"ops","grade":"A",
+# Grade: A
+__module_meta__ = {"id":"scan-iterator","name":"ScanIterator","version":"V0.1","group":"ops","grade":"B",
     "tags":["ops","scan","file","filesystem"],"description":"基于 os.walk 的真实文件扫描"}
 import time, uuid, logging, os, fnmatch, hashlib
 from pathlib import Path

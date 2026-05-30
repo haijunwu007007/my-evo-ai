@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["manager", "billion"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 亿群OS企业管理模块 Grade: A (生产级) | Category: 企业管理",
 }
 

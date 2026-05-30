@@ -1,4 +1,5 @@
 """Production-grade PGVector向量存储模块 V0.1
+# Grade: A
 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理
 """
 

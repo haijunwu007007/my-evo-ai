@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 — 模型路由"""
+# Grade: B
 VERSION="V0.1"
 __module_meta__={"id":"model-router","name":"ModelRouter","version":VERSION,"group":"ai"}
 import json,time,uuid,random,logging,urllib.request as ur

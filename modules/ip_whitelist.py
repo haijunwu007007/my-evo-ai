@@ -1,4 +1,5 @@
 """
+# Grade: A
 IP Whitelist Manager — 企业级IP白名单策略引擎
 生产级实现：白名单CRUD、CIDR解析、通配符匹配、标签分组、过期管理、审计日志
 """

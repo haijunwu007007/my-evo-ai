@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Excel 引擎（A级）"""
+# Grade: A
 __module_meta__ = {"id":"excel-engine","name":"Excel Engine","version":"V0.1","group":"data","grade":"A",
     "tags":["data","excel","spreadsheet"],"description":"Excel引擎-真实Excel读写/CSV降级/格式检测"}
 

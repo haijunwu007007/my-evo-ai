@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | 地理位置搜索引擎
 企业级地理位置搜索与空间索引系统
 

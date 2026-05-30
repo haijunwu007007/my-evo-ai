@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_mock", "method": "POST"}}],
     "depends_on": [],
     "tags": ["api", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — API Mock服务 Grade: A (生产级) | Category: API基础设施",
 }
 

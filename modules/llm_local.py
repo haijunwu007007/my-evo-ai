@@ -1,4 +1,5 @@
 """LLM Local - 本地部署模型管理模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "llm-local",

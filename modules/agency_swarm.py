@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 Agency Swarm - 多Agent协作框架
 基于OpenAI Agents SDK构建
 
@@ -29,7 +30,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["agency", "agent"],
-    "grade": "C",
+    "grade": "A",
     "description": "Agency Swarm - 多Agent协作框架 基于OpenAI Agents SDK构建",
 }
 

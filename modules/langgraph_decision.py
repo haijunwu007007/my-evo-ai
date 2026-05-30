@@ -1,4 +1,5 @@
 """
+# Grade: A
 langgraph_decision — LangGraph决策引擎
 上市公司生产级 — 状态机/有向图决策流程、条件路由、并行分支、循环检测、快照回滚
 """

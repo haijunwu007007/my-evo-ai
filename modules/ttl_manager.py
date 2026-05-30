@@ -1,4 +1,5 @@
 """Production-grade module: TTL过期管理器
+# Grade: A
 企业级TTL生命周期引擎 - 管理缓存/会话/临时文件/验证码等资源的自动过期。
 典型场景: Redis Key过期策略、Session超时管理、临时文件清理、OTP验证码生命周期。
 """

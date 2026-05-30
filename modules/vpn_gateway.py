@@ -1,4 +1,5 @@
 """Production-grade module: VPN网关
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

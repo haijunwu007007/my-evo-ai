@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_marketplace.task.request"}}],
     "depends_on": [],
     "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 智能体市场 Grade: A (生产级) | Category: AI智能体",
 }
 

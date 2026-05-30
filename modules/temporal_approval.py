@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 时序审批引擎（A级）
+# Grade: B
 
 审批工作流引擎，支持多级审批、超时自动处理/统计"""
-__module_meta__ = {"id":"temporal-approval","name":"Temporal Approval","version":"V0.1","group":"workflow","grade":"A",
+__module_meta__ = {"id":"temporal-approval","name":"Temporal Approval","version":"V0.1","group":"workflow","grade":"C",
     "tags":["workflow","approval","temporal","review"],"description":"Approval workflow: multi-level review/timeout/stats"}
 import time, uuid, logging
 from typing import Any, Dict

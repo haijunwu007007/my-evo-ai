@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — Kafka Producer
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | Kafka生产者引擎
 企业级消息生产者 - 分区策略、消息保证、批量发送
 

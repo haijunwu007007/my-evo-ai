@@ -1,4 +1,5 @@
 """LLM Gemini - Google Gemini系列模型管理模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "llm-gemini",

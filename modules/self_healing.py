@@ -1,4 +1,5 @@
 """
+# Grade: A
 自我修复机制 - AUTO-EVO-AI V0.1
 异常捕获、自动恢复、熔断保护
 """
@@ -24,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "self"],
-    "grade": "B",
+    "grade": "A",
     "description": "自我修复机制 - AUTO-EVO-AI V0.1 异常捕获、自动恢复、熔断保护",
 }
 

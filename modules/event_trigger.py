@@ -1,4 +1,5 @@
 """Production-grade module: 事件触发器
+# Grade: A
 Event triggers, condition matching, action dispatching, webhook integration, event chaining.
 """
 

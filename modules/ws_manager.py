@@ -1,5 +1,9 @@
+"""
+AUTO-EVO-AI V0.1 — Ws Manager
+"""
 # -*- coding: utf-8 -*-
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - WebSocketManager WebSocket连接管理器
 ========================================================
 企业级WebSocket管理：连接池/房间/广播/心跳/消息队列/重连。

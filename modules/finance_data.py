@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 金融数据引擎（A级）
+# Grade: A
 
 真实 HTTP API + 内存降级"""
-__module_meta__ = {"id":"finance-data","name":"Finance Data","version":"V0.1","group":"data","grade":"A",
+__module_meta__ = {"id":"finance-data","name":"Finance Data","version":"V0.1","group":"data","grade":"B",
     "tags":["data","finance","stock","market","quote"],"description":"Stock market and financial data query engine"}
 import time, logging, json, urllib.request, urllib.parse, random
 from typing import Any, Dict, List, Optional

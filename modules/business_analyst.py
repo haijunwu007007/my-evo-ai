@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "business_analyst.trigger"}}],
     "depends_on": [],
     "tags": ["manager", "business"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 商业分析师模块 Grade: A (生产级) | Category: 智能分析",
 }
 

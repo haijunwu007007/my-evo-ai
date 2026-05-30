@@ -1,4 +1,5 @@
 """Production-grade module: 隧道管理
+# Grade: A
 EnterpriseModule implementation with real business logic.
 安全隧道全生命周期管理：创建/销毁/健康检查/流量统计/多协议支持（SSH/HTTP/SOCKS5）。
 """

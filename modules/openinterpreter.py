@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — openinterpreter
 上市公司生产级 · 代码解释器模块
 功能：多语言代码执行沙箱、安全隔离、资源限制、输出捕获、执行历史

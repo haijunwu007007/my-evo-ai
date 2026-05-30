@@ -1,8 +1,12 @@
+"""
+AUTO-EVO-AI V0.1 — Permission Guard
+"""
 try:
     import time
 except ImportError:
     pass
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - Permission Guard Module
 基于 Mercury Agent 的权限加固系统
 

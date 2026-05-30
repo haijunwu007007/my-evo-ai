@@ -1,4 +1,5 @@
 """Production-grade module: 服务发现
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

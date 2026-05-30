@@ -28,7 +28,7 @@ __module_meta__ = {
     ],
     "depends_on": [],
     "tags": ["gateway", "manager", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — Phoebus AI智能体 Grade: A (生产级) | Category: AI智能体",
 }
 

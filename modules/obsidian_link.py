@@ -1,4 +1,5 @@
 """
+# Grade: A
 Obsidian Link Module - Enterprise Production Grade
 Bi-directional link management for knowledge graph,
 backlink tracking, graph view, tag management, and search.

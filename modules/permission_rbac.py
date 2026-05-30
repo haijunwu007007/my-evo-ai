@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+# Grade: B
 AUTO-EVO-AI V0.1 - RBAC 权限管理（A级生产实现）
 ================================================
 模块ID: permission-rbac
 功能：角色 CRUD、权限绑定、用户角色分配、check_permission。
 """
-__module_meta__ = {"id":"permission-rbac","name":"RBAC","version":"V0.1","group":"security","grade":"A",
+__module_meta__ = {"id":"permission-rbac","name":"RBAC","version":"V0.1","group":"security","grade":"B",
     "tags":["security","rbac","permission"],"description":"RBAC 权限管理 - 角色/权限/用户"}
 import time, uuid, logging
 from typing import Any, Dict, List, Optional

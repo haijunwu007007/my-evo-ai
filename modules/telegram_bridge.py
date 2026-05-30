@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Telegram 桥接器（A级）
+# Grade: A
 
 Telegram Bot API 客户端，支持消息发送、Markdown 消息、更新轮询。
 使用 requests 库调用 Telegram Bot HTTP API，内置 graceful degradation。"""
-__module_meta__ = {"id":"telegram-bridge","name":"Telegram Bridge","version":"V0.1","group":"communication","grade":"A",
+__module_meta__ = {"id":"telegram-bridge","name":"Telegram Bridge","version":"V0.1","group":"communication","grade":"B",
     "tags":["communication","telegram","bot","messaging"],"description":"Telegram Bot API bridge for messaging"}
 import logging, json
 from typing import Any, Dict, Optional, List

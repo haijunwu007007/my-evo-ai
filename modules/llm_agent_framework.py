@@ -1,4 +1,5 @@
 """LLM Agent Framework - 通用LLM智能体框架模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "llm-agent-framework",

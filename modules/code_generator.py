@@ -3,6 +3,9 @@ AUTO-EVO-AI V0.1 — 智能代码生成器
 Grade: A (生产级) | Category: 工具链
 职责：多语言代码生成、模板引擎、代码审查、重构建议、文档生成
 """
+from typing import List, Optional
+from pydantic import BaseModel
+from {module_path} import {class_name}
 
 __module_meta__ = {
     "id": "code-generator",
@@ -378,8 +381,6 @@ module_class = {class_name}
                 "api",
                 "FastAPI RESTful API接口",
                 """from fastapi import APIRouter, HTTPException, Depends
-from typing import List, Optional
-from pydantic import BaseModel
 
 router = APIRouter(prefix="/{prefix}", tags=["{tag}"])
 
@@ -426,7 +427,6 @@ def delete_{endpoint}(item_id: str):
                 "test",
                 "pytest单元测试模板",
                 """import pytest
-from {module_path} import {class_name}
 
 @pytest.fixture
 def instance():

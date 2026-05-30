@@ -1,4 +1,5 @@
 """Production-grade CTE查询引擎模块 V0.1
+# Grade: A
 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存
 """
 

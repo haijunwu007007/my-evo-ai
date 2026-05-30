@@ -17,7 +17,7 @@ __module_meta__ = {
     "name": "System Coordinator (Bridge)",
     "version": "V0.1",
     "group": "system",
-    "grade": "A",
+    "grade": "S",
     "tags": ["system", "coordinator", "bridge"],
     "description": "V2→V3 向后兼容桥接"
 }

@@ -28,7 +28,7 @@ __module_meta__ = {
     ],
     "depends_on": [],
     "tags": ["health", "monitor"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 健康监控 Grade: A (生产级) | Category: 运维监控",
 }
 

@@ -1,4 +1,5 @@
 """Production-grade module: Weaviate语义搜索
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

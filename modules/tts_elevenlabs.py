@@ -1,4 +1,5 @@
 """TTS ElevenLabs - 语音合成模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "tts-elevenlabs",

@@ -1,4 +1,5 @@
 """Goose Coder - AI编程助手模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "goose-coder",

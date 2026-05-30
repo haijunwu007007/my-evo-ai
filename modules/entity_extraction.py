@@ -1,4 +1,5 @@
 """Production-grade module: 实体抽取引擎
+# Grade: A
 NER entity extraction, pattern matching, dictionary-based extraction, entity linking, relation extraction.
 """
 

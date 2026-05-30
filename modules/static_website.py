@@ -1,4 +1,5 @@
 """Production-grade module: 静态网站托管
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

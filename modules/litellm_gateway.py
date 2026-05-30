@@ -1,4 +1,5 @@
 """LiteLLM Gateway - 统一LLM网关代理模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "litellm-gateway",

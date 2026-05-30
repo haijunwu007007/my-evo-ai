@@ -1,4 +1,5 @@
 """
+# Grade: A
 Bucket Policy Manager - 对象存储桶策略管理
 生产级模块：S3兼容桶策略的完整生命周期管理
 

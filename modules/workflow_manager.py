@@ -1,4 +1,5 @@
 """
+# Grade: A
         Workflow Manager - 企业级工作流管理引擎
 生产级DAG工作流编排：节点编排、条件分支、并行执行、超时控制、重试策略、审批流
 支持：JSON定义工作流、节点依赖DAG校验、执行状态追踪、SLA监控
@@ -20,7 +21,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "workflow.execute.request"}}],
     "depends_on": ["trigger-engine", "event-bus"],
     "tags": ["workflow", "dag", "core"],
-    "grade": "S",
+    "grade": "A",
 }
 import time
 import uuid

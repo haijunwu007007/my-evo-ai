@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 | Enterprise Module
 output_formatter — 企业级输出格式化引擎
 多格式输出(JSON/YAML/XML/CSV/Markdown/HTML/Table)、模板系统、字段映射、

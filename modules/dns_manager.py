@@ -1,4 +1,5 @@
 """Production-grade module: DNS域名管理系统
+# Grade: A
 DNS record management, caching, TTL tracking, health probing, zone management.
 """
 

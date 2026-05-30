@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
     "depends_on": [],
     "tags": ["backup", "manager", "resilience"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 备份管理 Grade: A (生产级) | Category: 数据保护",
 }
 

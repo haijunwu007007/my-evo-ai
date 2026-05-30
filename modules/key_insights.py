@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎
 
 上市公司级 A级模块，提供多维数据分析与洞察提取能力：
@@ -31,7 +32,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "key"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎 上市公司级 A级模块，提供多维数据分析与洞察提取能力：",
 }
 

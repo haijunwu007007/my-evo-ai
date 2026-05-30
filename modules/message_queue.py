@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "message_queue.trigger"}}],
     "depends_on": [],
     "tags": ["engine", "message"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 消息队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
 }
 

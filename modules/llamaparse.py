@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — Enterprise LlamaParse Document Parser
 Production-grade document parsing with multi-format support, chunking strategies,
 table extraction, OCR simulation, layout analysis, and metadata extraction for上市企业生产级标准.

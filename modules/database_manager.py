@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据库管理器（A级）— SQLite 连接池 + 迁移管理 + CRUD"""
+# Grade: A
 
 import sqlite3
 import os

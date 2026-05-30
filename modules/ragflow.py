@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — RAGFlow Document Intelligence Engine
 ========================================================
 Production-grade RAGFlow integration for intelligent document processing,

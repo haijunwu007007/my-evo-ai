@@ -1,4 +1,5 @@
 """
+# Grade: A
         GitHub趋势追踪模块 - GitHub Trending Tracker Service
 生产级实现：趋势仓库采集、语言分类、增速计算、历史对比、热点分析
 """

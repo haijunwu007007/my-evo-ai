@@ -1,4 +1,5 @@
 """Lua Script Engine - Production-grade Lua scripting sandbox for enterprise automation."""
+# Grade: A
 
 __module_meta__ = {
     "id": "lua-script",

@@ -1,5 +1,9 @@
+"""
+AUTO-EVO-AI V0.1 — Agent Orchestrator — 多智能体编排引擎
+"""
 from __future__ import annotations
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — m30 Agent Orchestrator 主编排器 (智能体大脑)
 ================================================================
 功能：系统级智能编排中枢 —— 用户一句话，自动拆解→调度→执行→学习→改进
@@ -50,7 +54,7 @@ __module_meta__ = {
     ],
     "depends_on": ["workflow-manager", "self-evolving-engine", "longterm-memory", "ai-gateway"],
     "tags": ["orchestrator", "agent", "core", "brain"],
-    "grade": "S",
+    "grade": "A",
 }
 import re, time, uuid, json, logging, threading
 from dataclasses import dataclass, field

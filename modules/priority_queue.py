@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 优先级队列（A级）
+# Grade: C
 
 基于堆的优先级任务队列，支持优先级分级和延迟消费"""
-__module_meta__ = {"id":"priority-queue","name":"Priority Queue","version":"V0.1","group":"infrastructure","grade":"A",
+__module_meta__ = {"id":"priority-queue","name":"Priority Queue","version":"V0.1","group":"infrastructure","grade":"C",
     "tags":["infrastructure","queue","priority","scheduling"],"description":"Priority queue with heap-based scheduling"}
 import time, uuid, logging, heapq
 from typing import Any, Dict, List, Optional

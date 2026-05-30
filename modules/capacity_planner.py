@@ -24,7 +24,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "manager", "capacity"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production) 容量规划：资源预测、负载分析、扩缩容建议、成本优化",
 }
 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 守护进程控制器（A级）
+# Grade: B
 
 使用 subprocess + os 管理真实系统进程，跨平台兼容 Windows/Linux。"""
-__module_meta__ = {"id":"daemon-controller","name":"Daemon Controller","version":"V0.1","group":"ops","grade":"A","tags":["ops","daemon","process"],"description":"守护进程控制器，支持真实进程启停监控"}
+__module_meta__ = {"id":"daemon-controller","name":"Daemon Controller","version":"V0.1","group":"ops","grade":"B","tags":["ops","daemon","process"],"description":"守护进程控制器，支持真实进程启停监控"}
 import os, time, uuid, logging, subprocess, platform, signal
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)

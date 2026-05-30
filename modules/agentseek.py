@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "agentseek", "manager", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — AgentSeek智能体搜索 Grade: A (生产级) | Category: AI智能体",
 }
 

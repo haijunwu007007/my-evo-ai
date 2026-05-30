@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — Trending Pipeline (Production Grade)
 =========================================================
 上市公司级自主趋势分析管线：

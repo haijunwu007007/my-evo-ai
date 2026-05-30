@@ -1,4 +1,5 @@
 """Production-grade module: 自适应进化引擎
+# Grade: A
 Adaptive evolution, strategy evaluation, parameter tuning, fitness scoring, population management.
 """
 

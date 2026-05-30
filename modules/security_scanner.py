@@ -28,7 +28,7 @@ __module_meta__ = {
     ],
     "depends_on": [],
     "tags": ["adapter", "scanner", "security"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — 安全扫描器 Grade: A (生产级) | Category: 安全合规",
 }
 

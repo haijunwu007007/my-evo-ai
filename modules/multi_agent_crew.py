@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 — 多Agent编排器"""
+# Grade: B
 VERSION = "V0.1"
 __module_meta__ = {"id": "multi-agent-crew", "name": "MultiAgentCrew", "version": VERSION, "group": "ai"}
 

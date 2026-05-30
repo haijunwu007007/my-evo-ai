@@ -1,4 +1,5 @@
 """AUTO-EVO-AI V0.1 — 自主Agent"""
+# Grade: B
 VERSION = "V0.1"
 __module_meta__ = {"id": "auto-agent", "name": "AutoAgent", "version": VERSION, "group": "ai"}
 

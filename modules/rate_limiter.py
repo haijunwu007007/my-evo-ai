@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 通用限流器（A级）— Token Bucket + Sliding Window 真实实现"""
+# Grade: A
 
 import time
 import uuid

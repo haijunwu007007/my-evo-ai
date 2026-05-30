@@ -1,4 +1,5 @@
 """
+# Grade: A
 Neo4j Graph Module - Enterprise Production Grade
 Graph database operations with node/relationship CRUD,
 Cypher-like query support, graph algorithms, and path finding.

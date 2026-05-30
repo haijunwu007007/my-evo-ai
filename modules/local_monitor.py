@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — Enterprise Local Resource Monitor
 Production-grade local system resource monitoring with process tracking,
 disk I/O, network stats, memory analysis, alerting, and historical metrics for上市企业生产级标准.

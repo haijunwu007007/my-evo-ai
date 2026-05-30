@@ -1,4 +1,5 @@
 """Production-grade Pinecone托管向量库模块 V0.1
+# Grade: A
 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标
 """
 

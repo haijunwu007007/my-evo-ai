@@ -1,4 +1,5 @@
 """Production-grade module: 错误聚合分析
+# Grade: A
 Error collection, aggregation, deduplication, root cause analysis, trend tracking, alerting.
 """
 

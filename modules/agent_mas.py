@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_mas.task.request"}}],
     "depends_on": [],
     "tags": ["manager", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — MAS多智能体系统 Grade: A (生产级) | Category: AI智能体",
 }
 

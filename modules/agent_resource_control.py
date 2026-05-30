@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — Agent Resource Control — 智能体资源管控
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# Grade: A
         AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块
 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断
 命名空间: evo.resource.agent.*
@@ -27,7 +31,7 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "agent_resource_control.task.request"}}],
     "depends_on": [],
     "tags": ["config", "monitor", "multi-agent", "agent"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断",
 }
 

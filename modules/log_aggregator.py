@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 日志聚合器（A级）
+# Grade: B
 
 日志收集、查询、导出引擎，支持多级别过滤"""
-__module_meta__ = {"id":"log-aggregator","name":"Log Aggregator","version":"V0.1","group":"monitoring","grade":"A",
+__module_meta__ = {"id":"log-aggregator","name":"Log Aggregator","version":"V0.1","group":"monitoring","grade":"C",
     "tags":["monitoring","logging","aggregation","query"],"description":"Log aggregation and query engine"}
 import time, uuid, logging, json, threading
 from typing import Any, Dict, List, Optional

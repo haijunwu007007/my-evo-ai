@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 报告生成器（A级）"""
+# Grade: A
 __module_meta__ = {"id":"report-generator","name":"Report Generator","version":"V0.1","group":"data","grade":"A",
     "tags":["data","report","document"],"description":"报告生成器 - 真实HTML报告/JSON摘要/结构化输出"}
 

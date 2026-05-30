@@ -1,6 +1,7 @@
 import time
 
 """
+# Grade: A
 AUTO-EVO-AI V0.1 — 跨平台兼容转译层 (Cross-Platform Adapter)
 命名空间: evo.adapter.platform.*
 优先级: P0 (紧急)
@@ -36,7 +37,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["adapter", "cross"],
-    "grade": "C",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 — 跨平台兼容转译层 (Cross-Platform Adapter) 命名空间: evo.adapter.platform.*",
 }
 

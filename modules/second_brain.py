@@ -1,6 +1,10 @@
+"""
+AUTO-EVO-AI V0.1 — Second Brain — 第二大脑知识管理
+"""
 import time
 
 """
+# Grade: A
 AUTO-EVO-AI V0.1 - Second Brain Memory Module
 基于 Mercury Agent 的第二大脑记忆系统
 
@@ -35,7 +39,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["memory", "second-brain"],
-    "grade": "B",
+    "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统",
 }
 

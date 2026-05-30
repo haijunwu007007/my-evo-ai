@@ -143,7 +143,7 @@ class SystemCoordinatorV3(EnterpriseModule):
         return {"registered": registered, "failed": failed}
 
     def _load_core_extensions(self):
-        """加载 core/ 目录下的扩展模块（extended_daemon_modules + extension_modules）"""
+        """加载 core/ 目录下的扩展模块（脚本模块 + extension_modules）"""
         import importlib.util
         from pathlib import Path
 

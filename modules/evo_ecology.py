@@ -1,4 +1,5 @@
 """Production-grade module: 进化生态系统
+# Grade: A
 Ecological simulation, species management, resource competition, food chain, ecosystem metrics.
 """
 

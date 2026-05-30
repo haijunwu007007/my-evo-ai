@@ -1,4 +1,5 @@
 """Production-grade module: 窗口管理
+# Grade: A
 EnterpriseModule implementation with real business logic.
 桌面窗口编排管理：窗口发现/布局管理/工作区切换/焦点控制/自动排列。
 """

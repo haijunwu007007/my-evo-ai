@@ -1,4 +1,5 @@
 """Production-grade module: SSL证书管理
+# Grade: A
 EnterpriseModule implementation with real business logic.
 证书全生命周期管理：签发、续期、撤销、部署、到期预警、ACME自动续签。
 """

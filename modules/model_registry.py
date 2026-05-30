@@ -1,4 +1,5 @@
 """Model Registry - 模型注册中心模块（生产级）"""
+# Grade: A
 
 __module_meta__ = {
     "id": "model-registry",

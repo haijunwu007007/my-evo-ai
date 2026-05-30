@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_tester", "method": "POST"}}],
     "depends_on": [],
     "tags": ["api", "manager"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — API测试器 Grade: A (生产级) | Category: 测试基础设施",
 }
 

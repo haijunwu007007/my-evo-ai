@@ -1,13 +1,14 @@
 """AUTO-EVO-AI V0.1 — 自主决策引擎"""
+# Grade: B
 VERSION = "V0.1"
-__module_meta__ = {"id": "auto-decision", "name": "DecisionEngine", "version": VERSION, "group": "ai"}
+__module_meta__ = {"id": "auto-decision", "name": "AutonomousDecisionEngine", "version": VERSION, "group": "ai"}
 import json, uuid, threading, time, logging, urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
 
 logger = logging.getLogger(__name__)
 
-class DecisionEngine(EnterpriseModule, CircuitBreakerMixin):
-    MODULE_ID = "auto-decision"; MODULE_NAME = "DecisionEngine"
+class AutonomousDecisionEngine(EnterpriseModule, CircuitBreakerMixin):
+    MODULE_ID = "auto-decision"; MODULE_NAME = "AutonomousDecisionEngine"
     def __init__(self, c=None):
         super().__init__(c)
         self._decisions = {}
@@ -66,4 +67,4 @@ class DecisionEngine(EnterpriseModule, CircuitBreakerMixin):
         with self._lock:
             self._decisions.clear(); self._rules.clear(); self._history.clear()
         self.status = ModuleStatus.STOPPED
-module_class = DecisionEngine
+module_class = AutonomousDecisionEngine

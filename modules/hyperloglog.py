@@ -2,6 +2,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.enterprise_module import ModuleStats
 
 """
+# Grade: A
 HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI V0.1
 Production-grade probabilistic cardinality estimation for distributed systems.
 Supports sparse/dense representation, union, intersection estimation, and persistence.

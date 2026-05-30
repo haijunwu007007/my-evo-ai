@@ -1,4 +1,5 @@
 """
+# Grade: A
         AUTO-EVO-AI V0.1 - Boreas智能体模块
 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作
 
@@ -1049,7 +1050,6 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
 module_class = AgentBoreas
 
-module_class = AgentBoreas
 
 class DeploymentPipelineEngine(object):
     """部署编排引擎 - 蓝绿部署、金丝雀发布、回滚管理"""

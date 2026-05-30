@@ -1,4 +1,5 @@
 """Production-grade module: 时序数据库
+# Grade: A
 EnterpriseModule implementation with real business logic.
 """
 

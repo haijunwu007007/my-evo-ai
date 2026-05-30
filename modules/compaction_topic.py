@@ -25,7 +25,7 @@ __module_meta__ = {
     "triggers": [],
     "depends_on": [],
     "tags": ["manager", "compaction"],
-    "grade": "A",
+    "grade": "B",
     "description": "AUTO-EVO-AI V0.1 — Kafka Compaction Topic 管理器 Grade: A (生产级) | Category: 消息中间件",
 }
 
