@@ -307,9 +307,30 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
         for action in ticket.actions:
             ticket.current_action = ticket.actions.index(action)
-            time.sleep(0.05)
-            success = True
-            result_msg = f"{action.name} 执行成功"
+            command = action.command or ""
+            try:
+                if command.startswith("http"):
+                    import urllib.request
+                    req = urllib.request.Request(command, method="POST")
+                    resp = urllib.request.urlopen(req, timeout=10)
+                    success = resp.status == 200
+                elif command.startswith(("python", "echo", "touch", "rm", "mkdir")):
+                    import subprocess
+                    r = subprocess.run(command, shell=True, capture_output=True, timeout=30, text=True)
+                    success = r.returncode == 0
+                elif command.startswith("reload:"):
+                    mod_name = command.split(":", 1)[1].strip()
+                    try:
+                        from core.module_manager import module_manager as mm
+                        mm.reload_module(mod_name)
+                        success = True
+                    except Exception:
+                        success = False
+                else:
+                    success = True
+            except Exception:
+                success = False
+            result_msg = f"{action.name} {'成功' if success else '失败'}: {command or '无命令'}"
             results.append(
                 {"action": action.name, "command": action.command, "success": success, "message": result_msg}
             )

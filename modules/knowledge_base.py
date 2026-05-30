@@ -59,16 +59,12 @@ except ImportError:
 logger = logging.getLogger("knowledge_base")
 
 class _MetricsAdapter:
-    """轻量指标适配器 — 兼容 self._metrics.increment/histogram 接口"""
-
-    def increment(self, name: str, value: float = 1.0, **kw):
-        pass  # 已由 EnterpriseModule.record_metrics() 覆盖
-
-    def histogram(self, name: str, value: float, **kw):
-        pass
-
-    def gauge(self, name: str, value: float, **kw):
-        pass
+    """轻量指标适配器"""
+    def __init__(self):self._data={}
+    def increment(self,name:str,value:float=1.0,**kw):self._data[name]=self._data.get(name,0)+value
+    def histogram(self,name:str,value:float,**kw):self._data[name]=value
+    def gauge(self,name:str,value:float,**kw):self._data[name]=value
+    def snapshot(self):return dict(self._data)
 
     def counter(self, name: str, value: float = 1.0, **kw):
         pass
