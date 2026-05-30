@@ -101,6 +101,12 @@ const routes = [
     component: () => import('@/views/NotifyMonitor.vue'),
     meta: { title: '通知监控', icon: 'ChatDotSquare' },
   },
+  {
+    path: '/config',
+    name: 'Config',
+    component: () => import('@/views/SystemConfig.vue'),
+    meta: { title: 'API 配置', icon: 'Key' },
+  },
 ]
 
 const router = createRouter({

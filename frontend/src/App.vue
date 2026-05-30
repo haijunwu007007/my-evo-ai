@@ -140,6 +140,7 @@ onMounted(() => {
 const coreMenu = [
   { path: '/dashboard',     title: '监控面板', icon: 'Monitor' },
   { path: '/sysmon',        title: '系统监控', icon: 'TrendCharts' },
+  { path: '/config',        title: 'API 配置', icon: 'Key' },
   { path: '/coordinator',   title: '协调中心', icon: 'Cpu' },
   { path: '/scheduler',     title: '调度器',   icon: 'Timer' },
   { path: '/modules',       title: '模块管理', icon: 'Grid' },
