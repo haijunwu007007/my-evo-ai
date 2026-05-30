@@ -165,6 +165,65 @@ async def cicd_list_webhooks(limit: int = 50):
     return {"success": True, "events": cicd.list_webhooks(limit)}
 
 
+# ═══════════════════════════════════════════════════════
+# GitHub Webhook 接收与事件管理 (V2 — 生产级)
+# ═══════════════════════════════════════════════════════
+from modules.github_webhook import process_webhook, list_events, get_event_stats, clear_events, get_config, update_config, health_check as gh_health
+from pydantic import BaseModel
+
+class GithubWebhookConfig(BaseModel):
+    enabled: bool | None = None
+    channels: list[dict] | None = None
+    events: list[str] | None = None
+    min_priority: int | None = None
+
+@router.post("/api/webhook/github")
+async def webhook_github(request: Request):
+    """接收 GitHub Webhook (push/pr/workflow/issues/release/ping)"""
+    event_type = request.headers.get("X-GitHub-Event", "ping")
+    signature = request.headers.get("X-Hub-Signature-256", "") or request.headers.get("X-Hub-Signature", "")
+    secret = (get_config().get("secret") or "")
+    payload = await request.json()
+    return await process_webhook(event_type, payload, signature, secret)
+
+@router.get("/api/webhook/github/events")
+async def webhook_events(event_type: str = "", repo: str = "", limit: int = 50, offset: int = 0):
+    """查询 GitHub Webhook 事件历史"""
+    return {"success": True, "events": list_events(
+        event_type=event_type or None,
+        repo=repo or None,
+        limit=limit,
+        offset=offset,
+    )}
+
+@router.get("/api/webhook/github/stats")
+async def webhook_stats():
+    """事件统计"""
+    return {"success": True, **get_event_stats()}
+
+@router.post("/api/webhook/github/clear")
+async def webhook_clear(older_than: int = 0):
+    """清理事件历史"""
+    n = clear_events(older_than)
+    return {"success": True, "deleted": n}
+
+@router.get("/api/webhook/github/config")
+async def webhook_get_config():
+    """获取通知配置"""
+    return {"success": True, "config": get_config()}
+
+@router.post("/api/webhook/github/config")
+async def webhook_set_config(body: GithubWebhookConfig):
+    """更新通知配置"""
+    cfg = {k: v for k, v in body.model_dump().items() if v is not None}
+    return {"success": True, "config": update_config(cfg)}
+
+@router.get("/api/webhook/github/health")
+async def webhook_health():
+    """健康检查"""
+    return gh_health()
+
+
 # ═══════════════════════════════════════════════════
 # 文档生成引擎 — Word/Excel/PPT/Markdown
 # ═══════════════════════════════════════════════════
