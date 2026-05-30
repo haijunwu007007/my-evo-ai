@@ -6,6 +6,7 @@ AUTO-EVO-AI V0.1 主编排器 - 系统大脑
 import json, re, asyncio, logging, hashlib
 from typing import Dict, List, Optional, Any
 from datetime import datetime
+from .evolution_engine import engine as evo_engine
 
 logger = logging.getLogger(__name__)
 
@@ -148,3 +149,59 @@ class EvoBrain:
 
     def clear_history(self):
         self.history.clear()
+
+    def suggest_best_module(self, intent: str = "", candidates: List[str] = None) -> Optional[str]:
+        """
+        根据进化引擎的评分推荐最佳模块。
+        - intent: 意图描述（可选）
+        - candidates: 候选模块列表
+        返回: 最佳模块名，或 None
+        """
+        if candidates:
+            scored = []
+            for m in candidates:
+                s = evo_engine.score_module(m)
+                if s:
+                    scored.append((m, s["score"]))
+            if not scored:
+                return candidates[0] if candidates else None
+            scored.sort(key=lambda x: x[1], reverse=True)
+            best = scored[0][0]
+            if scored[0][1] < 0.5:
+                logger.info(f"[EVO] adaptive: {best} score={scored[0][1]:.3f} low, returning anyway")
+            return best
+        # 无候选时返回评分最高的模块
+        ranked = evo_engine.ranking(1)
+        return ranked[0]["module"] if ranked else None
+
+    def get_adaptive_route(self, intent: str, candidates: List[str]) -> Dict:
+        """
+        自适应路由：返回候选模块的评分排序。
+        用于 UI 展示和手动选择。
+        """
+        scored = []
+        for m in candidates:
+            s = evo_engine.score_module(m)
+            if s:
+                scored.append({
+                    "module": m,
+                    "score": s["score"],
+                    "success_rate": s["success_rate"],
+                    "avg_latency_ms": s["avg_latency_ms"],
+                    "state": s["state"],
+                })
+            else:
+                scored.append({
+                    "module": m,
+                    "score": 0.5,
+                    "success_rate": 0,
+                    "avg_latency_ms": 0,
+                    "state": "unknown",
+                })
+        scored.sort(key=lambda x: x["score"], reverse=True)
+        return {
+            "intent": intent,
+            "candidates": scored,
+            "recommended": scored[0]["module"] if scored else None,
+            "has_evolution_data": len(scored) > 0,
+        }

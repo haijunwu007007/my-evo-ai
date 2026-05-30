@@ -24,6 +24,7 @@ from api.infra import (
     LLMChatRequest, LLMProviderRequest,
     DocReportRequest, DocPresentationRequest,
 )
+from core.evolution_engine import engine as evo_engine
 
 router = APIRouter()
 
@@ -998,6 +999,54 @@ async def plugin_compatibility(name: str):
     """检查插件兼容性"""
     pm = _get_plugin_manager()
     return {"success": True, **pm.check_compatibility(name)}
+
+
+# ═══════════════════════════════════════════════════════
+# 进化引擎 API
+# ═══════════════════════════════════════════════════════
+
+@router.get("/api/evo/summary")
+async def evo_summary():
+    """进化引擎概要"""
+    evo_engine.start_scoring_loop()
+    return {"success": True, "data": evo_engine.summary()}
+
+@router.get("/api/evo/ranking")
+async def evo_ranking(top_n: int = Query(5, ge=1, le=50)):
+    """模块评分排名"""
+    return {"success": True, "data": evo_engine.ranking(top_n)}
+
+@router.get("/api/evo/module/{module}")
+async def evo_module(module: str):
+    """模块进化详情"""
+    detail = evo_engine.module_detail(module)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Module not tracked")
+    return {"success": True, "data": detail}
+
+@router.get("/api/evo/degraded")
+async def evo_degraded():
+    """degraded 模块列表"""
+    return {"success": True, "data": evo_engine.degraded_modules()}
+
+@router.get("/api/evo/suggestions")
+async def evo_suggestions():
+    """优化建议"""
+    return {"success": True, "data": evo_engine.suggestions()}
+
+@router.post("/api/evo/record")
+async def evo_record(req: Request):
+    """手动记录一次执行"""
+    body = await req.json()
+    evo_engine.record(
+        module=body.get("module", "unknown"),
+        action=body.get("action", "execute"),
+        success=body.get("success", True),
+        latency_ms=body.get("latency_ms", 0),
+        error=body.get("error", ""),
+        context=body.get("context"),
+    )
+    return {"success": True}
 
 
 __all__ = ["router"]

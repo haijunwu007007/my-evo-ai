@@ -6,10 +6,12 @@ AUTO-EVO-AI V0.1 模块管理器
 
 import json
 import asyncio
+import time
 from typing import Dict, List, Optional, Any, Type
 from pathlib import Path
 from datetime import datetime
 
+from .evolution_engine import engine as evo_engine
 from .module_base import ModuleBase
 
 
@@ -52,21 +54,31 @@ class ModuleManager:
     async def execute_module(self, module_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
         self.stats["total_calls"] += 1
         module = self.get_module(module_id)
+        action = params.get("action", "execute")
+        start = time.monotonic()
         if not module:
             self.stats["failed_calls"] += 1
+            evo_engine.record(module_id, action, False, 0, "模块不存在")
             return {"success": False, "error": f"模块 {module_id} 不存在"}
         if not module.enabled:
             self.stats["failed_calls"] += 1
+            evo_engine.record(module_id, action, False, 0, "模块已禁用")
             return {"success": False, "error": f"模块 {module_id} 已禁用"}
         try:
             result = await module.execute(params)
-            if result.get("success", True):
+            elapsed = (time.monotonic() - start) * 1000
+            ok = result.get("success", True)
+            err = result.get("error", "")
+            evo_engine.record(module_id, action, ok, elapsed, err)
+            if ok:
                 self.stats["successful_calls"] += 1
             else:
                 self.stats["failed_calls"] += 1
             return result
         except Exception as e:
+            elapsed = (time.monotonic() - start) * 1000
             self.stats["failed_calls"] += 1
+            evo_engine.record(module_id, action, False, elapsed, str(e))
             return {"success": False, "error": str(e)}
 
     async def execute_chain(self, module_ids: List[str], params: Dict[str, Any]) -> List[Dict[str, Any]]:
