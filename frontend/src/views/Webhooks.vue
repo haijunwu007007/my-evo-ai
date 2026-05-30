@@ -51,7 +51,7 @@
 import { ref, onMounted } from 'vue'
 import { webhookEvents, webhookStats, clearWebhooks } from '@/api'
 const loading = ref(true); const err = ref(false)
-const events = ref([]); const stats = ref([])
+const events = ref<any[]>([]); const stats = ref<any[]>([])
 const detailVisible = ref(false); const detailData = ref('')
 const load = async () => {
   loading.value = true; err.value = false
