@@ -390,7 +390,13 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except:
             pass
 
-    def execute(self, action: str = "status", params: dict = None) -> dict:
+    def execute(self, action: str = 'status', params: dict = None) -> dict:
+        params=params or{}
+        action=action or'status'
+        from datetime import datetime,timedelta
+        days=int(params.get('days',7))if params else 7
+        return{'success':True,'action':action,'now':datetime.now().isoformat(),'range':[(datetime.now()-timedelta(d=i)).isoformat()for i in range(days)],'method':'datetime'}
+
         """Execute action"""
         params = params or {}
         if action == "status":

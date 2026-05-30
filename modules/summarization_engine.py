@@ -36,6 +36,7 @@ import uuid
 import re
 import math
 import logging
+from _zhipu_helper import llm_chat  # LLM fallback
 from typing import Any, Dict, List, Optional, Tuple
 from enum import Enum
 from dataclasses import dataclass, field

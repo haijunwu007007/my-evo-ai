@@ -33,6 +33,7 @@ import os
 import asyncio
 import time
 import logging
+from _zhipu_helper import llm_chat  # LLM fallback
 import uuid
 import math
 import statistics

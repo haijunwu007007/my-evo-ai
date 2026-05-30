@@ -29,6 +29,7 @@ __module_meta__ = {
 }
 import hashlib
 import logging
+from _zhipu_helper import llm_chat  # LLM fallback
 import time
 import uuid
 from typing import Any, Dict, List, Optional
