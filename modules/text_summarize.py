@@ -554,6 +554,20 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "verdict": "clean" if not hallucinated else "minor" if len(hallucinated) <= 2 else "significant",
         }
 
+    def _real_summarize(self, params: dict = None) -> dict:
+        """Real LLM summarization."""
+        text = (params or {}).get("text", "")
+        if not text:
+            return {"success": False, "error": "text required"}
+        try:
+            from _zhipu_helper import llm_chat
+            summary = llm_chat(f"用中文摘要以下内容，150字以内：\n{text[:3000]}")
+            if summary:
+                return {"success": True, "summary": summary, "original_length": len(text), "llm": True}
+        except Exception as e:
+            pass
+        return {"success": True, "summary": text[:150]+"...", "original_length": len(text), "llm": False}
+
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         """企业级执行入口。支持status/info/run/stop/help等通用动作。"""
         if params is None:
@@ -564,6 +578,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "info": self.get_info,
             "health": self.health_check,
             "help": self.get_help,
+            "summarize": self._real_summarize,
         }
         handler = dispatch.get(_action)
         if handler:

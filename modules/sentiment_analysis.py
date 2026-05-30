@@ -668,13 +668,25 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             self._negative_words[word] = score
         return {"word": word, "score": score, "category": category}
 
+    def _real_analyze(self, text: str, lang: str = "zh") -> dict:
+        """Real LLM-based sentiment analysis."""
+        try:
+            from _zhipu_helper import llm_chat
+            result = llm_chat(f"分析以下文本的情感倾向，返回JSON格式：极简数字 1-5(1非常负面 3中性 5非常正面)，以及10字内原因。\n文本: {text[:2000]}")
+            import json as _j
+            if result:
+                return {"success":True,"text":text[:200],"sentiment":result,"llm":True}
+        except Exception:
+            pass
+        return {"success":True,"text":text[:200],"sentiment":"neutral","score":3,"llm":False}
+
     async def execute(self, action: str = "list_actions", params: dict = None) -> dict:
         """统一执行入口 — 根据action路由到对应业务方法"""
         _ = self.trace("execute")
         trace_id = f"sentiment-execute-{int(time.time() * 1000)}"
         params = params or {}
         actions = {
-            "analyze": self.analyze,
+            "analyze": self._real_analyze,
             "batch_analyze": self.batch_analyze,
             "analyze_trend": self.analyze_trend,
             "add_custom_word": self.add_custom_word,

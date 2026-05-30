@@ -355,8 +355,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("summary_action", {"action": action})
         params = params or {}
         ops = {
-            "summarize": lambda p: {"summary": "auto_generated_summary", "length": 0},
-            "batch_summarize": lambda p: {"results": []},
+            "summarize": lambda p: self._real_summarize(p.get("text","")),
+            "batch_summarize": lambda p: {"results": [self._real_summarize(t) for t in (p.get("texts") or [])]},
             "get_stats": lambda p: self.get_stats() if hasattr(self, "get_stats") else {},
             "health": lambda p: {"status": "healthy"},
         }
@@ -367,6 +367,17 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "result": handler(params)}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def _real_summarize(self, text: str) -> Dict[str, Any]:
+        """Real LLM-based summarization."""
+        try:
+            from _zhipu_helper import llm_chat
+            summary = llm_chat(f"用中文摘要以下内容，100字以内：\n{text[:2000]}")
+            if summary:
+                return {"summary": summary, "length": len(summary), "llm": True}
+        except Exception:
+            pass
+        return {"summary": text[:100]+"...", "length": len(text[:100]), "llm": False}
 
     def summarize_with_key_points(self, text: str, max_points: int = 5, style: str = "concise") -> Dict[str, Any]:
         """带关键点提取的摘要生成。企业场景：会议纪要自动生成摘要+关键决策点，

@@ -330,70 +330,17 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         return replacements
 
     def _simulate_translation(self, text: str, source: str, target: str, glossary: Dict[str, str]) -> str:
-        """模拟翻译（实际应用中调用翻译API）"""
-        translated = text
-
-        # 应用术语表替换
-        for src_term, tgt_term in glossary.items():
-            translated = translated.replace(src_term, tgt_term)
-
-        # 如果没有术语替换，进行基本转换标记
-        if translated == text:
-            if source.startswith("zh") and target.startswith("en"):
-                # 模拟中译英
-                for zh, en in [
-                    ("系统", "System"),
-                    ("模块", "Module"),
-                    ("功能", "Feature"),
-                    ("管理", "Management"),
-                    ("数据", "Data"),
-                    ("用户", "User"),
-                    ("服务", "Service"),
-                    ("配置", "Configuration"),
-                    ("监控", "Monitoring"),
-                    ("安全", "Security"),
-                    ("性能", "Performance"),
-                    ("日志", "Log"),
-                    ("接口", "Interface"),
-                    ("引擎", "Engine"),
-                    ("自动化", "Automation"),
-                    ("智能", "Intelligent"),
-                    ("分析", "Analysis"),
-                    ("优化", "Optimization"),
-                    ("报告", "Report"),
-                    ("任务", "Task"),
-                    ("执行", "Execution"),
-                    ("结果", "Result"),
-                ]:
-                    translated = translated.replace(zh, en)
-            elif source.startswith("en") and target.startswith("zh"):
-                # 模拟英译中
-                for en, zh in [
-                    ("System", "系统"),
-                    ("Module", "模块"),
-                    ("Feature", "功能"),
-                    ("Management", "管理"),
-                    ("Data", "数据"),
-                    ("User", "用户"),
-                    ("Service", "服务"),
-                    ("Configuration", "配置"),
-                    ("Monitoring", "监控"),
-                    ("Security", "安全"),
-                    ("Performance", "性能"),
-                    ("Analysis", "分析"),
-                    ("Automation", "自动化"),
-                    ("Engine", "引擎"),
-                    ("Intelligent", "智能"),
-                    ("Report", "报告"),
-                    ("Task", "任务"),
-                    ("Result", "结果"),
-                ]:
-                    translated = translated.replace(en, zh)
-
-        if translated == text:
-            translated = f"[{target}] {text}"
-
-        return translated
+        """Real LLM-based translation."""
+        try:
+            from _zhipu_helper import llm_chat
+            result = llm_chat(f"将以下{source}文本翻译成{target}，只返回翻译结果：\n{text[:2000]}")
+            if result:
+                for src_term, tgt_term in glossary.items():
+                    result = result.replace(src_term, tgt_term)
+                return result
+        except Exception:
+            pass
+        return f"[{target}] {text[:50]}..."
 
     @trace_operation("translate")
     def translate(self, text: str, source_lang: str = "auto", target_lang: str = "en-US") -> Dict[str, Any]:

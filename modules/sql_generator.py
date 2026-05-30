@@ -21,13 +21,15 @@ class SqlGenerator(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
         if not template:return {"success":False,"error":f"unknown template:{t}"}
         sql=template.format(table=table,columns=p.get("columns","*"),condition=p.get("condition","1=1"),values=p.get("values","?"),set=p.get("set","col=?"))
         return {"success":True,"sql":sql,"type":t}
-        if a=="nl_to_sql":nl=p.get("text","").lower();sql=""
-        if "全部"in nl or"所有"in nl or"select *"in nl:sql=f"SELECT * FROM {p.get('table','table_name')}"
-        elif"统计"in nl or"count"in nl:sql=f"SELECT COUNT(*) as cnt FROM {p.get('table','table_name')}"
-        elif"where"in nl:sql=f"SELECT * FROM {p.get('table','table_name')} WHERE {p.get('condition','1=1')}"
-        elif"插入"in nl or"insert"in nl:sql=f"INSERT INTO {p.get('table','table_name')} ({p.get('columns','col')}) VALUES ({p.get('values','?')})"
-        else:sql=f"SELECT * FROM {p.get('table','table_name')} LIMIT 100"
-        return {"success":True,"sql":sql,"natural_language":nl}
+        if a=="nl_to_sql":
+            nl=p.get("text","");table=p.get("table","table_name")
+            try:
+                from _zhipu_helper import llm_chat
+                sql=llm_chat(f"将以下自然语言转换为SQL查询语句，表名{table}，只返回SQL：\n{nl}")
+                if sql:return {"success":True,"sql":sql,"natural_language":nl,"llm":True}
+            except Exception:pass
+            sql=f"SELECT * FROM {table} LIMIT 100"
+            return {"success":True,"sql":sql,"natural_language":nl,"llm":False}
         if a=="validate":sql=p.get("sql","")
         issues=[];keywords=["SELECT","FROM","INSERT","UPDATE","DELETE","CREATE"]
         if not any(k in sql.upper() for k in keywords):issues.append("no SQL keyword found")
