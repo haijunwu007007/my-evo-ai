@@ -74,7 +74,11 @@ class DataAnalysis(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 if os.path.exists(ap):
                     import pandas as pd
                     try:
-                        df = pd.read_sql(f"SELECT * FROM {table} LIMIT {limit}", sqlite3.connect(ap))
+                        # 参数化查询防止SQL注入
+                        safe_tbl = "".join(c for c in table if c.isalnum() or c == "_")
+                        if not safe_tbl:
+                            return {"success": False, "error": f"非法表名: {table}"}
+                        df = pd.read_sql(f"SELECT * FROM {safe_tbl} LIMIT ?", sqlite3.connect(ap), params=(int(limit),))
                         return {"success":True,"rows":len(df),"columns":list(df.columns),
                                 "records":json.loads(df.to_json(orient="records"))}
                     except Exception:

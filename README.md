@@ -114,7 +114,7 @@ AUTO-EVO-AI V0.1/
 
 ## 技术栈
 
-- **后端**: Python 3.14 / FastAPI / Uvicorn / SQLite WAL / asyncio
+- **后端**: Python 3.13 / FastAPI / Uvicorn / SQLite WAL / asyncio
 - **前端**: 原生 HTML/CSS/JS (零框架依赖, 57KB) / 响应式设计 / PWA
 - **AI**: 智谱 GLM-4-Flash (默认) / DeepSeek / OpenAI / Anthropic / Ollama
 - **测试**: pytest 9.x / 19 个真实测试文件 / 全真实链路校验 / 零 Stub / GitHub Actions CI
