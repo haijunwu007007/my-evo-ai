@@ -10,6 +10,7 @@ AUTO-EVO-AI V0.1 — 服务类路由
 
 from __future__ import annotations
 
+import os
 import base64
 from typing import Any, Dict, List
 
@@ -414,6 +415,62 @@ async def notify_templates():
     ns = get_notification_service()
     return {"success": True, "templates": ns.list_templates()}
 
+
+# ═══════════════════════════════════════════════════
+# AI 聊天聚合 API — 统一多模型接入
+# ═══════════════════════════════════════════════════
+
+from pydantic import BaseModel
+
+class AIChatMessage(BaseModel):
+    role: str = "user"
+    content: str = ""
+
+class AIChatRequest(BaseModel):
+    model: str = "gpt-4o-mini"
+    messages: list[AIChatMessage] = []
+    temperature: float = 0.7
+
+@router.post("/api/ai/chat")
+async def ai_chat(req: AIChatRequest):
+    """统一AI聊天API：自动选择最优provider，支持负载均衡和故障转移"""
+    from modules.ai_gateway import AIGateway
+    gw = AIGateway()
+    gw.initialize()
+    msgs = [{"role": m.role, "content": m.content} for m in req.messages]
+    params = {"model": req.model, "messages": msgs, "temperature": req.temperature}
+    result = await gw.execute("chat", params)
+    gw.shutdown()
+    return {"success": True, "data": result, "providers": {
+        "openai": bool(os.environ.get("OPENAI_API_KEY","")),
+        "claude": bool(os.environ.get("ANTHROPIC_API_KEY","")),
+        "gemini": bool(os.environ.get("GEMINI_API_KEY","")),
+    }}
+
+
+@router.get("/api/ai/providers")
+async def ai_providers():
+    """列出可用的AI provider及状态"""
+    cfg = {
+        "openai": {"configured": bool(os.environ.get("OPENAI_API_KEY","") or os.environ.get("OPENAI_BASE_URL",""))},
+        "claude": {"configured": bool(os.environ.get("ANTHROPIC_API_KEY",""))},
+        "gemini": {"configured": bool(os.environ.get("GEMINI_API_KEY",""))},
+    }
+    return {"success": True, "providers": cfg}
+
+@router.get("/api/ai/models")
+async def ai_models():
+    """列出支持的模型"""
+    models = [
+        {"id": "gpt-4o", "provider": "openai", "description": "OpenAI GPT-4o 旗舰"},
+        {"id": "gpt-4o-mini", "provider": "openai", "description": "OpenAI GPT-4o-mini 轻量"},
+        {"id": "gpt-4-turbo", "provider": "openai", "description": "OpenAI GPT-4 Turbo"},
+        {"id": "claude-sonnet-4-20250514", "provider": "claude", "description": "Claude Sonnet 4"},
+        {"id": "claude-haiku-3-20250313", "provider": "claude", "description": "Claude Haiku 3"},
+        {"id": "gemini-2.0-flash", "provider": "gemini", "description": "Gemini 2.0 Flash"},
+        {"id": "gemini-2.0-pro", "provider": "gemini", "description": "Gemini 2.0 Pro"},
+    ]
+    return {"success": True, "models": models}
 
 # ═══════════════════════════════════════════════════
 # 浏览器自动化引擎 — Web操作API

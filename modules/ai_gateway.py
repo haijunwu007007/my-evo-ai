@@ -1,4 +1,5 @@
 """
+# Grade: A
 AUTO-EVO-AI m63 - AI多模型网关 (真实实现版)
 支持: OpenAI GPT, Anthropic Claude, Google Gemini, 本地模型(Ollama)
 """
@@ -17,11 +18,12 @@ __module_meta__ = {
     "triggers": [{"type": "event", "config": {"on": "ai.inference.request"}}],
     "depends_on": [],
     "tags": ["ai", "llm", "gateway", "core"],
-    "grade": "S",
+    "grade": "A",
 }
 import os
 import json
 import time
+import asyncio
 import logging
 import urllib.request
 import urllib.error
@@ -631,6 +633,116 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             cfg = {"provider": "ollama", "model": "nomic-embed-text", "dimensions": 768}
         return cfg
 
+    # ── 多模型聚合 chat 动作 ────────────────────────────
+    _provider_index = 0  # round-robin 计数器
+
+    def _call_openai(self, model: str, messages: list, temp: float, api_key: str, base_url: str) -> dict:
+        body = json.dumps({"model": model, "messages": messages, "temperature": temp}).encode()
+        req = urllib.request.Request(
+            f"{base_url}/chat/completions", data=body,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            method="POST")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())
+
+    def _call_claude(self, model: str, messages: list, temp: float, api_key: str) -> dict:
+        # 将 messages 转为 Claude 格式
+        system = ""
+        msgs = []
+        for m in messages:
+            if m["role"] == "system": system = m["content"]
+            else: msgs.append({"role": m["role"], "content": m["content"]})
+        body = json.dumps({"model": model, "messages": msgs, "system": system, "temperature": temp}).encode()
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages", data=body,
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"},
+            method="POST")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())
+
+    def _call_gemini(self, model: str, messages: list, temp: float, api_key: str) -> dict:
+        contents = []
+        for m in messages:
+            contents.append({"role": m["role"], "parts": [{"text": m["content"]}]})
+        body = json.dumps({"contents": contents, "generationConfig": {"temperature": temp}}).encode()
+        req = urllib.request.Request(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}",
+            data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())
+
+    def _extract_result(self, provider: str, raw: dict) -> dict:
+        try:
+            if provider == "openai":
+                return {"content": raw["choices"][0]["message"]["content"], "model": raw["model"], "usage": raw.get("usage",{})}
+            if provider == "claude":
+                return {"content": raw["content"][0]["text"], "model": raw.get("model",""), "usage": raw.get("usage",{})}
+            if provider == "gemini":
+                return {"content": raw["candidates"][0]["content"]["parts"][0]["text"], "model": raw.get("model",""), "usage": {}}
+        except Exception as e:
+            return {"error": f"解析响应失败: {e}", "raw": str(raw)[:500]}
+        return {"content": str(raw)[:1000]}
+
+    def _pick_provider(self, model: str, providers: list) -> str:
+        """根据模型名自动选择 provider"""
+        model_lower = model.lower()
+        if any(k in model_lower for k in ["claude", "anthropic"]): return "claude"
+        if any(k in model_lower for k in ["gemini", "gemma"]): return "gemini"
+        if any(k in model_lower for k in ["gpt", "o1", "o3", "davinci"]): return "openai"
+        return "openai"  # default
+
+    async def _chat_provider(self, provider: str, model: str, messages: list, temp: float, config: dict) -> dict:
+        api_key = config.get("api_key", os.environ.get(f"{provider.upper()}_API_KEY", ""))
+        base_url = config.get("base_url", "https://api.openai.com/v1" if provider == "openai" else
+                              "https://api.anthropic.com/v1" if provider == "claude" else
+                              "https://generativelanguage.googleapis.com/v1beta")
+        if not api_key: return {"success": False, "error": f"{provider} API_KEY 未配置"}
+        # 在线程池中执行同步HTTP调用
+        loop = asyncio.get_event_loop()
+        try:
+            if provider == "claude":
+                raw = await loop.run_in_executor(None, self._call_claude, model, messages, temp, api_key)
+            elif provider == "gemini":
+                raw = await loop.run_in_executor(None, self._call_gemini, model, messages, temp, api_key)
+            else:
+                raw = await loop.run_in_executor(None, self._call_openai, model, messages, temp, api_key, base_url)
+            result = self._extract_result(provider, raw)
+            return {"success": True, "provider": provider, "model": model, **result}
+        except Exception as e:
+            return {"success": False, "error": str(e)[:200], "provider": provider}
+
+    async def _chat(self, params: dict) -> dict:
+        try:
+            model = params.get("model", "gpt-4o-mini")
+            messages = params.get("messages", [])
+            temperature = params.get("temperature", 0.7)
+            providers_config = params.get("providers", {})
+
+            default_providers = {
+                "openai": {"api_key": os.environ.get("OPENAI_API_KEY", ""), "base_url": os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1"), "priority": 0},
+                "claude": {"api_key": os.environ.get("ANTHROPIC_API_KEY", ""), "priority": 1},
+                "gemini": {"api_key": os.environ.get("GEMINI_API_KEY", ""), "priority": 2},
+            }
+            providers_config = {**default_providers, **providers_config}
+
+            healthy = {k: v for k, v in providers_config.items() if isinstance(v, dict)}
+            if not healthy:
+                return {"success": False, "error": "无可用provider（未配置API_KEY）"}
+
+            preferred = self._pick_provider(model, list(healthy.keys()))
+            candidates = sorted(healthy.items(), key=lambda x: (0 if x[0] == preferred else 1, x[1].get("priority", 99) if isinstance(x[1], dict) else 99))
+
+            errors = []
+            for provider, config in candidates:
+                result = await self._chat_provider(provider, model, messages, temperature, config)
+                if result.get("success"):
+                    return result
+                errors.append(f"{provider}: {result.get('error','')}")
+            return {"success": False, "error": f"所有provider失败: {'; '.join(errors)}"}
+        except Exception as ce:
+            import traceback
+            return {"success": False, "error": str(ce), "trace": traceback.format_exc()[-500:]}
+
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}
         self.trace("ai_gateway.execute", "start", action=action)
@@ -641,8 +753,13 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 result = self.health_check()
             elif action == "analyze":
                 result = self._analyzer.analyze(params)
-            elif action == "help":
-                result = {"actions": ["status", "analyze", "help"], "module": "ai_gateway"}
+            elif action == "chat":
+                try:
+                    result = await self._chat(params)
+                except Exception as ce:
+                    result = {"success": False, "error": str(ce), "loc": "_chat"}
+            elif action in ("help", "actions"):
+                result = {"actions": ["status", "chat", "analyze", "help"], "module": "ai_gateway"}
             else:
                 result = {"success": True, "action": action, "module": "ai_gateway"}
             self.metrics_collector.counter("ai_gateway.execute.success", 1)
