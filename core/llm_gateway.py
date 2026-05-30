@@ -414,10 +414,9 @@ class _ProviderAdapter:
             "stream": False,
         }
         url = f"{cfg.base_url.rstrip('/')}/v1/chat/completions"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {cfg.api_key}",
-        }
+        if "bigmodel" in (cfg.base_url or ""):
+            url = f"{cfg.base_url.rstrip('/')}/chat/completions"
+        headers = {"Content-Type":"application/json","Authorization":f"Bearer {cfg.api_key}"}
         result = _HTTPCaller.post_json(url, payload, headers, cfg.timeout)
         content = result["choices"][0]["message"]["content"]
         usage = result.get("usage", {})
@@ -435,6 +434,8 @@ class _ProviderAdapter:
             "stream": True,
         }
         url = f"{cfg.base_url.rstrip('/')}/v1/chat/completions"
+        if "bigmodel" in (cfg.base_url or ""):
+            url = f"{cfg.base_url.rstrip('/')}/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {cfg.api_key}",
@@ -781,7 +782,7 @@ class LLMPool:
                 "provider_type": "openai_compatible",
                 "base_url": base,
                 "api_key": zhipu_key,
-                "models": ["glm-4-flash", "glm-4", "glm-4-plus"],
+                "models": ["glm-4-flash", "glm-4", "glm-4-plus", "glm-4.5", "glm-4.7", "glm-5", "glm-5-turbo", "glm-5.1"],
                 "priority": 12,
                 "max_tokens_map": {"glm-4-flash": 128000, "glm-4": 128000, "glm-4-plus": 128000},
                 "cost_per_1k_map": {"glm-4-flash": 0.001, "glm-4": 0.1, "glm-4-plus": 0.05},
