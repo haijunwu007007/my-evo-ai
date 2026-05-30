@@ -89,6 +89,18 @@ const routes = [
     component: () => import('@/components/DataAnalysisPanel.vue'),
     meta: { title: '数据分析', icon: 'DataAnalysis' },
   },
+  {
+    path: '/webhooks',
+    name: 'Webhooks',
+    component: () => import('@/views/Webhooks.vue'),
+    meta: { title: 'Webhooks', icon: 'Connection' },
+  },
+  {
+    path: '/notify-monitor',
+    name: 'NotifyMonitor',
+    component: () => import('@/views/NotifyMonitor.vue'),
+    meta: { title: '通知监控', icon: 'ChatDotSquare' },
+  },
 ]
 
 const router = createRouter({

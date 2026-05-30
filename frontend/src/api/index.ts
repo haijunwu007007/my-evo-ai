@@ -78,4 +78,23 @@ export const getWsStatus = (): Promise<any> => api.get('/ws/status')
 export const login = (apiKey: string): Promise<any> => api.post('/auth/login', { api_key: apiKey })
 export const getSecurityStatus = (): Promise<any> => api.get('/security/status')
 
+// ─── Webhook ───
+export const webhookEvents = (limit = 50): Promise<any> => api.get('/webhook/github/events', { params: { limit } })
+export const webhookStats = (): Promise<any> => api.get('/webhook/github/stats')
+export const clearWebhooks = (): Promise<any> => api.delete('/webhook/github/events')
+
+// ─── 企业通知 ───
+export const notifyStatus = (): Promise<any> => api.get('/notify/status')
+export const notifySend = (channel: string, data: any): Promise<any> => api.post('/notify/send', { channel, ...data })
+export const notifyTest = (channel: string): Promise<any> => api.post('/notify/test', { channel })
+export const notifyConfig = (): Promise<any> => api.get('/notify/config')
+export const notifyUpdateConfig = (data: any): Promise<any> => api.put('/notify/config', data)
+
+// ─── CDC ───
+export const cdcStatus = (): Promise<any> => api.get('/cdc/status')
+export const cdcTables = (): Promise<any> => api.get('/cdc/tables')
+export const cdcStart = (config?: any): Promise<any> => api.post('/cdc/start', config || {})
+export const cdcStop = (): Promise<any> => api.post('/cdc/stop')
+export const cdcEvents = (limit = 50): Promise<any> => api.get('/cdc/events', { params: { limit } })
+
 export default api
