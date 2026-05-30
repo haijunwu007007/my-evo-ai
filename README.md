@@ -139,7 +139,7 @@ AUTO-EVO-AI V0.1/
 # .github/workflows/ci.yml
 # 推送到 master/develop 或 PR 时自动:
 #   1. 安装依赖
-#   2. 运行 3186 测试
+#   2. 运行 120+ 测试
 #   3. 启动服务验证 API
 #   4. 运行基准测试
 ```
