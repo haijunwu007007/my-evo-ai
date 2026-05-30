@@ -70,7 +70,7 @@ AUTO-EVO-AI V0.1/
 │   ├── scheduler_engine.py # 定时调度器
 │   ├── task_queue_engine.py # 持久化任务队列
 │   └── ws_engine.py        # WebSocket 实时推送
-├── modules/               # 535个功能模块 (0空壳)
+├── modules/               # 456个功能模块 (0空壳)
 │   └── _base/             # 企业级模块基类 (熔断/限流/审计/追踪)
 ├── config/                # 配置系统
 │   ├── defaults.yaml       # 默认配置
@@ -104,7 +104,7 @@ AUTO-EVO-AI V0.1/
 | 指标 | 数值 |
 |------|------|
 | **Python 代码** | 722 文件 / 13.9 MB |
-| **功能模块** | 535 个（0 空壳，全部有真实 dispatch 逻辑） |
+| **功能模块** | 456 个（0 空壳，全部有真实 dispatch 逻辑） |
 | **API 端点** | 154 路由 |
 | **测试覆盖** | 19 个测试文件，100% 真实 HTTP 请求，零 Stub / Mock |
 | **Git 提交** | 28 commits |
