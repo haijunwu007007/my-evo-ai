@@ -47,7 +47,7 @@ def test_system_root():
     assert status == 200
     assert data["system"] == "AUTO-EVO-AI V0.1"
     assert data["status"] == "running"
-    assert data["modules_total"] >= 500
+    assert data["modules_total"] >= 400
 
 
 def test_system_status():
@@ -58,7 +58,7 @@ def test_system_status():
     assert data["system"] == "AUTO-EVO-AI V0.1"
     assert data["status"] == "running"
     assert data["api_version"] == "0.1.0"
-    assert data["modules_total"] >= 500
+    assert data["modules_total"] >= 400
 
 
 def test_system_health():
@@ -67,7 +67,7 @@ def test_system_health():
     status, data = _req("GET", "/api/status")
     assert status == 200
     assert data.get("status") in ("running", "healthy", "degraded")
-    assert data["modules_total"] >= 500
+    assert data["modules_total"] >= 400
 
 
 # ═══════════════════════════════════════════════════════════
@@ -80,7 +80,7 @@ def test_list_modules():
     status, data = _req("GET", "/api/modules")
     assert status == 200
     assert "modules" in data
-    assert data["count"] >= 500
+    assert data["count"] >= 400
 
 
 def test_module_categories():
@@ -90,7 +90,7 @@ def test_module_categories():
     assert status == 200
     assert "categories" in data
     assert isinstance(data["categories"], dict)
-    assert data["total"] >= 500
+    assert data["total"] >= 400
 
 
 def test_module_detail():

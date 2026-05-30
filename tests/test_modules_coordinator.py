@@ -39,29 +39,40 @@ class TestCoordinatorV3Structure(unittest.TestCase):
         cls.module_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'modules')
     
     def test_004_file_exists(self):
-        path = os.path.join(self.module_dir, 'system_coordinator_v3.py')
-        self.assertTrue(os.path.exists(path))
-    
+        """验证拆包后存在 package 目录或 shim"""
+        path_shim = os.path.join(self.module_dir, '_system_coordinator_v3_shim.py')
+        path_pkg = os.path.join(self.module_dir, 'system_coordinator_v3')
+        self.assertTrue(os.path.exists(path_shim) or os.path.isdir(path_pkg),
+            "system_coordinator_v3 shim 或包 不存在")
+
     def test_005_no_infinite_recursion(self):
-        path = os.path.join(self.module_dir, 'system_coordinator_v3.py')
+        path = os.path.join(self.module_dir, 'system_coordinator_v3', 'analyzer.py')
+        if not os.path.exists(path):
+            path = os.path.join(self.module_dir, '_system_coordinator_v3_shim.py')
         content = open(path, encoding='utf-8').read()
         # Check that the analyzer doesn't create itself
-        analyzer_init = content[content.find('class SystemCoordinatorV3Analyzer'):]
-        analyzer_init = analyzer_init[:analyzer_init.find('\nclass ')]
-        # Should not have self._analyzer = SystemCoordinatorV3Analyzer()
-        self.assertNotIn('SystemCoordinatorV3Analyzer()', analyzer_init,
-            "Analyzer 不应自引用创建")
-    
+        if 'class SystemCoordinatorV3Analyzer' in content:
+            analyzer_init = content[content.find('class SystemCoordinatorV3Analyzer'):]
+            analyzer_init = analyzer_init[:analyzer_init.find('\nclass ') if '\nclass ' in analyzer_init else len(analyzer_init)]
+            self.assertNotIn('SystemCoordinatorV3Analyzer()', analyzer_init,
+                "Analyzer 不应自引用创建")
+
     def test_006_module_class_exists(self):
-        path = os.path.join(self.module_dir, 'system_coordinator_v3.py')
+        path = os.path.join(self.module_dir, 'system_coordinator_v3', 'coordinator.py')
+        if not os.path.exists(path):
+            path = os.path.join(self.module_dir, '_system_coordinator_v3_shim.py')
         content = open(path, encoding='utf-8').read()
         self.assertIn('module_class = SystemCoordinatorV3', content)
-    
+
     def test_007_no_extended_daemon_ref(self):
-        path = os.path.join(self.module_dir, 'system_coordinator_v3.py')
-        content = open(path, encoding='utf-8').read()
-        self.assertNotIn('extended_daemon_modules', content,
-            "不应再引用已归档的 extended_daemon_modules.py")
+        """验证拆包后各子文件均不引用 extended_daemon_modules"""
+        pkg_dir = os.path.join(self.module_dir, 'system_coordinator_v3')
+        for fn in os.listdir(pkg_dir):
+            if fn.endswith('.py'):
+                fp = os.path.join(pkg_dir, fn)
+                content = open(fp, encoding='utf-8', errors='replace').read()
+                self.assertNotIn('extended_daemon_modules', content,
+                    f"{fn} 不应再引用 extended_daemon_modules.py")
 
 class TestArchivedModulesClean(unittest.TestCase):
     """验证归档是否干净"""

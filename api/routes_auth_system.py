@@ -29,24 +29,20 @@ router = APIRouter()
 
 # ─── 系统诊断 ────────────────────────────────────────
 @router.get("/api/diagnosis/system")
-    """系统诊断信息：运行时长、版本"""
-    async def system_diagnosis():
+async def system_diagnosis():
     u = time.time() - _START_TIME
     return {"success": True, "uptime_seconds": round(u, 1), "uptime_human": f"{int(u//3600)}h{int(u%3600//60)}m", "memory_mb": 0, "cpu_percent": 0, "threads": 0, "api_version": "0.1.0"}
 @router.get("/api/diagnosis/modules")
-    """模块诊断：注册模块列表与统计"""
-    async def modules_diagnosis():
+async def modules_diagnosis():
     m = registry.list_modules() if hasattr(registry, 'list_modules') else []
     return {"success": True, "modules": m, "count": len(list(m)) if isinstance(m, (list,dict)) else 0}
 
 # ─── 配置中心 ────────────────────────────────────────
 @router.get("/api/config")
-    """系统配置列表"""
-    async def config_list():
+async def config_list():
     cc = get_config_center(); return {"success": True, "configs": cc.get_all()}
 @router.get("/api/config/entries")
-    """获取配置条目列表（扁平化）"""
-    async def config_entries():
+async def config_entries():
     try:
         cc = get_config_center(); all_cfg = cc.get_all()
         if isinstance(all_cfg, dict):
@@ -55,37 +51,30 @@ router = APIRouter()
     except: pass
     return {"success": True, "entries": [], "count": 0}
 @router.get("/api/config/{key:path}")
-    """获取指定配置项的值"""
-    async def config_get(key: str):
+async def config_get(key: str):
     return {"success": True, "key": key, "value": get_config_center().get(key)}
 @router.put("/api/config/{key:path}")
-    """更新指定配置项"""
-    async def config_set(key: str, body: dict):
+async def config_set(key: str, body: dict):
     get_config_center().set(key, body.get("value")); return {"success": True, "key": key, "set": True}
 @router.post("/api/config/batch")
-    """批量更新配置"""
-    async def config_batch(body: dict):
+async def config_batch(body: dict):
     items = body.get("configs", body)
     if isinstance(items, dict):
         for k, v in items.items(): get_config_center().set(k, v)
     return {"success": True, "updated": len(items) if isinstance(items, dict) else 0}
 @router.delete("/api/config/{key:path}")
-    """删除指定配置项"""
-    async def config_delete(key: str):
+async def config_delete(key: str):
     get_config_center().delete(key); return {"success": True, "deleted": key}
 @router.get("/api/config/stats")
-    """配置统计信息：分组与总量"""
-    async def config_stats():
+async def config_stats():
     return {"success": True, "groups": {"系统": ["api_host","api_port","log_level"],"通知":["dingtalk","feishu"],"LLM":["provider","model"]}, "total": 20}
 @router.get("/api/config/list")
-    """按分组列出所有配置"""
-    async def config_list_all(group: str = "", mask: bool = True):
+async def config_list_all(group: str = "", mask: bool = True):
     all_cfg = get_config_center().get_all()
     if group: return {"success": True, "group": group, "configs": {k:v for k,v in all_cfg.items() if k.startswith(group)}}
     return {"success": True, "configs": all_cfg}
 @router.post("/api/config/save")
-    """持久化保存当前配置到文件"""
-    async def config_save():
+async def config_save():
     cc = get_config_center()
     if hasattr(cc, 'save'): cc.save()
     try:
@@ -95,8 +84,7 @@ router = APIRouter()
         pass
     return {"success": True, "saved": True}
 @router.post("/api/config/reload")
-    """重新加载配置文件"""
-    async def config_reload():
+async def config_reload():
     cc = get_config_center()
     if hasattr(cc, 'reload'): cc.reload()
     return {"success": True, "reloaded": True}
@@ -146,8 +134,7 @@ def _get_system_metrics() -> dict:
     return cpu, mem, disk, net_in, net_out
 
 @router.get("/api/monitor/realtime")
-    """实时系统监控指标"""
-    async def monitor_realtime():
+async def monitor_realtime():
     cpu, mem, disk, net_in, net_out = _get_system_metrics()
     req_count = (_request_counter if isinstance(_request_counter, (int, float)) else sum(_request_counter.values()) if hasattr(_request_counter, 'values') else 0) or 0
     err_count = (_request_errors if isinstance(_request_errors, (int, float)) else 0) or 0
@@ -171,17 +158,14 @@ def _get_system_metrics() -> dict:
     }
 
 @router.get("/api/ws/status")
-    """WebSocket连接状态"""
-    async def ws_status():
+async def ws_status():
     try:
         active = len(manager.active_connections) if hasattr(manager, 'active_connections') else 0
     except: active = 0
     return {"success": True, "active_connections": active, "status": "running"}
 @router.get("/api/system/metrics")
-    """系统指标：运行时间/请求数/错误数/缓存命中"""
-    async def system_metrics():
+async def system_metrics():
     return {"success": True, "uptime": round(time.time()-_START_TIME,1), "requests": _request_counter, "errors": _request_errors, "cache_hits": _cache_hits}
 @router.get("/api/system/rate-limit")
-    """限流状态查询"""
-    async def rate_limit_status():
+async def rate_limit_status():
     return {"success": True, "rate_limiting": True, "limits": {}}

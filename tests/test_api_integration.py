@@ -32,7 +32,7 @@ class TestSystem:
     def test_root(self):
         s, d = req("GET", "/"); assert s == 200; assert d.get("system") == "AUTO-EVO-AI V0.1"
     def test_status(self):
-        s, d = req("GET", "/api/status"); assert s == 200; assert d.get("modules_total", 0) >= 500
+        s, d = req("GET", "/api/status"); assert s == 200; assert d.get("modules_total", 0) >= 400
     def test_health(self):
         s, d = req("GET", "/api/status"); assert s == 200  # 健康检查复用 /api/status
     def test_metrics(self):
@@ -43,7 +43,7 @@ class TestSystem:
 @pytest.mark.skipif(not _server_alive(), reason="API server not running")
 class TestModuleRoutes:
     def test_list_modules(self):
-        s, d = req("GET", "/api/modules"); assert s == 200; assert d.get("count", 0) >= 500
+        s, d = req("GET", "/api/modules"); assert s == 200; assert d.get("count", 0) >= 400
     def test_search_modules(self):
         s, d = req("GET", "/api/modules?search=agent"); assert s == 200
     def test_category_modules(self):

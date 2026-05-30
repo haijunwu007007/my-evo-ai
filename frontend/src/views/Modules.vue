@@ -248,20 +248,20 @@ onMounted(load)
 
 /* 迷你统计 */
 .mini-stat {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 1px solid #2d2d44;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-sidebar));
+  border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--c, #6366f1);
   border-radius: 10px;
   padding: 12px 14px;
   margin-bottom: 0;
 }
-.mini-val { font-size: 26px; font-weight: 700; line-height: 1.1; }
-.mini-label { font-size: 12px; color: #7b8fa1; margin-top: 2px; }
+.mini-val { font-size: 26px; font-weight: 700; line-height: 1.1; color: var(--text-primary); }
+.mini-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
 /* 面板 */
 .panel {
-  background: #1a1a2e;
-  border: 1px solid #2d2d44;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -272,18 +272,18 @@ onMounted(load)
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid #2d2d44;
+  border-bottom: 1px solid var(--border-subtle);
   flex-wrap: wrap;
 }
 .search-input { flex: 1; min-width: 180px; }
-.search-input :deep(.el-input__wrapper) { background: #0f0f1a; border-color: #2d2d44; }
+.search-input :deep(.el-input__wrapper) { background: var(--bg-sidebar); border-color: var(--border-subtle); }
 .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* 卡片视图 */
 .card-view { padding: 16px; max-height: 680px; overflow: auto; }
 .cat-group { margin-bottom: 20px; }
 .cat-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.cat-title { font-size: 12px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; }
+.cat-title { font-size: 12px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
 .cat-count { background: #6366f1; color: #fff; font-size: 11px; border-radius: 10px; padding: 1px 7px; }
 .mod-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .mod-card {
@@ -291,15 +291,15 @@ onMounted(load)
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: #0f0f1a;
-  border: 1px solid #1f1f33;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
-.mod-card:hover { border-color: #6366f1; background: #1a1a30; transform: translateY(-1px); }
+.mod-card:hover { border-color: #6366f1; background: var(--bg-card); transform: translateY(-1px); }
 .mod-badge {
   font-size: 10px;
   font-weight: 700;

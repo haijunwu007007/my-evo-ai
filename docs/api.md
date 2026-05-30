@@ -1,85 +1,113 @@
-# AUTO-EVO-AI V0.1 — API 文档
+# AUTO-EVO-AI V0.1 API 文档
 
-## 系统概览
-- **版本**: V0.1
-- **模块总数**: 416
-- **核心引擎**: SchedulerEngine / EventEngine / PipelineEngine / TaskQueueEngine
+## 基础信息
+- **Base URL**: `http://localhost:8765`
+- **Swagger UI**: `/docs`
+- **OpenAPI JSON**: `/openapi.json`
+- **认证方式**: JWT Bearer Token（`/api/auth/login` 获取）
 
-## 架构
+## 核心端点
+
+### 🔧 系统管理
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/status` | GET | 系统运行状态、模块数、版本 |
+| `/api/diagnosis/system` | GET | 系统诊断（运行时长/内存/CPU） |
+| `/api/diagnosis/modules` | GET | 模块诊断 |
+| `/api/system/metrics` | GET | 系统指标（请求数/错误率） |
+| `/api/monitor/realtime` | GET | 实时监控（CPU/内存/磁盘/网络） |
+
+### 📦 模块管理
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/modules` | GET | 模块列表（支持搜索/分级/分页） |
+| `/api/modules/categories` | GET | 模块分类统计 |
+| `/api/modules/rescan` | POST | 重新扫描模块目录 |
+| `/api/modules/{name}` | GET | 模块详情 |
+| `/api/modules/{name}/execute` | POST | 执行模块动作 |
+
+### 📅 调度器
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/scheduler/status` | GET | 调度器状态 |
+| `/api/scheduler/tasks` | GET | 调度任务列表 |
+| `/api/scheduler/tasks` | POST | 创建调度任务 |
+| `/api/scheduler/tasks/{id}/toggle` | POST | 切换任务启用状态 |
+
+### 📊 数据分析
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/events/stats` | GET | 事件统计 |
+| `/api/events/rules` | GET | 事件规则列表 |
+| `/api/pipelines` | GET | 管线列表 |
+| `/api/queue/stats` | GET | 队列统计 |
+| `/api/queue/tasks` | GET | 队列任务 |
+
+### 🔐 认证
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/auth/login` | POST | 用户登录（返回JWT） |
+| `/api/auth/status` | GET | 认证状态 |
+| `/api/auth/logout` | POST | 登出 |
+
+### ⚙️ 配置
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/config` | GET | 全部配置 |
+| `/api/config/{key}` | GET | 指定配置项 |
+| `/api/config/{key}` | PUT | 更新配置 |
+| `/api/config/batch` | POST | 批量更新 |
+
+### 🧠 协调中心
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/coordinator/status` | GET | 协调器状态 |
+| `/api/coordinator/capabilities` | GET | 协调能力列表 |
+| `/api/coordinator/execute` | POST | 执行协调任务 |
+
+## 数据格式
+
+### 统一响应格式
+```json
+{
+  "success": true,
+  "error": null,
+  "message": null,
+  "data": {}
+}
 ```
-api_server.py → api/ (路由) → core/ (引擎) → modules/ (功能模块)
-                                ↕
-                      core/module_delegate.py (单例委托)
+
+### 模块对象
+```json
+{
+  "name": "system_monitor",
+  "file": "system_monitor.py",
+  "size": 28118,
+  "lines": 680,
+  "grade": "A",
+  "category": "SYSTEM",
+  "real_logic": true,
+  "actions": ["execute"],
+  "docstring": "模块描述..."
+}
 ```
 
-## API 端点
+## 快速使用
 
-### 系统
-- `GET /` — 系统状态
-- `GET /api/status` — 详细状态
-- `GET /metrics` — Prometheus 指标
+```bash
+# 1. 获取认证token
+curl -X POST http://localhost:8765/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "api_key": "your-api-key"}'
 
-### 模块
-- `GET /api/modules` — 模块列表
-- `GET /api/modules/{name}` — 模块详情
-- `POST /api/modules/{name}/execute` — 执行模块
+# 2. 查看系统状态
+curl http://localhost:8765/api/status
 
-### 认证
-- `POST /api/auth/login` — 登录
-- `GET /api/auth/config` — 认证配置
-- `GET /api/auth/verify` — 验证令牌
+# 3. 列出模块
+curl "http://localhost:8765/api/modules?page=1&page_size=10"
 
-## 模块目录
-
-| 模块名 | 外部依赖 | 描述 |
-|--------|----------|------|
-| system_coordinator_v3 | 162KB | — |
-| agent_planner | 117KB | — |
-| agent_resource_control | 70KB | — |
-| system_coordinator | 66KB | — |
-| m53_finance_data | 51KB | — |
-| ragflow | 48KB | — |
-| second_brain | 47KB | — |
-| cli_interface | 47KB | — |
-| agent_hephaestus | 47KB | — |
-| key_insights | 44KB | — |
-| agent_cronus | 43KB | — |
-| flowise | 42KB | — |
-| data_pipeline | 42KB | — |
-| security_scanner | 41KB | — |
-| rpa_controller | 41KB | — |
-| cloud_connector | 41KB | — |
-| agent_eros | 41KB | — |
-| agent_boreas | 41KB | — |
-| code_review | 40KB | — |
-| agent_orchestrator | 40KB | — |
-| m51_web_remote | 39KB | — |
-| form_builder | 39KB | — |
-| access_control | 39KB | — |
-| http_client | 38KB | — |
-| flow_engine | 37KB | — |
-| docker_manager | 37KB | — |
-| bucket_policy | 37KB | — |
-| template_registry | 36KB | — |
-| smart_scheduler | 36KB | — |
-| code_generator | 36KB | — |
-| bloom_filter | 36KB | — |
-| user_profile | 35KB | — |
-| ui_renderer | 35KB | — |
-| project_mgmt | 35KB | — |
-| githubtrending | 35KB | — |
-| supermemory | 34KB | — |
-| soul_identity | 34KB | — |
-| permission_guard | 34KB | — |
-| config_manager | 34KB | — |
-| cicd_pipeline | 34KB | — |
-| backup_scheduler | 34KB | — |
-| file_system | 33KB | — |
-| database_client | 33KB | — |
-| resource_server | 32KB | — |
-| registry_center | 32KB | — |
-| qdrant_vector | 32KB | — |
-| mem0_memory | 32KB | — |
-| litellm_gateway | 32KB | — |
-| kafka_producer | 32KB | — |
-| feature_flag | 32KB | — |
+# 4. 执行模块
+curl -X POST http://localhost:8765/api/modules/system_monitor/execute \
+  -H "Content-Type: application/json" \
+  -d '{"action": "get_metrics", "params": {}}'
+```
