@@ -57,11 +57,33 @@ class DataAnalysis(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "summarize": lambda: self._summarize(p),
             "export_csv": lambda: self._export_csv(vals, p),
             "frequency": lambda: self._frequency(vals, p),
+            "sysmon_data": lambda: self._load_sysmon_data(p.get("table","system_metrics"), p.get("limit",500)),
         }
         handler = dispatch.get(action)
         if handler:
             return handler()
         return {"error": f"unknown: {action}"}
+
+    def _load_sysmon_data(self, table="system_metrics", limit=500):
+        """从系统SQLite读取真实数据"""
+        try:
+            # 系统监控数据路径
+            paths = ["backend/data/sysmon.db","data/sysmon.db","config/evo_system.db"]
+            for p in paths:
+                ap = os.path.join(os.path.dirname(os.path.dirname(__file__)), p)
+                if os.path.exists(ap):
+                    import pandas as pd
+                    try:
+                        df = pd.read_sql(f"SELECT * FROM {table} LIMIT {limit}", sqlite3.connect(ap))
+                        return {"success":True,"rows":len(df),"columns":list(df.columns),
+                                "records":json.loads(df.to_json(orient="records"))}
+                    except Exception:
+                        pass
+            return {"success":False,"error":"数据库未找到"}
+        except ImportError:
+            return {"success":False,"error":"pandas未安装"}
+        except Exception as e:
+            return {"success":False,"error":str(e)}
 
     def _require_data(self, vals, method="describe"):
         if not vals:

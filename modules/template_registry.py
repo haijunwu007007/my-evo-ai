@@ -6,7 +6,7 @@ AUTO-EVO-AI V0.1 - 生产级模板注册中心
 功能: 模板全生命周期管理、版本控制、依赖解析、渲染引擎、权限控制
 """
 import logging
-from modules._base.enterprise_module import (
+from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 __module_meta__ = {

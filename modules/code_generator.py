@@ -5,7 +5,6 @@ Grade: A (生产级) | Category: 工具链
 """
 from typing import List, Optional
 from pydantic import BaseModel
-from {module_path} import {class_name}
 
 __module_meta__ = {
     "id": "code-generator",

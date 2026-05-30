@@ -1,6 +1,6 @@
-"""Production-grade 图表引擎模块 V0.1
+"""生产级图表引擎模块 V0.1
 # Grade: A
-上市公司生产级实现 - 多图表类型/数据聚合/主题管理/图表缓存/导出
+多图表类型/数据聚合/主题管理/图表缓存/导出/真实matplotlib渲染
 """
 
 __module_meta__ = {
@@ -9,30 +9,25 @@ __module_meta__ = {
     "version": "V0.1",
     "group": "reports",
     "inputs": [
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "group_by", "type": "string", "required": True, "description": ""},
-        {"name": "value_field", "type": "string", "required": True, "description": ""},
-        {"name": "agg_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "window", "type": "string", "required": True, "description": ""},
+        {"name": "chart_type", "type": "string", "required": True, "description": "图表类型: line/bar/pie/scatter/histogram"},
+        {"name": "data", "type": "list", "required": True, "description": "数据数组"},
+        {"name": "labels", "type": "list", "description": "标签数组"},
     ],
     "outputs": [
         {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
+        {"name": "image_path", "type": "string", "description": "渲染图片路径"},
     ],
     "triggers": [],
     "depends_on": [],
     "tags": ["engine", "chart", "manager"],
     "grade": "A",
-    "description": "Production-grade 图表引擎模块 V0.1 上市公司生产级实现 - 多图表类型/数据聚合/主题管理/图表缓存/导出",
+    "description": "生产级图表引擎 - 真实matplotlib渲染/多种图表类型",
 }
 import hashlib
 import json
 import logging
 import math
-import time
-import uuid
+import time, os, uuid
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -393,6 +388,49 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "charts": [{"id": c["chart_id"], "type": c["type"], "title": c["title"]} for c in charts[:limit]],
             "total": len(self._chart_store),
         }
+
+    def render_chart(self, params: dict = None) -> dict:
+        """真实matplotlib渲染图表为png图片"""
+        params = params or {}
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            chart_type = params.get("chart_type", "line")
+            data = params.get("data", [])
+            labels = params.get("labels", [])
+            title = params.get("title", chart_type)
+            if not data:
+                return {"success": False, "error": "data required"}
+            fig, ax = plt.subplots(figsize=(10,6))
+            if chart_type == "line":
+                x = list(range(len(data))) if not labels else labels
+                ax.plot(x, data, marker='o')
+            elif chart_type == "bar":
+                x = labels or list(range(len(data)))
+                ax.bar(x, data)
+            elif chart_type == "pie" and labels:
+                ax.pie(data, labels=labels, autopct='%1.1f%%')
+            elif chart_type == "scatter":
+                x = labels or list(range(len(data)))
+                ax.scatter(x, data)
+            elif chart_type == "histogram":
+                ax.hist(data, bins=max(10, len(data)//5))
+            else:
+                ax.plot(data)
+            ax.set_title(title)
+            ax.grid(True, alpha=0.3)
+            outdir = os.path.join(os.path.dirname(self._cfg_path or "."), ".evo_data", "charts")
+            os.makedirs(outdir, exist_ok=True)
+            fname = f"chart_{uuid.uuid4().hex[:8]}.png"
+            fpath = os.path.join(outdir, fname)
+            fig.savefig(fpath, dpi=100, bbox_inches='tight')
+            plt.close(fig)
+            return {"success": True, "image_path": fpath, "chart_type": chart_type, "title": title}
+        except ImportError:
+            return {"success": False, "error": "matplotlib未安装"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
     async def execute(self, action: str, params: dict = None) -> dict:
         self.trace("execute", {"module": "chart_engine"})
