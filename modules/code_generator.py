@@ -661,8 +661,8 @@ def _implement_{name}({params}) -> Any:
 module_class = {name}
 '''
         else:
-            return f'# Module: {name}\n# {desc}\n\nimport asyncio\nimport logging
-from _zhipu_helper import llm_chat  # LLM fallback\n\nlogger = logging.getLogger("{name}")\n\n'
+            return f'''# Module: {name}\n# {desc}\n\nimport asyncio\nimport logging
+from _zhipu_helper import llm_chat  # LLM fallback\n\nlogger = logging.getLogger("{name}")\n\n'''
 
     def _gen_javascript(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
         name = self._extract_name(desc)
