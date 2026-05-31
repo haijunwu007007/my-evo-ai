@@ -53,11 +53,12 @@ node_modules/
 
 # ── 项目临时文件 ──
 *.tmp
+*.zip
 syntax_err.txt
 *.db-shm
 *.db-wal
 *.db
- 
+
 # ── 运行时SQLite数据库 ──
 backend/config/*.db
 core/*.db
@@ -68,4 +69,3 @@ modules/.backups/
 api_stderr*.txt
 api_stdout*.txt
 test_out.txt
-.gitignore
