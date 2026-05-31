@@ -107,3 +107,34 @@ def get_client() -> RealClient:
     if _client is None:
         _client = RealClient()
     return _client
+
+# ── 统一 HTTP 客户端 ──────────────────────────────────
+
+def configure_requests():
+    """统一配置全局 requests：重试/超时/连接池/UA
+
+    调用后，所有 ``import requests; requests.get(...)``
+    自动走统一 Session，无需修改任何模块代码。
+    """
+    import requests as _req
+    from requests.adapters import HTTPAdapter
+    import urllib3
+
+    _session = _req.Session()
+    _session.headers.update({"User-Agent": "AUTO-EVO-AI/0.1 (+https://github.com/haijunwu007007/my-evo-ai)"})
+    _retry = urllib3.Retry(
+        total=3,
+        backoff_factor=0.5,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=frozenset({"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"}),
+    )
+    _adapter = HTTPAdapter(max_retries=_retry, pool_connections=20, pool_maxsize=100)
+    _session.mount("https://", _adapter)
+    _session.mount("http://", _adapter)
+
+    # 替换 requests 模块的全局函数
+    for _method in ("get", "post", "put", "delete", "head", "options", "patch", "request"):
+        setattr(_req, _method, getattr(_session, _method))
+    _req.session = lambda: _session
+
+    logger.info("[CLIENT] requests 已统一配置 (3重试/连接池/UA)")

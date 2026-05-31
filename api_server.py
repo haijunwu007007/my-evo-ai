@@ -15,6 +15,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from collections import defaultdict
 
+# ── 统一 HTTP 客户端（在任意模块导入前生效）──
+try:
+    from modules._client import configure_requests
+    configure_requests()
+except Exception:
+    pass
+
 # ── 添加模块路径 ──
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     _MEIPASS = Path(sys._MEIPASS)
