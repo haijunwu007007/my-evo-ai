@@ -68,7 +68,10 @@ from api.infra import (
 # ── 加载中间件（副作用：注册 @app.middleware）──
 import api.middleware  # noqa: F401
 
-# ── 加载后台任务（副作用：注册 @app.on_event("startup")）──
+# ── Profiler 模块 ──
+from api.profiler import router as profiler_router
+
+app.include_router(profiler_router)
 import api.startup  # noqa: F401
 
 # ── 注册路由模块 ──
@@ -338,12 +341,12 @@ if __name__ == "__main__":
     reload = os.environ.get("EVO_RELOAD", "").lower() in ("1", "true", "yes")
     _frozen = getattr(sys, 'frozen', False)
 
-    # 启动时预热
-    from api.startup import warmup_modules
+    # 启动时预热（如果 startup 模块提供了 warmup 函数）
     try:
-        asyncio.run(warmup_modules())
-    except RuntimeError:
-        pass  # 有运行中事件循环时跳过
+        from api.startup import warmup as _warmup_fn
+        _warmup_fn()
+    except (ImportError, Exception):
+        pass
 
     auth_status = "已启用" if _API_KEY_ENABLED else "未启用"
     if os.environ.get("EVO_AUTH_ENABLED","false").lower()=="true":

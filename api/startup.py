@@ -21,6 +21,28 @@ logger = logging.getLogger("evo.api")
 
 _cleanup_tasks: list = []
 
+
+def _mount_vue_frontend():
+    """挂载 Vue 3 SPA (/app) + 旧版 Dashboard (/dashboard)"""
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+
+    vue_dist = BASE_DIR / "frontend" / "dist"
+    if vue_dist.is_dir():
+        app.mount("/app", StaticFiles(directory=str(vue_dist), html=True), name="vue_spa")
+        logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app")
+    else:
+        logger.warning("[VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build")
+
+    html_path = BASE_DIR / "index.html"
+    if html_path.exists():
+        @app.get("/dashboard", include_in_schema=False)
+        async def serve_dashboard():
+            return FileResponse(str(html_path), media_type="text/html")
+        logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
+
+
 def _cleanup_sqlite():
     """清理引擎模块中的SQLite连接（防止ResourceWarning）"""
     import sqlite3, gc
@@ -89,6 +111,108 @@ async def lifespan(app: FastAPI):
     # 关闭SQLite连接
     _cleanup_sqlite()
     logger.info("[SHUTDOWN] SQLite 连接已清理")
+
+
+# ═══════════════════════════════════════════════════════
+# 模块预热（上市级 — 启动时预热50个核心模块）
+# ═══════════════════════════════════════════════════════
+
+async def warmup_modules():
+    """启动后预热核心模块（基于注册表中实际存在的模块）"""
+    await asyncio.sleep(3)
+    candidate_names = list(registry.classes.keys())[:50]
+    if not candidate_names:
+        candidate_names = list(registry._pending_modules.keys())[:50]
+    if not candidate_names:
+        logger.info("[WARMUP] 无待加载模块，跳过预热")
+        return
+
+    ok = 0
+    for name in candidate_names:
+        try:
+            mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=15)
+            if mod is None:
+                continue
+            init = getattr(mod, "initialize", None)
+            if init:
+                if asyncio.iscoroutinefunction(init):
+                    await init()
+                else:
+                    init()
+            ok += 1
+        except asyncio.TimeoutError:
+            logger.warning(f"[WARMUP] 预热超时: {name}")
+        except Exception as e:
+            logger.warning(f"[WARMUP] 预热失败: {name}: {e}")
+    logger.info(f"[WARMUP] {ok}/{len(candidate_names)} 模块预热完成")
+
+
+# ═══════════════════════════════════════════════════════
+# 心跳 & 后台循环任务
+# ═══════════════════════════════════════════════════════
+
+async def heartbeat_task():
+    await asyncio.sleep(5)
+    while True:
+        await asyncio.sleep(30)
+        try:
+            registry.get_all_health()
+        except Exception:
+            pass
+
+
+async def activity_broadcast_task():
+    await asyncio.sleep(8)
+    while True:
+        await asyncio.sleep(10)
+        try:
+            await manager.broadcast({"type": "evt:activity_tick", "timestamp": datetime.now().isoformat()})
+        except Exception:
+            pass
+
+
+async def sysmon_broadcast_task():
+    await asyncio.sleep(10)
+    while True:
+        await asyncio.sleep(30)
+        try:
+            for mod_name in list(registry.modules.keys())[:5]:
+                mod = registry.modules.get(mod_name)
+                if mod is None:
+                    mod = await registry.lazy_load_module(mod_name)
+                if mod and hasattr(mod, "get_metrics"):
+                    r = mod.get_metrics()
+                    if isinstance(r, dict) and r.get("success"):
+                        await manager.broadcast({"type": "sysmon_metrics", "data": r["metrics"], "timestamp": datetime.now().isoformat()})
+        except Exception as e:
+            logger.warning(f"[SYSMON] 广播系统指标失败: {e}")
+
+
+async def auto_heal_task():
+    await asyncio.sleep(15)
+    while True:
+        await asyncio.sleep(60)
+        try:
+            for name, health in registry.get_all_health().items():
+                if health.get("status") in ("error", "timeout"):
+                    logger.info(f"[AUTO-HEAL] 尝试恢复: {name}")
+                    registry.modules.pop(name, None)
+                    await registry.lazy_load_module(name)
+        except Exception:
+            pass
+
+
+async def hot_reload_task():
+    await asyncio.sleep(10)
+    while True:
+        await asyncio.sleep(30)
+        try:
+            added = registry.rescan_modules("modules")
+            if added:
+                logger.info(f"[HOT-RELOAD] +{added} 新模块")
+        except Exception as e:
+            logger.warning(f"[HOT-RELOAD] 扫描异常: {e}")
+
 
 # 挂载 lifespan 到 app
 import starlette.routing

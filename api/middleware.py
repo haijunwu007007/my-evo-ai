@@ -22,6 +22,9 @@ from api.infra import (
 )
 from core.auth_provider import verify_token, verify_api_key, get_auth_config, check_role
 
+# ── Profiler 中间件（可选，pyinstrument 未安装时自动跳过）──
+from api.profiler import profiling_middleware_dispatch, HAS_PYINSTRUMENT
+
 logger = logging.getLogger("evo.api")
 
 # ── 公共路径白名单（无需认证/限流）──
@@ -31,6 +34,15 @@ _PUBLIC_PATHS = {
     "/manifest.json", "/sw.js",
     "/api/auth/login", "/api/auth/config",
 }
+
+
+# ═══════════════════════════════════════════════════════
+# Profiler 中间件（最先注册，包裹整个请求链路）
+# ═══════════════════════════════════════════════════════
+
+@app.middleware("http")
+async def profiler_middleware(request: Request, call_next):
+    return await profiling_middleware_dispatch(request, call_next)
 
 
 # ═══════════════════════════════════════════════════════
