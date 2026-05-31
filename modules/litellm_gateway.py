@@ -75,7 +75,7 @@ import os
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -90,7 +90,7 @@ from typing import Optional, List, Dict, Any
 
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LitellmGatewayAnalyzer(object):
     """litellm_gateway 分析引擎 - 运营分析核心组件

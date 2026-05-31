@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 import time
-import logging
+from core.logging_config import get_logger
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
@@ -25,7 +25,7 @@ from core.auth_provider import verify_token, verify_api_key, get_auth_config, ch
 # ── Profiler 中间件（可选，pyinstrument 未安装时自动跳过）──
 from api.profiler import profiling_middleware_dispatch, HAS_PYINSTRUMENT
 
-logger = logging.getLogger("evo.api")
+logger = get_logger("evo.api")
 
 # ── 公共路径白名单（无需认证/限流）──
 _PUBLIC_PATHS = {

@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 有序集合引擎 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class SortSet(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"sort_set")
+        self._logger = get_logger(f"sort_set")
 
     def initialize(self) -> dict:
         self.trace("sort_set.initialize", "start")

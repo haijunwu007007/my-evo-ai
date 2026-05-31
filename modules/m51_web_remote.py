@@ -99,7 +99,7 @@ import time
 import uuid
 import hashlib
 import base64
-import logging
+from core.logging_config import get_logger
 import asyncio
 import threading
 from datetime import datetime, timedelta
@@ -114,7 +114,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Resu
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("evo.web_remote")
+logger = get_logger("evo.web_remote")
 
 # ============================================================================
 # 数据结构

@@ -89,7 +89,7 @@ __module_meta__ = {
 
 import time
 import json
-import logging
+from core.logging_config import get_logger
 import re
 import subprocess
 import threading
@@ -111,7 +111,7 @@ except ImportError:
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin, Result
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.docker_manager")
+logger = get_logger("evo.docker_manager")
 
 # ============================================================================
 # 数据模型

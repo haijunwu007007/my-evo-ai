@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade 机器人检测模块 V0.1 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import math
 import re
 import time
@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("bot_detection")
+logger = get_logger("bot_detection")
 
 class BehavioralAnalyzer(object):
     """行为特征分析引擎"""

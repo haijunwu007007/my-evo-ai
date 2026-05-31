@@ -71,7 +71,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade PII检测模块 V0.1 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务"
     }
-import logging
+from core.logging_config import get_logger
 import re
 import time
 import uuid
@@ -82,7 +82,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("pii_detection")
+logger = get_logger("pii_detection")
 
 class PIIPatternLibrary:
     """PII模式库"""

@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Infrastructure as Code — 企业级IaC管理引擎 生产级实现：模板管理、 drift检测、状态同步、环境编排、审计追踪"
     }
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 import json
 from dataclasses import dataclass, field
@@ -83,7 +83,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class InfraAsCodeAnalyzer(object):
     """infra_as_code 分析引擎 - 运营分析核心组件

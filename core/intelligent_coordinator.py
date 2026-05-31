@@ -20,7 +20,7 @@ AUTO-EVO-AI 智能协调层 v1.0
 import asyncio
 import json
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 import sqlite3
 import uuid
@@ -32,7 +32,7 @@ from pathlib import Path
 from enum import Enum
 from collections import defaultdict
 
-logger = logging.getLogger("intelligent_coordinator")
+logger = get_logger("intelligent_coordinator")
 
 
 # ============================================================================

@@ -74,7 +74,7 @@ __module_meta__ = {
         "description": "N8N Module - Enterprise Production Grade Workflow automation engine with visual node-based programming,"
     }
 
-import logging
+from core.logging_config import get_logger
 import hashlib
 import threading
 import time
@@ -86,7 +86,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class N8NAnalyzer(object):
     """n8n 分析引擎 - 运营分析核心组件

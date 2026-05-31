@@ -6,10 +6,10 @@ Telegram Bot API 客户端，支持消息发送、Markdown 消息、更新轮询
 使用 requests 库调用 Telegram Bot HTTP API，内置 graceful degradation。"""
 __module_meta__ = {"id":"telegram-bridge","name":"Telegram Bridge","version":"V0.1","group":"communication","grade":"B",
     "tags":["communication","telegram","bot","messaging"],"description":"Telegram Bot API bridge for messaging"}
-import logging, json
+from core.logging_config import get_logger, json
 from typing import Any, Dict, Optional, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
-logger = logging.getLogger("evo.telegram-bridge")
+logger = get_logger("evo.telegram-bridge")
 
 # ── 底层 HTTP 调用（独立函数，支持独立调用） ──────────────────────────
 
@@ -77,7 +77,7 @@ class TelegramBridge(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._token = ""
         self._chat_id = ""
         self._simulated = True
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING

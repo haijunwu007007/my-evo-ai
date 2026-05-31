@@ -74,7 +74,7 @@ __module_meta__ = {
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import os
 import time
 from collections import defaultdict
@@ -94,7 +94,7 @@ except ImportError:
     APIError = Exception
     RateLimitError = Exception
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LlmOpenaiAnalyzer(object):
     """llm_openai 分析引擎 - 运营分析核心组件

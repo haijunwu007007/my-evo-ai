@@ -6,10 +6,11 @@ AUTO-EVO-AI V0.1 — 认证/系统路由
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Request, Response
 import time, json, logging, os
+from core.logging_config import get_logger
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
-logger = logging.getLogger("evo.api.auth_system")
+logger = get_logger("evo.api.auth_system")
 
 from api.infra import (
     app, registry, _module_activity, _START_TIME,

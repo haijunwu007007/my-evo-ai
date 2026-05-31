@@ -1,9 +1,10 @@
 """AUTO-EVO-AI V0.1 — 模块质量分析器（修正版）"""
 import os, ast, logging
+from core.logging_config import get_logger
 from pathlib import Path
 from typing import Dict, List
 
-logger = logging.getLogger("evo.module_quality")
+logger = get_logger("evo.module_quality")
 MODULES_DIR = Path(__file__).parent.parent / "modules"
 EXECUTE_LIKE = {'execute', 'run', 'process', 'handle', 'analyze', 'search', 'query',
                 'get_status', 'generate', 'create', 'transform', 'validate', 'dispatch',

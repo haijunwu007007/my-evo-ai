@@ -102,7 +102,7 @@ import struct
 import pickle
 import mmap
 import os
-import logging
+from core.logging_config import get_logger
 import threading
 from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
@@ -121,7 +121,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.bloom_filter")
+logger = get_logger("evo.bloom_filter")
 
 # ============================================================================
 # 数据结构与枚举

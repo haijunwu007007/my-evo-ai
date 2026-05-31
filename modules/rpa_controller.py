@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Production-grade RPA机器人控制器模块 V0.1 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import re
 import time
 import uuid
@@ -92,7 +92,7 @@ try:
 except ImportError:
     MIXIN_AVAILABLE = False
 
-logger = logging.getLogger("rpa_controller")
+logger = get_logger("rpa_controller")
 
 class ScriptExecutionEngine(object):
     """RPA脚本执行引擎 - 负责脚本解析、执行、断点续跑"""

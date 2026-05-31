@@ -25,7 +25,7 @@ __module_meta__ = {
 }
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import math
 import time, os, uuid
 from collections import defaultdict
@@ -35,7 +35,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("chart_engine")
+logger = get_logger("chart_engine")
 
 class DataAggregator:
     """数据聚合引擎"""

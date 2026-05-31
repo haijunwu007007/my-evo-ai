@@ -27,7 +27,7 @@ from __future__ import annotations
 import time
 import json
 import asyncio
-import logging
+from core.logging_config import get_logger
 import hashlib
 import sqlite3
 from datetime import datetime, timedelta
@@ -37,7 +37,7 @@ from pathlib import Path
 from enum import Enum
 from collections import defaultdict
 
-logger = logging.getLogger("evo.autonomous")
+logger = get_logger("evo.autonomous")
 
 
 # ============================================================================

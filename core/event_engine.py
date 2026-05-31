@@ -19,7 +19,7 @@ import json
 import time
 import asyncio
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable
@@ -29,7 +29,7 @@ from enum import Enum
 from collections import defaultdict
 import sqlite3
 
-logger = logging.getLogger("evo.events")
+logger = get_logger("evo.events")
 
 
 # ═══════════════════════════════════════════════════════════

@@ -7,10 +7,11 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Response
 from fastapi.responses import HTMLResponse
 import time, json, logging, os, traceback, sys
+from core.logging_config import get_logger
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
-logger = logging.getLogger("evo.api.coordinator")
+logger = get_logger("evo.api.coordinator")
 
 from api.infra import registry, _START_TIME, manager
 from api._data_store import (

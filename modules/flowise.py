@@ -92,7 +92,7 @@ import time
 import uuid
 import json
 import copy
-import logging
+from core.logging_config import get_logger
 from enum import Enum
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
@@ -105,7 +105,7 @@ from modules._base.enterprise_module import EnterpriseModule, Result, HealthRepo
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("evo.flowise")
+logger = get_logger("evo.flowise")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

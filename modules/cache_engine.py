@@ -90,7 +90,7 @@ __module_meta__ = {
 
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 import json
 import hashlib
@@ -114,7 +114,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.cache-engine")
+logger = get_logger("evo.cache-engine")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

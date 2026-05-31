@@ -94,7 +94,7 @@ __module_meta__ = {
 
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 import re
 from datetime import datetime
@@ -116,7 +116,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.cron-scheduler")
+logger = get_logger("evo.cron-scheduler")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

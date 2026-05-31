@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade module: Docker部署管理 Container lifecycle, image management, orchestration, health monitoring, deployment strategies."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -83,7 +83,7 @@ from typing import Any, Dict, List, Optional
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("docker_deploy")
+logger = get_logger("docker_deploy")
 
 class ContainerAnalyzer(object):
     """docker_deploy 运营分析引擎

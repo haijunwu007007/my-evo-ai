@@ -89,7 +89,7 @@ __module_meta__ = {
 import re
 import time
 import threading
-import logging
+from core.logging_config import get_logger
 import os
 import json
 from datetime import datetime
@@ -111,7 +111,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.data-sync")
+logger = get_logger("evo.data-sync")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

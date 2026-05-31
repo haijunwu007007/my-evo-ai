@@ -86,7 +86,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade AIOps智能运维监控模块 V0.1 上市公司生产级实现 - 异常检测/故障预测/自动修复/事件关联/容量预测"
     }
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -97,7 +97,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("aiops_monitor")
+logger = get_logger("aiops_monitor")
 
 class AnomalyDetector(object):
     """统计异常检测引擎"""

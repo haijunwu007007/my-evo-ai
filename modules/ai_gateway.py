@@ -24,7 +24,7 @@ import os
 import json
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import urllib.request
 import urllib.error
 from datetime import datetime
@@ -32,7 +32,7 @@ from typing import List, Dict, Any, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.ai_gateway")
+logger = get_logger("evo.ai_gateway")
 
 class AiGatewayAnalyzer(object):
     """ai_gateway 分析引擎 - 运营分析核心组件

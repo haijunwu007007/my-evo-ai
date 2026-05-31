@@ -76,7 +76,7 @@ __module_meta__ = {
     }
 import hashlib
 import time as tmod
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -87,7 +87,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("payment_center")
+logger = get_logger("payment_center")
 
 class PaymentGateway:
     """支付网关引擎"""

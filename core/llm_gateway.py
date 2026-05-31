@@ -38,7 +38,7 @@ import json
 import time
 import hashlib
 import asyncio
-import logging
+from core.logging_config import get_logger
 import threading
 import urllib.request
 import urllib.error
@@ -47,7 +47,7 @@ from datetime import datetime
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("evo.llm_gateway")
+logger = get_logger("evo.llm_gateway")
 
 
 # ═══════════════════════════════════════════════════

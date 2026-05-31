@@ -74,7 +74,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade module: 窗口管理 EnterpriseModule implementation with real business logic."
     }
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
@@ -365,7 +365,7 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("window_manager")
+        self._logger = get_logger("window_manager")
         self._layout_engine = LayoutEngine()
         self._tracker = WindowTracker()
 

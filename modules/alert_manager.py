@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade 告警中心模块 V0.1 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理"
     }
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("alert_manager")
+logger = get_logger("alert_manager")
 
 class AlertAggregator:
     """告警聚合引擎 - 去重/压缩/分组"""

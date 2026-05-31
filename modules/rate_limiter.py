@@ -4,7 +4,7 @@
 
 import time
 import uuid
-import logging
+from core.logging_config import get_logger
 import threading
 from collections import deque
 from typing import Any, Dict, Optional, Tuple
@@ -14,7 +14,7 @@ from modules._base.enterprise_module import (
     CircuitBreakerMixin, RateLimiterMixin,
 )
 
-logger = logging.getLogger("evo.rate-limiter-mod")
+logger = get_logger("evo.rate-limiter-mod")
 
 __module_meta__ = {
     "id": "rate-limiter-mod",
@@ -174,7 +174,7 @@ class RateLimiter(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._windows: Dict[str, SlidingWindow] = {}
         self._lock = threading.Lock()
         self._configs: Dict[str, Dict] = {}
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING

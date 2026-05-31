@@ -10,14 +10,14 @@ import sys
 import time
 import asyncio
 import atexit
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from api.infra import app, registry, manager, _module_activity, _START_TIME, BASE_DIR
 
-logger = logging.getLogger("evo.api")
+logger = get_logger("evo.api")
 
 _cleanup_tasks: list = []
 

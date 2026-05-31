@@ -79,7 +79,7 @@ __module_meta__ = {
         "description": "Production-grade module: 事件触发器 Event triggers, condition matching, action dispatching, webhook integration, event chaining."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import re
 import time
 from collections import defaultdict
@@ -90,7 +90,7 @@ from typing import Any, Callable, Dict, List, Optional
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("event_trigger")
+logger = get_logger("event_trigger")
 
 class EventFlowAnalyzer(object):
     """event_trigger 运营分析引擎

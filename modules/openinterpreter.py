@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "AUTO-EVO-AI V0.1 — openinterpreter 上市公司生产级 · 代码解释器模块"
     }
 
-import logging
+from core.logging_config import get_logger
 import subprocess
 import tempfile
 import os
@@ -93,7 +93,7 @@ from collections import deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class OpeninterpreterAnalyzer(object):
     """openinterpreter 分析引擎 - 运营分析核心组件

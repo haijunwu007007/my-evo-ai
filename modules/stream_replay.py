@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 流消息回放 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class StreamReplay(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"stream_replay")
+        self._logger = get_logger(f"stream_replay")
 
     def initialize(self) -> dict:
         self.trace("stream_replay.initialize", "start")

@@ -4,9 +4,10 @@ from typing import Any, Dict, List, Optional
 from pathlib import Path
 from datetime import datetime, timedelta
 import time, json, logging, os, uuid as _uuid, random as _random, socket as _socket
+from core.logging_config import get_logger
 
 BASE_DIR = Path(__file__).parent.parent
-logger = logging.getLogger("evo.api.data_store")
+logger = get_logger("evo.api.data_store")
 _now = datetime.now
 
 # ── 持久化数据存储 ──

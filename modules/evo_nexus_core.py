@@ -95,7 +95,7 @@ __module_meta__ = {
 import time
 import uuid
 import asyncio
-import logging
+from core.logging_config import get_logger
 import json
 import os
 import hashlib
@@ -121,7 +121,7 @@ from modules._base.enterprise_module import (
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.registry import get_registry
 
-logger = logging.getLogger("evo.evo-nexus-core")
+logger = get_logger("evo.evo-nexus-core")
 
 class EvolutionPhase(str, Enum):
     OBSERVE = "observe"  # 观察阶段：收集指标

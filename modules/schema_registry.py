@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: Schema注册表 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -298,7 +298,7 @@ class SchemaRegistry(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"schema_registry")
+        self._logger = get_logger(f"schema_registry")
 
     def initialize(self) -> dict:
         self.trace("schema_registry.initialize", "start")

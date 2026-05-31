@@ -102,7 +102,7 @@ __all__ = [
     "MediaContentAgent",
 ]
 
-import logging
+from core.logging_config import get_logger
 import time
 import json
 import hashlib
@@ -115,7 +115,7 @@ from datetime import datetime, timedelta
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.vertical.media_content")
+logger = get_logger("evo.vertical.media_content")
 
 # ============================================================
 # 枚举与数据结构
@@ -707,7 +707,7 @@ class MediaContentAgent:
         )()
 
         self.config = config or {}
-        self.logger = logging.getLogger("evo.vertical.media_content.agent")
+        self.logger = get_logger("evo.vertical.media_content.agent")
 
         self.content_generator = ContentGenerator(self.config.get("content", {}))
         self.publish_manager = PublishManager(self.config.get("publish", {}))

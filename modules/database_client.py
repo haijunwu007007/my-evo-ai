@@ -92,7 +92,7 @@ __module_meta__ = {
 
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 import json
 import sqlite3
@@ -117,7 +117,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.database-client")
+logger = get_logger("evo.database-client")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

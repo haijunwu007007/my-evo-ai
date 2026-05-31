@@ -73,7 +73,7 @@ __module_meta__ = {
     }
 import hashlib
 import time as tmod
-import logging
+from core.logging_config import get_logger
 import math
 import time as tmod
 import time
@@ -85,7 +85,7 @@ from typing import Any, Dict, List, Optional
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("evo_ecology")
+logger = get_logger("evo_ecology")
 
 class ModuleEcologyAnalyzer(object):
     """evo_ecology 运营分析引擎

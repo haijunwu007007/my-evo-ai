@@ -93,7 +93,7 @@ import subprocess
 import signal
 import shutil
 import json
-import logging
+from core.logging_config import get_logger
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field
@@ -102,7 +102,7 @@ from abc import ABC, abstractmethod
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.adapter.platform")
+logger = get_logger("evo.adapter.platform")
 
 class CrossPlatformAdapterAnalyzer(EnterpriseModule):
     """cross_platform_adapter 分析引擎 - 运营分析核心组件

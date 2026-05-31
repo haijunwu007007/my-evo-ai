@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade PGVector向量存储模块 V0.1 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理"
     }
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("pgvector")
+logger = get_logger("pgvector")
 
 class VectorIndex:
     """HNSW近似最近邻索引"""

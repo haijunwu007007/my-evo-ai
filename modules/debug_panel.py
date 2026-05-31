@@ -77,7 +77,7 @@ __module_meta__ = {
     }
 
 import time
-import logging
+from core.logging_config import get_logger
 import threading
 import json
 import os
@@ -91,7 +91,7 @@ from functools import partial
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("m41.debug_panel")
+logger = get_logger("m41.debug_panel")
 
 class StepRecord:
     """执行步骤记录"""

@@ -19,7 +19,7 @@ import json
 import time
 import asyncio
 import sqlite3
-import logging
+from core.logging_config import get_logger
 import secrets
 import threading
 import traceback
@@ -31,7 +31,7 @@ from enum import Enum
 from collections import defaultdict
 import heapq
 
-logger = logging.getLogger("evo.taskqueue")
+logger = get_logger("evo.taskqueue")
 
 
 class TaskPriority(str, Enum):

@@ -82,7 +82,7 @@ import re
 import json
 import os
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 from typing import Any, Optional, Dict, List, Tuple, Set
 from enum import Enum
@@ -92,7 +92,7 @@ from datetime import datetime, timedelta
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LogLevel(Enum):
     TRACE = 0

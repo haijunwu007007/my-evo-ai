@@ -85,12 +85,12 @@ import struct
 import time
 import threading
 import json
-import logging
+from core.logging_config import get_logger
 from enum import Enum
 from typing import Optional, Dict, List, Set, Any, Tuple
 from dataclasses import dataclass, field
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class HLLPrecision(Enum):
     P10 = 10  # ~1% error, 1KB per key

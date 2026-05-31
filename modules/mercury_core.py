@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Mercury Core Module - Enterprise Production Grade High-performance message processing engine with"
     }
 
-import logging
+from core.logging_config import get_logger
 import hashlib
 import heapq
 import threading
@@ -88,7 +88,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class MercuryCoreAnalyzer(object):
     """mercury_core 分析引擎 - 运营分析核心组件

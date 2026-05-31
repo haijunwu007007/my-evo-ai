@@ -111,13 +111,13 @@ from typing import Dict, List, Optional, Any, Tuple, Set
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-import logging
+from core.logging_config import get_logger
 import traceback
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("autoevo.agent.cronus")
+logger = get_logger("autoevo.agent.cronus")
 
 class TaskPriority(Enum):
     """任务优先级枚举"""

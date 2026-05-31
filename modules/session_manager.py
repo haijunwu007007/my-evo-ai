@@ -74,7 +74,7 @@ __module_meta__ = {
         "description": "Production-grade module: 会话管理器 企业级Session生命周期引擎 - 管理用户登录会话、Token刷新、并发控制、安全审计。"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("session_manager")
+logger = get_logger("session_manager")
 
 class SessionStoreManager:
     """会话存储管理器 - 管理Session的完整生命周期。
@@ -492,7 +492,7 @@ class SessionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("session_manager")
+        self._logger = get_logger("session_manager")
         self._store = SessionStoreManager(
             default_ttl=self.config.get("default_ttl", 1800),
             max_sessions_per_user=self.config.get("max_sessions_per_user", 5),

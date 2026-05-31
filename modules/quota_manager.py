@@ -79,7 +79,7 @@ __module_meta__ = {
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import time
 import threading
 from collections import defaultdict, deque
@@ -93,7 +93,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import CircuitBreakerMixin
 from modules._base.mixins import RateLimiterMixin
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # ──────────────────────────────────────────────
 # 数据模型

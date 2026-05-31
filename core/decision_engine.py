@@ -12,7 +12,7 @@ AUTO-EVO-AI 自主决策引擎 v1.0
 import asyncio
 import time
 import json
-import logging
+from core.logging_config import get_logger
 import traceback
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Callable
@@ -22,7 +22,7 @@ from pathlib import Path
 import sqlite3
 import uuid
 
-logger = logging.getLogger("decision_engine")
+logger = get_logger("decision_engine")
 
 
 # ============================================================================

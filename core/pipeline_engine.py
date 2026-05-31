@@ -7,11 +7,11 @@ A.execute() -> B.execute() -> C.execute()
 - 新增 PipelineStore SQLite 持久化（与 scheduler_engine 一致）
 - 自动重连：启动时从 SQLite 恢复历史
 """
-import logging, json, traceback, datetime, sqlite3, os
+from core.logging_config import get_logger, json, traceback, datetime, sqlite3, os
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PipelineStore:

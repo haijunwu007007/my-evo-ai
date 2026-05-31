@@ -88,7 +88,7 @@ import asyncio
 import time
 import json
 import time as tmod
-import logging
+from core.logging_config import get_logger
 import uuid
 import hashlib
 import re
@@ -101,7 +101,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class HttpMethod(Enum):
     GET = "GET"

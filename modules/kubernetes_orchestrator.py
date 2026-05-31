@@ -91,7 +91,7 @@ __module_meta__ = {
 import time
 import asyncio
 import json
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable
 from dataclasses import dataclass, field
@@ -108,7 +108,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.k8s_orchestrator")
+logger = get_logger("evo.k8s_orchestrator")
 
 # ============================================================================
 # 数据模型

@@ -87,7 +87,7 @@ __module_meta__ = {
 
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -110,7 +110,7 @@ from modules._base.enterprise_module import (
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.registry import get_registry
 
-logger = logging.getLogger("evo.auto-restart")
+logger = get_logger("evo.auto-restart")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

@@ -74,7 +74,7 @@ __module_meta__ = {
     }
 import importlib
 import importlib.util
-import logging
+from core.logging_config import get_logger
 import os
 import sys
 import time
@@ -86,7 +86,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("plugin_loader")
+logger = get_logger("plugin_loader")
 
 class PluginDependencyResolver(object):
     """插件依赖解析器"""

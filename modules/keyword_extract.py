@@ -78,6 +78,8 @@ import math
 import re
 import hashlib
 import logging
+from core.logging_config import get_logger
+from core.logging_config import get_logger
 import string
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -87,7 +89,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("keyword_extract")
+logger = get_logger("keyword_extract")
 
 class KeywordExtractAnalyzer(object):
     """keyword_extract 分析引擎 - 运营分析核心组件

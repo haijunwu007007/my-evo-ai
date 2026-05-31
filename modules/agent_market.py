@@ -90,7 +90,7 @@ __module_meta__ = {
 import time
 import json
 import hashlib
-import logging
+from core.logging_config import get_logger
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -101,7 +101,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Resu
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("agent.market")
+logger = get_logger("agent.market")
 
 class SkillStatus(Enum):
     DRAFT = "draft"

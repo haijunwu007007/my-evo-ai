@@ -94,6 +94,8 @@ import sys
 import json
 import time
 import logging
+from core.logging_config import get_logger
+from core.logging_config import get_logger
 import threading
 import queue
 import hashlib
@@ -129,7 +131,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[logging.FileHandler("agent_resource_control.log", encoding="utf-8"), logging.StreamHandler()],
 )
-logger = logging.getLogger("AgentResourceControl")
+logger = get_logger("AgentResourceControl")
 
 # ==================== 枚举定义 ====================
 

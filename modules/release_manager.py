@@ -87,7 +87,7 @@ import asyncio
 import json
 import re
 
-import logging
+from core.logging_config import get_logger
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Callable
 from dataclasses import dataclass, field
@@ -105,7 +105,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.release_manager")
+logger = get_logger("evo.release_manager")
 
 # ============================================================================
 # 数据模型

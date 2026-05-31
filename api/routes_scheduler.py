@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 调度/事件/管线/队列 路由（引擎优先，退化到字典存储）"""
 import importlib, logging, os, json, time, asyncio
+from core.logging_config import get_logger
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
-logger = logging.getLogger("evo.api.scheduler")
+logger = get_logger("evo.api.scheduler")
 
 from api._data_store import (
     _now, _next_id, _ts, _save_all,

@@ -22,7 +22,7 @@ import json
 import hashlib
 import hmac
 import base64
-import logging
+from core.logging_config import get_logger
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
@@ -33,7 +33,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.jwt-token")
+logger = get_logger("evo.jwt-token")
 
 class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     """JWT 令牌管理模块"""

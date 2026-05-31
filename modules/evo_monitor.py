@@ -86,7 +86,7 @@ __module_meta__ = {
         "description": "Production-grade module: 进化监控 Evolution monitoring, fitness tracking, generation analysis, convergence detection, diversity metrics."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import math
 import time
 from collections import defaultdict
@@ -97,7 +97,7 @@ from typing import Any, Dict, List, Optional
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("evo_monitor")
+logger = get_logger("evo_monitor")
 
 class EvolutionAnalyzer(object):
     """evo_monitor 运营分析引擎

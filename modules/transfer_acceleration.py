@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 传输加速 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class TransferAcceleration(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"transfer_acceleration")
+        self._logger = get_logger(f"transfer_acceleration")
 
     def initialize(self) -> dict:
         self.trace("transfer_acceleration.initialize", "start")

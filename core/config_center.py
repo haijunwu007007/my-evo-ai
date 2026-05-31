@@ -19,7 +19,7 @@ import hmac
 import hashlib
 import base64
 import secrets
-import logging
+from core.logging_config import get_logger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
@@ -27,7 +27,7 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 from copy import deepcopy
 
-logger = logging.getLogger("evo.config")
+logger = get_logger("evo.config")
 
 
 # ═══════════════════════════════════════════════════════════

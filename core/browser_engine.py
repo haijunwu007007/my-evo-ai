@@ -38,7 +38,7 @@ import re
 import json
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import hashlib
 import tempfile
 import base64
@@ -48,7 +48,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum
 
-logger = logging.getLogger("evo.browser_engine")
+logger = get_logger("evo.browser_engine")
 
 
 # ═══════════════════════════════════════════════════

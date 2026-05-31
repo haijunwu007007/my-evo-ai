@@ -6,10 +6,10 @@
 使用 requests 库，内置 graceful degradation。"""
 __module_meta__ = {"id":"grafana-monitor","name":"Grafana Monitor","version":"V0.1","group":"monitoring","grade":"B",
     "tags":["monitoring","grafana","observability"],"description":"Grafana 监控 API 桥接"}
-import logging, json, datetime
+from core.logging_config import get_logger, json, datetime
 from typing import Any, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
-logger = logging.getLogger("evo.grafana-monitor")
+logger = get_logger("evo.grafana-monitor")
 
 # ── 底层 API 调用（独立函数） ──────────────────────────────────────
 
@@ -87,7 +87,7 @@ class GrafanaMonitor(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         super().__init__(config)
         self._base_url = "http://localhost:3000"
         self._api_token = ""
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING

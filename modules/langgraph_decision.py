@@ -78,6 +78,8 @@ import hashlib
 import json
 import copy
 import logging
+from core.logging_config import get_logger
+from core.logging_config import get_logger
 import threading
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
@@ -87,7 +89,7 @@ from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixi
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("langgraph_decision")
+logger = get_logger("langgraph_decision")
 
 class LanggraphDecisionAnalyzer(object):
     """langgraph_decision 分析引擎 - 运营分析核心组件

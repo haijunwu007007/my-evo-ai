@@ -20,7 +20,7 @@ import json
 import time
 import asyncio
 import sqlite3
-import logging
+from core.logging_config import get_logger
 import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
-logger = logging.getLogger("evo.scheduler")
+logger = get_logger("evo.scheduler")
 
 
 # ═══════════════════════════════════════════════════════════

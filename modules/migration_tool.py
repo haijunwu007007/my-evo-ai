@@ -77,7 +77,7 @@ __module_meta__ = {
 
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import threading
 import time
 from collections import defaultdict, deque
@@ -87,7 +87,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class MigrationToolAnalyzer(object):
     """migration_tool 分析引擎 - 运营分析核心组件

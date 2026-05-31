@@ -84,7 +84,7 @@ __module_meta__ = {
 import time
 import asyncio
 import re
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable, Set
 from dataclasses import dataclass, field as dc_field
@@ -103,7 +103,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.rule_engine")
+logger = get_logger("evo.rule_engine")
 
 # ============================================================================
 # 数据模型

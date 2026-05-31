@@ -73,7 +73,7 @@ __module_meta__ = {
     }
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict, deque
@@ -94,7 +94,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("outbox_pattern")
+logger = get_logger("outbox_pattern")
 
 class OutboxStore:
     """Outbox消息存储 - 模拟数据库表"""

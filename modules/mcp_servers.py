@@ -74,7 +74,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "MCP Servers Management — 上市公司级MCP服务器生命周期管理 支持服务器注册/发现/健康监控/负载均衡/配置热更新/安全鉴权"
     }
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 import hashlib
@@ -288,7 +288,7 @@ class MCPServersManager(
         self._health_thread = threading.Thread(target=self._health_check_loop, daemon=True)
         self._health_thread.start()
         self._initialized = True
-        logging.getLogger("mcp_servers").info("MCP Servers Manager initialized")
+        get_logger("mcp_servers").info("MCP Servers Manager initialized")
         return True
 
     def shutdown(self) -> bool:
@@ -652,7 +652,7 @@ class MCPServersManager(
             try:
                 self._run_health_checks()
             except Exception as e:
-                logging.getLogger("mcp_servers").error(f"Health check error: {e}")
+                get_logger("mcp_servers").error(f"Health check error: {e}")
             time.sleep(30)
 
     def _run_health_checks(self):

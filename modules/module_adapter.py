@@ -100,14 +100,14 @@ __module_meta__ = {
     }
 
 import asyncio
-import logging
+from core.logging_config import get_logger
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.module_adapter")
+logger = get_logger("evo.module_adapter")
 
 # ============================================================================
 # 标准执行结果

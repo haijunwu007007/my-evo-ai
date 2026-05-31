@@ -89,7 +89,7 @@ __module_meta__ = {
 
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 import re
 import json
@@ -113,7 +113,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.agentguard-sec")
+logger = get_logger("evo.agentguard-sec")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

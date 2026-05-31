@@ -2,9 +2,10 @@
 模块注册表+依赖解析引擎 — 570 模块输入输出自动匹配
 """
 import os, ast, json, logging
+from core.logging_config import get_logger
 from typing import Dict, List, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ModuleRegistry:
     def __init__(self):

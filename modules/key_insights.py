@@ -87,7 +87,7 @@ import json
 import math
 import uuid
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 import statistics
 from datetime import datetime, timedelta
@@ -99,7 +99,7 @@ import re
 
 from modules._base.enterprise_module import EnterpriseModule
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class InsightType(Enum):
     TREND = "trend"

@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 跨集群复制 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class ReplicationCross(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"replication_cross")
+        self._logger = get_logger(f"replication_cross")
 
     def initialize(self) -> dict:
         self.trace("replication_cross.initialize", "start")

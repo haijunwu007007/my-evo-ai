@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 趋势雷达 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -286,7 +286,7 @@ class TrendRadarTrend(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"trendaradar_trend")
+        self._logger = get_logger(f"trendaradar_trend")
 
     def initialize(self) -> dict:
         self.trace("trendaradar_trend.initialize", "start")

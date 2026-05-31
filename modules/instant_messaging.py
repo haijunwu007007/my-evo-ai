@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Instant Messaging — 企业级即时通讯引擎 生产级实现：多租户会话管理、消息持久化、已读回执、@提及、文件传输、消息搜索"
     }
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 import re
 from dataclasses import dataclass, field
@@ -83,7 +83,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class InstantMessagingAnalyzer(object):
     """instant_messaging 分析引擎 - 运营分析核心组件

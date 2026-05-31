@@ -71,7 +71,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade 性能剖析模块 V0.1 上市公司生产级实现 - 函数级耗时/调用链追踪/热点分析/内存剖析/火焰图数据"
     }
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -93,7 +93,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("perf_profiler")
+logger = get_logger("perf_profiler")
 
 class FunctionProfiler:
     """函数级性能剖析器"""

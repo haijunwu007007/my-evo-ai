@@ -76,7 +76,7 @@ __module_meta__ = {
 
 import time
 import fnmatch
-import logging
+from core.logging_config import get_logger
 import hashlib
 import ipaddress
 from datetime import datetime, timedelta, timezone
@@ -86,7 +86,7 @@ from dataclasses import dataclass, field
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class IpWhitelistAnalyzer(object):
     """ip_whitelist 分析引擎 - 运营分析核心组件

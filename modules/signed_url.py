@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 签名URL EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class SignedUrl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"signed_url")
+        self._logger = get_logger(f"signed_url")
 
     def initialize(self) -> dict:
         self.trace("signed_url.initialize", "start")

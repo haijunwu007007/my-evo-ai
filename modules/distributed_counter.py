@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 分布式计数器 Atomic counters with TTL, rate limiting, sliding window, and consistent hashing."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 import time
 from collections import defaultdict
@@ -83,7 +83,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("distributed_counter")
+logger = get_logger("distributed_counter")
 
 class ConsistencyAnalyzer(object):
     """distributed_counter 运营分析引擎

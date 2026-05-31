@@ -8,7 +8,7 @@ import threading
 import shutil
 import time
 import uuid
-import logging
+from core.logging_config import get_logger
 from typing import Any, Dict, List, Optional
 
 from modules._base.enterprise_module import (
@@ -16,7 +16,7 @@ from modules._base.enterprise_module import (
     CircuitBreakerMixin, RateLimiterMixin,
 )
 
-logger = logging.getLogger("evo.json-store")
+logger = get_logger("evo.json-store")
 
 __module_meta__ = {
     "id": "json-store",
@@ -51,7 +51,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._store_path: str = self.config.get("path", "data/json_store.json")
         self._backup_path: str = self._store_path + ".bak"
         self._lock = threading.Lock()
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     # ------------------------------------------------------------------
     # 生命周期

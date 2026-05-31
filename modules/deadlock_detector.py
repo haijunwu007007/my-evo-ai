@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade 死锁检测模块 V0.1 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪"
     }
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict, deque
@@ -82,7 +82,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("deadlock_detector")
+logger = get_logger("deadlock_detector")
 
 class WaitGraph:
     """等待图(Wait-for Graph)构建与分析"""

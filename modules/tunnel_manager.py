@@ -73,7 +73,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade module: 隧道管理 EnterpriseModule implementation with real business logic."
     }
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -277,7 +277,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("tunnel_manager")
+        self._logger = get_logger("tunnel_manager")
         self._analyzer = TunnelHealthAnalyzer()
         self._default_idle_timeout = self.config.get("default_idle_timeout", 3600)
         self._default_max_conn = self.config.get("default_max_connections", 100)

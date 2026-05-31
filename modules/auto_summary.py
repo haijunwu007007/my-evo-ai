@@ -83,7 +83,7 @@ import json
 import hashlib
 import re
 import math
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any, Tuple
@@ -94,7 +94,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Resu
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("auto.summary")
+logger = get_logger("auto.summary")
 
 class SummaryStyle(Enum):
     CONCISE = "concise"

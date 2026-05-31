@@ -80,7 +80,7 @@ __module_meta__ = {
 import time
 import hashlib
 import threading
-import logging
+from core.logging_config import get_logger
 from enum import Enum
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
@@ -88,7 +88,7 @@ from collections import deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class EvoSafetyAnalyzer(object):
     """evo_safety 分析引擎 - 运营分析核心组件

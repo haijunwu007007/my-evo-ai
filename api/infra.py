@@ -21,21 +21,14 @@ import inspect
 import hashlib
 import secrets
 import logging
+from core.logging_config import get_logger
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
 from pathlib import Path
 from collections import defaultdict
 
-# ── 路径 ──
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    _MEIPASS = Path(sys._MEIPASS)
-    BASE_DIR = _MEIPASS
-    _ORIGINAL_BASE = Path(sys.executable).parent
-else:
-    BASE_DIR = Path(__file__).parent.parent
-    _ORIGINAL_BASE = BASE_DIR
-sys.path.insert(0, str(BASE_DIR))
-sys.path.insert(0, str(BASE_DIR / "modules"))
+# ── 统一路径（从共享模块计算 BASE_DIR + sys.path.insert）──
+from api._paths import BASE_DIR, _ORIGINAL_BASE
 
 # ── 向后兼容层（替代 builtins 注入 hack）──
 from modules._base.compat import inject_compat
@@ -53,7 +46,7 @@ import uvicorn
 
 # ── 日志 ──
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-8s | %(message)s")
-logger = logging.getLogger("evo.api")
+logger = get_logger("evo.api")
 
 
 # ════════════════════════════════════════════════════════════

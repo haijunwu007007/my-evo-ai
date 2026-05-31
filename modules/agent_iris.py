@@ -88,7 +88,7 @@ __module_meta__ = {
 import time
 import json
 import hashlib
-import logging
+from core.logging_config import get_logger
 import base64
 import threading
 from datetime import datetime
@@ -107,7 +107,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("agent.iris")
+logger = get_logger("agent.iris")
 
 class ImageFormat(Enum):
     JPEG = "jpeg"

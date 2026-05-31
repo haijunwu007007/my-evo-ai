@@ -19,7 +19,7 @@ import json
 import time
 import asyncio
 import hashlib
-import logging
+from core.logging_config import get_logger
 import secrets
 import threading
 from pathlib import Path
@@ -32,7 +32,7 @@ from collections import defaultdict
 from fastapi import WebSocket, WebSocketDisconnect, Query
 import asyncio
 
-logger = logging.getLogger("evo.ws")
+logger = get_logger("evo.ws")
 
 
 # ═══════════════════════════════════════════════════════════

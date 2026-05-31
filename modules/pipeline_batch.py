@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "pipeline_batch - 批处理流水线引擎（上市生产级） 支持：批处理编排/DAG依赖/并行分片/失败重试/检查点恢复/资源配额/执行监控"
     }
-import logging
+from core.logging_config import get_logger
 import hashlib
 import threading
 import time
@@ -83,7 +83,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class PipelineBatchAnalyzer(object):
     """pipeline_batch 分析引擎 - 运营分析核心组件

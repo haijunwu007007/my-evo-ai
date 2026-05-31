@@ -4,10 +4,11 @@ JWT 令牌签发验证 + API Key 管理 + RBAC 角色检查。
 支持配置热加载，auth.enabled=false 时完全透传。
 """
 import time, os, hmac, hashlib, json, logging, base64
+from core.logging_config import get_logger
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-logger = logging.getLogger("evo.auth")
+logger = get_logger("evo.auth")
 
 # 默认密钥（生产环境应通过 EVO_AUTH_SECRET 环境变量覆盖）
 _SECRET = os.environ.get("EVO_AUTH_SECRET", "evo-dev-secret-change-in-production")

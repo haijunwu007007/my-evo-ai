@@ -84,7 +84,7 @@ __module_meta__ = {
 
 import time
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -94,7 +94,7 @@ from enum import Enum
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ModuleStatus(str, Enum):
     UNINITIALIZED = "uninitialized"

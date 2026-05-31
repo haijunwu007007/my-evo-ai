@@ -5,10 +5,10 @@ AUTO-EVO-AI V0.1 — Module Delegate 模式
 所有方法都有 Noop 兜底，确保不会因为服务未注册而崩溃。
 """
 import time
-import logging
+from core.logging_config import get_logger
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger("evo.delegate")
+logger = get_logger("evo.delegate")
 
 
 class _ServiceWrapper:

@@ -4,7 +4,7 @@ AUTO-EVO-AI V0.1 — 模块浏览/搜索/分类 API
 """
 from __future__ import annotations
 
-import logging
+from core.logging_config import get_logger
 import os
 import re
 from pathlib import Path
@@ -13,7 +13,7 @@ from api.category_map import normalize_category
 
 from fastapi import APIRouter, Query
 
-logger = logging.getLogger("evo.api.modules_browse")
+logger = get_logger("evo.api.modules_browse")
 
 router = APIRouter()
 

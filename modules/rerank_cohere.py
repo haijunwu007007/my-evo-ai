@@ -71,7 +71,7 @@ __module_meta__ = {
     }
 import asyncio
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -81,7 +81,7 @@ from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class RerankCohereAnalyzer(object):
     """rerank_cohere 分析引擎 - 运营分析核心组件

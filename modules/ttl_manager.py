@@ -74,7 +74,7 @@ __module_meta__ = {
         "description": "Production-grade module: TTL过期管理器 企业级TTL生命周期引擎 - 管理缓存/会话/临时文件/验证码等资源的自动过期。"
     }
 import heapq
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from enum import Enum
@@ -84,7 +84,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("ttl_manager")
+logger = get_logger("ttl_manager")
 
 class TtlPolicy(Enum):
     FIXED = "fixed"  # 固定过期时间
@@ -353,7 +353,7 @@ class TtlManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("ttl_manager")
+        self._logger = get_logger("ttl_manager")
         self._scheduler = ExpirationScheduler(default_ttl_seconds=self.config.get("default_ttl", 3600))
         self._namespaces: Dict[str, ExpirationScheduler] = {}
 

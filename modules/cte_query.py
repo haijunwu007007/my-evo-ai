@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade CTE查询引擎模块 V0.1 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存"
     }
-import logging
+from core.logging_config import get_logger
 import re
 import time
 import uuid
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("cte_query")
+logger = get_logger("cte_query")
 
 class CTEParser:
     """CTE语法解析器"""

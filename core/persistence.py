@@ -34,7 +34,7 @@ import re
 import uuid
 import threading
 import hashlib
-import logging
+from core.logging_config import get_logger
 import shutil
 import traceback
 from pathlib import Path
@@ -42,7 +42,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class Persistence:

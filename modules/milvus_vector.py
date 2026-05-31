@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Milvus Vector Module - Enterprise Production Grade Vector database management with collection operations,"
     }
 
-import logging
+from core.logging_config import get_logger
 import hashlib
 import math
 import threading
@@ -88,7 +88,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class MilvusVectorAnalyzer(object):
     """milvus_vector 分析引擎 - 运营分析核心组件

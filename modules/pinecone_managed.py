@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade Pinecone托管向量库模块 V0.1 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -84,7 +84,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("pinecone_managed")
+logger = get_logger("pinecone_managed")
 
 class IndexManager(object):
     """Pinecone索引管理器"""

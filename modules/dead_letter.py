@@ -74,7 +74,7 @@ __module_meta__ = {
 import hashlib
 import json
 import time as tmod
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -96,7 +96,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("dead_letter")
+logger = get_logger("dead_letter")
 
 class RetryPolicy:
     """重试策略引擎"""

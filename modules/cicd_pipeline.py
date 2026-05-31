@@ -89,7 +89,7 @@ __module_meta__ = {
 import time
 import asyncio
 import json
-import logging
+from core.logging_config import get_logger
 import re
 import hashlib
 from datetime import datetime, timedelta
@@ -102,7 +102,7 @@ import uuid
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.cicd_pipeline")
+logger = get_logger("evo.cicd_pipeline")
 
 # ============================================================================
 # 本地兼容类型

@@ -12,12 +12,13 @@ AUTO-EVO-AI V0.1 — Auto Evolution Engine (Production Grade)
 """
 
 import os, re, json, time, hashlib, logging, threading, urllib.request, urllib.error
+from core.logging_config import get_logger
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
-logger = logging.getLogger("evo.evolution")
+logger = get_logger("evo.evolution")
 
 # ── 数据目录 ──
 DATA_DIR = Path(__file__).parent.parent / ".evo_data" / "evolution"

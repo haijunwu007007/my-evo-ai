@@ -92,7 +92,7 @@ __module_meta__ = {
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import re
 import uuid
 from dataclasses import dataclass, field
@@ -100,7 +100,7 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ProjectStatus(str, Enum):
     DRAFT = "draft"

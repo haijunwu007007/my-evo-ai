@@ -4,13 +4,13 @@ AUTO-EVO-AI V0.1 — 进化洞察 API
 """
 from __future__ import annotations
 
-import logging
+from core.logging_config import get_logger
 import os
 from typing import Any, Dict
 
 from fastapi import APIRouter, Query
 
-logger = logging.getLogger("evo.api.insights")
+logger = get_logger("evo.api.insights")
 router = APIRouter()
 
 INSIGHTS_DIR = os.path.join(os.path.dirname(__file__), "..", ".evo_data", "insights")

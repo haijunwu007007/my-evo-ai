@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Memory Guard Module - Enterprise Production Grade Monitors and protects system memory with leak detection,"
     }
 
-import logging
+from core.logging_config import get_logger
 import threading
 import time
 import gc
@@ -87,7 +87,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class MemoryGuardAnalyzer(object):
     """memory_guard 分析引擎 - 运营分析核心组件

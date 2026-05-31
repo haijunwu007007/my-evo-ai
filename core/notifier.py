@@ -5,12 +5,12 @@ AUTO-EVO-AI V0.1 — 通知发送器
 from __future__ import annotations
 
 import json
-import logging
+from core.logging_config import get_logger
 import os
 import urllib.request
 from typing import Any
 
-logger = logging.getLogger("evo.notifier")
+logger = get_logger("evo.notifier")
 
 _DINGTALK_WEBHOOK = os.environ.get("DINGTALK_WEBHOOK", "")
 _DINGTALK_ENABLED = bool(_DINGTALK_WEBHOOK)

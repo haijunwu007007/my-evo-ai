@@ -15,14 +15,14 @@ import json
 import time
 import asyncio
 import hashlib
-import logging
+from core.logging_config import get_logger
 import sqlite3
 from datetime import datetime, timedelta
 from typing import Optional
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
-logger = logging.getLogger("GitHubScanner")
+logger = get_logger("GitHubScanner")
 
 # ─── 已集成的依赖清单 ───
 INTEGRATED_DEPS = {

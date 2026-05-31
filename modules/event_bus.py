@@ -28,14 +28,14 @@ import asyncio
 import json
 import time
 import uuid
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable
 from collections import defaultdict, deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.event_bus")
+logger = get_logger("evo.event_bus")
 
 class EventBusAnalyzer(object):
     """event_bus 分析引擎 - 运营分析核心组件

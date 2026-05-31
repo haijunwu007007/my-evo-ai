@@ -36,7 +36,7 @@ import re
 import json
 import time
 import subprocess
-import logging
+from core.logging_config import get_logger
 import urllib.request
 import urllib.error
 import tempfile
@@ -46,7 +46,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from enum import Enum
 
-logger = logging.getLogger("evo.cicd_engine")
+logger = get_logger("evo.cicd_engine")
 
 
 # ═══════════════════════════════════════════════════

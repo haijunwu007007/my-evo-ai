@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade module: VPN网关 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -288,7 +288,7 @@ class VpnGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"vpn_gateway")
+        self._logger = get_logger(f"vpn_gateway")
 
     def initialize(self) -> dict:
         self.trace("vpn_gateway.initialize", "start")

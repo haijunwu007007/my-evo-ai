@@ -87,7 +87,7 @@ import re
 import hashlib
 import threading
 import heapq
-import logging
+from core.logging_config import get_logger
 from typing import Dict, List, Any, Optional, Set, Tuple
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -97,7 +97,7 @@ from enum import Enum
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class TaskStatus(str, Enum):
     PENDING = "pending"

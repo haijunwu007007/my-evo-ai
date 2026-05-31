@@ -94,7 +94,7 @@ import uuid
 import json
 import hashlib
 import asyncio
-import logging
+from core.logging_config import get_logger
 from enum import Enum
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable, Set
@@ -115,7 +115,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.flow-engine")
+logger = get_logger("evo.flow-engine")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

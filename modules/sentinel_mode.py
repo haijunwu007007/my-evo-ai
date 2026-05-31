@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 哨兵模式 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class SentinelMode(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"sentinel_mode")
+        self._logger = get_logger(f"sentinel_mode")
 
     def initialize(self) -> dict:
         self.trace("sentinel_mode.initialize", "start")

@@ -15,14 +15,14 @@ AUTO-EVO-AI V0.1 — Trending Pipeline (Production Grade)
 import os
 import json
 import time
-import logging
+from core.logging_config import get_logger
 import threading
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
-logger = logging.getLogger("evo.trending_pipeline")
+logger = get_logger("evo.trending_pipeline")
 
 # ── 配置 ──
 TRENDING_AI_KEYWORDS = [

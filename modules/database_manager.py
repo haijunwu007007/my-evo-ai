@@ -6,7 +6,7 @@ import sqlite3
 import os
 import glob
 import time
-import logging
+from core.logging_config import get_logger
 import threading
 from typing import Any, Dict, Optional, List, Tuple
 
@@ -15,7 +15,7 @@ from modules._base.enterprise_module import (
     CircuitBreakerMixin, RateLimiterMixin,
 )
 
-logger = logging.getLogger("evo.database-manager")
+logger = get_logger("evo.database-manager")
 
 __module_meta__ = {
     "id": "database-manager",
@@ -59,7 +59,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._locks: Dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
         self._migration_log: List[str] = []
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING

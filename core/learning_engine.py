@@ -1,10 +1,11 @@
 """Learning Engine — 上市公司级自主优化闭环"""
 import asyncio, json, logging, random
+from core.logging_config import get_logger
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LearningEngine:
     """学习引擎：分析执行数据 → 生成优化建议 → 自动应用"""

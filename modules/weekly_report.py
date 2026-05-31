@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 周报生成 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 from _zhipu_helper import llm_chat  # LLM fallback
 import time
 import uuid
@@ -288,7 +288,7 @@ class WeeklyReport(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"weekly_report")
+        self._logger = get_logger(f"weekly_report")
 
     def initialize(self) -> dict:
         self.trace("weekly_report.initialize", "start")

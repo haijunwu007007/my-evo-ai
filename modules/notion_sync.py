@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Notion Sync Module - Enterprise Production Grade Bidirectional Notion synchronization with conflict resolution,"
     }
 
-import logging
+from core.logging_config import get_logger
 import hashlib
 import threading
 import time
@@ -94,7 +94,7 @@ try:
 except ImportError:
     _HAS_REQUESTS = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class NotionSyncAnalyzer(object):
     """notion_sync 分析引擎 - 运营分析核心组件

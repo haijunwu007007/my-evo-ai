@@ -90,7 +90,7 @@ import re
 import json
 import time
 import asyncio
-import logging
+from core.logging_config import get_logger
 import os
 import hashlib
 import threading
@@ -113,7 +113,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.idempotent")
+logger = get_logger("evo.idempotent")
 
 class _MetricsAdapter:
     """轻量指标适配器"""

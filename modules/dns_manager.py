@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade module: DNS域名管理系统 DNS record management, caching, TTL tracking, health probing, zone management."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -84,7 +84,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("dns_manager")
+logger = get_logger("dns_manager")
 
 class RecordType(Enum):
     A = "A"

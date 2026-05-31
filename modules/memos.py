@@ -75,7 +75,7 @@ __module_meta__ = {
         "description": "Memos Management Module - Enterprise Production Grade Full-featured memo/note management with rich text support,"
     }
 
-import logging
+from core.logging_config import get_logger
 import hashlib
 import json
 import re
@@ -90,7 +90,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class MemosAnalyzer(object):
     """memos 分析引擎 - 运营分析核心组件

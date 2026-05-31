@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade 超级记忆引擎模块 V0.1 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import math
 import re
 import time
@@ -163,7 +163,7 @@ class MemoryRetrievalEngine(object):
             params = {}
         return self.search_with_decay(**params)
 
-logger = logging.getLogger("supermemory")
+logger = get_logger("supermemory")
 
 # 记忆类型枚举
 MEMORY_TYPES = ("episodic", "semantic", "procedural", "working", "flash")

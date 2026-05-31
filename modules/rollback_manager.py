@@ -75,7 +75,7 @@ __module_meta__ = {
     }
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from enum import Enum
@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("rollback_manager")
+logger = get_logger("rollback_manager")
 
 class RollbackStatus(Enum):
     PENDING = "pending"
@@ -364,7 +364,7 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("rollback_manager")
+        self._logger = get_logger("rollback_manager")
         self._planner = RollbackPlanner(max_checkpoints=self.config.get("max_checkpoints", 100))
 
     def initialize(self) -> dict:

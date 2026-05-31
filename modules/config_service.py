@@ -90,7 +90,7 @@ import time
 import asyncio
 import json
 import copy
-import logging
+from core.logging_config import get_logger
 import hashlib
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable, Set
@@ -109,7 +109,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.config_service")
+logger = get_logger("evo.config_service")
 
 # ============================================================================
 # 数据模型

@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 错误聚合分析 Error collection, aggregation, deduplication, root cause analysis, trend tracking, alerting."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -82,7 +82,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("error_aggregator")
+logger = get_logger("error_aggregator")
 
 class ErrorPatternAnalyzer(object):
     """error_aggregator 运营分析引擎

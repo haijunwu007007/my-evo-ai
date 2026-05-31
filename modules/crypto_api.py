@@ -81,7 +81,7 @@ __module_meta__ = {
     }
 import hashlib
 import hmac
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict
@@ -140,7 +140,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "last_success_ts": None,
         }
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("crypto_api")
+        self._logger = get_logger("crypto_api")
         # 行情缓存
         self._price_cache: Dict[str, Dict] = {}
         self._cache_ttl: int = self.config.get("cache_ttl", 30)

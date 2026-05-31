@@ -23,12 +23,12 @@ AUTO-EVO-AI V0.1 — Adaptive Engine (自适应引擎)
 import os
 import sqlite3
 import time
-import logging
+from core.logging_config import get_logger
 import threading
 from collections import defaultdict, deque
 from typing import Any, Dict, List, Optional
 
-logger = logging.getLogger("adaptive_engine")
+logger = get_logger("adaptive_engine")
 
 # ─── 常量 ────────────────────────────────────────────
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adaptive_engine.db")

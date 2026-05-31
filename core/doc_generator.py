@@ -38,7 +38,7 @@ import io
 import re
 import json
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
@@ -46,7 +46,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum
 
-logger = logging.getLogger("evo.doc_generator")
+logger = get_logger("evo.doc_generator")
 
 
 # ═══════════════════════════════════════════════════

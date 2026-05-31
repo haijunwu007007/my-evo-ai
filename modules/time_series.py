@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 时序数据库 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -287,7 +287,7 @@ class TimeSeries(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"time_series")
+        self._logger = get_logger(f"time_series")
 
     def initialize(self) -> dict:
         self.trace("time_series.initialize", "start")

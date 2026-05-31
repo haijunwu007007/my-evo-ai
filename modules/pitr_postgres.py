@@ -73,7 +73,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade PITR PostgreSQL模块 V0.1 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理"
     }
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict, deque
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("pitr_postgres")
+logger = get_logger("pitr_postgres")
 
 class WALArchive:
     """WAL归档管理器"""

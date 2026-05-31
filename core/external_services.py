@@ -40,7 +40,7 @@ import time
 import hmac
 import hashlib
 import smtplib
-import logging
+from core.logging_config import get_logger
 import threading
 import urllib.request
 import urllib.error
@@ -54,7 +54,7 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 from pathlib import Path
 
-logger = logging.getLogger("evo.external_services")
+logger = get_logger("evo.external_services")
 
 
 # ═══════════════════════════════════════════════════

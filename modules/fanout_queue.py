@@ -82,7 +82,7 @@ __module_meta__ = {
 import os
 import time
 import uuid
-import logging
+from core.logging_config import get_logger
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Set, Callable
 from enum import Enum
@@ -90,7 +90,7 @@ from collections import defaultdict, deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class FanoutQueueAnalyzer(object):
     """fanout_queue 分析引擎 - 运营分析核心组件

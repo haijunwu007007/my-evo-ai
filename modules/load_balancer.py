@@ -81,7 +81,7 @@ __module_meta__ = {
 
 import hashlib
 import heapq
-import logging
+from core.logging_config import get_logger
 import threading
 import time
 from bisect import bisect
@@ -92,7 +92,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LoadBalancerAnalyzer(object):
     """load_balancer 分析引擎 - 运营分析核心组件

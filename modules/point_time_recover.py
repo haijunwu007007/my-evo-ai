@@ -74,7 +74,7 @@ __module_meta__ = {
     }
 import copy
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict, deque
@@ -84,7 +84,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("point_time_recover")
+logger = get_logger("point_time_recover")
 
 class SnapshotManager(object):
     """数据快照管理器"""

@@ -74,7 +74,7 @@ __module_meta__ = {
     }
 
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 import threading
 import json
@@ -94,7 +94,7 @@ except ImportError:
     client = None
     k8s_config = None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class K8SOrchAnalyzer(object):
     """k8s_orch 分析引擎 - 运营分析核心组件

@@ -89,7 +89,7 @@ import time
 import asyncio
 import json
 import time as tmod
-import logging
+from core.logging_config import get_logger
 import time as tmod
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable
@@ -108,7 +108,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("evo.distributed_tracer")
+logger = get_logger("evo.distributed_tracer")
 
 # ============================================================================
 # 数据模型

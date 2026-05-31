@@ -76,7 +76,7 @@ __module_meta__ = {
 
 import time
 import hashlib
-import logging
+from core.logging_config import get_logger
 import ipaddress
 import threading
 from datetime import datetime, timedelta, timezone
@@ -84,7 +84,7 @@ from enum import Enum
 from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 try:
     from modules._base.enterprise_module import (

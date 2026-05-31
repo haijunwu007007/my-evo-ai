@@ -77,7 +77,7 @@ __module_meta__ = {
 import time
 import re
 import json
-import logging
+from core.logging_config import get_logger
 import threading
 from typing import Any, Optional, Dict, List, Set, Tuple
 from enum import Enum
@@ -86,7 +86,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LabelType(Enum):
     STRING = "string"

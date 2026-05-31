@@ -87,7 +87,7 @@ __module_meta__ = {
         "description": "I/O Monitor — 企业级I/O性能监控引擎 生产级实现：磁盘/网络I/O监控、瓶颈检测、容量预测、延迟分析、告警规则"
     }
 import time
-import logging
+from core.logging_config import get_logger
 
 import threading
 from dataclasses import dataclass, field
@@ -97,7 +97,7 @@ from collections import deque, defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class IoMonitorAnalyzer(object):
     """io_monitor 分析引擎 - 运营分析核心组件

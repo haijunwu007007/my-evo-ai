@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade 决策引擎模块 V0.1 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import math
 
 import time
@@ -84,7 +84,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("decision_engine")
+logger = get_logger("decision_engine")
 
 class RuleEngine(object):
     """规则引擎 - 条件匹配与优先级执行"""

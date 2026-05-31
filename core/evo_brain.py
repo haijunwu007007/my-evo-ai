@@ -4,11 +4,12 @@ AUTO-EVO-AI V0.1 主编排器 - 系统大脑
 使用LLM做真实语义理解，正则降级兜底
 """
 import json, re, asyncio, logging, hashlib
+from core.logging_config import get_logger
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from .evolution_engine import engine as evo_engine  # AdaptiveEngine 单例
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class EvoBrain:
     """主编排器 - LLM驱动意图理解 + 正则降级"""

@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "GitHub趋势追踪模块 - GitHub Trending Tracker Service 生产级实现：趋势仓库采集、语言分类、增速计算、历史对比、热点分析"
     }
-import logging
+from core.logging_config import get_logger
 import time
 import hashlib
 import urllib.request
@@ -88,7 +88,7 @@ from collections import defaultdict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class GithubtrendingAnalyzer(object):
     """githubtrending 分析引擎 - 运营分析核心组件

@@ -3,9 +3,10 @@ AUTO-EVO-AI 企业级模块增强层
 为所有 570 模块注入上市公司标准：重试/熔断/指标/结构化日志/健康检查
 """
 import functools, time, logging, traceback
+from core.logging_config import get_logger
 from typing import Dict, Any, Optional, Callable
 
-logger = logging.getLogger("enterprise")
+logger = get_logger("enterprise")
 
 # ─── 1. 重试装饰器 ───
 

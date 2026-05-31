@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade module: RPA控制中心 EnterpriseModule implementation with real business logic."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -288,7 +288,7 @@ class RpaControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger(f"rpa_control")
+        self._logger = get_logger(f"rpa_control")
 
     def initialize(self) -> dict:
         self.trace("rpa_control.initialize", "start")

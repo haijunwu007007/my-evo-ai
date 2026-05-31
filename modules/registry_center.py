@@ -74,7 +74,7 @@ __module_meta__ = {
         "description": "Production-grade 服务注册中心模块 V0.1 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import random
 import time
 import uuid
@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("registry_center")
+logger = get_logger("registry_center")
 
 class ServiceInstance:
     """服务实例 - 封装单个服务注册信息"""

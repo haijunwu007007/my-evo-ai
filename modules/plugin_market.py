@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Production-grade 插件市场模块 V0.1 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核"
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from collections import defaultdict, deque
@@ -83,7 +83,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("plugin_market")
+logger = get_logger("plugin_market")
 
 class PluginRegistry:
     """插件注册中心"""

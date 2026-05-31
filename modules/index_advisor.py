@@ -73,7 +73,7 @@ __module_meta__ = {
         "description": "Index Advisor — 企业级数据库索引优化顾问 生产级实现：查询分析、索引推荐、执行计划解读、成本估算、回滚方案"
     }
 import time
-import logging
+from core.logging_config import get_logger
 import hashlib
 import re
 from dataclasses import dataclass, field
@@ -83,7 +83,7 @@ from collections import Counter
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class IndexAdvisorAnalyzer(object):
     """index_advisor 分析引擎 - 运营分析核心组件

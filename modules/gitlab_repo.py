@@ -72,7 +72,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "GitLab仓库管理模块 - GitLab Repository Management Service 生产级实现：仓库CRUD、分支管理、MR/PR管理、CI/CD管道、Webhook、权限控制"
     }
-import logging
+from core.logging_config import get_logger
 import time
 import re
 import hashlib
@@ -82,7 +82,7 @@ from enum import Enum
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class GitlabRepoAnalyzer(object):
     """gitlab_repo 分析引擎 - 运营分析核心组件

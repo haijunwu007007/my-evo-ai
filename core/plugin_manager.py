@@ -20,7 +20,7 @@ import sys
 import json
 import shutil
 import hashlib
-import logging
+from core.logging_config import get_logger
 import importlib
 import subprocess
 import threading
@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -434,7 +434,7 @@ AUTO-EVO-AI Plugin: {manifest.display_name}
 """
 
 import logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class {manifest.name.replace("-","_").replace(".","_")}Plugin:

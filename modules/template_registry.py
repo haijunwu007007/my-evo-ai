@@ -5,7 +5,7 @@ AUTO-EVO-AI V0.1 - 生产级模板注册中心
 级别: A级 (上市公司生产级)
 功能: 模板全生命周期管理、版本控制、依赖解析、渲染引擎、权限控制
 """
-import logging
+from core.logging_config import get_logger
 from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -92,7 +92,7 @@ from enum import Enum
 import uuid
 import difflib
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class TemplateRegistryAnalyzer(object):
     """template_registry 分析引擎 - 运营分析核心组件
@@ -348,7 +348,7 @@ class TemplateRegistry:
 
     def __init__(self, config: Optional[Dict] = None):
         self.version = "V0.1"
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.config = config or self._default_config()
 
         # 模板存储
@@ -522,7 +522,7 @@ class TemplateRegistry:
 )
  {{ typing_imports | default("Dict, List, Optional, Any") }}
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class {{ class_name }}:
     \"\"\"
@@ -530,7 +530,7 @@ class {{ class_name }}:
     \"\"\"
 
     def __init__(self{% for param in init_params %}, {{ param.name }}: {{ param.type | default("Any") }} = {{ param.default | default("None") }}{% endfor %}):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         {{ init_body | default("# 初始化逻辑") }}
 
     def {{ main_method }}(self{% for param in method_params %}, {{ param.name }}: {{ param.type | default("Any") }}{% endfor %}) -> {{ return_type | default("Dict") }}:

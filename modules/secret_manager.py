@@ -75,7 +75,7 @@ __module_meta__ = {
     }
 import hashlib
 import hmac
-import logging
+from core.logging_config import get_logger
 import os
 import secrets
 import time
@@ -98,7 +98,7 @@ except ImportError:
     Fernet = None
     AESGCM = None
 
-logger = logging.getLogger("secret_manager")
+logger = get_logger("secret_manager")
 
 class SecretType(Enum):
     API_KEY = "api_key"
@@ -202,7 +202,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         self._audit_log: List[Dict] = []
         self._status = ModuleStatus.INITIALIZING
-        self._logger = logging.getLogger("secret_manager")
+        self._logger = get_logger("secret_manager")
         self._validator = SecretValidator(self.config.get("validation", {}))
         self._master_key = self.config.get("master_key", secrets.token_hex(32))
 
@@ -244,7 +244,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             except Exception:
                 pass
         # 回退：不可逆散列（仅用于不要求解密的场景）
-        _logger = logging.getLogger("secret_manager")
+        _logger = get_logger("secret_manager")
         _logger.warning("cryptography库不可用，使用HMAC-SHA256散列代替加密（不可逆）")
         return hmac.new(self._master_key.encode(), value.encode(), hashlib.sha256).hexdigest()
 

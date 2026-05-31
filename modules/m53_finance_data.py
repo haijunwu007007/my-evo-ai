@@ -97,14 +97,14 @@ __module_meta__ = {
 import time
 import json
 import hashlib
-import logging
+from core.logging_config import get_logger
 import threading
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
-logger = logging.getLogger("evo.m53_finance_data")
+logger = get_logger("evo.m53_finance_data")
 
 # ============================================================================
 # EnterpriseModule 导入 — 兼容多环境

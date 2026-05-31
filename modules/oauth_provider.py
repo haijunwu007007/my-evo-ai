@@ -21,7 +21,7 @@ import time
 import json
 import hashlib
 import uuid
-import logging
+from core.logging_config import get_logger
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -31,7 +31,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger("evo.oauth-provider")
+logger = get_logger("evo.oauth-provider")
 
 class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     """OAuth2 授权服务器"""

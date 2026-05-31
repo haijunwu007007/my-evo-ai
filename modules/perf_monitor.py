@@ -85,7 +85,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "Production-grade 性能监控模块 V0.1 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算"
     }
-import logging
+from core.logging_config import get_logger
 import math
 import time
 import uuid
@@ -96,7 +96,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("perf_monitor")
+logger = get_logger("perf_monitor")
 
 class SystemMetricsCollector:
     """系统指标采集器"""

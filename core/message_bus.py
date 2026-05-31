@@ -4,12 +4,13 @@
 为未来分布式消息队列提供兼容接口。
 """
 import asyncio, time, json, logging, uuid, threading, sqlite3
+from core.logging_config import get_logger
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("evo.message-bus")
+logger = get_logger("evo.message-bus")
 DATA_DIR = Path(".evo_data/queue")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -79,7 +79,7 @@ __module_meta__ = {
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -90,7 +90,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import metrics_collector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # ──────────────────────────────────────────────
 # 数据模型

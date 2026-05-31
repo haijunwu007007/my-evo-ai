@@ -72,7 +72,7 @@ __module_meta__ = {
         "description": "Production-grade module: 实体抽取引擎 NER entity extraction, pattern matching, dictionary-based extraction, entity linking, relation extraction."
     }
 import hashlib
-import logging
+from core.logging_config import get_logger
 import re
 import time
 from collections import defaultdict
@@ -83,7 +83,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger("entity_extraction")
+logger = get_logger("entity_extraction")
 
 class AccuracyAnalyzer(object):
     """entity_extraction 运营分析引擎

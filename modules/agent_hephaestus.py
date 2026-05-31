@@ -94,7 +94,7 @@ import time
 import json
 import hashlib
 import shutil
-import logging
+from core.logging_config import get_logger
 import subprocess
 import tempfile
 import threading
@@ -119,7 +119,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-logger = logging.getLogger("agent.hephaestus")
+logger = get_logger("agent.hephaestus")
 
 # ============================================================
 # 数据模型

@@ -88,7 +88,7 @@ __module_meta__ = {
 import asyncio
 import hashlib
 import json
-import logging
+from core.logging_config import get_logger
 import os
 import re
 import time
@@ -101,7 +101,7 @@ from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class DocumentFormat(Enum):
     """Supported document formats for ingestion."""
