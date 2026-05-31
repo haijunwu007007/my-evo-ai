@@ -47,14 +47,52 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
-            IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
-            echo "Pulling: $IMAGE"
-            docker pull "$IMAGE"
+            PREVIOUS_IMAGE="ghcr.io/${{ github.repository }}:previous"
+            NEW_IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+
+            # Save previous image tag for rollback
+            docker tag evo-api "$PREVIOUS_IMAGE" 2>/dev/null || true
+
+            echo "Pulling: $NEW_IMAGE"
+            docker pull "$NEW_IMAGE"
+
+            echo "Stopping old container..."
             docker stop evo-api 2>/dev/null || true
             docker rm evo-api 2>/dev/null || true
+
+            echo "Starting new container..."
             docker run -d --name evo-api --restart always -p 8765:8765 \
               -v evo-data:/app/data \
               -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
-              "$IMAGE"
+              "$NEW_IMAGE"
+
+            # Health check — wait up to 30s for container to be ready
+            echo "Health check: waiting for service..."
+            HEALTH_OK=false
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:8765/api/status >/dev/null 2>&1; then
+                HEALTH_OK=true
+                echo "Service is healthy!"
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$HEALTH_OK" != "true" ]; then
+              echo "Health check FAILED! Rolling back..."
+              docker stop evo-api 2>/dev/null || true
+              docker rm evo-api 2>/dev/null || true
+              if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "$PREVIOUS_IMAGE"; then
+                docker run -d --name evo-api --restart always -p 8765:8765 \
+                  -v evo-data:/app/data \
+                  -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
+                  "$PREVIOUS_IMAGE"
+                echo "Rollback complete: restored previous version"
+              else
+                echo "No previous image to rollback to!"
+                exit 1
+              fi
+            fi
+
             docker image prune -f
-            echo "Deploy complete: $IMAGE"
+            echo "Deploy complete: $NEW_IMAGE"
