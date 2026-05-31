@@ -1,8 +1,9 @@
+import os
 """将 system_coordinator_v3.py 3951行拆分为包"""
 import re
 
-SRC = "D:/AUTO-EVO-AI-V0.1/modules/system_coordinator_v3.py"
-DST = "D:/AUTO-EVO-AI-V0.1/modules/system_coordinator_v3"
+SRC = "os.environ.get("EVO_HOME", ".")/modules/system_coordinator_v3.py"
+DST = "os.environ.get("EVO_HOME", ".")/modules/system_coordinator_v3"
 
 with open(SRC, encoding="utf-8") as f:
     content = f.read()

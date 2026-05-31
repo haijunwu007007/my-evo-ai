@@ -2,7 +2,7 @@
 AUTO-EVO-AI 灾备工具 — 保存模块元数据 + 关键配置到备份目录
 """
 import os, shutil, json, datetime
-BASE = "D:/AUTO-EVO-AI-V0.1"
+BASE = "os.environ.get("EVO_HOME", ".")"
 BACKUP = "D:/AUTO-EVO-AI_BACKUPS"
 ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 dst = os.path.join(BACKUP, ts)

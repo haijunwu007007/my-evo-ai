@@ -319,8 +319,8 @@ class WindowsControl:
                             rect=(rect.left, rect.top, rect.right, rect.bottom),
                         )
                     )
-                except:
-                    pass
+                except Exception as e:
+            logger.warning(f"windows_control: {e}")
             return wins
         except Exception as e:
             logger.error(f"list_windows: {e}")
@@ -379,8 +379,8 @@ class WindowsControl:
                             name=desc.element_info.name or "",
                         )
                     )
-                except:
-                    pass
+                except Exception as e:
+            logger.warning(f"windows_control: {e}")
         except Exception as e:
             logger.error(f"get_controls: {e}")
         return controls

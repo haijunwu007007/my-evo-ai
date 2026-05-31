@@ -1,5 +1,6 @@
+import os
 import sys, os, inspect
-BASE = r'C:\Users\吴海军\yuanqiai\my-evo-ai'
+BASE = r'os.environ.get("EVO_HOME", ".")'
 sys.path.insert(0, BASE)
 sys.path.insert(0, os.path.join(BASE, 'modules'))
 

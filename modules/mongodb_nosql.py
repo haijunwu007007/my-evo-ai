@@ -36,7 +36,8 @@ class MongoDBNoSQL(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
         if a=="status":
             if not self._marked_as_mock:
                 try:names=self._db.list_collection_names();return{"success":True,"collections":names,"docs":sum(self._db[c].count_documents({})for c in names),"mode":"real"}
-                except:pass
+                except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
             return{"success":True,"collections":list(self._collections.keys()),"docs":sum(len(docs)for docs in self._collections.values()),"mode":"mock"}
         if a=="insert":
             doc=p.get("document",{})
@@ -51,14 +52,16 @@ class MongoDBNoSQL(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             query=p.get("query",{});limit=int(p.get("limit",100))
             if not self._marked_as_mock:
                 try:docs=list(self._db[col].find(query).limit(limit));return{"success":True,"documents":[dict(d)for d in docs],"count":len(docs),"mode":"real"}
-                except:pass
+                except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
             docs=self._collections.get(col,[]);results=copy.deepcopy([d for d in docs if all(d.get(k)==v for k,v in query.items())][:limit])
             return{"success":True,"documents":results,"count":len(results),"mode":"mock"}
         if a=="update":
             query=p.get("query",{});update=p.get("update",{});upsert=p.get("upsert",False)
             if not self._marked_as_mock:
                 try:r=self._db[col].update_many(query,{"$set":update});return{"success":True,"updated":r.modified_count,"collection":col,"mode":"real"}
-                except:pass
+                except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
             docs=self._collections.get(col,[]);updated=0
             for d in docs:
                 if all(d.get(k)==v for k,v in query.items()):d.update(update);d["_updated"]=time.time();updated+=1
@@ -67,19 +70,22 @@ class MongoDBNoSQL(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             query=p.get("query",{})
             if not self._marked_as_mock:
                 try:r=self._db[col].delete_many(query);return{"success":True,"deleted":r.deleted_count,"mode":"real"}
-                except:pass
+                except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
             docs=self._collections.get(col,[]);before=len(docs)
             self._collections[col]=[d for d in docs if not all(d.get(k)==v for k,v in query.items())]
             return{"success":True,"deleted":before-len(self._collections[col]),"mode":"mock"}
         if a=="count":
             if not self._marked_as_mock:
                 try:return{"success":True,"count":self._db[col].count_documents({}),"collection":col,"mode":"real"}
-                except:pass
+                except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
             return{"success":True,"count":len(self._collections.get(col,[])),"collection":col,"mode":"mock"}
         return{"success":False,"error":f"unknown_action:{a}"}
     async def shutdown(self)->None:
         if not self._marked_as_mock:
             try:self._client.close()
-            except:pass
+            except Exception as e:
+            logger.warning(f"mongodb_nosql: {e}")
         self._collections.clear();self.status=ModuleStatus.STOPPED
 module_class=MongoDBNoSQL

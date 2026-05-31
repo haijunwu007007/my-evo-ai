@@ -291,7 +291,8 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             conn.close()
             if row:
                 roles = json.loads(row["roles"] or '["user"]')
-        except: pass
+        except Exception as e:
+            logger.warning(f"sso_auth: {e}")
         attributes = params.get("attributes", {"username": username or user_id, "roles": roles})
         now = time.time()
         session_token = f"sso_{uuid.uuid4().hex}"
@@ -392,7 +393,8 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                           json.dumps(params.get("callback_urls", [])), time.time()))
             conn.commit()
             conn.close()
-        except: pass
+        except Exception as e:
+            logger.warning(f"sso_auth: {e}")
         return {"success": True, "app_id": app_id, "app_secret": secret}
 
     def _list_sessions(self, params: Dict) -> Dict:

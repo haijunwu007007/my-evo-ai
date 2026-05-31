@@ -58,8 +58,8 @@ def _get_llm():
         try:
             from core.llm_gateway import get_llm_pool
             _llm_pool = get_llm_pool()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"module_factory: {e}")
     return _llm_pool
 
 
@@ -69,8 +69,8 @@ def _get_notify():
         try:
             from core.external_services import get_notification_service
             _notify_service = get_notification_service()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"module_factory: {e}")
     return _notify_service
 
 
@@ -174,8 +174,8 @@ class ModuleFactory:
                 result = PROXY_TEMPLATES[action](mod_name, params)
                 if result.get("success"):
                     return result
-            except:
-                pass
+            except Exception as e:
+            logger.warning(f"module_factory: {e}")
 
         # 2. 尝试 LLM 推理（如果已配置）
         if llm and llm._providers:

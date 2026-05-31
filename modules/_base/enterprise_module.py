@@ -464,8 +464,8 @@ class EnterpriseModule(ABC):
                 return hc
             if hasattr(hc, "to_dict"):
                 return hc.to_dict()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"enterprise_module: {e}")
         return {"status": "unknown", "module_id": getattr(self, "module_id", "")}
 
     def _action_list_actions(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -689,8 +689,8 @@ class EnterpriseModule(ABC):
             except TypeError:
                 try:
                     return self._tracer.trace(name)
-                except:
-                    pass
+                except Exception as e:
+            logger.warning(f"enterprise_module: {e}")
 
         # 无追踪器时返回空上下文
         class _NoopSpan:
@@ -721,8 +721,8 @@ class EnterpriseModule(ABC):
                 # 尝试调用inc方法
                 try:
                     self._metrics.inc(name, value, tags or {})
-                except:
-                    pass
+                except Exception as e:
+            logger.warning(f"enterprise_module: {e}")
 
     def audit(self, action: str, detail: str = "", level: str = "INFO"):
         """记录审计日志"""

@@ -438,8 +438,8 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """Initialize module"""
         try:
             self._status = "initialized"
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"job_scheduler: {e}")
 
     def execute(self, action: str = 'status', params: dict = None) -> dict:
         params=params or{}

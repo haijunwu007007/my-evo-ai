@@ -1,6 +1,7 @@
+import os
 import sys, os
-sys.path.insert(0, r'C:\Users\吴海军\yuanqiai\my-evo-ai')
-sys.path.insert(0, r'C:\Users\吴海军\yuanqiai\my-evo-ai\modules')
+sys.path.insert(0, r'os.environ.get("EVO_HOME", ".")')
+sys.path.insert(0, r'os.environ.get("EVO_HOME", ".")\modules')
 try:
     from modules._base.module_meta import EnterpriseModule
     print('SUCCESS: EnterpriseModule imported')
