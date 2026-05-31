@@ -61,6 +61,9 @@ from api.infra import (
 # ── 加载中间件（副作用：注册 @app.middleware）──
 import api.middleware  # noqa: F401
 
+# ── 加载后台任务（副作用：注册 @app.on_event("startup")）──
+import api.startup  # noqa: F401
+
 # ── 注册路由模块 ──
 from api.routes_modules import router as modules_router
 from api.routes_services import router as services_router
@@ -325,9 +328,6 @@ if __name__ == "__main__":
         asyncio.run(warmup_modules())
     except RuntimeError:
         pass  # 有运行中事件循环时跳过
-
-    # 异步加载 startup（注册后台任务）
-    import api.startup  # noqa: F401
 
     auth_status = "已启用" if _API_KEY_ENABLED else "未启用"
     if os.environ.get("EVO_AUTH_ENABLED","false").lower()=="true":
