@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 class LearningEngine:
     """学习引擎：分析执行数据 → 生成优化建议 → 自动应用"""
 
-    def __init__(self, data_dir: str = None):
-        self.base = Path(data_dir or "D:/AUTO-EVO-AI-V0.1/data")
+    def __init__(self, data_dir: str | None = None):
+        self.base = Path(data_dir or Path(__file__).resolve().parent.parent / "data")
         self.base.mkdir(parents=True, exist_ok=True)
         self._insights = []
         self._rules = {}
@@ -23,7 +23,8 @@ class LearningEngine:
             try:
                 self._rules = json.loads(f.read_text(encoding="utf-8"))
                 logger.info(f"[LEARNING] 已加载 {len(self._rules)} 条优化规则")
-            except: logger.warning("learning_engine: rules load failed")
+            except OSError:
+                logger.warning("learning_engine: rules load failed")
 
     def _save(self):
         f = self.base / "learning_rules.json"

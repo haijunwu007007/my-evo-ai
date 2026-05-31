@@ -311,7 +311,7 @@ class ProcessWatchdogModule(ModuleBase):
             if proc.is_running():
                 return {"success": True, "pid": pid, "status": "running"}
             return {"success": False, "pid": pid, "status": "dead"}
-        except:
+        except (ImportError, Exception):
             return {"success": False, "pid": pid, "status": "not_found"}
             
     async def _kill_process(self, pid: int) -> Dict:

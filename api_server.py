@@ -34,16 +34,14 @@ sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(BASE_DIR / "modules"))
 
 # ── FastAPI ──
-from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 # ── 日志 ──
-from core.logging_config import get_logger, StructuredLogger
+from core.logging_config import get_logger
 
 # ── 配置系统 ──
 from core.config_loader import load_config, get_config_value
@@ -92,13 +90,6 @@ app.include_router(auth_system_router)
 app.include_router(scheduler_router)
 app.include_router(coordinator_router)
 app.include_router(insights_router)
-
-# ── Prometheus 指标端点 ──
-@app.get("/metrics", include_in_schema=False)
-async def prometheus_metrics():
-    from modules._prometheus import get_prometheus_text
-    from fastapi.responses import PlainTextResponse
-    return PlainTextResponse(get_prometheus_text())
 
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"
@@ -191,7 +182,7 @@ async def system_status():
         "modules_total": len(registry._pending_modules) + len(registry.modules),
         "modules_stub": registry.get_stub_count(),
         "coordinator": coord_data,
-        "api_version": "0.1.0",
+        "api_version": "V0.1",
     }
 
 
@@ -284,12 +275,23 @@ async def auth_verify(token: str = ""):
 # Prometheus Metrics
 # ═══════════════════════════════════════════════════════
 
-@app.get("/metrics")
+@app.get("/metrics", include_in_schema=False)
 async def prometheus_metrics():
     now = time.time()
     uptime = now - _START_TIME
-    lines = []
+    lines: list = []
     lines.append("# AUTO-EVO-AI V0.1 Prometheus Metrics Export")
+
+    # 模块级 Prometheus 指标（由 _prometheus 模块收集）
+    try:
+        from modules._prometheus import get_prometheus_text
+        pt = get_prometheus_text()
+        if pt.strip():
+            lines.append("")
+            lines.append("# -- modules._prometheus --")
+            lines.append(pt)
+    except Exception:
+        pass
 
     health = registry.get_all_health()
     ok_count = sum(1 for h in health.values() if h.get("status") in ("ok", "healthy", "configured", "module_only"))
@@ -305,7 +307,6 @@ async def prometheus_metrics():
     lines.append(f"evo_modules_stub {stub_count}")
 
     for path, count in sorted(_request_counter.items()):
-        safe = path.replace("/", "_").strip("_") or "root"
         lines.append(f'evo_http_requests_total{{endpoint="{path}"}} {count}')
     for path, count in sorted(_request_errors.items()):
         lines.append(f'evo_http_errors_total{{endpoint="{path}"}} {count}')

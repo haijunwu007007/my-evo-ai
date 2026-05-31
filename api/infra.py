@@ -748,8 +748,10 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
         if action.lower() in ("list_actions", "help", "actions"):
             acts = []
             if hasattr(mod, '_get_available_actions'):
-                try: acts = mod._get_available_actions()
-                except: logger.warning("infra: failed to get actions")
+                try:
+                    acts = mod._get_available_actions()
+                except Exception:
+                    logger.warning("infra: failed to get actions")
             if not acts:
                 acts = [m for m in dir(mod) if not m.startswith('_') and callable(getattr(mod, m, None)) and m not in ('execute', 'initialize', 'shutdown', 'health_check')]
             return {"success": True, "actions": acts, "module": name}

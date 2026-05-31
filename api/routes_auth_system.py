@@ -58,7 +58,8 @@ async def config_entries():
         if isinstance(all_cfg, dict):
             entries = [{"key": k, "value": str(v)[:200]} for k, v in all_cfg.items()]
             return {"success": True, "entries": entries, "count": len(entries)}
-    except: logger.warning("auth/system: config read failed")
+    except Exception:
+        logger.warning("auth/system: config read failed")
     return {"success": True, "entries": [], "count": 0}
 @router.get("/api/config/{key:path}")
 async def config_get(key: str):
@@ -171,7 +172,8 @@ async def monitor_realtime():
 async def ws_status():
     try:
         active = len(manager.active_connections) if hasattr(manager, 'active_connections') else 0
-    except: active = 0
+    except AttributeError:
+        active = 0
     return {"success": True, "active_connections": active, "status": "running"}
 @router.get("/api/system/metrics")
 async def system_metrics():

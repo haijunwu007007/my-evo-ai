@@ -464,7 +464,7 @@ class GitHubScannerEngine:
                 if l_parts[0] == i_parts[0] and len(l_parts) >= 2 and l_parts[1] > i_parts[1]:
                     return "medium"  # 小版本升级
             return "low"
-        except:
+        except (ValueError, IndexError, TypeError):
             return "low"
 
     # ─── GitHub Trending 扫描 ───

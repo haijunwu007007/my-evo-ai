@@ -66,8 +66,10 @@ except ImportError:
             self._load()
         def _load(self) -> Any:
             if _CONFIG_PATH.exists():
-                try: self._data = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
-                except: self._data = {}
+                try:
+                    self._data = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    self._data = {}
             else:
                 try:
                     import yaml
@@ -81,7 +83,8 @@ except ImportError:
                         return out
                     self._data = _flatten(cfg)
                     self._persist()
-                except: self._data = {}
+                except OSError:
+                    self._data = {}
         def get(self, k, d=None): return self._data.get(k, d)
         def get_all(self): return dict(self._data)
         def set(self, k, v): self._data[k] = str(v); self._persist(); return True
@@ -102,7 +105,8 @@ def _get_lan_ip() -> Any:
         ip = s.getsockname()[0]
         s.close()
         return ip
-    except: return "127.0.0.1"
+    except OSError:
+        return "127.0.0.1"
 _LAN_IP = _get_lan_ip()
 _TUNNEL_URL = ""
 
