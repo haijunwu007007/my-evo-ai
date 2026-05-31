@@ -173,9 +173,9 @@ const engineStatus = ref<any[]>([])
 const extraStats = ref<any>(null)
 const chartRef = ref<any>(null)
 const pieRef = ref<any>(null)
-let lineChart = null
-let pieChart = null
-let timer = null
+let lineChart: any = null
+let pieChart: any = null
+let timer: any = null
 
 const statCards = ref([
   { title: '模块总数', value: '-', color: '#6366f1', icon: '📦', trend: 0 },
@@ -249,7 +249,7 @@ const initPieChart = () => {
   })
 }
 
-const updatePie = (grades) => {
+const updatePie = (grades: any) => {
   const data = [
     { name: 'Grade A', value: grades.A || 1, itemStyle: { color: '#10b981' } },
     { name: 'Grade B', value: grades.B || 1, itemStyle: { color: '#6366f1' } },
@@ -321,7 +321,7 @@ const submitTask = async () => {
   taskResult.value = null
   try {
     taskResult.value = await executeTask(desc)
-  } catch (e) {
+  } catch (e: any) {
     taskResult.value = { error: e.message }
   }
   taskLoading.value = false

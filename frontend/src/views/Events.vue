@@ -59,7 +59,7 @@ const load = async () => {
   finally { loading.value = false }
 }
 const createRule = async () => { await createEventRule(ruleForm.value); showCreate.value=false; load() }
-const delRule = async (id) => { await deleteEventRule(id); load() }
+const delRule = async (id: any) => { await deleteEventRule(id); load() }
 onMounted(load)
 </script>
 <style scoped>

@@ -28,9 +28,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getConfigEntries, deleteConfig, reloadConfig, getSystemMetrics, getDiagnosis } from '@/api'
-const entries = ref([])
+const entries = ref<any[]>([])
 const configs = computed(() => entries.value)
-const statInfo = ref({})
+const statInfo = ref<Record<string, any>>({})
 const load = async () => {
   try {
     const [ce, m, d] = await Promise.all([getConfigEntries(), getSystemMetrics(), getDiagnosis()])

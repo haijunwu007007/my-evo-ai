@@ -41,7 +41,7 @@ export default {
     const password = ref('')
     const loginLoading = ref(false)
 
-    function oauthLogin(provider) {
+    function oauthLogin(provider: any) {
       ElMessage.info(`跳转 ${provider} 授权页面`)
       window.location.href = `/api/auth/oauth/${provider}?redirect_uri=${encodeURIComponent(window.location.origin + '/oauth/callback')}`
     }
@@ -59,7 +59,7 @@ export default {
         } else {
           ElMessage.error(r?.detail || '登录失败')
         }
-      } catch (e) {
+      } catch (e: any) {
         const msg = e.response?.data?.detail || e.message || '请求失败'
         ElMessage.error(msg)
       } finally {

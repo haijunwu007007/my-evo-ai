@@ -133,16 +133,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { rescanModules } from '@/api'
 import api from '@/api'
+import { ElMessage } from 'element-plus'
 
-const cats = ref({})
+const cats = ref<Record<string, any[]>>({})
 const search = ref('')
 const filterGrade = ref('')
 const filterCat = ref('')
 const viewMode = ref('card')
 const rescanning = ref(false)
 const drawerVisible = ref(false)
-const selectedMod = ref(null)
-const allModules = ref([])
+const selectedMod = ref<any>(null)
+const allModules = ref<any[]>([])
 
 const allCats = computed(() => Object.keys(cats.value))
 

@@ -64,7 +64,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { getSchedulerTasks, getSchedulerStatus, createSchedulerTask, toggleSchedulerTask, triggerSchedulerTask, deleteSchedulerTask } from '@/api'
 
-const tasks = ref([])
+const tasks = ref<any[]>([])
 const showCreate = ref(false)
 const form = ref({ name: '', target_type: 'module', target_id: '', cron: '' })
 const loading = ref(true)

@@ -57,12 +57,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/api'
-import { notifyStatus, notifyConfig, notifyUpdateConfig, notifySend } from '@/api'
+import { notifyStatus, notifyConfig, notifyUpdateConfig, notifySend, notifyTest } from '@/api'
 const loading = ref(true); const sending = ref(false); const testResult = ref<any>(null)
 const stats = ref([{key:'total',label:'总发送',val:0,color:'#6366f1'},{key:'success',label:'成功',val:0,color:'#10b981'},{key:'fail',label:'失败',val:0,color:'#ef4444'},{key:'channels',label:'渠道数',val:0,color:'#f59e0b'}])
-const history = ref([]) as any
+const history = ref<any[]>([])
 const testChannel = ref('wecom'); const testMsg = ref('这是一条来自AUTO-EVO-AI的测试通知')
-const config = ref({}) as any
+const config = ref<Record<string, any>>({})
 const load = async () => {
   loading.value = true
   try {
@@ -78,7 +78,7 @@ const load = async () => {
 const sendTest = async () => {
   sending.value = true; testResult.value = null
   try {
-    const r = await notifyTest(testChannel.value, { content: testMsg.value })
+    const r = await notifyTest(testChannel.value)
     testResult.value = r
   } catch(e:any) { testResult.value = { success: false, message: e.message } }
   finally { sending.value = false }
