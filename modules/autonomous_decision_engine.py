@@ -4,10 +4,12 @@ VERSION = "V0.1"
 __module_meta__ = {"id": "auto-decision", "name": "AutonomousDecisionEngine", "version": VERSION, "group": "ai"}
 import json, uuid, threading, time, logging, urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
+
 
 logger = logging.getLogger(__name__)
 
-class AutonomousDecisionEngine(EnterpriseModule, CircuitBreakerMixin):
+class AutonomousDecisionEngine(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "auto-decision"; MODULE_NAME = "AutonomousDecisionEngine"
     def __init__(self, c=None):
         super().__init__(c)

@@ -4,8 +4,10 @@ VERSION = "V0.1"
 __module_meta__ = {"id": "crewai", "name": "CrewAI", "version": VERSION, "group": "ai"}
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
 
-class CrewAIResult(dict):
+
+class CrewAIResult(PersistMixin,dict):
     def __init__(self, success, data=None, error=None):
         super().__init__(success=success, data=data or {}, error=error or "")
 

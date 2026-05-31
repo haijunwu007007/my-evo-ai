@@ -6,8 +6,10 @@ __module_meta__ = {"id":"slow-query","name":"Slow Query","version":"V0.1","group
 import time, uuid, logging, re
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.slow-query")
-class SlowQuery(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class SlowQuery(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="slow-query";MODULE_NAME="慢查询分析";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._queries=[];self._threshold_ms=1000
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

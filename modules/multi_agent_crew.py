@@ -5,13 +5,15 @@ __module_meta__ = {"id": "multi-agent-crew", "name": "MultiAgentCrew", "version"
 
 import asyncio, uuid
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
+
 
 class Message:
     def __init__(self, role="user", content="", sender="", receiver=""):
         self.role = role; self.content = content
         self.sender = sender; self.receiver = receiver
 
-class MultiAgentCrew(EnterpriseModule, CircuitBreakerMixin):
+class MultiAgentCrew(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "multi-agent-crew"; MODULE_NAME = "MultiAgentCrew"
 
     def __init__(self, config=None):

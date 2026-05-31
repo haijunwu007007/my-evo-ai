@@ -5,8 +5,10 @@ __module_meta__ = {"id": "auto-agent", "name": "AutoAgent", "version": VERSION, 
 
 import json, uuid, urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
 
-class AutoAgent(EnterpriseModule, CircuitBreakerMixin):
+
+class AutoAgent(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID = "auto-agent"; MODULE_NAME = "AutoAgent"
 
     def __init__(self, config=None):

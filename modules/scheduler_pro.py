@@ -10,8 +10,10 @@ import time, uuid, logging, heapq, threading
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.scheduler-pro")
-class SchedulerPro(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class SchedulerPro(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="scheduler-pro";MODULE_NAME="高级调度器";VERSION="v1.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config)
@@ -44,7 +46,8 @@ class SchedulerPro(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 except: logger.warning("scheduler_pro: invalid hour: %s", h)
             if m!="*":
                 try:return int(m)*60
-                except:pass
+                except Exception as e:
+                    logger.warning(f"scheduler_pro: {e}")
         return 300
     def _dispatch(self,p):
         a=p.get("action","status")

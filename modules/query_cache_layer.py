@@ -5,8 +5,10 @@ __module_meta__ = {"id":"query-cache-layer","name":"Query Cache","version":"V0.1
 import time,uuid,logging,hashlib
 from typing import Any,Dict
 from modules._base.enterprise_module import (EnterpriseModule,ModuleStatus,HealthReport,CircuitBreakerMixin,RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.query-cache-layer")
-class QueryCacheLayer(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class QueryCacheLayer(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="query-cache-layer";MODULE_NAME="查询缓存";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._cache:Dict[str,Dict]={};self._hits=0;self._misses=0;self._start=time.time()
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

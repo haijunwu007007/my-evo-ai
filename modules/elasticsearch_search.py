@@ -8,8 +8,10 @@ __module_meta__ = {"id":"elasticsearch-search","name":"ES Search","version":"V0.
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.es-search")
-class ElasticsearchSearch(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class ElasticsearchSearch(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="elasticsearch-search";MODULE_NAME="ES搜索";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._indices:Dict[str,list]={};self._start=time.time()

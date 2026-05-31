@@ -68,7 +68,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                     with open(path,'r') as f:data=f.read().strip()
                     if not owner or data.startswith(owner):os.remove(path)
                 except Exception as e:
-            logger.warning(f"distributed_lock: {e}")
+                    logger.warning(f"distributed_lock: {e}")
             self._held.pop(name,None)
             return{"success":True,"released":name}
         if a=="check":
@@ -98,7 +98,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 path=self._lock_path(name)
                 try:os.remove(path);count+=1
                 except Exception as e:
-            logger.warning(f"distributed_lock: {e}")
+                    logger.warning(f"distributed_lock: {e}")
             self._held.clear()
             return{"success":True,"released":count}
         if a=="deadlock_detect":
@@ -111,7 +111,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                         if len(parts)==2 and float(parts[1])<now-3600:
                             deadlocks.append({"lock":l,"expired_since":now-float(parts[1])})
                 except Exception as e:
-            logger.warning(f"distributed_lock: {e}")
+                    logger.warning(f"distributed_lock: {e}")
             return{"success":True,"deadlocks":deadlocks,"count":len(deadlocks)}
         return{"success":False,"error":f"unknown_action:{a}"}
     async def shutdown(self)->None:
@@ -119,6 +119,6 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             path=self._lock_path(name)
             try:os.remove(path)
             except Exception as e:
-            logger.warning(f"distributed_lock: {e}")
+                    logger.warning(f"distributed_lock: {e}")
         self._held.clear();self.status=ModuleStatus.STOPPED
 module_class=DistributedLock

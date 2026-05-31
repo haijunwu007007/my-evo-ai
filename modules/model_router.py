@@ -4,10 +4,12 @@ VERSION="V0.1"
 __module_meta__={"id":"model-router","name":"ModelRouter","version":VERSION,"group":"ai"}
 import json,time,uuid,random,logging,urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
+
 
 logger=logging.getLogger(__name__)
 
-class ModelRouter(EnterpriseModule, CircuitBreakerMixin):
+class ModelRouter(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="model-router";MODULE_NAME="ModelRouter"
     def __init__(self,c=None):
         super().__init__(c)

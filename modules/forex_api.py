@@ -6,8 +6,10 @@ __module_meta__ = {"id":"forex-api","name":"Forex API","version":"V0.1","group":
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.forex-api")
-class ForexApi(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class ForexApi(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="forex-api";MODULE_NAME="外汇汇率";VERSION="V0.1";MODULE_LEVEL="A"
     PAIRS={"USD/CNY":7.24,"EUR/CNY":7.85,"GBP/CNY":9.12,"JPY/CNY":0.048,"HKD/CNY":0.93,"KRW/CNY":0.0053,"AUD/CNY":4.72,"CAD/CNY":5.28,"EUR/USD":1.08,"GBP/USD":1.26,"USD/JPY":151.5,"USD/HKD":7.82}
     def __init__(self,config=None):super().__init__(config);self._history=[]

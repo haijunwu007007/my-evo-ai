@@ -8,6 +8,8 @@ __module_meta__ = {"id":"postgres-db","name":"PostgreSQL Connector","version":"V
 import time, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 
 try:
     import psycopg2
@@ -18,7 +20,7 @@ except ImportError:
     import sqlite3
 
 logger=logging.getLogger("evo.postgres-db")
-class PostgresDB(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class PostgresDB(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="postgres-db";MODULE_NAME="PostgreSQL 连接器";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._conn=None;self._pool=None;self._mode="not_connected"

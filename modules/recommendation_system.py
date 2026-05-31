@@ -5,8 +5,10 @@ __module_meta__ = {"id":"recommendation-system","name":"Recommendation","version
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.recommendation")
-class RecommendationSystem(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class RecommendationSystem(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="recommendation-system";MODULE_NAME="推荐系统";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._users={};self._items={}
     def initialize(self)->None:

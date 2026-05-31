@@ -8,8 +8,10 @@ __module_meta__ = {"id":"metric-collector","name":"Metric Collector","version":"
 import time, logging, json, threading, socket, os
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.metric-collector")
-class MetricCollector(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class MetricCollector(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="metric-collector";MODULE_NAME="指标收集器";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._history=[];self._lock=threading.Lock();self._psutil=None

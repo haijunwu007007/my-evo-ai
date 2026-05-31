@@ -8,8 +8,10 @@ __module_meta__ = {"id":"data-quality","name":"Data Quality","version":"V0.1","g
 import time, logging, re
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.data-quality")
-class DataQuality(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class DataQuality(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="data-quality";MODULE_NAME="数据质量引擎";VERSION="v1.0";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config)
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

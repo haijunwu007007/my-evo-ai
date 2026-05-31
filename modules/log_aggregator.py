@@ -8,8 +8,10 @@ __module_meta__ = {"id":"log-aggregator","name":"Log Aggregator","version":"V0.1
 import time, uuid, logging, json, threading
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.log-aggregator")
-class LogAggregator(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class LogAggregator(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="log-aggregator";MODULE_NAME="日志聚合器";VERSION="v1.0";MODULE_LEVEL="A"
     _MAX_ENTRIES=10000
     def __init__(self,config=None):

@@ -8,8 +8,10 @@ __module_meta__ = {"id":"health-ping","name":"Health Ping","version":"V0.1","gro
 import time, socket, urllib.request, urllib.parse, logging, json
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.health-ping")
-class HealthPing(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class HealthPing(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="health-ping";MODULE_NAME="健康探测";VERSION="v1.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._targets:Dict[str,Dict]={};self._history=[]
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

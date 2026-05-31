@@ -320,7 +320,7 @@ class WindowsControl:
                         )
                     )
                 except Exception as e:
-            logger.warning(f"windows_control: {e}")
+                    logger.warning(f"windows_control: {e}")
             return wins
         except Exception as e:
             logger.error(f"list_windows: {e}")
@@ -380,7 +380,7 @@ class WindowsControl:
                         )
                     )
                 except Exception as e:
-            logger.warning(f"windows_control: {e}")
+                    logger.warning(f"windows_control: {e}")
         except Exception as e:
             logger.error(f"get_controls: {e}")
         return controls

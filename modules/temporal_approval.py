@@ -8,8 +8,10 @@ __module_meta__ = {"id":"temporal-approval","name":"Temporal Approval","version"
 import time, uuid, logging
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.temporal-approval")
-class TemporalApproval(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class TemporalApproval(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="temporal-approval";MODULE_NAME="时序审批引擎";VERSION="v2.0";MODULE_LEVEL="A"
     _STATUSES=["pending","approved","rejected","expired","cancelled"]
     def __init__(self,config=None):super().__init__(config);self._requests:Dict[str,Dict]={};self._start=time.time()

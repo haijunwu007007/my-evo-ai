@@ -5,8 +5,10 @@ __module_meta__ = {"id":"process-watchdog","name":"Process Watchdog","version":"
 import time, uuid, logging
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.process-watchdog")
-class ProcessWatchdog(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class ProcessWatchdog(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="process-watchdog";MODULE_NAME="进程看门狗";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._targets={};self._alerts=[];self._history=[]
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

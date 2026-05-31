@@ -4,10 +4,12 @@ VERSION="V0.1"
 __module_meta__={"id":"ml-intern","name":"MLIntern","version":VERSION,"group":"ai"}
 import json,time,uuid,random,logging,urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
+
 
 logger=logging.getLogger(__name__)
 
-class MLIntern(EnterpriseModule, CircuitBreakerMixin):
+class MLIntern(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="ml-intern";MODULE_NAME="MLIntern"
     def __init__(self,c=None):
         super().__init__(c)

@@ -8,8 +8,10 @@ __module_meta__ = {"id":"health-dashboard","name":"Health Dashboard","version":"
 import time, logging, json, concurrent.futures
 from typing import Any, Dict, List
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.health-dashboard")
-class HealthDashboard(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class HealthDashboard(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="health-dashboard";MODULE_NAME="健康面板";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._requests=None;self._marked_as_mock=False

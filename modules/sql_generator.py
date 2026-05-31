@@ -6,8 +6,10 @@ __module_meta__ = {"id":"sql-generator","name":"SQL Generator","version":"V0.1",
 import time, uuid, logging
 from typing import Any, Dict, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin, Result)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.sql-generator")
-class SqlGenerator(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class SqlGenerator(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="sql-generator";MODULE_NAME="SQL生成器";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._templates={}
     def initialize(self)->None:

@@ -8,8 +8,10 @@ __module_meta__ = {"id":"priority-queue","name":"Priority Queue","version":"V0.1
 import time, uuid, logging, heapq
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.priority-queue")
-class PriorityQueue(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class PriorityQueue(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="priority-queue";MODULE_NAME="优先级队列";VERSION="v1.0";MODULE_LEVEL="A"
     def __init__(self,config=None):super().__init__(config);self._heap=[];self._counter=0;self._items:Dict[str,Dict]={}
     def initialize(self)->None:self.status=ModuleStatus.RUNNING

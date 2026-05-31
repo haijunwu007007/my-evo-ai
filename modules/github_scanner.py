@@ -13,8 +13,10 @@ __module_meta__ = {"id":"github-scanner","name":"GitHub Scanner","version":"V0.1
 import time, logging, json, urllib.request, re
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
+from modules._persist import PersistMixin
+
 logger=logging.getLogger("evo.github-scanner")
-class GithubScanner(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
+class GithubScanner(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="github-scanner";MODULE_NAME="GitHub 扫描器";VERSION="v1.0";MODULE_LEVEL="A"
     _CACHE={};_CACHE_TTL=300
     def __init__(self,config=None):super().__init__(config)

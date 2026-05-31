@@ -4,10 +4,12 @@ VERSION="V0.1"
 __module_meta__={"id":"mcp-bridge","name":"MCPBridge","version":VERSION,"group":"ai"}
 import json,time,uuid,logging,urllib.request as ur
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin
+from modules._persist import PersistMixin
+
 
 logger=logging.getLogger(__name__)
 
-class MCPBridge(EnterpriseModule, CircuitBreakerMixin):
+class MCPBridge(PersistMixin,EnterpriseModule, CircuitBreakerMixin):
     MODULE_ID="mcp-bridge";MODULE_NAME="MCPBridge"
     def __init__(self,c=None):
         super().__init__(c)
