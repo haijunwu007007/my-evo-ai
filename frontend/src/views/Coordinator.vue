@@ -56,25 +56,25 @@ import { getCoordinatorStatus, getCoordinatorCapabilities, executeTask, getTempl
 
 const taskDesc = ref('')
 const loading = ref(false)
-const result = ref(null)
-const status = ref(null)
-const capabilities = ref(null)
-const templates = ref([])
+const result = ref<any>(null)
+const status = ref<any>(null)
+const capabilities = ref<any>(null)
+const templates = ref<any[]>([])
 const templateId = ref('')
 
 const execute = async () => {
   if (!taskDesc.value.trim()) return
   loading.value = true; result.value = null
   try { result.value = await executeTask(taskDesc.value) }
-  catch (e) { result.value = { error: e.message } }
+  catch (e: any) { result.value = { error: e.message } }
   loading.value = false
 }
 
-const applyTpl = async (id) => {
+const applyTpl = async (id: string) => {
   try {
     const res = await applyTemplate(id)
     result.value = { success: true, message: `模板已应用`, task: res.task?.name }
-  } catch (e) {
+  } catch (e: any) {
     result.value = { error: e.message }
   }
 }

@@ -83,7 +83,6 @@ const sendTest = async () => {
   } catch(e:any) { testResult.value = { success: false, message: e.message } }
   finally { sending.value = false }
 }
-import api from '@/api'
 onMounted(load)
 </script>
 <style scoped>

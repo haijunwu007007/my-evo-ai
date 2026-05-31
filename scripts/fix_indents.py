@@ -2,7 +2,7 @@
 import re
 from pathlib import Path
 
-api_dir = Path("D:/AUTO-EVO-AI-V0.1/api")
+api_dir = Path(__file__).resolve().parent.parent / "api"
 fixed = 0
 for f in sorted(api_dir.glob("routes_*.py")):
     lines = f.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)

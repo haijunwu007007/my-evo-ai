@@ -166,13 +166,13 @@ echarts.use([LineChart, PieChart, GridComponent, TooltipComponent, LegendCompone
 // ── Refs ────────────────────────────────────────────────────────────────────
 const taskInput = ref('')
 const taskLoading = ref(false)
-const taskResult = ref(null)
-const systemStatus = ref(null)
-const tasks = ref([])
-const engineStatus = ref([])
-const extraStats = ref(null)
-const chartRef = ref(null)
-const pieRef = ref(null)
+const taskResult = ref<any>(null)
+const systemStatus = ref<any>(null)
+const tasks = ref<any[]>([])
+const engineStatus = ref<any[]>([])
+const extraStats = ref<any>(null)
+const chartRef = ref<any>(null)
+const pieRef = ref<any>(null)
 let lineChart = null
 let pieChart = null
 let timer = null
@@ -216,7 +216,7 @@ const initLineChart = () => {
   })
 }
 
-const pushLinePoint = (val) => {
+const pushLinePoint = (val: number) => {
   const t = new Date().toLocaleTimeString('zh', { hour12: false })
   lineData.times.push(t)
   lineData.values.push(val)

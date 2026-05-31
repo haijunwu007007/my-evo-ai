@@ -46,10 +46,10 @@
 import { ref, onMounted } from 'vue'
 import { getQueueStats, getQueueTasks, enqueueTask, cancelTask, retryTask } from '@/api'
 const loading = ref(true); const loadErr = ref(false)
-const stats = ref({}); const tasks = ref([])
+const stats = ref<Record<string,number>>({}); const tasks = ref<any[]>([])
 const showEnqueue = ref(false); const form = ref({name:'',type:'execute'})
-const colors = {total:'#6366f1',pending:'#f59e0b',running:'#06b6d4',completed:'#10b981',failed:'#ef4444',backlog:'#f59e0b'}
-const labels = {total:'总任务',pending:'待处理',running:'运行中',completed:'已完成',failed:'失败',backlog:'积压'}
+const colors: Record<string,string> = {total:'#6366f1',pending:'#f59e0b',running:'#06b6d4',completed:'#10b981',failed:'#ef4444',backlog:'#f59e0b'}
+const labels: Record<string,string> = {total:'总任务',pending:'待处理',running:'运行中',completed:'已完成',failed:'失败',backlog:'积压'}
 const tagMap = {pending:'warning',running:'primary',completed:'success',failed:'danger',cancelled:'info'}
 const load = async () => {
   loading.value = true; loadErr.value = false
@@ -58,8 +58,8 @@ const load = async () => {
   finally { loading.value = false }
 }
 const enqueue = async () => { await enqueueTask(form.value); showEnqueue.value=false; load() }
-const cancel = async (id) => { await cancelTask(id); load() }
-const retry = async (id) => { await retryTask(id); load() }
+const cancel = async (id: string) => { await cancelTask(id); load() }
+const retry = async (id: string) => { await retryTask(id); load() }
 onMounted(load)
 </script>
 <style scoped>

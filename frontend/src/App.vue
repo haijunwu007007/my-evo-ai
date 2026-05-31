@@ -137,7 +137,8 @@ onMounted(() => {
   document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
 })
 
-const coreMenu = [
+interface NavItem { path: string; title: string; icon: string; badge?: string }
+const coreMenu: NavItem[] = [
   { path: '/dashboard',     title: '监控面板', icon: 'Monitor' },
   { path: '/sysmon',        title: '系统监控', icon: 'TrendCharts' },
   { path: '/config',        title: 'API 配置', icon: 'Key' },
@@ -184,7 +185,7 @@ onMounted(() => {
   refreshAll()
   hTimer = setInterval(refreshAll, 30000)
 })
-onUnmounted(() => clearInterval(hTimer))
+onUnmounted(() => { if (hTimer) clearInterval(hTimer) })
 </script>
 
 <style>

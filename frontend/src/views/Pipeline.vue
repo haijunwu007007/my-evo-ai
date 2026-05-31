@@ -44,8 +44,8 @@ const load = async () => {
   finally { loading.value = false }
 }
 const create = async () => { await createPipeline(form.value); showCreate.value=false; load() }
-const exec = async (id) => { await executePipeline(id); load() }
-const remove = async (id) => { await deletePipeline(id); load() }
+const exec = async (id: string) => { await executePipeline(id); load() }
+const remove = async (id: string) => { await deletePipeline(id); load() }
 onMounted(load)
 </script>
 <style scoped>

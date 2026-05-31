@@ -1,7 +1,7 @@
 from pathlib import Path
 import py_compile, sys
 
-api_dir = Path("D:/AUTO-EVO-AI-V0.1/api")
+api_dir = Path(__file__).resolve().parent.parent / "api"
 all_ok = True
 for f in sorted(api_dir.glob("routes_*.py")):
     try:

@@ -26,6 +26,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { getConfigEntries, deleteConfig, reloadConfig, getSystemMetrics, getDiagnosis } from '@/api'
 const entries = ref([])
 const configs = computed(() => entries.value)
@@ -37,7 +38,7 @@ const load = async () => {
     statInfo.value = { '运行时间': d.uptime_human||'-', '请求数': m.requests||0, '错误数': m.errors||0, '缓存命中': m.cache_hits||0 }
   } catch {}
 }
-const del = async (key) => { await deleteConfig(key); load() }
+const del = async (key: string) => { await deleteConfig(key); load() }
 const reload = async () => { await reloadConfig(); load(); ElMessage.success('配置已重新加载') }
 onMounted(load)
 </script>

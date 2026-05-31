@@ -70,16 +70,28 @@ const form = ref({ name: '', target_type: 'module', target_id: '', cron: '' })
 const loading = ref(true)
 const loadErr = ref(false)
 
+const engineStatus = ref<Record<string,any>>({})
+const engineLabel = computed(() => {
+  if (!engineStatus.value) return null
+  const active = Object.values(engineStatus.value).filter((e: any) => e.active).length
+  const total = Object.keys(engineStatus.value).length
+  return total > 0 ? { text: `${active}/${total} 引擎运行中`, type: active === total ? 'success' : 'warning' as const } : null
+})
+
 const refresh = async () => {
   loading.value = true; loadErr.value = false
-  try { const r = await getSchedulerTasks(); tasks.value = r.tasks || [] }
+  try {
+    const [r, s] = await Promise.all([getSchedulerTasks(), getSchedulerStatus()])
+    tasks.value = r.tasks || []
+    engineStatus.value = s?.engines || {}
+  }
   catch { loadErr.value = true }
   finally { loading.value = false }
 }
 
-const toggle = async (id) => { await toggleSchedulerTask(id); refresh() }
-const trigger = async (id) => { await triggerSchedulerTask(id); refresh() }
-const remove = async (id) => { await deleteSchedulerTask(id); refresh() }
+const toggle = async (id: string) => { await toggleSchedulerTask(id); refresh() }
+const trigger = async (id: string) => { await triggerSchedulerTask(id); refresh() }
+const remove = async (id: string) => { await deleteSchedulerTask(id); refresh() }
 
 const create = async () => {
   await createSchedulerTask(form.value)

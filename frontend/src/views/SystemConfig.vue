@@ -96,6 +96,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { getConfig, setConfig } from '@/api'
 const tab = ref('ai')
 const form = ref({
