@@ -106,7 +106,7 @@ AUTO-EVO-AI V0.1/
 | **Python 代码** | 722+ 文件 / 13.9 MB |
 | **功能模块** | 457 个（0 空壳，全部有真实 dispatch 逻辑） |
 | **API 端点** | 185 路由 |
-| **测试覆盖** | 34 个测试文件 / 822+ 用例，真实 HTTP 请求，零 Stub / Mock |
+| **测试覆盖** | 55 个测试文件 / 822+ 用例（后端 40 + 前端 15），真实 HTTP 请求，零 Stub / Mock |
 | **Git 提交** | 125 commits |
 | **CI 管道** | GitHub Actions（推代码自动跑合规+E2E测试） |
 | **模块平均 actions** | 8-10 个 |
@@ -117,7 +117,7 @@ AUTO-EVO-AI V0.1/
 - **后端**: Python 3.13 / FastAPI / Uvicorn / SQLite WAL / asyncio
 - **前端**: 原生 HTML/CSS/JS (零框架依赖, 57KB) / 响应式设计 / PWA
 - **AI**: 智谱 GLM-4-Flash (默认) / DeepSeek / OpenAI / Anthropic / Ollama
-- **测试**: pytest 9.x / 34 个真实测试文件 / 822+ 测试用例 / 全真实链路校验 / 零 Stub / GitHub Actions CI
+- **测试**: pytest 9.x / 55 个真实测试文件（后端 40 + 前端 15）/ 822+ 测试用例 / 全真实链路校验 / 零 Stub / GitHub Actions CI
 - **安全**: JWT / RBAC / 限流 / 熔断 / 链路追踪 / 审计
 
 ## 配置向导
