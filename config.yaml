@@ -76,19 +76,6 @@
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-05-13T23:54:32.404307'
-  default_value: ''
-  description: ''
-  env_var: ''
-  group: custom
-  is_required: false
-  is_secret: false
-  key: items/ollama_base_url
-  label: items/ollama_base_url
-  updated_at: '2026-05-26T23:26:27.473313'
-  updated_by: api
-  validation_pattern: ''
-  value: http://127.0.0.1:11434
 - created_at: '2026-05-13T23:50:21.569612'
   default_value: ''
   description: MongoDB连接字符串

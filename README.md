@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 生产级 AI Agent 自动化平台 — **457 模块** · **185+ API** · **4 核心引擎** · **3500+ 测试通过**
+> 生产级 AI Agent 自动化平台 — **457 模块** · **185+ API** · **4 核心引擎** · **822+ 测试通过**
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
@@ -117,7 +117,7 @@ AUTO-EVO-AI V0.1/
 - **后端**: Python 3.13 / FastAPI / Uvicorn / SQLite WAL / asyncio
 - **前端**: 原生 HTML/CSS/JS (零框架依赖, 57KB) / 响应式设计 / PWA
 - **AI**: 智谱 GLM-4-Flash (默认) / DeepSeek / OpenAI / Anthropic / Ollama
-- **测试**: pytest 9.x / 34 个真实测试文件 / 3500+ 测试用例 / 全真实链路校验 / 零 Stub / GitHub Actions CI
+- **测试**: pytest 9.x / 34 个真实测试文件 / 822+ 测试用例 / 全真实链路校验 / 零 Stub / GitHub Actions CI
 - **安全**: JWT / RBAC / 限流 / 熔断 / 链路追踪 / 审计
 
 ## 配置向导
@@ -139,7 +139,7 @@ AUTO-EVO-AI V0.1/
 # .github/workflows/ci.yml
 # 推送到 master/develop 或 PR 时自动:
 #   1. 安装依赖
-#   2. 运行 3500+ 测试
+#   2. 运行 800+ 测试
 #   3. 启动服务验证 API
 #   4. 运行基准测试
 ```

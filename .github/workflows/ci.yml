@@ -22,7 +22,6 @@ jobs:
         run: |
           pip install flake8
           flake8 modules/ api/ --max-line-length=160 --count --statistics
-        continue-on-error: true
 
   test:
     name: Unit Tests
@@ -69,7 +68,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: true
 
   security:
     name: Security Scan
@@ -82,7 +81,7 @@ jobs:
           python-version: '3.11'
       - run: pip install bandit
       - name: Bandit security scan
-        run: bandit -r modules/ api/ -f json -o bandit-report.json || true
+        run: bandit -r modules/ api/ -f json -o bandit-report.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
