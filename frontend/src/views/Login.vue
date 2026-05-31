@@ -55,7 +55,7 @@ export default {
         if (d && d.access_token) {
           localStorage.setItem('evo_token', d.access_token)
           ElMessage.success('登录成功')
-          const redirect = route.query.redirect || '/dashboard'
+          const redirect = (route.query.redirect as string) || '/dashboard'
           setTimeout(() => router.push(redirect), 100)
         } else {
           ElMessage.error(d?.detail || '登录失败')
