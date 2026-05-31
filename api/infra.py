@@ -806,7 +806,8 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
                 if asyncio.iscoroutine(result):
                     result = await result
                 return {"success": True, "result": result}
-            except: pass
+            except Exception:
+                logger.warning(f"[HEALTH] {name} health_check 结果解析失败")
         return {"success": True, "status": "healthy"}
     if not action:
         if hasattr(mod, 'execute') and callable(mod.execute):

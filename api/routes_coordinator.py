@@ -41,6 +41,7 @@ async def tunnel_url():
 @router.get("/api/local-url")
 async def local_url():
     return {
+        "success": True,
         "url": f"http://{_LAN_IP}:8765",
         "dashboard": f"http://{_LAN_IP}:8765/dashboard",
         "lan_ip": _LAN_IP,

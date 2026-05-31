@@ -223,7 +223,10 @@ async def webhook_set_config(body: GithubWebhookConfig):
 @router.get("/api/webhook/github/health")
 async def webhook_health():
     """健康检查"""
-    return gh_health()
+    result = gh_health()
+    if isinstance(result, dict) and "success" not in result:
+        return {"success": True, **result}
+    return result
 
 
 # ═══════════════════════════════════════════════════
