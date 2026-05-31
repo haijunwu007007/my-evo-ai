@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 核心模块 API 测试"""
 import sys, json, http.client, pytest
 from pathlib import Path

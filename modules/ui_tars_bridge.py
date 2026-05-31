@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class UiTarsBridgeAnalyzer(object):
+class UiTarsBridgeAnalyzer:
     """ui_tars_bridge 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -307,12 +307,12 @@ class UIElement:
     class_name: str = ""
     css_selector: str = ""
     xpath: str = ""
-    bounds: Dict[str, int] = field(default_factory=dict)
+    bounds: dict[str, int] = field(default_factory=dict)
     visible: bool = True
     editable: bool = False
-    attributes: Dict[str, str] = field(default_factory=dict)
+    attributes: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "element_id": self.element_id,
             "tag": self.tag,
@@ -339,7 +339,7 @@ class InteractionStep:
     screenshot_after: str = ""
     duration_ms: float = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "step_id": self.step_id,
             "action": self.interaction.value,
@@ -355,9 +355,9 @@ class PageSnapshot:
     snapshot_id: str = ""
     url: str = ""
     title: str = ""
-    elements: List[UIElement] = field(default_factory=list)
+    elements: list[UIElement] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
-    viewport: Dict[str, int] = field(default_factory=dict)
+    viewport: dict[str, int] = field(default_factory=dict)
     screenshot_hash: str = ""
 
 @dataclass
@@ -368,7 +368,7 @@ class AutomationFlow:
     name: str = ""
     description: str = ""
     start_url: str = ""
-    steps: List[InteractionStep] = field(default_factory=list)
+    steps: list[InteractionStep] = field(default_factory=list)
     state: TaskState = TaskState.IDLE
     current_step: int = 0
     created: float = field(default_factory=time.time)
@@ -378,9 +378,9 @@ class AutomationFlow:
     error: str = ""
     success_count: int = 0
     run_count: int = 0
-    extracted_data: Dict[str, Any] = field(default_factory=dict)
+    extracted_data: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "flow_id": self.flow_id,
             "name": self.name,
@@ -398,7 +398,7 @@ class FormConfig:
     form_id: str = ""
     name: str = ""
     url_pattern: str = ""
-    field_mappings: Dict[str, str] = field(default_factory=dict)
+    field_mappings: dict[str, str] = field(default_factory=dict)
     submit_selector: str = ""
     success_selector: str = ""
 
@@ -426,10 +426,10 @@ class UiTarsBridgeModule:
     """企业级UI TARS桥接模块"""
 
     def __init__(self):
-        self._flows: Dict[str, AutomationFlow] = {}
-        self._snapshots: Dict[str, PageSnapshot] = {}
-        self._forms: Dict[str, FormConfig] = {}
-        self._element_cache: Dict[str, List[UIElement]] = {}
+        self._flows: dict[str, AutomationFlow] = {}
+        self._snapshots: dict[str, PageSnapshot] = {}
+        self._forms: dict[str, FormConfig] = {}
+        self._element_cache: dict[str, list[UIElement]] = {}
         self._history: deque = deque(maxlen=5000)
         self.metrics_collector = type(
             "_NMC",
@@ -500,14 +500,14 @@ class UiTarsBridgeModule:
             success_selector=".welcome",
         )
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "forms": len(self._forms)}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         running = sum(1 for f in self._flows.values() if f.state == TaskState.RUNNING)
@@ -522,7 +522,7 @@ class UiTarsBridgeModule:
         }
 
     # --- Page ---
-    def capture_page(self, url: str = "", title: str = "") -> Dict[str, Any]:
+    def capture_page(self, url: str = "", title: str = "") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import time as tmod
@@ -572,7 +572,7 @@ class UiTarsBridgeModule:
 
     def find_element(
         self, snapshot_id: str, selector: str = "", text: str = "", element_type: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if snapshot_id not in self._snapshots:
             return {"success": False, "error": "snapshot_not_found"}
         snapshot = self._snapshots[snapshot_id]
@@ -594,8 +594,8 @@ class UiTarsBridgeModule:
 
     # --- Flow ---
     def create_flow(
-        self, name: str, start_url: str = "", steps: List[Dict] = None, description: str = ""
-    ) -> Dict[str, Any]:
+        self, name: str, start_url: str = "", steps: list[dict] = None, description: str = ""
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         flow_id = f"flow_{uuid.uuid4().hex[:12]}"
@@ -623,7 +623,7 @@ class UiTarsBridgeModule:
         self._stats["flows_created"] += 1
         return {"success": True, "flow_id": flow_id, "steps": len(interaction_steps)}
 
-    def run_flow(self, flow_id: str, variables: Dict[str, str] = None) -> Dict[str, Any]:
+    def run_flow(self, flow_id: str, variables: dict[str, str] = None) -> dict[str, Any]:
         if flow_id not in self._flows:
             return {"success": False, "error": "not_found"}
         flow = self._flows[flow_id]
@@ -670,26 +670,26 @@ class UiTarsBridgeModule:
             "duration_ms": round(elapsed, 2),
         }
 
-    def stop_flow(self, flow_id: str) -> Dict[str, Any]:
+    def stop_flow(self, flow_id: str) -> dict[str, Any]:
         if flow_id not in self._flows:
             return {"success": False, "error": "not_found"}
         self._flows[flow_id].state = TaskState.PAUSED
         return {"success": True}
 
-    def get_flow(self, flow_id: str) -> Dict[str, Any]:
+    def get_flow(self, flow_id: str) -> dict[str, Any]:
         if flow_id not in self._flows:
             return {"success": False, "error": "not_found"}
         flow = self._flows[flow_id]
         return {"success": True, **flow.to_dict(), "steps": [s.to_dict() for s in flow.steps]}
 
-    def list_flows(self, status: str = "", limit: int = 100) -> Dict[str, Any]:
+    def list_flows(self, status: str = "", limit: int = 100) -> dict[str, Any]:
         items = sorted(self._flows.values(), key=lambda f: f.created, reverse=True)
         if status:
             items = [f for f in items if f.state.value == status]
         return {"success": True, "flows": [f.to_dict() for f in items[:limit]], "total": len(items)}
 
     # --- Form ---
-    def fill_form(self, form_id: str, data: Dict[str, str], snapshot_id: str = "") -> Dict[str, Any]:
+    def fill_form(self, form_id: str, data: dict[str, str], snapshot_id: str = "") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if form_id not in self._forms:
@@ -703,7 +703,7 @@ class UiTarsBridgeModule:
         self._stats["forms_filled"] += 1
         return {"success": True, "form_id": form_id, "filled_fields": filled, "submit_selector": form.submit_selector}
 
-    def list_forms(self) -> Dict[str, Any]:
+    def list_forms(self) -> dict[str, Any]:
         items = [
             {
                 "form_id": f.form_id,
@@ -717,7 +717,7 @@ class UiTarsBridgeModule:
         return {"success": True, "forms": items, "total": len(items)}
 
     # --- Stats ---
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 集成与端到端测试 (33+)
 
 覆盖：模块可导入、引擎接口、数据流、环境检查"""
@@ -90,7 +89,7 @@ class TestModuleMeta(unittest.TestCase):
         py_files = [f for f in py_files if not os.path.basename(f).startswith('__')]
         with_meta = 0
         for f in py_files:
-            content = open(f, 'r', encoding='utf-8', errors='ignore').read()
+            content = open(f, encoding='utf-8', errors='ignore').read()
             if '__module_meta__' in content or '__meta__' in content:
                 with_meta += 1
         self.assertGreaterEqual(with_meta, len(py_files) * 0.9)
@@ -102,7 +101,7 @@ class TestModuleMeta(unittest.TestCase):
         py_files = [f for f in py_files if not os.path.basename(f).startswith('__')]
         with_export = 0
         for f in py_files:
-            content = open(f, 'r', encoding='utf-8', errors='ignore').read()
+            content = open(f, encoding='utf-8', errors='ignore').read()
             if 'module_class=' in content:
                 with_export += 1
         self.assertGreaterEqual(with_export, 25)  # 至少有25个模块有class导出
@@ -114,7 +113,7 @@ class TestModuleMeta(unittest.TestCase):
         py_files = [f for f in py_files if not os.path.basename(f).startswith('__')]
         with_async = 0
         for f in py_files[:50]:
-            content = open(f, 'r', encoding='utf-8', errors='ignore').read()
+            content = open(f, encoding='utf-8', errors='ignore').read()
             if 'async def execute' in content:
                 with_async += 1
         self.assertGreaterEqual(with_async, 30)

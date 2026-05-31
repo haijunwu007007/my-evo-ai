@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 浏览器自动化引擎（上市公司级）
 # Grade: A
 
@@ -45,11 +44,11 @@ class BrowserAutomationEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseM
     VERSION = "v3.0"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__(config)
-        self._browser: Optional[Browser] = None
-        self._context: Optional[BrowserContext] = None
-        self._sessions: Dict[str, Dict] = {}
+        self._browser: Browser | None = None
+        self._context: BrowserContext | None = None
+        self._sessions: dict[str, dict] = {}
         self._default_timeout = int(config.get("timeout", 30000)) if config else 30000
         self._headless = bool(config.get("headless", True)) if config else True
         self._stats = {
@@ -114,7 +113,7 @@ class BrowserAutomationEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseM
             return False
 
     async def _navigate_playwright(self, url: str, wait_until: str = "domcontentloaded",
-                                    timeout: int = 0) -> Dict:
+                                    timeout: int = 0) -> dict:
         """Playwright 导航"""
         if not await self._ensure_browser():
             return {"success": False, "error": "浏览器不可用"}
@@ -144,7 +143,7 @@ class BrowserAutomationEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseM
             return {"success": False, "error": f"导航失败: {e}"}
 
     # ─── HTTP 回退导航 ─────────────────────────────────
-    def _navigate_http(self, url: str) -> Dict:
+    def _navigate_http(self, url: str) -> dict:
         """HTTP 回退：用 requests 获取页面"""
         if not FALLBACK_HTTP:
             return {"success": False, "error": "无可用 HTTP 后端"}
@@ -173,7 +172,7 @@ class BrowserAutomationEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseM
             return {"success": False, "error": f"HTTP请求失败: {e}"}
 
     # ─── 分发器（异步） ─────────────────────────────────
-    async def _dispatch_async(self, p: Dict) -> Dict:
+    async def _dispatch_async(self, p: dict) -> dict:
         a = p.get("action", "status")
 
         try:

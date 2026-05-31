@@ -154,14 +154,14 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._encrypt_records: Dict[str, EncryptionRecord] = {}
-        self._mask_rules: Dict[str, MaskRule] = {}
+        self._encrypt_records: dict[str, EncryptionRecord] = {}
+        self._mask_rules: dict[str, MaskRule] = {}
         self._counter: int = 0
 
     def initialize(self) -> None:
@@ -189,7 +189,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_hecate_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -267,7 +267,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -280,7 +280,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._encrypt_records.clear()
         # super().shutdown() removed for sync compatibility
 
-    def _encrypt(self, data: str, algorithm: str, sensitivity: str) -> Dict:
+    def _encrypt(self, data: str, algorithm: str, sensitivity: str) -> dict:
         try:
             algo = EncryptionAlgorithm(algorithm)
         except ValueError:
@@ -322,7 +322,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "original_hash": original_hash,
         }
 
-    def _mask(self, data: str, rule_names: List[str]) -> str:
+    def _mask(self, data: str, rule_names: list[str]) -> str:
         result = data
         for name in rule_names:
             rule = self._mask_rules.get(name)
@@ -331,7 +331,7 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.stats.success_count += 1
         return result
 
-    def _check_sensitivity(self, data: str) -> Dict:
+    def _check_sensitivity(self, data: str) -> dict:
         """检测数据敏感度"""
         flags = []
         if re.search(r"\d{11}", data):
@@ -372,12 +372,12 @@ class AgentHecateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
 module_class = AgentHecateManager
 
-class CryptoServiceEngine(object):
+class CryptoServiceEngine:
     """加密服务引擎 - 密钥管理、加密解密、签名验签、令牌生成"""
 
     def __init__(self):
-        self._key_store: Dict[str, Dict] = {}
-        self._algorithm_map: Dict[str, str] = {
+        self._key_store: dict[str, dict] = {}
+        self._algorithm_map: dict[str, str] = {
             "aes-256": "AES",
             "rsa-2048": "RSA",
             "sha256": "SHA256",
@@ -387,7 +387,7 @@ class CryptoServiceEngine(object):
         self._encryption_count: int = 0
         self._decryption_count: int = 0
 
-    def generate_key(self, key_id: str, algorithm: str = "aes-256", metadata: Dict = None) -> Dict:
+    def generate_key(self, key_id: str, algorithm: str = "aes-256", metadata: dict = None) -> dict:
         """生成密钥"""
         import secrets
 
@@ -407,7 +407,7 @@ class CryptoServiceEngine(object):
         }
         return {"key_id": key_id, "algorithm": algorithm, "status": "created"}
 
-    def encrypt_data(self, key_id: str, plaintext: str) -> Dict:
+    def encrypt_data(self, key_id: str, plaintext: str) -> dict:
         """加密数据"""
         key_entry = self._key_store.get(key_id)
         if not key_entry or key_entry["status"] != "active":
@@ -419,7 +419,7 @@ class CryptoServiceEngine(object):
         self._encryption_count += 1
         return {"ciphertext": cipher, "algorithm": key_entry["algorithm"], "key_id": key_id}
 
-    def decrypt_data(self, key_id: str, ciphertext: str) -> Dict:
+    def decrypt_data(self, key_id: str, ciphertext: str) -> dict:
         """解密数据（模拟）"""
         key_entry = self._key_store.get(key_id)
         if not key_entry:
@@ -427,7 +427,7 @@ class CryptoServiceEngine(object):
         self._decryption_count += 1
         return {"status": "decrypted", "algorithm": key_entry["algorithm"], "key_id": key_id}
 
-    def sign(self, key_id: str, data: str) -> Dict:
+    def sign(self, key_id: str, data: str) -> dict:
         """数字签名"""
         key_entry = self._key_store.get(key_id)
         if not key_entry:
@@ -437,7 +437,7 @@ class CryptoServiceEngine(object):
         sig = hashlib.sha256((data + key_entry["key"]).encode()).hexdigest()
         return {"signature": sig, "algorithm": key_entry["algorithm"], "key_id": key_id}
 
-    def verify(self, key_id: str, data: str, signature: str) -> Dict:
+    def verify(self, key_id: str, data: str, signature: str) -> dict:
         """验签"""
         result = self.sign(key_id, data)
         if "error" in result:
@@ -445,7 +445,7 @@ class CryptoServiceEngine(object):
         valid = result["signature"] == signature
         return {"valid": valid, "key_id": key_id}
 
-    def generate_token(self, subject: str, ttl: int = 3600) -> Dict:
+    def generate_token(self, subject: str, ttl: int = 3600) -> dict:
         """生成令牌"""
         import secrets
 
@@ -459,10 +459,10 @@ class CryptoServiceEngine(object):
     def is_token_revoked(self, token: str) -> bool:
         return token in self._token_blacklist
 
-    def list_keys(self) -> List[Dict]:
+    def list_keys(self) -> list[dict]:
         return [{"key_id": k, "algorithm": v["algorithm"], "status": v["status"]} for k, v in self._key_store.items()]
 
-    def rotate_key(self, key_id: str) -> Dict:
+    def rotate_key(self, key_id: str) -> dict:
         """轮转密钥"""
         import secrets
 
@@ -475,7 +475,7 @@ class CryptoServiceEngine(object):
         key_entry["previous_key"] = old_key[:8] + "..."
         return {"key_id": key_id, "status": "rotated", "rotated_at": key_entry["rotated_at"]}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "total_keys": len(self._key_store),
             "active_keys": sum(1 for v in self._key_store.values() if v["status"] == "active"),
@@ -490,7 +490,7 @@ class CryptoServiceEngine(object):
             return True
         return False
 
-    def batch_encrypt(self, key_id: str, items: List[str]) -> List[Dict]:
+    def batch_encrypt(self, key_id: str, items: list[str]) -> list[dict]:
         """批量加密"""
         results = []
         for item in items:
@@ -505,7 +505,7 @@ class CryptoServiceEngine(object):
             return hashlib.sha512(data.encode()).hexdigest()
         return hashlib.sha256(data.encode()).hexdigest()
 
-    def check_data_integrity(self, data: str, expected_hash: str) -> Dict[str, Any]:
+    def check_data_integrity(self, data: str, expected_hash: str) -> dict[str, Any]:
         """数据完整性校验"""
         actual = self.hash_data(data)
         valid = actual == expected_hash
@@ -525,7 +525,7 @@ class CryptoServiceEngine(object):
         expected = self.generate_hmac(key_id, message)
         return expected == mac
 
-    def get_key_age(self, key_id: str) -> Dict[str, Any]:
+    def get_key_age(self, key_id: str) -> dict[str, Any]:
         """获取密钥年龄"""
         key_entry = self._key_store.get(key_id)
         if not key_entry:
@@ -539,7 +539,7 @@ class CryptoServiceEngine(object):
             "rotated_at": key_entry.get("rotated_at"),
         }
 
-    def export_audit_trail(self) -> List[Dict]:
+    def export_audit_trail(self) -> list[dict]:
         """导出审计轨迹"""
         trail = []
         for kid, entry in self._key_store.items():
@@ -554,7 +554,7 @@ class CryptoServiceEngine(object):
             )
         return sorted(trail, key=lambda x: -x.get("created_at", 0))
 
-    def generate_certificate(self, cn: str, validity_days: int = 365) -> Dict:
+    def generate_certificate(self, cn: str, validity_days: int = 365) -> dict:
         """生成自签名证书(模拟)"""
         import secrets
 
@@ -571,7 +571,7 @@ class CryptoServiceEngine(object):
         }
         return cert
 
-    def verify_certificate(self, cert_id: str, cert: Dict) -> Dict:
+    def verify_certificate(self, cert_id: str, cert: dict) -> dict:
         """验证证书"""
         now = time.time()
         if now > cert.get("valid_to", 0):
@@ -584,7 +584,7 @@ class CryptoServiceEngine(object):
             "expires_in_days": round((cert.get("valid_to", 0) - now) / 86400, 1),
         }
 
-    def create_key_pair(self, pair_id: str, algorithm: str = "rsa-2048") -> Dict:
+    def create_key_pair(self, pair_id: str, algorithm: str = "rsa-2048") -> dict:
         """创建密钥对"""
         import secrets
 
@@ -598,9 +598,9 @@ class CryptoServiceEngine(object):
             "created_at": time.time(),
         }
 
-    def get_encryption_summary(self) -> Dict[str, Any]:
+    def get_encryption_summary(self) -> dict[str, Any]:
         """加密服务摘要"""
-        algo_dist: Dict[str, int] = {}
+        algo_dist: dict[str, int] = {}
         for entry in self._key_store.values():
             algo = entry["algorithm"]
             algo_dist[algo] = algo_dist.get(algo, 0) + 1
@@ -612,7 +612,7 @@ class CryptoServiceEngine(object):
             "blacklisted_tokens": len(self._token_blacklist),
         }
 
-    def derive_shared_secret(self, key_id_a: str, key_id_b: str) -> Dict:
+    def derive_shared_secret(self, key_id_a: str, key_id_b: str) -> dict:
         """派生共享密钥"""
         key_a = self._key_store.get(key_id_a)
         key_b = self._key_store.get(key_id_b)
@@ -633,7 +633,7 @@ class CryptoServiceEngine(object):
             chars += "!@#$%^&*"
         return "".join(secrets.choice(chars) for _ in range(length))
 
-    def assess_key_strength(self, key_id: str) -> Dict[str, Any]:
+    def assess_key_strength(self, key_id: str) -> dict[str, Any]:
         """评估密钥强度"""
         key_entry = self._key_store.get(key_id)
         if not key_entry:
@@ -652,13 +652,13 @@ class CryptoServiceEngine(object):
             "algorithm": key_entry["algorithm"],
         }
 
-    def generate_key_derivation_report(self) -> Dict[str, Any]:
+    def generate_key_derivation_report(self) -> dict[str, Any]:
         """生成密钥派生报告：密钥数量、算法分布、轮换状态汇总"""
         keys = self._keys if hasattr(self, "_keys") else {}
         if not keys:
             return {"total_keys": 0}
-        algo_dist: Dict[str, int] = {}
-        strength_dist: Dict[str, int] = {"strong": 0, "medium": 0, "weak": 0}
+        algo_dist: dict[str, int] = {}
+        strength_dist: dict[str, int] = {"strong": 0, "medium": 0, "weak": 0}
         rotation_needed = 0
         total_age_days = 0
         for key_id, entry in keys.items():

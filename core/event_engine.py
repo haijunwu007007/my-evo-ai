@@ -22,7 +22,8 @@ import hashlib
 from core.logging_config import get_logger
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from enum import Enum
@@ -105,7 +106,7 @@ class Event:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Event":
+    def from_dict(cls, d: dict) -> Event:
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 
@@ -249,8 +250,8 @@ class EventStore:
         finally:
             conn.close()
 
-    def list_events(self, event_type: Optional[str] = None, source: Optional[str] = None,
-                    limit: int = 100, offset: int = 0) -> List[dict]:
+    def list_events(self, event_type: str | None = None, source: str | None = None,
+                    limit: int = 100, offset: int = 0) -> list[dict]:
         conn = self._get_conn()
         try:
             conditions = []
@@ -296,7 +297,7 @@ class EventStore:
             conn.close()
         return rule
 
-    def get_rule(self, rule_id: str) -> Optional[EventRule]:
+    def get_rule(self, rule_id: str) -> EventRule | None:
         conn = self._get_conn()
         try:
             row = conn.execute("SELECT * FROM event_rules WHERE id=?", (rule_id,)).fetchone()
@@ -310,7 +311,7 @@ class EventStore:
         finally:
             conn.close()
 
-    def list_rules(self, enabled_only: bool = False) -> List[EventRule]:
+    def list_rules(self, enabled_only: bool = False) -> list[EventRule]:
         conn = self._get_conn()
         try:
             if enabled_only:
@@ -397,12 +398,12 @@ class FileWatcher:
 
     def __init__(self, emit_callback: Callable[[Event], None]) -> None:
         self._emit = emit_callback
-        self._watches: Dict[str, dict] = {}  # path -> {mtime_map, patterns, recursive}
+        self._watches: dict[str, dict] = {}  # path -> {mtime_map, patterns, recursive}
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._check_interval = 2.0  # 秒
 
-    def watch(self, directory: str, patterns: Optional[List[str]] = None,
+    def watch(self, directory: str, patterns: list[str] | None = None,
               recursive: bool = True, event_prefix: str = "file"):
         """添加目录监听"""
         abs_path = str(Path(directory).resolve())
@@ -518,9 +519,9 @@ class EventEngine:
 
     def __init__(self, data_dir: str = ".evo_data/events") -> None:
         self._store = EventStore(data_dir)
-        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)  # type → [callbacks]
-        self._global_subscribers: List[Callable] = []
-        self._rules: List[EventRule] = self._store.list_rules()
+        self._subscribers: dict[str, list[Callable]] = defaultdict(list)  # type → [callbacks]
+        self._global_subscribers: list[Callable] = []
+        self._rules: list[EventRule] = self._store.list_rules()
         self._file_watcher = FileWatcher(self.emit)
         self._running = False
         self._event_count = 0
@@ -683,14 +684,14 @@ class EventEngine:
             return True
         return False
 
-    def get_rules(self) -> List[EventRule]:
+    def get_rules(self) -> list[EventRule]:
         self._rules = self._store.list_rules()
         return self._rules
 
     # ─── Webhook接收 ───
 
     def handle_webhook(self, payload: dict, source: str = "webhook",
-                       headers: Optional[dict] = None) -> Event:
+                       headers: dict | None = None) -> Event:
         """处理接收到的Webhook"""
         # GitHub事件识别
         event_type = EventType.WEBHOOK_RECEIVED
@@ -725,7 +726,7 @@ class EventEngine:
 
 # ─── 全局单例 ───
 
-_engine: Optional[EventEngine] = None
+_engine: EventEngine | None = None
 
 def get_event_engine() -> EventEngine:
     global _engine

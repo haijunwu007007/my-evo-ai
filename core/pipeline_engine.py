@@ -90,7 +90,7 @@ class PipelineStore:
         finally:
             conn.close()
 
-    def get_recent_runs(self, limit: int = 10) -> List[dict]:
+    def get_recent_runs(self, limit: int = 10) -> list[dict]:
         conn = self._get_conn()
         try:
             rows = conn.execute(
@@ -100,7 +100,7 @@ class PipelineStore:
         finally:
             conn.close()
 
-    def get_run(self, run_id: str) -> Optional[dict]:
+    def get_run(self, run_id: str) -> dict | None:
         conn = self._get_conn()
         try:
             row = conn.execute(
@@ -165,7 +165,7 @@ class PipelineStore:
         finally:
             conn.close()
 
-    def list_definitions(self, tag: str = "", active_only: bool = False) -> List[dict]:
+    def list_definitions(self, tag: str = "", active_only: bool = False) -> list[dict]:
         conn = self._get_conn()
         try:
             parts = ["SELECT * FROM pipeline_definitions"]
@@ -184,7 +184,7 @@ class PipelineStore:
         finally:
             conn.close()
 
-    def get_definition(self, pipeline_id: str) -> Optional[dict]:
+    def get_definition(self, pipeline_id: str) -> dict | None:
         conn = self._get_conn()
         try:
             row = conn.execute(
@@ -194,7 +194,7 @@ class PipelineStore:
         finally:
             conn.close()
 
-    def get_definition_versions(self, pipeline_id: str) -> List[dict]:
+    def get_definition_versions(self, pipeline_id: str) -> list[dict]:
         conn = self._get_conn()
         try:
             row = conn.execute(
@@ -240,7 +240,7 @@ class PipelineStore:
 class PipelineEngine:
     def __init__(self, data_dir: str = ".evo_data/pipeline") -> None:
         self._store = PipelineStore(data_dir)
-        self._history: List[dict] = []
+        self._history: list[dict] = []
         self._max_history = 100
         # 启动时从 SQLite 恢复最近历史
         self._recover_history()
@@ -254,7 +254,7 @@ class PipelineEngine:
         except Exception as e:
             logger.warning("[PIPELINE] 恢复历史失败（首次运行可忽略）: %s", e)
 
-    async def run(self, chain: List[str], initial_params: dict = None) -> dict:
+    async def run(self, chain: list[str], initial_params: dict = None) -> dict:
         """
         执行模块链
         chain: ["module_a", "module_b", "module_c"]
@@ -369,7 +369,7 @@ class PipelineEngine:
         # Fallback: 返回模块本身（假设模块有 execute 函数）
         return mod
 
-    def get_history(self, limit: int = 10) -> List[dict]:
+    def get_history(self, limit: int = 10) -> list[dict]:
         return self._history[-limit:]
 
     def get_stats(self) -> dict:

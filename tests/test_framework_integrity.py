@@ -34,7 +34,7 @@ class TestModuleLoader(unittest.TestCase):
                 continue
             path = os.path.join(self.module_dir, f)
             try:
-                content = open(path, 'r', encoding='utf-8').read()
+                content = open(path, encoding='utf-8').read()
                 if '__module_meta__' not in content and '__meta__' not in content:
                     missing.append(f)
             except:
@@ -79,7 +79,7 @@ class TestModuleMetadata(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             if '"version"' in content and '"V0.1"' not in content:
                 for line in content.split('\n'):
                     if '"version"' in line and 'V0.1' not in line:
@@ -95,7 +95,7 @@ class TestModuleMetadata(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             for line in content.split('\n'):
                 if '"id"' in line and ':' in line:
                     import re
@@ -115,7 +115,7 @@ class TestModuleMetadata(unittest.TestCase):
                 continue
             path = os.path.join(core_dir, f)
             try:
-                compile(open(path, 'r', encoding='utf-8').read(), path, 'exec')
+                compile(open(path, encoding='utf-8').read(), path, 'exec')
             except SyntaxError as e:
                 broken.append(f"{f}: {e}")
         self.assertEqual(len(broken), 0, f"语法错误: {broken[:5]}")
@@ -137,7 +137,7 @@ class TestModuleSecurity(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             if '__import__(' in content:
                 dangerous.append(f)
         self.assertLessEqual(len(dangerous), 100, f"含__import__的模块: {dangerous}")
@@ -160,7 +160,7 @@ class TestModuleExecutionPattern(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             if 'def execute(' in content:
                 modules_with_execute.append(f)
             if content.count('\n') > 100 and 'def execute(' not in content:
@@ -175,7 +175,7 @@ class TestModuleExecutionPattern(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             if 'def health_check(' in content:
                 modules_with_hc.append(f)
         self.assertGreaterEqual(len(modules_with_hc), 30,
@@ -193,13 +193,13 @@ class TestVersionConsistency(unittest.TestCase):
         # 检查 api_server.py 版本
         api_path = os.path.join(root_dir, 'api_server.py')
         if os.path.exists(api_path):
-            content = open(api_path, 'r', encoding='utf-8').read()
+            content = open(api_path, encoding='utf-8').read()
             self.assertIn('V0.1', content, "api_server.py 版本非 V0.1")
         # 检查前端版本
         pkg_path = os.path.join(root_dir, 'frontend', 'package.json')
         if os.path.exists(pkg_path):
             import json
-            pkg = json.load(open(pkg_path, 'r', encoding='utf-8'))
+            pkg = json.load(open(pkg_path, encoding='utf-8'))
             ver = pkg.get('version', '')
             self.assertIn('0.1', ver, f"前端版本非 0.1: {ver}")
 
@@ -208,7 +208,7 @@ class TestVersionConsistency(unittest.TestCase):
         api_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                 'core', 'api_server.py')
         if os.path.exists(api_path):
-            content = open(api_path, 'r', encoding='utf-8').read()
+            content = open(api_path, encoding='utf-8').read()
             self.assertIn('V0.1', content, "api_server.py 版本非 V0.1")
 
 
@@ -247,7 +247,7 @@ class TestModuleCategorization(unittest.TestCase):
             if not f.endswith('.py') or f == '__init__.py':
                 continue
             path = os.path.join(self.module_dir, f)
-            content = open(path, 'r', encoding='utf-8').read()
+            content = open(path, encoding='utf-8').read()
             import re
             m = re.search(r'"group"\s*:\s*"([^"]+)"', content)
             if m:
@@ -278,7 +278,7 @@ class TestPythonSyntax(unittest.TestCase):
                 continue
             path = os.path.join(self.module_dir, f)
             try:
-                compile(open(path, 'r', encoding='utf-8').read(), path, 'exec')
+                compile(open(path, encoding='utf-8').read(), path, 'exec')
             except SyntaxError as e:
                 broken.append(f"{f}: {e}")
         self.assertEqual(len(broken), 0, f"编译失败的模块: {broken[:10]}")

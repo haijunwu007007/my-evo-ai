@@ -139,9 +139,9 @@ class MarketplacePackage:
     category: PackageCategory
     description: str = ""
     status: PackageStatus = PackageStatus.DRAFT
-    versions: List[PackageVersion] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    dependencies: List[PackageDependency] = field(default_factory=list)
+    versions: list[PackageVersion] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    dependencies: list[PackageDependency] = field(default_factory=list)
     downloads: int = 0
     rating: float = 0.0
     rating_count: int = 0
@@ -159,14 +159,14 @@ class PackageDependency:
     min_version: str = ""
     max_version: str = ""
 
-class PackageDependencyResolver(object):
+class PackageDependencyResolver:
     """包依赖解析器 - 解决包安装顺序、循环依赖检测、版本兼容性"""
 
     def __init__(self):
-        self._resolved: Dict[str, str] = {}  # package_id -> resolved_version
+        self._resolved: dict[str, str] = {}  # package_id -> resolved_version
         self._resolving: set = set()  # 当前解析栈，用于检测循环依赖
 
-    def resolve(self, package_id: str, registry: Dict[str, Package]) -> List[str]:
+    def resolve(self, package_id: str, registry: dict[str, Package]) -> list[str]:
         """解析包及其所有依赖的安装顺序"""
         if package_id in self._resolved:
             return []
@@ -188,9 +188,9 @@ class PackageDependencyResolver(object):
         metrics_collector.counter("marketplace_dep_resolved", len(order))
         return order
 
-    def check_conflicts(self, packages: List[Package]) -> List[Dict]:
+    def check_conflicts(self, packages: list[Package]) -> list[dict]:
         """检查多个包之间的版本冲突"""
-        version_map: Dict[str, List[str]] = {}
+        version_map: dict[str, list[str]] = {}
         for pkg in packages:
             for dep in getattr(pkg, "dependencies", []):
                 version_map.setdefault(dep.package_id, []).append(dep.min_version)
@@ -201,7 +201,7 @@ class PackageDependencyResolver(object):
                 conflicts.append({"package": pkg_id, "required_versions": sorted(unique)})
         return conflicts
 
-    def get_install_plan(self, package_ids: List[str], registry: Dict[str, Package]) -> Dict:
+    def get_install_plan(self, package_ids: list[str], registry: dict[str, Package]) -> dict:
         """生成完整安装计划，包含依赖"""
         plan = []
         visited = set()
@@ -232,13 +232,13 @@ class Review:
     comment: str = ""
     created_at: float = field(default_factory=time.time)
 
-class PackageDependencyResolver(object):
+class PackageDependencyResolver:
     """包依赖解析器 — 检查依赖完整性、解析安装顺序、检测循环依赖"""
 
-    def __init__(self, packages: Dict):
+    def __init__(self, packages: dict):
         self._packages = packages
 
-    def resolve_install_order(self, package_id: str, target_version: str = "latest") -> Dict[str, Any]:
+    def resolve_install_order(self, package_id: str, target_version: str = "latest") -> dict[str, Any]:
         """解析安装顺序（拓扑排序），返回安装计划"""
         if package_id not in self._packages:
             return {"error": "Package not found"}
@@ -246,7 +246,7 @@ class PackageDependencyResolver(object):
         visited = set()
         path = []
 
-        def visit(pid: str) -> Optional[str]:
+        def visit(pid: str) -> str | None:
             if pid in path:
                 return f"Circular dependency detected: {' -> '.join(path + [pid])}"
             if pid in visited:
@@ -269,7 +269,7 @@ class PackageDependencyResolver(object):
             return {"error": err, "package_id": package_id}
         return {"install_order": order, "total": len(order)}
 
-    def check_dependencies(self, package_id: str) -> Dict[str, Any]:
+    def check_dependencies(self, package_id: str) -> dict[str, Any]:
         """检查某包的所有依赖是否满足"""
         pkg = self._packages.get(package_id)
         if not pkg:
@@ -296,7 +296,7 @@ class PackageDependencyResolver(object):
             "satisfied": len(pkg.dependencies) - len(missing) - len(version_conflicts),
         }
 
-    def get_reverse_deps(self, package_id: str) -> List[Dict]:
+    def get_reverse_deps(self, package_id: str) -> list[dict]:
         """获取依赖某包的所有包（反向依赖）"""
         dependents = []
         for pkg in self._packages.values():
@@ -318,16 +318,16 @@ class PackageDependencyResolver(object):
         except (ValueError, AttributeError):
             return 0
 
-class MarketplaceSearchEngine(object):
+class MarketplaceSearchEngine:
     """市场搜索引擎 — 支持全文匹配、权重排序、分页"""
 
-    def __init__(self, packages: Dict):
+    def __init__(self, packages: dict):
         self._packages = packages
         self._field_weights = {"name": 3.0, "tags": 2.0, "description": 1.0, "author": 0.5}
 
     def search(
         self, query: str, category: str = "", page: int = 1, page_size: int = 20, sort_by: str = "relevance"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行搜索，返回分页结果"""
         query_lower = query.lower()
         scored = []
@@ -402,15 +402,15 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._packages: Dict[str, MarketplacePackage] = {}
-        self._reviews: Dict[str, Review] = {}
-        self._installed: Dict[str, str] = {}  # package_id -> installed_version
+        self._packages: dict[str, MarketplacePackage] = {}
+        self._reviews: dict[str, Review] = {}
+        self._installed: dict[str, str] = {}  # package_id -> installed_version
         self._pkg_counter: int = 0
         self._rev_counter: int = 0
 
@@ -456,7 +456,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")  # 链路追踪span注册
         params = params or {}
         start = time.time()
@@ -568,7 +568,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -582,7 +582,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         pass  # super().shutdown() removed for sync compatibility
 
     def _publish(
-        self, name: str, author: str, category: str, description: str, version: str, tags: List[str]
+        self, name: str, author: str, category: str, description: str, version: str, tags: list[str]
     ) -> MarketplacePackage:
         self._pkg_counter += 1
         try:
@@ -605,7 +605,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.stats.success_count += 1
         return pkg
 
-    def _search_with_engine(self, query: str, category: str, page: int, page_size: int, sort_by: str) -> Dict:
+    def _search_with_engine(self, query: str, category: str, page: int, page_size: int, sort_by: str) -> dict:
         """使用搜索引擎执行搜索"""
         try:
             return self._circuit_breaker.call(
@@ -615,7 +615,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             logger.warning(f"搜索熔断降级，使用基础搜索: {e}")
             return self._search(query, category)
 
-    def _search(self, query: str, category: str) -> List[Dict]:
+    def _search(self, query: str, category: str) -> list[dict]:
         results = []
         q = query.lower()
         for pkg in self._packages.values():
@@ -644,7 +644,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.stats.success_count += 1
         return results
 
-    def _install(self, package_id: str, version: str) -> Dict:
+    def _install(self, package_id: str, version: str) -> dict:
         pkg = self._packages.get(package_id)
         if not pkg:
             return {"error": "Package not found"}
@@ -658,7 +658,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.stats.success_count += 1
         return {"package_id": package_id, "version": ver, "installed": True}
 
-    def _uninstall(self, package_id: str) -> Dict:
+    def _uninstall(self, package_id: str) -> dict:
         if package_id not in self._installed:
             return {"error": "Package not installed"}
         ver = self._installed.pop(package_id)
@@ -667,7 +667,7 @@ class AgentMarketplaceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.stats.success_count += 1
         return {"package_id": package_id, "uninstalled": True, "was_version": ver}
 
-    def _add_review(self, package_id: str, user: str, rating: int, comment: str) -> Dict:
+    def _add_review(self, package_id: str, user: str, rating: int, comment: str) -> dict:
         pkg = self._packages.get(package_id)
         if not pkg:
             return {"error": "Package not found"}

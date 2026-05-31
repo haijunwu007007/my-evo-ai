@@ -115,7 +115,7 @@ class Keyword:
     score: float = 0.0
     frequency: int = 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {"word": self.word, "score": round(self.score, 4), "frequency": self.frequency}
 
 @dataclass
@@ -127,14 +127,14 @@ class SummaryResult:
     original_length: int = 0
     summary_length: int = 0
     compression_ratio: float = 0.0
-    keywords: List[Keyword] = field(default_factory=list)
-    key_sentences: List[str] = field(default_factory=list)
+    keywords: list[Keyword] = field(default_factory=list)
+    key_sentences: list[str] = field(default_factory=list)
     quality_score: float = 0.0
     language: str = "auto"
     processing_time_ms: int = 0
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "job_id": self.job_id,
             "source_ref": self.source_ref,
@@ -153,7 +153,7 @@ class SummaryResult:
 # TextRank句子排序
 # ============================================================
 
-class TextRankEngine(object):
+class TextRankEngine:
     """TextRank句子排序引擎"""
 
     def __init__(self, damping: float = 0.85, iterations: int = 30, threshold: float = 1e-5):
@@ -161,7 +161,7 @@ class TextRankEngine(object):
         self.iterations = iterations
         self.threshold = threshold
 
-    def split_sentences(self, text: str) -> List[str]:
+    def split_sentences(self, text: str) -> list[str]:
         sentences = re.split(r"[。！？\n;]+", text)
         return [s.strip() for s in sentences if len(s.strip()) > 5]
 
@@ -173,7 +173,7 @@ class TextRankEngine(object):
         intersection = words1 & words2
         return len(intersection) / (math.log(len(words1)) + math.log(len(words2)) + 1e-8)
 
-    def rank_sentences(self, sentences: List[str]) -> List[Tuple[int, float]]:
+    def rank_sentences(self, sentences: list[str]) -> list[tuple[int, float]]:
         if len(sentences) < 2:
             return [(0, 1.0)] if sentences else []
         n = len(sentences)
@@ -201,7 +201,7 @@ class TextRankEngine(object):
         ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
         return ranked
 
-    def extract_top_sentences(self, text: str, top_k: int = 3) -> List[str]:
+    def extract_top_sentences(self, text: str, top_k: int = 3) -> list[str]:
         sentences = self.split_sentences(text)
         if len(sentences) <= top_k:
             return sentences
@@ -217,16 +217,16 @@ class TFIDFExtractor:
     """TF-IDF关键词提取器"""
 
     STOP_WORDS = set(
-        "的 了 在 是 我 有 和 就 不 人 都 一 一个 上 也 很 到 说 要 去 你 会 着 没有 看 好 自己 这 他 她 它 们 那 里 为 什么 与 及 等".split()
+        ["的", "了", "在", "是", "我", "有", "和", "就", "不", "人", "都", "一", "一个", "上", "也", "很", "到", "说", "要", "去", "你", "会", "着", "没有", "看", "好", "自己", "这", "他", "她", "它", "们", "那", "里", "为", "什么", "与", "及", "等"]
     )
 
-    def extract_keywords(self, text: str, top_k: int = 10) -> List[Keyword]:
+    def extract_keywords(self, text: str, top_k: int = 10) -> list[Keyword]:
         sentences = re.split(r"[。！？\n\s,，;；:：]+", text)
         n_docs = len(sentences)
         if n_docs == 0:
             return []
         doc_freq: Counter = Counter()
-        doc_words: List[List[str]] = []
+        doc_words: list[list[str]] = []
         for sent in sentences:
             words = [w for w in sent if len(w) > 1 and w not in self.STOP_WORDS]
             doc_words.append(words)
@@ -249,10 +249,10 @@ class TFIDFExtractor:
 # 摘要质量评估
 # ============================================================
 
-class SummaryQualityEvaluator(object):
+class SummaryQualityEvaluator:
     """摘要质量评估器"""
 
-    def evaluate(self, original: str, summary: str, keywords: List[Keyword]) -> Dict:
+    def evaluate(self, original: str, summary: str, keywords: list[Keyword]) -> dict:
         if not summary:
             return {"quality_score": 0.0, "factors": {"empty_summary": True}}
         factors = {}
@@ -284,13 +284,13 @@ class SummaryQualityEvaluator(object):
 class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """自动摘要引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="auto_summary", version="6.39.0", config=config)
         self._textrank = TextRankEngine()
         self._tfidf = TFIDFExtractor()
         self._evaluator = SummaryQualityEvaluator()
-        self._results: Dict[str, SummaryResult] = {}
+        self._results: dict[str, SummaryResult] = {}
         self._stats = {
             "total_summaries": 0,
             "total_chars_processed": 0,
@@ -413,7 +413,7 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _real_summarize(self, text: str) -> Dict[str, Any]:
+    def _real_summarize(self, text: str) -> dict[str, Any]:
         """Real LLM-based summarization."""
         try:
             from _zhipu_helper import llm_chat
@@ -424,7 +424,7 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             pass
         return {"summary": text[:100]+"...", "length": len(text[:100]), "llm": False}
 
-    def summarize_with_key_points(self, text: str, max_points: int = 5, style: str = "concise") -> Dict[str, Any]:
+    def summarize_with_key_points(self, text: str, max_points: int = 5, style: str = "concise") -> dict[str, Any]:
         """带关键点提取的摘要生成。企业场景：会议纪要自动生成摘要+关键决策点，
          长文档生成摘要+章节要点，辅助快速阅读决策。
         style: concise(简洁) / detailed(详细) / bullet(要点列表)。
@@ -475,7 +475,7 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "style": style,
         }
 
-    def compare_documents(self, doc_a: str, doc_b: str) -> Dict[str, Any]:
+    def compare_documents(self, doc_a: str, doc_b: str) -> dict[str, Any]:
         """文档对比分析。企业场景：合同修订前后对比、需求文档版本差异分析。
         找出两份文档的相同点和差异点，标记新增、删除、修改的内容。
         """
@@ -503,7 +503,7 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "analysis": "高度相似" if similarity > 0.8 else "中度相似" if similarity > 0.5 else "差异较大",
         }
 
-    def multi_language_summary(self, text: str, source_lang: str = "auto", target_lang: str = "zh") -> Dict[str, Any]:
+    def multi_language_summary(self, text: str, source_lang: str = "auto", target_lang: str = "zh") -> dict[str, Any]:
         """跨语言摘要。企业场景：海外团队文档自动翻译并生成中文摘要，
          或中文需求文档生成英文摘要供跨国团队使用。
         source_lang: auto(自动检测) / zh / en / ja / ko 等。
@@ -529,7 +529,7 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "key_sentences_count": len(key_sentences),
         }
 
-    def extract_entities(self, text: str) -> Dict[str, Any]:
+    def extract_entities(self, text: str) -> dict[str, Any]:
         """命名实体提取。企业场景：合同/报告自动提取人名、公司名、金额、日期等关键实体，
         辅助信息录入和审核流程自动化。
         """
@@ -556,12 +556,12 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "entities": entities,
         }
 
-    def get_summary_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_summary_history(self, limit: int = 20) -> dict[str, Any]:
         """获取摘要生成历史。企业场景：用户查看之前的摘要记录。"""
         history = getattr(self, "_summary_history", [])
         return {"success": True, "total": len(history), "recent": history[-limit:]}
 
-    def batch_summarize(self, documents: List[Dict[str, str]], max_length: int = 200) -> Dict[str, Any]:
+    def batch_summarize(self, documents: list[dict[str, str]], max_length: int = 200) -> dict[str, Any]:
         """批量文档摘要。企业场景：日报/周报一次性汇总多个文档（会议纪要、邮件、工单）。
         每个文档返回摘要+关键词，并聚合生成全局摘要。
         """

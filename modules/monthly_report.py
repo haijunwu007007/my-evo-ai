@@ -82,13 +82,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MonthlyReportAnalyzer(object):
+class MonthlyReportAnalyzer:
     """monthly_report 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -282,7 +283,7 @@ class KPIDefinition:
     name: str
     value: float = 0.0
     previous_value: float = 0.0
-    target: Optional[float] = None
+    target: float | None = None
     unit: str = ""
     format_str: str = "{:.2f}"
     trend: str = "up"
@@ -294,18 +295,18 @@ class ChartData:
     chart_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     title: str = ""
     chart_type: ChartType = ChartType.BAR
-    x_labels: List[str] = field(default_factory=list)
-    series: List[Dict[str, Any]] = field(default_factory=list)
-    config: Dict[str, Any] = field(default_factory=dict)
+    x_labels: list[str] = field(default_factory=list)
+    series: list[dict[str, Any]] = field(default_factory=list)
+    config: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Section:
     section_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     title: str = ""
     content: str = ""
-    charts: List[ChartData] = field(default_factory=list)
-    kpis: List[KPIDefinition] = field(default_factory=list)
-    tables: List[Dict[str, Any]] = field(default_factory=list)
+    charts: list[ChartData] = field(default_factory=list)
+    kpis: list[KPIDefinition] = field(default_factory=list)
+    tables: list[dict[str, Any]] = field(default_factory=list)
     order: int = 0
     visible: bool = True
 
@@ -314,8 +315,8 @@ class ReportTemplate:
     template_id: str
     name: str
     description: str = ""
-    sections: List[str] = field(default_factory=list)
-    default_charts: List[Dict[str, Any]] = field(default_factory=list)
+    sections: list[str] = field(default_factory=list)
+    default_charts: list[dict[str, Any]] = field(default_factory=list)
     header_text: str = ""
     footer_text: str = ""
     css_theme: str = "professional"
@@ -347,22 +348,22 @@ class MonthlyReport:
     year: int = 0
     month: int = 0
     status: ReportStatus = ReportStatus.DRAFT
-    sections: List[Section] = field(default_factory=list)
+    sections: list[Section] = field(default_factory=list)
     template_id: str = ""
     author: str = ""
     created_at: float = field(default_factory=time.time)
     generated_at: float = 0.0
     published_at: float = 0.0
-    recipients: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    recipients: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ReportSchedule:
     schedule_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     template_id: str = ""
     cron_expr: str = "0 0 1 * *"
-    recipients: List[str] = field(default_factory=list)
+    recipients: list[str] = field(default_factory=list)
     enabled: bool = True
     next_run: float = 0.0
     last_run: float = 0.0
@@ -381,12 +382,12 @@ class MonthlyReport:
     """Enterprise monthly report generation with templates and multi-format export."""
 
     def __init__(self):
-        self._reports: Dict[str, MonthlyReport] = {}
-        self._templates: Dict[str, ReportTemplate] = {}
-        self._schedules: Dict[str, ReportSchedule] = {}
+        self._reports: dict[str, MonthlyReport] = {}
+        self._templates: dict[str, ReportTemplate] = {}
+        self._schedules: dict[str, ReportSchedule] = {}
         self._lock = threading.RLock()
         self._initialized = False
-        self._data_sources: Dict[str, Callable] = {}
+        self._data_sources: dict[str, Callable] = {}
         self._init_default_templates()
         logger.info("MonthlyReport created")
 
@@ -429,9 +430,9 @@ class MonthlyReport:
         title: str,
         year: int,
         month: int,
-        template_id: Optional[str] = None,
+        template_id: str | None = None,
         author: str = "",
-        recipients: Optional[List[str]] = None,
+        recipients: list[str] | None = None,
     ) -> MonthlyReport:
         template = self._templates.get(template_id) if template_id else None
         sections = []
@@ -460,7 +461,7 @@ class MonthlyReport:
         name: str,
         value: float,
         previous_value: float = 0.0,
-        target: Optional[float] = None,
+        target: float | None = None,
         unit: str = "",
     ) -> bool:
         with self._lock:
@@ -487,8 +488,8 @@ class MonthlyReport:
         section_id: str,
         title: str,
         chart_type: ChartType,
-        x_labels: List[str],
-        series: List[Dict[str, Any]],
+        x_labels: list[str],
+        series: list[dict[str, Any]],
     ) -> bool:
         with self._lock:
             report = self._reports.get(report_id)
@@ -502,7 +503,7 @@ class MonthlyReport:
         return False
 
     def add_table(
-        self, report_id: str, section_id: str, headers: List[str], rows: List[List[Any]], title: str = ""
+        self, report_id: str, section_id: str, headers: list[str], rows: list[list[Any]], title: str = ""
     ) -> bool:
         with self._lock:
             report = self._reports.get(report_id)
@@ -564,7 +565,7 @@ class MonthlyReport:
             report.published_at = time.time()
             return True
 
-    def list_reports(self, year: Optional[int] = None, month: Optional[int] = None) -> List[Dict[str, Any]]:
+    def list_reports(self, year: int | None = None, month: int | None = None) -> list[dict[str, Any]]:
         with self._lock:
             reports = self._reports.values()
             if year:
@@ -585,7 +586,7 @@ class MonthlyReport:
                 for r in reports
             ]
 
-    def get_report(self, report_id: str) -> Optional[Dict[str, Any]]:
+    def get_report(self, report_id: str) -> dict[str, Any] | None:
         with self._lock:
             report = self._reports.get(report_id)
             if not report:
@@ -620,7 +621,7 @@ class MonthlyReport:
                 ],
             }
 
-    def list_templates(self) -> List[Dict[str, Any]]:
+    def list_templates(self) -> list[dict[str, Any]]:
         return [
             {"template_id": t.template_id, "name": t.name, "description": t.description, "sections": t.sections}
             for t in self._templates.values()
@@ -727,7 +728,7 @@ class MonthlyReport:
         md = self._render_markdown(report)
         return f"Subject: {report.title}\n\n{md}"
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             return {

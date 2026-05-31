@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -187,8 +186,8 @@ class SecurityPolicy:
     block_file_delete: bool = True
     block_code_execution: bool = False
     max_output_length: int = 100000
-    block_patterns: List[str] = field(default_factory=list)
-    allowed_domains: List[str] = field(default_factory=list)
+    block_patterns: list[str] = field(default_factory=list)
+    allowed_domains: list[str] = field(default_factory=list)
     pii_detection: bool = True
     audit_all_operations: bool = True
 
@@ -249,7 +248,7 @@ class ThreatPatterns:
         r"dd\s+if=.*of=/dev/",
     ]
 
-class SecurityAuditAnalyzer(object):
+class SecurityAuditAnalyzer:
     """安全审计分析器 - 事件聚合、趋势分析、风险评估"""
 
     def __init__(self, max_events: int = 10000):
@@ -273,7 +272,7 @@ class SecurityAuditAnalyzer(object):
         if event_type == "blocked":
             self._blocked_count += 1
 
-    def get_summary(self, minutes: int = 60) -> Dict:
+    def get_summary(self, minutes: int = 60) -> dict:
         """获取时间范围内的安全摘要"""
         cutoff = time.time() - minutes * 60
         recent = [e for e in self._events if e["timestamp"] >= cutoff]
@@ -291,7 +290,7 @@ class SecurityAuditAnalyzer(object):
             "blocked_count": sum(1 for e in recent if e["type"] == "blocked"),
         }
 
-    def detect_burst(self, window_seconds: int = 60, threshold: int = 10) -> Optional[Dict]:
+    def detect_burst(self, window_seconds: int = 60, threshold: int = 10) -> dict | None:
         """检测短时间内的事件爆发"""
         cutoff = time.time() - window_seconds
         burst_events = [e for e in self._events if e["timestamp"] >= cutoff]
@@ -307,7 +306,7 @@ class SecurityAuditAnalyzer(object):
             }
         return None
 
-    def get_top_sources(self, n: int = 5) -> List[Dict]:
+    def get_top_sources(self, n: int = 5) -> list[dict]:
         """获取事件最多的来源"""
         source_counts = defaultdict(int)
         for e in self._events:
@@ -322,7 +321,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -336,7 +335,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         )
         self.patterns = ThreatPatterns()
         self._events: deque = deque(maxlen=5000)
-        self._agent_risk_scores: Dict[str, float] = defaultdict(float)
+        self._agent_risk_scores: dict[str, float] = defaultdict(float)
         self._blocked_count = 0
         self._allowed_count = 0
 
@@ -349,7 +348,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"shell_block={self.policy.block_shell_commands}")
         self.info("Agent安全防护就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("agentguard_ops_total", labels={"action": action})
         params = params or {}
@@ -373,7 +372,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 安全检查 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "check_input": self._do_check_input,
@@ -391,7 +390,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _do_check_input(self, params: Dict) -> Dict:
+    def _do_check_input(self, params: dict) -> dict:
         text = params.get("text", "")
         agent_id = params.get("agent_id", "")
         threats = self._scan_threats(text, "input")
@@ -414,7 +413,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._allowed_count += 1
         return {"safe": not blocked, "threats": threats, "action": "blocked" if blocked else "allowed"}
 
-    def _do_check_output(self, params: Dict) -> Dict:
+    def _do_check_output(self, params: dict) -> dict:
         text = params.get("text", "")
         agent_id = params.get("agent_id", "")
         threats = self._scan_threats(text, "output")
@@ -456,7 +455,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         text = _re.sub(r"\d{16,19}", lambda m: m.group()[:4] + replacement + m.group()[-4:], text)
         return text
 
-    def get_security_report(self) -> Dict:
+    def get_security_report(self) -> dict:
         """获取安全总览报告"""
         return {
             "total_scans": self._scan_count if hasattr(self, "_scan_count") else 0,
@@ -468,13 +467,13 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             else 0,
         }
 
-    def analyze_threat_timeline(self, hours: int = 24) -> Dict[str, Any]:
+    def analyze_threat_timeline(self, hours: int = 24) -> dict[str, Any]:
         """分析威胁时间线：按小时统计事件、识别攻击模式"""
         events = self._events if hasattr(self, "_events") else []
         now = time.time()
         cutoff = now - hours * 3600
         recent = [e for e in events if getattr(e, "timestamp", now) > cutoff]
-        hourly: Dict[int, Dict[str, int]] = {}
+        hourly: dict[int, dict[str, int]] = {}
         for e in recent:
             ts = getattr(e, "timestamp", now)
             hour_bucket = int(ts // 3600)
@@ -500,7 +499,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "hourly_breakdown": [{"hour": h, **counts} for h, counts in sorted_hours],
         }
 
-    def _do_check_operation(self, params: Dict) -> Dict:
+    def _do_check_operation(self, params: dict) -> dict:
         op = params.get("operation", "")
         agent_id = params.get("agent_id", "")
         target = params.get("target", "")
@@ -520,7 +519,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._allowed_count += 1
         return {"allowed": True}
 
-    def _do_get_events(self, params: Dict) -> Dict:
+    def _do_get_events(self, params: dict) -> dict:
         limit = params.get("limit", 50)
         agent_id = params.get("agent_id", "")
         events = list(self._events)
@@ -542,25 +541,25 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _do_get_agent_risk(self, params: Dict) -> Dict:
+    def _do_get_agent_risk(self, params: dict) -> dict:
         return {"agents": {k: round(v, 1) for k, v in self._agent_risk_scores.items()}}
 
-    def _do_update_policy(self, params: Dict) -> Dict:
+    def _do_update_policy(self, params: dict) -> dict:
         for key in SecurityPolicy.__dataclass_fields__:
             if key in params:
                 setattr(self.policy, key, params[key])
         self.audit("update_policy", str({k: v for k, v in params.items() if k in SecurityPolicy.__dataclass_fields__}))
         return {"success": True}
 
-    def _do_get_policy(self, params: Dict) -> Dict:
+    def _do_get_policy(self, params: dict) -> dict:
         return {k: v for k, v in self.policy.__dict__.items() if not k.startswith("_")}
 
-    def _do_scan_text(self, params: Dict) -> Dict:
+    def _do_scan_text(self, params: dict) -> dict:
         text = params.get("text", "")
         mode = params.get("mode", "all")
         return {"threats": self._scan_threats(text, mode)}
 
-    def _do_stats(self, params: Dict) -> Dict:
+    def _do_stats(self, params: dict) -> dict:
         total = self._blocked_count + self._allowed_count
         return {
             "total_checks": total,
@@ -571,7 +570,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "agents": len(self._agent_risk_scores),
         }
 
-    def _do_threat_summary(self, params: Dict) -> Dict:
+    def _do_threat_summary(self, params: dict) -> dict:
         """威胁类型统计"""
         threat_type_counts = defaultdict(int)
         for e in self._events:
@@ -581,7 +580,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "total_categories": len(threat_type_counts),
         }
 
-    def _do_quarantine_agent(self, params: Dict) -> Dict:
+    def _do_quarantine_agent(self, params: dict) -> dict:
         """隔离高风险Agent"""
         agent_id = params.get("agent_id", "")
         if not agent_id:
@@ -590,7 +589,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("quarantine_agent", f"agent={agent_id}")
         return {"quarantined": True, "agent_id": agent_id, "risk_score": 100.0}
 
-    def _do_clear_agent_risk(self, params: Dict) -> Dict:
+    def _do_clear_agent_risk(self, params: dict) -> dict:
         """清除Agent风险评分"""
         agent_id = params.get("agent_id", "")
         if agent_id in self._agent_risk_scores:
@@ -601,7 +600,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 威胁扫描引擎 ──
 
-    def _scan_threats(self, text: str, mode: str = "all") -> List[Dict]:
+    def _scan_threats(self, text: str, mode: str = "all") -> list[dict]:
         threats = []
         patterns = []
 
@@ -637,7 +636,7 @@ class AgentGuardSec(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return threats
 
-    def _detect_pii(self, text: str) -> List[Dict]:
+    def _detect_pii(self, text: str) -> list[dict]:
         if not self.policy.pii_detection:
             return []
         found = []

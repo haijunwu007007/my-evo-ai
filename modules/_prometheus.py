@@ -8,7 +8,7 @@ from typing import Dict
 
 logger = logging.getLogger("evo.prometheus")
 
-_metrics: Dict[str, Dict] = defaultdict(lambda: {"count": 0, "errors": 0, "total_ms": 0})
+_metrics: dict[str, dict] = defaultdict(lambda: {"count": 0, "errors": 0, "total_ms": 0})
 _registered = set()
 
 def increment(module_id: str, method: str = "execute", duration_ms: float = 0, error: bool = False):
@@ -21,7 +21,7 @@ def increment(module_id: str, method: str = "execute", duration_ms: float = 0, e
     m["last_ts"] = time.time()
     _registered.add(module_id)
 
-def get_metrics() -> Dict:
+def get_metrics() -> dict:
     now = time.time()
     rows = []
     for key, m in sorted(_metrics.items()):

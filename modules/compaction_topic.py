@@ -130,7 +130,7 @@ class CompactionTopic:
     delete_retention_ms: int = 86400000
     created_at: float = 0.0
     updated_at: float = 0.0
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class CompactionTask:
@@ -182,12 +182,12 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 "description": "Kafka Topic Compaction管理，支持压实策略、日志清理、去重、消费者offset管理",
             }
         )
-        self._topics: Dict[str, CompactionTopic] = {}
-        self._tasks: Dict[str, CompactionTask] = {}
-        self._messages: Dict[str, Dict[str, Any]] = defaultdict(dict)  # topic -> {key: message}
-        self._offsets: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-        self._metrics: Dict[str, TopicMetrics] = {}
-        self._compaction_schedule: Dict[str, float] = {}  # topic -> next_compaction_time
+        self._topics: dict[str, CompactionTopic] = {}
+        self._tasks: dict[str, CompactionTask] = {}
+        self._messages: dict[str, dict[str, Any]] = defaultdict(dict)  # topic -> {key: message}
+        self._offsets: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        self._metrics: dict[str, TopicMetrics] = {}
+        self._compaction_schedule: dict[str, float] = {}  # topic -> next_compaction_time
         self._initialized = False
         self._lock = threading.Lock()
 
@@ -220,7 +220,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._compaction_schedule[name] = time.time() + 3600
         return topic
 
-    def _simulate_compaction(self, topic_name: str) -> Dict[str, Any]:
+    def _simulate_compaction(self, topic_name: str) -> dict[str, Any]:
         """模拟压实操作，返回压实前后对比"""
         topic = self._topics.get(topic_name)
         if not topic:
@@ -241,7 +241,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "removed_messages": before_count - after_count,
         }
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"module": "compaction_topic"})
         self.metrics_collector.counter("compaction_topic.execute.calls", 1)
@@ -464,7 +464,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             logger.error(f"[CompactionTopic] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -487,7 +487,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
     def estimate_compaction_savings(
         self, topic: str, current_size_mb: float, avg_msg_size_kb: float = 1.0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """预估压缩节省空间。企业场景：存储规划时评估Topic压缩后可回收的磁盘空间。
         根据消息重复率（key相同value覆盖）和历史压缩比估算。
         """
@@ -510,7 +510,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "based_on_history": len(completed) > 0,
         }
 
-    def get_storage_forecast(self, days: int = 30) -> Dict[str, Any]:
+    def get_storage_forecast(self, days: int = 30) -> dict[str, Any]:
         """存储增长预测。企业场景：容量规划，预估各Topic未来N天的磁盘占用。
         基于近7天日均增长速率外推。
         """
@@ -537,7 +537,7 @@ class CompactionTopicManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
 def schedule_compaction(
     self, topic: str, strategy: str = "size_based", trigger_size_mb: float = 1024, trigger_age_hours: int = 72
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """配置Topic自动压缩策略。企业场景：Kafka运维设置各Topic的压缩触发条件，
      避免日志Topic无限增长占用磁盘空间。
     strategy: size_based(按大小) / age_based(按时间) / dual(双重条件)。
@@ -562,7 +562,7 @@ def schedule_compaction(
         "trigger_age_hours": trigger_age_hours,
     }
 
-def get_compaction_report(self, topic: Optional[str] = None) -> Dict[str, Any]:
+def get_compaction_report(self, topic: str | None = None) -> dict[str, Any]:
     """压缩任务报告。企业场景：运维评估各Topic压缩效果，
     统计压缩前后大小对比、节省空间、执行耗时。
     """
@@ -586,7 +586,7 @@ def get_compaction_report(self, topic: Optional[str] = None) -> Dict[str, Any]:
         "compression_ratio": round(saved / max(total_before, 0.001) * 100, 1),
     }
 
-def estimate_compaction_time(self, topic: str, current_size_mb: float) -> Dict[str, Any]:
+def estimate_compaction_time(self, topic: str, current_size_mb: float) -> dict[str, Any]:
     """估算Topic压缩所需时间。企业场景：大Topic压缩前评估是否需要维护窗口。
     基于历史压缩速度和当前数据量预估耗时。
     """
@@ -601,7 +601,7 @@ def estimate_compaction_time(self, topic: str, current_size_mb: float) -> Dict[s
         "recommendation": "可在业务低峰期执行" if estimated_seconds > 300 else "可在线执行",
     }
 
-def get_topic_list(self) -> Dict[str, Any]:
+def get_topic_list(self) -> dict[str, Any]:
     """获取所有Topic列表。企业场景：运维查看管理的Topic清单。"""
     topics = []
     for tid, topic in self._topics.items() if hasattr(self, "_topics") else []:

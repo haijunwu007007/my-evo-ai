@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - 审计日志（A级生产实现）
@@ -179,7 +178,7 @@ class AuditEntry:
     user: str = ""
     result: str = "success"
     duration_ms: float = 0.0
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.log_id:
@@ -187,7 +186,7 @@ class AuditEntry:
         if not self.timestamp:
             self.timestamp = datetime.now().isoformat()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "log_id": self.log_id,
             "timestamp": self.timestamp,
@@ -203,21 +202,21 @@ class AuditEntry:
             "duration_ms": round(self.duration_ms, 2),
         }
 
-    def to_storage(self) -> Dict:
+    def to_storage(self) -> dict:
         d = self.to_dict()
         d["extra"] = self.extra
         return d
 
-class AuditQueryEngine(object):
+class AuditQueryEngine:
     """审计查询引擎 - 提供复杂审计日志过滤、聚合和报表生成能力"""
 
     def __init__(self):
-        self._index: Dict[str, List[int]] = {}
+        self._index: dict[str, list[int]] = {}
         self._query_count: int = 0
-        self._cache: Dict[str, Any] = {}
+        self._cache: dict[str, Any] = {}
         self._cache_max: int = 100
 
-    def build_index(self, entries: List[Dict]) -> None:
+    def build_index(self, entries: list[dict]) -> None:
         """按module_id和category建立倒排索引"""
         self._index.clear()
         for i, entry in enumerate(entries):
@@ -227,7 +226,7 @@ class AuditQueryEngine(object):
             self._index.setdefault(f"cat:{cat}", []).append(i)
             self._index.setdefault(f"level:{entry.get('level', '')}", []).append(i)
 
-    def query(self, entries: List[Dict], filters: Dict[str, Any], limit: int = 100) -> List[Dict]:
+    def query(self, entries: list[dict], filters: dict[str, Any], limit: int = 100) -> list[dict]:
         """多条件过滤查询"""
         self._query_count += 1
         cache_key = str(sorted(filters.items())) + str(limit)
@@ -250,19 +249,19 @@ class AuditQueryEngine(object):
         self._cache[cache_key] = results
         return results
 
-    def aggregate_by_field(self, entries: List[Dict], field: str) -> Dict[str, int]:
+    def aggregate_by_field(self, entries: list[dict], field: str) -> dict[str, int]:
         """按字段聚合统计"""
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for entry in entries:
             key = entry.get(field, "unknown")
             counts[key] = counts.get(key, 0) + 1
         return dict(sorted(counts.items(), key=lambda x: -x[1]))
 
-    def time_range_query(self, entries: List[Dict], start: str, end: str) -> List[Dict]:
+    def time_range_query(self, entries: list[dict], start: str, end: str) -> list[dict]:
         """按时间范围查询"""
         return [e for e in entries if start <= e.get("timestamp", "") <= end]
 
-    def detect_anomalies(self, entries: List[Dict], threshold: int = 100) -> List[Dict]:
+    def detect_anomalies(self, entries: list[dict], threshold: int = 100) -> list[dict]:
         """检测异常审计模式（短时间内大量同类型操作）"""
         from collections import Counter
 
@@ -274,7 +273,7 @@ class AuditQueryEngine(object):
                 anomalies.append({"action": action, "count": count, "threshold": threshold})
         return anomalies
 
-    def generate_summary(self, entries: List[Dict]) -> Dict:
+    def generate_summary(self, entries: list[dict]) -> dict:
         """生成审计摘要报告"""
         return {
             "total_entries": len(entries),
@@ -284,7 +283,7 @@ class AuditQueryEngine(object):
             "query_count": self._query_count,
         }
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {"index_keys": len(self._index), "query_count": self._query_count, "cache_size": len(self._cache)}
 
 class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
@@ -295,7 +294,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -307,12 +306,12 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.max_memory_entries = self.config.get("max_memory_entries", 5000)
         self.archive_days = self.config.get("archive_days", 30)
         self._memory_log: deque = deque(maxlen=self.max_memory_entries)
-        self._file_buffer: List[Dict] = []
+        self._file_buffer: list[dict] = []
         self._buffer_size = self.config.get("buffer_size", 100)
-        self._stats_by_category: Dict[str, int] = defaultdict(int)
-        self._stats_by_level: Dict[str, int] = defaultdict(int)
-        self._bg_flush: Optional[object] = None
-        self._bg_archive: Optional[object] = None
+        self._stats_by_category: dict[str, int] = defaultdict(int)
+        self._stats_by_level: dict[str, int] = defaultdict(int)
+        self._bg_flush: object | None = None
+        self._bg_archive: object | None = None
 
     def initialize(self) -> None:
         self.info("初始化审计日志...")
@@ -323,7 +322,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"log_dir={self.log_dir}, archive_days={self.archive_days}")
         self.info("审计日志就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("audit_log_ops_total", labels={"action": action})
         params = params or {}
@@ -364,7 +363,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         user: str = "",
         result: str = "success",
         duration_ms: float = 0,
-        extra: Dict = None,
+        extra: dict = None,
     ):
         """记录审计条目"""
         entry = AuditEntry(
@@ -392,7 +391,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         if len(self._file_buffer) >= self._buffer_size:
             self._flush_buffer()
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "log": self._do_log,
@@ -410,7 +409,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _do_log(self, params: Dict) -> Dict:
+    def _do_log(self, params: dict) -> dict:
         self.log(
             module_id=params.get("module_id", ""),
             action=params.get("action", ""),
@@ -423,7 +422,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         )
         return {"logged": True}
 
-    def _do_query(self, params: Dict) -> Dict:
+    def _do_query(self, params: dict) -> dict:
         limit = params.get("limit", 100)
         category = params.get("category", "")
         level = params.get("level", "")
@@ -454,7 +453,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return {"total": len(filtered), "items": filtered}
 
-    def _do_summary(self, params: Dict) -> Dict:
+    def _do_summary(self, params: dict) -> dict:
         return {
             "total": len(self._memory_log),
             "by_category": dict(self._stats_by_category),
@@ -462,7 +461,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "success_rate": f"{(1 - self._stats_by_level.get('error', 0) / max(len(self._memory_log), 1)) * 100:.1f}%",
         }
 
-    def _do_report(self, params: Dict) -> Dict:
+    def _do_report(self, params: dict) -> dict:
         hours = params.get("hours", 24)
         cutoff = datetime.now() - timedelta(hours=hours)
         entries = [e for e in self._memory_log if datetime.fromisoformat(e.timestamp) >= cutoff]
@@ -482,7 +481,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "top_actions": self._top_n_actions(entries, 10),
         }
 
-    def _do_search(self, params: Dict) -> Dict:
+    def _do_search(self, params: dict) -> dict:
         keyword = params.get("keyword", "").lower()
         limit = params.get("limit", 50)
         if not keyword:
@@ -495,7 +494,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                     break
         return {"keyword": keyword, "total": len(results), "items": results}
 
-    def _do_by_module(self, params: Dict) -> Dict:
+    def _do_by_module(self, params: dict) -> dict:
         module_id = params.get("module_id", "")
         hours = params.get("hours", 24)
         if not module_id:
@@ -508,7 +507,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         ]
         return {"module_id": module_id, "hours": hours, "entries": len(entries), "items": entries[-100:]}
 
-    def _do_stats(self, params: Dict) -> Dict:
+    def _do_stats(self, params: dict) -> dict:
         return {
             "total": self.stats.request_count,
             "memory_entries": len(self._memory_log),
@@ -517,7 +516,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "buffer_pending": len(self._file_buffer),
         }
 
-    def _top_n_actions(self, entries, n: int) -> List[Dict]:
+    def _top_n_actions(self, entries, n: int) -> list[dict]:
         counts = defaultdict(int)
         for e in entries:
             counts[e.action] += 1
@@ -582,9 +581,9 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     def export_entries(
         self,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-        module_id: Optional[str] = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        module_id: str | None = None,
         fmt: str = "json",
     ) -> str:
         """导出审计日志为指定格式"""
@@ -609,7 +608,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return "\n".join(lines)
         return str(entries)
 
-    def get_retention_stats(self) -> Dict:
+    def get_retention_stats(self) -> dict:
         """获取保留策略执行统计"""
         total_size = (
             sum(
@@ -628,7 +627,7 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "buffer_size": len(self._buffer),
         }
 
-    def purge_module_logs(self, module_id: str, before_date: Optional[str] = None) -> int:
+    def purge_module_logs(self, module_id: str, before_date: str | None = None) -> int:
         """清除指定模块的历史日志"""
         before = datetime.strptime(before_date, "%Y-%m-%d") if before_date else datetime.now()
         before_ts = before.isoformat()
@@ -641,15 +640,15 @@ class AuditLog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._audit.log("purge_logs", {"module_id": module_id, "purged": purged})
         return purged
 
-    def generate_compliance_report(self, start_date: str, end_date: str) -> Dict[str, Any]:
+    def generate_compliance_report(self, start_date: str, end_date: str) -> dict[str, Any]:
         """生成合规报告：操作审计统计、敏感操作趋势、异常行为检测"""
         entries = self._entries if hasattr(self, "_entries") else []
         filtered = [e for e in entries if e.get("timestamp", "") >= start_date and e.get("timestamp", "") <= end_date]
         if not filtered:
             return {"period": f"{start_date}~{end_date}", "total_entries": 0}
-        actions: Dict[str, int] = {}
-        modules: Dict[str, int] = {}
-        operators: Dict[str, int] = {}
+        actions: dict[str, int] = {}
+        modules: dict[str, int] = {}
+        operators: dict[str, int] = {}
         sensitive_actions = {"delete", "remove", "drop", "truncate", "purge", "revoke", "shutdown"}
         sensitive_count = 0
         for e in filtered:

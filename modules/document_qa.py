@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DocumentQa:
@@ -140,7 +140,7 @@ class DocumentQa:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, DocumentQa] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, DocumentQa] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-        return {"success": False, "error": "Unknown action: {}".format(action)}
+        return {"success": False, "error": f"Unknown action: {action}"}
 
-    def score_answer_confidence(self, question: str, answer: str, source_chunks: List[str]) -> Dict[str, Any]:
+    def score_answer_confidence(self, question: str, answer: str, source_chunks: list[str]) -> dict[str, Any]:
         """答案置信度评分：基于来源相关性、答案完整性、关键词覆盖"""
         q_tokens = set(question.lower().split())
         a_tokens = set(answer.lower().split())
@@ -504,7 +504,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "answer_length": len(answer),
         }
 
-    def extract_citations(self, answer: str, source_chunks: List[Dict[str, str]]) -> Dict[str, Any]:
+    def extract_citations(self, answer: str, source_chunks: list[dict[str, str]]) -> dict[str, Any]:
         """从答案中提取来源引用：建立答案片段与源文档的映射"""
         citations = []
         for i, chunk in enumerate(source_chunks):
@@ -553,7 +553,7 @@ class DocumentQaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "citations": citations,
         }
 
-    def analyze_question_quality(self, question: str) -> Dict[str, Any]:
+    def analyze_question_quality(self, question: str) -> dict[str, Any]:
         """分析问题质量：判断问题是否清晰、是否有足够上下文"""
         q_lower = question.lower()
         words = question.split()

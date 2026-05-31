@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 健康探测（A级）
 # Grade: B
 
@@ -13,7 +12,7 @@ from modules._persist import PersistMixin
 logger=logging.getLogger("evo.health-ping")
 class HealthPing(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="health-ping";MODULE_NAME="健康探测";VERSION="v1.1";MODULE_LEVEL="A"
-    def __init__(self,config=None):super().__init__(config);self._targets:Dict[str,Dict]={};self._history=[]
+    def __init__(self,config=None):super().__init__(config);self._targets:dict[str,dict]={};self._history=[]
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)

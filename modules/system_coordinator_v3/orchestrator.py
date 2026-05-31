@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # 原 system_coordinator_v3.py L1210-3043 — 跨模块编排器
 """跨模块编排器"""
 import logging, time, re, os, sys, math, asyncio
 import threading, importlib, inspect
-from typing import Dict, Any, Optional, List, Set, Callable
+from typing import Dict, Any, Optional, List, Set
+from collections.abc import Callable
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
@@ -20,10 +20,10 @@ class CrossModuleOrchestrator:
     def __init__(self, coordinator, capability_graph: ModuleCapabilityGraph):
         self.coordinator = coordinator
         self.graph = capability_graph
-        self._execution_chains: Dict[str, List[str]] = {}  # task_pattern -> [module_ids]
-        self._chain_stats: Dict[str, Dict] = defaultdict(lambda: {"success": 0, "fail": 0})
+        self._execution_chains: dict[str, list[str]] = {}  # task_pattern -> [module_ids]
+        self._chain_stats: dict[str, dict] = defaultdict(lambda: {"success": 0, "fail": 0})
 
-    def build_chain(self, task: str) -> List[Dict]:
+    def build_chain(self, task: str) -> list[dict]:
         """
         为任务构建执行链
         返回: [{"module": id, "method": str, "params": dict}, ...]
@@ -56,7 +56,7 @@ class CrossModuleOrchestrator:
 
         return chain
 
-    def _get_task_patterns(self) -> Dict:
+    def _get_task_patterns(self) -> dict:
         """获取预定义的任务模式"""
         return {
             "financial_analysis": {
@@ -1179,7 +1179,7 @@ class CrossModuleOrchestrator:
             },
         }
 
-    def _build_chain_from_pattern(self, pattern: Dict, task: str = "") -> List[Dict]:
+    def _build_chain_from_pattern(self, pattern: dict, task: str = "") -> list[dict]:
         """从预定义模式构建执行链"""
         chain = []
         for step in pattern.get("chain", []):
@@ -1201,7 +1201,7 @@ class CrossModuleOrchestrator:
                 )
         return chain
 
-    def _build_chain_from_capabilities(self, needed_steps: List[str], task: str) -> List[Dict]:
+    def _build_chain_from_capabilities(self, needed_steps: list[str], task: str) -> list[dict]:
         """根据已识别的能力序列构建执行链（仅在needed_steps非空时调用）"""
         chain = []
 
@@ -1227,7 +1227,7 @@ class CrossModuleOrchestrator:
 
         return chain
 
-    def _analyze_task_capabilities(self, task: str) -> List[str]:
+    def _analyze_task_capabilities(self, task: str) -> list[str]:
         """分析任务需要的能力序列"""
         task_lower = task.lower()
         capabilities = []
@@ -1479,7 +1479,7 @@ class CrossModuleOrchestrator:
 
         return capabilities
 
-    def _resolve_module(self, hint: str, capability: str, task: str = "") -> Optional[str]:
+    def _resolve_module(self, hint: str, capability: str, task: str = "") -> str | None:
         """解析模块 hint 到实际模块ID"""
         task_lower = task.lower()
 
@@ -1779,7 +1779,7 @@ class CrossModuleOrchestrator:
 
         return "execute"
 
-    async def execute_chain(self, chain: List[Dict], task: str, context: Dict = None) -> Dict:
+    async def execute_chain(self, chain: list[dict], task: str, context: dict = None) -> dict:
         """执行模块链"""
         context = context or {}
         results = []

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - PostgreSQL 连接器（A级）
 # Grade: A
 

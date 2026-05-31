@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class InfraAsCodeAnalyzer(object):
+class InfraAsCodeAnalyzer:
     """infra_as_code 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -324,7 +324,7 @@ class StackState:
             "outputs": self.outputs,
         }
 
-class DriftDetector(object):
+class DriftDetector:
     """配置漂移检测器"""
 
     def __init__(self):
@@ -648,7 +648,7 @@ class InfraAsCode:
             for d in all_drifts
         ]
 
-    def get_stack(self, name: str) -> Optional[dict]:
+    def get_stack(self, name: str) -> dict | None:
         stack = self._stacks.get(name)
         return stack.to_dict() if stack else None
 

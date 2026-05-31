@@ -82,13 +82,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class N8NAnalyzer(object):
+class N8NAnalyzer:
     """n8n 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -302,9 +303,9 @@ class WorkflowNode:
     name: str = ""
     node_type: NodeType = NodeType.ACTION
     category: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    credentials: Dict[str, str] = field(default_factory=dict)
-    position: Dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0})
+    parameters: dict[str, Any] = field(default_factory=dict)
+    credentials: dict[str, str] = field(default_factory=dict)
+    position: dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0})
     status: NodeStatus = NodeStatus.ACTIVE
     retry_count: int = 0
     max_retries: int = 3
@@ -327,12 +328,12 @@ class WorkflowExecution:
     status: ExecutionStatus = ExecutionStatus.PENDING
     started_at: float = 0.0
     finished_at: float = 0.0
-    node_results: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    input_data: Dict[str, Any] = field(default_factory=dict)
-    output_data: Dict[str, Any] = field(default_factory=dict)
+    node_results: dict[str, dict[str, Any]] = field(default_factory=dict)
+    input_data: dict[str, Any] = field(default_factory=dict)
+    output_data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     trigger_type: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Workflow:
@@ -340,15 +341,15 @@ class Workflow:
     name: str = ""
     description: str = ""
     status: WorkflowStatus = WorkflowStatus.INACTIVE
-    nodes: List[WorkflowNode] = field(default_factory=list)
-    connections: List[Connection] = field(default_factory=list)
-    triggers: List[Dict[str, Any]] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    nodes: list[WorkflowNode] = field(default_factory=list)
+    connections: list[Connection] = field(default_factory=list)
+    triggers: list[dict[str, Any]] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
     version: int = 1
-    settings: Dict[str, Any] = field(default_factory=dict)
-    last_execution: Optional[float] = None
+    settings: dict[str, Any] = field(default_factory=dict)
+    last_execution: float | None = None
     total_executions: int = 0
     success_count: int = 0
     failure_count: int = 0
@@ -361,7 +362,7 @@ class WebhookEndpoint:
     path: str = ""
     method: str = "POST"
     authentication: str = "none"
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     active: bool = True
     created_at: float = field(default_factory=time.time)
     call_count: int = 0
@@ -372,7 +373,7 @@ class Credential:
     credential_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     name: str = ""
     type: str = ""
-    data: Dict[str, str] = field(default_factory=dict)
+    data: dict[str, str] = field(default_factory=dict)
     encrypted: bool = True
     created_at: float = field(default_factory=time.time)
 
@@ -400,13 +401,13 @@ class N8N:
     """Enterprise workflow automation engine with node-based visual programming."""
 
     def __init__(self):
-        self._workflows: Dict[str, Workflow] = {}
-        self._executions: Dict[str, WorkflowExecution] = {}
-        self._webhooks: Dict[str, WebhookEndpoint] = {}
-        self._credentials: Dict[str, Credential] = {}
-        self._node_registry: Dict[str, Dict[str, Any]] = {}
+        self._workflows: dict[str, Workflow] = {}
+        self._executions: dict[str, WorkflowExecution] = {}
+        self._webhooks: dict[str, WebhookEndpoint] = {}
+        self._credentials: dict[str, Credential] = {}
+        self._node_registry: dict[str, dict[str, Any]] = {}
         self._execution_queue: deque = deque(maxlen=10000)
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "before_execute": [],
             "after_execute": [],
             "on_error": [],
@@ -526,8 +527,8 @@ class N8N:
         self,
         name: str,
         description: str = "",
-        nodes: Optional[List[WorkflowNode]] = None,
-        connections: Optional[List[Connection]] = None,
+        nodes: list[WorkflowNode] | None = None,
+        connections: list[Connection] | None = None,
     ) -> Workflow:
         wf = Workflow(name=name, description=description, nodes=nodes or [], connections=connections or [])
         with self._lock:
@@ -573,7 +574,7 @@ class N8N:
             return True
 
     def execute(
-        self, workflow_id: str, input_data: Optional[Dict] = None, trigger_type: str = "manual"
+        self, workflow_id: str, input_data: dict | None = None, trigger_type: str = "manual"
     ) -> WorkflowExecution:
         with self._lock:
             wf = self._workflows.get(workflow_id)
@@ -643,8 +644,8 @@ class N8N:
         return execution
 
     def handle_webhook(
-        self, path: str, method: str = "POST", body: Optional[Dict] = None, headers: Optional[Dict] = None
-    ) -> Optional[WorkflowExecution]:
+        self, path: str, method: str = "POST", body: dict | None = None, headers: dict | None = None
+    ) -> WorkflowExecution | None:
         with self._lock:
             wh = None
             for endpoint in self._webhooks.values():
@@ -670,13 +671,13 @@ class N8N:
             self._webhooks[wh.webhook_id] = wh
         return wh
 
-    def register_credential(self, name: str, cred_type: str, data: Dict[str, str]) -> Credential:
+    def register_credential(self, name: str, cred_type: str, data: dict[str, str]) -> Credential:
         cred = Credential(name=name, type=cred_type, data=data)
         with self._lock:
             self._credentials[cred.credential_id] = cred
         return cred
 
-    def get_node_types(self, category: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_node_types(self, category: str | None = None) -> list[dict[str, Any]]:
         nodes = self._node_registry.values()
         if category:
             nodes = [n for n in nodes if n.get("category") == category]
@@ -692,7 +693,7 @@ class N8N:
             if v in nodes
         ]
 
-    def get_workflow(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+    def get_workflow(self, workflow_id: str) -> dict[str, Any] | None:
         with self._lock:
             wf = self._workflows.get(workflow_id)
             if not wf:
@@ -717,7 +718,7 @@ class N8N:
                 "updated_at": wf.updated_at,
             }
 
-    def list_workflows(self, status: Optional[WorkflowStatus] = None) -> List[Dict[str, Any]]:
+    def list_workflows(self, status: WorkflowStatus | None = None) -> list[dict[str, Any]]:
         with self._lock:
             wfs = self._workflows.values()
             if status:
@@ -734,7 +735,7 @@ class N8N:
                 for w in wfs
             ]
 
-    def get_execution(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_execution(self, execution_id: str) -> dict[str, Any] | None:
         with self._lock:
             ex = self._executions.get(execution_id)
             if not ex:
@@ -751,20 +752,20 @@ class N8N:
                 "error": ex.error,
             }
 
-    def _get_entry_nodes(self, wf: Workflow) -> List[str]:
+    def _get_entry_nodes(self, wf: Workflow) -> list[str]:
         target_ids = {c.target_node for c in wf.connections}
         return [n.node_id for n in wf.nodes if n.node_type == NodeType.TRIGGER or n.node_id not in target_ids]
 
-    def _get_next_nodes(self, wf: Workflow, node_id: str) -> List[str]:
+    def _get_next_nodes(self, wf: Workflow, node_id: str) -> list[str]:
         return [c.target_node for c in wf.connections if c.source_node == node_id]
 
-    def _find_node(self, wf: Workflow, node_id: str) -> Optional[WorkflowNode]:
+    def _find_node(self, wf: Workflow, node_id: str) -> WorkflowNode | None:
         for n in wf.nodes:
             if n.node_id == node_id:
                 return n
         return None
 
-    def _execute_node(self, node: WorkflowNode, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_node(self, node: WorkflowNode, data: dict[str, Any]) -> dict[str, Any]:
         if node.node_type == NodeType.TRIGGER:
             return {"success": True, "output": data, "node_type": "trigger"}
         elif node.node_type == NodeType.NO_OP or node.category == "no_op":
@@ -790,7 +791,7 @@ class N8N:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             wfs = self.list_workflows()

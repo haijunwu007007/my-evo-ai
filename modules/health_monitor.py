@@ -109,7 +109,7 @@ except ImportError:
 
 logger = logging.getLogger("health_monitor")
 
-class HealthTrendAnalyzer(object):
+class HealthTrendAnalyzer:
     """health_monitor 运营分析引擎
 
     - 分析健康分数变化趋势
@@ -168,7 +168,7 @@ class MetricPoint:
     name: str
     value: float
     timestamp: float = field(default_factory=time.time)
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class AlertRule:
@@ -198,16 +198,16 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._checks: Dict[str, HealthCheck] = {}
-        self._metrics_data: Dict[str, List[MetricPoint]] = {}
-        self._alert_rules: Dict[str, AlertRule] = {}
-        self._alerts: List[Alert] = []
+        self._checks: dict[str, HealthCheck] = {}
+        self._metrics_data: dict[str, list[MetricPoint]] = {}
+        self._alert_rules: dict[str, AlertRule] = {}
+        self._alerts: list[Alert] = []
         self._counter: int = 0
         self._sla_target: float = 99.9
 
@@ -250,7 +250,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         ok = False
@@ -365,7 +365,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         critical = sum(1 for c in self._checks.values() if c.status == CheckStatus.CRITICAL)
         active_alerts = sum(1 for a in self._alerts if not a.acknowledged)
         return {
@@ -383,7 +383,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._checks.clear()
         self._metrics_data.clear()
 
-    def _run_check(self, check_id: str) -> Dict:
+    def _run_check(self, check_id: str) -> dict:
         c = self._checks.get(check_id)
         if not c:
             return {"error": "Check not found"}
@@ -412,7 +412,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "uptime_pct": c.uptime_pct,
         }
 
-    def _record_metric(self, name: str, value: float, labels: Dict[str, str]):
+    def _record_metric(self, name: str, value: float, labels: dict[str, str]):
         point = MetricPoint(name=name, value=value, labels=labels)
         self._metrics_data.setdefault(name, []).append(point)
         if len(self._metrics_data[name]) > 10000:
@@ -422,13 +422,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if rule.metric != name or not rule.enabled:
                 continue
             triggered = False
-            if rule.condition == "gt" and value > rule.threshold:
-                triggered = True
-            elif rule.condition == "lt" and value < rule.threshold:
-                triggered = True
-            elif rule.condition == "eq" and value == rule.threshold:
-                triggered = True
-            elif rule.condition == "ne" and value != rule.threshold:
+            if rule.condition == "gt" and value > rule.threshold or rule.condition == "lt" and value < rule.threshold or rule.condition == "eq" and value == rule.threshold or rule.condition == "ne" and value != rule.threshold:
                 triggered = True
             if triggered:
                 self._counter += 1
@@ -443,7 +437,7 @@ class HealthMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     )
                 )
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,

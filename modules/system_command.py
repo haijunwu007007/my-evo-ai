@@ -174,7 +174,7 @@ class CommandResult:
     execution_id: str
     command: str
     status: CommandStatus
-    exit_code: Optional[int] = None
+    exit_code: int | None = None
     stdout: str = ""
     stderr: str = ""
     duration_ms: float = 0.0
@@ -189,13 +189,13 @@ class CommandHistory:
     execution_id: str
     command: str
     status: str
-    exit_code: Optional[int]
+    exit_code: int | None
     duration_ms: float
     risk_level: str
     executed_at: float
     executed_by: str
 
-class CommandSafetyEvaluator(object):
+class CommandSafetyEvaluator:
     """命令安全检查器 — 风险评估、黑名单过滤、参数净化"""
 
     DANGEROUS_PATTERNS = [
@@ -212,14 +212,14 @@ class CommandSafetyEvaluator(object):
     ]
 
     def __init__(self):
-        self._blocked_commands: List[Dict[str, Any]] = []
-        self._allowed_commands: List[Dict[str, Any]] = []
-        self._whitelist_patterns: List[str] = []
+        self._blocked_commands: list[dict[str, Any]] = []
+        self._allowed_commands: list[dict[str, Any]] = []
+        self._whitelist_patterns: list[str] = []
 
     def add_whitelist(self, pattern: str) -> None:
         self._whitelist_patterns.append(pattern)
 
-    def check_command(self, command: str, user: str = "", source_ip: str = "") -> Dict[str, Any]:
+    def check_command(self, command: str, user: str = "", source_ip: str = "") -> dict[str, Any]:
         for wp in self._whitelist_patterns:
             if re.search(wp, command):
                 self._allowed_commands.append(
@@ -257,7 +257,7 @@ class CommandSafetyEvaluator(object):
         )
         return {"allowed": True, "risk": risk_score, "reason": "safe"}
 
-    def sanitize_args(self, args: List[str]) -> List[str]:
+    def sanitize_args(self, args: list[str]) -> list[str]:
         sanitized = []
         for arg in args:
             cleaned = re.sub(r"[;&|`$]", "", arg)
@@ -265,7 +265,7 @@ class CommandSafetyEvaluator(object):
             sanitized.append(cleaned)
         return sanitized
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "total_blocked": len(self._blocked_commands),
             "total_allowed": len(self._allowed_commands),
@@ -280,9 +280,9 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._rules: List[CommandRule] = []
-        self._history: List[CommandHistory] = []
-        self._active_commands: Dict[str, asyncio.Task] = {}
+        self._rules: list[CommandRule] = []
+        self._history: list[CommandHistory] = []
+        self._active_commands: dict[str, asyncio.Task] = {}
         self._max_output_length = 1024 * 1024  # 1MB
         self._max_concurrent = 5
         self._semaphore = asyncio.Semaphore(self._max_concurrent)
@@ -351,7 +351,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for cmd in self._blocked_commands:
             self._rules.append(CommandRule(f".*{re.escape(cmd)}.*", RiskLevel.BLOCKED, f"危险命令: {cmd}"))
 
-    def _assess_risk(self, command: str) -> Tuple[RiskLevel, Optional[CommandRule]]:
+    def _assess_risk(self, command: str) -> tuple[RiskLevel, CommandRule | None]:
         """评估命令风险"""
         cmd_base = command.strip().split()[0] if command.strip() else ""
 
@@ -378,11 +378,11 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def execute(
         self,
         command: str,
-        timeout: Optional[int] = None,
-        working_dir: Optional[str] = None,
-        env: Optional[Dict[str, str]] = None,
+        timeout: int | None = None,
+        working_dir: str | None = None,
+        env: dict[str, str] | None = None,
         approved: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行系统命令"""
         _ = self.trace("execute")
         execution_id = f"cmd_{uuid.uuid4().hex[:10]}"
@@ -417,7 +417,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         try:
             with self._semaphore:
                 result = self._run_command(execution_id, command, cmd_timeout, working_dir, env or {}, risk_level)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             result = CommandResult(
                 execution_id=execution_id,
                 command=command,
@@ -471,8 +471,8 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         execution_id: str,
         command: str,
         timeout: int,
-        working_dir: Optional[str],
-        env: Dict,
+        working_dir: str | None,
+        env: dict,
         risk_level: RiskLevel,
     ) -> CommandResult:
         """执行命令"""
@@ -496,7 +496,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         try:
             stdout, stderr = asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             proc.wait()
             raise
@@ -521,7 +521,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             risk_level=risk_level,
         )
 
-    def execute_batch(self, commands: List[Dict]) -> List[Dict]:
+    def execute_batch(self, commands: list[dict]) -> list[dict]:
         """批量执行命令"""
         results = []
         for cmd_config in commands:
@@ -537,7 +537,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results.append({"command": cmd_config.get("command", ""), "status": "error", "error": str(e)})
         return results
 
-    def get_history(self, limit: int = 100, risk_level: Optional[str] = None) -> List[Dict]:
+    def get_history(self, limit: int = 100, risk_level: str | None = None) -> list[dict]:
         """获取命令历史"""
         history = self._history
         if risk_level:
@@ -555,7 +555,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for h in reversed(history[-limit:])
         ]
 
-    def get_system_info(self) -> Dict[str, Any]:
+    def get_system_info(self) -> dict[str, Any]:
         """获取系统信息"""
         info = {
             "platform": platform.system(),
@@ -580,7 +580,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             pass
             return info
 
-    def assess_command(self, command: str) -> Dict[str, Any]:
+    def assess_command(self, command: str) -> dict[str, Any]:
         """预评估命令风险"""
         risk, rule = self._assess_risk(command)
         return {
@@ -592,7 +592,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "blocked": risk == RiskLevel.BLOCKED,
         }
 
-    async def execute(self, action: str = "status", params: dict = None) -> Dict[str, Any]:
+    async def execute(self, action: str = "status", params: dict = None) -> dict[str, Any]:
         """统一执行入口 — 根据action路由到对应业务方法"""
         params = params or {}
         actions = {
@@ -633,7 +633,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _execute_command(self, command: str, timeout: int = 30) -> Dict[str, Any]:
+    def _execute_command(self, command: str, timeout: int = 30) -> dict[str, Any]:
         if not command:
             return {"status": "error", "message": "No command provided"}
         risk, rule = self._assess_risk(command)
@@ -656,7 +656,7 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 history.status = "completed" if proc.returncode == 0 else "failed"
                 history.output = stdout.decode(errors="ignore")[:2000]
                 history.return_code = proc.returncode
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 history.status = "timeout"
             except Exception as e:
                 history.status = "error"
@@ -666,25 +666,25 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._active_commands[command[:50]] = task
         return {"status": "running", "command": command, "risk": risk.value}
 
-    def _add_rule(self, pattern: str, level: str, description: str) -> Dict[str, Any]:
+    def _add_rule(self, pattern: str, level: str, description: str) -> dict[str, Any]:
         from fnmatch import fnmatch
 
         risk = RiskLevel(level.upper()) if level.upper() in [r.value for r in RiskLevel] else RiskLevel.MEDIUM
         self._rules[pattern] = CommandRule(pattern=pattern, risk_level=risk, description=description)
         return {"status": "success", "rules_count": len(self._rules)}
 
-    def _remove_rule(self, pattern: str) -> Dict[str, Any]:
+    def _remove_rule(self, pattern: str) -> dict[str, Any]:
         if pattern in self._rules:
             del self._rules[pattern]
             return {"status": "success", "rules_count": len(self._rules)}
         return {"status": "not_found", "pattern": pattern}
 
-    def _clear_history(self) -> Dict[str, Any]:
+    def _clear_history(self) -> dict[str, Any]:
         count = len(self._history)
         self._history.clear()
         return {"status": "success", "cleared": count}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         total = len(self._history)
         success = sum(1 for h in self._history if h.status == "completed")
@@ -700,8 +700,8 @@ class SystemCommand(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return base
 
-    def _count_by_risk(self) -> Dict[str, int]:
-        counts: Dict[str, int] = {}
+    def _count_by_risk(self) -> dict[str, int]:
+        counts: dict[str, int] = {}
         for h in self._history:
             counts[h.risk_level] = counts.get(h.risk_level, 0) + 1
         return counts

@@ -41,10 +41,10 @@ class ModuleCapability:
     display_name: str  # 显示名
     category: str  # 分类
     description: str  # 功能描述
-    actions: List[str] = field(default_factory=list)  # 可用action
-    input_schema: Dict[str, Any] = field(default_factory=dict)
-    output_schema: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)  # 标签（用于匹配）
+    actions: list[str] = field(default_factory=list)  # 可用action
+    input_schema: dict[str, Any] = field(default_factory=dict)
+    output_schema: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)  # 标签（用于匹配）
     priority: int = 5  # 优先级 1-10
 
 @dataclass
@@ -54,11 +54,11 @@ class ExecutionStep:
     step_id: int
     module_name: str
     action: str
-    params: Dict[str, Any] = field(default_factory=dict)
-    depends_on: List[int] = field(default_factory=list)  # 依赖的step_id
-    result: Optional[Dict[str, Any]] = None
+    params: dict[str, Any] = field(default_factory=dict)
+    depends_on: list[int] = field(default_factory=list)  # 依赖的step_id
+    result: dict[str, Any] | None = None
     status: str = "pending"  # pending/running/done/failed
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: float = 0.0
 
 @dataclass
@@ -68,11 +68,11 @@ class ExecutionPlan:
     plan_id: str
     task_type: TaskType
     user_intent: str
-    steps: List[ExecutionStep] = field(default_factory=list)
+    steps: list[ExecutionStep] = field(default_factory=list)
     status: PlanStatus = PlanStatus.PENDING
     created_at: str = ""
     started_at: str = ""
     completed_at: str = ""
-    final_result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    final_result: dict[str, Any] | None = None
+    error: str | None = None
 

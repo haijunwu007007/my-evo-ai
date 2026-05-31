@@ -102,8 +102,9 @@ import base64
 import threading
 import traceback
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, TypeVar
+from datetime import datetime, timedelta, timezone, UTC
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -178,19 +179,19 @@ class CloudCredentials:
     secret_key: str = ""
     session_token: str = ""
     region: str = ""
-    endpoint_url: Optional[str] = None
-    expires_at: Optional[datetime] = None
+    endpoint_url: str | None = None
+    expires_at: datetime | None = None
     account_id: str = ""
     project_id: str = ""
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def is_expired(self) -> bool:
         if not self.expires_at:
             return False
-        return datetime.now(timezone.utc) >= self.expires_at
+        return datetime.now(UTC) >= self.expires_at
 
-    def to_masked_dict(self) -> Dict[str, str]:
+    def to_masked_dict(self) -> dict[str, str]:
         """返回脱敏的凭证信息"""
         result = {
             "provider": self.provider.value,
@@ -215,7 +216,7 @@ class CloudConnection:
     region: str = ""
     endpoint: str = ""
     created_at: datetime = field(default_factory=datetime.now)
-    last_used_at: Optional[datetime] = None
+    last_used_at: datetime | None = None
     last_error: str = ""
     request_count: int = 0
     error_count: int = 0
@@ -243,9 +244,9 @@ class CloudResource:
     name: str
     region: str
     state: str = "available"
-    tags: Dict[str, str] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: Optional[datetime] = None
+    tags: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    created_at: datetime | None = None
     cost_per_hour: float = 0.0
     connection_id: str = ""
 
@@ -256,9 +257,9 @@ class CloudRequest:
     request_id: str
     method: str
     path: str
-    headers: Dict[str, str] = field(default_factory=dict)
-    params: Dict[str, str] = field(default_factory=dict)
-    body: Optional[str] = None
+    headers: dict[str, str] = field(default_factory=dict)
+    params: dict[str, str] = field(default_factory=dict)
+    body: str | None = None
     provider: CloudProvider = CloudProvider.AWS
     region: str = ""
     timeout: float = 30.0
@@ -271,7 +272,7 @@ class CloudResponse:
 
     status_code: int
     body: Any = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     request_id: str = ""
     duration_ms: float = 0
     error: str = ""
@@ -287,7 +288,7 @@ class CostRecord:
     cost: float
     currency: str = "USD"
     period_start: datetime = field(default_factory=datetime.now)
-    period_end: Optional[datetime] = None
+    period_end: datetime | None = None
 
 class CloudConnectionError(Exception):
     """连接异常"""
@@ -309,13 +310,13 @@ class CloudResourceNotFoundError(Exception):
 
     pass
 
-class CredentialManager(object):
+class CredentialManager:
     """凭证管理器"""
 
-    def __init__(self, data_dir: Optional[str] = None):
-        self._credentials: Dict[str, CloudCredentials] = {}
+    def __init__(self, data_dir: str | None = None):
+        self._credentials: dict[str, CloudCredentials] = {}
         self._lock = threading.RLock()
-        self._refresh_callbacks: Dict[str, Callable] = {}
+        self._refresh_callbacks: dict[str, Callable] = {}
         self._data_dir = Path(data_dir or "./.evo_data/cloud_credentials")
         self._data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -326,7 +327,7 @@ class CredentialManager(object):
             if persist:
                 self._persist(name, creds)
 
-    def retrieve(self, name: str) -> Optional[CloudCredentials]:
+    def retrieve(self, name: str) -> CloudCredentials | None:
         """获取凭证"""
         with self._lock:
             creds = self._credentials.get(name)
@@ -344,7 +345,7 @@ class CredentialManager(object):
                 return True
             return False
 
-    def list_all(self) -> List[Tuple[str, CloudCredentials]]:
+    def list_all(self) -> list[tuple[str, CloudCredentials]]:
         """列出所有凭证"""
         with self._lock:
             return list(self._credentials.items())
@@ -404,10 +405,10 @@ class ConnectionPool:
     def __init__(self, max_size: int = 20, idle_timeout: float = 300):
         self.max_size = max_size
         self.idle_timeout = idle_timeout
-        self._connections: Dict[str, CloudConnection] = {}
-        self._pool: Dict[str, List[CloudConnection]] = {}
+        self._connections: dict[str, CloudConnection] = {}
+        self._pool: dict[str, list[CloudConnection]] = {}
         self._lock = threading.RLock()
-        self._health_checker: Optional[threading.Thread] = None
+        self._health_checker: threading.Thread | None = None
         self._running = False
 
     def create_connection(
@@ -434,7 +435,7 @@ class ConnectionPool:
                 self._pool[provider.value].append(conn)
             return conn
 
-    def get_connection(self, provider: CloudProvider) -> Optional[CloudConnection]:
+    def get_connection(self, provider: CloudProvider) -> CloudConnection | None:
         """获取可用连接"""
         with self._lock:
             pool_list = self._pool.get(provider.value, [])
@@ -466,12 +467,12 @@ class ConnectionPool:
                 return True
             return False
 
-    def get_all_connections(self) -> List[CloudConnection]:
+    def get_all_connections(self) -> list[CloudConnection]:
         """获取所有连接"""
         with self._lock:
             return list(self._connections.values())
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取连接池统计"""
         with self._lock:
             total = len(self._connections)
@@ -516,16 +517,16 @@ class RequestSigner:
     def sign_aws_v4(
         method: str,
         path: str,
-        headers: Dict[str, str],
+        headers: dict[str, str],
         body: str,
         access_key: str,
         secret_key: str,
         region: str,
         service: str = "execute-api",
-        datetime_now: Optional[datetime] = None,
-    ) -> Dict[str, str]:
+        datetime_now: datetime | None = None,
+    ) -> dict[str, str]:
         """AWS Signature Version 4签名"""
-        dt = datetime_now or datetime.now(timezone.utc)
+        dt = datetime_now or datetime.now(UTC)
         amz_date = dt.strftime("%Y%m%dT%H%M%SZ")
         date_stamp = dt.strftime("%Y%m%d")
 
@@ -535,7 +536,7 @@ class RequestSigner:
         canonical_headers = ""
         for k in sorted(headers.keys()):
             canonical_headers += f"{k.lower()}:{headers[k].strip()}\n"
-        signed_headers = ";".join(sorted(k.lower() for k in headers.keys()))
+        signed_headers = ";".join(sorted(k.lower() for k in headers))
 
         payload_hash = hashlib.sha256(body.encode()).hexdigest()
         canonical_request = f"{method}\n{path}\n\n{canonical_headers}\n{signed_headers}\n{payload_hash}"
@@ -560,10 +561,10 @@ class RequestSigner:
     @staticmethod
     def sign_aliyun(
         method: str,
-        params: Dict[str, str],
+        params: dict[str, str],
         access_key: str,
         secret_key: str,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """阿里云HMAC-SHA1签名"""
         import urllib.parse
 
@@ -583,9 +584,9 @@ class RequestSigner:
         method: str,
         host: str,
         path: str,
-        params: Dict[str, str],
+        params: dict[str, str],
         secret_key: str,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """腾讯云HMAC-SHA256签名"""
         endpoint = host.rstrip("/")
         sorted_params = sorted(params.items())
@@ -605,7 +606,7 @@ class RetryPolicy:
         max_delay: float = 30.0,
         backoff_factor: float = 2.0,
         jitter: bool = True,
-        retryable_status_codes: Optional[Set[int]] = None,
+        retryable_status_codes: set[int] | None = None,
     ):
         self.max_retries = max_retries
         self.base_delay = base_delay
@@ -623,7 +624,7 @@ class RetryPolicy:
             delay *= 0.5 + (int(tmod.time()*1000000)%1000000/1000000) * 0.5
         return delay
 
-    def should_retry(self, response: Optional[CloudResponse], error: Optional[Exception]) -> bool:
+    def should_retry(self, response: CloudResponse | None, error: Exception | None) -> bool:
         """判断是否应该重试"""
         if error:
             return True
@@ -651,7 +652,7 @@ class CircuitBreaker:
         self._state = self.State.CLOSED
         self._failure_count = 0
         self._success_count = 0
-        self._last_failure_time: Optional[float] = None
+        self._last_failure_time: float | None = None
         self._half_open_calls = 0
         self._lock = threading.Lock()
 
@@ -689,9 +690,7 @@ class CircuitBreaker:
             self._failure_count += 1
             self._last_failure_time = time.time()
             self._success_count = 0
-            if self._state == self.State.HALF_OPEN:
-                self._state = self.State.OPEN
-            elif self._failure_count >= self.failure_threshold:
+            if self._state == self.State.HALF_OPEN or self._failure_count >= self.failure_threshold:
                 self._state = self.State.OPEN
 
     @property
@@ -710,10 +709,10 @@ class CostTracker:
     def __init__(self, budget_monthly: float = 10000.0, alert_threshold: float = 0.8):
         self.budget_monthly = budget_monthly
         self.alert_threshold = alert_threshold
-        self._records: List[CostRecord] = []
-        self._alerts: List[Dict] = []
+        self._records: list[CostRecord] = []
+        self._alerts: list[dict] = []
         self._lock = threading.Lock()
-        self._alert_callbacks: List[Callable] = []
+        self._alert_callbacks: list[Callable] = []
 
     def record_cost(self, record: CostRecord) -> None:
         """记录成本"""
@@ -749,7 +748,7 @@ class CostTracker:
         """注册告警回调"""
         self._alert_callbacks.append(callback)
 
-    def get_month_summary(self, year: Optional[int] = None, month: Optional[int] = None) -> Dict[str, Any]:
+    def get_month_summary(self, year: int | None = None, month: int | None = None) -> dict[str, Any]:
         """获取月度成本摘要"""
         now = datetime.now()
         y = year or now.year
@@ -762,8 +761,8 @@ class CostTracker:
 
         month_records = [r for r in self._records if month_start <= r.period_start < month_end]
 
-        by_provider: Dict[str, float] = {}
-        by_type: Dict[str, float] = {}
+        by_provider: dict[str, float] = {}
+        by_type: dict[str, float] = {}
         for r in month_records:
             by_provider[r.provider.value] = by_provider.get(r.provider.value, 0) + r.cost
             by_type[r.resource_type.value] = by_type.get(r.resource_type.value, 0) + r.cost
@@ -780,7 +779,7 @@ class CostTracker:
             "record_count": len(month_records),
         }
 
-    def get_forecast(self) -> Dict[str, Any]:
+    def get_forecast(self) -> dict[str, Any]:
         """成本预测"""
         now = datetime.now()
         days_elapsed = now.day
@@ -815,13 +814,13 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._connection_pool = ConnectionPool(max_size=20)
         self._signer = RequestSigner()
         self._retry_policy = RetryPolicy(max_retries=3)
-        self._circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self._circuit_breakers: dict[str, CircuitBreaker] = {}
         self._cost_tracker = CostTracker()
-        self._resources: Dict[str, CloudResource] = {}
-        self._request_log: List[Dict] = []
+        self._resources: dict[str, CloudResource] = {}
+        self._request_log: list[dict] = []
         self._lock = threading.RLock()
         self._executor = ThreadPoolExecutor(max_workers=10)
-        self._registered_providers: Set[CloudProvider] = set()
+        self._registered_providers: set[CloudProvider] = set()
 
     # ─────────────────────── 凭证管理 ───────────────────────
 
@@ -843,13 +842,13 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._audit_log("remove_credentials", f"移除凭证: {name}")
         return result
 
-    def list_credentials(self) -> List[Dict[str, str]]:
+    def list_credentials(self) -> list[dict[str, str]]:
         """列出所有凭证（脱敏）"""
         return [{"name": name, **creds.to_masked_dict()} for name, creds in self._credential_mgr.list_all()]
 
     # ─────────────────────── 连接管理 ───────────────────────
 
-    def connect(self, credential_name: str) -> Optional[CloudConnection]:
+    def connect(self, credential_name: str) -> CloudConnection | None:
         """建立云连接"""
         creds = self._credential_mgr.retrieve(credential_name)
         if not creds:
@@ -871,7 +870,7 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit_log("disconnect", f"断开连接: {conn_id}")
         return result
 
-    def get_connection_stats(self) -> Dict[str, Any]:
+    def get_connection_stats(self) -> dict[str, Any]:
         """获取连接统计"""
         return self._connection_pool.get_stats()
 
@@ -886,10 +885,10 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def list_resources(
         self,
-        provider: Optional[CloudProvider] = None,
-        resource_type: Optional[ResourceType] = None,
-        region: Optional[str] = None,
-    ) -> List[CloudResource]:
+        provider: CloudProvider | None = None,
+        resource_type: ResourceType | None = None,
+        region: str | None = None,
+    ) -> list[CloudResource]:
         """列出资源"""
         with self._lock:
             resources = list(self._resources.values())
@@ -901,7 +900,7 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 resources = [r for r in resources if r.region == region]
             return resources
 
-    def get_resource(self, resource_id: str) -> Optional[CloudResource]:
+    def get_resource(self, resource_id: str) -> CloudResource | None:
         """获取资源详情"""
         return self._resources.get(resource_id)
 
@@ -921,9 +920,9 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         conn: CloudConnection,
         method: str,
         path: str,
-        params: Optional[Dict] = None,
-        body: Optional[Dict] = None,
-        headers: Optional[Dict] = None,
+        params: dict | None = None,
+        body: dict | None = None,
+        headers: dict | None = None,
         timeout: float = 30.0,
     ) -> CloudResponse:
         """执行云API请求"""
@@ -1104,10 +1103,10 @@ class CloudConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         self._cost_tracker.record_cost(record)
 
-    def get_cost_summary(self, year: int = None, month: int = None) -> Dict:
+    def get_cost_summary(self, year: int = None, month: int = None) -> dict:
         return self._cost_tracker.get_month_summary(year, month)
 
-    def get_cost_forecast(self) -> Dict:
+    def get_cost_forecast(self) -> dict:
         return self._cost_tracker.get_forecast()
 
     # ─────────────────────── 企业级接口 ───────────────────────

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -196,7 +195,7 @@ class SyncRecord:
     resolved_value: Any = None
     conflict: bool = False
 
-class ConflictResolver(object):
+class ConflictResolver:
     """数据冲突解决器 — 检测同步冲突、多策略自动解决、冲突审计"""
 
     STRATEGY_LATEST = "latest_wins"
@@ -207,11 +206,11 @@ class ConflictResolver(object):
 
     def __init__(self, default_strategy: str = "latest_wins"):
         self._default_strategy = default_strategy
-        self._conflict_log: List[Dict[str, Any]] = []
+        self._conflict_log: list[dict[str, Any]] = []
 
     def detect_conflicts(
-        self, source_records: List[Dict[str, Any]], target_records: List[Dict[str, Any]], key_field: str = "id"
-    ) -> List[Dict[str, Any]]:
+        self, source_records: list[dict[str, Any]], target_records: list[dict[str, Any]], key_field: str = "id"
+    ) -> list[dict[str, Any]]:
         """检测源端与目标端之间的数据冲突"""
         source_map = {r.get(key_field): r for r in source_records if key_field in r}
         target_map = {r.get(key_field): r for r in target_records if key_field in r}
@@ -237,7 +236,7 @@ class ConflictResolver(object):
                 )
         return conflicts
 
-    def resolve(self, conflict: Dict[str, Any], strategy: str = None) -> Dict[str, Any]:
+    def resolve(self, conflict: dict[str, Any], strategy: str = None) -> dict[str, Any]:
         """根据策略解决单个冲突"""
         strategy = strategy or self._default_strategy
         resolved_data = None
@@ -277,7 +276,7 @@ class ConflictResolver(object):
         )
         return conflict
 
-    def batch_resolve(self, conflicts: List[Dict[str, Any]], strategy: str = None) -> Dict[str, Any]:
+    def batch_resolve(self, conflicts: list[dict[str, Any]], strategy: str = None) -> dict[str, Any]:
         """批量解决冲突"""
         results = []
         for c in conflicts:
@@ -290,7 +289,7 @@ class ConflictResolver(object):
             "results": results,
         }
 
-    def get_conflict_stats(self) -> Dict[str, Any]:
+    def get_conflict_stats(self) -> dict[str, Any]:
         """获取冲突统计"""
         if not self._conflict_log:
             return {"total_conflicts": 0}
@@ -300,11 +299,11 @@ class ConflictResolver(object):
             strategies[s] = strategies.get(s, 0) + 1
         return {"total_conflicts": len(self._conflict_log), "strategies_used": strategies}
 
-    def _compare_fields(self, src: Dict, tgt: Dict) -> List[str]:
+    def _compare_fields(self, src: dict, tgt: dict) -> list[str]:
         all_keys = set(list(src.keys()) + list(tgt.keys()))
         return [k for k in all_keys if src.get(k) != tgt.get(k)]
 
-    def _deep_merge(self, src: Dict, tgt: Dict) -> Dict:
+    def _deep_merge(self, src: dict, tgt: dict) -> dict:
         result = dict(tgt)
         for k, v in src.items():
             if k in result and isinstance(result[k], dict) and isinstance(v, dict):
@@ -313,18 +312,18 @@ class ConflictResolver(object):
                 result[k] = v
         return result
 
-class ConflictResolver(object):
+class ConflictResolver:
     """冲突解决器 — 检测数据同步冲突、自动解决、记录决策"""
 
     def __init__(self):
-        self._conflict_log: List[Dict] = []
-        self._resolution_rules: Dict[str, str] = {
+        self._conflict_log: list[dict] = []
+        self._resolution_rules: dict[str, str] = {
             "last_write_wins": "timestamp",
             "source_priority": "source_rank",
             "merge": "field_level",
         }
 
-    def detect_conflict(self, local_data: Dict, remote_data: Dict, fields: List[str]) -> List[Dict[str, Any]]:
+    def detect_conflict(self, local_data: dict, remote_data: dict, fields: list[str]) -> list[dict[str, Any]]:
         """检测两份数据之间的字段级冲突"""
         conflicts = []
         for field in fields:
@@ -342,8 +341,8 @@ class ConflictResolver(object):
         return conflicts
 
     def auto_resolve(
-        self, conflicts: List[Dict], strategy: str = "last_write_wins", local_ts: float = 0, remote_ts: float = 0
-    ) -> Dict[str, Any]:
+        self, conflicts: list[dict], strategy: str = "last_write_wins", local_ts: float = 0, remote_ts: float = 0
+    ) -> dict[str, Any]:
         """根据策略自动解决冲突"""
         resolved = {}
         unresolved = []
@@ -369,7 +368,7 @@ class ConflictResolver(object):
         self._conflict_log.append({"strategy": strategy, **result, "timestamp": time.time()})
         return result
 
-    def get_conflict_stats(self) -> Dict[str, Any]:
+    def get_conflict_stats(self) -> dict[str, Any]:
         if not self._conflict_log:
             return {"total_conflicts": 0}
         total_resolved = sum(len(r["resolved"]) for r in self._conflict_log)
@@ -389,7 +388,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -397,10 +396,10 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._buckets = {}
         self._windows = {}
 
-        self._tasks: Dict[str, SyncTask] = {}
+        self._tasks: dict[str, SyncTask] = {}
         self._records: deque = deque(maxlen=5000)
-        self._data_store: Dict[str, Dict[str, Any]] = defaultdict(dict)  # namespace -> key -> {value, ts}
-        self._bg_sync: Optional[threading.Thread] = None
+        self._data_store: dict[str, dict[str, Any]] = defaultdict(dict)  # namespace -> key -> {value, ts}
+        self._bg_sync: threading.Thread | None = None
 
     def initialize(self) -> None:
         self.info("初始化数据同步...")
@@ -413,14 +412,14 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.start_time = datetime.now()
         self.info("数据同步就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("data_sync_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
         params = params or {}
         return self._safe_execute(action, params, self._dispatch)
 
-    def _dispatch(self, action: str, params: Dict) -> Any:
+    def _dispatch(self, action: str, params: dict) -> Any:
         """路由到具体业务方法"""
         if action == "sync":
             return self._execute_sync(params)
@@ -441,7 +440,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         else:
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def _execute_sync(self, params: Dict) -> Dict:
+    def _execute_sync(self, params: dict) -> dict:
         """执行数据同步"""
         source = params.get("source", "")
         target = params.get("target", "")
@@ -460,7 +459,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "duration_ms": 0,
         }
 
-    def _detect_conflicts(self, params: Dict) -> Dict:
+    def _detect_conflicts(self, params: dict) -> dict:
         """检测数据冲突"""
         source_data = params.get("source_data", [])
         target_data = params.get("target_data", [])
@@ -469,7 +468,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         conflicts = resolver.detect_conflicts(source_data, target_data, key_field)
         return {"total_conflicts": len(conflicts), "conflicts": conflicts}
 
-    def _resolve_conflicts(self, params: Dict) -> Dict:
+    def _resolve_conflicts(self, params: dict) -> dict:
         """解决冲突"""
         conflicts = params.get("conflicts", [])
         strategy = params.get("strategy", "latest_wins")
@@ -478,22 +477,22 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("conflicts_resolved", f"strategy={strategy}, total={result['total']}")
         return result
 
-    def _get_sync_status(self) -> Dict:
+    def _get_sync_status(self) -> dict:
         """获取同步状态"""
         return {"status": "idle", "active_syncs": 0, "total_synced": 0, "last_sync": None}
 
-    def _configure_sync(self, params: Dict) -> Dict:
+    def _configure_sync(self, params: dict) -> dict:
         """配置同步参数"""
         interval = params.get("interval_seconds", 300)
         batch_size = params.get("batch_size", 1000)
         return {"success": True, "interval_seconds": interval, "batch_size": batch_size}
 
-    def _get_sync_history(self, params: Dict) -> Dict:
+    def _get_sync_history(self, params: dict) -> dict:
         """获取同步历史"""
         limit = params.get("limit", 20)
         return {"history": [], "limit": limit}
 
-    def _compare_sources(self, params: Dict) -> Dict:
+    def _compare_sources(self, params: dict) -> dict:
         """比较源端和目标端数据差异"""
         source_count = params.get("source_count", 0)
         target_count = params.get("target_count", 0)
@@ -505,7 +504,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "direction": "source_ahead" if diff > 0 else "target_ahead" if diff < 0 else "in_sync",
         }
 
-    def _cleanup_stale(self, params: Dict) -> Dict:
+    def _cleanup_stale(self, params: dict) -> dict:
         """清理过期同步数据"""
         max_age = params.get("max_age_days", 30)
         return {"success": True, "max_age_days": max_age, "cleaned": 0}
@@ -535,7 +534,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             interval=300,
         )
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "create_task": self._do_create_task,
@@ -557,7 +556,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 任务管理 ──
 
-    def _do_create_task(self, params: Dict) -> Dict:
+    def _do_create_task(self, params: dict) -> dict:
         task = SyncTask(
             name=params.get("name", ""),
             source=params.get("source", ""),
@@ -570,7 +569,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("create_task", task.task_id)
         return {"success": True, "task_id": task.task_id}
 
-    def _do_run_task(self, params: Dict) -> Dict:
+    def _do_run_task(self, params: dict) -> dict:
         task_id = params.get("task_id", "")
         task = self._tasks.get(task_id)
         if not task:
@@ -627,7 +626,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._data_store[task.target] = dst_data
         return synced
 
-    def _do_list_tasks(self, params: Dict) -> Dict:
+    def _do_list_tasks(self, params: dict) -> dict:
         return {
             "total": len(self._tasks),
             "tasks": [
@@ -648,14 +647,14 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _do_delete_task(self, params: Dict) -> Dict:
+    def _do_delete_task(self, params: dict) -> dict:
         task_id = params.get("task_id", "")
         if task_id in self._tasks:
             del self._tasks[task_id]
             return {"deleted": True}
         return {"error": "任务不存在"}
 
-    def _do_toggle_task(self, params: Dict) -> Dict:
+    def _do_toggle_task(self, params: dict) -> dict:
         task_id = params.get("task_id", "")
         task = self._tasks.get(task_id)
         if not task:
@@ -663,7 +662,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         task.enabled = not task.enabled
         return {"enabled": task.enabled, "task_id": task_id}
 
-    def _do_get_records(self, params: Dict) -> Dict:
+    def _do_get_records(self, params: dict) -> dict:
         limit = params.get("limit", 50)
         task_id = params.get("task_id", "")
         records = list(self._records)
@@ -685,7 +684,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 数据操作 ──
 
-    def _do_put(self, params: Dict) -> Dict:
+    def _do_put(self, params: dict) -> dict:
         namespace = params.get("namespace", "default")
         key = params.get("key", "")
         value = params.get("value")
@@ -694,7 +693,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._data_store[namespace][key] = {"value": value, "ts": time.time()}
         return {"success": True, "namespace": namespace, "key": key}
 
-    def _do_get(self, params: Dict) -> Dict:
+    def _do_get(self, params: dict) -> dict:
         namespace = params.get("namespace", "default")
         key = params.get("key", "")
         entry = self._data_store.get(namespace, {}).get(key)
@@ -702,7 +701,7 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"found": False}
         return {"found": True, "value": entry["value"], "timestamp": entry["ts"]}
 
-    def _do_delete_key(self, params: Dict) -> Dict:
+    def _do_delete_key(self, params: dict) -> dict:
         namespace = params.get("namespace", "default")
         key = params.get("key", "")
         if namespace in self._data_store and key in self._data_store[namespace]:
@@ -710,12 +709,12 @@ class DataSync(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"deleted": True}
         return {"deleted": False}
 
-    def _do_list_data(self, params: Dict) -> Dict:
+    def _do_list_data(self, params: dict) -> dict:
         namespace = params.get("namespace", "default")
         data = self._data_store.get(namespace, {})
         return {"namespace": namespace, "keys": len(data), "items": {k: v["value"] for k, v in data.items()}}
 
-    def _do_stats(self, params: Dict) -> Dict:
+    def _do_stats(self, params: dict) -> dict:
         return {
             "tasks": len(self._tasks),
             "namespaces": list(self._data_store.keys()),

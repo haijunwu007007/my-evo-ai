@@ -50,14 +50,14 @@ class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
 
     def __init__(self):
         super().__init__()
-        self._session: Optional[requests.Session] = None
-        self._cache: Dict[str, FetchResult] = {}
+        self._session: requests.Session | None = None
+        self._cache: dict[str, FetchResult] = {}
         self._cache_ttl = int(self.config.get("cache_ttl", 300))
         self._max_concurrent = int(self.config.get("max_concurrent", 5))
         self._default_timeout = int(self.config.get("timeout", 30))
         self._rate_limit_delay = float(self.config.get("rate_limit_delay", 0.5))
-        self._robots_cache: Dict[str, Set[str]] = {}
-        self._seen_urls: Set[str] = set()
+        self._robots_cache: dict[str, set[str]] = {}
+        self._seen_urls: set[str] = set()
         self._semaphore = threading.Semaphore(self._max_concurrent)
         self._last_request_time = 0.0
         self._lock = threading.Lock()
@@ -111,7 +111,7 @@ class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
             except Exception as e:
                 return FetchResult(url, error=str(e), elapsed=time.time() - t0)
 
-    def _extract_by_rules(self, html: str, rules: List[ScrapeRule]) -> Dict[str, Any]:
+    def _extract_by_rules(self, html: str, rules: list[ScrapeRule]) -> dict[str, Any]:
         result = {}
         if not HAS_BS4 or not html:
             return {"error": "bs4 not available or empty html"}
@@ -134,7 +134,7 @@ class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
                 result[rule.name] = None
         return result
 
-    def _extract_links(self, html: str, base_url: str) -> List[str]:
+    def _extract_links(self, html: str, base_url: str) -> list[str]:
         if not HAS_BS4 or not html:
             return []
         soup = BeautifulSoup(html, "html.parser")
@@ -217,7 +217,7 @@ class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
         max_pages = int(p.get("max_pages", 10))
         if not start_url:
             return {"success": False, "error": "url required"}
-        visited: Set[str] = set()
+        visited: set[str] = set()
         to_visit = [start_url]
         pages = []
         while to_visit and len(visited) < max_pages:
@@ -243,7 +243,7 @@ class WebScraperModule(EnterpriseModule, CircuitBreakerMixin):
         return {"success": True, "cache_size": len(self._cache), "seen_urls": len(self._seen_urls),
                 "requests_available": HAS_REQUESTS, "bs4_available": HAS_BS4}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {"status": "healthy", "module_id": self.MODULE_ID,
                 "requests": HAS_REQUESTS, "bs4": HAS_BS4,
                 "cache": len(self._cache), "seen": len(self._seen_urls)}

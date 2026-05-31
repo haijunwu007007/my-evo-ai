@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 — SSO 单点登录（生产级）
@@ -71,11 +70,11 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     _JWT_SECRET = os.environ.get("SSO_JWT_SECRET", "evo-sso-secret-change-me-2026")
     _JWT_ISSUER = "auto-evo-ai"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
-        self._sessions: Dict[str, Dict] = {}
-        self._tickets: Dict[str, Dict] = {}
-        self._apps: Dict[str, Dict] = {}
+        self._sessions: dict[str, dict] = {}
+        self._tickets: dict[str, dict] = {}
+        self._apps: dict[str, dict] = {}
         self._session_ttl = int(self.config.get("session_ttl", 28800))
         self._ticket_ttl = int(self.config.get("ticket_ttl", 300))
         self._setup_rate_limit(rate=500, burst=1000)
@@ -237,10 +236,10 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             checks={"active_sessions": active, "registered_apps": len(self._apps)},
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
-    def _dispatch(self, params: Dict) -> Dict:
+    def _dispatch(self, params: dict) -> dict:
         action = params.get("action", "status")
         dispatch = {
             "login": self._login,
@@ -264,7 +263,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return handler(params)
         return {"success": False, "error": f"unknown action: {action}"}
 
-    def _login(self, params: Dict) -> Dict:
+    def _login(self, params: dict) -> dict:
         user_id = params.get("user_id", "")
         username = params.get("username", "")
         password = params.get("password", "")
@@ -307,7 +306,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"success": True, "session_token": session_token, "user_id": user_id,
                 "jwt": jwt, "expires_in": self._session_ttl}
 
-    def _validate_session(self, params: Dict) -> Dict:
+    def _validate_session(self, params: dict) -> dict:
         token = params.get("token", params.get("session_token", ""))
         if not token:
             return {"success": False, "valid": False, "error": "no token"}
@@ -323,7 +322,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"success": True, "valid": True, "user_id": session["user_id"],
                 "attributes": session["attributes"]}
 
-    def _logout(self, params: Dict) -> Dict:
+    def _logout(self, params: dict) -> dict:
         token = params.get("token", params.get("session_token", ""))
         if token:
             self._sessions.pop(token, None)
@@ -337,7 +336,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         metrics_collector.counter("sso_logout")
         return {"success": True, "logged_out": True}
 
-    def _create_ticket(self, params: Dict) -> Dict:
+    def _create_ticket(self, params: dict) -> dict:
         session_token = params.get("session_token", "")
         service = params.get("service", "")
         if not session_token or not service:
@@ -353,7 +352,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._save_session(session_token, session)
         return {"success": True, "ticket": ticket, "service": service}
 
-    def _exchange_ticket(self, params: Dict) -> Dict:
+    def _exchange_ticket(self, params: dict) -> dict:
         ticket = params.get("ticket", "")
         service = params.get("service", "")
         if not ticket:
@@ -379,7 +378,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"success": True, "app_session_token": app_session_token, "jwt": jwt,
                 "user_id": ticket_data["user_id"]}
 
-    def _register_app(self, params: Dict) -> Dict:
+    def _register_app(self, params: dict) -> dict:
         app_id = params.get("app_id", f"app_{uuid.uuid4().hex[:8]}")
         secret = params.get("secret", uuid.uuid4().hex)
         self._apps[app_id] = {"name": params.get("name", app_id), "secret": secret,
@@ -397,7 +396,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             logger.warning(f"sso_auth: {e}")
         return {"success": True, "app_id": app_id, "app_secret": secret}
 
-    def _list_sessions(self, params: Dict) -> Dict:
+    def _list_sessions(self, params: dict) -> dict:
         limit = int(params.get("limit", 100))
         now = time.time()
         active = {k: v for k, v in self._sessions.items() if v["expires_at"] > now}
@@ -407,7 +406,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                      for s in list(active.values())[:limit]]
         return {"success": True, "sessions": sessions, "total_active": len(active)}
 
-    def _register_user(self, params: Dict) -> Dict:
+    def _register_user(self, params: dict) -> dict:
         username = params.get("username", "")
         password = params.get("password", "")
         if not username or not password:
@@ -426,7 +425,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except sqlite3.IntegrityError:
             return {"success": False, "error": "username already exists"}
 
-    def _authenticate(self, params: Dict) -> Dict:
+    def _authenticate(self, params: dict) -> dict:
         username = params.get("username", "")
         password = params.get("password", "")
         if not username or not password:
@@ -447,20 +446,20 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"success": False, "error": f"auth error: {e}"}
 
-    def _generate_jwt(self, params: Dict) -> Dict:
+    def _generate_jwt(self, params: dict) -> dict:
         payload = params.get("payload", {})
         ttl = int(params.get("ttl", 3600))
         token = self._gen_jwt(payload, ttl)
         return {"success": True, "jwt": token, "ttl": ttl}
 
-    def _verify_jwt_action(self, params: Dict) -> Dict:
+    def _verify_jwt_action(self, params: dict) -> dict:
         token = params.get("token", "")
         if not token:
             return {"success": False, "error": "token required"}
         result = self._verify_jwt(token)
         return {"success": result.get("valid", False), **result}
 
-    def _get_user(self, params: Dict) -> Dict:
+    def _get_user(self, params: dict) -> dict:
         user_id = params.get("user_id", "")
         if not user_id:
             return {"success": False, "error": "user_id required"}
@@ -480,7 +479,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ==================== OAuth2 第三方登录 ====================
 
-    def _list_oauth_providers(self, params: Dict = None) -> Dict:
+    def _list_oauth_providers(self, params: dict = None) -> dict:
         """列出已配置的 OAuth2 提供商"""
         configured = {
             name: {
@@ -493,7 +492,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
         return {"success": True, "providers": configured}
 
-    def _oauth_authorize(self, params: Dict) -> Dict:
+    def _oauth_authorize(self, params: dict) -> dict:
         """生成 OAuth2 授权跳转 URL"""
         provider = params.get("provider", "").lower()
         if provider not in self._oauth_providers:
@@ -520,7 +519,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "provider": provider,
         }
 
-    def _oauth_callback(self, params: Dict) -> Dict:
+    def _oauth_callback(self, params: dict) -> dict:
         """处理 OAuth2 回调：用 code 交换 token + 获取用户信息"""
         provider = params.get("provider", "").lower()
         code = params.get("code", "")

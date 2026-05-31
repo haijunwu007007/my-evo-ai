@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - JWT 令牌管理（A级生产实现）
@@ -46,13 +45,13 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     # 默认密钥（生产环境应从配置或环境变量读取）
     DEFAULT_SECRET = "evo-ai-jwt-secret-key-change-in-production"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
         self._secret = self.config.get("secret", self.DEFAULT_SECRET)
         self._access_ttl = int(self.config.get("access_ttl", 3600))  # 1小时
         self._refresh_ttl = int(self.config.get("refresh_ttl", 2592000))  # 30天
         # 吊销令牌黑名单（token_id -> 吊销时间戳）
-        self._revoked: Dict[str, float] = {}
+        self._revoked: dict[str, float] = {}
         self._setup_rate_limit(rate=500, burst=1000)
 
     def initialize(self) -> None:
@@ -69,10 +68,10 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             details={"secret_configured": self._secret != self.DEFAULT_SECRET},
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
-    def _dispatch(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _dispatch(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "status")
         if action == "create":
             return self._create_token(params)
@@ -104,7 +103,7 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         ).digest()
         return self._base64url_encode(sig)
 
-    def _create_token(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_token(self, params: dict[str, Any]) -> dict[str, Any]:
         """创建 JWT 令牌"""
         claims = params.get("claims", {})
         if not isinstance(claims, dict):
@@ -156,7 +155,7 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "subject": sub,
         }
 
-    def _verify_token(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify_token(self, params: dict[str, Any]) -> dict[str, Any]:
         """验证 JWT 令牌"""
         token = params.get("token", "")
         if not token:
@@ -202,7 +201,7 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "claims": body,
         }
 
-    def _refresh_token(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _refresh_token(self, params: dict[str, Any]) -> dict[str, Any]:
         """用 refresh_token 刷新 access_token"""
         refresh_token = params.get("refresh_token", "")
         if not refresh_token:
@@ -229,7 +228,7 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             }
         })
 
-    def _revoke_token(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _revoke_token(self, params: dict[str, Any]) -> dict[str, Any]:
         """吊销令牌"""
         token_id = params.get("token_id", "")
         token = params.get("token", "")
@@ -253,7 +252,7 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return {"success": False, "error": "token_id or token is required"}
 
-    def _decode_token(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _decode_token(self, params: dict[str, Any]) -> dict[str, Any]:
         """解码令牌（不验证签名，仅查看内容）"""
         token = params.get("token", "")
         if not token:

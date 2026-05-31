@@ -88,7 +88,7 @@ class PIIPatternLibrary:
     """PII模式库"""
 
     def __init__(self):
-        self._patterns: Dict[str, Dict] = {
+        self._patterns: dict[str, dict] = {
             "phone_cn": {
                 "name": "中国手机号",
                 "category": "contact",
@@ -164,7 +164,7 @@ class PIIPatternLibrary:
                 "mask_func": lambda m: m[:4] + "********" + m[-4:],
             },
         }
-        self._custom_patterns: Dict[str, Dict] = {}
+        self._custom_patterns: dict[str, dict] = {}
 
     def add_custom_pattern(self, name: str, regex: str, category: str = "custom", severity: str = "medium"):
         self._custom_patterns[name] = {
@@ -175,10 +175,10 @@ class PIIPatternLibrary:
             "mask_func": lambda m: "***REDACTED***",
         }
 
-    def get_all_patterns(self) -> Dict[str, Dict]:
+    def get_all_patterns(self) -> dict[str, dict]:
         return {**self._patterns, **self._custom_patterns}
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         cats = set()
         for p in self._patterns.values():
             cats.add(p["category"])
@@ -205,14 +205,14 @@ class PIIPatternLibrary:
             params = {}
         return self.get_categories(**params)
 
-class PIIDetector(object):
+class PIIDetector:
     """PII检测引擎"""
 
     def __init__(self, library: PIIPatternLibrary = None):
         self.library = library or PIIPatternLibrary()
         self._scan_history: deque = deque(maxlen=200)
 
-    def detect(self, text: str, include_categories: List[str] = None, exclude_patterns: List[str] = None) -> Dict:
+    def detect(self, text: str, include_categories: list[str] = None, exclude_patterns: list[str] = None) -> dict:
         findings = []
         patterns = self.library.get_all_patterns()
         for ptype, pconfig in patterns.items():
@@ -256,7 +256,7 @@ class PIIDetector(object):
         }
 
     @staticmethod
-    def _deduplicate(findings: List[Dict]) -> List[Dict]:
+    def _deduplicate(findings: list[dict]) -> list[dict]:
         seen = set()
         unique = []
         for f in findings:
@@ -267,7 +267,7 @@ class PIIDetector(object):
         return unique
 
     @staticmethod
-    def _calculate_risk_score(findings: List[Dict]) -> float:
+    def _calculate_risk_score(findings: list[dict]) -> float:
         if not findings:
             return 0
         severity_weights = {"critical": 30, "high": 20, "medium": 10, "low": 5}
@@ -280,7 +280,7 @@ class DataMasker:
     def __init__(self, library: PIIPatternLibrary = None):
         self.library = library or PIIPatternLibrary()
 
-    def mask(self, text: str, patterns: List[str] = None) -> Dict:
+    def mask(self, text: str, patterns: list[str] = None) -> dict:
         result = text
         all_patterns = self.library.get_all_patterns()
         for ptype, pconfig in all_patterns.items():
@@ -296,7 +296,7 @@ class DataMasker:
                     continue
         return {"success": True, "masked": result, "original_length": len(text), "masked_length": len(result)}
 
-    def mask_findings(self, text: str, findings: List[Dict]) -> str:
+    def mask_findings(self, text: str, findings: list[dict]) -> str:
         if not findings:
             return text
         replacements = sorted(findings, key=lambda x: x["start"], reverse=True)
@@ -313,9 +313,9 @@ class ComplianceReporter:
     """合规报告生成器"""
 
     def __init__(self):
-        self._reports: List[Dict] = []
+        self._reports: list[dict] = []
 
-    def generate_report(self, scan_results: List[Dict], regulation: str = "GDPR") -> Dict:
+    def generate_report(self, scan_results: list[dict], regulation: str = "GDPR") -> dict:
         total_findings = sum(r.get("total_findings", 0) for r in scan_results)
         categories = defaultdict(int)
         severities = defaultdict(int)
@@ -340,7 +340,7 @@ class ComplianceReporter:
         return report
 
     @staticmethod
-    def _generate_recommendations(severities: Dict, categories: Dict) -> List[str]:
+    def _generate_recommendations(severities: dict, categories: dict) -> list[str]:
         recs = []
         if severities.get("critical", 0) > 0:
             recs.append(f"发现{severities['critical']}个严重级别PII，需立即处理")
@@ -357,13 +357,13 @@ class ComplianceReporter:
 class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """PII检测 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "texts_scanned": 0,
@@ -371,7 +371,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -449,7 +449,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def mask_pii(self, text: str, mask_char: str = "*") -> Dict[str, Any]:
+    def mask_pii(self, text: str, mask_char: str = "*") -> dict[str, Any]:
         """脱敏处理。企业场景：日志输出前对敏感信息脱敏，
         手机号保留前3后4位，身份证保留前3后4位，邮箱保留首尾。
         符合GDPR/个人信息保护法的数据最小化原则。
@@ -484,7 +484,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "details": pii_found,
         }
 
-    def get_detection_report(self) -> Dict[str, Any]:
+    def get_detection_report(self) -> dict[str, Any]:
         """PII检测报告。企业场景：合规审计时统计各类型PII检测量，
         满足数据安全法要求的个人信息处理活动记录。
         """
@@ -500,12 +500,12 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 type_counts[pii_type] = type_counts.get(pii_type, 0) + 1
         return {"success": True, "total_scanned": total_scanned, "total_pii_found": total_pii, "by_type": type_counts}
 
-    def scan_file(self, file_path: str) -> Dict[str, Any]:
+    def scan_file(self, file_path: str) -> dict[str, Any]:
         """扫描文件中的PII。企业场景：数据治理团队批量扫描数据库导出文件、
         日志文件中的个人信息，确保符合隐私合规要求。
         """
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -526,7 +526,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "details": line_details[:50],
         }
 
-    def get_compliance_score(self) -> Dict[str, Any]:
+    def get_compliance_score(self) -> dict[str, Any]:
         """合规评分。企业场景：数据保护官查看PII检测合规评分，
         评估系统对个人信息的保护水平。满分100分。
         """
@@ -551,7 +551,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "grade": "A" if score >= 90 else ("B" if score >= 80 else "C"),
         }
 
-    def get_pii_type_distribution(self, days: int = 7) -> Dict[str, Any]:
+    def get_pii_type_distribution(self, days: int = 7) -> dict[str, Any]:
         """PII类型分布统计。企业场景：DPO审查发现哪些类型的个人信息
         被频繁存储/传输，评估是否符合GDPR/个保法要求。
         """
@@ -572,7 +572,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "distribution": [{"type": t, "count": c} for t, c in sorted_types],
         }
 
-    def mask_pii_in_text(self, text: str, mask_char: str = "*") -> Dict[str, Any]:
+    def mask_pii_in_text(self, text: str, mask_char: str = "*") -> dict[str, Any]:
         """文本PII脱敏。企业场景：客服聊天记录导出前，自动遮盖客户手机号、
         身份证号、银行卡号等敏感信息，合规导出。
         支持中文手机号(11位)、身份证号(18位)、银行卡号(16-19位)、邮箱。
@@ -623,7 +623,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "findings": findings,
         }
 
-    def generate_compliance_report(self, report_type: str = "summary") -> Dict[str, Any]:
+    def generate_compliance_report(self, report_type: str = "summary") -> dict[str, Any]:
         """生成合规报告。企业场景：等保三级评估、GDPR合规审查时，
         导出PII检测统计报告，包含检测覆盖率、类型分布、风险等级。
         """

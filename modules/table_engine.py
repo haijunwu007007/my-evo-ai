@@ -85,7 +85,8 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import metrics_collector
@@ -133,25 +134,25 @@ class ColumnDef:
 
     key: str
     title: str = ""
-    width: Optional[str] = None
+    width: str | None = None
     min_width: str = "80px"
     type: ColumnType = ColumnType.TEXT
     align: AlignType = AlignType.LEFT
     sortable: bool = True
     filterable: bool = True
-    fixed: Optional[str] = None  # "left" or "right"
+    fixed: str | None = None  # "left" or "right"
     editable: bool = False
     hidden: bool = False
     ellipsis: bool = True
     tooltip: bool = False
-    status_map: Optional[Dict[str, str]] = None  # status type: value -> label/color
-    tag_colors: Optional[Dict[str, str]] = None
+    status_map: dict[str, str] | None = None  # status type: value -> label/color
+    tag_colors: dict[str, str] | None = None
     currency_symbol: str = "¥"
     date_format: str = "YYYY-MM-DD"
-    format_fn: Optional[Callable] = None
-    render_fn: Optional[Callable] = None
-    actions: Optional[List[Dict[str, str]]] = None  # for action type
-    children: List["ColumnDef"] = field(default_factory=list)  # for grouped headers
+    format_fn: Callable | None = None
+    render_fn: Callable | None = None
+    actions: list[dict[str, str]] | None = None  # for action type
+    children: list[ColumnDef] = field(default_factory=list)  # for grouped headers
 
 @dataclass
 class FilterDef:
@@ -181,16 +182,16 @@ class SortState:
 class TableState:
     """表格状态"""
 
-    data: List[Dict[str, Any]] = field(default_factory=list)
-    filtered_data: List[Dict[str, Any]] = field(default_factory=list)
-    sorted_data: List[Dict[str, Any]] = field(default_factory=list)
+    data: list[dict[str, Any]] = field(default_factory=list)
+    filtered_data: list[dict[str, Any]] = field(default_factory=list)
+    sorted_data: list[dict[str, Any]] = field(default_factory=list)
     selected_rows: set = field(default_factory=set)
     expanded_rows: set = field(default_factory=set)
     sort: SortState = field(default_factory=SortState)
     pagination: PaginationState = field(default_factory=PaginationState)
     search_query: str = ""
     loading: bool = False
-    editing_cell: Optional[Tuple[str, int]] = None  # (column_key, row_index)
+    editing_cell: tuple[str, int] | None = None  # (column_key, row_index)
 
 @dataclass
 class TableStats:
@@ -220,11 +221,11 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 响应式布局
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__("table_engine", config=config or {})
-        self._tables: Dict[str, Dict[str, Any]] = {}
-        self._states: Dict[str, TableState] = {}
+        self._tables: dict[str, dict[str, Any]] = {}
+        self._states: dict[str, TableState] = {}
         self._stats = TableStats()
         self._page_sizes = [10, 20, 50, 100]
         self._row_height: int = self.config.get("row_height", 44)
@@ -245,8 +246,8 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def create_table(
         self,
         table_id: str,
-        columns: List[ColumnDef],
-        data: Optional[List[Dict[str, Any]]] = None,
+        columns: list[ColumnDef],
+        data: list[dict[str, Any]] | None = None,
         selection: SelectionMode = SelectionMode.NONE,
         title: str = "",
         pagination: bool = True,
@@ -274,7 +275,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._metrics.increment("table_engine.created")
         return table_id
 
-    def set_data(self, table_id: str, data: List[Dict[str, Any]]) -> None:
+    def set_data(self, table_id: str, data: list[dict[str, Any]]) -> None:
         """设置表格数据"""
         if table_id not in self._states:
             return
@@ -288,7 +289,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         state.pagination.page = 1
         state.selected_rows.clear()
 
-    def sort(self, table_id: str, column: str, direction: SortDirection = SortDirection.ASC) -> List[Dict]:
+    def sort(self, table_id: str, column: str, direction: SortDirection = SortDirection.ASC) -> list[dict]:
         """排序"""
         state = self._states.get(table_id)
         if not state:
@@ -306,7 +307,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._apply_pagination(table_id)
         return state.sorted_data
 
-    def _get_sort_value(self, row: Dict, column: str) -> Any:
+    def _get_sort_value(self, row: dict, column: str) -> Any:
         """获取排序值"""
         val = row.get(column)
         if val is None:
@@ -318,7 +319,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return val.lower()
         return val
 
-    def filter_data(self, table_id: str, filters: List[FilterDef]) -> List[Dict]:
+    def filter_data(self, table_id: str, filters: list[FilterDef]) -> list[dict]:
         """筛选数据"""
         state = self._states.get(table_id)
         if not state:
@@ -337,7 +338,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.sort(table_id, state.sort.column, state.sort.direction)
         return result
 
-    def _match_filter(self, row: Dict, f: FilterDef) -> bool:
+    def _match_filter(self, row: dict, f: FilterDef) -> bool:
         """匹配筛选条件"""
         val = row.get(f.column)
         target = f.value
@@ -363,7 +364,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return val in (target if isinstance(target, list) else [target])
         return True
 
-    def search(self, table_id: str, query: str) -> List[Dict]:
+    def search(self, table_id: str, query: str) -> list[dict]:
         """全文搜索"""
         state = self._states.get(table_id)
         if not state:
@@ -380,7 +381,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         state.pagination.page = 1
         return state.filtered_data
 
-    def _apply_pagination(self, table_id: str) -> List[Dict]:
+    def _apply_pagination(self, table_id: str) -> list[dict]:
         """应用分页"""
         state = self._states.get(table_id)
         if not state:
@@ -422,7 +423,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return True
         return False
 
-    def get_selected(self, table_id: str) -> List[Dict]:
+    def get_selected(self, table_id: str) -> list[dict]:
         """获取选中行"""
         state = self._states.get(table_id)
         if not state:
@@ -604,7 +605,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._metrics.histogram("table_engine.render.time_ms", render_time)
         return html
 
-    def _render_cell(self, value: Any, col: ColumnDef, row: Dict, row_idx: int) -> str:
+    def _render_cell(self, value: Any, col: ColumnDef, row: dict, row_idx: int) -> str:
         """渲染单元格内容"""
         if col.render_fn:
             try:
@@ -676,7 +677,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return f"<span title='{display}'>{display[:28]}...</span>"
         return display
 
-    def _get_fixed_offset(self, columns: List[ColumnDef], current: ColumnDef) -> str:
+    def _get_fixed_offset(self, columns: list[ColumnDef], current: ColumnDef) -> str:
         """计算固定列偏移量"""
         offset = 0
         for c in columns:
@@ -686,7 +687,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 offset += int(c.width.replace("px", "")) if c.width else 120
         return f"{offset + 48}px" if offset > 0 else "0px"
 
-    def _build_page_range(self, current: int, total: int) -> List[int]:
+    def _build_page_range(self, current: int, total: int) -> list[int]:
         """构建分页范围"""
         if total <= 7:
             return list(range(1, total + 1))
@@ -701,7 +702,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return sorted(set(pages))
 
     def export_data(
-        self, table_id: str, format_: ExportFormat = ExportFormat.CSV, columns: Optional[List[str]] = None
+        self, table_id: str, format_: ExportFormat = ExportFormat.CSV, columns: list[str] | None = None
     ) -> str:
         """导出数据"""
         state = self._states.get(table_id)
@@ -729,7 +730,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return html
         return ""
 
-    def get_state(self, table_id: str) -> Optional[Dict[str, Any]]:
+    def get_state(self, table_id: str) -> dict[str, Any] | None:
         """获取表格状态"""
         state = self._states.get(table_id)
         if not state:
@@ -791,7 +792,7 @@ class TableEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"status": "success", **result}
         return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "total_tables": self._stats.total_tables,

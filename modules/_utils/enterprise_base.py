@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 modules.enterprise_base — 兼容桥接
 ==================================

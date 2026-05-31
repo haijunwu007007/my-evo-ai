@@ -179,7 +179,7 @@ class RenderResult:
     cache_key: str = ""
     render_time_ms: float = 0.0
     bundle_size: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class RenderStats:
@@ -205,10 +205,10 @@ class LayoutConfig:
     sidebar_width: str = "280px"
     header_height: str = "64px"
     footer_height: str = "48px"
-    responsive_breakpoints: Dict[str, str] = field(
+    responsive_breakpoints: dict[str, str] = field(
         default_factory=lambda: {"sm": "640px", "md": "768px", "lg": "1024px", "xl": "1280px", "2xl": "1536px"}
     )
-    spacing: Dict[str, str] = field(
+    spacing: dict[str, str] = field(
         default_factory=lambda: {"xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "2xl": "48px"}
     )
 
@@ -229,14 +229,14 @@ class ThemeConfig:
     font_size_base: str = "14px"
     border_radius: str = "8px"
     shadow: str = "0 1px 3px rgba(0,0,0,0.1)"
-    custom_css_vars: Dict[str, str] = field(default_factory=dict)
+    custom_css_vars: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class I18nConfig:
     """国际化配置"""
 
     default_locale: str = "zh-CN"
-    supported_locales: List[str] = field(default_factory=lambda: ["zh-CN", "en-US", "ja-JP"])
+    supported_locales: list[str] = field(default_factory=lambda: ["zh-CN", "en-US", "ja-JP"])
     fallback_locale: str = "zh-CN"
     auto_detect: bool = True
 
@@ -248,10 +248,10 @@ class RenderPipeline:
         self._cache_hits: int = 0
         self._cache_misses: int = 0
         self._avg_render_ms: float = 0.0
-        self._layout_cache: Dict[str, Any] = {}
+        self._layout_cache: dict[str, Any] = {}
         self._theme_vars_applied: int = 0
 
-    def pre_compile(self, template_str: str) -> Dict[str, Any]:
+    def pre_compile(self, template_str: str) -> dict[str, Any]:
         """预编译模板，提取变量和块结构"""
         self._compile_count += 1
         variables = set()
@@ -261,7 +261,7 @@ class RenderPipeline:
             variables.add(m.group(1))
         return {"variables": list(variables), "compile_time_ms": 0.1}
 
-    def compute_layout(self, grid_spec: Dict, viewport: Dict) -> Dict[str, Any]:
+    def compute_layout(self, grid_spec: dict, viewport: dict) -> dict[str, Any]:
         """计算响应式布局"""
         cols = grid_spec.get("columns", 12)
         vp_width = viewport.get("width", 1024)
@@ -276,7 +276,7 @@ class RenderPipeline:
             self._cache_misses += 1
         self._avg_render_ms = 0.1 * latency_ms + 0.9 * self._avg_render_ms
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total = self._cache_hits + self._cache_misses
         return {
             "compile_count": self._compile_count,
@@ -286,15 +286,15 @@ class RenderPipeline:
             "theme_vars_applied": self._theme_vars_applied,
         }
 
-class ThemeConsistencyChecker(object):
+class ThemeConsistencyChecker:
     """主题一致性检查器 — 检测样式冲突、评估色彩对比度、验证设计规范"""
 
     def __init__(self):
-        self._color_palette: Dict[str, str] = {}
-        self._font_stack: List[str] = []
-        self._spacing_scale: List[int] = [4, 8, 12, 16, 24, 32, 48, 64]
+        self._color_palette: dict[str, str] = {}
+        self._font_stack: list[str] = []
+        self._spacing_scale: list[int] = [4, 8, 12, 16, 24, 32, 48, 64]
 
-    def check_color_contrast(self, fg: str, bg: str) -> Dict[str, Any]:
+    def check_color_contrast(self, fg: str, bg: str) -> dict[str, Any]:
         """检查前景色与背景色的对比度"""
         fg_rgb = self._hex_to_rgb(fg)
         bg_rgb = self._hex_to_rgb(bg)
@@ -321,10 +321,10 @@ class ThemeConsistencyChecker(object):
             "grade": "AAA" if wcag_aaa else "AA" if wcag_aa else "A-large" if wcag_aa_large else "Fail",
         }
 
-    def detect_style_conflicts(self, css_rules: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    def detect_style_conflicts(self, css_rules: list[dict[str, str]]) -> list[dict[str, Any]]:
         """检测CSS规则中的样式冲突"""
         conflicts = []
-        seen_selectors: Dict[str, List[Dict]] = {}
+        seen_selectors: dict[str, list[dict]] = {}
 
         for rule in css_rules:
             selector = rule.get("selector", "")
@@ -349,7 +349,7 @@ class ThemeConsistencyChecker(object):
                 prop_values[key] = p["value"]
         return conflicts
 
-    def analyze_spacing_consistency(self, values: List[int]) -> Dict[str, Any]:
+    def analyze_spacing_consistency(self, values: list[int]) -> dict[str, Any]:
         """分析间距值是否符合设计规范"""
         inconsistent = []
         for v in values:
@@ -398,24 +398,24 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 渲染性能监控
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__("ui_renderer", config=config or {})
         self.render_mode = RenderMode(self.config.get("render_mode", "hybrid"))
-        self._layouts: Dict[str, LayoutConfig] = {}
-        self._themes: Dict[str, ThemeConfig] = {}
+        self._layouts: dict[str, LayoutConfig] = {}
+        self._themes: dict[str, ThemeConfig] = {}
         self._active_theme: str = "default"
         self._metrics = _NoOpMetrics()
         self._audit_logger = _NoOpAuditLogger()
         self._active_layout: str = "default"
-        self._i18n: Dict[str, Dict[str, str]] = {}
+        self._i18n: dict[str, dict[str, str]] = {}
         self._i18n_config = I18nConfig()
-        self._component_registry: Dict[str, Dict[str, Any]] = {}
-        self._render_cache: Dict[str, Tuple[float, RenderResult]] = {}
+        self._component_registry: dict[str, dict[str, Any]] = {}
+        self._render_cache: dict[str, tuple[float, RenderResult]] = {}
         self._cache_ttl: int = self.config.get("cache_ttl", 300)
         self._cache_max_size: int = self.config.get("cache_max_size", 1000)
         self._stats = RenderStats()
-        self._etag_map: Dict[str, str] = {}
+        self._etag_map: dict[str, str] = {}
         self._compression_enabled: bool = self.config.get("compression_enabled", True)
         self._minify_enabled: bool = self.config.get("minify_enabled", True)
         self._preload_critical_css: bool = self.config.get("preload_critical_css", True)
@@ -528,10 +528,10 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def render(
         self,
         template: str,
-        data: Optional[Dict[str, Any]] = None,
-        layout: Optional[str] = None,
-        locale: Optional[str] = None,
-        mode: Optional[RenderMode] = None,
+        data: dict[str, Any] | None = None,
+        layout: str | None = None,
+        locale: str | None = None,
+        mode: RenderMode | None = None,
     ) -> RenderResult:
         """
         渲染模板
@@ -638,7 +638,7 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 render_time_ms=(time.monotonic() - start) * 1000,
             )
 
-    def _build_context(self, data: Dict[str, Any], locale: str) -> Dict[str, Any]:
+    def _build_context(self, data: dict[str, Any], locale: str) -> dict[str, Any]:
         """构建模板上下文"""
         context = {
             **data,
@@ -657,7 +657,7 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return context
 
-    def _process_template(self, template: str, context: Dict[str, Any]) -> str:
+    def _process_template(self, template: str, context: dict[str, Any]) -> str:
         """处理模板（变量插值 + 条件 + 循环）"""
         result = template
         # {{var}} 变量插值
@@ -816,13 +816,13 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return True
         return False
 
-    def add_translations(self, locale: str, translations: Dict[str, str]) -> None:
+    def add_translations(self, locale: str, translations: dict[str, str]) -> None:
         """添加翻译"""
         if locale not in self._i18n:
             self._i18n[locale] = {}
         self._i18n[locale].update(translations)
 
-    def t(self, key: str, locale: Optional[str] = None) -> str:
+    def t(self, key: str, locale: str | None = None) -> str:
         """翻译快捷方法"""
         locale = locale or self._i18n_config.default_locale
         return self._i18n.get(locale, {}).get(key, key)
@@ -899,7 +899,7 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "mode": self.render_mode.value,

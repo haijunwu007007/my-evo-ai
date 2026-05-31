@@ -100,7 +100,7 @@ try:
 except ImportError:
     _HAS_NUMPY = False
 
-def _find_ffmpeg() -> Optional[str]:
+def _find_ffmpeg() -> str | None:
     """查找系统中的ffmpeg"""
     for name in ["ffmpeg", "ffmpeg.exe"]:
         path = shutil.which(name)
@@ -131,7 +131,7 @@ def _find_font() -> str:
     return ""
 
 @dataclass
-class PixelleVideoAnalyzer(object):
+class PixelleVideoAnalyzer:
     """pixelle_video 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -324,13 +324,13 @@ class PixelleVideo:
         "landscape": {"width": 1280, "height": 720, "fps": 24},
     }
 
-    def __init__(self, output_dir: str = "./pixelle_videos", ffmpeg_path: Optional[str] = None):
+    def __init__(self, output_dir: str = "./pixelle_videos", ffmpeg_path: str | None = None):
         super().__init__()
         self.output_dir = output_dir
         self._ensure_output_dir()
         self.ffmpeg_path = ffmpeg_path or _find_ffmpeg()
         self.font_path = _find_font()
-        self._font_cache: Dict[int, Any] = {}
+        self._font_cache: dict[int, Any] = {}
 
     def _ensure_output_dir(self):
         os.makedirs(self.output_dir, exist_ok=True)
@@ -355,8 +355,8 @@ class PixelleVideo:
         duration: int = 60,
         platform: str = "tiktok",
         style: str = "gradient",
-        scenes_script: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        scenes_script: str | None = None,
+    ) -> dict[str, Any]:
         """
         生成短视频(真实MP4文件)
 
@@ -453,7 +453,7 @@ class PixelleVideo:
 
     def _render_frame(
         self, w: int, h: int, scene: VideoScene, progress: float, style: str, frame_idx: int, total_frames: int
-    ) -> "Image.Image":
+    ) -> Image.Image:
         """渲染单帧"""
         img = Image.new("RGB", (w, h))
         draw = ImageDraw.Draw(img)
@@ -513,7 +513,7 @@ class PixelleVideo:
 
         return img
 
-    def _wrap_text(self, text: str, font, max_width: int) -> List[str]:
+    def _wrap_text(self, text: str, font, max_width: int) -> list[str]:
         """自动换行"""
         lines = []
         for paragraph in text.split("\n"):
@@ -591,7 +591,7 @@ class PixelleVideo:
             Image.new("RGB", (1, 1)).save(output_path)
         return output_path
 
-    def _fallback_metadata_only(self, topic: str, duration: int, platform: str) -> Dict:
+    def _fallback_metadata_only(self, topic: str, duration: int, platform: str) -> dict:
         """无Pillow时的降级方案"""
         video_id = f"vid_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         project_dir = os.path.join(self.output_dir, video_id)
@@ -614,7 +614,7 @@ class PixelleVideo:
         }
 
     # ─── 场景生成 ──────────────────────────────────────
-    def _generate_scenes(self, topic: str, duration: int) -> List[VideoScene]:
+    def _generate_scenes(self, topic: str, duration: int) -> list[VideoScene]:
         """生成视频场景序列"""
         scenes_count = max(3, duration // 15)
         scene_duration = duration / scenes_count
@@ -656,7 +656,7 @@ class PixelleVideo:
             )
         return scenes
 
-    def _parse_custom_scenes(self, script: str, duration: int) -> List[VideoScene]:
+    def _parse_custom_scenes(self, script: str, duration: int) -> list[VideoScene]:
         """解析自定义场景脚本"""
         try:
             data = json.loads(script) if script.startswith("[") else [{"script": script}]
@@ -680,7 +680,7 @@ class PixelleVideo:
         return scenes
 
     # ─── 查询 ──────────────────────────────────────────
-    def get_capabilities(self) -> Dict:
+    def get_capabilities(self) -> dict:
         return {
             "pil": _HAS_PIL,
             "numpy": _HAS_NUMPY,
@@ -690,7 +690,7 @@ class PixelleVideo:
             "version": self.VERSION,
         }
 
-    def list_projects(self) -> List[str]:
+    def list_projects(self) -> list[str]:
         if not os.path.exists(self.output_dir):
             return []
         return [
@@ -699,7 +699,7 @@ class PixelleVideo:
             if os.path.isdir(os.path.join(self.output_dir, d)) and d.startswith("vid_")
         ]
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         caps = self.get_capabilities()
         return {
             "healthy": caps["pil"],

@@ -102,7 +102,7 @@ logger = logging.getLogger("graph_engine")
 class GraphNode:
     node_id: str
     label: str = ""
-    properties: Dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -112,13 +112,13 @@ class GraphEdge:
     target: str
     relation: str = ""
     weight: float = 1.0
-    properties: Dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
 class PathResult:
-    nodes: List[str] = field(default_factory=list)
-    edges: List[str] = field(default_factory=list)
+    nodes: list[str] = field(default_factory=list)
+    edges: list[str] = field(default_factory=list)
     total_weight: float = 0.0
 
 class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -127,16 +127,16 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._nodes: Dict[str, GraphNode] = {}
-        self._edges: Dict[str, GraphEdge] = {}
-        self._adj: Dict[str, List[str]] = defaultdict(list)  # node_id -> [edge_ids]
-        self._reverse_adj: Dict[str, List[str]] = defaultdict(list)
+        self._nodes: dict[str, GraphNode] = {}
+        self._edges: dict[str, GraphEdge] = {}
+        self._adj: dict[str, list[str]] = defaultdict(list)  # node_id -> [edge_ids]
+        self._reverse_adj: dict[str, list[str]] = defaultdict(list)
         self._counter: int = 0
 
     def initialize(self) -> None:
@@ -171,7 +171,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "graph_engine"})
         self.metrics_collector.counter("graph_engine.execute.calls", 1)
         self.audit("execute", {"module": "graph_engine"})
@@ -289,7 +289,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -314,7 +314,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._reverse_adj[target].append(eid)
         return e
 
-    def _get_neighbors(self, node_id: str) -> List[Dict]:
+    def _get_neighbors(self, node_id: str) -> list[dict]:
         neighbors = []
         for eid in self._adj.get(node_id, []):
             e = self._edges.get(eid)
@@ -346,12 +346,12 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     queue.append((e.target, new_path))
         return PathResult()
 
-    def _find_all_paths(self, source: str, target: str, max_depth: int) -> List[PathResult]:
+    def _find_all_paths(self, source: str, target: str, max_depth: int) -> list[PathResult]:
         if source not in self._nodes or target not in self._nodes:
             return []
         results = []
 
-        def dfs(node: str, path: List[str], visited: Set[str], depth: int):
+        def dfs(node: str, path: list[str], visited: set[str], depth: int):
             if depth > max_depth:
                 return
             if node == target:
@@ -376,7 +376,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         dfs(source, [source], {source}, 0)
         return results
 
-    def get_graph_statistics(self) -> Dict[str, Any]:
+    def get_graph_statistics(self) -> dict[str, Any]:
         """图统计信息。企业场景：知识图谱管理员查看图谱规模、密度、
         连通性等指标，评估数据质量。
         """
@@ -415,7 +415,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "hub_nodes": sorted(node_degrees.items(), key=lambda x: -x[1])[:10],
         }
 
-    def find_shortest_path(self, source: str, target: str) -> Dict[str, Any]:
+    def find_shortest_path(self, source: str, target: str) -> dict[str, Any]:
         """最短路径（BFS）。企业场景：社交网络分析中查找两个用户的
         最短关系链路，推荐"你可能认识的人"。
         """
@@ -443,7 +443,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 queue.append((next_node, new_path))
         return {"success": True, "path": [], "length": -1, "message": "无可达路径"}
 
-    def get_node_neighbors(self, node_id: str, depth: int = 1) -> Dict[str, Any]:
+    def get_node_neighbors(self, node_id: str, depth: int = 1) -> dict[str, Any]:
         """获取节点邻居。企业场景：知识图谱探索时查看某实体的关联实体
         及其属性，辅助信息检索和关系发现。
         """
@@ -489,7 +489,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             **neighbors,
         }
 
-    def find_shortest_path(self, source_id: str, target_id: str) -> Dict[str, Any]:
+    def find_shortest_path(self, source_id: str, target_id: str) -> dict[str, Any]:
         """最短路径。企业场景：社交网络中查找两人之间的最短关系链，
         或供应链中查找两个供应商之间的最短依赖路径。
         """
@@ -530,7 +530,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "message": "无可达路径",
         }
 
-    def get_graph_statistics(self) -> Dict[str, Any]:
+    def get_graph_statistics(self) -> dict[str, Any]:
         """图统计。企业场景：知识图谱分析时获取节点数、边数、
         平均度数、连通分量数，评估图谱完整度。
         """
@@ -566,7 +566,7 @@ class GraphEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "edge_type_distribution": edge_type_dist,
         }
 
-    def find_shortest_path(self, source: str, target: str, max_depth: int = 10) -> Dict[str, Any]:
+    def find_shortest_path(self, source: str, target: str, max_depth: int = 10) -> dict[str, Any]:
         """BFS最短路径。企业场景：社交网络好友推荐、知识图谱关系查询、
         微服务调用链路追踪，查找两个节点间的最短关系路径。
         """

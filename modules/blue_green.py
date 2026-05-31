@@ -118,7 +118,7 @@ class Environment:
 
     color: EnvColor
     version: str
-    instances: List[str] = field(default_factory=list)
+    instances: list[str] = field(default_factory=list)
     healthy_count: int = 0
     is_active: bool = False
     deployed_at: str = ""
@@ -148,7 +148,7 @@ class Deployment:
     started_at: str = ""
     completed_at: str = ""
     traffic_pct: int = 0
-    checks: List[HealthCheck] = field(default_factory=list)
+    checks: list[HealthCheck] = field(default_factory=list)
     rollback_reason: str = ""
 
 class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -158,11 +158,11 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_NAME = "蓝绿部署"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._apps: Dict[str, Dict[EnvColor, Environment]] = {}
-        self._deployments: Dict[str, Deployment] = {}
+        self._apps: dict[str, dict[EnvColor, Environment]] = {}
+        self._deployments: dict[str, Deployment] = {}
         self._counter = 0
         self._decision_engine = DeploymentDecisionEngine()
 
@@ -231,7 +231,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             timestamp=datetime.now().isoformat(),
         )
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("blue_green_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
         actions = {
@@ -257,7 +257,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return handler(params)
         return {"status": "healthy", "module": "blue_green"}
 
-    def _exec_start_deploy(self, p: Dict) -> Dict:
+    def _exec_start_deploy(self, p: dict) -> dict:
         """启动蓝绿部署"""
         app = p["app_name"]
         version = p.get("version", "v2.0.0")
@@ -306,7 +306,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_switch_traffic(self, p: Dict) -> Dict:
+    def _exec_switch_traffic(self, p: dict) -> dict:
         """切换流量"""
         app = p["app_name"]
         target_pct = p.get("traffic_pct", 100)
@@ -321,7 +321,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         active = [c.value for c, e in envs.items() if e.is_active]
         return {"success": True, "result": {"app": app, "traffic_pct": target_pct, "active_envs": active}}
 
-    def _exec_rollback(self, p: Dict) -> Dict:
+    def _exec_rollback(self, p: dict) -> dict:
         """回滚"""
         app = p["app_name"]
         reason = p.get("reason", "手动回滚")
@@ -339,7 +339,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.record_metric("bluegreen_rollback_total", 1, tags={"app": app})
         return {"success": True, "result": {"rollback_id": rid, "app": app, "reason": reason, "active_envs": active}}
 
-    def _exec_health_check(self, p: Dict) -> Dict:
+    def _exec_health_check(self, p: dict) -> dict:
         app = p["app_name"]
         color = EnvColor(p.get("color", "green"))
         if app not in self._apps:
@@ -356,7 +356,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_get_status(self, p: Dict) -> Dict:
+    def _exec_get_status(self, p: dict) -> dict:
         app = p["app_name"]
         if app not in self._apps:
             return {"success": False, "error": "应用不存在"}
@@ -379,7 +379,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_get_deployment(self, p: Dict) -> Dict:
+    def _exec_get_deployment(self, p: dict) -> dict:
         did = p["deploy_id"]
         if did not in self._deployments:
             return {"success": False, "error": "部署不存在"}
@@ -400,7 +400,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_list_deployments(self, p: Dict) -> Dict:
+    def _exec_list_deployments(self, p: dict) -> dict:
         app = p.get("app_name", "")
         deps = [d for d in self._deployments.values() if not app or d.app_name == app]
         return {
@@ -414,10 +414,10 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_get_app_info(self, p: Dict) -> Dict:
+    def _exec_get_app_info(self, p: dict) -> dict:
         return self._exec_get_status(p)
 
-    def _exec_list_apps(self, p: Dict) -> Dict:
+    def _exec_list_apps(self, p: dict) -> dict:
         result = []
         for app, envs in self._apps.items():
             active = next((c.value for c, e in envs.items() if e.is_active), "none")
@@ -431,7 +431,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "result": result}
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         completed = sum(1 for d in self._deployments.values() if d.state == DeploymentState.COMPLETED)
         failed = sum(1 for d in self._deployments.values() if d.state == DeploymentState.FAILED)
         return {
@@ -445,23 +445,23 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_assess_risk(self, p: Dict) -> Dict:
+    def _exec_assess_risk(self, p: dict) -> dict:
         """评估部署风险"""
         app = p.get("app_name", "")
         version = p.get("version", "unknown")
         return {"success": True, "result": self._decision_engine.assess_deploy_risk(app, version)}
 
-    def _exec_release_window(self, p: Dict) -> Dict:
+    def _exec_release_window(self, p: dict) -> dict:
         """推荐发布窗口"""
         return {"success": True, "result": self._decision_engine.recommend_release_window()}
 
-    def _exec_rollback_plan(self, p: Dict) -> Dict:
+    def _exec_rollback_plan(self, p: dict) -> dict:
         """生成回滚预案"""
         app = p.get("app_name", "")
         version = p.get("version", "current")
         return {"success": True, "result": self._decision_engine.generate_rollback_plan(app, version)}
 
-    def _exec_pre_deploy_checklist(self, p: Dict) -> Dict:
+    def _exec_pre_deploy_checklist(self, p: dict) -> dict:
         """部署前检查清单：验证所有前置条件是否满足"""
         app = p.get("app_name", "")
         version = p.get("version", "")
@@ -540,7 +540,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _exec_lock_check(self, p: Dict) -> Dict:
+    def _exec_lock_check(self, p: dict) -> dict:
         """检查应用部署锁状态"""
         app = p.get("app_name", "")
         in_progress = sum(
@@ -576,7 +576,7 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -596,13 +596,13 @@ class BlueGreenManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
 module_class = BlueGreenManager
 
-class DeploymentDecisionEngine(object):
+class DeploymentDecisionEngine:
     """部署决策引擎 — 基于历史数据评估部署风险、推荐发布窗口、自动生成回滚预案"""
 
     def __init__(self):
-        self._deployment_history: List[Dict[str, Any]] = []
+        self._deployment_history: list[dict[str, Any]] = []
 
-    def record_deployment(self, deployment: Dict[str, Any]) -> None:
+    def record_deployment(self, deployment: dict[str, Any]) -> None:
         """记录部署结果用于风险评估"""
         self._deployment_history.append(
             {
@@ -617,7 +617,7 @@ class DeploymentDecisionEngine(object):
         if len(self._deployment_history) > 500:
             self._deployment_history = self._deployment_history[-500:]
 
-    def assess_deploy_risk(self, app: str, version: str) -> Dict[str, Any]:
+    def assess_deploy_risk(self, app: str, version: str) -> dict[str, Any]:
         """评估部署风险：基于该应用的历史成功率和失败模式"""
         app_deps = [d for d in self._deployment_history if d["app"] == app]
         total = len(app_deps)
@@ -671,7 +671,7 @@ class DeploymentDecisionEngine(object):
             "recommendations": recommendations,
         }
 
-    def recommend_release_window(self) -> Dict[str, Any]:
+    def recommend_release_window(self) -> dict[str, Any]:
         """推荐最佳发布窗口：基于历史故障时间分布"""
         if not self._deployment_history:
             return {"window": "any", "message": "无历史数据，任意时间可发布"}
@@ -704,7 +704,7 @@ class DeploymentDecisionEngine(object):
             "advice": f"建议在{best_start}:00-{best_start + 4}:00发布，该时段历史故障率最低",
         }
 
-    def generate_rollback_plan(self, app: str, current_version: str) -> Dict[str, Any]:
+    def generate_rollback_plan(self, app: str, current_version: str) -> dict[str, Any]:
         """生成回滚预案：步骤、检查点、预估影响"""
         plan = {
             "app": app,

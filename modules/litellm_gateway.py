@@ -79,7 +79,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -92,7 +92,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LitellmGatewayAnalyzer(object):
+class LitellmGatewayAnalyzer:
     """litellm_gateway 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -372,7 +372,7 @@ class LitellmGatewayModule:
 
     """统一LLM网关 - 多Provider路由/负载均衡/限流/熔断/缓存/A-B测试"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -414,22 +414,22 @@ class LitellmGatewayModule:
             "total_latency_ms": 0,
             "routed_requests": defaultdict(int),
         }
-        self._providers: Dict[str, Dict] = {}
+        self._providers: dict[str, dict] = {}
         self._routing_strategy = RoutingStrategy(self.config.get("routing_strategy", "failover"))
         self._default_provider = self.config.get("default_provider", "openai")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 60)
-        self._circuits: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
-        self._cache: Dict[str, Dict] = {}
+        self._circuits: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 3600)
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 20))
-        self._round_robin_idx: Dict[str, int] = defaultdict(int)
-        self._ab_tests: Dict[str, Dict] = {}
-        self._model_mapping: Dict[str, str] = {}
+        self._round_robin_idx: dict[str, int] = defaultdict(int)
+        self._ab_tests: dict[str, dict] = {}
+        self._model_mapping: dict[str, str] = {}
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_providers()
             self._register_default_rate_limits()
@@ -445,7 +445,7 @@ class LitellmGatewayModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         open_circuits = sum(1 for cb in self._circuits.values() if cb["state"] == GatewayCircuitState.OPEN)
@@ -489,7 +489,7 @@ class LitellmGatewayModule:
             "gemini-2.0-flash": "google",
         }
 
-    def _select_provider(self, model: str, preferred: Optional[str] = None) -> Optional[str]:
+    def _select_provider(self, model: str, preferred: str | None = None) -> str | None:
         """按路由策略选择Provider"""
         candidates = []
         if preferred and preferred in self._providers and self._providers[preferred]["enabled"]:
@@ -617,7 +617,7 @@ class LitellmGatewayModule:
                     "input_tokens": input_tokens,
                     "output_tokens": out_tok,
                     "latency_ms": latency,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -706,7 +706,7 @@ class LitellmGatewayModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_provider = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": []})
         for r in recent:

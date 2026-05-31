@@ -163,16 +163,16 @@ class VisualNode:
     y: float = 0.0
     width: float = 180.0
     height: float = 80.0
-    config: Dict[str, Any] = field(default_factory=dict)
-    style: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
+    style: dict[str, Any] = field(default_factory=dict)
     group_id: str = ""
-    inputs: List[str] = field(default_factory=list)
-    outputs: List[str] = field(default_factory=list)
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
     icon: str = "⬡"
     color: str = "#4A90D9"
     tooltip: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "node_id": self.node_id,
             "node_type": self.node_type,
@@ -200,10 +200,10 @@ class VisualEdge:
     target_id: str
     target_port: str
     label: str = ""
-    style: Dict[str, Any] = field(default_factory=dict)
+    style: dict[str, Any] = field(default_factory=dict)
     animated: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "edge_id": self.edge_id,
             "source_id": self.source_id,
@@ -223,9 +223,9 @@ class NodeGroup:
     name: str
     color: str = "#E8F0FE"
     collapsed: bool = False
-    children: List[str] = field(default_factory=list)
+    children: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "group_id": self.group_id,
             "name": self.name,
@@ -242,11 +242,11 @@ class FlowCanvas:
     name: str
     description: str = ""
     mode: CanvasMode = CanvasMode.EDIT
-    nodes: Dict[str, VisualNode] = field(default_factory=dict)
-    edges: Dict[str, VisualEdge] = field(default_factory=dict)
-    groups: Dict[str, NodeGroup] = field(default_factory=dict)
-    variables: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    nodes: dict[str, VisualNode] = field(default_factory=dict)
+    edges: dict[str, VisualEdge] = field(default_factory=dict)
+    groups: dict[str, NodeGroup] = field(default_factory=dict)
+    variables: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
     version: int = 1
     locked_by: str = ""
     locked_at: str = ""
@@ -258,7 +258,7 @@ class FlowCanvas:
             self.created_at = datetime.now().isoformat()
         self.updated_at = self.created_at
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "canvas_id": self.canvas_id,
             "name": self.name,
@@ -282,7 +282,7 @@ class FlowVersion:
     version_id: str
     canvas_id: str
     version_number: int
-    snapshot: Dict[str, Any]
+    snapshot: dict[str, Any]
     changelog: str = ""
     created_by: str = "system"
     created_at: str = ""
@@ -296,18 +296,18 @@ class FlowTemplate:
     description: str = ""
     category: str = "general"
     icon: str = "📋"
-    canvas_snapshot: Dict[str, Any] = field(default_factory=dict)
-    variables: Dict[str, Any] = field(default_factory=dict)
+    canvas_snapshot: dict[str, Any] = field(default_factory=dict)
+    variables: dict[str, Any] = field(default_factory=dict)
     downloads: int = 0
     rating: float = 0.0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_by: str = "system"
     created_at: str = ""
 
-class CanvasValidator(object):
+class CanvasValidator:
     """画布验证器 — 检测死循环、孤立节点、类型不匹配、执行路径可达性"""
 
-    def validate_canvas(self, nodes: List[Dict], edges: List[Dict]) -> Dict[str, Any]:
+    def validate_canvas(self, nodes: list[dict], edges: list[dict]) -> dict[str, Any]:
         """验证画布完整性：连通性、类型兼容性、无死循环"""
         if not nodes:
             return {"valid": False, "error": "empty canvas"}
@@ -332,7 +332,7 @@ class CanvasValidator(object):
                 {"type": "dangling_edge", "edge_target": eid, "severity": "error", "detail": "边引用了不存在的目标节点"}
             )
         # 检测死循环(DFS)
-        adj: Dict[str, List[str]] = {nid: [] for nid in node_ids}
+        adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
         for e in edges:
             s, t = e.get("source", ""), e.get("target", "")
             if s in adj:
@@ -351,7 +351,7 @@ class CanvasValidator(object):
             "edge_count": len(edges),
         }
 
-    def _detect_cycles(self, adj: Dict[str, List[str]]) -> List[List[str]]:
+    def _detect_cycles(self, adj: dict[str, list[str]]) -> list[list[str]]:
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {n: WHITE for n in adj}
         cycles = []
@@ -377,12 +377,12 @@ class CanvasValidator(object):
                 dfs(n)
         return cycles
 
-    def estimate_complexity(self, nodes: List[Dict], edges: List[Dict]) -> Dict[str, Any]:
+    def estimate_complexity(self, nodes: list[dict], edges: list[dict]) -> dict[str, Any]:
         """估算画布复杂度：节点数、边数、最长路径、分支因子"""
         if not nodes:
             return {"complexity": "trivial"}
-        adj: Dict[str, List[str]] = {n.get("id"): [] for n in nodes}
-        in_degree: Dict[str, int] = {n.get("id"): 0 for n in nodes}
+        adj: dict[str, list[str]] = {n.get("id"): [] for n in nodes}
+        in_degree: dict[str, int] = {n.get("id"): 0 for n in nodes}
         for e in edges:
             s, t = e.get("source", ""), e.get("target", "")
             if s in adj:
@@ -405,7 +405,7 @@ class CanvasValidator(object):
             "complexity_level": level,
         }
 
-    def _longest_path(self, adj: Dict[str, List[str]]) -> int:
+    def _longest_path(self, adj: dict[str, list[str]]) -> int:
         memo = {}
 
         def dfs(u, visited):
@@ -434,14 +434,14 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
-        self._canvases: Dict[str, FlowCanvas] = {}
-        self._versions: Dict[str, List[FlowVersion]] = {}
-        self._templates: Dict[str, FlowTemplate] = {}
-        self._simulations: Dict[str, Dict] = {}
+        self._canvases: dict[str, FlowCanvas] = {}
+        self._versions: dict[str, list[FlowVersion]] = {}
+        self._templates: dict[str, FlowTemplate] = {}
+        self._simulations: dict[str, dict] = {}
         self.max_canvases = self.config.get("max_canvases", 200)
         self.max_versions_per_canvas = self.config.get("max_versions", 50)
 
@@ -559,7 +559,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._templates.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Result:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("flowise_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -598,7 +598,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 画布管理 ──
 
-    def _create_canvas(self, params: Dict) -> Any:
+    def _create_canvas(self, params: dict) -> Any:
         name = params.get("name", "未命名流程")
         description = params.get("description", "")
         tags = params.get("tags", [])
@@ -609,14 +609,14 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("create_canvas", f"canvas_id={canvas_id}")
         return {"canvas_id": canvas_id, "name": name}
 
-    def _get_canvas(self, params: Dict) -> Any:
+    def _get_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
             raise ValueError(f"画布不存在: {canvas_id}")
         return canvas.to_dict()
 
-    def _list_canvases(self, params: Dict) -> Any:
+    def _list_canvases(self, params: dict) -> Any:
         tag = params.get("tag")
         canvases = list(self._canvases.values())
         if tag:
@@ -637,7 +637,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def _delete_canvas(self, params: Dict) -> Any:
+    def _delete_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         if canvas_id not in self._canvases:
             raise ValueError(f"画布不存在: {canvas_id}")
@@ -646,7 +646,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("delete_canvas", f"canvas_id={canvas_id}")
         return {"deleted": canvas_id}
 
-    def _duplicate_canvas(self, params: Dict) -> Any:
+    def _duplicate_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         source = self._canvases.get(canvas_id)
         if not source:
@@ -682,7 +682,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 节点操作 ──
 
-    def _add_node(self, params: Dict) -> Any:
+    def _add_node(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
@@ -706,7 +706,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         canvas.updated_at = self._now()
         return {"node_id": node_id, "label": node.label}
 
-    def _update_node(self, params: Dict) -> Any:
+    def _update_node(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         node_id = params.get("node_id")
         canvas = self._canvases.get(canvas_id)
@@ -734,7 +734,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         canvas.updated_at = self._now()
         return {"updated": node_id}
 
-    def _delete_node(self, params: Dict) -> Any:
+    def _delete_node(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         node_id = params.get("node_id")
         canvas = self._canvases.get(canvas_id)
@@ -750,7 +750,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 连线操作 ──
 
-    def _add_edge(self, params: Dict) -> Any:
+    def _add_edge(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
@@ -781,7 +781,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         canvas.updated_at = self._now()
         return {"edge_id": edge_id}
 
-    def _delete_edge(self, params: Dict) -> Any:
+    def _delete_edge(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         edge_id = params.get("edge_id")
         canvas = self._canvases.get(canvas_id)
@@ -793,7 +793,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 分组管理 ──
 
-    def _create_group(self, params: Dict) -> Any:
+    def _create_group(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
@@ -812,7 +812,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         canvas.updated_at = self._now()
         return {"group_id": group_id, "name": group.name}
 
-    def _delete_group(self, params: Dict) -> Any:
+    def _delete_group(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         group_id = params.get("group_id")
         canvas = self._canvases.get(canvas_id)
@@ -828,7 +828,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 版本控制 ──
 
-    def _save_version(self, params: Dict) -> Any:
+    def _save_version(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         changelog = params.get("changelog", "")
         canvas = self._canvases.get(canvas_id)
@@ -852,7 +852,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("save_version", f"canvas={canvas_id} v{canvas.version}")
         return {"version": canvas.version, "version_id": version.version_id}
 
-    def _list_versions(self, params: Dict) -> Any:
+    def _list_versions(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         versions = self._versions.get(canvas_id, [])
         return {
@@ -869,7 +869,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def _restore_version(self, params: Dict) -> Any:
+    def _restore_version(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         version_id = params.get("version_id")
         canvas = self._canvases.get(canvas_id)
@@ -895,7 +895,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 导入/导出 ──
 
-    def _export_canvas(self, params: Dict) -> Any:
+    def _export_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         fmt = params.get("format", "json")
         canvas = self._canvases.get(canvas_id)
@@ -912,7 +912,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             content = "\n".join(lines)
         return {"format": fmt, "content": content, "size": len(content)}
 
-    def _import_canvas(self, params: Dict) -> Any:
+    def _import_canvas(self, params: dict) -> Any:
         content = params.get("content", "")
         name = params.get("name", "导入的流程")
         try:
@@ -932,7 +932,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 锁定 ──
 
-    def _lock_canvas(self, params: Dict) -> Any:
+    def _lock_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         user = params.get("user", "system")
         canvas = self._canvases.get(canvas_id)
@@ -944,7 +944,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         canvas.locked_at = self._now()
         return {"locked_by": user}
 
-    def _unlock_canvas(self, params: Dict) -> Any:
+    def _unlock_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
@@ -956,7 +956,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 仿真执行 ──
 
-    def _simulate(self, params: Dict) -> Any:
+    def _simulate(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         variables = params.get("variables", {})
         canvas = self._canvases.get(canvas_id)
@@ -1004,7 +1004,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 模板 ──
 
-    def _list_templates(self, params: Dict) -> Any:
+    def _list_templates(self, params: dict) -> Any:
         category = params.get("category")
         templates = list(self._templates.values())
         if category:
@@ -1024,7 +1024,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def _use_template(self, params: Dict) -> Any:
+    def _use_template(self, params: dict) -> Any:
         template_id = params.get("template_id")
         name = params.get("name", "")
         template = self._templates.get(template_id)
@@ -1062,14 +1062,14 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 自动布局 ──
 
-    def _auto_layout(self, params: Dict) -> Any:
+    def _auto_layout(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         layout = params.get("layout", "dagre")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
             raise ValueError(f"画布不存在: {canvas_id}")
         # 简化的分层布局
-        layer_map: Dict[str, int] = {}
+        layer_map: dict[str, int] = {}
         has_incoming = set()
         for e in canvas.edges.values():
             has_incoming.add(e.target_id)
@@ -1088,7 +1088,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     visited.add(e.target_id)
                     queue.append(e.target_id)
         # 分配坐标
-        layer_nodes: Dict[int, List[str]] = {}
+        layer_nodes: dict[int, list[str]] = {}
         for nid, layer in layer_map.items():
             layer_nodes.setdefault(layer, []).append(nid)
         for nid in canvas.nodes:
@@ -1105,7 +1105,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 校验 ──
 
-    def _validate_canvas(self, params: Dict) -> Any:
+    def _validate_canvas(self, params: dict) -> Any:
         canvas_id = params.get("canvas_id")
         canvas = self._canvases.get(canvas_id)
         if not canvas:
@@ -1138,7 +1138,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "score": max(0, 100 - len(errors) * 20 - len(warnings) * 5),
         }
 
-    def _get_stats(self, params: Dict) -> Any:
+    def _get_stats(self, params: dict) -> Any:
         total_nodes = sum(len(c.nodes) for c in self._canvases.values())
         total_edges = sum(len(c.edges) for c in self._canvases.values())
         total_groups = sum(len(c.groups) for c in self._canvases.values())

@@ -101,15 +101,15 @@ class FunctionProfiler:
     def __init__(self, max_traces: int = 10000):
         self.max_traces = max_traces
         self._traces: deque = deque(maxlen=max_traces)
-        self._function_stats: Dict[str, Dict] = {}
-        self._active_probes: Dict[str, float] = {}
+        self._function_stats: dict[str, dict] = {}
+        self._active_probes: dict[str, float] = {}
 
     def start_trace(self, func_name: str, trace_id: str = None) -> str:
         trace_id = trace_id or str(uuid.uuid4())[:12]
         self._active_probes[trace_id] = {"func": func_name, "start": time.time(), "stack": []}
         return trace_id
 
-    def end_trace(self, trace_id: str, result: str = "success") -> Dict:
+    def end_trace(self, trace_id: str, result: str = "success") -> dict:
         probe = self._active_probes.pop(trace_id, None)
         if not probe:
             return {"success": False, "error": "unknown_trace"}
@@ -134,7 +134,7 @@ class FunctionProfiler:
         self._traces.append(trace)
         return {"success": True, **trace}
 
-    def get_hot_functions(self, limit: int = 20) -> List[Dict]:
+    def get_hot_functions(self, limit: int = 20) -> list[dict]:
         results = []
         for name, stats in self._function_stats.items():
             if stats["calls"] == 0:
@@ -153,12 +153,12 @@ class FunctionProfiler:
         results.sort(key=lambda x: x["total_ms"], reverse=True)
         return results[:limit]
 
-    def get_slow_traces(self, threshold_ms: float = 100, limit: int = 50) -> List[Dict]:
+    def get_slow_traces(self, threshold_ms: float = 100, limit: int = 50) -> list[dict]:
         slow = [t for t in self._traces if t["elapsed_ms"] > threshold_ms]
         slow.sort(key=lambda x: x["elapsed_ms"], reverse=True)
         return slow[:limit]
 
-    def get_function_stats(self, func_name: str) -> Optional[Dict]:
+    def get_function_stats(self, func_name: str) -> dict | None:
         stats = self._function_stats.get(func_name)
         if not stats or stats["calls"] == 0:
             return None
@@ -188,7 +188,7 @@ class CallChainTracker:
     def __init__(self, max_chains: int = 5000):
         self.max_chains = max_chains
         self._chains: deque = deque(maxlen=max_chains)
-        self._active: Dict[str, Dict] = {}
+        self._active: dict[str, dict] = {}
 
     def start_chain(self, entry_point: str = "") -> str:
         chain_id = str(uuid.uuid4())[:12]
@@ -222,7 +222,7 @@ class CallChainTracker:
                 return True
         return False
 
-    def end_chain(self, chain_id: str) -> Optional[Dict]:
+    def end_chain(self, chain_id: str) -> dict | None:
         chain = self._active.pop(chain_id, None)
         if not chain:
             return None
@@ -235,7 +235,7 @@ class CallChainTracker:
         self._chains.append(chain)
         return chain
 
-    def get_slow_chains(self, threshold_ms: float = 500, limit: int = 20) -> List[Dict]:
+    def get_slow_chains(self, threshold_ms: float = 500, limit: int = 20) -> list[dict]:
         slow = [c for c in self._chains if c.get("total_ms", 0) > threshold_ms]
         slow.sort(key=lambda x: x["total_ms"], reverse=True)
         return slow[:limit]
@@ -245,12 +245,12 @@ class MemoryProfiler:
 
     def __init__(self, snapshot_interval: float = 10.0):
         self.snapshot_interval = snapshot_interval
-        self._snapshots: List[Dict] = []
-        self._allocations: Dict[str, int] = defaultdict(int)
-        self._object_counts: Dict[str, int] = defaultdict(int)
+        self._snapshots: list[dict] = []
+        self._allocations: dict[str, int] = defaultdict(int)
+        self._object_counts: dict[str, int] = defaultdict(int)
         self._max_snapshots = 500
 
-    def take_snapshot(self) -> Dict:
+    def take_snapshot(self) -> dict:
         import sys
 
         snapshot = {
@@ -273,7 +273,7 @@ class MemoryProfiler:
         if self._object_counts[obj_type] > 0:
             self._object_counts[obj_type] -= 1
 
-    def detect_growth(self, window: int = 10) -> List[Dict]:
+    def detect_growth(self, window: int = 10) -> list[dict]:
         if len(self._snapshots) < window:
             return []
         old = self._snapshots[-window]
@@ -295,20 +295,20 @@ class MemoryProfiler:
         growing.sort(key=lambda x: x["growth"], reverse=True)
         return growing
 
-    def get_snapshots(self, limit: int = 20) -> List[Dict]:
+    def get_snapshots(self, limit: int = 20) -> list[dict]:
         return self._snapshots[-limit:]
 
 class FlameGraphGenerator:
     """火焰图数据生成器"""
 
     def __init__(self):
-        self._stack_data: Dict[str, int] = defaultdict(int)
+        self._stack_data: dict[str, int] = defaultdict(int)
 
-    def record_stack(self, stack: List[str], weight: int = 1):
+    def record_stack(self, stack: list[str], weight: int = 1):
         key = ";".join(stack)
         self._stack_data[key] += weight
 
-    def generate(self, min_weight: int = 1) -> Dict:
+    def generate(self, min_weight: int = 1) -> dict:
         nodes = []
         edges = []
         node_id = 0
@@ -331,7 +331,7 @@ class FlameGraphGenerator:
         total = sum(self._stack_data.values())
         return {"nodes": nodes, "edges": edges, "total_weight": total, "unique_stacks": len(self._stack_data)}
 
-class ProfileAnalyzer(object):
+class ProfileAnalyzer:
     """perf_profiler 运营分析引擎
 
     - 分析函数调用热点
@@ -357,11 +357,11 @@ class ProfileAnalyzer(object):
 class PerfProfiler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """性能剖析 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "traces_recorded": 0,
@@ -370,7 +370,7 @@ class PerfProfiler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 

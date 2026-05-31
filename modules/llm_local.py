@@ -79,7 +79,7 @@ import subprocess
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -87,7 +87,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LlmLocalAnalyzer(object):
+class LlmLocalAnalyzer:
     """llm_local 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -290,7 +290,7 @@ class LlmLocalModule:
 
     """本地模型管理 - 模型加载/卸载/GPU内存管理/推理引擎/限流/熔断"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -331,21 +331,21 @@ class LlmLocalModule:
             "total_latency_ms": 0,
             "gpu_memory_used_mb": 0,
         }
-        self._models: Dict[str, Dict] = {}
+        self._models: dict[str, dict] = {}
         self._default_model = self.config.get("default_model", "qwen")
         self._models_dir = self.config.get("models_dir", "./local_models")
         self._max_gpu_memory_mb = self.config.get("max_gpu_memory_mb", 16384)
         self._engine = self.config.get("engine", "llama.cpp")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 120)
-        self._circuits: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
-        self._cache: Dict[str, Dict] = {}
+        self._circuits: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 7200)
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 4))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             os.makedirs(self._models_dir, exist_ok=True)
             self._register_default_models()
@@ -362,7 +362,7 @@ class LlmLocalModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         loaded = [m for m, info in self._models.items() if info.get("status") == LocalModelStatus.LOADED]
@@ -485,7 +485,7 @@ class LlmLocalModule:
             }
         info["status"] = LocalModelStatus.LOADING
         info["config"] = {"gpu_layers": gpu_layers, "quantization": quantization, "context_size": ctx_size}
-        info["loaded_at"] = datetime.now(timezone.utc).isoformat()
+        info["loaded_at"] = datetime.now(UTC).isoformat()
         self._stats["gpu_memory_used_mb"] += mem_needed
         info["status"] = LocalModelStatus.LOADED
         return {
@@ -554,7 +554,7 @@ class LlmLocalModule:
                     "output_tokens": out_tok,
                     "latency_ms": latency,
                     "tokens_per_second": round(out_tok / max(latency / 1000, 0.001), 2),
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -611,7 +611,7 @@ class LlmLocalModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_model = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": []})
         for r in recent:

@@ -84,7 +84,8 @@ import time
 import uuid
 from core.logging_config import get_logger
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Set, Callable
+from typing import Dict, List, Optional, Any, Set
+from collections.abc import Callable
 from enum import Enum
 from collections import defaultdict, deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -92,7 +93,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class FanoutQueueAnalyzer(object):
+class FanoutQueueAnalyzer:
     """fanout_queue 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -299,8 +300,8 @@ class FanoutMessage:
 
     msg_id: str = ""
     topic: str = ""
-    payload: Dict[str, Any] = field(default_factory=dict)
-    headers: Dict[str, str] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     key: str = ""
     partition: int = 0
     created: float = field(default_factory=time.time)
@@ -308,7 +309,7 @@ class FanoutMessage:
     producer_id: str = ""
     size: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"msg_id": self.msg_id, "topic": self.topic, "key": self.key, "created": self.created, "size": self.size}
 
 class FanoutQueueModule:
@@ -335,12 +336,12 @@ class FanoutQueueModule:
     """企业级扇出队列模块"""
 
     def __init__(self):
-        self._topics: Dict[str, TopicInfo] = {}
-        self._subs: Dict[str, Subscription] = {}
-        self._topic_subs: Dict[str, List[str]] = defaultdict(list)
-        self._group_subs: Dict[str, List[str]] = defaultdict(list)
-        self._consumer_subs: Dict[str, List[str]] = defaultdict(list)
-        self._pending: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100000))
+        self._topics: dict[str, TopicInfo] = {}
+        self._subs: dict[str, Subscription] = {}
+        self._topic_subs: dict[str, list[str]] = defaultdict(list)
+        self._group_subs: dict[str, list[str]] = defaultdict(list)
+        self._consumer_subs: dict[str, list[str]] = defaultdict(list)
+        self._pending: dict[str, deque] = defaultdict(lambda: deque(maxlen=100000))
         self._history: deque = deque(maxlen=50000)
         self.metrics_collector = type(
             "_NMC",
@@ -384,7 +385,7 @@ class FanoutQueueModule:
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             for t in ["system.events", "system.metrics", "app.orders", "app.alerts", "app.logs", "app.notifications"]:
                 self._topics[t] = TopicInfo(topic=t)
@@ -393,7 +394,7 @@ class FanoutQueueModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active_subs = sum(1 for s in self._subs.values() if s.state == SubState.ACTIVE)
@@ -406,14 +407,14 @@ class FanoutQueueModule:
             "stats": self._stats,
         }
 
-    def create_topic(self, topic: str, partitions: int = 1, retention_ms: int = 86400000) -> Dict[str, Any]:
+    def create_topic(self, topic: str, partitions: int = 1, retention_ms: int = 86400000) -> dict[str, Any]:
         if topic in self._topics:
             return {"success": False, "error": "already_exists"}
         self._topics[topic] = TopicInfo(topic=topic, partitions=partitions, retention_ms=retention_ms)
         self._stats["topics"] += 1
         return {"success": True, "topic": topic, "partitions": partitions}
 
-    def delete_topic(self, topic: str) -> Dict[str, Any]:
+    def delete_topic(self, topic: str) -> dict[str, Any]:
         if topic not in self._topics:
             return {"success": False, "error": "not_found"}
         for sub_id in self._topic_subs.get(topic, []):
@@ -422,7 +423,7 @@ class FanoutQueueModule:
         self._topic_subs.pop(topic, None)
         return {"success": True, "topic": topic}
 
-    def list_topics(self) -> Dict[str, Any]:
+    def list_topics(self) -> dict[str, Any]:
         items = [
             {"topic": t.topic, "partitions": t.partitions, "msg_count": t.msg_count, "retention_ms": t.retention_ms}
             for t in self._topics.values()
@@ -437,7 +438,7 @@ class FanoutQueueModule:
         filter_expr: str = "",
         delivery: str = "at_least_once",
         prefetch: int = 10,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if topic not in self._topics:
             return {"success": False, "error": "topic_not_found"}
         try:
@@ -462,7 +463,7 @@ class FanoutQueueModule:
         self._stats["subscriptions"] += 1
         return {"success": True, "sub_id": sub_id, "topic": topic, "consumer_id": consumer_id, "group_id": group_id}
 
-    def unsubscribe(self, sub_id: str) -> Dict[str, Any]:
+    def unsubscribe(self, sub_id: str) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         sub = self._subs.pop(sub_id)
@@ -475,7 +476,7 @@ class FanoutQueueModule:
         self._pending.pop(sub_id, None)
         return {"success": True, "sub_id": sub_id}
 
-    def list_subscriptions(self, topic: str = "", consumer_id: str = "") -> Dict[str, Any]:
+    def list_subscriptions(self, topic: str = "", consumer_id: str = "") -> dict[str, Any]:
         items = []
         for sub in self._subs.values():
             if topic and sub.topic != topic:
@@ -496,8 +497,8 @@ class FanoutQueueModule:
         return {"success": True, "subscriptions": items, "total": len(items)}
 
     def publish(
-        self, topic: str, payload: Dict[str, Any], key: str = "", headers: Dict[str, str] = None, producer_id: str = ""
-    ) -> Dict[str, Any]:
+        self, topic: str, payload: dict[str, Any], key: str = "", headers: dict[str, str] = None, producer_id: str = ""
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if topic not in self._topics:
@@ -531,7 +532,7 @@ class FanoutQueueModule:
         self._stats["fanned_out"] += fanout_count
         return {"success": True, "msg_id": msg_id, "topic": topic, "fanned_out": fanout_count}
 
-    def _match_filter(self, payload: Dict, expr: str) -> bool:
+    def _match_filter(self, payload: dict, expr: str) -> bool:
         try:
             for pair in expr.split(","):
                 if "=" in pair:
@@ -542,7 +543,7 @@ class FanoutQueueModule:
         except Exception:
             return True
 
-    def consume(self, sub_id: str, max_count: int = 10) -> Dict[str, Any]:
+    def consume(self, sub_id: str, max_count: int = 10) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         sub = self._subs[sub_id]
@@ -559,7 +560,7 @@ class FanoutQueueModule:
             self._stats["delivered"] += 1
         return {"success": True, "messages": items, "count": len(items)}
 
-    def acknowledge(self, sub_id: str, msg_id: str) -> Dict[str, Any]:
+    def acknowledge(self, sub_id: str, msg_id: str) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         sub = self._subs[sub_id]
@@ -568,7 +569,7 @@ class FanoutQueueModule:
         self._stats["acked"] += 1
         return {"success": True}
 
-    def negative_acknowledge(self, sub_id: str, msg_id: str, requeue: bool = True) -> Dict[str, Any]:
+    def negative_acknowledge(self, sub_id: str, msg_id: str, requeue: bool = True) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         sub = self._subs[sub_id]
@@ -576,19 +577,19 @@ class FanoutQueueModule:
         self._stats["nacked"] += 1
         return {"success": True}
 
-    def pause_subscription(self, sub_id: str) -> Dict[str, Any]:
+    def pause_subscription(self, sub_id: str) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         self._subs[sub_id].state = SubState.PAUSED
         return {"success": True}
 
-    def resume_subscription(self, sub_id: str) -> Dict[str, Any]:
+    def resume_subscription(self, sub_id: str) -> dict[str, Any]:
         if sub_id not in self._subs:
             return {"success": False, "error": "not_found"}
         self._subs[sub_id].state = SubState.ACTIVE
         return {"success": True}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(1 for s in self._subs.values() if s.state == SubState.ACTIVE)
         total_lag = sum(s.lag for s in self._subs.values())
         return {

@@ -79,7 +79,7 @@ import hashlib
 from core.logging_config import get_logger
 import ipaddress
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
@@ -159,7 +159,7 @@ class IPRule:
 
     def __post_init__(self):
         if not self.created_at:
-            self.created_at = datetime.now(timezone.utc).isoformat()
+            self.created_at = datetime.now(UTC).isoformat()
             self.updated_at = self.created_at
 
 @dataclass
@@ -207,7 +207,7 @@ class AccessDecision:
         self.action = action
         self.rule_id = rule_id
         self.reason = reason
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
         self.headers: dict = {}
 
     def to_dict(self) -> dict:
@@ -236,7 +236,7 @@ class SlidingWindowCounter:
             if not self._timestamps[key]:
                 del self._timestamps[key]
 
-    def check_and_record(self, key: str, now: Optional[float] = None) -> tuple[bool, int, int]:
+    def check_and_record(self, key: str, now: float | None = None) -> tuple[bool, int, int]:
         """Returns (allowed, remaining, retry_after_seconds)."""
         if now is None:
             now = time.time()
@@ -258,13 +258,13 @@ class IPRuleMatcher:
     """IP规则匹配器（IPRuleAnalyzer核心组件）"""
 
     def __init__(self):
-        self._compiled_networks: Dict[str, List] = {}
-        self._match_cache: Dict[str, Optional[str]] = {}
+        self._compiled_networks: dict[str, list] = {}
+        self._match_cache: dict[str, str | None] = {}
         self._cache_lock = threading.Lock()
         self._hits = 0
         self._misses = 0
 
-    def compile_rules(self, rules: List[object]) -> None:
+    def compile_rules(self, rules: list[object]) -> None:
         """预编译规则中的CIDR网络为ipaddress对象"""
         self._compiled_networks.clear()
         for rule in rules:
@@ -281,7 +281,7 @@ class IPRuleMatcher:
                     continue
             self._compiled_networks[rule.rule_id] = networks
 
-    def match(self, ip_str: str, rules: List[object]) -> Optional[object]:
+    def match(self, ip_str: str, rules: list[object]) -> object | None:
         """匹配IP对应的规则（按优先级排序）"""
         with self._cache_lock:
             cached = self._match_cache.get(ip_str)
@@ -299,7 +299,7 @@ class IPRuleMatcher:
             for net in networks:
                 if ip_obj in net:
                     rule.hit_count += 1
-                    rule.last_hit_at = datetime.now(timezone.utc).isoformat()
+                    rule.last_hit_at = datetime.now(UTC).isoformat()
                     with self._cache_lock:
                         self._match_cache[ip_str] = rule.rule_id
                         self._match_cache[f"_rule_{rule.rule_id}"] = rule
@@ -311,7 +311,7 @@ class IPRuleMatcher:
         with self._cache_lock:
             self._match_cache.clear()
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "cache_hits": self._hits,
             "cache_misses": self._misses,
@@ -319,13 +319,13 @@ class IPRuleMatcher:
             "compiled_rules": len(self._compiled_networks),
         }
 
-class IPRuleAnalyzer(object):
+class IPRuleAnalyzer:
     """IP规则分析器 - 分析规则命中趋势、识别冗余规则、生成安全报告"""
 
     def __init__(self):
         self._matcher = IPRuleMatcher()
 
-    def analyze_rule_coverage(self, rules: List[object]) -> Dict:
+    def analyze_rule_coverage(self, rules: list[object]) -> dict:
         """分析规则覆盖情况"""
         total_ips = 0
         for rule in rules:
@@ -345,7 +345,7 @@ class IPRuleAnalyzer(object):
             "top_hit_rules": sorted(rules, key=lambda r: r.hit_count, reverse=True)[:5],
         }
 
-    def find_redundant_rules(self, rules: List[object]) -> List[Dict]:
+    def find_redundant_rules(self, rules: list[object]) -> list[dict]:
         """找出可能冗余的规则（0命中+低优先级）"""
         return [
             {"rule_id": r.rule_id, "name": r.name, "hit_count": r.hit_count, "priority": r.priority}
@@ -476,11 +476,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for gr in geo_rules:
             match_type = gr.get("type", "")
             value = gr.get("value", "")
-            if match_type == GeoMatchType.COUNTRY and geo_info.country_code == value:
-                return True
-            elif match_type == GeoMatchType.REGION and geo_info.region == value:
-                return True
-            elif match_type == GeoMatchType.ASN and geo_info.asn == value:
+            if match_type == GeoMatchType.COUNTRY and geo_info.country_code == value or match_type == GeoMatchType.REGION and geo_info.region == value or match_type == GeoMatchType.ASN and geo_info.asn == value:
                 return True
         return False
 
@@ -508,7 +504,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 continue
 
             rule.hit_count += 1
-            rule.last_hit_at = datetime.now(timezone.utc).isoformat()
+            rule.last_hit_at = datetime.now(UTC).isoformat()
 
             if rule.action == RuleAction.ALLOW:
                 decision = AccessDecision(True, RuleAction.ALLOW, rule.rule_id, "Matched allow rule")
@@ -618,7 +614,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for k, v in kwargs.items():
             if hasattr(rule, k):
                 setattr(rule, k, v)
-        rule.updated_at = datetime.now(timezone.utc).isoformat()
+        rule.updated_at = datetime.now(UTC).isoformat()
         return True
 
     def delete_rule(self, rule_id: str) -> bool:
@@ -627,7 +623,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         del self._rules[rule_id]
         return True
 
-    def get_rule(self, rule_id: str) -> Optional[dict]:
+    def get_rule(self, rule_id: str) -> dict | None:
         if rule_id not in self._rules:
             return None
         r = self._rules[rule_id]
@@ -754,7 +750,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "rph": self._rate_config.requests_per_hour,
                 "rpd": self._rate_config.requests_per_day,
             },
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

@@ -128,7 +128,7 @@ class AgentNode:
     agent_id: str
     name: str
     role: AgentRole
-    capabilities: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
     status: AgentStatus = AgentStatus.IDLE
     current_task: str = ""
     tasks_completed: int = 0
@@ -144,17 +144,17 @@ class TaskAssignment:
     agent_id: str
     status: str = "assigned"
     assigned_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
 
 class CoalitionOptimizer:
     """多Agent联盟优化器 - 动态分组、负载均衡、协作策略"""
 
     def __init__(self):
-        self._coalitions: Dict[str, List[str]] = {}
-        self._agent_capacities: Dict[str, float] = {}
-        self._assignment_history: List[Dict] = []
+        self._coalitions: dict[str, list[str]] = {}
+        self._agent_capacities: dict[str, float] = {}
+        self._assignment_history: list[dict] = []
 
-    def form_coalition(self, coalition_id: str, agent_ids: List[str], task_type: str) -> Dict:
+    def form_coalition(self, coalition_id: str, agent_ids: list[str], task_type: str) -> dict:
         """组建Agent联盟"""
         self._coalitions[coalition_id] = agent_ids
         for aid in agent_ids:
@@ -163,7 +163,7 @@ class CoalitionOptimizer:
         self._assignment_history.append(entry)
         return {"coalition_id": coalition_id, "size": len(agent_ids), "task_type": task_type}
 
-    def balance_load(self, task_counts: Dict[str, int]) -> Dict:
+    def balance_load(self, task_counts: dict[str, int]) -> dict:
         """负载均衡：建议任务重新分配"""
         agents = sorted(task_counts.items(), key=lambda x: x[1], reverse=True)
         if len(agents) < 2:
@@ -175,7 +175,7 @@ class CoalitionOptimizer:
                 suggestions.append({"from": aid, " redistribute": count - int(avg)})
         return {"balanced": len(suggestions) == 0, "avg_load": round(avg, 1), "suggestions": suggestions}
 
-    def evaluate_coalition(self, coalition_id: str, success_rate: float) -> Dict:
+    def evaluate_coalition(self, coalition_id: str, success_rate: float) -> dict:
         """评估联盟效能"""
         agents = self._coalitions.get(coalition_id, [])
         score = success_rate * min(len(agents) / 5.0, 1.0)
@@ -186,12 +186,12 @@ class CoalitionOptimizer:
             "score": round(score, 3),
         }
 
-    def dissolve_coalition(self, coalition_id: str) -> Dict:
+    def dissolve_coalition(self, coalition_id: str) -> dict:
         """解散联盟"""
         agents = self._coalitions.pop(coalition_id, None)
         return {"dissolved": agents is not None, "released_agents": agents or []}
 
-    def find_best_agent(self, task_type: str, agent_skills: Dict[str, List[str]]) -> str:
+    def find_best_agent(self, task_type: str, agent_skills: dict[str, list[str]]) -> str:
         """根据任务类型找最匹配的Agent"""
         best, best_score = None, 0
         for aid, skills in agent_skills.items():
@@ -201,7 +201,7 @@ class CoalitionOptimizer:
                 best = aid
         return best or ""
 
-    def detect_conflict(self, agent_id: str, active_coalitions: List[str]) -> Dict:
+    def detect_conflict(self, agent_id: str, active_coalitions: list[str]) -> dict:
         """检测Agent是否在多个冲突联盟中"""
         memberships = [cid for cid in active_coalitions if agent_id in self._coalitions.get(cid, [])]
         return {
@@ -211,7 +211,7 @@ class CoalitionOptimizer:
             "coalitions": memberships,
         }
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """获取优化器摘要"""
         total_agents = set()
         for agents in self._coalitions.values():
@@ -233,15 +233,15 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._agents: Dict[str, AgentNode] = {}
-        self._assignments: Dict[str, TaskAssignment] = {}
-        self._task_queue: List[Dict[str, Any]] = []
+        self._agents: dict[str, AgentNode] = {}
+        self._assignments: dict[str, TaskAssignment] = {}
+        self._task_queue: list[dict[str, Any]] = []
         self._agent_counter: int = 0
         self._assign_counter: int = 0
 
@@ -258,7 +258,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_mas_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -360,7 +360,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         online = sum(1 for a in self._agents.values() if a.status != AgentStatus.OFFLINE)
         idle = sum(1 for a in self._agents.values() if a.status == AgentStatus.IDLE)
         return {
@@ -378,7 +378,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._task_queue.clear()
         # super().shutdown() removed for sync compatibility
 
-    def _register_agent(self, name: str, role: str, capabilities: List[str]) -> AgentNode:
+    def _register_agent(self, name: str, role: str, capabilities: list[str]) -> AgentNode:
         self._agent_counter += 1
         try:
             r = AgentRole(role)
@@ -391,7 +391,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return agent
 
-    def _unregister_agent(self, agent_id: str) -> Dict:
+    def _unregister_agent(self, agent_id: str) -> dict:
         agent = self._agents.get(agent_id)
         if not agent:
             return {"error": "Agent not found"}
@@ -401,7 +401,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"agent_id": agent_id, "status": "offline"}
 
-    def _heartbeat(self, agent_id: str, status: str) -> Dict:
+    def _heartbeat(self, agent_id: str, status: str) -> dict:
         agent = self._agents.get(agent_id)
         if not agent:
             return {"error": "Agent not found"}
@@ -413,7 +413,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         agent.last_heartbeat = time.time()
         return {"agent_id": agent_id, "status": s.value}
 
-    def _submit_task(self, task: Dict, required_caps: List[str]) -> Dict:
+    def _submit_task(self, task: dict, required_caps: list[str]) -> dict:
         """提交任务，自动分配给空闲agent"""
         # 找匹配的空闲agent
         best_agent = None
@@ -464,7 +464,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "agent_name": best_agent.name,
         }
 
-    def _complete_assignment(self, assignment_id: str, result_data: Dict) -> Dict:
+    def _complete_assignment(self, assignment_id: str, result_data: dict) -> dict:
         assignment = self._assignments.get(assignment_id)
         if not assignment:
             return {"error": "Assignment not found"}
@@ -488,7 +488,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "agent_tasks": agent.tasks_completed if agent else 0,
         }
 
-    def _cancel_assignment(self, assignment_id: str, reason: str) -> Dict:
+    def _cancel_assignment(self, assignment_id: str, reason: str) -> dict:
         """取消任务分配"""
         assignment = self._assignments.get(assignment_id)
         if not assignment or assignment.status != "pending":
@@ -502,7 +502,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._audit.log("assignment_cancelled", {"assignment_id": assignment_id, "reason": reason})
         return {"cancelled": True, "assignment_id": assignment_id}
 
-    def _get_agent_utilization(self) -> Dict:
+    def _get_agent_utilization(self) -> dict:
         """获取所有Agent利用率"""
         utils = []
         for agent in self._agents.values():
@@ -521,7 +521,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"agents": utils, "avg_utilization": round(sum(a["utilization"] for a in utils) / max(len(utils), 1), 1)}
 
-    def _reassign_task(self, assignment_id: str, new_agent_id: str) -> Dict:
+    def _reassign_task(self, assignment_id: str, new_agent_id: str) -> dict:
         """将任务重新分配给另一个Agent"""
         assignment = self._assignments.get(assignment_id)
         if not assignment:
@@ -543,7 +543,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"reassigned": True, "assignment_id": assignment_id, "new_agent": new_agent_id}
 
-    def _get_queue_status(self) -> Dict:
+    def _get_queue_status(self) -> dict:
         """获取任务队列状态"""
         return {
             "queue_length": len(self._task_queue),
@@ -552,9 +552,9 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "idle_agents": sum(1 for a in self._agents.values() if a.status == AgentStatus.IDLE),
         }
 
-    def _get_capability_map(self) -> Dict:
+    def _get_capability_map(self) -> dict:
         """获取系统能力分布图"""
-        cap_map: Dict[str, List[str]] = {}
+        cap_map: dict[str, list[str]] = {}
         for agent in self._agents.values():
             for cap in agent.capabilities:
                 cap_map.setdefault(cap, []).append(agent.agent_id)
@@ -564,7 +564,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "coverage": {k: len(v) for k, v in cap_map.items()},
         }
 
-    def _expel_agent(self, agent_id: str, reason: str) -> Dict:
+    def _expel_agent(self, agent_id: str, reason: str) -> dict:
         """驱逐不健康Agent"""
         agent = self._agents.pop(agent_id, None)
         if not agent:
@@ -579,7 +579,7 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._audit.log("agent_expelled", {"agent_id": agent_id, "reason": reason, "released_tasks": len(released)})
         return {"expelled": True, "agent_id": agent_id, "released_tasks": released}
 
-    def _batch_register(self, agents: List[Dict]) -> Dict:
+    def _batch_register(self, agents: list[dict]) -> dict:
         """批量注册Agent"""
         registered, failed = [], []
         for a in agents:
@@ -590,13 +590,13 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 failed.append({"name": a.get("name", ""), "error": str(e)[:100]})
         return {"registered": len(registered), "failed": len(failed), "agent_ids": registered}
 
-    def analyze_team_synergy(self) -> Dict[str, Any]:
+    def analyze_team_synergy(self) -> dict[str, Any]:
         """分析团队协同效能：Agent间协作频率、冲突检测、角色覆盖度"""
         agents = self._agents if hasattr(self, "_agents") else {}
         tasks = self._tasks if hasattr(self, "_tasks") else {}
         if not agents:
             return {"total_agents": 0}
-        role_coverage: Dict[str, int] = {}
+        role_coverage: dict[str, int] = {}
         for aid, agent in agents.items():
             role = agent.get("role", "worker") if isinstance(agent, dict) else "worker"
             role_coverage[role] = role_coverage.get(role, 0) + 1
@@ -611,14 +611,14 @@ class AgentMASManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "completion_rate": round(completed / total, 3),
         }
 
-    def get_task_assignment_summary(self) -> Dict[str, Any]:
+    def get_task_assignment_summary(self) -> dict[str, Any]:
         """任务分配摘要：各Agent任务负载、超时统计、优先级分布"""
         tasks = self._tasks if hasattr(self, "_tasks") else {}
         agents = self._agents if hasattr(self, "_agents") else {}
         if not tasks:
             return {"total_tasks": 0}
-        agent_load: Dict[str, int] = {}
-        priority_dist: Dict[str, int] = {}
+        agent_load: dict[str, int] = {}
+        priority_dist: dict[str, int] = {}
         overdue = 0
         now = time.time()
         for tid, task in tasks.items():

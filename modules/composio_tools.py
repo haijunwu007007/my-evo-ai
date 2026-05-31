@@ -130,8 +130,8 @@ class ComposioTool:
     status: ToolStatus = ToolStatus.ACTIVE
     endpoint: str = ""
     method: str = "POST"
-    headers: Dict[str, str] = field(default_factory=dict)
-    params_schema: Dict[str, Any] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
+    params_schema: dict[str, Any] = field(default_factory=dict)
     rate_limit: int = 100
     timeout_ms: int = 30000
     created_at: float = 0.0
@@ -154,7 +154,7 @@ class Credential:
     access_token: str = ""
     refresh_token: str = ""
     expires_at: float = 0.0
-    scopes: List[str] = field(default_factory=list)
+    scopes: list[str] = field(default_factory=list)
     created_at: float = 0.0
     last_used: float = 0.0
 
@@ -169,8 +169,8 @@ class WebhookConfig:
     url: str = ""
     method: WebhookMethod = WebhookMethod.POST
     secret: str = ""
-    events: List[str] = field(default_factory=list)
-    headers: Dict[str, str] = field(default_factory=dict)
+    events: list[str] = field(default_factory=list)
+    headers: dict[str, str] = field(default_factory=dict)
     enabled: bool = True
     success_count: int = 0
     failure_count: int = 0
@@ -184,10 +184,10 @@ class ExecutionRecord:
     exec_id: str = ""
     tool_id: str = ""
     action: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     status: str = "success"
     duration_ms: float = 0.0
-    response: Dict[str, Any] = field(default_factory=dict)
+    response: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     timestamp: float = 0.0
 
@@ -279,10 +279,10 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         super().__init__(
             config={"module_id": "composio_tools", "version": "7.0.0", "description": "Composio第三方服务集成管理"}
         )
-        self._tools: Dict[str, ComposioTool] = {}
-        self._credentials: Dict[str, Credential] = {}
-        self._webhooks: Dict[str, WebhookConfig] = {}
-        self._executions: List[ExecutionRecord] = []
+        self._tools: dict[str, ComposioTool] = {}
+        self._credentials: dict[str, Credential] = {}
+        self._webhooks: dict[str, WebhookConfig] = {}
+        self._executions: list[ExecutionRecord] = []
         self._initialized = False
         self._max_executions = 5000
 
@@ -306,7 +306,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._initialized = True
         logger.info(f"Composio工具管理器初始化完成，预置工具: {len(self._tools)}")
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"module": "composio_tools"})
         self.metrics_collector.counter("composio_tools.execute.calls", 1)
@@ -542,7 +542,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             logger.error(f"[ComposioTools] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _simulate_tool_call(self, tool: ComposioTool, action: str, params: Dict) -> Dict:
+    def _simulate_tool_call(self, tool: ComposioTool, action: str, params: dict) -> dict:
         """模拟工具调用返回"""
         provider = tool.provider
         if provider == "github":
@@ -593,7 +593,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 },
             }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -616,7 +616,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._initialized = False
         logger.info(f"关闭Composio工具管理器，工具数: {len(self._tools)}")
 
-    def batch_register_tools(self, tools: List[Dict]) -> Dict[str, Any]:
+    def batch_register_tools(self, tools: list[dict]) -> dict[str, Any]:
         """批量注册外部工具。企业场景：团队一次性接入多个第三方SaaS工具。
         每个工具定义包含 name, description, api_endpoint, auth_type, parameters。
         """
@@ -644,7 +644,7 @@ class ComposioToolsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 results["details"].append({"name": tool_def.get("name", "?"), "error": str(e)})
         return results
 
-    def get_tool_usage_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_tool_usage_report(self, days: int = 7) -> dict[str, Any]:
         """获取工具使用报告。企业场景：周报统计哪些外部工具被频繁调用，辅助成本优化。"""
         report = {"period_days": days, "total_calls": 0, "tool_stats": [], "top_tools": []}
         now = time.time()

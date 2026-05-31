@@ -147,7 +147,7 @@ class BoundingBox:
     label: str = ""
     category: DetectionCategory = DetectionCategory.OBJECT
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "x": self.x,
             "y": self.y,
@@ -177,10 +177,10 @@ class DetectedObject:
 
     object_id: str = ""
     bbox: BoundingBox = field(default_factory=BoundingBox)
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    feature_vector: List[float] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    feature_vector: list[float] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {"object_id": self.object_id, "bbox": self.bbox.to_dict(), "attributes": self.attributes}
 
 @dataclass
@@ -190,10 +190,10 @@ class OCRResult:
     text: str = ""
     confidence: float = 0.0
     language: str = "auto"
-    words: List[Dict[str, Any]] = field(default_factory=list)
-    blocks: List[Dict[str, Any]] = field(default_factory=list)
+    words: list[dict[str, Any]] = field(default_factory=list)
+    blocks: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "text": self.text,
             "confidence": self.confidence,
@@ -209,12 +209,12 @@ class SceneAnalysis:
 
     scene_type: SceneType = SceneType.INDOOR
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     confidence: float = 0.0
-    color_palette: List[str] = field(default_factory=list)
-    dominant_colors: List[Tuple[str, float]] = field(default_factory=list)
+    color_palette: list[str] = field(default_factory=list)
+    dominant_colors: list[tuple[str, float]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "scene_type": self.scene_type.value,
             "description": self.description,
@@ -233,16 +233,16 @@ class ImageAnalysisResult:
     width: int = 0
     height: int = 0
     file_size: int = 0
-    objects: List[DetectedObject] = field(default_factory=list)
-    ocr: Optional[OCRResult] = None
-    scene: Optional[SceneAnalysis] = None
+    objects: list[DetectedObject] = field(default_factory=list)
+    ocr: OCRResult | None = None
+    scene: SceneAnalysis | None = None
     anomaly_score: float = 0.0
     is_anomaly: bool = False
-    features: List[float] = field(default_factory=list)
+    features: list[float] = field(default_factory=list)
     processing_time_ms: int = 0
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "analysis_id": self.analysis_id,
             "source_ref": self.source_ref,
@@ -266,9 +266,9 @@ class FeatureExtractor:
 
     def __init__(self, feature_dim: int = 256):
         self.feature_dim = feature_dim
-        self._feature_cache: Dict[str, List[float]] = {}
+        self._feature_cache: dict[str, list[float]] = {}
 
-    def extract_color_histogram(self, pixel_data: List[Tuple[int, int, int]], bins: int = 16) -> List[float]:
+    def extract_color_histogram(self, pixel_data: list[tuple[int, int, int]], bins: int = 16) -> list[float]:
         """提取颜色直方图特征"""
         r_hist = [0] * bins
         g_hist = [0] * bins
@@ -286,7 +286,7 @@ class FeatureExtractor:
             features.append(0.0)
         return features[: self.feature_dim]
 
-    def extract_phash(self, pixel_data: List[Tuple[int, int, int]], width: int, height: int, hash_size: int = 8) -> str:
+    def extract_phash(self, pixel_data: list[tuple[int, int, int]], width: int, height: int, hash_size: int = 8) -> str:
         """感知哈希(简化版)"""
         block_w = max(1, width // hash_size)
         block_h = max(1, height // hash_size)
@@ -306,7 +306,7 @@ class FeatureExtractor:
         bits = "".join("1" if v >= avg else "0" for v in flat)
         return hex(int(bits, 2))[2:]
 
-    def compute_similarity(self, vec_a: List[float], vec_b: List[float]) -> float:
+    def compute_similarity(self, vec_a: list[float], vec_b: list[float]) -> float:
         """计算余弦相似度"""
         if not vec_a or not vec_b:
             return 0.0
@@ -321,7 +321,7 @@ class FeatureExtractor:
 # NMS非极大值抑制
 # ============================================================
 
-class NMSProcessor(object):
+class NMSProcessor:
     """非极大值抑制 — 去除重叠检测框"""
 
     def __init__(self, iou_threshold: float = 0.5):
@@ -337,7 +337,7 @@ class NMSProcessor(object):
         union = box_a.area + box_b.area - intersection
         return intersection / union if union > 0 else 0.0
 
-    def suppress(self, boxes: List[BoundingBox]) -> List[BoundingBox]:
+    def suppress(self, boxes: list[BoundingBox]) -> list[BoundingBox]:
         """执行NMS"""
         if not boxes:
             return []
@@ -358,10 +358,10 @@ class FeatureExtractor:
     """
 
     def __init__(self):
-        self._feature_cache: Dict[str, List[float]] = {}
+        self._feature_cache: dict[str, list[float]] = {}
         self._dimensions = 256  # 特征向量维度
 
-    def extract_color_histogram(self, pixels: List[Tuple], bins: int = 32) -> List[float]:
+    def extract_color_histogram(self, pixels: list[tuple], bins: int = 32) -> list[float]:
         """提取RGB颜色直方图特征（归一化）"""
         hist_r = [0] * bins
         hist_g = [0] * bins
@@ -375,7 +375,7 @@ class FeatureExtractor:
         features = [h / total for h in hist_r + hist_g + hist_b]
         return features
 
-    def extract_edge_histogram(self, pixels: List[Tuple], width: int, height: int) -> List[float]:
+    def extract_edge_histogram(self, pixels: list[tuple], width: int, height: int) -> list[float]:
         """提取边缘方向直方图（Sobel简化版）"""
         directions = [0] * 8  # 8方向量化
         for y in range(1, height - 1):
@@ -401,7 +401,7 @@ class FeatureExtractor:
         total = sum(directions) or 1
         return [d / total for d in directions]
 
-    def compute_similarity(self, features_a: List[float], features_b: List[float]) -> float:
+    def compute_similarity(self, features_a: list[float], features_b: list[float]) -> float:
         """余弦相似度计算"""
         if len(features_a) != len(features_b) or not features_a:
             return 0.0
@@ -412,7 +412,7 @@ class FeatureExtractor:
             return 0.0
         return dot / (mag_a * mag_b)
 
-    def build_fingerprint(self, image_id: str, pixels: List[Tuple], width: int, height: int) -> Dict:
+    def build_fingerprint(self, image_id: str, pixels: list[tuple], width: int, height: int) -> dict:
         """生成图像综合特征指纹"""
         color_feat = self.extract_color_histogram(pixels)
         features = color_feat + [0.0] * (self._dimensions - len(color_feat))
@@ -430,13 +430,13 @@ class FeatureExtractor:
 class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Iris智能体 — 视觉感知引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_iris", version="6.39.0", config=config)
         self._feature_extractor = FeatureExtractor()
         self._nms = NMSProcessor()
-        self._analysis_cache: Dict[str, ImageAnalysisResult] = {}
-        self._feature_store: Dict[str, List[float]] = {}
+        self._analysis_cache: dict[str, ImageAnalysisResult] = {}
+        self._feature_store: dict[str, list[float]] = {}
         self._stats = {
             "total_analyses": 0,
             "total_detections": 0,
@@ -451,7 +451,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._update_status(ModuleStatus.READY)
         logger.info("AgentIris 视觉感知引擎初始化完成")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         """统一执行入口 — 根据action路由到视觉分析业务方法"""
         _ = self.trace("execute")
         metrics_collector.counter("agent_iris_ops_total", labels={"action": action})
@@ -491,7 +491,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 图像分析 ===
 
-    async def analyze_image(self, source_ref: str, image_data: str, options: Optional[Dict[str, Any]] = None) -> Result:
+    async def analyze_image(self, source_ref: str, image_data: str, options: dict[str, Any] | None = None) -> Result:
         """分析图像（OCR + 目标检测 + 场景分类）"""
         start = time.time()
         analysis_id = hashlib.md5(f"{source_ref}:{time.time()}".encode()).hexdigest()[:16]
@@ -550,7 +550,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.error(f"图像分析失败: {e}")
             return Result(success=False, message=str(e))
 
-    async def _perform_ocr(self, image_data: str, opts: Dict) -> OCRResult:
+    async def _perform_ocr(self, image_data: str, opts: dict) -> OCRResult:
         """执行OCR识别"""
         # 模拟OCR处理 — 生产环境接入真实OCR引擎
         result = OCRResult(text="", confidence=0.0, language=opts.get("language", "auto"))
@@ -562,7 +562,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             result.words = [{"text": "示例", "confidence": 0.9, "bbox": [0, 0, 50, 20]}]
         return result
 
-    async def _analyze_scene(self, opts: Dict) -> SceneAnalysis:
+    async def _analyze_scene(self, opts: dict) -> SceneAnalysis:
         """场景分类"""
         scene_type = opts.get("expected_scene", SceneType.INDOOR)
         if isinstance(scene_type, str):
@@ -578,7 +578,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             dominant_colors=[("#333333", 0.3), ("#666666", 0.25), ("#999999", 0.2)],
         )
 
-    async def _detect_objects(self, opts: Dict) -> List[DetectedObject]:
+    async def _detect_objects(self, opts: dict) -> list[DetectedObject]:
         """目标检测"""
         objects = []
         categories = opts.get("detect_categories", ["object"])
@@ -612,7 +612,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # === 特征匹配 ===
 
     async def extract_features(
-        self, source_ref: str, pixel_data: List[Tuple[int, int, int]], width: int, height: int
+        self, source_ref: str, pixel_data: list[tuple[int, int, int]], width: int, height: int
     ) -> Result:
         """提取图像特征向量"""
         features = self._feature_extractor.extract_color_histogram(pixel_data)
@@ -702,9 +702,9 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def __init__(self):
-        self._time_series: Dict[str, List[Tuple[float, float]]] = {}
-        self._alert_rules: Dict[str, Dict] = {}
-        self._alerts: List[Dict] = []
+        self._time_series: dict[str, list[tuple[float, float]]] = {}
+        self._alert_rules: dict[str, dict] = {}
+        self._alerts: list[dict] = []
         self._window_size: int = 1000
 
     def record(self, metric_name: str, value: float, timestamp: float = None) -> None:
@@ -715,7 +715,7 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if len(series) > self._window_size:
             self._time_series[metric_name] = series[-self._window_size :]
 
-    def get_aggregate(self, metric_name: str, window: int = 60) -> Dict[str, float]:
+    def get_aggregate(self, metric_name: str, window: int = 60) -> dict[str, float]:
         """获取聚合统计"""
         series = self._time_series.get(metric_name, [])
         if not series:
@@ -743,18 +743,14 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "status": "active",
         }
 
-    def evaluate_alerts(self) -> List[Dict]:
+    def evaluate_alerts(self) -> list[dict]:
         """评估告警规则"""
         triggered = []
         for rule_id, rule in self._alert_rules.items():
             agg = self.get_aggregate(rule["metric"])
             value = agg.get("avg", 0)
             triggered_flag = False
-            if rule["condition"] == "gt" and value > rule["threshold"]:
-                triggered_flag = True
-            elif rule["condition"] == "lt" and value < rule["threshold"]:
-                triggered_flag = True
-            elif rule["condition"] == "eq" and abs(value - rule["threshold"]) < 0.01:
+            if rule["condition"] == "gt" and value > rule["threshold"] or rule["condition"] == "lt" and value < rule["threshold"] or rule["condition"] == "eq" and abs(value - rule["threshold"]) < 0.01:
                 triggered_flag = True
             if triggered_flag:
                 alert = {
@@ -769,10 +765,10 @@ class AgentIris(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 self._alerts.append(alert)
         return triggered
 
-    def get_metric_names(self) -> List[str]:
+    def get_metric_names(self) -> list[str]:
         return list(self._time_series.keys())
 
-    def get_alert_history(self, limit: int = 50) -> List[Dict]:
+    def get_alert_history(self, limit: int = 50) -> list[dict]:
         return self._alerts[-limit:]
 
     def delete_metric(self, metric_name: str) -> bool:

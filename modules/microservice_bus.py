@@ -91,13 +91,14 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MicroserviceBusAnalyzer(object):
+class MicroserviceBusAnalyzer:
     """microservice_bus 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -290,7 +291,7 @@ class ServiceInstance:
     port: int = 0
     status: ServiceStatus = ServiceStatus.HEALTHY
     weight: int = 100
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
     registered_at: float = field(default_factory=time.time)
     last_heartbeat: float = field(default_factory=time.time)
     request_count: int = 0
@@ -303,7 +304,7 @@ class BusMessage:
     type: MessageType = MessageType.PUBLISH
     topic: str = ""
     payload: Any = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     source_service: str = ""
     target_service: str = ""
     reply_to: str = ""
@@ -318,9 +319,9 @@ class BusMessage:
 class Subscription:
     sub_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     topic: str = ""
-    handler: Optional[Callable] = None
+    handler: Callable | None = None
     service_name: str = ""
-    filter_headers: Dict[str, str] = field(default_factory=dict)
+    filter_headers: dict[str, str] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -367,7 +368,7 @@ class MicroserviceBus:
 
     """Enterprise microservice message bus with service discovery and routing."""
 
-    def __init__(self, config: Optional[BusConfig] = None):
+    def __init__(self, config: BusConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -400,15 +401,15 @@ class MicroserviceBus:
         )()
 
         self._config = config or BusConfig()
-        self._services: Dict[str, Dict[str, ServiceInstance]] = defaultdict(dict)
-        self._subscriptions: Dict[str, List[Subscription]] = defaultdict(list)
-        self._pending_replies: Dict[str, threading.Event] = {}
-        self._reply_data: Dict[str, BusMessage] = {}
-        self._dead_letter: List[BusMessage] = []
+        self._services: dict[str, dict[str, ServiceInstance]] = defaultdict(dict)
+        self._subscriptions: dict[str, list[Subscription]] = defaultdict(list)
+        self._pending_replies: dict[str, threading.Event] = {}
+        self._reply_data: dict[str, BusMessage] = {}
+        self._dead_letter: list[BusMessage] = []
         self._lock = threading.RLock()
         self._stats = BusStats()
-        self._heartbeat_thread: Optional[threading.Thread] = None
-        self._rr_counters: Dict[str, int] = defaultdict(int)
+        self._heartbeat_thread: threading.Thread | None = None
+        self._rr_counters: dict[str, int] = defaultdict(int)
         self._running = False
         self._initialized = False
         logger.info("MicroserviceBus created")
@@ -453,7 +454,7 @@ class MicroserviceBus:
             return False
 
     def subscribe(
-        self, topic: str, handler: Callable, service_name: str = "", filter_headers: Optional[Dict[str, str]] = None
+        self, topic: str, handler: Callable, service_name: str = "", filter_headers: dict[str, str] | None = None
     ) -> str:
         sub = Subscription(topic=topic, handler=handler, service_name=service_name, filter_headers=filter_headers or {})
         with self._lock:
@@ -470,7 +471,7 @@ class MicroserviceBus:
             return False
 
     def publish(
-        self, topic: str, payload: Any, headers: Optional[Dict[str, str]] = None, source: str = "", priority: int = 5
+        self, topic: str, payload: Any, headers: dict[str, str] | None = None, source: str = "", priority: int = 5
     ) -> int:
         msg = BusMessage(
             type=MessageType.PUBLISH,
@@ -498,7 +499,7 @@ class MicroserviceBus:
                             self._stats.dead_letter_count += 1
             return delivered
 
-    def request(self, service_name: str, method: str, payload: Any, timeout: float = 5.0) -> Optional[Any]:
+    def request(self, service_name: str, method: str, payload: Any, timeout: float = 5.0) -> Any | None:
         correlation_id = uuid.uuid4().hex[:16]
         msg = BusMessage(
             type=MessageType.REQUEST, topic=f"{service_name}.{method}", payload=payload, correlation_id=correlation_id
@@ -531,11 +532,11 @@ class MicroserviceBus:
             self._pending_replies.pop(correlation_id, None)
             return self._reply_data.pop(correlation_id, None)
 
-    def discover(self, service_name: str) -> List[ServiceInstance]:
+    def discover(self, service_name: str) -> list[ServiceInstance]:
         with self._lock:
             return list(self._services.get(service_name, {}).values())
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             active = sum(
                 len({k: v for k, v in insts.items() if v.status == ServiceStatus.HEALTHY})
@@ -552,7 +553,7 @@ class MicroserviceBus:
                 "registered_services": list(self._services.keys()),
             }
 
-    def _select_instance(self, service_name: str, instances: List[ServiceInstance]) -> ServiceInstance:
+    def _select_instance(self, service_name: str, instances: list[ServiceInstance]) -> ServiceInstance:
         if self._config.routing_strategy == RoutingStrategy.ROUND_ROBIN:
             idx = self._rr_counters[service_name] % len(instances)
             self._rr_counters[service_name] += 1
@@ -588,7 +589,7 @@ class MicroserviceBus:
                 logger.error("Heartbeat loop error: %s", e)
             time.sleep(self._config.heartbeat_interval)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

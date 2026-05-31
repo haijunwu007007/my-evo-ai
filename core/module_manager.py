@@ -19,9 +19,9 @@ class ModuleManager:
     """模块管理器"""
 
     def __init__(self):
-        self.modules: Dict[str, ModuleBase] = {}
-        self.module_registry: Dict[str, Type[ModuleBase]] = {}
-        self.module_metadata: Dict[str, Dict] = {}
+        self.modules: dict[str, ModuleBase] = {}
+        self.module_registry: dict[str, type[ModuleBase]] = {}
+        self.module_metadata: dict[str, dict] = {}
         self.stats = {
             "total_calls": 0,
             "successful_calls": 0,
@@ -29,13 +29,13 @@ class ModuleManager:
             "start_time": datetime.now().isoformat()
         }
 
-    def register_module_class(self, module_id: str, module_class: Type[ModuleBase]):
+    def register_module_class(self, module_id: str, module_class: type[ModuleBase]):
         self.module_registry[module_id] = module_class
 
     def register_module(self, module: ModuleBase):
         self.modules[module.id] = module
 
-    def get_module(self, module_id: str) -> Optional[ModuleBase]:
+    def get_module(self, module_id: str) -> ModuleBase | None:
         if module_id in self.modules:
             return self.modules[module_id]
         if module_id in self.module_registry:
@@ -45,13 +45,13 @@ class ModuleManager:
             return instance
         return None
 
-    def get_all_modules(self) -> List[ModuleBase]:
+    def get_all_modules(self) -> list[ModuleBase]:
         return list(self.modules.values())
 
-    def get_enabled_modules(self) -> List[ModuleBase]:
+    def get_enabled_modules(self) -> list[ModuleBase]:
         return [m for m in self.modules.values() if m.enabled]
 
-    async def execute_module(self, module_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_module(self, module_id: str, params: dict[str, Any]) -> dict[str, Any]:
         self.stats["total_calls"] += 1
         module = self.get_module(module_id)
         action = params.get("action", "execute")
@@ -81,7 +81,7 @@ class ModuleManager:
             evo_engine.record(module_id, action, False, elapsed, str(e))
             return {"success": False, "error": str(e)}
 
-    async def execute_chain(self, module_ids: List[str], params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def execute_chain(self, module_ids: list[str], params: dict[str, Any]) -> list[dict[str, Any]]:
         results = []
         shared_context = params.copy()
         for module_id in module_ids:
@@ -90,7 +90,7 @@ class ModuleManager:
             shared_context[f"_{module_id}_result"] = result
         return results
 
-    async def execute_parallel(self, module_ids: List[str], params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def execute_parallel(self, module_ids: list[str], params: dict[str, Any]) -> list[dict[str, Any]]:
         tasks = [self.execute_module(mid, params) for mid in module_ids]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [
@@ -100,7 +100,7 @@ class ModuleManager:
 
     def load_metadata_from_html(self, html_path: str):
         """从 HTML 中解析 DEFAULT_MODULES 数组，支持跨行字段值"""
-        with open(html_path, 'r', encoding='utf-8') as f:
+        with open(html_path, encoding='utf-8') as f:
             content = f.read()
         import re
 
@@ -152,7 +152,7 @@ class ModuleManager:
                 "stars": extract_field(obj_text, 'stars'),
             }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self.stats,
             "registered_modules": len(self.modules),
@@ -160,7 +160,7 @@ class ModuleManager:
             "groups": len(set(m.get("group") for m in self.module_metadata.values()))
         }
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         groups = {}
         for module_id, meta in self.module_metadata.items():
             group = meta.get("group", "未分类")

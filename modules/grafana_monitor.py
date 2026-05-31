@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — Grafana 监控桥接（A级）
 # Grade: A
 
@@ -13,7 +12,7 @@ logger = get_logger("evo.grafana-monitor")
 
 # ── 底层 API 调用（独立函数） ──────────────────────────────────────
 
-def _grafana_get(path: str, base_url: str, api_key: str) -> Tuple[bool, Any]:
+def _grafana_get(path: str, base_url: str, api_key: str) -> tuple[bool, Any]:
     """向 Grafana REST API 发起 GET 请求。
     返回 (success, data) 元组。"""
     try:
@@ -31,7 +30,7 @@ def _grafana_get(path: str, base_url: str, api_key: str) -> Tuple[bool, Any]:
         logger.error("grafana: GET %s 失败: %s", path, e)
         return False, {"error": str(e)}
 
-def query_metric(url: str, api_key: str, query: str) -> Dict:
+def query_metric(url: str, api_key: str, query: str) -> dict:
     """通过 Grafana API 查询 Prometheus 指标。
     使用 /api/ds/query 端点（datasource query proxy）。"""
     try:
@@ -61,14 +60,14 @@ def query_metric(url: str, api_key: str, query: str) -> Dict:
         logger.error("grafana: query_metric 失败: %s", e)
         return {"success": False, "error": str(e)}
 
-def list_dashboards(url: str, api_key: str) -> List[Dict]:
+def list_dashboards(url: str, api_key: str) -> list[dict]:
     """列出 Grafana 中所有仪表盘。"""
     ok, data = _grafana_get("/search?type=dash-db", url, api_key)
     if ok and isinstance(data, list):
         return data
     return []
 
-def get_dashboard(url: str, api_key: str, uid: str) -> Dict:
+def get_dashboard(url: str, api_key: str, uid: str) -> dict:
     """获取指定 UID 的仪表盘详情。"""
     ok, data = _grafana_get(f"/dashboards/uid/{uid}", url, api_key)
     if ok and isinstance(data, dict):

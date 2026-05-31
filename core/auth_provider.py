@@ -35,7 +35,7 @@ def _sign(payload: str) -> str:
     return hashlib.sha256(msg.encode()).hexdigest()
 
 
-def create_token(subject: str, role: str = "user", extra: Dict = None) -> Dict:
+def create_token(subject: str, role: str = "user", extra: dict = None) -> dict:
     """签发 JWT 令牌。"""
     now = int(time.time())
     payload = {
@@ -54,7 +54,7 @@ def create_token(subject: str, role: str = "user", extra: Dict = None) -> Dict:
     return {"access_token": token, "token_type": "bearer", "expires_in": _TOKEN_TTL, "subject": subject, "role": role}
 
 
-def verify_token(token: str) -> Optional[Dict]:
+def verify_token(token: str) -> dict | None:
     """验证 JWT 令牌，返回 payload 或 None。"""
     try:
         parts = token.split(".")
@@ -80,7 +80,7 @@ def verify_api_key(api_key: str) -> bool:
     return hmac.compare_digest(api_key, _ADMIN_KEY)
 
 
-def check_role(payload: Dict, required_role: str) -> bool:
+def check_role(payload: dict, required_role: str) -> bool:
     """检查角色权限。"""
     role_hierarchy = {"admin": 3, "editor": 2, "user": 1, "guest": 0}
     user_level = role_hierarchy.get(payload.get("role", "guest"), 0)
@@ -88,7 +88,7 @@ def check_role(payload: Dict, required_role: str) -> bool:
     return user_level >= required_level
 
 
-def get_auth_config() -> Dict:
+def get_auth_config() -> dict:
     """获取认证配置（给 API 返回用）。"""
     return {
         "enabled": os.environ.get("EVO_AUTH_ENABLED", "false").lower() == "true",

@@ -4,7 +4,8 @@ AUTO-EVO-AI 企业级模块增强层
 """
 import functools, time, logging, traceback
 from core.logging_config import get_logger
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional
+from collections.abc import Callable
 
 logger = get_logger("enterprise")
 
@@ -43,7 +44,7 @@ class CircuitBreaker:
         self.last_fail_time = 0.0
         self.state = "closed"  # closed → open → half_open → closed
 
-    def call(self, func: Callable, *args, **kwargs) -> Dict:
+    def call(self, func: Callable, *args, **kwargs) -> dict:
         now = time.time()
         if self.state == "open":
             if now - self.last_fail_time > self.recovery_timeout:

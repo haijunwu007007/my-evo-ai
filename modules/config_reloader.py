@@ -82,7 +82,8 @@ import copy
 import hashlib
 import logging
 import threading
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
@@ -132,7 +133,7 @@ class ConfigVersion:
     version_id: str = ""
     source_id: str = ""
     version: int = 0
-    content: Dict[str, Any] = field(default_factory=dict)
+    content: dict[str, Any] = field(default_factory=dict)
     hash: str = ""
     change_summary: str = ""
     created_at: float = 0.0
@@ -147,7 +148,7 @@ class ReloadEvent:
     event_type: str = "changed"  # changed, rolled_back, validated
     old_hash: str = ""
     new_hash: str = ""
-    changes: List[str] = field(default_factory=list)
+    changes: list[str] = field(default_factory=list)
     timestamp: float = 0.0
     success: bool = True
     error: str = ""
@@ -168,12 +169,12 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 "description": "配置热重载管理，支持文件监听、变更检测、版本管理、回滚",
             }
         )
-        self._sources: Dict[str, ConfigSource] = {}
-        self._configs: Dict[str, Dict[str, Any]] = {}  # source_id -> current config
-        self._versions: Dict[str, List[ConfigVersion]] = defaultdict(list)
-        self._events: List[ReloadEvent] = []
-        self._watchers: Dict[str, Dict] = {}  # source_id -> {interval, last_check, strategy}
-        self._callbacks: List[Callable] = []
+        self._sources: dict[str, ConfigSource] = {}
+        self._configs: dict[str, dict[str, Any]] = {}  # source_id -> current config
+        self._versions: dict[str, list[ConfigVersion]] = defaultdict(list)
+        self._events: list[ReloadEvent] = []
+        self._watchers: dict[str, dict] = {}  # source_id -> {interval, last_check, strategy}
+        self._callbacks: list[Callable] = []
         self._initialized = False
         self._max_versions = 50
         self._max_events = 1000
@@ -210,7 +211,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._initialized = True
         logger.info(f"配置重载管理器初始化完成，配置源: {len(self._sources)}")
 
-    def _generate_default_config(self, source_id: str) -> Dict:
+    def _generate_default_config(self, source_id: str) -> dict:
         """生成默认配置"""
         if "app" in source_id:
             return {
@@ -236,10 +237,10 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             }
         return {}
 
-    def _hash_dict(self, d: Dict) -> str:
+    def _hash_dict(self, d: dict) -> str:
         return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()[:16]
 
-    def _diff_configs(self, old: Dict, new: Dict, prefix: str = "") -> List[str]:
+    def _diff_configs(self, old: dict, new: dict, prefix: str = "") -> list[str]:
         """比较两个配置的差异"""
         changes = []
         all_keys = set(list(old.keys()) + list(new.keys()))
@@ -256,7 +257,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                     changes.append(f"~ {path}: {old[key]} -> {new[key]}")
         return changes
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"module": "config_reloader"})
         self.metrics_collector.counter("config_reloader.execute.calls", 1)
@@ -507,7 +508,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             logger.error(f"[ConfigReloader] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _deep_merge(self, base: Dict, override: Dict):
+    def _deep_merge(self, base: dict, override: dict):
         """深度合并字典"""
         for key, value in override.items():
             if key in base and isinstance(base[key], dict) and isinstance(value, dict):
@@ -515,7 +516,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             else:
                 base[key] = copy.deepcopy(value)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -536,7 +537,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def diff_config_versions(self, source: str, version_a: str, version_b: str) -> Dict[str, Any]:
+    def diff_config_versions(self, source: str, version_a: str, version_b: str) -> dict[str, Any]:
         """对比两个配置版本的差异。企业场景：配置变更前对比新旧版本，
         确认变更内容是否符合预期，防止误操作。
         """
@@ -569,7 +570,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "total_changes": len(added) + len(removed) + len(changed),
         }
 
-    def rollback_config(self, source: str, target_version: str) -> Dict[str, Any]:
+    def rollback_config(self, source: str, target_version: str) -> dict[str, Any]:
         """回滚配置到指定版本。企业场景：配置变更导致线上问题后紧急回滚，
         将配置恢复到上一个已知正常版本。
         """
@@ -590,7 +591,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             self._audit.log("config_rollback", {"source": source, "target": target_version})
         return {"success": True, "source": source, "rolled_back_to": target_version}
 
-    def get_config_change_log(self, source: str = "", limit: int = 50) -> Dict[str, Any]:
+    def get_config_change_log(self, source: str = "", limit: int = 50) -> dict[str, Any]:
         """配置变更日志。企业场景：审计追踪配置变更历史，排查问题时回溯变更链。
         支持按source过滤，按时间倒序展示。
         """
@@ -606,7 +607,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "changes": recent,
         }
 
-    def get_source_health(self) -> Dict[str, Any]:
+    def get_source_health(self) -> dict[str, Any]:
         """配置源健康状态。企业场景：监控各配置源（Git/Nacos/Consul/本地文件）
         的连接状态和最后同步时间，发现配置源异常及时告警。
         """
@@ -631,7 +632,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "sources": health,
         }
 
-    def get_config_change_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_config_change_summary(self, hours: int = 24) -> dict[str, Any]:
         """配置变更摘要。企业场景：SRE团队每日晨会回顾过去24小时配置变更，
         识别异常变更（非工作时间、高频变更、核心配置被改）。
         """
@@ -652,7 +653,7 @@ class ConfigReloaderManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "top_changed_keys": self._top_changed_keys(recent, 10),
         }
 
-    def _top_changed_keys(self, history: list, limit: int) -> List[Dict]:
+    def _top_changed_keys(self, history: list, limit: int) -> list[dict]:
         key_counts = {}
         for h in history:
             key = h.get("key", "")

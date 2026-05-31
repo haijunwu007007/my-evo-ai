@@ -135,7 +135,7 @@ class SkillAuthor:
     reputation_score: float = 0.0
     skills_count: int = 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "author_id": self.author_id,
             "name": self.name,
@@ -153,9 +153,9 @@ class SkillVersion:
     size_bytes: int = 0
     checksum_sha256: str = ""
     min_platform_version: str = ""
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "version": self.version,
             "changelog": self.changelog,
@@ -173,7 +173,7 @@ class SkillReview:
     comment: str = ""
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "review_id": self.review_id,
             "reviewer_id": self.reviewer_id,
@@ -189,9 +189,9 @@ class Skill:
     category: SkillCategory = SkillCategory.AUTOMATION
     author: SkillAuthor = field(default_factory=SkillAuthor)
     status: SkillStatus = SkillStatus.DRAFT
-    tags: List[str] = field(default_factory=list)
-    versions: List[SkillVersion] = field(default_factory=list)
-    reviews: List[SkillReview] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    versions: list[SkillVersion] = field(default_factory=list)
+    reviews: list[SkillReview] = field(default_factory=list)
     download_count: int = 0
     install_count: int = 0
     security_level: SecurityLevel = SecurityLevel.MEDIUM
@@ -203,7 +203,7 @@ class Skill:
     updated_at: float = field(default_factory=time.time)
 
     @property
-    def latest_version(self) -> Optional[SkillVersion]:
+    def latest_version(self) -> SkillVersion | None:
         return self.versions[-1] if self.versions else None
 
     @property
@@ -216,7 +216,7 @@ class Skill:
     def review_count(self) -> int:
         return len(self.reviews)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "skill_id": self.skill_id,
             "name": self.name,
@@ -261,7 +261,7 @@ class SecurityAuditor:
 
     FILE_PATTERNS = ["open(", "Path(", "os.path", "shutil", "tempfile"]
 
-    def audit(self, source_code: str, skill_name: str = "") -> Dict:
+    def audit(self, source_code: str, skill_name: str = "") -> dict:
         """执行安全审计"""
         findings = []
         risk_score = 0.0
@@ -335,11 +335,11 @@ class SecurityAuditor:
 # 搜索引擎
 # ============================================================
 
-class SkillSearchEngine(object):
+class SkillSearchEngine:
     """技能搜索引擎"""
 
     def __init__(self):
-        self._index: Dict[str, List[str]] = defaultdict(list)  # token -> [skill_ids]
+        self._index: dict[str, list[str]] = defaultdict(list)  # token -> [skill_ids]
 
     def index_skill(self, skill: Skill):
         """索引技能"""
@@ -351,15 +351,15 @@ class SkillSearchEngine(object):
     def search(
         self,
         query: str,
-        all_skills: Dict[str, Skill],
-        category: Optional[SkillCategory] = None,
+        all_skills: dict[str, Skill],
+        category: SkillCategory | None = None,
         min_rating: float = 0.0,
         sort_by: str = "relevance",
         limit: int = 20,
-    ) -> List[Skill]:
+    ) -> list[Skill]:
         """搜索技能"""
         tokens = self._tokenize(query)
-        scores: Dict[str, float] = defaultdict(float)
+        scores: dict[str, float] = defaultdict(float)
 
         for token in tokens:
             for sid in self._index.get(token, []):
@@ -392,13 +392,13 @@ class SkillSearchEngine(object):
 
         return [skill for skill, _ in results[:limit]]
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """分词"""
         words = text.lower().replace("_", " ").replace("-", " ").split()
         return [w.strip() for w in words if len(w) > 1]
 
 # ============================================================
-class SkillVersionManager(object):
+class SkillVersionManager:
     """技能版本管理器 - 处理技能包的语义化版本控制与兼容性检查。
 
     企业场景：技能市场需要管理数百个技能的多版本共存，
@@ -406,8 +406,8 @@ class SkillVersionManager(object):
     """
 
     def __init__(self):
-        self._versions: Dict[str, List[Dict]] = defaultdict(list)
-        self._install_records: Dict[str, Dict] = {}
+        self._versions: dict[str, list[dict]] = defaultdict(list)
+        self._install_records: dict[str, dict] = {}
 
     def register_version(self, skill_id: str, version: str, changelog: str = "", breaking: bool = False):
         """注册新版本"""
@@ -433,7 +433,7 @@ class SkillVersionManager(object):
             int(parts[2].split("-")[0]) if len(parts) > 2 else 0,
         )
 
-    def get_compatible_versions(self, skill_id: str, constraint: str) -> List[str]:
+    def get_compatible_versions(self, skill_id: str, constraint: str) -> list[str]:
         """获取满足约束的版本列表（支持^和~前缀）"""
         all_versions = self._versions.get(skill_id, [])
         if not all_versions:
@@ -451,7 +451,7 @@ class SkillVersionManager(object):
         else:
             return [v["version"] for v in all_versions if v["version"].startswith(constraint)]
 
-    def check_breaking_changes(self, skill_id: str, from_ver: str, to_ver: str) -> List[Dict]:
+    def check_breaking_changes(self, skill_id: str, from_ver: str, to_ver: str) -> list[dict]:
         """检查两个版本间是否存在破坏性变更"""
         versions = self._versions.get(skill_id, [])
         from_parsed = self._parse_version(from_ver)
@@ -469,7 +469,7 @@ class SkillVersionManager(object):
                 )
         return changes
 
-    def rollback(self, skill_id: str, target_version: str) -> Dict:
+    def rollback(self, skill_id: str, target_version: str) -> dict:
         """执行版本回滚"""
         versions = self._versions.get(skill_id, [])
         target = next((v for v in versions if v["version"] == target_version), None)
@@ -488,14 +488,14 @@ class SkillVersionManager(object):
 class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """智能体市场 — 技能发布与分发"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_market", version="6.39.0", config=config)
-        self._skills: Dict[str, Skill] = {}
-        self._authors: Dict[str, SkillAuthor] = {}
+        self._skills: dict[str, Skill] = {}
+        self._authors: dict[str, SkillAuthor] = {}
         self._auditor = SecurityAuditor()
         self._search = SkillSearchEngine()
-        self._installations: Dict[str, Dict[str, str]] = defaultdict(dict)  # user -> {skill_id: version}
+        self._installations: dict[str, dict[str, str]] = defaultdict(dict)  # user -> {skill_id: version}
         self._stats = {
             "total_skills": 0,
             "published_skills": 0,
@@ -522,7 +522,7 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         category: SkillCategory,
         source_code: str = "",
         version: str = "1.0.0",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         license_type: str = "MIT",
         homepage: str = "",
         repository: str = "",
@@ -605,7 +605,7 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     async def search_skills(
         self,
         query: str,
-        category: Optional[SkillCategory] = None,
+        category: SkillCategory | None = None,
         min_rating: float = 0.0,
         sort_by: str = "relevance",
         limit: int = 20,
@@ -622,7 +622,7 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, data=skill.to_dict())
 
     async def list_skills(
-        self, category: Optional[SkillCategory] = None, status: Optional[SkillStatus] = None, limit: int = 50
+        self, category: SkillCategory | None = None, status: SkillStatus | None = None, limit: int = 50
     ) -> Result:
         skills = list(self._skills.values())
         if category:
@@ -641,7 +641,7 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 安装管理 ===
 
-    async def install_skill(self, user_id: str, skill_id: str, version: Optional[str] = None) -> Result:
+    async def install_skill(self, user_id: str, skill_id: str, version: str | None = None) -> Result:
         skill = self._skills.get(skill_id)
         if not skill:
             return Result(success=False, message=f"技能 {skill_id} 不存在")
@@ -682,7 +682,7 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 健康检查 ===
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — 技能市场路由"""
         _ = self.trace("execute")
         metrics_collector.counter("agent_market_ops_total", labels={"action": action})
@@ -707,11 +707,11 @@ class AgentMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     async def get_module_stats(self) -> Result:
         return Result(success=True, data=self._stats)
 
-    def generate_marketplace_report(self) -> Dict[str, Any]:
+    def generate_marketplace_report(self) -> dict[str, Any]:
         """生成市场报告：技能分类统计、评分分布、活跃度趋势、下载排行"""
         skills = self._skills if hasattr(self, "_skills") else {}
-        categories: Dict[str, int] = {}
-        ratings: Dict[int, int] = {}
+        categories: dict[str, int] = {}
+        ratings: dict[int, int] = {}
         total_reviews = 0
         total_downloads = 0
         for sid, skill in skills.items():

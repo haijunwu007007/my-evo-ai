@@ -105,7 +105,7 @@ class ModuleStatus(str, Enum):
     STOPPED = "stopped"
     ERROR = "error"
 
-class TaskHeatmapAnalyzer(object):
+class TaskHeatmapAnalyzer:
     """task_heatmap 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -233,7 +233,7 @@ class TaskRecord(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.category = category
         self.status = kwargs.get("status", "pending")
         self.start_time = kwargs.get("start_time", time.time())
-        self.end_time = kwargs.get("end_time", None)
+        self.end_time = kwargs.get("end_time")
         self.duration_ms = kwargs.get("duration_ms", 0)
         self.resource_usage = kwargs.get("resource_usage", {})
         self.error = kwargs.get("error", "")
@@ -253,7 +253,7 @@ class HeatmapCell:
         self.min_duration_ms = float("inf")
         self.max_duration_ms = 0.0
         self.resource_sum = defaultdict(float)
-        self.task_ids: List[str] = []
+        self.task_ids: list[str] = []
 
     def add_record(self, record: TaskRecord):
         self.count += 1
@@ -299,7 +299,7 @@ class BottleneckResult:
         self.task_count = task_count
         self.recommendation = recommendation
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "dimension": self.dimension,
             "key": self.key,
@@ -333,7 +333,7 @@ class TaskHeatmap:
 
     """任务热力图分析引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -366,8 +366,8 @@ class TaskHeatmap:
         )()
 
         self.config = config or {}
-        self._records: Dict[str, TaskRecord] = {}
-        self._heatmap_cache: Dict[str, Dict[str, HeatmapCell]] = {}
+        self._records: dict[str, TaskRecord] = {}
+        self._heatmap_cache: dict[str, dict[str, HeatmapCell]] = {}
         self._lock = threading.RLock()
         self._max_records = self.config.get("max_records", 100000)
         self._retention_days = self.config.get("retention_days", 30)
@@ -381,7 +381,7 @@ class TaskHeatmap:
     def _update_status(self, status):
         self._status = status
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             self._status = ModuleStatus.RUNNING
@@ -398,7 +398,7 @@ class TaskHeatmap:
             self._update_status(ModuleStatus.ERROR, str(e))
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         is_healthy = len(self._records) >= 0
         status = ModuleStatus.RUNNING if is_healthy else ModuleStatus.DEGRADED
         self._update_status(status)
@@ -418,10 +418,10 @@ class TaskHeatmap:
         category: str = "general",
         status: str = "completed",
         duration_ms: float = 0,
-        resource_usage: Optional[Dict] = None,
+        resource_usage: dict | None = None,
         error: str = "",
-        tags: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             record = TaskRecord(
                 task_id=task_id,
@@ -480,7 +480,7 @@ class TaskHeatmap:
         for record in self._records.values():
             self._update_heatmap(record)
 
-    def get_heatmap(self, dimension: str, time_range: Optional[str] = None) -> Dict[str, Any]:
+    def get_heatmap(self, dimension: str, time_range: str | None = None) -> dict[str, Any]:
         dim = self._heatmap_cache.get(dimension, {})
         cells = []
         for key, cell in dim.items():
@@ -498,7 +498,7 @@ class TaskHeatmap:
         cells.sort(key=lambda x: x["intensity"], reverse=True)
         return {"dimension": dimension, "time_range": time_range, "total_cells": len(cells), "cells": cells[:200]}
 
-    def detect_bottlenecks(self) -> Dict[str, Any]:
+    def detect_bottlenecks(self) -> dict[str, Any]:
         bottlenecks = []
         threshold = self._bottleneck_threshold
         for dim_name, dim in self._heatmap_cache.items():
@@ -548,7 +548,7 @@ class TaskHeatmap:
         }
         return recs.get(dim, "建议深入分析该维度数据")
 
-    def get_sla_report(self) -> Dict[str, Any]:
+    def get_sla_report(self) -> dict[str, Any]:
         durations = sorted(r.duration_ms for r in self._records.values() if r.duration_ms > 0)
         if not durations:
             return {"total_tasks": 0, "sla_status": "no_data"}
@@ -568,7 +568,7 @@ class TaskHeatmap:
             "p99_target": sla["p99_ms"],
         }
 
-    def get_resource_utilization(self) -> Dict[str, Any]:
+    def get_resource_utilization(self) -> dict[str, Any]:
         total_res = defaultdict(float)
         peak_res = defaultdict(float)
         for record in self._records.values():
@@ -581,7 +581,7 @@ class TaskHeatmap:
             "peak": {k: round(v, 2) for k, v in peak_res.items()},
         }
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         total = len(self._records)
         if total == 0:
             return {"total_records": 0, "status": "empty"}
@@ -597,7 +597,7 @@ class TaskHeatmap:
             "heatmap_dimensions": list(self._heatmap_cache.keys()),
         }
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         params = params or {}
         actions = {
             "record_task": lambda: self.record_task(**params),

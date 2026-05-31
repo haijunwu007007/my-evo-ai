@@ -85,13 +85,14 @@ import weakref
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MemoryLeakDetectAnalyzer(object):
+class MemoryLeakDetectAnalyzer:
     """memory_leak_detect 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -272,7 +273,7 @@ class TrackedObject:
     type_name: str
     count: int
     size_estimate: int
-    sample_ids: List[int] = field(default_factory=list)
+    sample_ids: list[int] = field(default_factory=list)
     growth_rate: float = 0.0
     first_seen: float = field(default_factory=time.time)
     last_seen: float = field(default_factory=time.time)
@@ -294,14 +295,14 @@ class LeakCandidate:
 class DetectionResult:
     scan_id: str
     timestamp: float
-    candidates: List[LeakCandidate]
+    candidates: list[LeakCandidate]
     total_objects: int
     total_size_mb: float
     scan_duration_ms: float
     healthy: bool = True
 
 @dataclass
-class DetectorConfig(object):
+class DetectorConfig:
     scan_interval: float = 30.0
     history_size: int = 100
     baseline_samples: int = 5
@@ -314,18 +315,18 @@ class DetectorConfig(object):
     alert_on_medium: bool = False
     alert_on_high: bool = True
 
-class MemoryLeakDetector(object):
+class MemoryLeakDetector:
     """Enterprise memory leak detection with object tracking and trend analysis."""
 
-    def __init__(self, config: Optional[DetectorConfig] = None):
+    def __init__(self, config: DetectorConfig | None = None):
         self._config = config or DetectorConfig()
         self._lock = threading.RLock()
         self._history: deque = deque(maxlen=self._config.history_size)
-        self._baselines: Dict[str, List[int]] = defaultdict(list)
-        self._type_sizes: Dict[str, float] = {}
+        self._baselines: dict[str, list[int]] = defaultdict(list)
+        self._type_sizes: dict[str, float] = {}
         self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self._callbacks: List[Callable] = []
+        self._thread: threading.Thread | None = None
+        self._callbacks: list[Callable] = []
         self._scan_count = 0
         self._leaks_found = 0
         self._initialized = False
@@ -359,8 +360,8 @@ class MemoryLeakDetector(object):
         start = time.time()
         objects = gc.get_objects()
         total_objects = len(objects)
-        type_counts: Dict[str, int] = defaultdict(int)
-        type_sizes: Dict[str, int] = defaultdict(int)
+        type_counts: dict[str, int] = defaultdict(int)
+        type_sizes: dict[str, int] = defaultdict(int)
 
         for obj in objects:
             tn = type(obj).__name__
@@ -459,16 +460,16 @@ class MemoryLeakDetector(object):
 
         return result
 
-    def get_leak_summary(self) -> Dict[str, Any]:
+    def get_leak_summary(self) -> dict[str, Any]:
         with self._lock:
             if not self._history:
                 return {"scans": 0, "leaks_found": 0, "active_leaks": 0, "leak_details": {}, "candidates": []}
 
-            all_candidates: List[LeakCandidate] = []
+            all_candidates: list[LeakCandidate] = []
             for r in self._history:
                 all_candidates.extend(r.candidates)
 
-            type_severity: Dict[str, Severity] = {}
+            type_severity: dict[str, Severity] = {}
             for c in all_candidates:
                 current = type_severity.get(c.type_name, Severity.NONE)
                 severity_order = [Severity.NONE, Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.CRITICAL]
@@ -487,16 +488,16 @@ class MemoryLeakDetector(object):
                 ],
             }
 
-    def get_type_distribution(self) -> List[Tuple[str, int]]:
+    def get_type_distribution(self) -> list[tuple[str, int]]:
         objects = gc.get_objects()
-        counts: Dict[str, int] = defaultdict(int)
+        counts: dict[str, int] = defaultdict(int)
         for obj in objects:
             counts[type(obj).__name__] += 1
         return sorted(counts.items(), key=lambda x: x[1], reverse=True)[: self._config.track_top_types]
 
     def _take_baseline(self):
         objects = gc.get_objects()
-        counts: Dict[str, int] = defaultdict(int)
+        counts: dict[str, int] = defaultdict(int)
         for obj in objects:
             counts[type(obj).__name__] += 1
         for tn, count in counts.items():
@@ -521,7 +522,7 @@ class MemoryLeakDetector(object):
                 logger.error("Scan loop error: %s", e)
             time.sleep(self._config.scan_interval)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             summary = self.get_leak_summary()

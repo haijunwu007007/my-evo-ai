@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class KvCacheAnalyzer(object):
+class KvCacheAnalyzer:
     """kv_cache 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -268,12 +268,12 @@ class CacheEntry:
     created_at: float = field(default_factory=time.time)
     accessed_at: float = field(default_factory=time.time)
     access_count: int = 0
-    ttl_seconds: Optional[float] = None
+    ttl_seconds: float | None = None
     compressed: bool = False
     compression_type: CompressionType = CompressionType.NONE
     size_bytes: int = 0
     version: int = 1
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
     @property
     def is_expired(self) -> bool:
@@ -302,7 +302,7 @@ class CacheStats:
     hit_rate: float = 0.0
     avg_access_time_us: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "hits": self.hits,
             "misses": self.misses,
@@ -323,7 +323,7 @@ class CacheShard:
     """Shard for distributed caching."""
 
     shard_id: int
-    entries: Dict[str, CacheEntry] = field(default_factory=dict)
+    entries: dict[str, CacheEntry] = field(default_factory=dict)
     lock: threading.RLock = field(default_factory=threading.RLock)
 
 class AdaptiveReplacementCache:
@@ -337,7 +337,7 @@ class AdaptiveReplacementCache:
         self.b2: OrderedDict = OrderedDict()  # frequent ghost B2
         self.p = capacity // 2  # target size for T1
 
-    def access(self, key: str) -> Tuple[bool, Optional[str]]:
+    def access(self, key: str) -> tuple[bool, str | None]:
         """Returns (found, evicted_key_or_None)."""
         if key in self.t2:
             self.t2.move_to_end(key)
@@ -373,21 +373,21 @@ class AdaptiveReplacementCache:
         self.t1[key] = True
         return False, evicted
 
-    def _replace(self) -> Optional[str]:
+    def _replace(self) -> str | None:
         if not self.t1 and not self.t2:
             return None
         if self.t1 and ((len(self.t1) > self.p) or (len(self.t1) == self.p and key in self.b2)):
             return self._move_t1_to_b1()
         return self._move_t2_to_b2()
 
-    def _move_t1_to_b1(self) -> Optional[str]:
+    def _move_t1_to_b1(self) -> str | None:
         if not self.t1:
             return None
         k, _ = self.t1.popitem(last=False)
         self.b1[k] = True
         return k
 
-    def _move_t2_to_b2(self) -> Optional[str]:
+    def _move_t2_to_b2(self) -> str | None:
         if not self.t2:
             return None
         k, _ = self.t2.popitem(last=False)
@@ -444,7 +444,7 @@ class KVCache:
         max_memory_mb: int = 256,
         shard_count: int = 16,
         default_policy: EvictionPolicy = EvictionPolicy.LRU,
-        default_ttl: Optional[float] = None,
+        default_ttl: float | None = None,
     ):
         self.metrics_collector = type(
             "_NMC",
@@ -481,14 +481,14 @@ class KVCache:
         self._default_policy = default_policy
         self._default_ttl = default_ttl
         self._shard_count = max(shard_count, 1)
-        self._shards: List[CacheShard] = []
+        self._shards: list[CacheShard] = []
         self._global_lock = threading.RLock()
         self._stats = CacheStats(memory_limit_bytes=self._max_memory)
         self._compression_enabled = True
         self._compression_threshold = 1024  # compress entries > 1KB
-        self._access_times: List[float] = []
-        self._warming_entries: Dict[str, Any] = {}
-        self._policies: Dict[str, AdaptiveReplacementCache] = {}
+        self._access_times: list[float] = []
+        self._warming_entries: dict[str, Any] = {}
+        self._policies: dict[str, AdaptiveReplacementCache] = {}
         self._initialized = False
         self._closed = False
 
@@ -526,7 +526,7 @@ class KVCache:
 
         return zlib.decompress(data)
 
-    def _serialize(self, value: Any) -> Tuple[bytes, bool, int]:
+    def _serialize(self, value: Any) -> tuple[bytes, bool, int]:
         raw = json.dumps(value, default=str).encode()
         compressed = False
         result = raw
@@ -580,7 +580,7 @@ class KVCache:
                 self._stats.avg_access_time_us = sum(self._access_times) / len(self._access_times)
             return val
 
-    def set(self, key: str, value: Any, ttl: Optional[float] = None, tags: Optional[List[str]] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: float | None = None, tags: list[str] | None = None) -> bool:
         if not self._initialized or self._closed:
             return False
         shard = self._get_shard(key)
@@ -637,10 +637,10 @@ class KVCache:
             self._stats.memory_used_bytes -= entry.size_bytes
         return evicted_count
 
-    def mget(self, keys: List[str]) -> Dict[str, Any]:
+    def mget(self, keys: list[str]) -> dict[str, Any]:
         return {k: self.get(k) for k in keys}
 
-    def mset(self, mapping: Dict[str, Any], ttl: Optional[float] = None) -> int:
+    def mset(self, mapping: dict[str, Any], ttl: float | None = None) -> int:
         count = 0
         for k, v in mapping.items():
             if self.set(k, v, ttl=ttl):
@@ -658,7 +658,7 @@ class KVCache:
                 return False
             return entry is not None
 
-    def get_ttl(self, key: str) -> Optional[float]:
+    def get_ttl(self, key: str) -> float | None:
         if not self._initialized:
             return None
         shard = self._get_shard(key)
@@ -669,7 +669,7 @@ class KVCache:
                 return max(0, remaining)
             return None
 
-    def keys(self, pattern: str = "*") -> List[str]:
+    def keys(self, pattern: str = "*") -> list[str]:
         import fnmatch
 
         if not self._initialized:
@@ -682,7 +682,7 @@ class KVCache:
                         result.append(key)
         return sorted(result)
 
-    def get_by_tag(self, tag: str) -> Dict[str, Any]:
+    def get_by_tag(self, tag: str) -> dict[str, Any]:
         if not self._initialized:
             return {}
         result = {}
@@ -727,7 +727,7 @@ class KVCache:
                     count += 1
         return count
 
-    def warm(self, entries: Dict[str, Any], ttl: Optional[float] = None) -> int:
+    def warm(self, entries: dict[str, Any], ttl: float | None = None) -> int:
         count = 0
         for k, v in entries.items():
             if self.set(k, v, ttl=ttl):
@@ -741,7 +741,7 @@ class KVCache:
             self._stats.hit_rate = self._stats.hits / max(1, self._stats.hits + self._stats.misses)
             return self._stats
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         stats = self.get_stats()
         return {
             "healthy": self._initialized and not self._closed,

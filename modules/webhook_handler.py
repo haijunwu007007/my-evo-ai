@@ -94,7 +94,8 @@ import json
 import re
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -142,7 +143,7 @@ class SignatureVerifier:
         return hmac.compare_digest(expected, signature)
 
     def verify_header(
-        self, payload: str, secret: str, headers: Dict, header_name: str = "X-Signature", algorithm: str = "sha256"
+        self, payload: str, secret: str, headers: dict, header_name: str = "X-Signature", algorithm: str = "sha256"
     ) -> bool:
         """从HTTP头中提取签名并验证"""
         signature = headers.get(header_name) or headers.get(header_name.lower()) or ""
@@ -157,12 +158,12 @@ class WebhookRouter:
     """Webhook URL路由匹配：精确匹配、通配符、正则"""
 
     def __init__(self):
-        self._routes: List[Dict] = []
-        self._exact: Dict[str, Dict] = {}
-        self._pattern: List[Dict] = []
+        self._routes: list[dict] = []
+        self._exact: dict[str, dict] = {}
+        self._pattern: list[dict] = []
 
     def add_route(
-        self, path: str, handler_id: str, methods: List[str] = None, priority: int = 0, condition: Dict = None
+        self, path: str, handler_id: str, methods: list[str] = None, priority: int = 0, condition: dict = None
     ):
         """注册路由"""
         route = {
@@ -186,7 +187,7 @@ class WebhookRouter:
         self._routes = [r for r in self._routes if r["path"] != path]
         return True
 
-    def match(self, path: str, method: str = "POST") -> Optional[Dict]:
+    def match(self, path: str, method: str = "POST") -> dict | None:
         """匹配路由"""
         # 精确匹配优先
         route = self._exact.get(path)
@@ -209,7 +210,7 @@ class WebhookRouter:
                     return route
         return None
 
-    def list_routes(self) -> List[Dict]:
+    def list_routes(self) -> list[dict]:
         return [
             {"path": r["path"], "handler": r["handler_id"], "methods": r["methods"], "priority": r["priority"]}
             for r in self._routes
@@ -221,24 +222,24 @@ class DeliveryEngine:
     """Webhook投递引擎：重试、超时、死信"""
 
     def __init__(self):
-        self._delivery_log: List[Dict] = []
-        self._pending: List[Dict] = []
-        self._dead_letters: List[Dict] = []
-        self._idempotency_keys: Dict[str, float] = {}
+        self._delivery_log: list[dict] = []
+        self._pending: list[dict] = []
+        self._dead_letters: list[dict] = []
+        self._idempotency_keys: dict[str, float] = {}
         self._idempotency_ttl = 300.0
         self._lock = threading.Lock()
         self._max_retries = 5
         self._retry_delays = [1, 5, 30, 120, 600]  # 指数退避
         self._max_log = 10000
-        self._callbacks: Dict[str, Callable] = {}
+        self._callbacks: dict[str, Callable] = {}
 
     def register_callback(self, handler_id: str, callback: Callable):
         """注册投递回调（实际发送HTTP请求的函数）"""
         self._callbacks[handler_id] = callback
 
     def deliver(
-        self, handler_id: str, payload: Dict, headers: Dict = None, idempotency_key: str = None, timeout: float = 30.0
-    ) -> Dict:
+        self, handler_id: str, payload: dict, headers: dict = None, idempotency_key: str = None, timeout: float = 30.0
+    ) -> dict:
         """投递Webhook"""
         # 幂等检查
         if idempotency_key:
@@ -287,7 +288,7 @@ class DeliveryEngine:
         self._add_log(record)
         return {"success": record["state"] == "delivered", "delivery_id": delivery_id, "state": record["state"]}
 
-    def _schedule_retry(self, record: Dict):
+    def _schedule_retry(self, record: dict):
         """调度重试"""
         if record["attempts"] >= self._max_retries:
             record["state"] = "failed"
@@ -305,7 +306,7 @@ class DeliveryEngine:
         record["state"] = "retrying"
         record["next_retry_at"] = time.time() + self._retry_delays[min(record["attempts"], len(self._retry_delays) - 1)]
 
-    def retry(self, delivery_id: str) -> Dict:
+    def retry(self, delivery_id: str) -> dict:
         """手动重试"""
         record = next((r for r in self._delivery_log if r["delivery_id"] == delivery_id), None)
         if not record:
@@ -330,12 +331,12 @@ class DeliveryEngine:
 
         return {"success": record["state"] == "delivered", "state": record["state"]}
 
-    def _add_log(self, record: Dict):
+    def _add_log(self, record: dict):
         self._delivery_log.append(record)
         if len(self._delivery_log) > self._max_log:
             self._delivery_log = self._delivery_log[-self._max_log :]
 
-    def get_delivery_log(self, handler_id: str = None, state: str = None, limit: int = 50) -> List[Dict]:
+    def get_delivery_log(self, handler_id: str = None, state: str = None, limit: int = 50) -> list[dict]:
         records = self._delivery_log
         if handler_id:
             records = [r for r in records if r["handler_id"] == handler_id]
@@ -343,10 +344,10 @@ class DeliveryEngine:
             records = [r for r in records if r["state"] == state]
         return records[-limit:]
 
-    def get_dead_letters(self, limit: int = 50) -> List[Dict]:
+    def get_dead_letters(self, limit: int = 50) -> list[dict]:
         return self._dead_letters[-limit:]
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         total = len(self._delivery_log)
         return {
             "total_deliveries": total,
@@ -363,20 +364,20 @@ class SubscriptionManager:
     """Webhook订阅管理：订阅CRUD、事件过滤、活跃度追踪"""
 
     def __init__(self):
-        self._subscriptions: Dict[str, Dict] = {}
-        self._event_subscribers: Dict[str, List[str]] = defaultdict(list)
+        self._subscriptions: dict[str, dict] = {}
+        self._event_subscribers: dict[str, list[str]] = defaultdict(list)
         self._lock = threading.Lock()
 
     def subscribe(
         self,
         sub_id: str,
         url: str,
-        events: List[str] = None,
+        events: list[str] = None,
         secret: str = None,
-        headers: Dict = None,
+        headers: dict = None,
         active: bool = True,
         description: str = "",
-    ) -> Dict:
+    ) -> dict:
         with self._lock:
             events = events or ["*"]
             sub = {
@@ -411,7 +412,7 @@ class SubscriptionManager:
                 return True
             return False
 
-    def get_subscribers(self, event_type: str) -> List[Dict]:
+    def get_subscribers(self, event_type: str) -> list[dict]:
         """获取事件的活跃订阅者"""
         subscriber_ids = self._event_subscribers.get(event_type, []) + self._event_subscribers.get("*", [])
         return [
@@ -420,10 +421,10 @@ class SubscriptionManager:
             if sid in self._subscriptions and self._subscriptions[sid]["active"]
         ]
 
-    def get_subscription(self, sub_id: str) -> Optional[Dict]:
+    def get_subscription(self, sub_id: str) -> dict | None:
         return self._subscriptions.get(sub_id)
 
-    def list_subscriptions(self, active_only: bool = False) -> List[Dict]:
+    def list_subscriptions(self, active_only: bool = False) -> list[dict]:
         subs = list(self._subscriptions.values())
         if active_only:
             subs = [s for s in subs if s["active"]]
@@ -459,7 +460,7 @@ class SubscriptionManager:
                     max(0, sub["delivery_count"] - sub["failure_count"]) / sub["delivery_count"] * 100, 1
                 )
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         subs = list(self._subscriptions.values())
         return {
             "total_subscriptions": len(subs),
@@ -483,10 +484,10 @@ class WebhookHandler(EnterpriseModule):
         self._router = WebhookRouter()
         self._delivery = DeliveryEngine()
         self._subscriptions = SubscriptionManager()
-        self._incoming_log: List[Dict] = []
+        self._incoming_log: list[dict] = []
         self._max_incoming = 5000
 
-    def _dispatch(self, action: str, params: Dict) -> Dict:
+    def _dispatch(self, action: str, params: dict) -> dict:
         handler = {
             "status": self._action_status,
             "stats": self._action_stats,
@@ -520,7 +521,7 @@ class WebhookHandler(EnterpriseModule):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    async def execute(self, action: str = "status", params: Dict = None) -> Dict:
+    async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}
         self.trace("execute", {"action": action})
         self.metrics_collector.counter("webhook_execute_total", labels={"action": action}).inc()
@@ -528,7 +529,7 @@ class WebhookHandler(EnterpriseModule):
 
     # ── 基础Action ──
 
-    def _action_status(self, params: Dict) -> Dict:
+    def _action_status(self, params: dict) -> dict:
         return {
             "success": True,
             "data": {
@@ -539,7 +540,7 @@ class WebhookHandler(EnterpriseModule):
             },
         }
 
-    def _action_stats(self, params: Dict) -> Dict:
+    def _action_stats(self, params: dict) -> dict:
         return {
             "success": True,
             "data": {
@@ -550,7 +551,7 @@ class WebhookHandler(EnterpriseModule):
             },
         }
 
-    def _action_health(self, params: Dict) -> Dict:
+    def _action_health(self, params: dict) -> dict:
         ds = self._delivery.stats()
         ss = self._subscriptions.stats()
         issues = []
@@ -560,7 +561,7 @@ class WebhookHandler(EnterpriseModule):
             issues.append(f"Low success rate: {ss['avg_success_rate']}%")
         return {"success": True, "data": {"status": "healthy" if not issues else "degraded", "issues": issues}}
 
-    def _action_configure(self, params: Dict) -> Dict:
+    def _action_configure(self, params: dict) -> dict:
         if "max_retries" in params:
             self._delivery._max_retries = params["max_retries"]
         if "idempotency_ttl" in params:
@@ -572,13 +573,13 @@ class WebhookHandler(EnterpriseModule):
 
     # ── 签名 ──
 
-    def _action_sign(self, params: Dict) -> Dict:
+    def _action_sign(self, params: dict) -> dict:
         sig = self._verifier.sign(
             params.get("payload", ""), params.get("secret", ""), params.get("algorithm", "sha256")
         )
         return {"success": True, "data": {"signature": sig, "algorithm": params.get("algorithm", "sha256")}}
 
-    def _action_verify(self, params: Dict) -> Dict:
+    def _action_verify(self, params: dict) -> dict:
         ok = self._verifier.verify(
             params.get("payload", ""),
             params.get("secret", ""),
@@ -589,27 +590,27 @@ class WebhookHandler(EnterpriseModule):
 
     # ── 路由 ──
 
-    def _action_add_route(self, params: Dict) -> Dict:
+    def _action_add_route(self, params: dict) -> dict:
         self._router.add_route(
             params.get("path", "/"), params.get("handler_id", ""), params.get("methods"), params.get("priority", 0)
         )
         return {"success": True, "data": {"path": params.get("path"), "handler": params.get("handler_id")}}
 
-    def _action_remove_route(self, params: Dict) -> Dict:
+    def _action_remove_route(self, params: dict) -> dict:
         self._router.remove_route(params.get("path", ""))
         return {"success": True}
 
-    def _action_list_routes(self, params: Dict) -> Dict:
+    def _action_list_routes(self, params: dict) -> dict:
         routes = self._router.list_routes()
         return {"success": True, "data": {"routes": routes, "total": len(routes)}}
 
-    def _action_match_route(self, params: Dict) -> Dict:
+    def _action_match_route(self, params: dict) -> dict:
         route = self._router.match(params.get("path", ""), params.get("method", "POST"))
         return {"success": True, "data": {"matched": route is not None, "route": route}}
 
     # ── 接收 ──
 
-    def _action_receive(self, params: Dict) -> Dict:
+    def _action_receive(self, params: dict) -> dict:
         """接收Webhook请求"""
         path = params.get("path", "/")
         method = params.get("method", "POST")
@@ -647,7 +648,7 @@ class WebhookHandler(EnterpriseModule):
             "data": {"request_id": incoming["request_id"], "handler": handler_id, "route_matched": True},
         }
 
-    def _action_process_event(self, params: Dict) -> Dict:
+    def _action_process_event(self, params: dict) -> dict:
         """处理事件并投递到所有订阅者"""
         event_type = params.get("event_type", "custom")
         payload = params.get("payload", {})
@@ -678,7 +679,7 @@ class WebhookHandler(EnterpriseModule):
 
     # ── 订阅 ──
 
-    def _action_subscribe(self, params: Dict) -> Dict:
+    def _action_subscribe(self, params: dict) -> dict:
         sub = self._subscriptions.subscribe(
             params.get("subscription_id", str(uuid.uuid4())[:8]),
             params.get("url", ""),
@@ -690,27 +691,27 @@ class WebhookHandler(EnterpriseModule):
         )
         return {"success": True, "data": {"subscription_id": sub["subscription_id"], "url": sub["url"]}}
 
-    def _action_unsubscribe(self, params: Dict) -> Dict:
+    def _action_unsubscribe(self, params: dict) -> dict:
         ok = self._subscriptions.unsubscribe(params.get("subscription_id", ""))
         return {"success": ok}
 
-    def _action_list_subs(self, params: Dict) -> Dict:
+    def _action_list_subs(self, params: dict) -> dict:
         subs = self._subscriptions.list_subscriptions(active_only=params.get("active_only", False))
         return {"success": True, "data": {"subscriptions": subs, "total": len(subs)}}
 
-    def _action_get_sub(self, params: Dict) -> Dict:
+    def _action_get_sub(self, params: dict) -> dict:
         sub = self._subscriptions.get_subscription(params.get("subscription_id", ""))
         if not sub:
             return {"success": False, "error": "Subscription not found"}
         return {"success": True, "data": sub}
 
-    def _action_toggle_sub(self, params: Dict) -> Dict:
+    def _action_toggle_sub(self, params: dict) -> dict:
         ok = self._subscriptions.toggle_active(params.get("subscription_id", ""), params.get("active", True))
         return {"success": ok}
 
     # ── 投递 ──
 
-    def _action_deliver(self, params: Dict) -> Dict:
+    def _action_deliver(self, params: dict) -> dict:
         return self._delivery.deliver(
             params.get("handler_id", ""),
             params.get("payload", {}),
@@ -719,22 +720,22 @@ class WebhookHandler(EnterpriseModule):
             params.get("timeout", 30.0),
         )
 
-    def _action_retry(self, params: Dict) -> Dict:
+    def _action_retry(self, params: dict) -> dict:
         return self._delivery.retry(params.get("delivery_id", ""))
 
-    def _action_delivery_log(self, params: Dict) -> Dict:
+    def _action_delivery_log(self, params: dict) -> dict:
         log = self._delivery.get_delivery_log(params.get("handler_id"), params.get("state"), params.get("limit", 50))
         return {"success": True, "data": {"log": log, "total": len(log)}}
 
-    def _action_dead_letters(self, params: Dict) -> Dict:
+    def _action_dead_letters(self, params: dict) -> dict:
         dls = self._delivery.get_dead_letters(params.get("limit", 50))
         return {"success": True, "data": {"dead_letters": dls, "total": len(dls)}}
 
-    def _action_incoming_log(self, params: Dict) -> Dict:
+    def _action_incoming_log(self, params: dict) -> dict:
         log = self._incoming_log[-(params.get("limit", 50)) :]
         return {"success": True, "data": {"incoming": log, "total": len(log)}}
 
-    def _action_reset(self, params: Dict) -> Dict:
+    def _action_reset(self, params: dict) -> dict:
         self._incoming_log.clear()
         self._delivery._delivery_log.clear()
         self._delivery._dead_letters.clear()

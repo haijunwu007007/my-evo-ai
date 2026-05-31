@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class VoiceRecorderAnalyzer(object):
+class VoiceRecorderAnalyzer:
     """voice_recorder 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -300,9 +300,9 @@ class Recording:
     duration_sec: float = 0
     file_size: int = 0
     file_path: str = ""
-    segments: List[Dict[str, Any]] = field(default_factory=list)
+    segments: list[dict[str, Any]] = field(default_factory=list)
     transcript: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     error: str = ""
 
 @dataclass
@@ -365,9 +365,9 @@ class VoiceRecorderModule:
     """企业级语音录制模块"""
 
     def __init__(self):
-        self._recordings: Dict[str, Recording] = {}
-        self._active_recording: Optional[str] = None
-        self._configs: Dict[str, Dict[str, Any]] = {
+        self._recordings: dict[str, Recording] = {}
+        self._active_recording: str | None = None
+        self._configs: dict[str, dict[str, Any]] = {
             "default": {
                 "format": "wav",
                 "sample_rate": 16000,
@@ -437,14 +437,14 @@ class VoiceRecorderModule:
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "presets": list(self._configs.keys())}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active = self._active_recording is not None
@@ -463,8 +463,8 @@ class VoiceRecorderModule:
         format: str = "",
         sample_rate: int = 0,
         channels: int = 0,
-        metadata: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if self._active_recording:
@@ -504,7 +504,7 @@ class VoiceRecorderModule:
             "channels": preset["channels"],
         }
 
-    def stop_recording(self, recording_id: str = "") -> Dict[str, Any]:
+    def stop_recording(self, recording_id: str = "") -> dict[str, Any]:
         rid = recording_id or self._active_recording
         if not rid or rid not in self._recordings:
             return {"success": False, "error": "no_active_recording"}
@@ -550,7 +550,7 @@ class VoiceRecorderModule:
             "file_path": recording.file_path,
         }
 
-    def pause_recording(self, recording_id: str = "") -> Dict[str, Any]:
+    def pause_recording(self, recording_id: str = "") -> dict[str, Any]:
         rid = recording_id or self._active_recording
         if not rid or rid not in self._recordings:
             return {"success": False, "error": "not_found"}
@@ -560,7 +560,7 @@ class VoiceRecorderModule:
             return {"success": True, "recording_id": rid, "state": "paused"}
         return {"success": False, "error": "invalid_state"}
 
-    def resume_recording(self, recording_id: str = "") -> Dict[str, Any]:
+    def resume_recording(self, recording_id: str = "") -> dict[str, Any]:
         rid = recording_id or self._active_recording
         if not rid or rid not in self._recordings:
             return {"success": False, "error": "not_found"}
@@ -570,7 +570,7 @@ class VoiceRecorderModule:
             return {"success": True, "recording_id": rid, "state": "recording"}
         return {"success": False, "error": "invalid_state"}
 
-    def cancel_recording(self, recording_id: str = "") -> Dict[str, Any]:
+    def cancel_recording(self, recording_id: str = "") -> dict[str, Any]:
         rid = recording_id or self._active_recording
         if not rid or rid not in self._recordings:
             return {"success": False, "error": "not_found"}
@@ -580,7 +580,7 @@ class VoiceRecorderModule:
         return {"success": True, "recording_id": rid}
 
     # --- Query ---
-    def get_recording(self, recording_id: str) -> Dict[str, Any]:
+    def get_recording(self, recording_id: str) -> dict[str, Any]:
         if recording_id not in self._recordings:
             return {"success": False, "error": "not_found"}
         r = self._recordings[recording_id]
@@ -599,7 +599,7 @@ class VoiceRecorderModule:
             "stopped": r.stopped,
         }
 
-    def list_recordings(self, limit: int = 100) -> Dict[str, Any]:
+    def list_recordings(self, limit: int = 100) -> dict[str, Any]:
         items = sorted(self._recordings.values(), key=lambda r: r.started, reverse=True)
         results = [
             {
@@ -614,14 +614,14 @@ class VoiceRecorderModule:
         ]
         return {"success": True, "recordings": results, "total": len(results)}
 
-    def get_segments(self, recording_id: str) -> Dict[str, Any]:
+    def get_segments(self, recording_id: str) -> dict[str, Any]:
         if recording_id not in self._recordings:
             return {"success": False, "error": "not_found"}
         segments = self._recordings[recording_id].segments
         speech_count = sum(1 for s in segments if s.get("is_speech", False))
         return {"success": True, "segments": segments, "total": len(segments), "speech_segments": speech_count}
 
-    def get_audio_metrics(self, recording_id: str) -> Dict[str, Any]:
+    def get_audio_metrics(self, recording_id: str) -> dict[str, Any]:
         if recording_id not in self._recordings:
             return {"success": False, "error": "not_found"}
         r = self._recordings[recording_id]
@@ -645,10 +645,10 @@ class VoiceRecorderModule:
         return {"success": True, **metrics.__dict__}
 
     # --- Config ---
-    def list_presets(self) -> Dict[str, Any]:
+    def list_presets(self) -> dict[str, Any]:
         return {"success": True, "presets": self._configs}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = self._active_recording is not None
         return {"success": True, **self._stats, "active_recording": active, "total_recordings": len(self._recordings)}
 

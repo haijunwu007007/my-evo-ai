@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — API 集成测试（匹配实际路由）"""
 import os, sys, pytest, json, http.client
 

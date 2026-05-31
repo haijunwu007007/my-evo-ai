@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 — 数据分析引擎（生产级）

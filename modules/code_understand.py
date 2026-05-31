@@ -108,12 +108,12 @@ class FunctionInfo:
     file_path: str = ""
     line_start: int = 0
     line_end: int = 0
-    params: List[str] = field(default_factory=list)
+    params: list[str] = field(default_factory=list)
     return_type: str = ""
-    decorators: List[str] = field(default_factory=list)
+    decorators: list[str] = field(default_factory=list)
     docstring: str = ""
     complexity: int = 1
-    calls: List[str] = field(default_factory=list)
+    calls: list[str] = field(default_factory=list)
     parent_class: str = ""
 
 @dataclass
@@ -124,11 +124,11 @@ class ClassInfo:
     file_path: str = ""
     line_start: int = 0
     line_end: int = 0
-    bases: List[str] = field(default_factory=list)
-    methods: List[str] = field(default_factory=list)
-    class_vars: Dict[str, str] = field(default_factory=dict)
+    bases: list[str] = field(default_factory=list)
+    methods: list[str] = field(default_factory=list)
+    class_vars: dict[str, str] = field(default_factory=dict)
     docstring: str = ""
-    decorators: List[str] = field(default_factory=list)
+    decorators: list[str] = field(default_factory=list)
     is_abstract: bool = False
 
 @dataclass
@@ -136,7 +136,7 @@ class ImportInfo:
     """导入信息"""
 
     module: str
-    names: List[str] = field(default_factory=list)
+    names: list[str] = field(default_factory=list)
     is_from_import: bool = False
     is_relative: bool = False
     line: int = 0
@@ -152,9 +152,9 @@ class FileAnalysis:
     code_lines: int = 0
     comment_lines: int = 0
     blank_lines: int = 0
-    classes: List[str] = field(default_factory=list)
-    functions: List[str] = field(default_factory=list)
-    imports: List[str] = field(default_factory=list)
+    classes: list[str] = field(default_factory=list)
+    functions: list[str] = field(default_factory=list)
+    imports: list[str] = field(default_factory=list)
     avg_complexity: float = 0.0
     max_complexity: int = 1
     hash_md5: str = ""
@@ -166,8 +166,8 @@ class DependencyNode:
 
     module_name: str
     file_path: str = ""
-    imports_from: List[str] = field(default_factory=list)
-    imported_by: List[str] = field(default_factory=list)
+    imports_from: list[str] = field(default_factory=list)
+    imported_by: list[str] = field(default_factory=list)
     complexity: int = 0
     functions_count: int = 0
     classes_count: int = 0
@@ -177,10 +177,10 @@ class CodeAnalyzer(ast.NodeVisitor):
 
     def __init__(self, file_path: str = ""):
         self.file_path = file_path
-        self.classes: List[ClassInfo] = []
-        self.functions: List[FunctionInfo] = []
-        self.imports: List[ImportInfo] = []
-        self.calls: Dict[str, List[str]] = defaultdict(list)
+        self.classes: list[ClassInfo] = []
+        self.functions: list[FunctionInfo] = []
+        self.imports: list[ImportInfo] = []
+        self.calls: dict[str, list[str]] = defaultdict(list)
         self._current_class = ""
         self._current_function = ""
 
@@ -351,9 +351,9 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 "description": "代码理解引擎，支持AST分析、依赖图、复杂度计算、代码搜索",
             }
         )
-        self._files: Dict[str, FileAnalysis] = {}
-        self._dependency_graph: Dict[str, DependencyNode] = {}
-        self._analyzer_cache: Dict[str, CodeAnalyzer] = {}
+        self._files: dict[str, FileAnalysis] = {}
+        self._dependency_graph: dict[str, DependencyNode] = {}
+        self._analyzer_cache: dict[str, CodeAnalyzer] = {}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -377,7 +377,7 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             logger.error(f"[CodeUnderstand] 语法错误 {file_path}: {e}")
             return CodeAnalyzer(file_path)
 
-    def _count_lines(self, code: str) -> Tuple[int, int, int, int]:
+    def _count_lines(self, code: str) -> tuple[int, int, int, int]:
         """统计行数: total, code, comment, blank"""
         total = len(code.split("\n"))
         code_lines = 0
@@ -405,7 +405,7 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 code_lines += 1
         return total, code_lines, comment_lines, blank_lines
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"action": action})
         self.metrics_collector.counter("code_understand.execute.calls", 1)
@@ -653,7 +653,7 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             logger.error(f"[CodeUnderstand] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()

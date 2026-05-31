@@ -98,7 +98,7 @@ except ImportError:
 
 logger = logging.getLogger("connection_pool")
 
-class PoolUtilizationAnalyzer(object):
+class PoolUtilizationAnalyzer:
     """connection_pool 运营分析引擎
 
     - 分析连接池使用率与等待
@@ -172,14 +172,14 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._pools: Dict[str, Dict[str, Any]] = {}  # pool_name -> {config, conns, semaphore}
-        self._all_conns: Dict[str, PooledConn] = {}
+        self._pools: dict[str, dict[str, Any]] = {}  # pool_name -> {config, conns, semaphore}
+        self._all_conns: dict[str, PooledConn] = {}
 
     def initialize(self) -> None:
         self.trace("connection_pool.initialize", "start")
@@ -212,7 +212,7 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         ok = False
@@ -314,7 +314,7 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         expired = sum(1 for c in self._all_conns.values() if c.state == ConnState.EXPIRED)
         return {
             "status": "healthy" if expired == 0 else "degraded",
@@ -338,7 +338,7 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             max_lifetime=cfg.max_lifetime,
         )
 
-    def _acquire(self, pool_name: str) -> Dict:
+    def _acquire(self, pool_name: str) -> dict:
         pool = self._pools.get(pool_name)
         if not pool:
             return {"error": "Pool not found"}
@@ -367,7 +367,7 @@ class ConnectionPool(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return {"error": "Pool exhausted", "pool": pool_name, "max_size": cfg.max_size}
 
-    def _release(self, conn_id: str) -> Dict:
+    def _release(self, conn_id: str) -> dict:
         conn = self._all_conns.get(conn_id)
         if not conn:
             return {"error": "Connection not found"}

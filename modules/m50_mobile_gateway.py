@@ -84,7 +84,8 @@ import hmac
 import json
 from core.logging_config import get_logger
 import threading
-from typing import Dict, List, Optional, Callable, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Tuple, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
@@ -94,7 +95,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class M50MobileGatewayAnalyzer(object):
+class M50MobileGatewayAnalyzer:
     """m50_mobile_gateway 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -289,10 +290,10 @@ class DeviceInfo:
     timezone: str = "Asia/Shanghai"
     registered_at: float = 0.0
     last_active: float = 0.0
-    capabilities: Dict[str, bool] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    capabilities: dict[str, bool] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "device_id": self.device_id,
             "platform": self.platform.value,
@@ -314,7 +315,7 @@ class Message:
     target_device: str
     title: str = ""
     body: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     priority: int = 5
     ttl: int = 3600
     created_at: float = 0.0
@@ -334,7 +335,7 @@ class Message:
     def is_expired(self) -> bool:
         return time.time() - self.created_at > self.ttl
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "msg_id": self.msg_id,
             "msg_type": self.msg_type.value,
@@ -356,8 +357,8 @@ class DeviceRegistry:
     """Thread-safe device registration and management."""
 
     def __init__(self):
-        self._devices: Dict[str, DeviceInfo] = {}
-        self._user_devices: Dict[str, Set[str]] = defaultdict(set)
+        self._devices: dict[str, DeviceInfo] = {}
+        self._user_devices: dict[str, set[str]] = defaultdict(set)
         self._lock = threading.RWLock if hasattr(threading, "RWLock") else threading.Lock()
         self._lock = threading.Lock()
 
@@ -383,10 +384,10 @@ class DeviceRegistry:
                 return True
         return False
 
-    def get(self, device_id: str) -> Optional[DeviceInfo]:
+    def get(self, device_id: str) -> DeviceInfo | None:
         return self._devices.get(device_id)
 
-    def get_user_devices(self, user_id: str) -> List[DeviceInfo]:
+    def get_user_devices(self, user_id: str) -> list[DeviceInfo]:
         with self._lock:
             ids = list(self._user_devices.get(user_id, set()))
         return [self._devices[did] for did in ids if did in self._devices]
@@ -405,7 +406,7 @@ class DeviceRegistry:
                 if old != token:
                     logger.info(f"Push token updated for {device_id}")
 
-    def online_devices(self) -> List[DeviceInfo]:
+    def online_devices(self) -> list[DeviceInfo]:
         return [d for d in self._devices.values() if d.status in (DeviceStatus.ONLINE, DeviceStatus.SLEEPING)]
 
     @property
@@ -416,14 +417,14 @@ class DeviceRegistry:
     def online_count(self) -> int:
         return len(self.online_devices())
 
-    def all_devices(self) -> List[DeviceInfo]:
+    def all_devices(self) -> list[DeviceInfo]:
         return list(self._devices.values())
 
 class MessageQueue:
     """Priority-based message queue with delivery tracking."""
 
     def __init__(self, max_size: int = 50000):
-        self._queues: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_size))
+        self._queues: dict[str, deque] = defaultdict(lambda: deque(maxlen=max_size))
         self._global_queue: deque = deque(maxlen=max_size * 10)
         self._history: deque = deque(maxlen=10000)
         self._lock = threading.Lock()
@@ -435,7 +436,7 @@ class MessageQueue:
             self._global_queue.append(message)
             self._stats["queued"] += 1
 
-    def dequeue(self, device_id: str, limit: int = 10) -> List[Message]:
+    def dequeue(self, device_id: str, limit: int = 10) -> list[Message]:
         messages = []
         with self._lock:
             queue = self._queues[device_id]
@@ -486,7 +487,7 @@ class MessageQueue:
         return removed
 
     @property
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         with self._lock:
             return {
                 **self._stats,
@@ -500,7 +501,7 @@ class RateLimiter:
     def __init__(self, max_per_minute: int = 60, max_per_hour: int = 500):
         self._max_min = max_per_minute
         self._max_hour = max_per_hour
-        self._counters: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: {"minute": [], "hour": []})
+        self._counters: dict[str, dict[str, list[float]]] = defaultdict(lambda: {"minute": [], "hour": []})
         self._lock = threading.Lock()
 
     def allow(self, device_id: str) -> bool:
@@ -525,15 +526,15 @@ class APNSimulator:
     """Simulated push notification service for development and testing."""
 
     def __init__(self):
-        self._sent: List[Dict] = []
-        self._failed: List[Dict] = []
-        self._callbacks: List[Callable] = []
+        self._sent: list[dict] = []
+        self._failed: list[dict] = []
+        self._callbacks: list[Callable] = []
         self._lock = threading.Lock()
 
     def on_send(self, callback: Callable):
         self._callbacks.append(callback)
 
-    def send(self, device: DeviceInfo, message: Message) -> Dict[str, Any]:
+    def send(self, device: DeviceInfo, message: Message) -> dict[str, Any]:
         result = {
             "device_id": device.device_id,
             "msg_id": message.msg_id,
@@ -557,7 +558,7 @@ class APNSimulator:
         return result
 
     @property
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         with self._lock:
             return {"sent": len(self._sent), "failed": len(self._failed)}
 
@@ -642,7 +643,7 @@ class MobileGateway:
         self._rate_limiter = RateLimiter()
         self._apn = APNSimulator()
         self._running = False
-        self._cleanup_thread: Optional[threading.Thread] = None
+        self._cleanup_thread: threading.Thread | None = None
         self._stats = {
             "messages_sent": 0,
             "messages_received": 0,
@@ -651,7 +652,7 @@ class MobileGateway:
             "devices_unregistered": 0,
             "uptime_start": 0,
         }
-        self._message_handlers: Dict[MessageType, List[Callable]] = defaultdict(list)
+        self._message_handlers: dict[MessageType, list[Callable]] = defaultdict(list)
 
     def register_device(self, device: DeviceInfo, user_id: str) -> bool:
         result = self._registry.register(device, user_id)
@@ -665,7 +666,7 @@ class MobileGateway:
             self._stats["devices_unregistered"] += 1
         return result
 
-    def send_push(self, device_id: str, title: str, body: str, data: Optional[Dict] = None, priority: int = 5) -> Dict:
+    def send_push(self, device_id: str, title: str, body: str, data: dict | None = None, priority: int = 5) -> dict:
         device = self._registry.get(device_id)
         if not device:
             return {"status": "error", "error": "device_not_found", "device_id": device_id}
@@ -686,8 +687,8 @@ class MobileGateway:
         return {"status": "sent", "msg_id": message.msg_id, "delivery": result}
 
     def send_broadcast(
-        self, title: str, body: str, data: Optional[Dict] = None, platforms: Optional[List[DevicePlatform]] = None
-    ) -> Dict:
+        self, title: str, body: str, data: dict | None = None, platforms: list[DevicePlatform] | None = None
+    ) -> dict:
         devices = self._registry.online_devices()
         if platforms:
             devices = [d for d in devices if d.platform in platforms]
@@ -713,7 +714,7 @@ class MobileGateway:
         self._stats["messages_sent"] += sent
         return {"status": "broadcast", "sent": sent, "failed": failed, "total_targets": len(devices)}
 
-    def send_to_user(self, user_id: str, title: str, body: str, data: Optional[Dict] = None) -> Dict:
+    def send_to_user(self, user_id: str, title: str, body: str, data: dict | None = None) -> dict:
         devices = self._registry.get_user_devices(user_id)
         sent = 0
         for device in devices:
@@ -723,7 +724,7 @@ class MobileGateway:
                     sent += 1
         return {"status": "user_send", "user_id": user_id, "sent": sent, "devices": len(devices)}
 
-    def get_pending_messages(self, device_id: str, limit: int = 20) -> List[Dict]:
+    def get_pending_messages(self, device_id: str, limit: int = 20) -> list[dict]:
         messages = self._queue.dequeue(device_id, limit)
         self._stats["messages_received"] += len(messages)
         return [m.to_dict() for m in messages]
@@ -758,7 +759,7 @@ class MobileGateway:
         if self._cleanup_thread:
             self._cleanup_thread.join(timeout=5)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         uptime = time.time() - self._stats["uptime_start"] if self._stats["uptime_start"] else 0
         return {
             "status": "healthy" if self._running else "stopped",
@@ -774,7 +775,7 @@ class MobileGateway:
             "uptime_seconds": round(uptime, 1),
         }
 
-    async def execute(self, action: str = "status", **kwargs) -> Dict[str, Any]:
+    async def execute(self, action: str = "status", **kwargs) -> dict[str, Any]:
         if action == "status":
             # Delegate standard actions to base class
             return self.health_check()

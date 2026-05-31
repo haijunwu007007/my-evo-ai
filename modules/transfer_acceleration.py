@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class TransferAnalyzer(object):
+class TransferAnalyzer:
     """transfer_acceleration 运营分析引擎
 
     - 分析传输速度与成功率
@@ -116,7 +116,7 @@ class TransferAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "TransferAnalyzer", "module": "transfer_acceleration", "summary": summary}
 
-class TransferAccelerationAnalyzer(object):
+class TransferAccelerationAnalyzer:
     """transfer acceleration 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class TransferAccelerationAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class TransferAccelerationAnalyzer(object):
+class TransferAccelerationAnalyzer:
     """transfer_acceleration核心分析引擎
 
     为transfer_acceleration模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class TransferAccelerationAnalyzer(object):
 class TransferAcceleration(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """传输加速"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"transfer_acceleration")
 

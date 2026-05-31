@@ -14,7 +14,7 @@ import json
 class ModuleBase(ABC):
     """模块基类"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
+    def __init__(self, module_id: str, config: dict | None = None) -> None:
         self.id = module_id
         self.config = config or {}
         self.enabled = True
@@ -23,7 +23,7 @@ class ModuleBase(ABC):
         self.status = "idle"  # idle, running, success, error
 
     @abstractmethod
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         执行模块功能
         返回执行结果
@@ -31,21 +31,21 @@ class ModuleBase(ABC):
         pass
 
     @abstractmethod
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """获取模块信息"""
         pass
 
-    async def validate(self, params: Dict[str, Any]) -> bool:
+    async def validate(self, params: dict[str, Any]) -> bool:
         """验证参数是否有效"""
         return True
 
-    async def pre_execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def pre_execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行前钩子"""
         self.status = "running"
         self.usage_count += 1
         return params
 
-    async def post_execute(self, result: Dict[str, Any]) -> Dict[str, Any]:
+    async def post_execute(self, result: dict[str, Any]) -> dict[str, Any]:
         """执行后钩子"""
         self.last_used = datetime.now()
         self.status = "success" if result.get("success") else "error"
@@ -59,7 +59,7 @@ class ModuleBase(ABC):
         """禁用模块"""
         self.enabled = False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取模块统计"""
         return {
             "id": self.id,
@@ -73,11 +73,11 @@ class ModuleBase(ABC):
 class CompositeModule(ModuleBase):
     """组合模块 - 包含多个子模块"""
 
-    def __init__(self, module_id: str, sub_modules: List[ModuleBase], config: Optional[Dict] = None) -> None:
+    def __init__(self, module_id: str, sub_modules: list[ModuleBase], config: dict | None = None) -> None:
         super().__init__(module_id, config)
         self.sub_modules = {m.id: m for m in sub_modules}
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         results = {}
         for name, module in self.sub_modules.items():
             if module.enabled:
@@ -87,7 +87,7 @@ class CompositeModule(ModuleBase):
                     results[name] = {"error": str(e)}
         return {"sub_results": results}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "type": "composite",
@@ -98,12 +98,12 @@ class CompositeModule(ModuleBase):
 class AsyncModule(ModuleBase):
     """异步模块 - 支持长时间运行任务"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
+    def __init__(self, module_id: str, config: dict | None = None) -> None:
         super().__init__(module_id, config)
         self.task = None
         self.progress = 0
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         params = await self.pre_execute(params)
 
         try:
@@ -114,7 +114,7 @@ class AsyncModule(ModuleBase):
             return {"success": False, "error": str(e)}
 
     @abstractmethod
-    async def _run_async(self, params: Dict[str, Any]) -> Any:
+    async def _run_async(self, params: dict[str, Any]) -> Any:
         """实际的异步执行逻辑"""
         pass
 
@@ -132,11 +132,11 @@ class AsyncModule(ModuleBase):
 class StreamingModule(ModuleBase):
     """流式模块 - 支持流式输出"""
 
-    def __init__(self, module_id: str, config: Optional[Dict] = None) -> None:
+    def __init__(self, module_id: str, config: dict | None = None) -> None:
         super().__init__(module_id, config)
         self.queue = asyncio.Queue()
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         params = await self.pre_execute(params)
 
         try:
@@ -147,7 +147,7 @@ class StreamingModule(ModuleBase):
             self.status = "error"
             return {"success": False, "error": str(e)}
 
-    async def _stream_task(self, params: Dict[str, Any]) -> Any:
+    async def _stream_task(self, params: dict[str, Any]) -> Any:
         """流式任务"""
         try:
             async for chunk in self._generate_stream(params):
@@ -158,7 +158,7 @@ class StreamingModule(ModuleBase):
             await self.queue.put(None)
 
     @abstractmethod
-    async def _generate_stream(self, params: Dict[str, Any]):
+    async def _generate_stream(self, params: dict[str, Any]):
         """生成流式数据"""
         pass
 
@@ -174,11 +174,11 @@ class StreamingModule(ModuleBase):
 class ToolModule(ModuleBase):
     """工具类模块 - 提供工具能力"""
 
-    def __init__(self, module_id: str, tools: List[Dict], config: Optional[Dict] = None) -> None:
+    def __init__(self, module_id: str, tools: list[dict], config: dict | None = None) -> None:
         super().__init__(module_id, config)
         self.tools = {t["name"]: t for t in tools}
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         tool_name = params.get("tool")
         if tool_name not in self.tools:
             return {"success": False, "error": f"工具 {tool_name} 不存在"}
@@ -193,11 +193,11 @@ class ToolModule(ModuleBase):
             return {"success": False, "error": str(e)}
 
     @abstractmethod
-    async def _call_tool(self, tool: Dict, params: Dict) -> Any:
+    async def _call_tool(self, tool: dict, params: dict) -> Any:
         """调用工具"""
         pass
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "type": "tool",

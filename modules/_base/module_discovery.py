@@ -28,7 +28,8 @@ import logging
 import importlib
 import importlib.util
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Callable
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from datetime import datetime
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
@@ -56,7 +57,7 @@ class DiscoveryResult:
     updated: int = 0  # 更新的模块数
     failed: int = 0  # 解析失败的模块数
     removed: int = 0  # 已删除的模块数
-    errors: List[str] = None  # 错误列表
+    errors: list[str] = None  # 错误列表
     duration_ms: float = 0.0  # 耗时
 
     def __post_init__(self):
@@ -112,8 +113,8 @@ class ModuleDiscoveryEngine:
     """
 
     # 排除模式
-    EXCLUDE_PREFIXES: Set[str] = {"_", "."}
-    EXCLUDE_DIRS: Set[str] = {
+    EXCLUDE_PREFIXES: set[str] = {"_", "."}
+    EXCLUDE_DIRS: set[str] = {
         "_base",
         "_utils",
         "__pycache__",
@@ -126,7 +127,7 @@ class ModuleDiscoveryEngine:
         ".cache",
         "node_modules",
     }
-    EXCLUDE_MODULES: Set[str] = {
+    EXCLUDE_MODULES: set[str] = {
         "__init__",
         "module_base",
         "enterprise_module",
@@ -137,7 +138,7 @@ class ModuleDiscoveryEngine:
     def __init__(
         self,
         module_dir: str = "modules",
-        registry: Optional[ModuleRegistry] = None,
+        registry: ModuleRegistry | None = None,
         max_workers: int = 8,
     ):
         self._base_path = Path(module_dir).resolve()
@@ -145,13 +146,13 @@ class ModuleDiscoveryEngine:
         self._max_workers = max_workers
 
         # 缓存
-        self._file_hashes: Dict[str, str] = {}  # filepath → md5
+        self._file_hashes: dict[str, str] = {}  # filepath → md5
         self._scanned_file_count: int = 0
-        self._last_scan_time: Optional[datetime] = None
+        self._last_scan_time: datetime | None = None
 
         # 回调
-        self._on_discover: List[Callable[[ModuleMeta], None]] = []
-        self._on_error: List[Callable[[str, str], None]] = []
+        self._on_discover: list[Callable[[ModuleMeta], None]] = []
+        self._on_error: list[Callable[[str, str], None]] = []
 
         # 监控
         self._watcher_running = False
@@ -245,7 +246,7 @@ class ModuleDiscoveryEngine:
         result.duration_ms = (time.time() - start) * 1000
         return result
 
-    async def discover_removed_files(self) -> List[str]:
+    async def discover_removed_files(self) -> list[str]:
         """检测已删除的文件并注销对应模块，返回已移除的模块ID列表"""
         registered_files = {
             mid: self._registry.source_of(mid)
@@ -316,9 +317,9 @@ class ModuleDiscoveryEngine:
 
     # ── 内部方法 ──
 
-    def _find_py_files(self) -> List[Path]:
+    def _find_py_files(self) -> list[Path]:
         """递归查找 modules/ 下所有 .py 文件"""
-        files: List[Path] = []
+        files: list[Path] = []
         base = self._base_path
         if not base.exists():
             logger.warning(f"模块目录不存在: {base}")
@@ -342,7 +343,7 @@ class ModuleDiscoveryEngine:
         self._scanned_file_count = len(files)
         return files
 
-    def _scan_single_file(self, filepath: Path) -> Tuple[Optional[ModuleMeta], Optional[str]]:
+    def _scan_single_file(self, filepath: Path) -> tuple[ModuleMeta | None, str | None]:
         """扫描单个文件，返回 (元数据, 错误信息)"""
         try:
             meta = extract_meta_from_file(str(filepath))

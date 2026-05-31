@@ -23,7 +23,7 @@ class IntentParser:
                 logger.warning("[Planner] LLM库不可用，回退到关键词匹配")
 
     # 意图关键词映射
-    INTENT_PATTERNS: List[Tuple[TaskType, List[str]]] = [
+    INTENT_PATTERNS: list[tuple[TaskType, list[str]]] = [
         (
             TaskType.DATA_ANALYSIS,
             [
@@ -170,7 +170,7 @@ class IntentParser:
     ]
 
     # 任务模板 — 意图 → 模块调用序列
-    TASK_TEMPLATES: Dict[TaskType, List[Dict[str, Any]]] = {
+    TASK_TEMPLATES: dict[TaskType, list[dict[str, Any]]] = {
         TaskType.DATA_ANALYSIS: [
             {"module": "data_analysis", "action": "status", "desc": "数据分析"},
         ],
@@ -213,7 +213,7 @@ class IntentParser:
         ],
     }
 
-    def parse(self, message: str) -> Tuple[TaskType, Dict[str, Any]]:
+    def parse(self, message: str) -> tuple[TaskType, dict[str, Any]]:
         """
         解析用户意图 — 特化场景优先，LLM次之，关键词fallback
         返回: (task_type, extracted_params)
@@ -260,7 +260,7 @@ class IntentParser:
 
         return best_type, params
 
-    def _parse_with_llm(self, message: str) -> Tuple[TaskType, Dict[str, Any]]:
+    def _parse_with_llm(self, message: str) -> tuple[TaskType, dict[str, Any]]:
         """使用LLM解析意图并返回结构化结果"""
 
         task_types = ", ".join([t.value for t in TaskType])
@@ -328,7 +328,7 @@ class IntentParser:
 
         return task_type, params
 
-    def _extract_params(self, message: str) -> Dict[str, Any]:
+    def _extract_params(self, message: str) -> dict[str, Any]:
         """从消息中提取结构化参数"""
         params = {"raw_message": message}
 
@@ -345,7 +345,7 @@ class IntentParser:
 
         return params
 
-    def get_plan(self, task_type: TaskType, params: Dict[str, Any], registry: ModuleRegistry) -> List[Dict[str, Any]]:
+    def get_plan(self, task_type: TaskType, params: dict[str, Any], registry: ModuleRegistry) -> list[dict[str, Any]]:
         """
         根据任务类型生成执行计划
         优先使用LLM推荐的步骤，fallback到模板

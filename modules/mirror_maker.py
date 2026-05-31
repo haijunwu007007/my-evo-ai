@@ -85,13 +85,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MirrorMakerAnalyzer(object):
+class MirrorMakerAnalyzer:
     """mirror_maker 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -282,7 +283,7 @@ class MirrorState(Enum):
 class SourceConfig:
     name: str
     source_type: str  # file, database, api, kafka, etc.
-    connection_params: Dict[str, Any] = field(default_factory=dict)
+    connection_params: dict[str, Any] = field(default_factory=dict)
     table_or_path: str = ""
     batch_size: int = 1000
     poll_interval: float = 1.0
@@ -291,7 +292,7 @@ class SourceConfig:
 class TargetConfig:
     name: str
     target_type: str
-    connection_params: Dict[str, Any] = field(default_factory=dict)
+    connection_params: dict[str, Any] = field(default_factory=dict)
     table_or_path: str = ""
     batch_size: int = 1000
 
@@ -302,8 +303,8 @@ class ChangeRecord:
     source: str = ""
     table: str = ""
     key: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
-    old_data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
+    old_data: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     checksum: str = ""
     lsn: int = 0
@@ -322,14 +323,14 @@ class ConflictRecord:
     detected_at: float = field(default_factory=time.time)
     strategy: ConflictStrategy = ConflictStrategy.LAST_WRITE_WINS
     resolved: bool = False
-    resolution: Optional[Dict[str, Any]] = None
+    resolution: dict[str, Any] | None = None
 
 @dataclass
 class MirrorTask:
     task_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     name: str = ""
-    source: Optional[SourceConfig] = None
-    target: Optional[TargetConfig] = None
+    source: SourceConfig | None = None
+    target: TargetConfig | None = None
     direction: SyncDirection = SyncDirection.SOURCE_TO_TARGET
     mode: ReplicationMode = ReplicationMode.ASYNC
     conflict_strategy: ConflictStrategy = ConflictStrategy.LAST_WRITE_WINS
@@ -361,7 +362,7 @@ class CheckpointData:
     task_id: str
     lsn: int = 0
     timestamp: float = field(default_factory=time.time)
-    source_position: Dict[str, Any] = field(default_factory=dict)
+    source_position: dict[str, Any] = field(default_factory=dict)
     records_synced: int = 0
 
 class MirrorMaker:
@@ -388,12 +389,12 @@ class MirrorMaker:
     """Enterprise data replication engine with conflict resolution and streaming."""
 
     def __init__(self):
-        self._tasks: Dict[str, MirrorTask] = {}
-        self._changes: Dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
-        self._conflicts: Dict[str, List[ConflictRecord]] = defaultdict(list)
-        self._checkpoints: Dict[str, CheckpointData] = {}
-        self._stats: Dict[str, SyncMetrics] = {}
-        self._hooks: Dict[str, List[Callable]] = {
+        self._tasks: dict[str, MirrorTask] = {}
+        self._changes: dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
+        self._conflicts: dict[str, list[ConflictRecord]] = defaultdict(list)
+        self._checkpoints: dict[str, CheckpointData] = {}
+        self._stats: dict[str, SyncMetrics] = {}
+        self._hooks: dict[str, list[Callable]] = {
             "on_change": [],
             "on_conflict": [],
             "on_sync_complete": [],
@@ -431,7 +432,7 @@ class MirrorMaker:
         )()
         self._lock = threading.RLock()
         self._initialized = False
-        self._lsn_counter: Dict[str, int] = defaultdict(int)
+        self._lsn_counter: dict[str, int] = defaultdict(int)
         logger.info("MirrorMaker created")
 
     def initialize(self) -> None:
@@ -465,8 +466,8 @@ class MirrorMaker:
         operation: str,
         table: str,
         key: str,
-        data: Dict[str, Any],
-        old_data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any],
+        old_data: dict[str, Any] | None = None,
     ) -> ChangeRecord:
         with self._lock:
             task = self._tasks.get(task_id)
@@ -490,7 +491,7 @@ class MirrorMaker:
                     logger.error("on_change hook error: %s", e)
             return record
 
-    def sync(self, task_id: str, batch_size: Optional[int] = None) -> SyncMetrics:
+    def sync(self, task_id: str, batch_size: int | None = None) -> SyncMetrics:
         start = time.time()
         inserted = updated = deleted = errors = bytes_xfer = 0
         total_latency = 0.0
@@ -562,7 +563,7 @@ class MirrorMaker:
                     pass
             return metrics
 
-    def detect_conflicts(self, task_id: str) -> List[ConflictRecord]:
+    def detect_conflicts(self, task_id: str) -> list[ConflictRecord]:
         with self._lock:
             changes = list(self._changes[task_id])
         key_changes = defaultdict(list)
@@ -587,8 +588,8 @@ class MirrorMaker:
         self,
         task_id: str,
         conflict_id: str,
-        strategy: Optional[ConflictStrategy] = None,
-        resolution: Optional[Dict] = None,
+        strategy: ConflictStrategy | None = None,
+        resolution: dict | None = None,
     ) -> bool:
         with self._lock:
             conflicts = self._conflicts.get(task_id, [])
@@ -626,7 +627,7 @@ class MirrorMaker:
                 return True
         return False
 
-    def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         with self._lock:
             task = self._tasks.get(task_id)
             if not task:
@@ -657,7 +658,7 @@ class MirrorMaker:
                 else None,
             }
 
-    def list_tasks(self) -> List[Dict[str, Any]]:
+    def list_tasks(self) -> list[dict[str, Any]]:
         with self._lock:
             return [
                 {
@@ -686,7 +687,7 @@ class MirrorMaker:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             tasks = self.list_tasks()

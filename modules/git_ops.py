@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -85,8 +84,9 @@ import asyncio
 import json
 import logging
 import hashlib
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Callable
+from datetime import datetime, timezone, UTC
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -131,11 +131,11 @@ class GitRepository:
     target_revision: str = ""
     auth_type: str = "ssh"  # ssh/https/token
     auth_secret: str = ""
-    last_poll: Optional[str] = None
+    last_poll: str | None = None
     poll_interval_seconds: float = 300.0
     auto_sync: bool = True
     self_heal: bool = True  # Drift自动修复
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 @dataclass
@@ -148,14 +148,14 @@ class ManagedResource:
     namespace: str = "default"
     group: str = ""
     version: str = "v1"
-    desired_manifest: Dict[str, Any] = field(default_factory=dict)
-    live_manifest: Dict[str, Any] = field(default_factory=dict)
+    desired_manifest: dict[str, Any] = field(default_factory=dict)
+    live_manifest: dict[str, Any] = field(default_factory=dict)
     desired_hash: str = ""
     live_hash: str = ""
     status: SyncStatus = SyncStatus.UNKNOWN
     health: HealthState = HealthState.UNKNOWN
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    diff: Optional[str] = None
+    diff: str | None = None
 
 @dataclass
 class Application:
@@ -164,15 +164,15 @@ class Application:
     app_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
     name: str = ""
     namespace: str = "default"
-    repository: Optional[GitRepository] = None
-    resources: List[ManagedResource] = field(default_factory=list)
+    repository: GitRepository | None = None
+    resources: list[ManagedResource] = field(default_factory=list)
     sync_status: SyncStatus = SyncStatus.UNKNOWN
     health_state: HealthState = HealthState.UNKNOWN
-    sync_revisions: List[str] = field(default_factory=list)
+    sync_revisions: list[str] = field(default_factory=list)
     current_revision: str = ""
     auto_sync: bool = True
     self_heal: bool = False
-    sync_options: Dict[str, Any] = field(
+    sync_options: dict[str, Any] = field(
         default_factory=lambda: {
             "respect_ignore_differences": True,
             "create_namespace": False,
@@ -180,10 +180,10 @@ class Application:
             "server_side_apply": True,
         }
     )
-    retry: Dict[str, Any] = field(
+    retry: dict[str, Any] = field(
         default_factory=lambda: {"limit": 2, "backoff": {"duration": "5s", "max_delay": "3m"}}
     )
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 @dataclass
@@ -195,7 +195,7 @@ class SyncOperation:
     revision: str = ""
     phase: OperationPhase = OperationPhase.RUNNING
     started_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    finished_at: Optional[str] = None
+    finished_at: str | None = None
     message: str = ""
     resources_synced: int = 0
     resources_total: int = 0
@@ -217,24 +217,24 @@ class RevisionHistory:
 # GitOps 主类
 # ============================================================================
 
-class GitRepositoryAnalyzer(object):
+class GitRepositoryAnalyzer:
     """Git仓库分析引擎：解析仓库结构、变更检测、依赖分析"""
 
     def __init__(self):
-        self._commit_history: List[Dict] = []
-        self._branch_info: Dict[str, Dict] = {}
-        self._diff_cache: Dict[str, str] = {}
+        self._commit_history: list[dict] = []
+        self._branch_info: dict[str, dict] = {}
+        self._diff_cache: dict[str, str] = {}
 
     def analyze_commit(
-        self, commit_hash: str, author: str = "", message: str = "", files_changed: Optional[List[str]] = None
-    ) -> Dict:
+        self, commit_hash: str, author: str = "", message: str = "", files_changed: list[str] | None = None
+    ) -> dict:
         """分析单次提交，提取变更摘要"""
         entry = {
             "hash": commit_hash,
             "author": author,
             "message": message,
             "files": files_changed or [],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "risk_level": "low",
         }
         # 根据变更文件数量评估风险
@@ -247,7 +247,7 @@ class GitRepositoryAnalyzer(object):
             self._commit_history = self._commit_history[-500:]
         return entry
 
-    def detect_branch_drift(self, base_branch: str = "main", target_branch: str = "develop") -> Dict:
+    def detect_branch_drift(self, base_branch: str = "main", target_branch: str = "develop") -> dict:
         """检测分支间差异和漂移程度"""
         base_commits = sum(1 for c in self._commit_history if c.get("hash", "").startswith(base_branch[:4]))
         target_commits = sum(1 for c in self._commit_history if c.get("hash", "").startswith(target_branch[:4]))
@@ -260,7 +260,7 @@ class GitRepositoryAnalyzer(object):
             "recommendation": "merge" if drift > 10 else "rebase" if drift > 3 else "fast-forward",
         }
 
-    def get_recent_commits(self, limit: int = 10) -> List[Dict]:
+    def get_recent_commits(self, limit: int = 10) -> list[dict]:
         """获取最近N次提交记录"""
         return self._commit_history[-limit:]
 
@@ -281,20 +281,20 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 操作审计
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # Application注册表
-        self._applications: Dict[str, Application] = {}
+        self._applications: dict[str, Application] = {}
         # 仓库注册
-        self._repositories: Dict[str, GitRepository] = {}
+        self._repositories: dict[str, GitRepository] = {}
         # 操作记录
-        self._operations: List[SyncOperation] = []
+        self._operations: list[SyncOperation] = []
         # 版本历史
-        self._revision_history: Dict[str, List[RevisionHistory]] = defaultdict(list)
+        self._revision_history: dict[str, list[RevisionHistory]] = defaultdict(list)
         # 轮询任务
-        self._poll_tasks: Dict[str, asyncio.Task] = {}
+        self._poll_tasks: dict[str, asyncio.Task] = {}
         # 统计
         self._gitops_stats = {
             "applications_count": 0,
@@ -414,7 +414,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Application管理
     # ----------------------------------------------------------------
 
-    def _create_application_from_config(self, cfg: Dict) -> Application:
+    def _create_application_from_config(self, cfg: dict) -> Application:
         """从配置创建Application"""
         repo = GitRepository(
             url=cfg.get("repo_url", ""),
@@ -486,7 +486,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 同步
     # ----------------------------------------------------------------
 
-    def sync_application(self, app_id: str, revision: Optional[str] = None, dry_run: bool = False) -> Result:
+    def sync_application(self, app_id: str, revision: str | None = None, dry_run: bool = False) -> Result:
         """手动同步Application"""
         start = time.time()
         app = self._applications.get(app_id)
@@ -555,7 +555,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.record_request((time.time() - start) * 1000, False, str(e))
             return Result(success=False, error=str(e))
 
-    def _generate_manifests(self, app: Application) -> List[ManagedResource]:
+    def _generate_manifests(self, app: Application) -> list[ManagedResource]:
         """生成Desired Manifest（模拟）"""
         resources = []
         # Deployment
@@ -621,7 +621,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Drift检测
     # ----------------------------------------------------------------
 
-    def detect_drift(self, app_id: str) -> Dict[str, Any]:
+    def detect_drift(self, app_id: str) -> dict[str, Any]:
         """检测Drift"""
         app = self._applications.get(app_id)
         if not app:
@@ -670,7 +670,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self._gitops_stats,
             "applications": len(self._applications),
@@ -678,7 +678,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def list_applications(self) -> List[Dict]:
+    def list_applications(self) -> list[dict]:
         return [
             {
                 "id": a.app_id,
@@ -695,7 +695,7 @@ class GitOps(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for a in self._applications.values()
         ]
 
-    def get_app_detail(self, app_id: str) -> Optional[Dict]:
+    def get_app_detail(self, app_id: str) -> dict | None:
         app = self._applications.get(app_id)
         if not app:
             return None

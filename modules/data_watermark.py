@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DataWatermark:
@@ -140,7 +140,7 @@ class DataWatermark:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, DataWatermark] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, DataWatermark] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-        return {"success": False, "error": "Unknown action: {}".format(action)}
+        return {"success": False, "error": f"Unknown action: {action}"}
 
-    def batch_verify_watermarks(self, items: List[Dict[str, str]]) -> Dict[str, Any]:
+    def batch_verify_watermarks(self, items: list[dict[str, str]]) -> dict[str, Any]:
         """批量验证数据水印：检查每个数据项的水印完整性和归属"""
         results = []
         valid_count = 0
@@ -513,7 +513,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "details": results,
         }
 
-    def test_watermark_robustness(self, test_data: str, attacks: List[str] = None) -> Dict[str, Any]:
+    def test_watermark_robustness(self, test_data: str, attacks: list[str] = None) -> dict[str, Any]:
         """测试水印鲁棒性：模拟各种攻击（裁剪、压缩、噪声）后验证水印可提取性"""
         attacks = attacks or ["crop_10", "crop_30", "noise_light", "noise_heavy", "compress_50", "compress_90"]
         results = []
@@ -563,7 +563,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             result = result[: len(result) - remove]
         return "".join(result)
 
-    def detect_watermark_collision(self, owner_a: str, data_a: str, owner_b: str, data_b: str) -> Dict[str, Any]:
+    def detect_watermark_collision(self, owner_a: str, data_a: str, owner_b: str, data_b: str) -> dict[str, Any]:
         """水印冲突检测：判断两份数据嵌入不同水印后是否会互相覆盖"""
         combined_a = self._embed_watermark(data_a, owner_a) if hasattr(self, "_embed_watermark") else data_a
         combined_b = self._embed_watermark(data_b, owner_b) if hasattr(self, "_embed_watermark") else data_b
@@ -578,7 +578,7 @@ class DataWatermarkManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "recommendation": "使用不同水印算法或增加水印间隔" if collision_risk == "high" else "无冲突风险",
         }
 
-    def get_watermark_usage_report(self) -> Dict[str, Any]:
+    def get_watermark_usage_report(self) -> dict[str, Any]:
         """水印使用统计报告：嵌入次数、验证次数、按所有者统计"""
         stats = self._stats if hasattr(self, "_stats") else {}
         history = self._history if hasattr(self, "_history") else []

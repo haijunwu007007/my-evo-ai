@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 调度/事件/管线/队列 路由（引擎优先，退化到字典存储）"""
 import importlib, logging, os, json, time, asyncio
 from core.logging_config import get_logger
@@ -25,7 +24,7 @@ HAS_PIPELINE = False; _pipeline_engine = None
 HAS_QUEUE = False; _queue_instance = None
 SchedulerEngineCls = None; EventEngineCls = None
 PipelineEngineCls = None; TaskQueueCls = None
-_engine_tasks: List[asyncio.Task] = []
+_engine_tasks: list[asyncio.Task] = []
 
 try:
     _sch = importlib.import_module("core.scheduler_engine")

@@ -136,13 +136,13 @@ class HealingTicket:
     severity: Severity
     target: str
     status: FixStatus = FixStatus.DETECTED
-    actions: List[RepairAction] = field(default_factory=list)
+    actions: list[RepairAction] = field(default_factory=list)
     current_action: int = 0
     diagnosis: str = ""
     result: str = ""
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    resolved_at: Optional[float] = None
+    resolved_at: float | None = None
 
 FIX_STRATEGIES = {
     "service_down": [
@@ -172,14 +172,14 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._tickets: Dict[str, HealingTicket] = {}
-        self._strategies: Dict[str, List[Dict]] = dict(FIX_STRATEGIES)
+        self._tickets: dict[str, HealingTicket] = {}
+        self._strategies: dict[str, list[dict]] = dict(FIX_STRATEGIES)
         self._counter: int = 0
         self._max_active: int = 5
 
@@ -195,7 +195,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "auto_healing"})
         self.metrics_collector.counter("auto_healing.execute.calls", 1)
         self.audit("execute", {"module": "auto_healing"})
@@ -278,7 +278,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         active = sum(
             1
             for t in self._tickets.values()
@@ -296,7 +296,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def shutdown(self) -> None:
         pass
 
-    def _create_ticket(self, issue: str, severity: str, target: str, strategy: str) -> Dict:
+    def _create_ticket(self, issue: str, severity: str, target: str, strategy: str) -> dict:
         self._counter += 1
         ticket_id = f"fix_{self._counter}"
         try:
@@ -340,7 +340,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "diagnosis": ticket.diagnosis,
         }
 
-    def _execute_healing(self, ticket_id: str) -> Dict:
+    def _execute_healing(self, ticket_id: str) -> dict:
         ticket = self._tickets.get(ticket_id)
         if not ticket:
             return {"error": "Ticket not found"}
@@ -413,14 +413,14 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "results": results,
         }
 
-    def get_healing_dashboard(self) -> Dict[str, Any]:
+    def get_healing_dashboard(self) -> dict[str, Any]:
         """自愈仪表板数据。企业场景：SRE大屏展示实时自愈系统状态——活跃工单、成功率、修复类型分布。"""
         tickets = list(self._tickets.values())
         active = [t for t in tickets if t.status in (FixStatus.PENDING, FixStatus.IN_PROGRESS)]
         resolved = [t for t in tickets if t.status == FixStatus.RESOLVED]
         failed = [t for t in tickets if t.status == FixStatus.FAILED]
         # 修复类型分布
-        type_dist: Dict[str, int] = {}
+        type_dist: dict[str, int] = {}
         for t in resolved:
             ttype = t.issue_type or "unknown"
             type_dist[ttype] = type_dist.get(ttype, 0) + 1
@@ -451,10 +451,10 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def register_healing_pattern(
         self,
         pattern_name: str,
-        match_conditions: Dict[str, Any],
-        fix_actions: List[Dict[str, Any]],
+        match_conditions: dict[str, Any],
+        fix_actions: list[dict[str, Any]],
         enabled: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """注册自愈模式。企业场景：将已知故障及其修复方案注册为可复用的自愈模式，
         后续检测到相同条件时自动触发对应修复流程，减少人工干预。
         """
@@ -480,7 +480,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "actions_count": len(fix_actions),
         }
 
-    def get_healing_patterns(self) -> Dict[str, Any]:
+    def get_healing_patterns(self) -> dict[str, Any]:
         """列出所有注册的自愈模式。企业场景：团队查阅已注册的自愈模式库，
         评估覆盖范围，发现缺失的故障模式。
         """
@@ -503,7 +503,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ],
         }
 
-    def auto_diagnose(self, symptoms: List[str], severity: str = "medium") -> Dict[str, Any]:
+    def auto_diagnose(self, symptoms: list[str], severity: str = "medium") -> dict[str, Any]:
         """自动诊断故障原因。企业场景：SRE输入故障现象（如"CPU高"、"响应慢"），
         自动匹配已知自愈模式或生成排查建议。
         """
@@ -540,8 +540,8 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
 
     def register_healing_pattern(
-        self, name: str, symptoms: List[str], fix_actions: List[str], severity: str = "medium"
-    ) -> Dict[str, Any]:
+        self, name: str, symptoms: list[str], fix_actions: list[str], severity: str = "medium"
+    ) -> dict[str, Any]:
         """注册自愈模式。企业场景：运维总结故障经验，将已知故障-修复方案注册为自愈模式，
         下次遇到相同症状时自动触发修复。
         """
@@ -568,7 +568,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "fix_actions_count": len(fix_actions),
         }
 
-    def get_healing_effectiveness(self, days: int = 7) -> Dict[str, Any]:
+    def get_healing_effectiveness(self, days: int = 7) -> dict[str, Any]:
         """自愈有效性报告。企业场景：每周复盘自愈系统的整体效果，
         统计各模式触发次数、成功率、节省的MTTR。
         """
@@ -600,7 +600,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "top_patterns": pattern_stats[:10],
         }
 
-    def get_active_alerts(self) -> Dict[str, Any]:
+    def get_active_alerts(self) -> dict[str, Any]:
         """获取当前活跃告警。企业场景：SRE看板展示当前正在处理的自愈告警，
         区分"自愈中"和"需人工介入"状态。
         """
@@ -615,7 +615,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "alerts": alerts,
         }
 
-    def get_symptom_trends(self, hours: int = 24) -> Dict[str, Any]:
+    def get_symptom_trends(self, hours: int = 24) -> dict[str, Any]:
         """症状趋势分析。企业场景：识别反复出现的故障模式，
         统计各症状出现频率和变化趋势。
         """
@@ -636,7 +636,7 @@ class AutoHealingManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "top_symptoms": [{"symptom": s, "count": c} for s, c in top],
         }
 
-    def get_healing_action_ranking(self, days: int = 7) -> Dict[str, Any]:
+    def get_healing_action_ranking(self, days: int = 7) -> dict[str, Any]:
         """自愈动作效果排名。企业场景：运维团队周会回顾哪种修复策略最有效，
         据此调整自愈优先级。统计各action的成功率、平均耗时、适用频率。
         """

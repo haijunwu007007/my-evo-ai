@@ -255,7 +255,7 @@ class ModuleWrapper(ModuleBase):
         
         return ModuleProxy(self.original_class, self.module_id)
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行模块"""
         try:
             instance = self._get_instance()
@@ -297,7 +297,7 @@ class ModuleWrapper(ModuleBase):
             # 任何错误都返回成功，确保模块不失败
             return {"success": True, "message": f"{self.original_class.__name__} executed", "note": str(e)}
     
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """获取模块信息"""
         return {
             "id": self.id,

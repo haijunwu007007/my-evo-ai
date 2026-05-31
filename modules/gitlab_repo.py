@@ -84,7 +84,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class GitlabRepoAnalyzer(object):
+class GitlabRepoAnalyzer:
     """gitlab_repo 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -274,7 +274,7 @@ class Branch:
     ahead: int = 0
     behind: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "repo_id": self.repo_id,
@@ -295,14 +295,14 @@ class MergeRequest:
     author: str = ""
     description: str = ""
     status: MergeStatus = MergeStatus.OPEN
-    reviewers: List[str] = field(default_factory=list)
-    labels: List[str] = field(default_factory=list)
+    reviewers: list[str] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    merged_at: Optional[float] = None
-    comments: List[Dict[str, Any]] = field(default_factory=list)
+    merged_at: float | None = None
+    comments: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "mr_id": self.mr_id,
             "repo_id": self.repo_id,
@@ -322,12 +322,12 @@ class Pipeline:
     repo_id: str
     ref: str
     status: PipelineStatus = PipelineStatus.PENDING
-    stages: List[Dict[str, Any]] = field(default_factory=list)
+    stages: list[dict[str, Any]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     duration: float = 0.0
     triggerer: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "pipeline_id": self.pipeline_id,
             "repo_id": self.repo_id,
@@ -353,7 +353,7 @@ class Repository:
     issues_count: int = 0
     last_activity: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "repo_id": self.repo_id,
             "name": self.name,
@@ -391,15 +391,15 @@ class GitLabRepo:
 
     """GitLab仓库管理 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or {}
-        self._repos: Dict[str, Repository] = {}
-        self._branches: Dict[str, Dict[str, Branch]] = {}
-        self._merge_requests: Dict[str, Dict[str, MergeRequest]] = {}
-        self._pipelines: Dict[str, Dict[str, Pipeline]] = {}
-        self._webhooks: Dict[str, List[Dict[str, Any]]] = {}
-        self._members: Dict[str, Dict[str, str]] = {}
-        self._access_tokens: Dict[str, Dict[str, Any]] = {}
+        self._repos: dict[str, Repository] = {}
+        self._branches: dict[str, dict[str, Branch]] = {}
+        self._merge_requests: dict[str, dict[str, MergeRequest]] = {}
+        self._pipelines: dict[str, dict[str, Pipeline]] = {}
+        self._webhooks: dict[str, list[dict[str, Any]]] = {}
+        self._members: dict[str, dict[str, str]] = {}
+        self._access_tokens: dict[str, dict[str, Any]] = {}
         self._initialized = False
         self._stats = {
             "repos_created": 0,
@@ -411,7 +411,7 @@ class GitLabRepo:
             "total_commits": 0,
         }
         self._max_repos = self.config.get("max_repos", 10000)
-        self._branch_protection_rules: List[Dict[str, Any]] = []
+        self._branch_protection_rules: list[dict[str, Any]] = []
 
     def initialize(self) -> None:
         self.trace("gitlab_repo.initialize", "start")
@@ -429,7 +429,7 @@ class GitLabRepo:
 
     def create_repo(
         self, name: str, path: str = "", owner: str = "", visibility: str = "private", description: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if len(self._repos) >= self._max_repos:
             return {"success": False, "error": "Max repositories reached"}
         repo_path = path or f"{owner}/{name}" if owner else name
@@ -455,11 +455,11 @@ class GitLabRepo:
         self._stats["branches_created"] += 1
         return {"success": True, "repo_id": repo_id, "path": repo_path}
 
-    def get_repo(self, repo_id: str) -> Optional[Dict[str, Any]]:
+    def get_repo(self, repo_id: str) -> dict[str, Any] | None:
         repo = self._repos.get(repo_id)
         return repo.to_dict() if repo else None
 
-    def delete_repo(self, repo_id: str) -> Dict[str, Any]:
+    def delete_repo(self, repo_id: str) -> dict[str, Any]:
         if repo_id not in self._repos:
             return {"success": False, "error": "Repository not found"}
         del self._repos[repo_id]
@@ -472,7 +472,7 @@ class GitLabRepo:
 
     def list_repos(
         self, owner: str = "", visibility: str = "", limit: int = 50, offset: int = 0
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         result = []
         for repo in self._repos.values():
             if owner and repo.owner != owner:
@@ -485,7 +485,7 @@ class GitLabRepo:
 
     # --- 分支管理 ---
 
-    def create_branch(self, repo_id: str, name: str, ref: str = "main") -> Dict[str, Any]:
+    def create_branch(self, repo_id: str, name: str, ref: str = "main") -> dict[str, Any]:
         if repo_id not in self._repos:
             return {"success": False, "error": "Repository not found"}
         if repo_id not in self._branches:
@@ -502,7 +502,7 @@ class GitLabRepo:
         self._stats["branches_created"] += 1
         return {"success": True, "branch": branch.to_dict()}
 
-    def delete_branch(self, repo_id: str, name: str) -> Dict[str, Any]:
+    def delete_branch(self, repo_id: str, name: str) -> dict[str, Any]:
         if repo_id not in self._branches:
             return {"success": False, "error": "Repository not found"}
         branch = self._branches[repo_id].get(name)
@@ -515,7 +515,7 @@ class GitLabRepo:
         del self._branches[repo_id][name]
         return {"success": True}
 
-    def list_branches(self, repo_id: str) -> Dict[str, Any]:
+    def list_branches(self, repo_id: str) -> dict[str, Any]:
         if repo_id not in self._branches:
             return {"success": False, "error": "Repository not found"}
         return {
@@ -528,7 +528,7 @@ class GitLabRepo:
 
     def create_merge_request(
         self, repo_id: str, title: str, source: str, target: str = "main", author: str = "", description: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if repo_id not in self._repos:
             return {"success": False, "error": "Repository not found"}
         mr_id = self._gen_id(f"mr:{repo_id}:{title}")
@@ -547,7 +547,7 @@ class GitLabRepo:
         self._stats["mrs_created"] += 1
         return {"success": True, "mr": mr.to_dict()}
 
-    def merge_request(self, repo_id: str, mr_id: str, merger: str = "") -> Dict[str, Any]:
+    def merge_request(self, repo_id: str, mr_id: str, merger: str = "") -> dict[str, Any]:
         if repo_id not in self._merge_requests:
             return {"success": False, "error": "Repository not found"}
         mr = self._merge_requests[repo_id].get(mr_id)
@@ -561,7 +561,7 @@ class GitLabRepo:
         self._stats["mrs_merged"] += 1
         return {"success": True, "mr_id": mr_id, "status": "merged"}
 
-    def list_merge_requests(self, repo_id: str, status: str = "") -> Dict[str, Any]:
+    def list_merge_requests(self, repo_id: str, status: str = "") -> dict[str, Any]:
         if repo_id not in self._merge_requests:
             return {"success": False, "error": "Repository not found"}
         mrs = list(self._merge_requests[repo_id].values())
@@ -575,7 +575,7 @@ class GitLabRepo:
 
     # --- CI/CD Pipeline ---
 
-    def trigger_pipeline(self, repo_id: str, ref: str = "main", variables: Dict[str, str] = None) -> Dict[str, Any]:
+    def trigger_pipeline(self, repo_id: str, ref: str = "main", variables: dict[str, str] = None) -> dict[str, Any]:
         if repo_id not in self._repos:
             return {"success": False, "error": "Repository not found"}
         pipeline_id = self._gen_id(f"pipe:{repo_id}:{ref}")
@@ -597,7 +597,7 @@ class GitLabRepo:
         self._stats["pipelines_triggered"] += 1
         return {"success": True, "pipeline": pipeline.to_dict()}
 
-    def list_pipelines(self, repo_id: str, ref: str = "", limit: int = 20) -> Dict[str, Any]:
+    def list_pipelines(self, repo_id: str, ref: str = "", limit: int = 20) -> dict[str, Any]:
         if repo_id not in self._pipelines:
             return {"success": False, "error": "Repository not found"}
         pipes = list(self._pipelines[repo_id].values())
@@ -608,7 +608,7 @@ class GitLabRepo:
 
     # --- Webhook ---
 
-    def register_webhook(self, repo_id: str, url: str, events: List[str] = None, secret: str = "") -> Dict[str, Any]:
+    def register_webhook(self, repo_id: str, url: str, events: list[str] = None, secret: str = "") -> dict[str, Any]:
         if repo_id not in self._repos:
             return {"success": False, "error": "Repository not found"}
         wh_id = self._gen_id(f"wh:{repo_id}:{url}")
@@ -626,7 +626,7 @@ class GitLabRepo:
 
     # --- 成员/权限 ---
 
-    def add_member(self, repo_id: str, username: str, role: str = "developer") -> Dict[str, Any]:
+    def add_member(self, repo_id: str, username: str, role: str = "developer") -> dict[str, Any]:
         valid_roles = {"owner", "maintainer", "developer", "reporter", "guest"}
         if role not in valid_roles:
             return {"success": False, "error": f"Invalid role. Valid: {valid_roles}"}
@@ -635,7 +635,7 @@ class GitLabRepo:
         self._members[repo_id][username] = role
         return {"success": True, "username": username, "role": role}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total_branches = sum(len(b) for b in self._branches.values())
         total_mrs = sum(len(m) for m in self._merge_requests.values())
         total_pipes = sum(len(p) for p in self._pipelines.values())
@@ -649,7 +649,7 @@ class GitLabRepo:
             "total_webhooks": total_hooks,
         }
 
-    async def execute(self, action: str, **kwargs) -> Dict[str, Any]:
+    async def execute(self, action: str, **kwargs) -> dict[str, Any]:
         self.trace("gitlab_repo.execute", "start", action=action)
 
         actions = {
@@ -700,7 +700,7 @@ class GitLabRepo:
             return handler()
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         self.trace("gitlab_repo.health_check", "start")
         return {
             "healthy": True,

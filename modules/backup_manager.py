@@ -151,7 +151,7 @@ class BackupRecord:
     checksum: str = ""
     duration_s: float = 0
     created_at: float = field(default_factory=time.time)
-    expires_at: Optional[float] = None
+    expires_at: float | None = None
     verified: bool = False
     path: str = ""
 
@@ -163,14 +163,14 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._policies: Dict[str, BackupPolicy] = {}
-        self._records: Dict[str, BackupRecord] = {}
+        self._policies: dict[str, BackupPolicy] = {}
+        self._records: dict[str, BackupRecord] = {}
         self._counter: int = 0
 
     def initialize(self) -> None:
@@ -193,7 +193,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "backup_manager"})
         self.metrics_collector.counter("backup_manager.execute.calls", 1)
         self.audit("execute", {"module": "backup_manager"})
@@ -303,7 +303,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         failed = sum(1 for r in self._records.values() if r.status == BackupStatus.FAILED)
         return {
             "status": "healthy" if failed == 0 else "degraded",
@@ -317,7 +317,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         pass
 
-    def _create_backup(self, policy_id: str) -> Dict:
+    def _create_backup(self, policy_id: str) -> dict:
         policy = self._policies.get(policy_id)
         if not policy:
             return {"error": f"Policy not found: {policy_id}"}
@@ -353,7 +353,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "path": record.path,
         }
 
-    def _restore_backup(self, backup_id: str, target: str) -> Dict:
+    def _restore_backup(self, backup_id: str, target: str) -> dict:
         record = self._records.get(backup_id)
         if not record:
             return {"error": "Backup not found"}
@@ -373,7 +373,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "restored": True,
         }
 
-    def _verify_backup(self, backup_id: str) -> Dict:
+    def _verify_backup(self, backup_id: str) -> dict:
         record = self._records.get(backup_id)
         if not record:
             return {"error": "Backup not found"}
@@ -402,7 +402,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._audit.log("backup_cleanup", {"expired": count})
         return count
 
-    def get_backup_compliance_report(self) -> Dict[str, Any]:
+    def get_backup_compliance_report(self) -> dict[str, Any]:
         """备份合规报告。企业场景：满足等保/ISO27001要求的备份策略审计。
         检查各业务线的备份覆盖率、RPO/RTO达标率、加密状态、异地存储情况。
         """
@@ -412,7 +412,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         failed = sum(1 for r in records if r.status == BackupStatus.FAILED)
         encrypted = sum(1 for r in records if getattr(r, "encrypted", False))
         # 按业务线统计
-        source_stats: Dict[str, Dict] = {}
+        source_stats: dict[str, dict] = {}
         for r in records:
             src = r.source or "unknown"
             if src not in source_stats:
@@ -455,7 +455,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "rpo_violations": rpo_violations,
         }
 
-    def estimate_backup_size(self, source: str, strategy: str = "full") -> Dict[str, Any]:
+    def estimate_backup_size(self, source: str, strategy: str = "full") -> dict[str, Any]:
         """估算备份大小。企业场景：备份前预估存储需求，防止磁盘空间不足导致备份失败。
         基于历史备份大小趋势+数据增长率计算预期大小。
         """
@@ -486,7 +486,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def schedule_backup(
         self, source: str, schedule: str, strategy: str = "full", retention_days: int = 30, enabled: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """配置定时备份计划。企业场景：数据库、配置文件等重要资产自动定期备份。
         schedule格式: cron表达式 (分 时 日 月 周)，如 "0 2 * * *" = 每天凌晨2点。
         """
@@ -519,7 +519,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "retention_days": retention_days,
         }
 
-    def cross_region_replicate(self, backup_id: str, target_region: str) -> Dict[str, Any]:
+    def cross_region_replicate(self, backup_id: str, target_region: str) -> dict[str, Any]:
         """跨区域备份复制。企业场景：满足灾备合规要求，将备份同步到异地机房。
         记录复制进度和校验结果，确保异地备份可用。
         """
@@ -552,7 +552,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "size_bytes": replication["size_bytes"],
         }
 
-    def get_backup_timeline(self, source: str, days: int = 30) -> Dict[str, Any]:
+    def get_backup_timeline(self, source: str, days: int = 30) -> dict[str, Any]:
         """获取备份时间线。企业场景：回溯某数据源的备份历史，选择合适的恢复点。
         展示每次备份的时间、大小、状态，标记可用的恢复点。
         """
@@ -585,7 +585,7 @@ class BackupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "timeline": timeline,
         }
 
-    def cleanup_old_backups(self, keep_days: int = 30) -> Dict[str, Any]:
+    def cleanup_old_backups(self, keep_days: int = 30) -> dict[str, Any]:
         """清理过期备份记录。企业场景：定期清理超过保留期的备份记录释放空间。"""
         cutoff = time.time() - keep_days * 86400
         removed = 0

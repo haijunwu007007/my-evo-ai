@@ -80,7 +80,7 @@ import urllib.parse
 import json
 import re
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -90,7 +90,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class GithubtrendingAnalyzer(object):
+class GithubtrendingAnalyzer:
     """githubtrending 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,11 +277,11 @@ class TrendingRepo:
     stars_today: int
     stars_week: int
     stars_month: int
-    topics: List[str] = field(default_factory=list)
+    topics: list[str] = field(default_factory=list)
     category: RepoCategory = RepoCategory.OTHER
     velocity: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "rank": self.rank,
             "full_name": self.full_name,
@@ -306,7 +306,7 @@ class LanguageStats:
     avg_stars_per_repo: float
     top_repo: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "language": self.language,
             "repos": self.repo_count,
@@ -324,9 +324,9 @@ class SnapshotRecord:
     repo_count: int
     top_repo: str
     top_stars: int
-    language_breakdown: Dict[str, int] = field(default_factory=dict)
+    language_breakdown: dict[str, int] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "snapshot_id": self.snapshot_id,
             "timestamp": self.timestamp,
@@ -485,9 +485,9 @@ class CategoryClassifier:
     }
 
     @classmethod
-    def classify(cls, topics: List[str], description: str = "", language: str = "") -> RepoCategory:
+    def classify(cls, topics: list[str], description: str = "", language: str = "") -> RepoCategory:
         text = " ".join(topics).lower() + " " + description.lower()
-        scores: Dict[RepoCategory, int] = defaultdict(int)
+        scores: dict[RepoCategory, int] = defaultdict(int)
         for cat, keywords in cls.CATEGORY_MAP.items():
             for kw in keywords:
                 if kw in text:
@@ -512,7 +512,7 @@ class VelocityCalculator:
         return stars_today / total_stars * 100
 
     @staticmethod
-    def rank_velocity(repos: List[TrendingRepo]) -> List[TrendingRepo]:
+    def rank_velocity(repos: list[TrendingRepo]) -> list[TrendingRepo]:
         for repo in repos:
             repo.velocity = VelocityCalculator.calculate(repo.stars_today, repo.stars)
         repos.sort(key=lambda r: r.velocity, reverse=True)
@@ -524,11 +524,11 @@ class TrendHistory:
     """趋势历史记录"""
 
     def __init__(self, max_snapshots: int = 1000):
-        self._snapshots: List[SnapshotRecord] = []
+        self._snapshots: list[SnapshotRecord] = []
         self._max_snapshots = max_snapshots
 
-    def add_snapshot(self, repos: List[TrendingRepo], period: TrendPeriod) -> SnapshotRecord:
-        lang_breakdown: Dict[str, int] = defaultdict(int)
+    def add_snapshot(self, repos: list[TrendingRepo], period: TrendPeriod) -> SnapshotRecord:
+        lang_breakdown: dict[str, int] = defaultdict(int)
         for r in repos:
             lang_breakdown[r.language] += 1
         top = repos[0] if repos else None
@@ -546,7 +546,7 @@ class TrendHistory:
             self._snapshots = self._snapshots[-self._max_snapshots :]
         return snapshot
 
-    def compare_periods(self, period: TrendPeriod = TrendPeriod.DAILY) -> Dict[str, Any]:
+    def compare_periods(self, period: TrendPeriod = TrendPeriod.DAILY) -> dict[str, Any]:
         period_snaps = [s for s in self._snapshots if s.period == period]
         if len(period_snaps) < 2:
             return {"available": False, "snapshots": len(period_snaps)}
@@ -580,7 +580,7 @@ class TrendHistory:
 class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """GitHub趋势追踪 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__(
             config={
                 "module_id": "githubtrending",
@@ -589,7 +589,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             }
         )
         self.config = config or {}
-        self._repos: List[TrendingRepo] = []
+        self._repos: list[TrendingRepo] = []
         self._classifier = CategoryClassifier()
         self._velocity_calc = VelocityCalculator()
         self._history = TrendHistory(max_snapshots=self.config.get("max_snapshots", 1000))
@@ -734,7 +734,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def fetch_trending(
         self, language: str = "", period: TrendPeriod = TrendPeriod.DAILY, limit: int = 25,
         ai_filter: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取热门项目
         策略：1) 爬 github.com/trending（官方策展，质量最高）
               2) Search API 兜底 — created:>30d + stars:>300（近一个月的热门项目，平衡时效性与质量）
@@ -769,7 +769,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "monthly": {"days": 90, "min_stars": 200},
             }
             cfg = period_config.get(period_key, period_config["daily"])
-            cutoff = (datetime.now(timezone.utc) - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
+            cutoff = (datetime.now(UTC) - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
             fetch_limit = max(limit * 2, 50)
             q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
             if language and language != "all":
@@ -847,7 +847,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             logger.debug("后台刷新失败: %s", e)
 
-    def by_category(self, category: str = "", limit: int = 10) -> Dict[str, Any]:
+    def by_category(self, category: str = "", limit: int = 10) -> dict[str, Any]:
         self._stats["categories_classified"] += 1
         if category:
             cat = RepoCategory(category)
@@ -861,8 +861,8 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "results": [r.to_dict() for r in filtered[:limit]],
         }
 
-    def language_stats(self) -> List[Dict[str, Any]]:
-        lang_data: Dict[str, Dict] = defaultdict(lambda: {"count": 0, "stars": 0, "forks": 0, "stars_today": 0})
+    def language_stats(self) -> list[dict[str, Any]]:
+        lang_data: dict[str, dict] = defaultdict(lambda: {"count": 0, "stars": 0, "forks": 0, "stars_today": 0})
         for r in self._repos:
             d = lang_data[r.language]
             d["count"] += 1
@@ -882,16 +882,16 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return stats
 
-    def save_snapshot(self, period: str = "daily") -> Dict[str, Any]:
+    def save_snapshot(self, period: str = "daily") -> dict[str, Any]:
         p = TrendPeriod(period)
         snapshot = self._history.add_snapshot(self._repos, p)
         self._stats["snapshots_saved"] += 1
         return {"success": True, **snapshot.to_dict()}
 
-    def get_history(self, period: str = "daily") -> Dict[str, Any]:
+    def get_history(self, period: str = "daily") -> dict[str, Any]:
         return self._history.compare_periods(TrendPeriod(period))
 
-    def search(self, keyword: str, limit: int = 10) -> Dict[str, Any]:
+    def search(self, keyword: str, limit: int = 10) -> dict[str, Any]:
         kw = keyword.lower()
         results = [
             r
@@ -908,7 +908,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "results": [r.to_dict() for r in results[:limit]],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         categories = defaultdict(int)
         for r in self._repos:
             categories[r.category.value] += 1
@@ -919,7 +919,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "snapshots": self._history.snapshot_count,
         }
 
-    async def execute(self, action: str = "", params: dict = None, **kwargs) -> Dict[str, Any]:
+    async def execute(self, action: str = "", params: dict = None, **kwargs) -> dict[str, Any]:
         """执行模块动作 — 兼容 api_server 多种调用签名
         api_server 可能的调用方式：
           1) mod.execute(action, params)          — 标准两参数
@@ -961,7 +961,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         else:
             return {"success": False, "error": f"Unknown action: {action}", "available": ["trending", "fetch_trending", "scan_trending", "analyze", "category", "languages", "snapshot", "history", "search", "stats", "help"]}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         self.trace("githubtrending.health_check", "start")
         return {
             "healthy": True,

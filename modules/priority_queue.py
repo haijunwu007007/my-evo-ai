@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 优先级队列（A级）
 # Grade: C
 
@@ -13,7 +12,7 @@ from modules._persist import PersistMixin
 logger=logging.getLogger("evo.priority-queue")
 class PriorityQueue(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="priority-queue";MODULE_NAME="优先级队列";VERSION="v1.0";MODULE_LEVEL="A"
-    def __init__(self,config=None):super().__init__(config);self._heap=[];self._counter=0;self._items:Dict[str,Dict]={}
+    def __init__(self,config=None):super().__init__(config);self._heap=[];self._counter=0;self._items:dict[str,dict]={}
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"size":len(self._heap)})
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)

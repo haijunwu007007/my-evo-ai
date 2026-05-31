@@ -202,8 +202,8 @@ class WidgetConfig:
     widget_id: str = ""
     name: str = ""
     type: str = "card"  # card, chart, table, gauge, text
-    props: Dict[str, Any] = field(default_factory=dict)
-    position: Dict[str, int] = field(default_factory=lambda: {"row": 0, "col": 0, "w": 1, "h": 1})
+    props: dict[str, Any] = field(default_factory=dict)
+    position: dict[str, int] = field(default_factory=lambda: {"row": 0, "col": 0, "w": 1, "h": 1})
     visible: bool = True
     refresh_interval: int = 0  # 0=不自动刷新
 
@@ -215,8 +215,8 @@ class UserProfile:
     theme: str = "light"
     layout: str = "default"
     language: str = "zh-CN"
-    widgets: Dict[str, Dict] = field(default_factory=dict)
-    preferences: Dict[str, Any] = field(default_factory=dict)
+    widgets: dict[str, dict] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
     updated_at: float = 0.0
 
 class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -235,12 +235,12 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "description": "前端配置界面管理，支持主题/布局/组件/用户偏好管理",
             }
         )
-        self._themes: Dict[str, Dict] = dict(BUILTIN_THEMES)
-        self._layouts: Dict[str, Dict] = dict(BUILTIN_LAYOUTS)
-        self._profiles: Dict[str, UserProfile] = {}
-        self._widgets: Dict[str, WidgetConfig] = {}
-        self._components: Dict[str, Dict] = {}
-        self._change_log: List[Dict] = []
+        self._themes: dict[str, dict] = dict(BUILTIN_THEMES)
+        self._layouts: dict[str, dict] = dict(BUILTIN_LAYOUTS)
+        self._profiles: dict[str, UserProfile] = {}
+        self._widgets: dict[str, WidgetConfig] = {}
+        self._components: dict[str, dict] = {}
+        self._change_log: list[dict] = []
         self._initialized = False
 
     def initialize(self) -> None:
@@ -275,7 +275,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._profiles[user_id] = UserProfile(user_id=user_id, updated_at=time.time())
         return self._profiles[user_id]
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "config_ui"})
         self.metrics_collector.counter("config_ui.execute.calls", 1)
         self.audit("execute", {"module": "config_ui"})
@@ -485,7 +485,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.error(f"[ConfigUI] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -506,7 +506,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
         logger.info("关闭配置UI管理器")
 
-    def export_theme_config(self, theme_id: str) -> Dict[str, Any]:
+    def export_theme_config(self, theme_id: str) -> dict[str, Any]:
         """导出主题配置。企业场景：多环境部署时将定制主题导出为JSON，
         在生产/预发/测试环境之间共享UI配置。
         """
@@ -522,7 +522,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return {"success": True, "format": "json", "config": config}
 
-    def get_layout_usage_report(self) -> Dict[str, Any]:
+    def get_layout_usage_report(self) -> dict[str, Any]:
         """布局使用报告。企业场景：产品团队分析哪些页面布局被广泛使用，
         哪些是冗余配置，辅助UI组件库优化。
         """
@@ -536,7 +536,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         report["layout_details"] = sorted(layout_details, key=lambda x: -x["widget_count"])
         return {"success": True, **report}
 
-    def validate_widget_config(self, widget_id: str) -> Dict[str, Any]:
+    def validate_widget_config(self, widget_id: str) -> dict[str, Any]:
         """校验组件配置完整性。企业场景：上线前检查组件配置是否满足
         必填字段要求，避免前端渲染异常。
         """
@@ -552,7 +552,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 issues.append({"field": field, "error": "必填字段缺失"})
         return {"success": True, "widget_id": widget_id, "valid": len(issues) == 0, "issues": issues}
 
-    def clone_theme(self, source_id: str, new_name: str) -> Dict[str, Any]:
+    def clone_theme(self, source_id: str, new_name: str) -> dict[str, Any]:
         """克隆主题。企业场景：基于现有主题创建变体（如暗色版、大字体版），
         避免从零开始配置。
         """
@@ -568,7 +568,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         themes[new_id].name = new_name
         return {"success": True, "new_theme_id": new_id, "name": new_name, "cloned_from": source_id}
 
-    def export_theme_json(self, theme_id: str) -> Dict[str, Any]:
+    def export_theme_json(self, theme_id: str) -> dict[str, Any]:
         """导出主题为JSON。企业场景：跨项目共享UI主题，或版本控制管理主题变更。"""
         themes = getattr(self, "_themes", {})
         theme = themes.get(theme_id)
@@ -585,7 +585,7 @@ class ConfigUIManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return {"success": True, "theme": export_data, "size_bytes": len(str(export_data).encode())}
 
-    def get_widget_usage_stats(self) -> Dict[str, Any]:
+    def get_widget_usage_stats(self) -> dict[str, Any]:
         """组件使用统计。企业场景：产品团队分析哪些配置组件被团队频繁使用，
         识别低频组件可下线，高频组件需优化体验。
         """

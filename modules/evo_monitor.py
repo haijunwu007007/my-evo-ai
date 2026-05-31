@@ -99,7 +99,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("evo_monitor")
 
-class EvolutionAnalyzer(object):
+class EvolutionAnalyzer:
     """evo_monitor 运营分析引擎
 
     - 分析版本演进趋势
@@ -158,7 +158,7 @@ class FitnessSnapshot:
     median: float = 0.0
     count: int = 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "generation": self.generation,
             "timestamp": self.timestamp,
@@ -178,7 +178,7 @@ class ConvergenceReport:
     improvement_rate: float = 0.0
     diversity_trend: str = "stable"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "converged": self.is_converged,
             "convergence_rate": round(self.convergence_rate, 4),
@@ -198,7 +198,7 @@ class MonitorAlert:
     value: float = 0.0
     threshold: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "level": self.level.value,
@@ -212,12 +212,12 @@ class MonitorAlert:
 class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """进化监控：适应度追踪、收敛检测、多样性度量、停滞预警、代际分析"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._snapshots: List[FitnessSnapshot] = []
-        self._alerts: List[MonitorAlert] = []
-        self._thresholds: Dict[str, Dict[str, float]] = {
+        self._snapshots: list[FitnessSnapshot] = []
+        self._alerts: list[MonitorAlert] = []
+        self._thresholds: dict[str, dict[str, float]] = {
             "stagnation": {"generations": 10, "alert": AlertLevel.WARNING.value},
             "low_diversity": {"threshold": 0.01, "alert": AlertLevel.WARNING.value},
             "convergence": {"rate": 0.99, "alert": AlertLevel.INFO.value},
@@ -226,7 +226,7 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._max_snapshots = 500
         self._max_alerts = 100
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("evo_monitor.initialize", "start")
         self.trace("evo_monitor.initialize", "end")
         try:
@@ -237,7 +237,7 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         return {
             "healthy": self.status == ModuleStatus.RUNNING,
             "status": self.status.value,
@@ -247,7 +247,7 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "latest_gen": self._snapshots[-1].generation if self._snapshots else 0,
         }
 
-    def record_fitness(self, params: Optional[Dict] = None) -> Dict:
+    def record_fitness(self, params: dict | None = None) -> dict:
         params = params or {}
         generation = params.get("generation", len(self._snapshots))
         values = params.get("values", [])
@@ -330,7 +330,7 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._alerts = self._alerts[-self._max_alerts :]
         self.audit("alert", f"{level.value}: {message}")
 
-    def check_convergence(self, params: Optional[Dict] = None) -> Dict:
+    def check_convergence(self, params: dict | None = None) -> dict:
         if len(self._snapshots) < 3:
             return {"success": True, "report": ConvergenceReport().to_dict(), "note": "Insufficient data"}
         recent = self._snapshots[-10:]
@@ -362,19 +362,19 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return {"success": True, "report": report.to_dict()}
 
-    def get_snapshots(self, params: Optional[Dict] = None) -> Dict:
+    def get_snapshots(self, params: dict | None = None) -> dict:
         params = params or {}
         limit = params.get("limit", 50)
         snaps = [s.to_dict() for s in self._snapshots[-limit:]]
         return {"success": True, "snapshots": snaps, "count": len(snaps)}
 
-    def get_alerts(self, params: Optional[Dict] = None) -> Dict:
+    def get_alerts(self, params: dict | None = None) -> dict:
         params = params or {}
         level = params.get("level")
         result = [a.to_dict() for a in self._alerts if not level or a.level.value == level]
         return {"success": True, "alerts": result, "count": len(result)}
 
-    def get_summary(self, params: Optional[Dict] = None) -> Dict:
+    def get_summary(self, params: dict | None = None) -> dict:
         if not self._snapshots:
             return {"success": True, "summary": {"generations": 0}}
         first = self._snapshots[0]
@@ -396,7 +396,7 @@ class EvoMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._alerts.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

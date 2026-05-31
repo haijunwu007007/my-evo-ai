@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EmbeddingOpenai:
@@ -140,7 +140,7 @@ class EmbeddingOpenai:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, EmbeddingOpenai] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, EmbeddingOpenai] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-        return {"success": False, "error": "Unknown action: {}".format(action)}
+        return {"success": False, "error": f"Unknown action: {action}"}
 
-    def estimate_cost(self, texts: List[str], model: str = "text-embedding-ada-002") -> Dict[str, Any]:
+    def estimate_cost(self, texts: list[str], model: str = "text-embedding-ada-002") -> dict[str, Any]:
         """预估嵌入成本：基于Token数量和模型定价计算费用"""
         PRICING = {
             "text-embedding-ada-002": 0.0001,
@@ -486,7 +486,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "monthly_projection_usd": round(cost * 30, 4) if len(texts) > 0 else 0,
         }
 
-    def analyze_cache_efficiency(self) -> Dict[str, Any]:
+    def analyze_cache_efficiency(self) -> dict[str, Any]:
         """分析嵌入缓存效率：命中率、节省成本、缓存分布"""
         cache = self._cache if hasattr(self, "_cache") else {}
         stats = self._stats if hasattr(self, "_stats") else {}
@@ -517,7 +517,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             else "缓存命中率偏低，检查缓存策略",
         }
 
-    def batch_embed_with_progress(self, texts: List[str], batch_size: int = 100) -> Dict[str, Any]:
+    def batch_embed_with_progress(self, texts: list[str], batch_size: int = 100) -> dict[str, Any]:
         """批量嵌入带进度追踪：分批处理、错误隔离、结果汇总"""
         results = []
         errors = []
@@ -544,7 +544,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "error_details": errors[:10],
         }
 
-    def compare_embeddings_similarity(self, text_pairs: List[List[str]]) -> List[Dict[str, Any]]:
+    def compare_embeddings_similarity(self, text_pairs: list[list[str]]) -> list[dict[str, Any]]:
         """比较文本对嵌入相似度：批量计算并返回排序结果"""
         results = []
         for pair in text_pairs:
@@ -582,7 +582,7 @@ class EmbeddingOpenaiManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         results.sort(key=lambda x: x["combined_similarity"], reverse=True)
         return results
 
-    def get_model_recommendation(self, use_case: str = "general", avg_text_length: int = 100) -> Dict[str, Any]:
+    def get_model_recommendation(self, use_case: str = "general", avg_text_length: int = 100) -> dict[str, Any]:
         """根据使用场景推荐嵌入模型"""
         models = {
             "text-embedding-ada-002": {

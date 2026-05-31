@@ -179,17 +179,17 @@ class ScalePlan:
     estimated_cost_impact: float = 0
     created_at: datetime = field(default_factory=datetime.now)
 
-class DemandForecastEngine(object):
+class DemandForecastEngine:
     """需求预测引擎 - 基于历史数据的容量趋势预测"""
 
     def __init__(self):
-        self._history: List[UsageSample] = []
+        self._history: list[UsageSample] = []
         self._window_size = 7
 
     def add_sample(self, sample: object) -> None:
         self._history.append(sample)
 
-    def predict_next(self, resource: str) -> Dict:
+    def predict_next(self, resource: str) -> dict:
         """基于移动平均预测下一周期需求"""
         recent = [s for s in self._history if hasattr(s, "resource_id") and s.resource_id == resource]
         if len(recent) < 2:
@@ -226,10 +226,10 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self.module_name = "capacity_planner"
         self.module_id = self.module_name
         self.module_version = "7.0.0"
-        self._pools: Dict[str, ResourcePool] = {}
-        self._usage_history: Dict[str, List[UsageSample]] = defaultdict(list)
-        self._forecasts: Dict[str, ForecastResult] = {}
-        self._scale_plans: Dict[str, ScalePlan] = {}
+        self._pools: dict[str, ResourcePool] = {}
+        self._usage_history: dict[str, list[UsageSample]] = defaultdict(list)
+        self._forecasts: dict[str, ForecastResult] = {}
+        self._scale_plans: dict[str, ScalePlan] = {}
         self._audit = AuditLogger()
         self._forecast_count = 0
         self._setup_default_pools()
@@ -256,7 +256,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     def initialize(self):
         logger.info("capacity_planner initialized")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("capacity_planner_ops_total", labels={"action": operation})
         self.audit("execute", f"operation={operation}")
@@ -296,7 +296,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 ],
             }
 
-    def _add_pool(self, p: Dict) -> Dict:
+    def _add_pool(self, p: dict) -> dict:
         pool_id = p.get("pool_id")
         name = p.get("name", "")
         resource_type = p.get("resource_type", "cpu")
@@ -316,7 +316,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._pools[pool_id] = pool
         return {"success": True, "result": {"pool_id": pool_id, "name": name, "capacity": capacity, "unit": unit}}
 
-    def _record_usage(self, p: Dict) -> Dict:
+    def _record_usage(self, p: dict) -> dict:
         pool_id = p.get("pool_id")
         used = p.get("used", 0)
         requested = p.get("requested", 0)
@@ -336,7 +336,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "result": {"pool_id": pool_id, "used": used, "total_samples": len(self._usage_history[pool_id])},
         }
 
-    def _get_pool_status(self, p: Dict) -> Dict:
+    def _get_pool_status(self, p: dict) -> dict:
         pool_id = p.get("pool_id")
         if not pool_id or pool_id not in self._pools:
             return {"success": False, "error": "pool not found"}
@@ -369,7 +369,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _forecast(self, p: Dict) -> Dict:
+    def _forecast(self, p: dict) -> dict:
         pool_id = p.get("pool_id")
         horizon_days = p.get("horizon_days", 30)
 
@@ -438,7 +438,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _generate_plan(self, p: Dict) -> Dict:
+    def _generate_plan(self, p: dict) -> dict:
         plans = []
         for pool_id, pool in self._pools.items():
             history = self._usage_history.get(pool_id, [])
@@ -499,7 +499,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "total": len(plans),
         }
 
-    def _get_alerts(self, p: Dict) -> Dict:
+    def _get_alerts(self, p: dict) -> dict:
         alerts = []
         for pool_id, pool in self._pools.items():
             history = self._usage_history.get(pool_id, [])
@@ -528,7 +528,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         alerts.sort(key=lambda x: 0 if x["level"] == "critical" else 1)
         return {"success": True, "result": alerts, "total": len(alerts)}
 
-    def _get_all_pools(self, p: Dict) -> Dict:
+    def _get_all_pools(self, p: dict) -> dict:
         pools = []
         for pool_id, pool in self._pools.items():
             history = self._usage_history.get(pool_id, [])
@@ -548,7 +548,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return {"success": True, "result": pools, "total": len(pools)}
 
-    def _cost_analysis(self, p: Dict) -> Dict:
+    def _cost_analysis(self, p: dict) -> dict:
         total_cost = 0
         pool_costs = []
         for pool_id, pool in self._pools.items():
@@ -577,7 +577,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _utilization_report(self, p: Dict) -> Dict:
+    def _utilization_report(self, p: dict) -> dict:
         report = []
         for pool_id, pool in self._pools.items():
             history = self._usage_history.get(pool_id, [])
@@ -603,7 +603,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._initialized = False
         self._audit.log("shutdown", "capacity_planner shutdown")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -616,7 +616,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         )
         return result
 
-    def get_utilization_report(self) -> Dict:
+    def get_utilization_report(self) -> dict:
         """获取资源利用率报告"""
         pools = self._pools if hasattr(self, "_pools") else {}
         report = {}
@@ -631,7 +631,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 }
         return report
 
-    def recommend_scale_actions(self) -> List[Dict]:
+    def recommend_scale_actions(self) -> list[dict]:
         """基于当前利用率推荐扩缩容操作"""
         report = self.get_utilization_report()
         actions = []
@@ -656,7 +656,7 @@ class CapacityPlannerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 )
         return sorted(actions, key=lambda x: 0 if x["priority"] == "high" else 1)
 
-    def forecast_resource_demand(self, days: int = 7) -> Dict[str, Any]:
+    def forecast_resource_demand(self, days: int = 7) -> dict[str, Any]:
         """预测未来资源需求：基于历史趋势线性外推，生成容量预警"""
         resources = self._resources if hasattr(self, "_resources") else {}
         if not resources:

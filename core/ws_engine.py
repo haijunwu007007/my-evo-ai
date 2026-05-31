@@ -90,7 +90,7 @@ class WSMessage:
         return json.dumps(asdict(self), ensure_ascii=False)
 
     @classmethod
-    def from_dict(cls, d: dict) -> "WSMessage":
+    def from_dict(cls, d: dict) -> WSMessage:
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 
@@ -103,7 +103,7 @@ class WSClient:
     """WebSocket客户端连接"""
     ws: WebSocket = field(repr=False)
     client_id: str = ""
-    rooms: Set[str] = field(default_factory=set)
+    rooms: set[str] = field(default_factory=set)
     connected_at: str = ""
     last_heartbeat: float = 0.0
     auth_token: str = ""
@@ -145,13 +145,13 @@ class WSEngine:
         self._history_size = history_size
 
         # 连接管理
-        self._clients: Dict[str, WSClient] = {}          # client_id → WSClient
-        self._room_clients: Dict[str, Set[str]] = defaultdict(set)  # room → {client_ids}
+        self._clients: dict[str, WSClient] = {}          # client_id → WSClient
+        self._room_clients: dict[str, set[str]] = defaultdict(set)  # room → {client_ids}
         self._lock = asyncio.Lock()
 
         # 历史缓冲
-        self._history: Dict[str, List[dict]] = defaultdict(list)  # channel → [messages]
-        self._all_history: List[dict] = []               # 全局历史
+        self._history: dict[str, list[dict]] = defaultdict(list)  # channel → [messages]
+        self._all_history: list[dict] = []               # 全局历史
 
         # 统计
         self._total_messages = 0
@@ -174,7 +174,7 @@ class WSEngine:
     # ─── 连接管理 ───
 
     async def connect(self, websocket: WebSocket, token: str = "",
-                      rooms: Optional[List[str]] = None, client_ip: str = "",
+                      rooms: list[str] | None = None, client_ip: str = "",
                       user_agent: str = "") -> WSClient:
         """接受WebSocket连接"""
         # 认证
@@ -384,7 +384,7 @@ class WSEngine:
             "history_size": len(self._all_history)
         }
 
-    def get_history(self, channel: Optional[str] = None, limit: int = 50) -> List[dict]:
+    def get_history(self, channel: str | None = None, limit: int = 50) -> list[dict]:
         """获取历史消息"""
         if channel:
             return self._history.get(channel, [])[-limit:]
@@ -449,7 +449,7 @@ async def ws_endpoint_handler(websocket: WebSocket, engine: WSEngine,
 
 # ─── 全局单例 ───
 
-_engine: Optional[WSEngine] = None
+_engine: WSEngine | None = None
 
 def get_ws_engine() -> WSEngine:
     global _engine

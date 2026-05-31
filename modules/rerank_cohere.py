@@ -75,7 +75,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -83,7 +83,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class RerankCohereAnalyzer(object):
+class RerankCohereAnalyzer:
     """rerank_cohere 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,7 +277,7 @@ class RerankCohereModule:
 
     """Cohere Rerank - 文档重排序/语义相关性/批量处理/多模型/缓存"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -322,14 +322,14 @@ class RerankCohereModule:
         self._default_model = self.config.get("default_model", "rerank-v3.5")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 30)
-        self._circuits: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._cache: Dict[str, Dict] = {}
+        self._circuits: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 1800)
-        self._request_log: List[Dict] = []
+        self._request_log: list[dict] = []
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 10))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_rate_limits()
             self._initialized = True
@@ -338,7 +338,7 @@ class RerankCohereModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -458,7 +458,7 @@ class RerankCohereModule:
                     "query_length": len(query),
                     "doc_count": len(documents),
                     "latency_ms": latency,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -483,7 +483,7 @@ class RerankCohereModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         total_docs = sum(r["doc_count"] for r in recent)
         avg_lat = sum(r["latency_ms"] for r in recent) / len(recent) if recent else 0

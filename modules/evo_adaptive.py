@@ -87,7 +87,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("evo_adaptive")
 
-class AdaptationAnalyzer(object):
+class AdaptationAnalyzer:
     """evo_adaptive 运营分析引擎
 
     - 分析策略切换效果
@@ -141,7 +141,7 @@ class SelectionType(Enum):
 class Strategy:
     id: str = ""
     name: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     fitness: float = 0.0
     trials: int = 0
     rewards: float = 0.0
@@ -150,7 +150,7 @@ class Strategy:
     last_used: float = 0.0
     tag: str = ""
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
@@ -166,13 +166,13 @@ class Strategy:
 class Population:
     id: str = ""
     generation: int = 0
-    strategies: List[Strategy] = field(default_factory=list)
+    strategies: list[Strategy] = field(default_factory=list)
     best_fitness: float = 0.0
     avg_fitness: float = 0.0
     created_at: float = 0.0
     size: int = 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "generation": self.generation,
@@ -191,7 +191,7 @@ class EvolutionResult:
     population_id: str = ""
     generation: int = 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "selected": self.selected_id,
             "name": self.selected_name,
@@ -204,16 +204,16 @@ class EvolutionResult:
 class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """自适应进化引擎：策略评估、参数调优、适应度评分、种群管理、进化选择"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._populations: Dict[str, Population] = {}
-        self._all_strategies: Dict[str, Strategy] = {}
+        self._populations: dict[str, Population] = {}
+        self._all_strategies: dict[str, Strategy] = {}
         self._exploration_rate = 0.1
         self._selection_method = EvolutionStrategy.EPSILON_GREEDY
         self._stats = {"total_selections": 0, "total_rewards": 0, "mutations": 0, "crossovers": 0}
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("evo_adaptive.initialize", "start")
         self.trace("evo_adaptive.initialize", "end")
         try:
@@ -242,7 +242,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         total_strats = len(self._all_strategies)
         best = max((s.fitness for s in self._all_strategies.values()), default=0)
         return {
@@ -259,7 +259,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _gen_id(self, prefix: str) -> str:
         return hashlib.md5(f"{prefix}-{time.time()}-{(int(tmod.time()*1000000)%1000000/1000000)}".encode()).hexdigest()[:12]
 
-    def select(self, params: Optional[Dict] = None) -> Dict:
+    def select(self, params: dict | None = None) -> dict:
         params = params or {}
         pop_id = params.get("population_id")
         method = params.get("method")
@@ -309,7 +309,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         else:
             return max(strats, key=lambda s: s.fitness)
 
-    def reward(self, params: Optional[Dict] = None) -> Dict:
+    def reward(self, params: dict | None = None) -> dict:
         params = params or {}
         sid = params.get("strategy_id", "")
         value = params.get("value", 0.0)
@@ -323,7 +323,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._stats["total_rewards"] += value
         return {"success": True, "strategy_id": sid, "fitness": round(s.fitness, 4)}
 
-    def mutate(self, params: Optional[Dict] = None) -> Dict:
+    def mutate(self, params: dict | None = None) -> dict:
         params = params or {}
         sid = params.get("strategy_id", "")
         if sid not in self._all_strategies:
@@ -352,7 +352,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._stats["mutations"] += 1
         return {"success": True, "child_id": new_id, "child_name": child.name, "params": new_params}
 
-    def evolve(self, params: Optional[Dict] = None) -> Dict:
+    def evolve(self, params: dict | None = None) -> dict:
         params = params or {}
         pop_id = params.get("population_id")
         pop = self._get_pop(pop_id)
@@ -386,18 +386,18 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("evolve", f"gen={pop.generation} size={len(new_strats)}")
         return {"success": True, "generation": pop.generation, "population": pop.to_dict()}
 
-    def list_populations(self, params: Optional[Dict] = None) -> Dict:
+    def list_populations(self, params: dict | None = None) -> dict:
         result = [p.to_dict() for p in self._populations.values()]
         return {"success": True, "populations": result}
 
-    def list_strategies(self, params: Optional[Dict] = None) -> Dict:
+    def list_strategies(self, params: dict | None = None) -> dict:
         params = params or {}
         tag = params.get("tag")
         result = [s.to_dict() for s in self._all_strategies.values() if not tag or s.tag == tag]
         result.sort(key=lambda x: -x["fitness"])
         return {"success": True, "strategies": result, "count": len(result)}
 
-    def _get_pop(self, pop_id: Optional[str]) -> Optional[Population]:
+    def _get_pop(self, pop_id: str | None) -> Population | None:
         if pop_id and pop_id in self._populations:
             return self._populations[pop_id]
         if self._populations:
@@ -409,7 +409,7 @@ class EvoAdaptive(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._all_strategies.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

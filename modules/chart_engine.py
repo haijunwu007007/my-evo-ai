@@ -41,7 +41,7 @@ class DataAggregator:
     """数据聚合引擎"""
 
     @staticmethod
-    def aggregate(data: List[Dict], group_by: str, value_field: str, agg_type: str = "sum") -> List[Dict]:
+    def aggregate(data: list[dict], group_by: str, value_field: str, agg_type: str = "sum") -> list[dict]:
         groups = defaultdict(list)
         for item in data:
             key = item.get(group_by, "unknown")
@@ -68,7 +68,7 @@ class DataAggregator:
         return result
 
     @staticmethod
-    def moving_average(data: List[float], window: int = 5) -> List[float]:
+    def moving_average(data: list[float], window: int = 5) -> list[float]:
         if len(data) < window:
             return data
         result = []
@@ -78,7 +78,7 @@ class DataAggregator:
         return result
 
     @staticmethod
-    def percentile(data: List[float], pct: float = 95) -> float:
+    def percentile(data: list[float], pct: float = 95) -> float:
         if not data:
             return 0
         s = sorted(data)
@@ -104,11 +104,11 @@ class DataAggregator:
             params = {}
         return self.percentile(**params)
 
-class ThemeManager(object):
+class ThemeManager:
     """图表主题管理"""
 
     def __init__(self):
-        self._themes: Dict[str, Dict] = {
+        self._themes: dict[str, dict] = {
             "default": {
                 "colors": ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f", "#edc948", "#b07aa1", "#ff9da7"],
                 "background": "#ffffff",
@@ -133,7 +133,7 @@ class ThemeManager(object):
         }
         self._current = "default"
 
-    def get_theme(self, name: str = None) -> Dict:
+    def get_theme(self, name: str = None) -> dict:
         name = name or self._current
         return self._themes.get(name, self._themes["default"])
 
@@ -143,7 +143,7 @@ class ThemeManager(object):
             return True
         return False
 
-    def list_themes(self) -> List[str]:
+    def list_themes(self) -> list[str]:
         return list(self._themes.keys())
 
 class ChartRenderer:
@@ -152,13 +152,13 @@ class ChartRenderer:
     CHART_TYPES = ["line", "bar", "pie", "scatter", "area", "heatmap", "radar", "gauge", "funnel", "treemap"]
 
     def __init__(self):
-        self._chart_cache: Dict[str, Dict] = {}
+        self._chart_cache: dict[str, dict] = {}
         self._max_cache = 200
 
     def _cache_key(self, chart_type: str, data_hash: str) -> str:
         return hashlib.md5(f"{chart_type}:{data_hash}".encode()).hexdigest()[:12]
 
-    def render_line(self, data: List[Dict], x_field: str, y_field: str, title: str = "", options: Dict = None) -> Dict:
+    def render_line(self, data: list[dict], x_field: str, y_field: str, title: str = "", options: dict = None) -> dict:
         options = options or {}
         xs = [d.get(x_field, "") for d in data]
         ys = [float(d.get(y_field, 0)) for d in data]
@@ -179,7 +179,7 @@ class ChartRenderer:
         }
         return chart
 
-    def render_bar(self, data: List[Dict], x_field: str, y_field: str, title: str = "", options: Dict = None) -> Dict:
+    def render_bar(self, data: list[dict], x_field: str, y_field: str, title: str = "", options: dict = None) -> dict:
         options = options or {}
         xs = [str(d.get(x_field, "")) for d in data]
         ys = [float(d.get(y_field, 0)) for d in data]
@@ -197,8 +197,8 @@ class ChartRenderer:
         }
 
     def render_pie(
-        self, data: List[Dict], label_field: str, value_field: str, title: str = "", options: Dict = None
-    ) -> Dict:
+        self, data: list[dict], label_field: str, value_field: str, title: str = "", options: dict = None
+    ) -> dict:
         options = options or {}
         total = sum(float(d.get(value_field, 0)) for d in data)
         slices = []
@@ -220,8 +220,8 @@ class ChartRenderer:
         }
 
     def render_scatter(
-        self, data: List[Dict], x_field: str, y_field: str, title: str = "", options: Dict = None
-    ) -> Dict:
+        self, data: list[dict], x_field: str, y_field: str, title: str = "", options: dict = None
+    ) -> dict:
         points = [
             {"x": float(d.get(x_field, 0)), "y": float(d.get(y_field, 0)), "label": d.get("name", d.get("label", ""))}
             for d in data
@@ -244,8 +244,8 @@ class ChartRenderer:
         }
 
     def render_gauge(
-        self, value: float, min_val: float = 0, max_val: float = 100, title: str = "", options: Dict = None
-    ) -> Dict:
+        self, value: float, min_val: float = 0, max_val: float = 100, title: str = "", options: dict = None
+    ) -> dict:
         options = options or {}
         pct = (value - min_val) / (max_val - min_val) * 100 if max_val > min_val else 0
         pct = max(0, min(100, pct))
@@ -268,7 +268,7 @@ class ChartRenderer:
         }
 
     @staticmethod
-    def _correlation(xs: List[float], ys: List[float]) -> float:
+    def _correlation(xs: list[float], ys: list[float]) -> float:
         if len(xs) < 2:
             return 0
         n = len(xs)
@@ -281,27 +281,27 @@ class ChartRenderer:
 class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """图表引擎 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "charts_created": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
         self.aggregator = DataAggregator()
         self.themes = ThemeManager()
         self.renderer = ChartRenderer()
-        self._chart_store: Dict[str, Dict] = {}
+        self._chart_store: dict[str, dict] = {}
         self._max_store = 500
 
     def initialize(self) -> dict:
@@ -454,8 +454,8 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": False, "error": f"Unknown action: {action}"}
 
     def generate_dashboard_config(
-        self, title: str, charts: List[Dict[str, Any]], layout: str = "grid"
-    ) -> Dict[str, Any]:
+        self, title: str, charts: list[dict[str, Any]], layout: str = "grid"
+    ) -> dict[str, Any]:
         """生成仪表板配置。企业场景：运营大屏一键生成多图表仪表板，
          指定每个图表的类型/数据源/位置，输出完整的仪表板JSON配置。
         layout: grid(网格) / row(行) / free(自由定位)。
@@ -494,7 +494,7 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def export_chart_image(
         self, chart_id: str, format: str = "png", width: int = 800, height: int = 600
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出图表为图片配置。企业场景：报告生成时将图表嵌入PDF/PPT。
         返回图片生成参数，实际渲染由前端或外部服务完成。
         """
@@ -515,7 +515,7 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return {"success": True, "export": export_config}
 
-    def get_chart_usage_analytics(self) -> Dict[str, Any]:
+    def get_chart_usage_analytics(self) -> dict[str, Any]:
         """图表使用分析。企业场景：产品团队了解哪些图表类型最受欢迎，
         优化默认图表模板，指导新功能优先级。
         """
@@ -523,8 +523,8 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "total_charts": len(self._charts), "message": "无访问日志"}
         log = self._chart_access_log
         total_access = len(log)
-        by_type: Dict[str, int] = {}
-        by_chart: Dict[str, int] = {}
+        by_type: dict[str, int] = {}
+        by_chart: dict[str, int] = {}
         for entry in log:
             ct = entry.get("chart_type", "unknown")
             cid = entry.get("chart_id", "unknown")
@@ -539,7 +539,7 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_charts": [{"chart_id": c, "accesses": a} for c, a in top_charts],
         }
 
-    def get_template_gallery(self) -> Dict[str, Any]:
+    def get_template_gallery(self) -> dict[str, Any]:
         """图表模板库。企业场景：产品团队选择预设图表模板快速创建报表，
         避免重复配置，统一数据可视化风格。
         """
@@ -607,12 +607,12 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "templates": self._templates,
         }
 
-    def get_chart_types(self) -> Dict[str, Any]:
+    def get_chart_types(self) -> dict[str, Any]:
         """获取支持的图表类型。企业场景：前端展示可选图表类型。"""
         types = ["line", "bar", "pie", "area", "scatter", "radar", "heatmap", "funnel", "gauge", "treemap"]
         return {"success": True, "types": types, "total": len(types)}
 
-    def export_chart_data(self, chart_id: str, format: str = "csv") -> Dict[str, Any]:
+    def export_chart_data(self, chart_id: str, format: str = "csv") -> dict[str, Any]:
         """导出图表数据为CSV/JSON。企业场景：运营团队导出报表数据做离线分析。"""
         chart = getattr(self, "_charts", {}).get(chart_id)
         if not chart:

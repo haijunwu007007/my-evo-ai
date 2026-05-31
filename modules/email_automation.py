@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -145,16 +144,16 @@ class EmailMessage:
 
     msg_id: str = ""
     from_addr: str = ""
-    to_addrs: List[str] = field(default_factory=list)
-    cc_addrs: List[str] = field(default_factory=list)
-    bcc_addrs: List[str] = field(default_factory=list)
+    to_addrs: list[str] = field(default_factory=list)
+    cc_addrs: list[str] = field(default_factory=list)
+    bcc_addrs: list[str] = field(default_factory=list)
     subject: str = ""
     body_text: str = ""
     body_html: str = ""
-    attachments: List[str] = field(default_factory=list)
+    attachments: list[str] = field(default_factory=list)
     priority: EmailPriority = EmailPriority.NORMAL
     template: str = ""
-    template_vars: Dict[str, str] = field(default_factory=dict)
+    template_vars: dict[str, str] = field(default_factory=dict)
     send_at: str = ""  # 定时发送时间（ISO格式）
     status: str = "draft"  # draft/queued/sent/failed
     sent_at: str = ""
@@ -190,11 +189,11 @@ class EmailConfig:
     send_delay: float = 2.0  # 发送间隔（秒）
     max_per_minute: int = 30
 
-class EmailTemplateEngine(object):
+class EmailTemplateEngine:
     """邮件模板引擎"""
 
     def __init__(self):
-        self._templates: Dict[str, Dict[str, str]] = {
+        self._templates: dict[str, dict[str, str]] = {
             "system_report": {
                 "subject": "【系统报告】{title} - {date}",
                 "body_html": """<html><body>
@@ -229,7 +228,7 @@ class EmailTemplateEngine(object):
             },
         }
 
-    def render(self, template_name: str, variables: Dict[str, str]) -> Tuple[str, str, str]:
+    def render(self, template_name: str, variables: dict[str, str]) -> tuple[str, str, str]:
         """渲染模板，返回 (subject, body_html, body_text)"""
         tmpl = self._templates.get(template_name)
         if not tmpl:
@@ -242,7 +241,7 @@ class EmailTemplateEngine(object):
         body_text = tmpl["body_text"].format(**variables) if tmpl.get("body_text") else ""
         return subject, body_html, body_text
 
-    def list_templates(self) -> Dict[str, str]:
+    def list_templates(self) -> dict[str, str]:
         return {name: t["subject"] for name, t in self._templates.items()}
 
     def add_template(self, name: str, subject: str, body_html: str = "", body_text: str = ""):
@@ -256,7 +255,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -272,8 +271,8 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._send_queue: deque = deque(maxlen=500)
         self._sent_history: deque = deque(maxlen=1000)
         self._send_times: deque = deque(maxlen=200)
-        self._bg_sender: Optional[asyncio.Task] = None
-        self._bg_checker: Optional[asyncio.Task] = None
+        self._bg_sender: asyncio.Task | None = None
+        self._bg_checker: asyncio.Task | None = None
         self.check_interval = self.config.get("check_interval", 300)
 
     def initialize(self) -> None:
@@ -301,7 +300,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"smtp={self.email_config.smtp_host or '未配置'}")
         self.info("邮件自动化就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("email_automation_ops_total", labels={"action": action})
         params = params or {}
@@ -379,7 +378,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                     self.warning(f"添加附件失败 {filepath}: {e}")
         return mime
 
-    def _do_send_smtp(self, mime: MIMEMultipart, to_addrs: List[str]) -> bool:
+    def _do_send_smtp(self, mime: MIMEMultipart, to_addrs: list[str]) -> bool:
         """通过SMTP发送"""
         try:
             if self.email_config.smtp_use_ssl:
@@ -399,7 +398,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── IMAP收信 ──
 
-    def _imap_connect(self) -> Optional[imaplib.IMAP4_SSL]:
+    def _imap_connect(self) -> imaplib.IMAP4_SSL | None:
         """连接IMAP服务器"""
         try:
             if self.email_config.imap_use_ssl:
@@ -412,7 +411,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             logger.error(f"IMAP连接失败: {e}")
             return None
 
-    def _fetch_emails(self, folder: str = "INBOX", criteria: str = "UNSEEN", limit: int = 20) -> List[Dict[str, Any]]:
+    def _fetch_emails(self, folder: str = "INBOX", criteria: str = "UNSEEN", limit: int = 20) -> list[dict[str, Any]]:
         """获取邮件列表"""
         conn = self._imap_connect()
         if not conn:
@@ -476,7 +475,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 动作分发 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "send": self._action_send,
@@ -494,7 +493,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _action_send(self, params: Dict) -> Dict:
+    def _action_send(self, params: dict) -> dict:
         """发送邮件"""
         msg = EmailMessage(
             to_addrs=params.get("to", []),
@@ -514,7 +513,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return self._queue_and_send(msg)
 
-    def _action_send_template(self, params: Dict) -> Dict:
+    def _action_send_template(self, params: dict) -> dict:
         """模板发送"""
         tmpl_name = params.get("template", "")
         tmpl_vars = params.get("vars", {})
@@ -530,7 +529,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         )
         return self._queue_and_send(msg)
 
-    def _action_schedule(self, params: Dict) -> Dict:
+    def _action_schedule(self, params: dict) -> dict:
         """定时发送"""
         msg = EmailMessage(
             to_addrs=params.get("to", []),
@@ -545,7 +544,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._send_queue.append(msg)
         return {"msg_id": msg.msg_id, "status": "scheduled", "send_at": msg.send_at}
 
-    def _action_fetch(self, params: Dict) -> Dict:
+    def _action_fetch(self, params: dict) -> dict:
         """收取邮件"""
         folder = params.get("folder", "INBOX")
         criteria = params.get("criteria", "UNSEEN")
@@ -554,7 +553,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.record_metrics("emails_fetched", len(emails))
         return {"total": len(emails), "emails": emails}
 
-    def _action_history(self, params: Dict) -> Dict:
+    def _action_history(self, params: dict) -> dict:
         limit = params.get("limit", 50)
         return {
             "total": len(self._sent_history),
@@ -573,7 +572,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _action_queue(self, params: Dict) -> Dict:
+    def _action_queue(self, params: dict) -> dict:
         return {
             "queue_size": len(self._send_queue),
             "items": [
@@ -588,14 +587,14 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _action_templates(self, params: Dict) -> Dict:
+    def _action_templates(self, params: dict) -> dict:
         return {"templates": self.template_engine.list_templates()}
 
-    def _action_test_conn(self, params: Dict) -> Dict:
+    def _action_test_conn(self, params: dict) -> dict:
         smtp = self._test_smtp_connection()
         return {"smtp": smtp, "imap": bool(self.email_config.imap_host)}
 
-    def _action_stats(self, params: Dict) -> Dict:
+    def _action_stats(self, params: dict) -> dict:
         return {
             "sent": self.stats.request_count,
             "failed": self.stats.error_count,
@@ -606,7 +605,7 @@ class EmailAutomation(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 队列发送 ──
 
-    def _queue_and_send(self, msg: EmailMessage) -> Dict:
+    def _queue_and_send(self, msg: EmailMessage) -> dict:
         """加入发送队列"""
         msg.status = "queued"
         self._send_queue.append(msg)

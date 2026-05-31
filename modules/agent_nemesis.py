@@ -132,25 +132,25 @@ class Incident:
     severity: Severity = Severity.WARNING
     status: IncidentStatus = IncidentStatus.OPEN
     source: str = ""
-    symptoms: List[str] = field(default_factory=list)
+    symptoms: list[str] = field(default_factory=list)
     root_cause: str = ""
     remediation: str = ""
-    timeline: List[Dict[str, str]] = field(default_factory=list)
+    timeline: list[dict[str, str]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
-    resolved_at: Optional[float] = None
+    resolved_at: float | None = None
 
-class IncidentResponseEngine(object):
+class IncidentResponseEngine:
     """事件响应引擎 - 事件分级、自动响应策略、事后复盘"""
 
     def __init__(self):
-        self._response_playbooks: Dict[str, Dict] = {}
-        self._escalation_rules: List[Dict] = []
-        self._postmortems: List[Dict] = []
+        self._response_playbooks: dict[str, dict] = {}
+        self._escalation_rules: list[dict] = []
+        self._postmortems: list[dict] = []
 
-    def add_playbook(self, severity: str, actions: List[str], auto_execute: bool = False) -> None:
+    def add_playbook(self, severity: str, actions: list[str], auto_execute: bool = False) -> None:
         self._response_playbooks[severity] = {"actions": actions, "auto_execute": auto_execute}
 
-    def evaluate_incident(self, incident: Dict) -> Dict:
+    def evaluate_incident(self, incident: dict) -> dict:
         """评估事件严重等级"""
         impact = incident.get("impact", "low")
         urgency = incident.get("urgency", "low")
@@ -159,7 +159,7 @@ class IncidentResponseEngine(object):
         level = "critical" if score >= 12 else "high" if score >= 6 else "medium" if score >= 2 else "low"
         return {"severity": level, "score": score, "playbook": self._response_playbooks.get(level)}
 
-    def check_escalation(self, incident: Dict) -> Dict:
+    def check_escalation(self, incident: dict) -> dict:
         """检查是否需要升级"""
         for rule in self._escalation_rules:
             if rule.get("condition") in str(incident.get("type", "")):
@@ -167,8 +167,8 @@ class IncidentResponseEngine(object):
         return {"escalate": False}
 
     def create_postmortem(
-        self, incident_id: str, timeline: List[Dict], root_cause: str, action_items: List[str]
-    ) -> Dict:
+        self, incident_id: str, timeline: list[dict], root_cause: str, action_items: list[str]
+    ) -> dict:
         """创建事后复盘"""
         pm = {
             "incident_id": incident_id,
@@ -180,7 +180,7 @@ class IncidentResponseEngine(object):
         self._postmortems.append(pm)
         return {"postmortem_id": len(self._postmortems), "incident_id": incident_id}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "playbooks": len(self._response_playbooks),
             "escalation_rules": len(self._escalation_rules),
@@ -195,14 +195,14 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._incidents: Dict[str, Incident] = {}
-        self._rules: List[Dict[str, Any]] = []
+        self._incidents: dict[str, Incident] = {}
+        self._rules: list[dict[str, Any]] = []
         self._incident_counter: int = 0
         self._auto_remediate: bool = True
 
@@ -231,7 +231,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_nemesis_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -319,7 +319,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         open_crit = sum(
             1
             for i in self._incidents.values()
@@ -339,7 +339,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     async def shutdown(self) -> None:
         super().shutdown()
 
-    def assess_chaos_maturity(self) -> Dict[str, Any]:
+    def assess_chaos_maturity(self) -> dict[str, Any]:
         """评估混沌工程成熟度：实验覆盖率、故障类型分布、自动修复率、稳态验证深度"""
         incidents = self._incidents if hasattr(self, "_incidents") else {}
         experiments = self._experiments if hasattr(self, "_experiments") else []
@@ -395,7 +395,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "recommendations": self._maturity_recommendations(level, auto_fix_rate, type_coverage),
         }
 
-    def _maturity_recommendations(self, level: str, auto_fix: float, coverage: float) -> List[str]:
+    def _maturity_recommendations(self, level: str, auto_fix: float, coverage: float) -> list[str]:
         recs = []
         if level == "initial":
             recs.append("从低风险实验开始：模拟网络延迟和进程崩溃")
@@ -412,7 +412,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             recs.append("将混沌工程成果与SLO关联，量化韧性投资回报")
         return recs
 
-    def generate_incident_timeline(self, hours: int = 24) -> Dict[str, Any]:
+    def generate_incident_timeline(self, hours: int = 24) -> dict[str, Any]:
         """生成混沌实验时间线：按时间排序，标注阶段（注入/检测/修复）"""
         incidents = self._incidents if hasattr(self, "_incidents") else {}
         cutoff = time.time() - hours * 3600
@@ -474,7 +474,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "timeline": timeline,
         }
 
-    def _create_incident(self, title: str, severity: str, source: str, symptoms: List[str]) -> Incident:
+    def _create_incident(self, title: str, severity: str, source: str, symptoms: list[str]) -> Incident:
         self._incident_counter += 1
         try:
             sev = Severity(severity)
@@ -492,7 +492,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return inc
 
-    async def _diagnose(self, inc_id: str) -> Dict:
+    async def _diagnose(self, inc_id: str) -> dict:
         inc = self._incidents.get(inc_id)
         if not inc:
             return {"error": "Incident not found"}
@@ -509,7 +509,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("incident_diagnosed", {"id": inc_id, "root_cause": root_cause})
         return {"incident_id": inc_id, "status": "diagnosed", "root_cause": root_cause, "timeline": inc.timeline}
 
-    async def _remediate(self, inc_id: str) -> Dict:
+    async def _remediate(self, inc_id: str) -> dict:
         inc = self._incidents.get(inc_id)
         if not inc:
             return {"error": "Incident not found"}
@@ -525,13 +525,13 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return {"incident_id": inc_id, "status": "resolved", "remediation": inc.remediation}
 
-    async def _chaos_test(self, target: str) -> Dict:
+    async def _chaos_test(self, target: str) -> dict:
         inc = self._create_incident(f"混沌测试: {target}", "warning", "chaos_engine", [f"注入故障到 {target}"])
         self._diagnose(inc.incident_id)
         result = self._remediate(inc.incident_id)
         return {"target": target, "incident_id": inc.incident_id, "status": "chaos_test_passed", "result": result}
 
-    def _batch_create_incidents(self, incidents: List[Dict]) -> Dict:
+    def _batch_create_incidents(self, incidents: list[dict]) -> dict:
         """批量创建事件"""
         created = []
         for inc in incidents:
@@ -541,7 +541,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             created.append(obj.incident_id)
         return {"created": len(created), "incident_ids": created}
 
-    def _get_incident_summary(self) -> Dict:
+    def _get_incident_summary(self) -> dict:
         """获取事件统计摘要"""
         by_severity = {}
         by_status = {}
@@ -556,7 +556,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "resolved": by_status.get("resolved", 0),
         }
 
-    def _search_incidents(self, query: str, limit: int = 10) -> List[Dict]:
+    def _search_incidents(self, query: str, limit: int = 10) -> list[dict]:
         """搜索事件"""
         results = []
         q = query.lower()
@@ -569,7 +569,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                     break
         return results
 
-    def _get_response_time_stats(self) -> Dict:
+    def _get_response_time_stats(self) -> dict:
         """获取响应时间统计"""
         resolved = [inc for inc in self._incidents.values() if inc.status == "resolved"]
         if not resolved:
@@ -587,7 +587,7 @@ class AgentNemesisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "count": len(times),
         }
 
-    def compute_resilience_score(self) -> Dict[str, Any]:
+    def compute_resilience_score(self) -> dict[str, Any]:
         """计算系统韧性综合评分：基于历史实验的MTTD、MTTR、恢复成功率"""
         incidents = self._incidents if hasattr(self, "_incidents") else {}
         if not incidents:

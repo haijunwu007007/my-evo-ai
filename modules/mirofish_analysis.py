@@ -82,13 +82,14 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MirofishAnalysisAnalyzer(object):
+class MirofishAnalysisAnalyzer:
     """mirofish_analysis 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -327,15 +328,15 @@ class StockAssessment:
     b_bmsy_ratio: float
     f_fmsy_ratio: float
     stock_status: StockStatus
-    confidence_interval: Tuple[float, float]
+    confidence_interval: tuple[float, float]
     assessment_date: float
 
 @dataclass
 class QuotaAllocation:
     species_id: str
     total_tac: float
-    zone_allocations: Dict[str, float]
-    vessel_allocations: Dict[str, float]
+    zone_allocations: dict[str, float]
+    vessel_allocations: dict[str, float]
     season_start: float
     season_end: float
     consumed: float = 0.0
@@ -362,7 +363,7 @@ class ComplianceReport:
     total_caught: float
     quota_limit: float
     compliance_pct: float
-    violations: List[str]
+    violations: list[str]
     status: str = "compliant"
 
 class MirofishAnalysis:
@@ -389,12 +390,12 @@ class MirofishAnalysis:
     """Enterprise fishery analytics with stock assessment and quota management."""
 
     def __init__(self):
-        self._species: Dict[str, SpeciesInfo] = {}
-        self._catch_records: List[CatchRecord] = []
-        self._assessments: Dict[str, StockAssessment] = {}
-        self._quotas: Dict[str, QuotaAllocation] = {}
-        self._ecosystem_indicators: Dict[str, EcosystemIndicator] = {}
-        self._vessels: Dict[str, Dict[str, Any]] = {}
+        self._species: dict[str, SpeciesInfo] = {}
+        self._catch_records: list[CatchRecord] = []
+        self._assessments: dict[str, StockAssessment] = {}
+        self._quotas: dict[str, QuotaAllocation] = {}
+        self._ecosystem_indicators: dict[str, EcosystemIndicator] = {}
+        self._vessels: dict[str, dict[str, Any]] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -475,7 +476,7 @@ class MirofishAnalysis:
 
     def assess_stock(
         self, species_id: str, model: AssessmentModel = AssessmentModel.SURPLUS_PRODUCTION
-    ) -> Optional[StockAssessment]:
+    ) -> StockAssessment | None:
         with self._lock:
             species = self._species.get(species_id)
         if not species:
@@ -527,9 +528,9 @@ class MirofishAnalysis:
         self,
         species_id: str,
         total_tac: float,
-        zone_alloc: Optional[Dict[str, float]] = None,
-        season_start: Optional[float] = None,
-        season_end: Optional[float] = None,
+        zone_alloc: dict[str, float] | None = None,
+        season_start: float | None = None,
+        season_end: float | None = None,
     ) -> QuotaAllocation:
         quota = QuotaAllocation(
             species_id=species_id,
@@ -544,7 +545,7 @@ class MirofishAnalysis:
             self._quotas[species_id] = quota
         return quota
 
-    def check_compliance(self, species_id: str, vessel_id: Optional[str] = None) -> List[ComplianceReport]:
+    def check_compliance(self, species_id: str, vessel_id: str | None = None) -> list[ComplianceReport]:
         quota = self._quotas.get(species_id)
         if not quota:
             return []
@@ -588,7 +589,7 @@ class MirofishAnalysis:
             )
         return reports
 
-    def get_ecosystem_report(self) -> Dict[str, Any]:
+    def get_ecosystem_report(self) -> dict[str, Any]:
         indicators = {}
         with self._lock:
             for iid, ind in self._ecosystem_indicators.items():
@@ -607,7 +608,7 @@ class MirofishAnalysis:
             "summary": {"total": len(indicators), "good": good, "warning": len(indicators) - good},
         }
 
-    def get_statistics(self, species_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_statistics(self, species_id: str | None = None) -> dict[str, Any]:
         records = self._catch_records
         if species_id:
             records = [r for r in records if r.species_id == species_id]
@@ -634,7 +635,7 @@ class MirofishAnalysis:
             "date_range": (min(r.date for r in records), max(r.date for r in records)),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             return {

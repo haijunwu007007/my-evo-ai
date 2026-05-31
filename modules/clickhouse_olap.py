@@ -120,9 +120,9 @@ class ColumnDef:
 
     name: str
     type: str  # String, UInt64, Float64, DateTime, Array(String)等
-    default: Optional[str] = None
-    comment: Optional[str] = None
-    codec: Optional[str] = None
+    default: str | None = None
+    comment: str | None = None
+    codec: str | None = None
 
 @dataclass
 class ConnectionConfig:
@@ -145,14 +145,14 @@ class TableInfo:
     table_name: str
     database: str = "default"
     engine: TableEngine = TableEngine.MERGE_TREE
-    columns: List[ColumnDef] = field(default_factory=list)
-    order_by: List[str] = field(default_factory=list)
-    partition_by: Optional[str] = None
-    primary_key: Optional[List[str]] = None
-    settings: Dict[str, str] = field(default_factory=dict)
+    columns: list[ColumnDef] = field(default_factory=list)
+    order_by: list[str] = field(default_factory=list)
+    partition_by: str | None = None
+    primary_key: list[str] | None = None
+    settings: dict[str, str] = field(default_factory=dict)
     row_count: int = 0
     total_bytes: int = 0
-    created_at: Optional[str] = None
+    created_at: str | None = None
 
 @dataclass
 class QueryResult:
@@ -161,14 +161,14 @@ class QueryResult:
     query_id: str
     sql: str
     status: QueryStatus = QueryStatus.IDLE
-    rows: List[Dict[str, Any]] = field(default_factory=list)
-    columns: List[str] = field(default_factory=list)
+    rows: list[dict[str, Any]] = field(default_factory=list)
+    columns: list[str] = field(default_factory=list)
     rows_read: int = 0
     bytes_read: int = 0
     elapsed_ms: float = 0.0
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
+    error: str | None = None
+    started_at: float | None = None
+    finished_at: float | None = None
 
 @dataclass
 class IngestTask:
@@ -176,13 +176,13 @@ class IngestTask:
 
     task_id: str = ""
     table: str = ""
-    columns: List[str] = field(default_factory=list)
-    rows: List[List[Any]] = field(default_factory=list)
+    columns: list[str] = field(default_factory=list)
+    rows: list[list[Any]] = field(default_factory=list)
     status: str = "pending"
     inserted_rows: int = 0
-    error: Optional[str] = None
+    error: str | None = None
     created_at: float = 0.0
-    finished_at: Optional[float] = None
+    finished_at: float | None = None
 
 @dataclass
 class MaterializedViewInfo:
@@ -191,7 +191,7 @@ class MaterializedViewInfo:
     view_name: str
     target_table: str
     source_sql: str
-    created_at: Optional[str] = None
+    created_at: str | None = None
     rows: int = 0
 
 # ═══════════════════════════════════════════════════════════════
@@ -212,12 +212,12 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self.description = "ClickHouse列式数据库连接管理、OLAP查询、表引擎管理"
 
         self._initialized = False
-        self._connections: Dict[str, ConnectionConfig] = {}
-        self._tables: Dict[str, TableInfo] = {}
-        self._queries: Dict[str, QueryResult] = {}
-        self._ingest_tasks: Dict[str, IngestTask] = {}
-        self._materialized_views: Dict[str, MaterializedViewInfo] = {}
-        self._query_history: List[Dict[str, Any]] = []
+        self._connections: dict[str, ConnectionConfig] = {}
+        self._tables: dict[str, TableInfo] = {}
+        self._queries: dict[str, QueryResult] = {}
+        self._ingest_tasks: dict[str, IngestTask] = {}
+        self._materialized_views: dict[str, MaterializedViewInfo] = {}
+        self._query_history: list[dict[str, Any]] = []
 
         # 统计
         self._stats = {
@@ -348,7 +348,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     # 查询执行引擎
     # ═══════════════════════════════════════════════════════════
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一执行入口"""
         _ = self.trace("execute")
         metrics_collector.counter("clickhouse_olap_ops_total", labels={"action": action})
@@ -380,7 +380,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             logger.error(f"[ClickHouseOLAP] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _exec_query(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _exec_query(self, p: dict[str, Any]) -> dict[str, Any]:
         """执行SQL查询"""
         sql = p.get("sql", "").strip()
         conn = p.get("connection", "primary")
@@ -406,9 +406,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             sql_upper = sql.upper()
             if "SELECT" in sql_upper and "FROM" in sql_upper:
                 rows = self._simulate_select(sql)
-            elif "INSERT" in sql_upper:
-                rows = []
-            elif "CREATE" in sql_upper or "DROP" in sql_upper or "ALTER" in sql_upper:
+            elif "INSERT" in sql_upper or "CREATE" in sql_upper or "DROP" in sql_upper or "ALTER" in sql_upper:
                 rows = []
             else:
                 rows = [{"result": "OK"}]
@@ -467,7 +465,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             self._stats["failed_queries"] += 1
             return {"success": False, "error": str(e), "query_id": query_id}
 
-    def _simulate_select(self, sql: str) -> List[Dict[str, Any]]:
+    def _simulate_select(self, sql: str) -> list[dict[str, Any]]:
         """模拟SELECT查询结果"""
         sql_upper = sql.upper()
         if "user_events" in sql and ("count" in sql_upper or "group" in sql_upper):
@@ -523,7 +521,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     # 表管理
     # ═══════════════════════════════════════════════════════════
 
-    def _create_table(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_table(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建表"""
         name = p.get("table_name", "")
         db = p.get("database", "default")
@@ -579,7 +577,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _drop_table(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _drop_table(self, p: dict[str, Any]) -> dict[str, Any]:
         """删除表"""
         name = p.get("table_name", "")
         db = p.get("database", "default")
@@ -598,7 +596,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         logger.info(f"[ClickHouseOLAP] 删除表: {full_name}")
         return {"success": True, "result": {"table": full_name, "deleted": True}}
 
-    def _get_table(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_table(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取表详情"""
         name = p.get("table_name", "")
         db = p.get("database", "default")
@@ -625,7 +623,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _list_tables(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_tables(self, p: dict[str, Any]) -> dict[str, Any]:
         """列出所有表"""
         db = p.get("database")
         tables = []
@@ -648,7 +646,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     # 数据写入
     # ═══════════════════════════════════════════════════════════
 
-    def _ingest_data(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _ingest_data(self, p: dict[str, Any]) -> dict[str, Any]:
         """批量数据写入"""
         table = p.get("table", "")
         columns = p.get("columns", [])
@@ -710,7 +708,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     # 查询分析 & 物化视图
     # ═══════════════════════════════════════════════════════════
 
-    def _explain_query(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _explain_query(self, p: dict[str, Any]) -> dict[str, Any]:
         """查询计划分析"""
         sql = p.get("sql", "")
         if not sql:
@@ -742,7 +740,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _create_materialized_view(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_materialized_view(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建物化视图"""
         view_name = p.get("view_name", "")
         target_table = p.get("target_table", "")
@@ -762,7 +760,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return {"success": True, "result": {"view_name": full_name, "target_table": target_table, "created": True}}
 
-    def _list_views(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_views(self, p: dict[str, Any]) -> dict[str, Any]:
         """列出物化视图"""
         views = []
         for k, v in self._materialized_views.items():
@@ -777,7 +775,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             )
         return {"success": True, "result": views}
 
-    def _optimize_table(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _optimize_table(self, p: dict[str, Any]) -> dict[str, Any]:
         """优化表"""
         table_name = p.get("table_name", "")
         if not table_name:
@@ -799,7 +797,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _list_mutations(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_mutations(self, p: dict[str, Any]) -> dict[str, Any]:
         """列出进行中的mutations"""
         return {
             "success": True,
@@ -814,7 +812,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             ],
         }
 
-    def _get_stats(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_stats(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取统计信息"""
         return {
             "success": True,
@@ -828,7 +826,7 @@ class ClickhouseOlapManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         if not self._initialized:
             return {"status": "not_initialized", "module_id": self.module_id}

@@ -99,10 +99,10 @@ class Skill:
     description: str = ""
     version: str = "1.0.0"
     author: str = "system"
-    tags: List[str] = field(default_factory=list)
-    dependencies: List[str] = field(default_factory=list)
-    inputs: Dict[str, str] = field(default_factory=dict)
-    outputs: Dict[str, str] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    inputs: dict[str, str] = field(default_factory=dict)
+    outputs: dict[str, str] = field(default_factory=dict)
     complexity: int = 1  # 1-10
     accuracy: float = 0.0  # 0-1
     usage_count: int = 0
@@ -121,13 +121,13 @@ class SkillExecution:
 
     execution_id: str
     skill_id: str
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any] = field(default_factory=dict)
+    inputs: dict[str, Any]
+    outputs: dict[str, Any] = field(default_factory=dict)
     status: str = "pending"  # pending, running, success, failed
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
 
 @dataclass
 class SkillChain:
@@ -136,7 +136,7 @@ class SkillChain:
     chain_id: str
     name: str
     description: str = ""
-    steps: List[Dict[str, Any]] = field(default_factory=list)
+    steps: list[dict[str, Any]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     execution_count: int = 0
     success_count: int = 0
@@ -147,8 +147,8 @@ class SkillProfile:
 
     profile_id: str
     owner_id: str  # agent_id or user_id
-    learned_skills: Set[str] = field(default_factory=set)
-    in_progress: Set[str] = field(default_factory=set)
+    learned_skills: set[str] = field(default_factory=set)
+    in_progress: set[str] = field(default_factory=set)
     total_practice: int = 0
     level: str = "beginner"  # beginner, intermediate, advanced, expert, master
 
@@ -182,20 +182,20 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._running = False
 
         # 技能存储
-        self._skills: Dict[str, Skill] = {}
+        self._skills: dict[str, Skill] = {}
         # 技能分类索引
-        self._category_index: Dict[str, List[str]] = {}
+        self._category_index: dict[str, list[str]] = {}
         # 标签索引
-        self._tag_index: Dict[str, List[str]] = {}
+        self._tag_index: dict[str, list[str]] = {}
         # 执行历史
-        self._executions: List[SkillExecution] = []
+        self._executions: list[SkillExecution] = []
         self._max_executions = 1000
         # 技能链
-        self._chains: Dict[str, SkillChain] = {}
+        self._chains: dict[str, SkillChain] = {}
         # 技能档案
-        self._profiles: Dict[str, SkillProfile] = {}
+        self._profiles: dict[str, SkillProfile] = {}
         # 技能市场
-        self._marketplace: List[Dict[str, Any]] = []
+        self._marketplace: list[dict[str, Any]] = []
         # 并发控制
         self._max_concurrent = 10
         self._active_executions = 0
@@ -260,7 +260,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for tag in tags:
                 self._tag_index.setdefault(tag, []).append(sid)
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行技能操作"""
         _ = self.trace("execute")
         metrics_collector.counter("autoskills_ops_total", labels={"action": operation})
@@ -296,7 +296,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             logger.error(f"技能操作失败 [{operation}]: {e}")
             return {"success": False, "error": str(e)}
 
-    def _register_skill(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _register_skill(self, p: dict[str, Any]) -> dict[str, Any]:
         """注册新技能"""
         skill_id = p.get("skill_id", f"skill_{hashlib.md5(p['name'].encode()).hexdigest()[:8]}")
         if skill_id in self._skills:
@@ -322,7 +322,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return {"skill_id": skill_id, "name": skill.name, "category": skill.category}
 
-    def _execute_skill(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_skill(self, p: dict[str, Any]) -> dict[str, Any]:
         """执行技能"""
         skill_id = p["skill_id"]
         skill = self._skills.get(skill_id)
@@ -397,7 +397,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             with self._lock:
                 self._active_executions -= 1
 
-    def _search_skills(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _search_skills(self, p: dict[str, Any]) -> dict[str, Any]:
         """搜索技能"""
         query = p.get("query", "").lower()
         category = p.get("category")
@@ -430,7 +430,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         results.sort(key=lambda x: x["proficiency"], reverse=True)
         return {"results": results[:limit], "total": len(results)}
 
-    def _evaluate_skill(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _evaluate_skill(self, p: dict[str, Any]) -> dict[str, Any]:
         """评估技能"""
         skill_id = p["skill_id"]
         skill = self._skills.get(skill_id)
@@ -465,7 +465,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "recommendations": self._get_recommendations(skill),
         }
 
-    def _get_recommendations(self, skill: Skill) -> List[str]:
+    def _get_recommendations(self, skill: Skill) -> list[str]:
         """获取技能提升建议"""
         recs = []
         if skill.proficiency < 0.3:
@@ -478,7 +478,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             recs.append("高复杂度技能建议先完成前置技能学习")
         return recs
 
-    def _learn_skill(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _learn_skill(self, p: dict[str, Any]) -> dict[str, Any]:
         """手动学习技能"""
         skill_id = p["skill_id"]
         skill = self._skills.get(skill_id)
@@ -498,7 +498,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return {"learned": True, "skill_id": skill_id, "proficiency": round(skill.proficiency, 2)}
 
-    def _practice_skill(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _practice_skill(self, p: dict[str, Any]) -> dict[str, Any]:
         """练习技能"""
         skill_id = p["skill_id"]
         skill = self._skills.get(skill_id)
@@ -521,7 +521,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "improvement": round(skill.proficiency - old_prof, 3),
         }
 
-    def _create_chain(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_chain(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建技能链"""
         chain_id = p.get("chain_id", f"chain_{hashlib.md5(p['name'].encode()).hexdigest()[:8]}")
         steps = p.get("steps", [])
@@ -534,7 +534,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._chains[chain_id] = chain
         return {"chain_id": chain_id, "name": chain.name, "steps": len(steps)}
 
-    def _execute_chain(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_chain(self, p: dict[str, Any]) -> dict[str, Any]:
         """执行技能链"""
         chain_id = p["chain_id"]
         chain = self._chains.get(chain_id)
@@ -564,14 +564,14 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         chain.success_count += 1 if successful == len(results) else 0
         return {"chain_id": chain_id, "status": "success", "steps_completed": successful, "results": results}
 
-    def _create_profile(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_profile(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建技能档案"""
         profile_id = p.get("profile_id", f"profile_{p['owner_id']}")
         profile = SkillProfile(profile_id=profile_id, owner_id=p["owner_id"])
         self._profiles[profile_id] = profile
         return {"profile_id": profile_id, "owner_id": p["owner_id"], "level": profile.level}
 
-    def _update_profile(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _update_profile(self, p: dict[str, Any]) -> dict[str, Any]:
         """更新技能档案"""
         profile_id = p["profile_id"]
         profile = self._profiles.get(profile_id)
@@ -598,7 +598,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return {"profile_id": profile_id, "level": profile.level, "skills": len(profile.learned_skills)}
 
-    def _get_profile(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_profile(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取技能档案"""
         profile_id = p["profile_id"]
         profile = self._profiles.get(profile_id)
@@ -613,7 +613,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "skill_list": list(profile.learned_skills),
         }
 
-    def _list_skills(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_skills(self, p: dict[str, Any]) -> dict[str, Any]:
         """列出技能"""
         category = p.get("category")
         skills = []
@@ -633,7 +633,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
         return {"skills": skills, "total": len(skills)}
 
-    def _get_stats(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_stats(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取统计"""
         learned = sum(1 for s in self._skills.values() if s.is_learned)
         return {
@@ -646,11 +646,11 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "avg_proficiency": round(sum(s.proficiency for s in self._skills.values()) / max(len(self._skills), 1), 3),
         }
 
-    def _marketplace_list(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _marketplace_list(self, p: dict[str, Any]) -> dict[str, Any]:
         """技能市场列表"""
         return {"items": self._marketplace, "total": len(self._marketplace)}
 
-    def _marketplace_publish(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _marketplace_publish(self, p: dict[str, Any]) -> dict[str, Any]:
         """发布技能到市场"""
         skill_id = p["skill_id"]
         skill = self._skills.get(skill_id)
@@ -670,7 +670,7 @@ class AutoSkillsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._marketplace.append(item)
         return {"published": True, "skill_id": skill_id}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         learned = sum(1 for s in self._skills.values() if s.is_learned)
         return {

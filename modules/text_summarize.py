@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class TextSummarize:
@@ -140,7 +140,7 @@ class TextSummarize:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, TextSummarize] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, TextSummarize] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-        return {"success": False, "error": "Unknown action: {}".format(action)}
+        return {"success": False, "error": f"Unknown action: {action}"}
 
-    def evaluate_summary_quality(self, original: str, summary: str) -> Dict[str, Any]:
+    def evaluate_summary_quality(self, original: str, summary: str) -> dict[str, Any]:
         """评估摘要质量：覆盖率、压缩率、关键信息保留率、流畅度"""
         orig_tokens = set(self._tokenize(original)) if hasattr(self, "_tokenize") else set(original.split())
         summ_tokens = set(self._tokenize(summary)) if hasattr(self, "_tokenize") else set(summary.split())
@@ -502,7 +502,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "summary_sentences": len(sentences_summ),
         }
 
-    def summarize_batch(self, documents: List[str], max_length: int = 200) -> Dict[str, Any]:
+    def summarize_batch(self, documents: list[str], max_length: int = 200) -> dict[str, Any]:
         """批量摘要：带进度追踪和统一质量控制"""
         import hashlib
 
@@ -542,7 +542,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "results": results,
         }
 
-    def compare_summaries(self, summary_a: str, summary_b: str) -> Dict[str, Any]:
+    def compare_summaries(self, summary_a: str, summary_b: str) -> dict[str, Any]:
         """比较两份摘要：相似度和信息互补性分析"""
         tokens_a = set(summary_a.split())
         tokens_b = set(summary_b.split())
@@ -570,7 +570,7 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             else "partially_overlap",
         }
 
-    def detect_summary_hallucination(self, original: str, summary: str) -> Dict[str, Any]:
+    def detect_summary_hallucination(self, original: str, summary: str) -> dict[str, Any]:
         """检测摘要幻觉：识别摘要中不存在于原文的陈述"""
         orig_tokens = set(original.lower().split())
         summ_sentences = [s.strip() for s in summary.replace("！", ".").replace("？", ".").split(".") if s.strip()]

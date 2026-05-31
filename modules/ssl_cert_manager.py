@@ -98,8 +98,8 @@ class CertificateRecord:
     expires_at: float = 0.0
     status: str = "active"
     auto_renew: bool = True
-    deploy_targets: List[str] = field(default_factory=list)
-    san_domains: List[str] = field(default_factory=list)
+    deploy_targets: list[str] = field(default_factory=list)
+    san_domains: list[str] = field(default_factory=list)
     revoke_reason: str = ""
     renewed_from: str = ""
     renewed_to: str = ""
@@ -107,7 +107,7 @@ class CertificateRecord:
 class CertificateAnalyzer:
     """证书分析引擎：证书链验证、域名覆盖分析、过期风险评估。"""
 
-    def analyze_domain_coverage(self, certs: List[CertificateRecord], domains: List[str]) -> Dict[str, Any]:
+    def analyze_domain_coverage(self, certs: list[CertificateRecord], domains: list[str]) -> dict[str, Any]:
         """分析域名覆盖率。企业场景：确认所有业务域名都有有效证书覆盖，
         发现遗漏域名避免上线后出现证书错误。
         """
@@ -141,7 +141,7 @@ class CertificateAnalyzer:
             "coverage_pct": round((len(domains) - len(missing)) / max(len(domains), 1) * 100, 1),
         }
 
-    def calculate_risk_score(self, cert: CertificateRecord) -> Dict[str, Any]:
+    def calculate_risk_score(self, cert: CertificateRecord) -> dict[str, Any]:
         """计算单证书风险分数。企业场景：优先修复高风险证书，
         综合考虑剩余天数、算法强度、自动续签状态。
         """
@@ -182,7 +182,7 @@ class CertificateAnalyzer:
             "factors": factors,
         }
 
-    def get_expiry_summary(self, certs: List[CertificateRecord]) -> Dict[str, Any]:
+    def get_expiry_summary(self, certs: list[CertificateRecord]) -> dict[str, Any]:
         """过期汇总。企业场景：月度安全报告，展示证书过期分布。"""
         now = time.time()
         buckets = {"expired": 0, "7d": 0, "30d": 0, "90d": 0, "180d": 0, "safe": 0}
@@ -217,7 +217,7 @@ class CertificateAnalyzer:
             "auto_renew": auto_stats,
         }
 
-    def verify_chain(self, cert: CertificateRecord) -> Dict[str, Any]:
+    def verify_chain(self, cert: CertificateRecord) -> dict[str, Any]:
         """证书链验证。企业场景：部署前验证证书链完整性，
         避免中间证书缺失导致客户端浏览器报错。
         """
@@ -259,17 +259,17 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 预警：多级过期告警（90/30/7/1天）
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._certificates: Dict[str, CertificateRecord] = {}
-        self._renewal_history: List[Dict] = []
-        self._deploy_log: List[Dict] = []
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._certificates: dict[str, CertificateRecord] = {}
+        self._renewal_history: list[dict] = []
+        self._deploy_log: list[dict] = []
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
@@ -278,7 +278,7 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "certs_renewed": 0,
             "certs_revoked": 0,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("ssl_cert_manager")
         self._analyzer = CertificateAnalyzer()
@@ -526,13 +526,13 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_deploy_targets": len(cert.deploy_targets),
         }
 
-    def get_expiry_summary(self, params: dict = None) -> Dict[str, Any]:
+    def get_expiry_summary(self, params: dict = None) -> dict[str, Any]:
         """过期汇总报告。企业场景：月度安全报告，证书资产盘点。"""
         self.trace("get_expiry_summary", {})
         self.metrics_collector.counter("ssl_cert_manager.get_expiry_summary.calls", 1)
         return self._analyzer.get_expiry_summary(list(self._certificates.values()))
 
-    def get_risk_report(self, params: dict = None) -> Dict[str, Any]:
+    def get_risk_report(self, params: dict = None) -> dict[str, Any]:
         """风险报告。企业场景：安全评审，按风险等级排列所有证书。"""
         self.trace("get_risk_report", {})
         self.metrics_collector.counter("ssl_cert_manager.get_risk_report.calls", 1)
@@ -549,7 +549,7 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_risks": risks[:20],
         }
 
-    def get_domain_coverage(self, params: dict = None) -> Dict[str, Any]:
+    def get_domain_coverage(self, params: dict = None) -> dict[str, Any]:
         """域名覆盖率。企业场景：确认所有业务域名都有证书覆盖。"""
         params = params or {}
         domains = params.get("domains", [c.domain for c in self._certificates.values()])
@@ -557,7 +557,7 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.metrics_collector.counter("ssl_cert_manager.get_domain_coverage.calls", 1)
         return self._analyzer.analyze_domain_coverage(list(self._certificates.values()), domains)
 
-    def verify_cert_chain(self, cert_id: str = "") -> Dict[str, Any]:
+    def verify_cert_chain(self, cert_id: str = "") -> dict[str, Any]:
         """验证证书链。企业场景：部署前检查证书链完整性。"""
         cert = self._certificates.get(cert_id)
         if not cert:
@@ -565,7 +565,7 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.trace("verify_cert_chain", {"cert_id": cert_id})
         return self._analyzer.verify_chain(cert)
 
-    def list_certs(self, params: dict = None) -> Dict[str, Any]:
+    def list_certs(self, params: dict = None) -> dict[str, Any]:
         """列出所有证书。企业场景：资产管理，查看证书全貌。"""
         params = params or {}
         status_filter = params.get("status", "")
@@ -597,7 +597,7 @@ class SslCertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "certificates": cert_list,
         }
 
-    def get_renewal_history(self, params: dict = None) -> Dict[str, Any]:
+    def get_renewal_history(self, params: dict = None) -> dict[str, Any]:
         """续期历史。企业场景：审计证书续签记录，排查续签失败原因。"""
         params = params or {}
         limit = params.get("limit", 50)

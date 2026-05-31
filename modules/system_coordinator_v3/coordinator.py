@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # 原 system_coordinator_v3.py L3044-3951 — 系统协调器主类+工厂
 """系统协调器主类 + 工厂函数"""
 import logging, time, re, os, sys, math, asyncio
 import threading, importlib, inspect
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List
+from collections.abc import Callable
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
@@ -34,7 +34,7 @@ class SystemCoordinatorV3(EnterpriseModule):
 
         self.initialized = False
         self.start_time = None
-        self.modules: Dict[str, Any] = {}
+        self.modules: dict[str, Any] = {}
         self.status = "stopped"
 
         # v2.0 模块引用
@@ -74,9 +74,9 @@ class SystemCoordinatorV3(EnterpriseModule):
         self.reflection = ReflectionEngine(self)
 
         # 模块健康状态
-        self._module_health: Dict[str, str] = {}
-        self._module_instances: Dict[str, Any] = {}
-        self._ext_module_classes: Dict[str, Any] = {}  # 扩展模块类（懒加载）
+        self._module_health: dict[str, str] = {}
+        self._module_instances: dict[str, Any] = {}
+        self._ext_module_classes: dict[str, Any] = {}  # 扩展模块类（懒加载）
 
         # 执行统计
         self._stats = {
@@ -88,7 +88,7 @@ class SystemCoordinatorV3(EnterpriseModule):
         }
 
         # 模块元数据缓存
-        self._module_metadata: Dict = {}
+        self._module_metadata: dict = {}
 
         logger.info(f"[Coordinator v3.0] 创建 | 全模块自动协调")
 
@@ -218,7 +218,7 @@ class SystemCoordinatorV3(EnterpriseModule):
 
         return auto_result
 
-    async def execute(self, task: str, context: Dict = None) -> Dict:
+    async def execute(self, task: str, context: dict = None) -> dict:
         """统一执行接口 — v3.1 智能增强版"""
         if not self.initialized:
             return {"success": False, "error": "系统未初始化"}
@@ -354,7 +354,7 @@ class SystemCoordinatorV3(EnterpriseModule):
             self._stats["failed_tasks"] += 1
             return {"success": False, "error": str(e)}
 
-    async def _execute_routed(self, route_info: Dict, task: str, context: Dict) -> Dict:
+    async def _execute_routed(self, route_info: dict, task: str, context: dict) -> dict:
         """执行路由后的任务 — 兼容 v2.0"""
         modules = route_info.get("modules", [])
         params = route_info.get("params", {})
@@ -407,7 +407,7 @@ class SystemCoordinatorV3(EnterpriseModule):
 
         return None
 
-    async def _ai_fallback(self, task: str, context: Dict) -> Optional[Dict]:
+    async def _ai_fallback(self, task: str, context: dict) -> dict | None:
         """AI Gateway兜底 — 用ai_gateway直接回答任务"""
         try:
             instance = self._get_or_create_instance("ai_gateway")
@@ -450,7 +450,7 @@ class SystemCoordinatorV3(EnterpriseModule):
             logger.debug(f"[Coordinator v3.0] AI fallback失败: {e}")
         return None
 
-    async def _execute_single_module(self, module_id: str, task: str, params: Dict, context: Dict) -> Dict:
+    async def _execute_single_module(self, module_id: str, task: str, params: dict, context: dict) -> dict:
         """执行单个模块 — v3.0 增强（带超时保护）"""
         # 1. 获取模块实例（支持懒加载）
         instance = self._get_or_create_instance(module_id)
@@ -522,7 +522,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                     elif isinstance(result, object) and hasattr(result, "success"):
                         _exec_success = getattr(result, "success", True)
                     return {"success": _exec_success, "result": result, "module": module_id, "method": method_name}
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     return {
                         "success": False,
                         "error": f"模块 {module_id}.{method_name} 执行超时(30s)",
@@ -547,7 +547,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                 if hasattr(registry, "lazy_load_module"):
                     try:
                         mod = await asyncio.wait_for(registry.lazy_load_module(module_id), timeout=20.0)
-                    except (asyncio.TimeoutError, Exception) as e:
+                    except (TimeoutError, Exception) as e:
                         logger.debug(f"[Execute] lazy_load {module_id} failed: {e}")
                 # fallback: 直接从 modules dict 获取（可能是 ModuleInfo 或实例）
                 if mod is None:
@@ -601,7 +601,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                             if asyncio.iscoroutine(result):
                                 result = await asyncio.wait_for(result, timeout=30.0)
                             return {"success": True, "result": result, "module": module_id, "method": method_name}
-                        except asyncio.TimeoutError:
+                        except TimeoutError:
                             return {
                                 "success": False,
                                 "error": f"模块 {module_id}.{method_name} 执行超时(30s)",
@@ -624,7 +624,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                                 if asyncio.iscoroutine(result):
                                     result = await asyncio.wait_for(result, timeout=30.0)
                                 return {"success": True, "result": result, "module": module_id, "method": method_name}
-                            except asyncio.TimeoutError:
+                            except TimeoutError:
                                 return {
                                     "success": False,
                                     "error": f"模块 {module_id}.{method_name} 执行超时(30s)",
@@ -677,7 +677,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                     if asyncio.iscoroutine(result):
                         result = await asyncio.wait_for(result, timeout=30.0)
                     return {"success": True, "result": result, "module": module_id, "method": method_name}
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     return {
                         "success": False,
                         "error": f"模块 {module_id}.{method_name} 执行超时(30s)",
@@ -697,7 +697,7 @@ class SystemCoordinatorV3(EnterpriseModule):
                         else:
                             result = method(**exec_params)
                         return {"success": True, "result": result, "module": module_id, "method": method_name}
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         return {
                             "success": False,
                             "error": f"模块 {module_id}.{method_name} 执行超时(30s)",
@@ -711,7 +711,7 @@ class SystemCoordinatorV3(EnterpriseModule):
 
         return {"success": False, "error": f"模块 {module_id} 无法执行"}
 
-    def _get_module_actions(self, instance: Any) -> Optional[list]:
+    def _get_module_actions(self, instance: Any) -> list | None:
         """获取模块execute()支持的action列表 — 合并所有来源"""
         if not hasattr(instance, "execute"):
             return None
@@ -758,7 +758,7 @@ class SystemCoordinatorV3(EnterpriseModule):
 
         return sorted(all_actions) if all_actions else None
 
-    def _find_best_method(self, instance: Any, task: str, params: Dict) -> Optional[str]:
+    def _find_best_method(self, instance: Any, task: str, params: dict) -> str | None:
         """查找实例上最适合的方法"""
         methods = [m for m in dir(instance) if not m.startswith("_") and callable(getattr(instance, m))]
 
@@ -815,7 +815,7 @@ class SystemCoordinatorV3(EnterpriseModule):
         """停止自主决策循环"""
         await self.autonomous_loop.stop()
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """获取系统状态"""
         return {
             "version": f"V0.1 COORDINATED (v3.0)",
@@ -844,7 +844,7 @@ class SystemCoordinatorV3(EnterpriseModule):
             "recent_executions": self.autonomous_loop._recent_executions[-20:],
         }
 
-    def get_capabilities(self) -> Dict:
+    def get_capabilities(self) -> dict:
         """获取系统能力"""
         return {
             "perception": True,

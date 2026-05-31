@@ -84,13 +84,13 @@ class WordGenerator:
         self._doc = None
         self._init_doc()
 
-    def add_title(self, text: str, level: int = 0) -> Dict:
+    def add_title(self, text: str, level: int = 0) -> dict:
         self._ensure()
         self._doc.add_heading(text, level=level)
         return {"success": True}
 
     def add_paragraph(self, text: str, bold: bool = False, italic: bool = False,
-                      font_size: int = 0, color: str = "", align: str = "") -> Dict:
+                      font_size: int = 0, color: str = "", align: str = "") -> dict:
         self._ensure()
         p = self._doc.add_paragraph()
         run = p.add_run(text)
@@ -108,8 +108,8 @@ class WordGenerator:
             p.alignment = self._WD_ALIGN.RIGHT
         return {"success": True}
 
-    def add_table(self, data: List[List[str]], headers: List[str] = None,
-                  col_widths: List[float] = None) -> Dict:
+    def add_table(self, data: list[list[str]], headers: list[str] = None,
+                  col_widths: list[float] = None) -> dict:
         """添加表格"""
         self._ensure()
         if headers:
@@ -133,31 +133,31 @@ class WordGenerator:
                     row.cells[i].width = self._Cm(width)
         return {"success": True, "rows": len(rows), "cols": len(rows[0])}
 
-    def add_bullet_list(self, items: List[str]) -> Dict:
+    def add_bullet_list(self, items: list[str]) -> dict:
         self._ensure()
         for item in items:
             self._doc.add_paragraph(str(item), style="List Bullet")
         return {"success": True, "items": len(items)}
 
-    def add_numbered_list(self, items: List[str]) -> Dict:
+    def add_numbered_list(self, items: list[str]) -> dict:
         self._ensure()
         for item in items:
             self._doc.add_paragraph(str(item), style="List Number")
         return {"success": True, "items": len(items)}
 
-    def add_page_break(self) -> Dict:
+    def add_page_break(self) -> dict:
         self._ensure()
         self._doc.add_page_break()
         return {"success": True}
 
-    def add_image(self, image_path: str, width_cm: float = 15) -> Dict:
+    def add_image(self, image_path: str, width_cm: float = 15) -> dict:
         self._ensure()
         if os.path.exists(image_path):
             self._doc.add_picture(image_path, width=self._Cm(width_cm))
             return {"success": True}
         return {"success": False, "error": f"图片不存在: {image_path}"}
 
-    def add_image_bytes(self, image_bytes: bytes, width_cm: float = 15, ext: str = "png") -> Dict:
+    def add_image_bytes(self, image_bytes: bytes, width_cm: float = 15, ext: str = "png") -> dict:
         """从字节添加图片"""
         self._ensure()
         try:
@@ -177,7 +177,7 @@ class WordGenerator:
         self._doc.save(buf)
         return buf.getvalue()
 
-    def save_file(self, path: str) -> Dict:
+    def save_file(self, path: str) -> dict:
         self._ensure()
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self._doc.save(path)
@@ -193,7 +193,7 @@ class ExcelGenerator:
 
     def __init__(self):
         self._wb = None
-        self._sheets_data: Dict[str, Dict] = {}
+        self._sheets_data: dict[str, dict] = {}
         self._init()
 
     def _init(self):
@@ -219,8 +219,8 @@ class ExcelGenerator:
         self._wb = None
         self._init()
 
-    def add_sheet(self, name: str, headers: List[str] = None,
-                  rows: List[List[Any]] = None, auto_width: bool = True) -> Dict:
+    def add_sheet(self, name: str, headers: list[str] = None,
+                  rows: list[list[Any]] = None, auto_width: bool = True) -> dict:
         self._ensure()
         ws = self._wb.create_sheet(title=name) if name != "Sheet" else self._wb.active
         if ws is None:
@@ -269,7 +269,7 @@ class ExcelGenerator:
         self._sheets_data[name] = {"headers": headers, "rows": rows or [], "total_rows": len(rows or [])}
         return {"success": True, "sheet": name, "rows": len(rows or [])}
 
-    def add_formula(self, sheet: str, cell: str, formula: str) -> Dict:
+    def add_formula(self, sheet: str, cell: str, formula: str) -> dict:
         self._ensure()
         ws = self._wb[sheet]
         ws[cell] = formula
@@ -281,7 +281,7 @@ class ExcelGenerator:
         self._wb.save(buf)
         return buf.getvalue()
 
-    def save_file(self, path: str) -> Dict:
+    def save_file(self, path: str) -> dict:
         self._ensure()
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self._wb.save(path)
@@ -320,7 +320,7 @@ class PPTGenerator:
         self._init()
 
     def add_slide(self, title: str = "", content: str = "",
-                  layout: str = "title_and_content", notes: str = "") -> Dict:
+                  layout: str = "title_and_content", notes: str = "") -> dict:
         """添加幻灯片"""
         self._ensure()
         layout_map = {
@@ -367,8 +367,8 @@ class PPTGenerator:
 
         return {"success": True, "slide": len(self._prs.slides)}
 
-    def add_table_slide(self, title: str, data: List[List[str]],
-                        headers: List[str] = None) -> Dict:
+    def add_table_slide(self, title: str, data: list[list[str]],
+                        headers: list[str] = None) -> dict:
         """添加含表格的幻灯片"""
         self._ensure()
         rows = (headers or []) + data if headers else data
@@ -408,7 +408,7 @@ class PPTGenerator:
         self._prs.save(buf)
         return buf.getvalue()
 
-    def save_file(self, path: str) -> Dict:
+    def save_file(self, path: str) -> dict:
         self._ensure()
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self._prs.save(path)
@@ -423,7 +423,7 @@ class MarkdownGenerator:
     """Markdown文档生成器"""
 
     @staticmethod
-    def report(title: str, sections: List[Dict], metadata: Dict = None) -> str:
+    def report(title: str, sections: list[dict], metadata: dict = None) -> str:
         """
         生成Markdown报告
         sections: [{"title": "标题", "content": "内容", "level": 2}]
@@ -518,8 +518,8 @@ class DocGenerator:
 
     # ─── 快捷生成 ───
 
-    def generate_report(self, title: str, sections: List[Dict],
-                        format: str = "markdown", metadata: Dict = None) -> Dict:
+    def generate_report(self, title: str, sections: list[dict],
+                        format: str = "markdown", metadata: dict = None) -> dict:
         """
         一键生成报告
         format: markdown | html | word | all
@@ -555,8 +555,8 @@ class DocGenerator:
 
         return {"success": True, "title": title, "format": format, "files": results}
 
-    def generate_table_report(self, title: str, tables: Dict[str, Dict],
-                               format: str = "excel") -> Dict:
+    def generate_table_report(self, title: str, tables: dict[str, dict],
+                               format: str = "excel") -> dict:
         """
         生成表格报告
         tables: {"Sheet名": {"headers": [...], "rows": [...]}}
@@ -573,7 +573,7 @@ class DocGenerator:
 
         return {"success": True, "title": title, "format": format, "files": results}
 
-    def generate_presentation(self, title: str, slides: List[Dict]) -> Dict:
+    def generate_presentation(self, title: str, slides: list[dict]) -> dict:
         """
         生成PPT
         slides: [{"title": "...", "content": "...", "notes": "...", "table": {"headers":[], "rows":[]}}]
@@ -598,14 +598,14 @@ class DocGenerator:
 
     # ─── 数据转换 ───
 
-    def data_to_excel_bytes(self, tables: Dict[str, Dict]) -> bytes:
+    def data_to_excel_bytes(self, tables: dict[str, dict]) -> bytes:
         """数据直接转Excel字节流"""
         self.excel.reset()
         for sheet_name, data in tables.items():
             self.excel.add_sheet(sheet_name, data.get("headers"), data.get("rows"))
         return self.excel.save_bytes()
 
-    def data_to_word_bytes(self, title: str, sections: List[Dict]) -> bytes:
+    def data_to_word_bytes(self, title: str, sections: list[dict]) -> bytes:
         """数据直接转Word字节流"""
         self.word.reset()
         self.word.add_title(title)
@@ -616,7 +616,7 @@ class DocGenerator:
                 self.word.add_table(sec["table"].get("rows", []), sec["table"].get("headers", []))
         return self.word.save_bytes()
 
-    def list_output_files(self) -> List[Dict]:
+    def list_output_files(self) -> list[dict]:
         """列出已生成的文件"""
         files = []
         for f in os.listdir(self._output_dir):
@@ -640,7 +640,7 @@ class DocGenerator:
 
 import tempfile
 
-_doc_generator: Optional[DocGenerator] = None
+_doc_generator: DocGenerator | None = None
 
 
 def get_doc_generator() -> DocGenerator:

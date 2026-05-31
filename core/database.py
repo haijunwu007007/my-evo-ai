@@ -386,7 +386,7 @@ def migrate_from_legacy():
     print("\n迁移完成")
 
 
-def health_check() -> Dict[str, Any]:
+def health_check() -> dict[str, Any]:
     """数据库健康检查"""
     conn = get_connection()
     tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()]

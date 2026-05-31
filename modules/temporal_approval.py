@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 时序审批引擎（A级）
 # Grade: B
 
@@ -14,7 +13,7 @@ logger=logging.getLogger("evo.temporal-approval")
 class TemporalApproval(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="temporal-approval";MODULE_NAME="时序审批引擎";VERSION="v2.0";MODULE_LEVEL="A"
     _STATUSES=["pending","approved","rejected","expired","cancelled"]
-    def __init__(self,config=None):super().__init__(config);self._requests:Dict[str,Dict]={};self._start=time.time()
+    def __init__(self,config=None):super().__init__(config);self._requests:dict[str,dict]={};self._start=time.time()
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)

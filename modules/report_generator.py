@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 报告生成器（A级）"""
 # Grade: A
 __module_meta__ = {"id":"report-generator","name":"Report Generator","version":"V0.1","group":"data","grade":"A",
@@ -89,7 +88,7 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── public API: generate_html_report ────────────────────────────────
     def generate_html_report(self, title: str,
-                             sections: List[Dict[str, Any]]) -> str:
+                             sections: list[dict[str, Any]]) -> str:
         """生成美观的 HTML 报告
 
         sections 每项格式：
@@ -123,7 +122,7 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         logger.info("generate_html_report: '%s' with %d sections", title, len(sections))
         return report
 
-    def _render_section(self, s: Dict[str, Any]) -> str:
+    def _render_section(self, s: dict[str, Any]) -> str:
         stype = s.get("type", "text")
         title = html.escape(s.get("title", ""))
         html_parts = [f'<div class="section"><h2>{title}</h2>']
@@ -172,7 +171,7 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── public API: generate_summary ────────────────────────────────────
     def generate_summary(self, data: Any,
-                         fmt: str = "json") -> Union[str, Dict[str, Any]]:
+                         fmt: str = "json") -> str | dict[str, Any]:
         """生成摘要，支持 json / text 两种格式"""
         if fmt == "json":
             result = self._summary_to_json(data)
@@ -183,7 +182,7 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._generated += 1
             return result
 
-    def _summary_to_json(self, data: Any) -> Dict[str, Any]:
+    def _summary_to_json(self, data: Any) -> dict[str, Any]:
         if isinstance(data, dict):
             return {
                 "type": "dict",

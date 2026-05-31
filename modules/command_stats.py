@@ -129,7 +129,7 @@ class CommandRecord:
     is_dangerous: bool = False
     danger_reason: str = ""
     risk_level: str = "low"  # low, medium, high, critical
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class CommandStats:
@@ -142,10 +142,10 @@ class CommandStats:
     total_duration_ms: float = 0.0
     dangerous_count: int = 0
     unique_commands: int = 0
-    top_commands: List[Dict] = field(default_factory=list)
-    by_shell: Dict[str, int] = field(default_factory=dict)
-    by_user: Dict[str, int] = field(default_factory=dict)
-    by_hour: Dict[int, int] = field(default_factory=dict)
+    top_commands: list[dict] = field(default_factory=list)
+    by_shell: dict[str, int] = field(default_factory=dict)
+    by_user: dict[str, int] = field(default_factory=dict)
+    by_hour: dict[int, int] = field(default_factory=dict)
 
 @dataclass
 class CostEstimate:
@@ -173,9 +173,9 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 "description": "命令执行统计管理，支持历史记录、频率分析、安全审计、成本估算",
             }
         )
-        self._records: List[CommandRecord] = []
-        self._command_index: Dict[str, List[int]] = defaultdict(list)  # cmd_hash -> record indices
-        self._alerts: List[Dict] = []
+        self._records: list[CommandRecord] = []
+        self._command_index: dict[str, list[int]] = defaultdict(list)  # cmd_hash -> record indices
+        self._alerts: list[dict] = []
         self._initialized = False
         self._max_records = 10000
 
@@ -214,7 +214,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             return "medium"
         return "low"
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"module": "command_stats"})
         self.metrics_collector.counter("command_stats.execute.calls", 1)
@@ -444,7 +444,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             logger.error(f"[CommandStats] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -465,7 +465,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._initialized = False
         logger.info(f"关闭命令统计管理器，记录数: {len(self._records)}")
 
-    def get_slow_commands(self, threshold_ms: float = 1000, limit: int = 20) -> Dict[str, Any]:
+    def get_slow_commands(self, threshold_ms: float = 1000, limit: int = 20) -> dict[str, Any]:
         """慢命令排行。企业场景：性能优化团队识别耗时的系统命令，
         优化脚本执行效率。
         """
@@ -479,7 +479,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "commands": slow,
         }
 
-    def get_error_commands(self, limit: int = 20) -> Dict[str, Any]:
+    def get_error_commands(self, limit: int = 20) -> dict[str, Any]:
         """错误命令统计。企业场景：运维排查频繁失败的系统命令。"""
         records = getattr(self, "_records", [])
         errors = [r for r in records if r.get("exit_code", 0) != 0]
@@ -496,7 +496,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "top_commands": [{"command": c, "count": n} for c, n in top_errors],
         }
 
-    def get_command_trend(self, command: str, hours: int = 24) -> Dict[str, Any]:
+    def get_command_trend(self, command: str, hours: int = 24) -> dict[str, Any]:
         """命令执行趋势。企业场景：查看某个命令在最近N小时的执行频率和耗时变化，
         检测异常波动。
         """
@@ -516,7 +516,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "min_duration_ms": min(durations),
         }
 
-    def get_command_frequency_ranking(self, hours: int = 24, limit: int = 20) -> Dict[str, Any]:
+    def get_command_frequency_ranking(self, hours: int = 24, limit: int = 20) -> dict[str, Any]:
         """命令频次排行。企业场景：运维了解系统最常执行的命令，
         识别可优化的重复操作（如定时任务替代手动执行）。
         """
@@ -536,7 +536,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "ranking": [{"command": c, "count": n} for c, n in ranking],
         }
 
-    def get_hourly_distribution(self, command: str = "", days: int = 1) -> Dict[str, Any]:
+    def get_hourly_distribution(self, command: str = "", days: int = 1) -> dict[str, Any]:
         """按小时分布。企业场景：发现命令执行的时间规律，
         识别异常时段的异常命令执行（安全审计）。
         """
@@ -559,7 +559,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "off_peak_hour": hourly.index(min(hourly)),
         }
 
-    def export_stats_csv(self, hours: int = 24) -> Dict[str, Any]:
+    def export_stats_csv(self, hours: int = 24) -> dict[str, Any]:
         """导出统计数据为CSV。企业场景：运维团队导出命令执行统计做周报，
         包含命令名、执行次数、平均耗时、错误率。
         """

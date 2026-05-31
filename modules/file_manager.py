@@ -129,14 +129,14 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._files: Dict[str, FileMetadata] = {}
-        self._versions: Dict[str, List[FileVersion]] = {}
+        self._files: dict[str, FileMetadata] = {}
+        self._versions: dict[str, list[FileVersion]] = {}
         self._storage_size: int = 0
 
     def initialize(self) -> None:
@@ -160,7 +160,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "file_manager"})
         self.metrics_collector.counter("file_manager.execute.calls", 1)
         self.audit("execute", {"module": "file_manager"})
@@ -247,7 +247,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -261,7 +261,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._versions.clear()
         super().shutdown()
 
-    def _create_file(self, path: str, size: int, owner: str) -> Dict:
+    def _create_file(self, path: str, size: int, owner: str) -> dict:
         if path in self._files:
             return {"error": "Already exists"}
         parent = "/".join(path.split("/")[:-1]) or "/"
@@ -281,7 +281,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"path": path, "created": True, "version": 1}
 
-    def _create_directory(self, path: str) -> Dict:
+    def _create_directory(self, path: str) -> dict:
         if path in self._files:
             return {"error": "Already exists"}
         self._files[path] = FileMetadata(
@@ -291,7 +291,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"path": path, "created": True}
 
-    def _read_file(self, path: str) -> Dict:
+    def _read_file(self, path: str) -> dict:
         f = self._files.get(path)
         if not f:
             return {"error": "Not found"}
@@ -300,7 +300,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         f.accessed_at = time.time()
         return {"path": path, "name": f.name, "size": f.size_bytes, "checksum": f.checksum, "version": f.version}
 
-    def _write_file(self, path: str, size: int, owner: str) -> Dict:
+    def _write_file(self, path: str, size: int, owner: str) -> dict:
         f = self._files.get(path)
         if not f:
             return {"error": "Not found"}
@@ -316,7 +316,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"path": path, "updated": True, "version": f.version}
 
-    def _delete(self, path: str) -> Dict:
+    def _delete(self, path: str) -> dict:
         f = self._files.pop(path, None)
         if not f:
             return {"error": "Not found"}
@@ -329,7 +329,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"deleted": path, "total": 1 + len(children)}
 
-    def _list_dir(self, path: str) -> Dict:
+    def _list_dir(self, path: str) -> dict:
         if path not in self._files:
             return {"error": "Not found"}
         prefix = path if path == "/" else path + "/"
@@ -347,7 +347,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def search_files(self, query: str, max_results: int = 50) -> Dict[str, Any]:
+    def search_files(self, query: str, max_results: int = 50) -> dict[str, Any]:
         """文件搜索。企业场景：员工在文档库中搜索包含关键词的文件，
         支持按文件名、扩展名、内容标签过滤。
         """
@@ -368,7 +368,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     break
         return {"success": True, "query": query, "total_found": len(results), "results": results}
 
-    def get_storage_usage_report(self) -> Dict[str, Any]:
+    def get_storage_usage_report(self) -> dict[str, Any]:
         """存储使用报告。企业场景：管理员审查存储空间消耗，
         按文件类型和目录分布统计，识别可清理的大文件。
         """
@@ -394,7 +394,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "by_directory": [{"dir": d, "size_mb": round(sz / 1024 / 1024, 2)} for d, sz in sorted_dirs[:10]],
         }
 
-    def batch_copy_files(self, source_targets: List[Dict[str, str]]) -> Dict[str, Any]:
+    def batch_copy_files(self, source_targets: list[dict[str, str]]) -> dict[str, Any]:
         """批量复制文件。企业场景：项目模板初始化时一次性复制几十个模板文件
         到新项目目录。
         """
@@ -416,7 +416,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             copied += 1
         return {"success": True, "copied": copied, "failed": failed, "total": len(source_targets)}
 
-    def get_file_version_history(self, path: str) -> Dict[str, Any]:
+    def get_file_version_history(self, path: str) -> dict[str, Any]:
         """文件版本历史。企业场景：协作文档查看修改记录，
         支持回滚到指定版本。
         """
@@ -434,7 +434,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         history.sort(key=lambda x: x["version"], reverse=True)
         return {"success": True, "path": path, "total_versions": len(history), "history": history}
 
-    def search_files(self, query: str, file_type: Optional[str] = None, limit: int = 50) -> Dict[str, Any]:
+    def search_files(self, query: str, file_type: str | None = None, limit: int = 50) -> dict[str, Any]:
         """搜索文件。企业场景：在文件库中按名称/标签搜索，
         支持按类型过滤（文档/图片/代码）。
         """
@@ -468,7 +468,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "results": results[:limit],
         }
 
-    def get_storage_usage(self) -> Dict[str, Any]:
+    def get_storage_usage(self) -> dict[str, Any]:
         """存储使用统计。企业场景：运维监控文件存储空间用量，
         按类型/时间/所有者分布，预警空间不足。
         """
@@ -494,7 +494,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "by_month_mb": [{"month": m, "mb": round(s / 1024 / 1024, 2)} for m, s in sorted(monthly.items())],
         }
 
-    def get_duplicate_files(self, directory: str = "/") -> Dict[str, Any]:
+    def get_duplicate_files(self, directory: str = "/") -> dict[str, Any]:
         """检测重复文件。企业场景：S3存储成本优化，通过SHA256哈希找出
         完全相同的文件，合并后可节省存储费用。
         """
@@ -540,7 +540,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_duplicates": dup_details[:20],
         }
 
-    def get_file_type_distribution(self) -> Dict[str, Any]:
+    def get_file_type_distribution(self) -> dict[str, Any]:
         """文件类型分布。企业场景：分析存储中各类文件占比，
         发现非必要文件类型（如.log .tmp），制定清理策略。
         """
@@ -571,7 +571,7 @@ class FileManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def get_recently_modified(self, hours: int = 24, limit: int = 50) -> Dict[str, Any]:
+    def get_recently_modified(self, hours: int = 24, limit: int = 50) -> dict[str, Any]:
         """最近修改文件列表。企业场景：排查问题时查看最近被修改的文件，
         如发布后哪些配置文件被改动过。
         """

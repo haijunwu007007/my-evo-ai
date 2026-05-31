@@ -109,7 +109,7 @@ class ChecksumRecord:
     file_size: int = 0
     verified: bool = False
     created_at: float = field(default_factory=time.time)
-    verified_at: Optional[float] = None
+    verified_at: float | None = None
 
 @dataclass
 class BackupManifest:
@@ -120,9 +120,9 @@ class BackupManifest:
     total_files: int = 0
     total_size: int = 0
     checksum_algorithm: str = "sha256"
-    records: List[ChecksumRecord] = field(default_factory=list)
+    records: list[ChecksumRecord] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
-    verified_at: Optional[float] = None
+    verified_at: float | None = None
     integrity_verified: bool = False
 
 @dataclass
@@ -136,7 +136,7 @@ class DiffResult:
     added_files: int = 0
     removed_files: int = 0
     total_size_diff: int = 0
-    details: List[Dict[str, Any]] = field(default_factory=list)
+    details: list[dict[str, Any]] = field(default_factory=list)
 
 class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """
@@ -166,14 +166,14 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._running = False
 
         # 清单存储
-        self._manifests: Dict[str, BackupManifest] = {}
+        self._manifests: dict[str, BackupManifest] = {}
         # 校验记录索引 (backup_id -> records)
-        self._backup_records: Dict[str, List[ChecksumRecord]] = {}
+        self._backup_records: dict[str, list[ChecksumRecord]] = {}
         # 校验历史
-        self._history: List[Dict[str, Any]] = []
+        self._history: list[dict[str, Any]] = []
         self._max_history = 500
         # 模拟文件存储 (内存中)
-        self._file_store: Dict[str, bytes] = {}
+        self._file_store: dict[str, bytes] = {}
         # 并发控制
         self._max_concurrent = 10
         self._active_verifications = 0
@@ -203,7 +203,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._running = True
         logger.info("备份校验管理器初始化完成")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         self.trace("execute", {"module": "backup_checksum"})
         self.metrics_collector.counter("backup_checksum.execute.calls", 1)
         self.audit("execute", {"module": "backup_checksum"})
@@ -239,7 +239,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             raise ValueError(f"不支持的算法: {algorithm}")
         return h(data).hexdigest()
 
-    def _store_file(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _store_file(self, p: dict[str, Any]) -> dict[str, Any]:
         """存储文件（模拟）"""
         file_path = p["file_path"]
         content = p.get("content", "default file content").encode()
@@ -251,7 +251,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "hash_sha256": self._hash(content, "sha256")[:16],
         }
 
-    def _get_file(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_file(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取文件"""
         file_path = p["file_path"]
         content = self._file_store.get(file_path)
@@ -259,7 +259,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             return {"error": f"文件不存在: {file_path}"}
         return {"file_path": file_path, "size_bytes": len(content), "hash_sha256": self._hash(content, "sha256")[:16]}
 
-    def _compute_hash(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _compute_hash(self, p: dict[str, Any]) -> dict[str, Any]:
         """计算文件哈希"""
         file_path = p["file_path"]
         algorithm = p.get("algorithm", self._default_algorithm)
@@ -272,7 +272,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return {"file_path": file_path, "algorithm": algorithm, "hash": hash_val, "size_bytes": len(content)}
 
-    def _verify_file(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify_file(self, p: dict[str, Any]) -> dict[str, Any]:
         """验证文件哈希"""
         file_path = p["file_path"]
         expected_hash = p["expected_hash"]
@@ -329,7 +329,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "duration_ms": round(elapsed_ms, 2),
         }
 
-    def _verify_batch(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify_batch(self, p: dict[str, Any]) -> dict[str, Any]:
         """批量校验"""
         backup_id = p["backup_id"]
         file_hashes = p.get("file_hashes", [])  # [{file_path, expected_hash, algorithm}]
@@ -373,7 +373,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             with self._lock:
                 self._active_verifications -= 1
 
-    def _create_manifest(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_manifest(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建备份清单"""
         backup_id = p["backup_id"]
         file_paths = p.get("file_paths", [])
@@ -424,7 +424,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "algorithm": algorithm,
         }
 
-    def _verify_manifest(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify_manifest(self, p: dict[str, Any]) -> dict[str, Any]:
         """验证备份清单"""
         manifest_id = p["manifest_id"]
         manifest = self._manifests.get(manifest_id)
@@ -464,7 +464,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "failures": failures[:10],
         }
 
-    def _diff_backups(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _diff_backups(self, p: dict[str, Any]) -> dict[str, Any]:
         """比较两个备份的差异"""
         backup_a = p["backup_id_a"]
         backup_b = p["backup_id_b"]
@@ -507,7 +507,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "details": details[:20],
         }
 
-    def _repair_suggest(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _repair_suggest(self, p: dict[str, Any]) -> dict[str, Any]:
         """修复建议"""
         backup_id = p.get("backup_id")
         manifest_id = p.get("manifest_id")
@@ -543,7 +543,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return {"suggestions": suggestions}
 
-    def _get_manifest(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_manifest(self, p: dict[str, Any]) -> dict[str, Any]:
         manifest = self._manifests.get(p["manifest_id"])
         if not manifest:
             return {"error": f"清单不存在: {p['manifest_id']}"}
@@ -557,7 +557,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "records": len(manifest.records),
         }
 
-    def _list_manifests(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_manifests(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         return [
             {
                 "manifest_id": m.manifest_id,
@@ -568,7 +568,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             for m in self._manifests.values()
         ]
 
-    def _get_stats(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_stats(self, p: dict[str, Any]) -> dict[str, Any]:
         return {
             "total_verifications": self._total_verifications,
             "successful": self._successful_verifications,
@@ -579,7 +579,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "avg_verification_ms": round(self._verification_time_ms / max(self._total_verifications, 1), 2),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module": self.module_name,
@@ -596,7 +596,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._running = False
         logger.info(f"备份校验管理器关闭, 校验次数: {self._total_verifications}")
 
-    def batch_verify(self, file_paths: List[str], algorithm: str = "sha256") -> Dict[str, Any]:
+    def batch_verify(self, file_paths: list[str], algorithm: str = "sha256") -> dict[str, Any]:
         """批量校验文件完整性。企业场景：灾备演练时一次性校验数百个备份文件。
         返回每文件的校验结果（匹配/不匹配/缺失），汇总统计。
         """
@@ -627,7 +627,7 @@ class BackupChecksumManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 results["errors"].append({"file": fp, "error": str(e)})
         return results
 
-    def get_integrity_report(self) -> Dict[str, Any]:
+    def get_integrity_report(self) -> dict[str, Any]:
         """获取备份完整性报告。企业场景：每日自动生成备份健康度报告。
         统计各算法校验次数、成功率、最近异常记录。
         """

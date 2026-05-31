@@ -88,7 +88,8 @@ import time
 import uuid
 import logging
 import threading
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from enum import Enum
 from dataclasses import dataclass, field
@@ -132,14 +133,14 @@ class TaskItem:
     sort_key: tuple = field(compare=True)
     task_id: str = field(compare=False)
     name: str = field(compare=False)
-    payload: Dict[str, Any] = field(compare=False, default_factory=dict)
+    payload: dict[str, Any] = field(compare=False, default_factory=dict)
     priority: TaskPriority = field(compare=False, default=TaskPriority.NORMAL)
     state: TaskState = field(compare=False, default=TaskState.PENDING)
     max_retries: int = field(compare=False, default=3)
     retry_count: int = field(compare=False, default=0)
     timeout_seconds: int = field(compare=False, default=300)
     run_at: float = field(compare=False, default=0.0)
-    depends_on: List[str] = field(compare=False, default_factory=list)
+    depends_on: list[str] = field(compare=False, default_factory=list)
     result: Any = field(compare=False, default=None)
     error: str = field(compare=False, default="")
     created_at: float = field(compare=False, default_factory=time.time)
@@ -167,18 +168,18 @@ class QueueStats:
     avg_wait_seconds: float = 0.0
     avg_exec_seconds: float = 0.0
 
-class TaskSchedulerEngine(object):
+class TaskSchedulerEngine:
     """任务调度引擎 - 负责任务优先级排序、依赖管理和定时调度"""
 
     def __init__(self):
-        self._scheduled_tasks: Dict[str, Dict] = {}
-        self._dependencies: Dict[str, List[str]] = {}
+        self._scheduled_tasks: dict[str, dict] = {}
+        self._dependencies: dict[str, list[str]] = {}
         self._completed_deps: Set[str] = set()
         self._dispatch_count: int = 0
 
     def schedule(
-        self, task_id: str, priority: int = 0, delay_seconds: float = 0, dependencies: Optional[List[str]] = None
-    ) -> Dict:
+        self, task_id: str, priority: int = 0, delay_seconds: float = 0, dependencies: list[str] | None = None
+    ) -> dict:
         """调度任务"""
         self._scheduled_tasks[task_id] = {
             "priority": priority,
@@ -192,7 +193,7 @@ class TaskSchedulerEngine(object):
             self._dependencies[task_id] = dependencies
         return {"task_id": task_id, "priority": priority, "status": "scheduled"}
 
-    def get_ready_tasks(self) -> List[str]:
+    def get_ready_tasks(self) -> list[str]:
         """获取所有就绪的任务（依赖已满足且延迟已过）"""
         ready = []
         now = time.time()
@@ -232,12 +233,12 @@ class TaskSchedulerEngine(object):
             return True
         return False
 
-    def get_pending_dependencies(self, task_id: str) -> List[str]:
+    def get_pending_dependencies(self, task_id: str) -> list[str]:
         """获取任务未满足的依赖"""
         deps = self._dependencies.get(task_id, [])
         return [d for d in deps if d not in self._completed_deps]
 
-    def get_queue_snapshot(self) -> Dict:
+    def get_queue_snapshot(self) -> dict:
         """获取调度队列快照"""
         from collections import Counter
 
@@ -249,7 +250,7 @@ class TaskSchedulerEngine(object):
             "completed_deps": len(self._completed_deps),
         }
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return self.get_queue_snapshot()
 
 class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -258,17 +259,17 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__()
-        self._queue: List[TaskItem] = []
-        self._tasks: Dict[str, TaskItem] = {}
+        self._queue: list[TaskItem] = []
+        self._tasks: dict[str, TaskItem] = {}
         self._completed: deque = deque(maxlen=5000)
         self._stats = QueueStats()
         self._max_concurrent = 10
         self._running_count = 0
         self._lock = threading.Lock()
         self._condition = threading.Condition(self._lock)
-        self._worker_thread: Optional[threading.Thread] = None
+        self._worker_thread: threading.Thread | None = None
         self._running = False
-        self._handlers: Dict[str, Callable] = {}
+        self._handlers: dict[str, Callable] = {}
 
     def initialize(self) -> bool:
         """初始化任务队列"""
@@ -370,7 +371,7 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         with self._lock:
             pending = len(self._queue)
             running = self._running_count
@@ -570,7 +571,7 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def batch_enqueue(self, tasks: List[Dict]) -> Dict:
+    def batch_enqueue(self, tasks: list[dict]) -> dict:
         """批量入队任务"""
         success = 0
         for task in tasks:
@@ -584,7 +585,7 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 success += 1
         return {"enqueued": success, "total": len(tasks)}
 
-    def retry_failed(self, max_retries: int = 1) -> Dict:
+    def retry_failed(self, max_retries: int = 1) -> dict:
         """重试失败的任务"""
         retried = 0
         if hasattr(self, "_failed_tasks"):
@@ -598,7 +599,7 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     retried += 1
         return {"retried": retried}
 
-    def get_task_by_id(self, task_id: str) -> Optional[Dict]:
+    def get_task_by_id(self, task_id: str) -> dict | None:
         """按ID获取任务"""
         for task_list in [
             getattr(self, "_pending_tasks", []),
@@ -611,7 +612,7 @@ class TaskQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     return t
         return None
 
-    def get_queue_stats(self) -> Dict:
+    def get_queue_stats(self) -> dict:
         """获取队列统计"""
         return {
             "pending": len(getattr(self, "_pending_tasks", [])),

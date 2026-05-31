@@ -86,17 +86,17 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("pinecone_managed")
 
-class IndexManager(object):
+class IndexManager:
     """Pinecone索引管理器"""
 
     def __init__(self, default_dim: int = 768):
         self.default_dim = default_dim
-        self._indexes: Dict[str, Dict] = {}
-        self._namespaces: Dict[str, Dict[str, List]] = defaultdict(lambda: defaultdict(list))
+        self._indexes: dict[str, dict] = {}
+        self._namespaces: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
 
     def create_index(
         self, name: str, dimension: int = 0, metric: str = "cosine", replicas: int = 1, pod_type: str = "p1.x1"
-    ) -> Dict:
+    ) -> dict:
         if name in self._indexes:
             return {"success": False, "error": "index_exists"}
         dim = dimension or self.default_dim
@@ -118,14 +118,14 @@ class IndexManager(object):
         self._namespaces.pop(name, None)
         return self._indexes.pop(name, None) is not None
 
-    def describe_index(self, name: str) -> Optional[Dict]:
+    def describe_index(self, name: str) -> dict | None:
         idx = self._indexes.get(name)
         if not idx:
             return None
         ns_count = len(self._namespaces.get(name, {}))
         return {**idx, "namespace_count": ns_count}
 
-    def list_indexes(self) -> List[Dict]:
+    def list_indexes(self) -> list[dict]:
         return [self.describe_index(n) for n in self._indexes]
 
     # --- Auto-generated action dispatch methods ---
@@ -156,16 +156,16 @@ class IndexManager(object):
 class VectorStore:
     """向量存储引擎"""
 
-    def __init__(self, index_config: Dict):
+    def __init__(self, index_config: dict):
         self.config = index_config
         self.dim = index_config["dimension"]
         self.metric = index_config["metric"]
-        self._vectors: Dict[str, Dict] = {}
-        self._ns_vectors: Dict[str, Dict[str, Dict]] = defaultdict(dict)
+        self._vectors: dict[str, dict] = {}
+        self._ns_vectors: dict[str, dict[str, dict]] = defaultdict(dict)
 
     def upsert(
-        self, ids: List[str], vectors: List[List[float]], metadata: List[Dict] = None, namespace: str = ""
-    ) -> Dict:
+        self, ids: list[str], vectors: list[list[float]], metadata: list[dict] = None, namespace: str = ""
+    ) -> dict:
         ns = namespace or ""
         store = self._ns_vectors[ns] if ns else self._vectors
         upserted = 0
@@ -182,13 +182,13 @@ class VectorStore:
             pass
         return {"success": True, "upserted": upserted}
 
-    def delete(self, ids: List[str], namespace: str = "") -> Dict:
+    def delete(self, ids: list[str], namespace: str = "") -> dict:
         ns = namespace or ""
         store = self._ns_vectors[ns] if ns else self._vectors
         deleted = sum(1 for i in ids if store.pop(i, None) is not None)
         return {"success": True, "deleted": deleted}
 
-    def fetch(self, ids: List[str], namespace: str = "") -> Dict:
+    def fetch(self, ids: list[str], namespace: str = "") -> dict:
         ns = namespace or ""
         store = self._ns_vectors[ns] if ns else self._vectors
         vectors = [store.get(i) for i in ids if i in store]
@@ -196,12 +196,12 @@ class VectorStore:
 
     def query(
         self,
-        vector: List[float],
+        vector: list[float],
         top_k: int = 10,
         namespace: str = "",
-        filters: Dict = None,
+        filters: dict = None,
         include_metadata: bool = True,
-    ) -> Dict:
+    ) -> dict:
         ns = namespace or ""
         store = self._ns_vectors[ns] if ns else self._vectors
         if len(vector) != self.dim:
@@ -220,7 +220,7 @@ class VectorStore:
         return {"success": True, "matches": candidates[:top_k], "namespace": ns}
 
     @staticmethod
-    def _match_filters(metadata: Dict, filters: Dict) -> bool:
+    def _match_filters(metadata: dict, filters: dict) -> bool:
         for k, v in filters.items():
             if k not in metadata:
                 return False
@@ -246,7 +246,7 @@ class VectorStore:
             return round(dot / (na * nb), 6) if na * nb > 0 else 0
         return round(math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b))), 6)
 
-    def stats(self, namespace: str = "") -> Dict:
+    def stats(self, namespace: str = "") -> dict:
         ns = namespace or ""
         store = self._ns_vectors[ns] if ns else self._vectors
         return {"total_vectors": len(store), "dimension": self.dim, "namespace": ns, "index_full": False}
@@ -254,13 +254,13 @@ class VectorStore:
 class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Pinecone托管向量库 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "vectors_upserted": 0,
@@ -268,13 +268,13 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
         self.index_mgr = IndexManager(default_dim=self.config.get("default_dimension", 768))
-        self._stores: Dict[str, VectorStore] = {}
+        self._stores: dict[str, VectorStore] = {}
 
-    def _get_store(self, index_name: str) -> Optional[VectorStore]:
+    def _get_store(self, index_name: str) -> VectorStore | None:
         if index_name not in self._stores:
             idx = self.index_mgr._indexes.get(index_name)
             if idx:
@@ -378,7 +378,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def list_all_indexes(self) -> Dict[str, Any]:
+    def list_all_indexes(self) -> dict[str, Any]:
         """列出所有索引。企业场景：开发团队查看Pinecone中已创建的
         所有向量索引及其状态和向量数量。
         """
@@ -396,7 +396,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "total": len(result), "indexes": result}
 
-    def get_query_stats(self, hours: int = 1) -> Dict[str, Any]:
+    def get_query_stats(self, hours: int = 1) -> dict[str, Any]:
         """查询统计。企业场景：监控向量检索的QPS和延迟，
         识别慢查询或异常流量。
         """
@@ -408,7 +408,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": self._metrics.get("avg_latency_ms", 0),
         }
 
-    def batch_upsert(self, index_name: str, vectors: List[Dict]) -> Dict[str, Any]:
+    def batch_upsert(self, index_name: str, vectors: list[dict]) -> dict[str, Any]:
         """批量写入向量。企业场景：Embedding管道批量处理文档后，
         一次性upsert到Pinecone，支持自动分批（Pinecone单批上限1000条）。
         """
@@ -442,11 +442,11 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def search_with_metadata_filter(
         self,
         index_name: str,
-        query: List[float],
+        query: list[float],
         top_k: int = 10,
-        filter_expr: Dict = None,
+        filter_expr: dict = None,
         score_threshold: float = 0.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """带元数据过滤的搜索。企业场景：RAG中按部门/文档类型/日期范围
         限定搜索范围，提高检索精准度。
         """
@@ -480,7 +480,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         results.sort(key=lambda x: -x["score"])
         return {"success": True, "index": index_name, "results": results[:top_k], "total_matched": len(results)}
 
-    def delete_by_namespace(self, index_name: str, namespace: str) -> Dict[str, Any]:
+    def delete_by_namespace(self, index_name: str, namespace: str) -> dict[str, Any]:
         """按命名空间删除。企业场景：清理测试环境的向量数据，
         或按项目/租户隔离数据后批量清理。
         """
@@ -497,7 +497,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.metrics_collector.counter("pinecone.namespace_delete", count=len(to_delete))
         return {"success": True, "index": index_name, "namespace": namespace, "deleted": len(to_delete)}
 
-    def get_index_health(self, index_name: str) -> Dict[str, Any]:
+    def get_index_health(self, index_name: str) -> dict[str, Any]:
         """索引健康检查。企业场景：监控向量索引状态，
         检查向量数量、维度一致性、元数据完整性。
         """
@@ -529,7 +529,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "metadata_coverage_pct": round(meta_coverage, 1),
         }
 
-    def update_vectors_metadata(self, index_name: str, ids: List[str], metadata: Dict) -> Dict[str, Any]:
+    def update_vectors_metadata(self, index_name: str, ids: list[str], metadata: dict) -> dict[str, Any]:
         """批量更新向量元数据。企业场景：文档重新分类后批量更新
         向量的metadata标签，无需重新计算embedding。
         """
@@ -555,7 +555,7 @@ class PineconeManaged(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "fields_updated": list(metadata.keys()),
         }
 
-    def describe_index_stats(self, index_name: str) -> Dict[str, Any]:
+    def describe_index_stats(self, index_name: str) -> dict[str, Any]:
         """索引统计概览。企业场景：容量规划时查看各索引的向量数、
         总大小、按命名空间的分布。
         """

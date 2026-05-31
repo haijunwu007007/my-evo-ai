@@ -90,7 +90,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class FileSystemAnalyzer(object):
+class FileSystemAnalyzer:
     """file_system 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -278,11 +278,11 @@ class FileNode:
     permissions: str = "rw-r--r--"
     checksum: str = ""
     version: int = 1
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     parent: str = ""
-    children: List[str] = field(default_factory=list)
+    children: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "path": self.path,
             "name": self.name,
@@ -310,7 +310,7 @@ class QuotaInfo:
     current_size: int = 0
     current_files: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "path": self.path,
             "max_size": self.max_size,
@@ -355,13 +355,13 @@ class FileSystemModule:
     """企业级虚拟文件系统管理模块"""
 
     def __init__(self):
-        self._nodes: Dict[str, FileNode] = {}
-        self._versions: Dict[str, List[VersionRecord]] = defaultdict(list)
-        self._quotas: Dict[str, QuotaInfo] = {}
-        self._search_index: Dict[str, set] = defaultdict(set)
-        self._trash: Dict[str, FileNode] = {}
-        self._watchers: Dict[str, List[Dict]] = defaultdict(list)
-        self._lock_table: Dict[str, Dict] = {}
+        self._nodes: dict[str, FileNode] = {}
+        self._versions: dict[str, list[VersionRecord]] = defaultdict(list)
+        self._quotas: dict[str, QuotaInfo] = {}
+        self._search_index: dict[str, set] = defaultdict(set)
+        self._trash: dict[str, FileNode] = {}
+        self._watchers: dict[str, list[dict]] = defaultdict(list)
+        self._lock_table: dict[str, dict] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -395,7 +395,7 @@ class FileSystemModule:
         self._initialized = False
         self._stats = {"ops_read": 0, "ops_write": 0, "ops_delete": 0, "bytes_read": 0, "bytes_written": 0}
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             root = FileNode(path="/", name="/", file_type=FileType.DIRECTORY, owner="root", permissions="rwxr-xr-x")
             self._nodes["/"] = root
@@ -416,7 +416,7 @@ class FileSystemModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         issues = []
@@ -432,7 +432,7 @@ class FileSystemModule:
     # --- Core CRUD ---
     def create_file(
         self, path: str, content: bytes = b"", owner: str = "system", overwrite: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path in self._nodes and not overwrite:
@@ -465,7 +465,7 @@ class FileSystemModule:
         self._notify_watchers(parent, "create", path)
         return {"success": True, "path": path, "size": len(content), "checksum": checksum}
 
-    def create_directory(self, path: str, owner: str = "system", recursive: bool = False) -> Dict[str, Any]:
+    def create_directory(self, path: str, owner: str = "system", recursive: bool = False) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path in self._nodes:
@@ -497,7 +497,7 @@ class FileSystemModule:
         self._notify_watchers(str(Path(path).parent), "create", path)
         return {"success": True, "path": path}
 
-    def read_file(self, path: str, offset: int = 0, length: int = -1, encoding: str = None) -> Dict[str, Any]:
+    def read_file(self, path: str, offset: int = 0, length: int = -1, encoding: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path not in self._nodes:
@@ -529,7 +529,7 @@ class FileSystemModule:
             result["content_base64"] = content.hex()
         return result
 
-    def delete(self, path: str, recursive: bool = False, permanent: bool = False) -> Dict[str, Any]:
+    def delete(self, path: str, recursive: bool = False, permanent: bool = False) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path not in self._nodes:
@@ -564,7 +564,7 @@ class FileSystemModule:
         return count
 
     # --- Listing & Search ---
-    def list_directory(self, path: str, recursive: bool = False, pattern: str = None) -> Dict[str, Any]:
+    def list_directory(self, path: str, recursive: bool = False, pattern: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path not in self._nodes:
@@ -576,7 +576,7 @@ class FileSystemModule:
         self._collect_items(path, node, items, recursive, pattern)
         return {"success": True, "path": path, "items": items, "total": len(items)}
 
-    def _collect_items(self, path: str, node: FileNode, items: List[Dict], recursive: bool, pattern: str):
+    def _collect_items(self, path: str, node: FileNode, items: list[dict], recursive: bool, pattern: str):
         import fnmatch
 
         for child_path in node.children:
@@ -589,7 +589,7 @@ class FileSystemModule:
             if recursive and child.file_type == FileType.DIRECTORY:
                 self._collect_items(child_path, child, items, True, pattern)
 
-    def search(self, query: str, root: str = "/", max_results: int = 100) -> Dict[str, Any]:
+    def search(self, query: str, root: str = "/", max_results: int = 100) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         results = []
@@ -603,14 +603,14 @@ class FileSystemModule:
                     break
         return {"success": True, "query": query, "results": results, "total": len(results)}
 
-    def get_info(self, path: str) -> Dict[str, Any]:
+    def get_info(self, path: str) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if path not in self._nodes:
             return {"success": False, "error": "not_found", "path": path}
         return {"success": True, **self._nodes[path].to_dict()}
 
-    def move(self, src: str, dst: str) -> Dict[str, Any]:
+    def move(self, src: str, dst: str) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if src not in self._nodes or dst not in self._nodes:
@@ -632,7 +632,7 @@ class FileSystemModule:
             self._update_child_paths(new_path, node)
         return {"success": True, "from": src, "to": new_path}
 
-    def copy(self, src: str, dst: str) -> Dict[str, Any]:
+    def copy(self, src: str, dst: str) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if src not in self._nodes:
@@ -691,13 +691,13 @@ class FileSystemModule:
                 q.current_files += files_delta
             path = str(Path(path).parent)
 
-    def get_quota(self, path: str) -> Dict[str, Any]:
+    def get_quota(self, path: str) -> dict[str, Any]:
         for p in [path, str(Path(path).parent)]:
             if p in self._quotas:
                 return {"success": True, **self._quotas[p].to_dict()}
         return {"success": True, "path": path, "unlimited": True}
 
-    def set_quota(self, path: str, max_size: int = 0, max_files: int = 0) -> Dict[str, Any]:
+    def set_quota(self, path: str, max_size: int = 0, max_files: int = 0) -> dict[str, Any]:
         if path not in self._nodes or self._nodes[path].file_type != FileType.DIRECTORY:
             return {"success": False, "error": "invalid_path"}
         self._quotas[path] = QuotaInfo(path=path, max_size=max_size, max_files=max_files)
@@ -712,7 +712,7 @@ class FileSystemModule:
         self._versions[path].append(record)
         node.version += 1
 
-    def get_versions(self, path: str) -> Dict[str, Any]:
+    def get_versions(self, path: str) -> dict[str, Any]:
         if path not in self._versions:
             return {"success": True, "path": path, "versions": [], "current": 1}
         versions = [v.to_dict() for v in self._versions[path]]
@@ -732,14 +732,14 @@ class FileSystemModule:
                 self._search_index[w].add(node.path)
 
     # --- Watchers ---
-    def watch(self, path: str, callback_id: str, events: List[str] = None) -> Dict[str, Any]:
+    def watch(self, path: str, callback_id: str, events: list[str] = None) -> dict[str, Any]:
         if path not in self._nodes:
             return {"success": False, "error": "not_found"}
         watcher = {"id": callback_id, "events": events or ["create", "modify", "delete"], "created": time.time()}
         self._watchers[path].append(watcher)
         return {"success": True, "path": path, "watcher_id": callback_id}
 
-    def unwatch(self, path: str, callback_id: str) -> Dict[str, Any]:
+    def unwatch(self, path: str, callback_id: str) -> dict[str, Any]:
         if path in self._watchers:
             self._watchers[path] = [w for w in self._watchers[path] if w["id"] != callback_id]
         return {"success": True}
@@ -750,14 +750,14 @@ class FileSystemModule:
                 logger.info(f"Watcher {watcher['id']}: {event} on {target}")
 
     # --- Trash ---
-    def list_trash(self) -> Dict[str, Any]:
+    def list_trash(self) -> dict[str, Any]:
         items = [
             {"path": p, "name": n.name, "type": n.file_type.value, "size": n.size, "deleted": n.modified}
             for p, n in self._trash.items()
         ]
         return {"success": True, "items": items, "total": len(items)}
 
-    def restore(self, path: str) -> Dict[str, Any]:
+    def restore(self, path: str) -> dict[str, Any]:
         if path not in self._trash:
             return {"success": False, "error": "not_in_trash", "path": path}
         node = self._trash.pop(path)
@@ -768,13 +768,13 @@ class FileSystemModule:
             return {"success": True, "path": path, "restored_to": parent}
         return {"success": False, "error": "parent_missing"}
 
-    def empty_trash(self) -> Dict[str, Any]:
+    def empty_trash(self) -> dict[str, Any]:
         count = len(self._trash)
         self._trash.clear()
         return {"success": True, "freed": count}
 
     # --- Locking ---
-    def acquire_lock(self, path: str, owner: str, exclusive: bool = True, timeout: float = 30.0) -> Dict[str, Any]:
+    def acquire_lock(self, path: str, owner: str, exclusive: bool = True, timeout: float = 30.0) -> dict[str, Any]:
         if path in self._lock_table:
             lock = self._lock_table[path]
             if lock["exclusive"] or (exclusive and lock["owner"] != owner):
@@ -782,14 +782,14 @@ class FileSystemModule:
         self._lock_table[path] = {"owner": owner, "exclusive": exclusive, "acquired": time.time(), "timeout": timeout}
         return {"success": True, "path": path, "owner": owner}
 
-    def release_lock(self, path: str, owner: str) -> Dict[str, Any]:
+    def release_lock(self, path: str, owner: str) -> dict[str, Any]:
         if path in self._lock_table and self._lock_table[path]["owner"] == owner:
             del self._lock_table[path]
             return {"success": True}
         return {"success": False, "error": "not_owner"}
 
     # --- Stats ---
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total_size = sum(n.size for n in self._nodes.values())
         file_count = sum(1 for n in self._nodes.values() if n.file_type == FileType.FILE)
         dir_count = sum(1 for n in self._nodes.values() if n.file_type == FileType.DIRECTORY)
@@ -804,7 +804,7 @@ class FileSystemModule:
             "ops": self._stats,
         }
 
-    def get_disk_usage(self, path: str = "/") -> Dict[str, Any]:
+    def get_disk_usage(self, path: str = "/") -> dict[str, Any]:
         if path not in self._nodes:
             return {"success": False, "error": "not_found"}
         node = self._nodes[path]

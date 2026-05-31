@@ -93,7 +93,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ResourceSchedulerAnalyzer(object):
+class ResourceSchedulerAnalyzer:
     """resource_scheduler 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -286,7 +286,7 @@ class ResourceRequest:
     disk_mb: int = 0
     timeout_seconds: float = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "cpu_cores": self.cpu_cores,
             "memory_mb": self.memory_mb,
@@ -307,10 +307,10 @@ class ResourcePool:
     available_cpu: float = 0
     available_memory_mb: int = 0
     available_gpu: int = 0
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     enabled: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "pool_id": self.pool_id,
             "name": self.name,
@@ -337,8 +337,8 @@ class ScheduledTask:
     state: TaskState = TaskState.PENDING
     request: ResourceRequest = field(default_factory=ResourceRequest)
     assigned_pool: str = ""
-    affinity: List[str] = field(default_factory=list)
-    anti_affinity: List[str] = field(default_factory=list)
+    affinity: list[str] = field(default_factory=list)
+    anti_affinity: list[str] = field(default_factory=list)
     created: float = field(default_factory=time.time)
     scheduled: float = 0
     started: float = 0
@@ -346,9 +346,9 @@ class ScheduledTask:
     retries: int = 0
     max_retries: int = 3
     owner: str = "system"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "name": self.name,
@@ -377,7 +377,7 @@ class QuotaLimit:
     current_gpu: int = 0
     current_tasks: int = 0
 
-    def check(self, req: ResourceRequest) -> Tuple[bool, str]:
+    def check(self, req: ResourceRequest) -> tuple[bool, str]:
         if self.max_cpu > 0 and self.current_cpu + req.cpu_cores > self.max_cpu:
             return False, "cpu_quota_exceeded"
         if self.max_memory_mb > 0 and self.current_memory_mb + req.memory_mb > self.max_memory_mb:
@@ -388,7 +388,7 @@ class QuotaLimit:
             return False, "task_limit_exceeded"
         return True, ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entity": self.entity,
             "max_cpu": self.max_cpu,
@@ -401,7 +401,7 @@ class QuotaLimit:
             "current_tasks": self.current_tasks,
         }
 
-class ResourceSchedulerModule(object):
+class ResourceSchedulerModule:
     def trace(self, name, *args, **kwargs):
 
         class _NS:
@@ -425,10 +425,10 @@ class ResourceSchedulerModule(object):
     """企业级资源调度模块"""
 
     def __init__(self):
-        self._tasks: Dict[str, ScheduledTask] = {}
-        self._pools: Dict[str, ResourcePool] = {}
-        self._queue: List[Tuple[int, float, str]] = []  # (-priority, created, task_id)
-        self._quotas: Dict[str, QuotaLimit] = {}
+        self._tasks: dict[str, ScheduledTask] = {}
+        self._pools: dict[str, ResourcePool] = {}
+        self._queue: list[tuple[int, float, str]] = []  # (-priority, created, task_id)
+        self._quotas: dict[str, QuotaLimit] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -471,7 +471,7 @@ class ResourceSchedulerModule(object):
         }
         self._initialized = False
 
-    def initialize(self, config: Dict[str, Any] = None) -> Dict[str, Any]:
+    def initialize(self, config: dict[str, Any] = None) -> dict[str, Any]:
         try:
             self._create_default_pools()
             self._create_default_quotas()
@@ -485,7 +485,7 @@ class ResourceSchedulerModule(object):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         running = sum(1 for t in self._tasks.values() if t.state == TaskState.RUNNING)
@@ -529,8 +529,8 @@ class ResourceSchedulerModule(object):
 
     # --- Pool Management ---
     def create_pool(
-        self, pool_id: str, name: str, cpu: float, memory_mb: int, gpu: int = 0, labels: Dict[str, str] = None
-    ) -> Dict[str, Any]:
+        self, pool_id: str, name: str, cpu: float, memory_mb: int, gpu: int = 0, labels: dict[str, str] = None
+    ) -> dict[str, Any]:
         if pool_id in self._pools:
             return {"success": False, "error": "pool_exists"}
         pool = ResourcePool(
@@ -547,11 +547,11 @@ class ResourceSchedulerModule(object):
         self._pools[pool_id] = pool
         return {"success": True, "pool_id": pool_id}
 
-    def list_pools(self) -> Dict[str, Any]:
+    def list_pools(self) -> dict[str, Any]:
         pools = [p.to_dict() for p in self._pools.values()]
         return {"success": True, "pools": pools, "total": len(pools)}
 
-    def get_pool(self, pool_id: str) -> Dict[str, Any]:
+    def get_pool(self, pool_id: str) -> dict[str, Any]:
         if pool_id not in self._pools:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._pools[pool_id].to_dict()}
@@ -566,9 +566,9 @@ class ResourceSchedulerModule(object):
         priority: int = 0,
         owner: str = "system",
         pool_preference: str = "",
-        affinity: List[str] = None,
+        affinity: list[str] = None,
         timeout: float = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         task_id = f"task_{uuid.uuid4().hex[:10]}"
@@ -585,7 +585,7 @@ class ResourceSchedulerModule(object):
         self._stats["tasks_submitted"] += 1
         return {"success": True, "task_id": task_id, "name": name, "priority": priority, "state": "queued"}
 
-    def cancel_task(self, task_id: str) -> Dict[str, Any]:
+    def cancel_task(self, task_id: str) -> dict[str, Any]:
         if task_id not in self._tasks:
             return {"success": False, "error": "not_found"}
         task = self._tasks[task_id]
@@ -602,7 +602,7 @@ class ResourceSchedulerModule(object):
         return {"success": True, "task_id": task_id}
 
     # --- Scheduling ---
-    def schedule(self, max_tasks: int = 10) -> Dict[str, Any]:
+    def schedule(self, max_tasks: int = 10) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         scheduled = []
@@ -626,7 +626,7 @@ class ResourceSchedulerModule(object):
         self._stats["scheduling_cycles"] += 1
         return {"success": True, "scheduled": scheduled, "no_resources": failed, "remaining_queue": len(self._queue)}
 
-    def _find_best_pool(self, task: ScheduledTask) -> Optional[str]:
+    def _find_best_pool(self, task: ScheduledTask) -> str | None:
         """找到最佳资源池"""
         candidates = []
         for pool_id, pool in self._pools.items():
@@ -674,7 +674,7 @@ class ResourceSchedulerModule(object):
             quota.current_tasks += 1
 
     # --- Task Lifecycle ---
-    def complete_task(self, task_id: str, success: bool = True, result: Dict[str, Any] = None) -> Dict[str, Any]:
+    def complete_task(self, task_id: str, success: bool = True, result: dict[str, Any] = None) -> dict[str, Any]:
         if task_id not in self._tasks:
             return {"success": False, "error": "not_found"}
         task = self._tasks[task_id]
@@ -715,24 +715,24 @@ class ResourceSchedulerModule(object):
     # --- Quota ---
     def set_quota(
         self, entity: str, max_cpu: float = 0, max_memory_mb: int = 0, max_gpu: int = 0, max_tasks: int = 0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         self._quotas[entity] = QuotaLimit(
             entity=entity, max_cpu=max_cpu, max_memory_mb=max_memory_mb, max_gpu=max_gpu, max_tasks=max_tasks
         )
         return {"success": True, "entity": entity}
 
-    def get_quota(self, entity: str) -> Dict[str, Any]:
+    def get_quota(self, entity: str) -> dict[str, Any]:
         if entity not in self._quotas:
             return {"success": True, "entity": entity, "unlimited": True}
         return {"success": True, **self._quotas[entity].to_dict()}
 
     # --- Query ---
-    def get_task(self, task_id: str) -> Dict[str, Any]:
+    def get_task(self, task_id: str) -> dict[str, Any]:
         if task_id not in self._tasks:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._tasks[task_id].to_dict()}
 
-    def list_tasks(self, state: str = None, owner: str = None, limit: int = 50) -> Dict[str, Any]:
+    def list_tasks(self, state: str = None, owner: str = None, limit: int = 50) -> dict[str, Any]:
         tasks = []
         for t in self._tasks.values():
             if state and t.state.value != state:
@@ -742,7 +742,7 @@ class ResourceSchedulerModule(object):
             tasks.append(t.to_dict())
         return {"success": True, "tasks": tasks[:limit], "total": len(tasks)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         running = sum(1 for t in self._tasks.values() if t.state == TaskState.RUNNING)
         pending = sum(1 for t in self._tasks.values() if t.state == TaskState.PENDING)
         return {

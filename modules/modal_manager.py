@@ -83,7 +83,8 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -158,7 +159,7 @@ class ModalConfig:
     centered: bool = True
     fullscreen: bool = False
     z_index: int = 1000
-    max_width: Optional[int] = None
+    max_width: int | None = None
     custom_class: str = ""
     aria_label: str = ""
     role: str = "dialog"
@@ -171,26 +172,26 @@ class ModalConfig:
 class ModalInstance:
     instance_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     config: ModalConfig = field(default_factory=ModalConfig)
-    actions: List[ModalAction] = field(default_factory=list)
-    state: Dict[str, Any] = field(default_factory=dict)
+    actions: list[ModalAction] = field(default_factory=list)
+    state: dict[str, Any] = field(default_factory=dict)
     opened_at: float = field(default_factory=time.time)
     closed_at: float = 0.0
-    close_reason: Optional[CloseReason] = None
+    close_reason: CloseReason | None = None
     result: Any = None
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     is_open: bool = True
     position: int = 0
-    user_data: Dict[str, Any] = field(default_factory=dict)
-    callbacks: Dict[str, str] = field(default_factory=dict)
+    user_data: dict[str, Any] = field(default_factory=dict)
+    callbacks: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class ModalHistory:
     history_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     instance_id: str = ""
     action: str = "open"
-    config_snapshot: Dict[str, Any] = field(default_factory=dict)
+    config_snapshot: dict[str, Any] = field(default_factory=dict)
     result: Any = None
-    close_reason: Optional[str] = None
+    close_reason: str | None = None
     timestamp: float = field(default_factory=time.time)
 
 @dataclass
@@ -201,7 +202,7 @@ class AccessibilityState:
     screen_reader_announced: bool = False
     tab_order_preserved: bool = True
 
-class ModalManagerAnalyzer(object):
+class ModalManagerAnalyzer:
     """modal_manager 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -307,16 +308,16 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
         super().__init__()
 
-        self._stack: List[ModalInstance] = []
-        self._history: List[ModalHistory] = []
-        self._configs: Dict[str, ModalConfig] = {}
-        self._callbacks: Dict[str, Callable] = {}
-        self._a11y: Dict[str, AccessibilityState] = {}
+        self._stack: list[ModalInstance] = []
+        self._history: list[ModalHistory] = []
+        self._configs: dict[str, ModalConfig] = {}
+        self._callbacks: dict[str, Callable] = {}
+        self._a11y: dict[str, AccessibilityState] = {}
         self._max_stack_depth: int = 10
         self.metrics_collector = self._NoopMetricsCollector()
         self._lock = threading.RLock()
         self._initialized = False
-        self._global_listeners: Dict[str, List[Callable]] = {"on_open": [], "on_close": [], "on_stack_change": []}
+        self._global_listeners: dict[str, list[Callable]] = {"on_open": [], "on_close": [], "on_stack_change": []}
         logger.info("ModalManager created")
 
     def initialize(self) -> None:
@@ -331,11 +332,11 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def open(
         self,
-        config: Optional[ModalConfig] = None,
-        config_name: Optional[str] = None,
-        actions: Optional[List[ModalAction]] = None,
-        user_data: Optional[Dict] = None,
-        callbacks: Optional[Dict[str, str]] = None,
+        config: ModalConfig | None = None,
+        config_name: str | None = None,
+        actions: list[ModalAction] | None = None,
+        user_data: dict | None = None,
+        callbacks: dict[str, str] | None = None,
     ) -> ModalInstance:
         cfg = config or (self._configs.get(config_name, ModalConfig()) if config_name else ModalConfig())
         if len(self._stack) >= self._max_stack_depth:
@@ -438,10 +439,10 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             count += 1
         return count
 
-    def get_current(self) -> Optional[ModalInstance]:
+    def get_current(self) -> ModalInstance | None:
         return self._stack[-1] if self._stack else None
 
-    def get_stack(self) -> List[Dict[str, Any]]:
+    def get_stack(self) -> list[dict[str, Any]]:
         return [
             {
                 "instance_id": m.instance_id,
@@ -463,14 +464,14 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 setattr(instance, key, val)
         return True
 
-    def set_actions(self, instance_id: str, actions: List[ModalAction]) -> bool:
+    def set_actions(self, instance_id: str, actions: list[ModalAction]) -> bool:
         instance = self._find_instance(instance_id)
         if not instance:
             return False
         instance.actions = actions
         return True
 
-    def trigger_action(self, instance_id: str, action_id: str) -> Optional[Any]:
+    def trigger_action(self, instance_id: str, action_id: str) -> Any | None:
         instance = self._find_instance(instance_id)
         if not instance:
             return None
@@ -482,7 +483,7 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return action.callback_id
         return None
 
-    def get_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 50) -> list[dict[str, Any]]:
         return [
             {"instance_id": h.instance_id, "action": h.action, "close_reason": h.close_reason, "timestamp": h.timestamp}
             for h in self._history[-limit:]
@@ -495,7 +496,7 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if event in self._global_listeners:
             self._global_listeners[event].append(fn)
 
-    def _find_instance(self, instance_id: str) -> Optional[ModalInstance]:
+    def _find_instance(self, instance_id: str) -> ModalInstance | None:
         for m in self._stack:
             if m.instance_id == instance_id:
                 return m
@@ -524,10 +525,10 @@ class ModalManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         )
 
-    def _get_stack_info(self) -> Dict[str, Any]:
+    def _get_stack_info(self) -> dict[str, Any]:
         return {"depth": len(self._stack), "top_type": self._stack[-1].config.modal_type.value if self._stack else None}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             return {

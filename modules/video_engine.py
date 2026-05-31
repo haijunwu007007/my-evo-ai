@@ -89,7 +89,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class VideoEngineAnalyzer(object):
+class VideoEngineAnalyzer:
     """video_engine 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -297,7 +297,7 @@ class VideoInfo:
     has_subtitle: bool = False
     created: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "video_id": self.video_id,
             "file_name": self.file_name,
@@ -332,7 +332,7 @@ class ThumbnailConfig:
     format: str = "jpeg"
     quality: int = 85
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "time_offset": self.time_offset,
             "width": self.width,
@@ -353,7 +353,7 @@ class WatermarkConfig:
     start_time: float = 0
     end_time: float = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "text": self.text,
             "position": self.position,
@@ -379,7 +379,7 @@ class TranscodeConfig:
     start_time: float = 0
     end_time: float = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "target_format": self.target_format,
             "video_codec": self.video_codec,
@@ -401,7 +401,7 @@ class ProcessingJob:
     video_id: str = ""
     task_type: str = ""
     status: ProcessingStatus = ProcessingStatus.QUEUED
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     progress: float = 0.0
     created: float = field(default_factory=time.time)
     started: float = 0
@@ -409,9 +409,9 @@ class ProcessingJob:
     output_path: str = ""
     output_size: int = 0
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "job_id": self.job_id,
             "video_id": self.video_id,
@@ -434,10 +434,10 @@ class SubtitleEntry:
     end_time: float = 0
     text: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"index": self.index, "start": self.start_time, "end": self.end_time, "text": self.text}
 
-class VideoEngineModule(object):
+class VideoEngineModule:
     def trace(self, name, *args, **kwargs):
         class _NS:
             def __enter__(self):
@@ -468,10 +468,10 @@ class VideoEngineModule(object):
     }
 
     def __init__(self):
-        self._videos: Dict[str, VideoInfo] = {}
-        self._jobs: Dict[str, ProcessingJob] = {}
-        self._thumbnails: Dict[str, List[Dict]] = defaultdict(list)
-        self._subtitles: Dict[str, List[SubtitleEntry]] = defaultdict(list)
+        self._videos: dict[str, VideoInfo] = {}
+        self._jobs: dict[str, ProcessingJob] = {}
+        self._thumbnails: dict[str, list[dict]] = defaultdict(list)
+        self._subtitles: dict[str, list[SubtitleEntry]] = defaultdict(list)
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -516,14 +516,14 @@ class VideoEngineModule(object):
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "presets": list(self.PRESETS.keys())}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active_jobs = sum(1 for j in self._jobs.values() if j.status == ProcessingStatus.PROCESSING)
@@ -549,7 +549,7 @@ class VideoEngineModule(object):
         format: str = "mp4",
         video_codec: str = "h264",
         audio_codec: str = "aac",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import time as tmod
@@ -571,13 +571,13 @@ class VideoEngineModule(object):
         self._stats["videos_registered"] += 1
         return {"success": True, **info.to_dict()}
 
-    def get_video_info(self, video_id: str) -> Dict[str, Any]:
+    def get_video_info(self, video_id: str) -> dict[str, Any]:
         if video_id not in self._videos:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._videos[video_id].to_dict()}
 
     # --- Transcode ---
-    def transcode(self, video_id: str, preset: str = "", config: Dict[str, Any] = None) -> Dict[str, Any]:
+    def transcode(self, video_id: str, preset: str = "", config: dict[str, Any] = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -622,7 +622,7 @@ class VideoEngineModule(object):
     # --- Thumbnail ---
     def create_thumbnail(
         self, video_id: str, time_offset: float = 0, width: int = 320, height: int = 180, count: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -648,7 +648,7 @@ class VideoEngineModule(object):
         self._stats["thumbnails"] += count
         return {"success": True, "video_id": video_id, "thumbnails": thumbs, "count": count}
 
-    def get_thumbnails(self, video_id: str) -> Dict[str, Any]:
+    def get_thumbnails(self, video_id: str) -> dict[str, Any]:
         return {"success": True, "video_id": video_id, "thumbnails": self._thumbnails.get(video_id, [])}
 
     # --- Watermark ---
@@ -660,7 +660,7 @@ class VideoEngineModule(object):
         opacity: float = 0.5,
         start_time: float = 0,
         end_time: float = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -689,7 +689,7 @@ class VideoEngineModule(object):
         return {"success": True, **job.to_dict()}
 
     # --- Clip ---
-    def clip(self, video_id: str, start_time: float, end_time: float, output_format: str = "mp4") -> Dict[str, Any]:
+    def clip(self, video_id: str, start_time: float, end_time: float, output_format: str = "mp4") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -725,7 +725,7 @@ class VideoEngineModule(object):
     # --- GIF ---
     def to_gif(
         self, video_id: str, start_time: float = 0, end_time: float = 5, width: int = 480, fps: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -752,7 +752,7 @@ class VideoEngineModule(object):
         return {"success": True, **job.to_dict()}
 
     # --- Merge ---
-    def merge(self, video_ids: List[str], output_format: str = "mp4") -> Dict[str, Any]:
+    def merge(self, video_ids: list[str], output_format: str = "mp4") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         for vid in video_ids:
@@ -782,7 +782,7 @@ class VideoEngineModule(object):
         return {"success": True, **job.to_dict()}
 
     # --- Subtitles ---
-    def add_subtitles(self, video_id: str, entries: List[Dict[str, Any]], language: str = "zh") -> Dict[str, Any]:
+    def add_subtitles(self, video_id: str, entries: list[dict[str, Any]], language: str = "zh") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if video_id not in self._videos:
@@ -802,19 +802,19 @@ class VideoEngineModule(object):
             "total_entries": len(self._subtitles[video_id]),
         }
 
-    def get_subtitles(self, video_id: str) -> Dict[str, Any]:
+    def get_subtitles(self, video_id: str) -> dict[str, Any]:
         subs = self._subtitles.get(video_id, [])
         return {"success": True, "video_id": video_id, "subtitles": [s.to_dict() for s in subs], "count": len(subs)}
 
     # --- Jobs ---
-    def get_job(self, job_id: str) -> Dict[str, Any]:
+    def get_job(self, job_id: str) -> dict[str, Any]:
         if job_id not in self._jobs:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._jobs[job_id].to_dict()}
 
     def list_jobs(
         self, video_id: str = None, task_type: str = None, status: str = None, limit: int = 50
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         jobs = []
         for j in self._jobs.values():
             if video_id and j.video_id != video_id:
@@ -826,7 +826,7 @@ class VideoEngineModule(object):
             jobs.append(j.to_dict())
         return {"success": True, "jobs": jobs[:limit], "total": len(jobs)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

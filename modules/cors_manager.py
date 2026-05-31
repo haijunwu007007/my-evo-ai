@@ -130,8 +130,8 @@ class RouteConfig:
     path_pattern: str = ""
     cors_enabled: bool = True
     strict_mode: bool = False
-    allowed_methods_override: Optional[List[str]] = None
-    max_age_override: Optional[int] = None
+    allowed_methods_override: list[str] | None = None
+    max_age_override: int | None = None
 
 class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "cors_manager"
@@ -149,15 +149,15 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         self._middleware_enabled = True
         self._strict_mode = False
-        self._global_allowed_origins: List[str] = ["*"]
-        self._global_allowed_methods: List[str] = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
-        self._global_allowed_headers: List[str] = ["Content-Type", "Authorization", "X-Request-ID", "X-API-Key"]
-        self._global_expose_headers: List[str] = ["X-Request-ID", "X-RateLimit-Remaining"]
+        self._global_allowed_origins: list[str] = ["*"]
+        self._global_allowed_methods: list[str] = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+        self._global_allowed_headers: list[str] = ["Content-Type", "Authorization", "X-Request-ID", "X-API-Key"]
+        self._global_expose_headers: list[str] = ["X-Request-ID", "X-RateLimit-Remaining"]
         self._global_allow_credentials = False
         self._global_max_age = 86400
-        self._route_configs: Dict[str, RouteConfig] = {}
-        self._origin_stats: Dict[str, Dict] = defaultdict(lambda: {"requests": 0, "blocked": 0, "preflight": 0})
-        self._request_log: List[RequestLog] = []
+        self._route_configs: dict[str, RouteConfig] = {}
+        self._origin_stats: dict[str, dict] = defaultdict(lambda: {"requests": 0, "blocked": 0, "preflight": 0})
+        self._request_log: list[RequestLog] = []
         self._initialized = False
 
     def initialize(self) -> None:
@@ -179,7 +179,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _is_preflight(self, method: str) -> bool:
         return method.upper() == "OPTIONS"
 
-    def _check_origin(self, origin: str) -> Tuple[bool, str]:
+    def _check_origin(self, origin: str) -> tuple[bool, str]:
         if not origin:
             return False, "Missing Origin header"
         if "*" in self._global_allowed_origins:
@@ -210,7 +210,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             headers.access_control_expose_headers = ", ".join(self._global_expose_headers)
         return headers
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "cors_manager"})
         self.metrics_collector.counter("cors_manager.execute.calls", 1)
         self.audit("execute", {"module": "cors_manager"})
@@ -405,7 +405,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.error(f"[CORSManager] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -426,7 +426,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_origin_access_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_origin_access_report(self, days: int = 7) -> dict[str, Any]:
         """来源域访问报告。企业场景：安全审计查看哪些外部域名在调用API，
         识别未授权的来源域名，辅助CORS白名单配置。
         """
@@ -455,7 +455,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_origins": report[:20],
         }
 
-    def validate_cors_config(self) -> Dict[str, Any]:
+    def validate_cors_config(self) -> dict[str, Any]:
         """CORS配置安全检查。企业场景：上线前安全扫描，检查是否存在
         通配符域名、不安全的HTTP方法、缺少凭证限制等安全风险。
         """
@@ -494,7 +494,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "secure": len(issues) == 0,
         }
 
-    def add_temporary_origin(self, origin: str, ttl_minutes: int = 60) -> Dict[str, Any]:
+    def add_temporary_origin(self, origin: str, ttl_minutes: int = 60) -> dict[str, Any]:
         """添加临时CORS白名单。企业场景：第三方集成测试时临时开放跨域访问，
         过期自动移除，避免长期开放安全风险。
         """
@@ -503,7 +503,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._temp_origins = temp
         return {"success": True, "origin": origin, "expires_at": time.time() + ttl_minutes * 60}
 
-    def cleanup_expired_origins(self) -> Dict[str, Any]:
+    def cleanup_expired_origins(self) -> dict[str, Any]:
         """清理过期的临时CORS白名单。企业场景：定时任务清理已过期的临时域名。"""
         temp = getattr(self, "_temp_origins", {})
         now = time.time()
@@ -513,7 +513,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._temp_origins = temp
         return {"success": True, "expired_removed": len(expired), "remaining": len(temp)}
 
-    def get_origin_access_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_origin_access_report(self, days: int = 7) -> dict[str, Any]:
         """来源访问报告。企业场景：安全团队周报统计各域名跨域请求数，
         识别异常来源（未注册域名高频访问）。
         """
@@ -537,7 +537,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_origins": [{"origin": o, "requests": c} for o, c in sorted_origins[:20]],
         }
 
-    def evaluate_origin(self, origin: str) -> Dict[str, Any]:
+    def evaluate_origin(self, origin: str) -> dict[str, Any]:
         """评估来源安全性。企业场景：新前端域名接入前，安全团队审查其
         是否符合CORS策略（是否在白名单、是否有通配符风险）。
         """
@@ -573,7 +573,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recommendation": "允许接入" if exact_match else ("需安全审查" if wildcard_match else "拒绝接入"),
         }
 
-    def export_config(self, format: str = "json") -> Dict[str, Any]:
+    def export_config(self, format: str = "json") -> dict[str, Any]:
         """导出CORS配置。企业场景：环境迁移时导出当前CORS策略，
         导入到新环境。支持JSON和Nginx格式。
         """

@@ -42,7 +42,8 @@ from core.logging_config import get_logger
 import threading
 import urllib.request
 import urllib.error
-from typing import Any, Dict, List, Optional, AsyncIterator
+from typing import Any, Dict, List, Optional
+from collections.abc import AsyncIterator
 from datetime import datetime
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -61,15 +62,15 @@ class ProviderConfig:
     provider_type: str  # openai_compatible | anthropic | gemini | ollama
     base_url: str
     api_key: str = ""
-    models: List[str] = field(default_factory=list)
+    models: list[str] = field(default_factory=list)
     priority: int = 10  # 数字越小越优先
     max_concurrent: int = 5
     timeout: int = 120
     enabled: bool = True
     # 每模型的Token限制
-    max_tokens_map: Dict[str, int] = field(default_factory=lambda: defaultdict(lambda: 4096))
+    max_tokens_map: dict[str, int] = field(default_factory=lambda: defaultdict(lambda: 4096))
     # 每模型每1K token成本(USD)
-    cost_per_1k_map: Dict[str, float] = field(default_factory=lambda: defaultdict(lambda: 0.0))
+    cost_per_1k_map: dict[str, float] = field(default_factory=lambda: defaultdict(lambda: 0.0))
 
 
 @dataclass
@@ -110,18 +111,18 @@ class ResponseCache:
     """LRU响应缓存 — 相同问题+参数命中缓存"""
 
     def __init__(self, max_size: int = 500, default_ttl: int = 300):
-        self._cache: Dict[str, Dict] = {}
+        self._cache: dict[str, dict] = {}
         self._max_size = max_size
         self._default_ttl = default_ttl
         self._hits = 0
         self._misses = 0
         self._lock = threading.Lock()
 
-    def _make_key(self, messages: List[Dict], model: str, temperature: float) -> str:
+    def _make_key(self, messages: list[dict], model: str, temperature: float) -> str:
         raw = json.dumps({"m": messages, "model": model, "t": temperature}, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
-    def get(self, messages: List[Dict], model: str, temperature: float) -> Optional[Dict]:
+    def get(self, messages: list[dict], model: str, temperature: float) -> dict | None:
         key = self._make_key(messages, model, temperature)
         with self._lock:
             entry = self._cache.get(key)
@@ -132,7 +133,7 @@ class ResponseCache:
         self._misses += 1
         return None
 
-    def set(self, messages: List[Dict], model: str, temperature: float, data: Dict, ttl: int = 0):
+    def set(self, messages: list[dict], model: str, temperature: float, data: dict, ttl: int = 0):
         key = self._make_key(messages, model, temperature)
         with self._lock:
             if len(self._cache) >= self._max_size:
@@ -146,7 +147,7 @@ class ResponseCache:
         with self._lock:
             self._cache.clear()
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {"size": len(self._cache), "max": self._max_size, "hits": self._hits, "misses": self._misses}
 
 
@@ -158,12 +159,12 @@ class ConversationManager:
     """多轮对话上下文管理"""
 
     def __init__(self, max_sessions: int = 200, max_history_per_session: int = 50):
-        self._sessions: Dict[str, List[ChatMessage]] = {}
+        self._sessions: dict[str, list[ChatMessage]] = {}
         self._max_sessions = max_sessions
         self._max_history = max_history_per_session
         self._lock = threading.Lock()
 
-    def get_or_create(self, session_id: str) -> List[ChatMessage]:
+    def get_or_create(self, session_id: str) -> list[ChatMessage]:
         with self._lock:
             if session_id not in self._sessions:
                 if len(self._sessions) >= self._max_sessions:
@@ -180,7 +181,7 @@ class ConversationManager:
             if len(msgs) > self._max_history:
                 self._sessions[session_id] = msgs[-self._max_history:]
 
-    def get_messages(self, session_id: str, last_n: int = 0) -> List[Dict]:
+    def get_messages(self, session_id: str, last_n: int = 0) -> list[dict]:
         msgs = self.get_or_create(session_id)
         if last_n and last_n < len(msgs):
             msgs = msgs[-last_n:]
@@ -190,7 +191,7 @@ class ConversationManager:
         with self._lock:
             self._sessions.pop(session_id, None)
 
-    def list_sessions(self) -> List[Dict]:
+    def list_sessions(self) -> list[dict]:
         result = []
         for sid, msgs in self._sessions.items():
             if msgs:
@@ -213,8 +214,8 @@ class ProviderRateLimiter:
     def __init__(self, max_rpm: int = 60, max_tpm: int = 100000):
         self._max_rpm = max_rpm
         self._max_tpm = max_tpm
-        self._timestamps: List[float] = []
-        self._token_usage: List[tuple] = []  # (timestamp, tokens)
+        self._timestamps: list[float] = []
+        self._token_usage: list[tuple] = []  # (timestamp, tokens)
         self._lock = threading.Lock()
 
     def can_proceed(self, estimated_tokens: int = 0) -> tuple:
@@ -251,7 +252,7 @@ class CostTracker:
     """LLM调用成本实时追踪"""
 
     def __init__(self, max_records: int = 10000):
-        self._records: List[UsageRecord] = []
+        self._records: list[UsageRecord] = []
         self._max_records = max_records
         self._lock = threading.Lock()
 
@@ -261,7 +262,7 @@ class CostTracker:
             if len(self._records) > self._max_records:
                 self._records = self._records[-self._max_records:]
 
-    def summary(self, hours: int = 24) -> Dict:
+    def summary(self, hours: int = 24) -> dict:
         now = time.time()
         cutoff = now - hours * 3600
         with self._lock:
@@ -359,7 +360,7 @@ class _ProviderAdapter:
     """将统一请求格式转换为各Provider的API格式"""
 
     @staticmethod
-    def normalize_models(cfg: ProviderConfig) -> Dict[str, dict]:
+    def normalize_models(cfg: ProviderConfig) -> dict[str, dict]:
         """返回 {model_name: {model_id, max_tokens, cost_per_1k}} 映射"""
         result = {}
         for m in cfg.models:
@@ -371,8 +372,8 @@ class _ProviderAdapter:
         return result
 
     @staticmethod
-    def call(cfg: ProviderConfig, model: str, messages: List[Dict],
-             temperature: float = 0.7, max_tokens: int = 0) -> Dict:
+    def call(cfg: ProviderConfig, model: str, messages: list[dict],
+             temperature: float = 0.7, max_tokens: int = 0) -> dict:
         """统一调用入口 — 根据provider_type分发"""
         model_id = model
         _max_tokens = max_tokens or cfg.max_tokens_map.get(model, 4096)
@@ -388,7 +389,7 @@ class _ProviderAdapter:
             return _ProviderAdapter._call_openai_compatible(cfg, model_id, messages, temperature, _max_tokens)
 
     @staticmethod
-    def call_stream(cfg: ProviderConfig, model: str, messages: List[Dict],
+    def call_stream(cfg: ProviderConfig, model: str, messages: list[dict],
                     temperature: float = 0.7, max_tokens: int = 0):
         """流式调用 — 返回response对象"""
         model_id = model
@@ -404,8 +405,8 @@ class _ProviderAdapter:
     # ── OpenAI Compatible (OpenAI / DeepSeek / 智谱 / 任何兼容) ──
 
     @staticmethod
-    def _call_openai_compatible(cfg: ProviderConfig, model: str, messages: List[Dict],
-                                  temperature: float, max_tokens: int) -> Dict:
+    def _call_openai_compatible(cfg: ProviderConfig, model: str, messages: list[dict],
+                                  temperature: float, max_tokens: int) -> dict:
         payload = {
             "model": model,
             "messages": messages,
@@ -424,7 +425,7 @@ class _ProviderAdapter:
         return {"content": content, "tokens": tokens, "raw": result}
 
     @staticmethod
-    def _stream_openai_compatible(cfg: ProviderConfig, model: str, messages: List[Dict],
+    def _stream_openai_compatible(cfg: ProviderConfig, model: str, messages: list[dict],
                                     temperature: float, max_tokens: int):
         payload = {
             "model": model,
@@ -445,8 +446,8 @@ class _ProviderAdapter:
     # ── Anthropic Claude ──
 
     @staticmethod
-    def _call_anthropic(cfg: ProviderConfig, model: str, messages: List[Dict],
-                         temperature: float, max_tokens: int) -> Dict:
+    def _call_anthropic(cfg: ProviderConfig, model: str, messages: list[dict],
+                         temperature: float, max_tokens: int) -> dict:
         system = ""
         claude_msgs = []
         for m in messages:
@@ -474,7 +475,7 @@ class _ProviderAdapter:
         return {"content": content, "tokens": tokens, "raw": result}
 
     @staticmethod
-    def _stream_anthropic(cfg: ProviderConfig, model: str, messages: List[Dict],
+    def _stream_anthropic(cfg: ProviderConfig, model: str, messages: list[dict],
                            temperature: float, max_tokens: int):
         system = ""
         claude_msgs = []
@@ -502,8 +503,8 @@ class _ProviderAdapter:
     # ── Google Gemini ──
 
     @staticmethod
-    def _call_gemini(cfg: ProviderConfig, model: str, messages: List[Dict],
-                      temperature: float, max_tokens: int) -> Dict:
+    def _call_gemini(cfg: ProviderConfig, model: str, messages: list[dict],
+                      temperature: float, max_tokens: int) -> dict:
         content = "\n".join([f"{m['role']}: {m['content']}" for m in messages if m["role"] != "system"])
         system = next((m["content"] for m in messages if m["role"] == "system"), "")
         if system:
@@ -522,8 +523,8 @@ class _ProviderAdapter:
     # ── Ollama (本地) ──
 
     @staticmethod
-    def _call_ollama(cfg: ProviderConfig, model: str, messages: List[Dict],
-                      temperature: float, max_tokens: int) -> Dict:
+    def _call_ollama(cfg: ProviderConfig, model: str, messages: list[dict],
+                      temperature: float, max_tokens: int) -> dict:
         payload = {
             "model": model,
             "messages": messages,
@@ -538,7 +539,7 @@ class _ProviderAdapter:
         return {"content": content, "tokens": tokens, "raw": result}
 
     @staticmethod
-    def _stream_ollama(cfg: ProviderConfig, model: str, messages: List[Dict],
+    def _stream_ollama(cfg: ProviderConfig, model: str, messages: list[dict],
                         temperature: float, max_tokens: int):
         payload = {
             "model": model,
@@ -585,19 +586,19 @@ class LLMPool:
     """
 
     def __init__(self):
-        self._providers: Dict[str, ProviderConfig] = {}
-        self._rate_limiters: Dict[str, ProviderRateLimiter] = {}
+        self._providers: dict[str, ProviderConfig] = {}
+        self._rate_limiters: dict[str, ProviderRateLimiter] = {}
         self._cache = ResponseCache(max_size=500, default_ttl=300)
         self._conversations = ConversationManager()
         self._cost_tracker = CostTracker()
         self._default_model = "gpt-4o-mini"
         self._default_provider = ""
-        self._failover_chain: List[str] = []  # 按优先级排序的provider列表
+        self._failover_chain: list[str] = []  # 按优先级排序的provider列表
         self._lock = threading.Lock()
 
     # ─── Provider管理 ───
 
-    def add_provider(self, name: str, config: Dict) -> bool:
+    def add_provider(self, name: str, config: dict) -> bool:
         """注册一个LLM Provider"""
         try:
             mtm = config.pop("max_tokens_map", {})
@@ -634,7 +635,7 @@ class LLMPool:
                 return True
         return False
 
-    def list_providers(self) -> List[Dict]:
+    def list_providers(self) -> list[dict]:
         """列出所有已注册Provider"""
         result = []
         for name, cfg in self._providers.items():
@@ -650,7 +651,7 @@ class LLMPool:
             })
         return sorted(result, key=lambda x: x["priority"])
 
-    def list_models(self) -> List[Dict]:
+    def list_models(self) -> list[dict]:
         """列出所有可用模型"""
         models = []
         for name, cfg in self._providers.items():
@@ -701,7 +702,7 @@ class LLMPool:
         cfg_file = config_path or os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.yaml")
         if os.path.exists(cfg_file):
             try:
-                with open(cfg_file, "r", encoding="utf-8") as f:
+                with open(cfg_file, encoding="utf-8") as f:
                     raw = yaml.safe_load(f) or {}
                     # 兼容新格式（ConfigCenter 改为 list）和老格式（dict with "ai" key）
                     yaml_cfg = raw if isinstance(raw, dict) else {}
@@ -712,7 +713,7 @@ class LLMPool:
             defaults_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "defaults.yaml")
             if os.path.exists(defaults_file):
                 try:
-                    with open(defaults_file, "r", encoding="utf-8") as f:
+                    with open(defaults_file, encoding="utf-8") as f:
                         raw = yaml.safe_load(f) or {}
                         yaml_cfg = raw if isinstance(raw, dict) else {}
                 except Exception:
@@ -864,7 +865,7 @@ class LLMPool:
 
     def chat_sync(self, prompt: str, model: str = "", session_id: str = "",
                   system_prompt: str = "", temperature: float = 0.7,
-                  max_tokens: int = 0, use_cache: bool = True) -> Dict:
+                  max_tokens: int = 0, use_cache: bool = True) -> dict:
         """同步聊天接口"""
         if not prompt:
             return {"success": False, "error": "prompt不能为空"}
@@ -1073,19 +1074,19 @@ class LLMPool:
 
     # ─── 会话管理 ───
 
-    def get_session_history(self, session_id: str, last_n: int = 20) -> List[Dict]:
+    def get_session_history(self, session_id: str, last_n: int = 20) -> list[dict]:
         return self._conversations.get_messages(session_id, last_n)
 
     def clear_session(self, session_id: str) -> bool:
         self._conversations.clear_session(session_id)
         return True
 
-    def list_sessions(self) -> List[Dict]:
+    def list_sessions(self) -> list[dict]:
         return self._conversations.list_sessions()
 
     # ─── 统计 ───
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "providers": len(self._providers),
             "total_models": len(self.list_models()),
@@ -1097,14 +1098,14 @@ class LLMPool:
             "cost_summary": self._cost_tracker.summary(hours=24),
         }
 
-    def get_cost_report(self, hours: int = 24) -> Dict:
+    def get_cost_report(self, hours: int = 24) -> dict:
         return self._cost_tracker.summary(hours)
 
     def clear_cache(self):
         self._cache.invalidate()
         return {"success": True}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         """检查各Provider连通性"""
         results = {}
         for name, cfg in self._providers.items():
@@ -1135,7 +1136,7 @@ class LLMPool:
 # 全局单例
 # ═══════════════════════════════════════════════════
 
-_llm_pool: Optional[LLMPool] = None
+_llm_pool: LLMPool | None = None
 
 
 def get_llm_pool() -> LLMPool:

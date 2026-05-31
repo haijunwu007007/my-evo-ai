@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # 原 system_coordinator_v3.py L217-716 — 模块能力图谱
 """模块能力图谱 — 自动扫描所有模块并构建能力索引"""
 import logging, time, re, os, sys, math, asyncio
-from typing import Dict, Any, Optional, List, Set, Callable
+from typing import Dict, Any, Optional, List, Set
+from collections.abc import Callable
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
@@ -20,14 +20,14 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     def __init__(self, modules_dir: str = None):
         super().__init__()
         self.modules_dir = Path(modules_dir) if modules_dir else Path(__file__).parent
-        self.graph: Dict[str, Dict] = {}  # module_id -> {classes, methods, capabilities, tags}
-        self.capability_index: Dict[str, List[str]] = defaultdict(list)  # capability -> [module_ids]
-        self.method_index: Dict[str, List[str]] = defaultdict(list)  # method_name -> [module_ids]
-        self.tag_index: Dict[str, List[str]] = defaultdict(list)  # tag -> [module_ids]
+        self.graph: dict[str, dict] = {}  # module_id -> {classes, methods, capabilities, tags}
+        self.capability_index: dict[str, list[str]] = defaultdict(list)  # capability -> [module_ids]
+        self.method_index: dict[str, list[str]] = defaultdict(list)  # method_name -> [module_ids]
+        self.tag_index: dict[str, list[str]] = defaultdict(list)  # tag -> [module_ids]
         self._tfidf_built = False
-        self._tfidf_docs: Dict[str, str] = {}
-        self._idf: Dict[str, float] = {}
-        self._doc_freq: Dict[str, int] = defaultdict(int)
+        self._tfidf_docs: dict[str, str] = {}
+        self._idf: dict[str, float] = {}
+        self._doc_freq: dict[str, int] = defaultdict(int)
         # ChromaDB 向量语义索引
         self._chroma_client = None
         self._chroma_col = None
@@ -92,7 +92,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         for tag in tags:
             self.tag_index[tag].append(module_id)
 
-    def _infer_tags(self, module_id: str, content: str, methods: List[str], doc: str) -> List[str]:
+    def _infer_tags(self, module_id: str, content: str, methods: list[str], doc: str) -> list[str]:
         """推断模块标签"""
         tags = set()
 
@@ -140,7 +140,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return list(tags)
 
-    def _method_to_capability(self, method: str) -> Optional[str]:
+    def _method_to_capability(self, method: str) -> str | None:
         """将方法名映射到能力"""
         cap_map = {
             "get_": "read",
@@ -186,7 +186,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     # TF-IDF 语义匹配引擎
     # ═══════════════════════════════════════════════════════
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """分词：支持中英文混合"""
         text = text.lower()
         # 英文单词
@@ -201,7 +201,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 underscore_tokens.extend(t.split("_"))
         return en_tokens + underscore_tokens + cn_chars + cn_bigrams
 
-    def _build_module_document(self, module_id: str, info: Dict) -> str:
+    def _build_module_document(self, module_id: str, info: dict) -> str:
         """为每个模块构建搜索文档"""
         parts = [module_id.replace("_", " ")]
         if info.get("description"):
@@ -244,7 +244,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._tfidf_built = True
         logger.debug(f"[CapabilityGraph] TF-IDF index built: {N} docs, {len(self._idf)} terms")
 
-    def _tfidf_vector(self, text: str) -> Dict[str, float]:
+    def _tfidf_vector(self, text: str) -> dict[str, float]:
         """计算文本的 TF-IDF 向量"""
         tokens = self._tokenize(text)
         if not tokens:
@@ -263,7 +263,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return vector
 
-    def _cosine_similarity(self, vec1: Dict[str, float], vec2: Dict[str, float]) -> float:
+    def _cosine_similarity(self, vec1: dict[str, float], vec2: dict[str, float]) -> float:
         """余弦相似度"""
         if not vec1 or not vec2:
             return 0.0
@@ -279,7 +279,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
         return dot / (norm1 * norm2)
 
-    def find_modules_semantic(self, task: str, top_k: int = 10) -> List[tuple]:
+    def find_modules_semantic(self, task: str, top_k: int = 10) -> list[tuple]:
         """TF-IDF 语义匹配 — 返回 [(module_id, score)]"""
         if not self._tfidf_built:
             self._build_tfidf_index()
@@ -349,7 +349,7 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         except Exception:
             self._chroma_built = False  # ChromaDB不可用时优雅降级
 
-    def find_modules_vector(self, task: str, top_k: int = 10) -> List[tuple]:
+    def find_modules_vector(self, task: str, top_k: int = 10) -> list[tuple]:
         """ChromaDB 向量语义搜索 — 返回 [(module_id, score)]"""
         if not self._chroma_built:
             self._build_chroma_index()
@@ -415,17 +415,17 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 return cap
         return None
 
-    def find_modules_by_capability(self, capability: str) -> List[str]:
+    def find_modules_by_capability(self, capability: str) -> list[str]:
         """按能力查找模块"""
         return self.capability_index.get(capability, [])
 
-    def find_modules_by_task(self, task: str) -> List[tuple]:
+    def find_modules_by_task(self, task: str) -> list[tuple]:
         """
         按任务描述查找最匹配的模块 — Chroma向量 + TF-IDF + 关键词多级匹配
         返回: [(module_id, score), ...]
         """
         task_lower = task.lower()
-        scores: Dict[str, float] = defaultdict(float)
+        scores: dict[str, float] = defaultdict(float)
 
         # ═══ Layer 0: ChromaDB 向量语义匹配（权重最高） ═══
         vector_results = self.find_modules_vector(task, top_k=30)
@@ -498,11 +498,11 @@ class ModuleCapabilityGraph(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         sorted_modules = sorted(scores.items(), key=lambda x: -x[1])
         return sorted_modules
 
-    def get_module_info(self, module_id: str) -> Optional[Dict]:
+    def get_module_info(self, module_id: str) -> dict | None:
         """获取模块信息"""
         return self.graph.get(module_id)
 
-    def list_all_capabilities(self) -> List[str]:
+    def list_all_capabilities(self) -> list[str]:
         """列出所有能力"""
         return list(self.capability_index.keys())
 

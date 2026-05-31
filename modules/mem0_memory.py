@@ -90,7 +90,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class Mem0MemoryAnalyzer(object):
+class Mem0MemoryAnalyzer:
     """mem0_memory 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -283,21 +283,21 @@ class MemoryEntry:
     content: str
     memory_type: MemoryType = MemoryType.EPISODIC
     status: MemoryStatus = MemoryStatus.ACTIVE
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    user_id: str | None = None
+    session_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     importance: float = 0.5
     access_count: int = 0
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     last_accessed: float = field(default_factory=time.time)
-    expires_at: Optional[float] = None
-    tags: List[str] = field(default_factory=list)
-    embedding_hash: Optional[str] = None
+    expires_at: float | None = None
+    tags: list[str] = field(default_factory=list)
+    embedding_hash: str | None = None
     source: str = ""
-    ttl: Optional[float] = None
+    ttl: float | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "memory_id": self.memory_id,
             "content": self.content,
@@ -320,12 +320,12 @@ class MemoryEntry:
 class RetrievalResult:
     """检索结果"""
 
-    entries: List[MemoryEntry]
+    entries: list[MemoryEntry]
     query: str
     strategy: RetrievalStrategy
     total_candidates: int = 0
     retrieval_time_ms: float = 0.0
-    context_window: Dict[str, Any] = field(default_factory=dict)
+    context_window: dict[str, Any] = field(default_factory=dict)
 
     def to_context(self, max_tokens: int = 2048) -> str:
         lines = []
@@ -354,11 +354,11 @@ class MemoryStore:
     """内存存储引擎"""
 
     def __init__(self, max_entries: int = 100000):
-        self._entries: Dict[str, MemoryEntry] = {}
-        self._user_index: Dict[str, Set[str]] = {}
-        self._session_index: Dict[str, Set[str]] = {}
-        self._type_index: Dict[MemoryType, Set[str]] = {}
-        self._tag_index: Dict[str, Set[str]] = {}
+        self._entries: dict[str, MemoryEntry] = {}
+        self._user_index: dict[str, set[str]] = {}
+        self._session_index: dict[str, set[str]] = {}
+        self._type_index: dict[MemoryType, set[str]] = {}
+        self._tag_index: dict[str, set[str]] = {}
         self._lru = OrderedDict()
         self._lock = threading.RLock()
         self._max_entries = max_entries
@@ -376,7 +376,7 @@ class MemoryStore:
                 oldest_key, _ = self._lru.popitem(last=False)
                 self._remove(oldest_key)
 
-    def get(self, memory_id: str) -> Optional[MemoryEntry]:
+    def get(self, memory_id: str) -> MemoryEntry | None:
         with self._lock:
             self._total_accesses += 1
             entry = self._entries.get(memory_id)
@@ -388,26 +388,26 @@ class MemoryStore:
                     self._lru.move_to_end(memory_id)
             return entry
 
-    def search_by_user(self, user_id: str, limit: int = 50) -> List[MemoryEntry]:
+    def search_by_user(self, user_id: str, limit: int = 50) -> list[MemoryEntry]:
         with self._lock:
             ids = list(self._user_index.get(user_id, set()))
             entries = [self._entries[m] for m in ids[:limit] if m in self._entries]
             entries.sort(key=lambda e: e.updated_at, reverse=True)
             return entries
 
-    def search_by_type(self, mtype: MemoryType, limit: int = 50) -> List[MemoryEntry]:
+    def search_by_type(self, mtype: MemoryType, limit: int = 50) -> list[MemoryEntry]:
         with self._lock:
             ids = list(self._type_index.get(mtype, set()))
             entries = [self._entries[m] for m in ids[:limit] if m in self._entries]
             entries.sort(key=lambda e: e.importance, reverse=True)
             return entries
 
-    def search_by_tag(self, tag: str, limit: int = 50) -> List[MemoryEntry]:
+    def search_by_tag(self, tag: str, limit: int = 50) -> list[MemoryEntry]:
         with self._lock:
             ids = list(self._tag_index.get(tag, set()))
             return [self._entries[m] for m in ids[:limit] if m in self._entries]
 
-    def get_all(self) -> List[MemoryEntry]:
+    def get_all(self) -> list[MemoryEntry]:
         with self._lock:
             return list(self._entries.values())
 
@@ -455,17 +455,17 @@ class TFIDFRetriever:
     """TF-IDF语义检索器"""
 
     def __init__(self):
-        self._vocab: Dict[str, int] = {}
-        self._doc_freq: Dict[str, int] = {}
+        self._vocab: dict[str, int] = {}
+        self._doc_freq: dict[str, int] = {}
         self._doc_count = 0
 
-    def tokenize(self, text: str) -> List[str]:
+    def tokenize(self, text: str) -> list[str]:
         text = text.lower()
         tokens = re.findall(r"[\w\u4e00-\u9fff]+", text)
         return tokens
 
-    def _compute_tfidf(self, tokens: List[str]) -> Dict[str, float]:
-        tf: Dict[str, int] = {}
+    def _compute_tfidf(self, tokens: list[str]) -> dict[str, float]:
+        tf: dict[str, int] = {}
         for t in tokens:
             tf[t] = tf.get(t, 0) + 1
         total = max(len(tokens), 1)
@@ -475,7 +475,7 @@ class TFIDFRetriever:
             tfidf[word] = (count / total) * idf
         return tfidf
 
-    def _cosine_similarity(self, v1: Dict[str, float], v2: Dict[str, float]) -> float:
+    def _cosine_similarity(self, v1: dict[str, float], v2: dict[str, float]) -> float:
         common = set(v1) & set(v2)
         if not common:
             return 0.0
@@ -486,7 +486,7 @@ class TFIDFRetriever:
             return 0.0
         return dot / (n1 * n2)
 
-    def index_documents(self, entries: List[MemoryEntry]) -> None:
+    def index_documents(self, entries: list[MemoryEntry]) -> None:
         for entry in entries:
             tokens = self.tokenize(entry.content)
             self._doc_count += 1
@@ -497,7 +497,7 @@ class TFIDFRetriever:
                     self._doc_freq[t] = self._doc_freq.get(t, 0) + 1
                     seen.add(t)
 
-    def search(self, query: str, entries: List[MemoryEntry], top_k: int = 10) -> List[Tuple[MemoryEntry, float]]:
+    def search(self, query: str, entries: list[MemoryEntry], top_k: int = 10) -> list[tuple[MemoryEntry, float]]:
         query_vec = self._compute_tfidf(self.tokenize(query))
         scored = []
         for entry in entries:
@@ -617,13 +617,13 @@ class Mem0Memory:
         self,
         content: str,
         memory_type: MemoryType = MemoryType.EPISODIC,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
         source: str = "",
-        ttl_hours: Optional[float] = None,
+        ttl_hours: float | None = None,
     ) -> MemoryEntry:
         if not content or not content.strip():
             raise ValueError("Memory content cannot be empty")
@@ -664,10 +664,10 @@ class Mem0Memory:
         self,
         query: str,
         strategy: RetrievalStrategy = RetrievalStrategy.HYBRID,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
-        memory_type: Optional[MemoryType] = None,
-        tags: Optional[List[str]] = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
+        memory_type: MemoryType | None = None,
+        tags: list[str] | None = None,
         limit: int = 10,
         min_similarity: float = 0.0,
     ) -> RetrievalResult:
@@ -693,17 +693,17 @@ class Mem0Memory:
             context_window={"tokens_used": sum(len(r[0].content) for r in results)},
         )
 
-    def get_memory(self, memory_id: str) -> Optional[MemoryEntry]:
+    def get_memory(self, memory_id: str) -> MemoryEntry | None:
         return self._store.get(memory_id)
 
     def update_memory(
         self,
         memory_id: str,
-        content: Optional[str] = None,
-        importance: Optional[float] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Optional[MemoryEntry]:
+        content: str | None = None,
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> MemoryEntry | None:
         entry = self._store.get(memory_id)
         if not entry:
             return None
@@ -761,13 +761,13 @@ class Mem0Memory:
         )
         return result.to_context(max_tokens=max_tokens)
 
-    def search_by_user(self, user_id: str, limit: int = 50) -> List[MemoryEntry]:
+    def search_by_user(self, user_id: str, limit: int = 50) -> list[MemoryEntry]:
         return self._store.search_by_user(user_id, limit)
 
-    def search_by_tag(self, tag: str, limit: int = 50) -> List[MemoryEntry]:
+    def search_by_tag(self, tag: str, limit: int = 50) -> list[MemoryEntry]:
         return self._store.search_by_tag(tag, limit)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "store_size": self._store.size(),
             "hit_rate": round(self._store.hit_rate(), 4),
@@ -775,7 +775,7 @@ class Mem0Memory:
             "config": dict(self._config),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         store_size = self._store.size()
         return {
             "healthy": self._initialized and store_size >= 0,
@@ -788,7 +788,7 @@ class Mem0Memory:
             "dedup_prevented": self._stats["dedup_prevented"],
         }
 
-    def _find_duplicate(self, content: str, threshold: float = 0.9) -> Optional[MemoryEntry]:
+    def _find_duplicate(self, content: str, threshold: float = 0.9) -> MemoryEntry | None:
         content_hash = self._compute_hash(content)
         for entry in self._store.get_all():
             if entry.embedding_hash == content_hash:
@@ -806,11 +806,11 @@ class Mem0Memory:
 
     def _get_candidates(
         self,
-        user_id: Optional[str],
-        session_id: Optional[str],
-        memory_type: Optional[MemoryType],
-        tags: Optional[List[str]],
-    ) -> List[MemoryEntry]:
+        user_id: str | None,
+        session_id: str | None,
+        memory_type: MemoryType | None,
+        tags: list[str] | None,
+    ) -> list[MemoryEntry]:
         candidates = self._store.get_all()
         if user_id:
             candidates = [e for e in candidates if e.user_id == user_id]
@@ -826,10 +826,10 @@ class Mem0Memory:
     def _retrieve_semantic(
         self,
         query: str,
-        candidates: List[MemoryEntry],
+        candidates: list[MemoryEntry],
         limit: int,
         min_similarity: float,
-    ) -> List[Tuple[MemoryEntry, float]]:
+    ) -> list[tuple[MemoryEntry, float]]:
         if not query:
             return sorted(candidates, key=lambda e: e.importance, reverse=True)[:limit]
         results = self._retriever.search(query, candidates, limit)
@@ -839,9 +839,9 @@ class Mem0Memory:
 
     def _retrieve_recency(
         self,
-        candidates: List[MemoryEntry],
+        candidates: list[MemoryEntry],
         limit: int,
-    ) -> List[Tuple[MemoryEntry, float]]:
+    ) -> list[tuple[MemoryEntry, float]]:
         scored = [(e, self._decay_scorer.score(e)) for e in candidates]
         scored.sort(key=lambda x: x[1], reverse=True)
         return scored[:limit]
@@ -849,9 +849,9 @@ class Mem0Memory:
     def _retrieve_relevance(
         self,
         query: str,
-        candidates: List[MemoryEntry],
+        candidates: list[MemoryEntry],
         limit: int,
-    ) -> List[Tuple[MemoryEntry, float]]:
+    ) -> list[tuple[MemoryEntry, float]]:
         semantic = self._retrieve_semantic(query, candidates, limit, 0.0)
         for entry, _ in semantic:
             entry.last_accessed = time.time()
@@ -861,11 +861,11 @@ class Mem0Memory:
     def _retrieve_hybrid(
         self,
         query: str,
-        candidates: List[MemoryEntry],
+        candidates: list[MemoryEntry],
         limit: int,
         min_similarity: float,
-    ) -> List[Tuple[MemoryEntry, float]]:
-        semantic_scores: Dict[str, float] = {}
+    ) -> list[tuple[MemoryEntry, float]]:
+        semantic_scores: dict[str, float] = {}
         if query:
             for entry, score in self._retriever.search(query, candidates, len(candidates)):
                 semantic_scores[entry.memory_id] = score

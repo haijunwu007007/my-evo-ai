@@ -24,7 +24,8 @@ import logging
 import time
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from collections import defaultdict
 
@@ -68,7 +69,7 @@ class EventDrivenOrchestrator:
         event_bus: Any,
         trigger_engine: Any,
         orch_engine: OrchestrationEngine,
-        registry: Optional[ModuleRegistry] = None,
+        registry: ModuleRegistry | None = None,
     ):
         self._event_bus = event_bus
         self._trigger_engine = trigger_engine
@@ -77,13 +78,13 @@ class EventDrivenOrchestrator:
 
         # 运行时状态
         self._running = False
-        self._subscriptions: Dict[str, List[Callable]] = defaultdict(list)
-        self._event_stats: Dict[str, int] = defaultdict(int)
-        self._event_history: List[dict] = []
+        self._subscriptions: dict[str, list[Callable]] = defaultdict(list)
+        self._event_stats: dict[str, int] = defaultdict(int)
+        self._event_history: list[dict] = []
         self._max_history = 1000
 
         # Cron 守护
-        self._cron_task: Optional[asyncio.Task] = None
+        self._cron_task: asyncio.Task | None = None
         self._cron_interval = 30  # 秒，每30秒检查一次
 
         # 锁
@@ -278,12 +279,12 @@ class EventDrivenOrchestrator:
             "event_history_size": len(self._event_history),
         }
 
-    def get_event_history(self, limit: int = 50) -> List[dict]:
+    def get_event_history(self, limit: int = 50) -> list[dict]:
         return self._event_history[-limit:]
 
     def get_module_trigger_map(self) -> dict:
         """返回 事件 → [模块ID] 的映射"""
-        mapping: Dict[str, List[str]] = defaultdict(list)
+        mapping: dict[str, list[str]] = defaultdict(list)
         for meta in self._registry.get_all():
             for trigger in meta.triggers:
                 if trigger.type == "event":
@@ -315,12 +316,12 @@ class PipelineEventBridge:
 
     def __init__(self, event_bus: Any):
         self._event_bus = event_bus
-        self._active_pipelines: Dict[str, dict] = {}
+        self._active_pipelines: dict[str, dict] = {}
 
     async def execute_with_events(
         self,
         orch: OrchestrationEngine,
-        module_ids: List[str],
+        module_ids: list[str],
         params: dict = None,
         mode: ExecutionMode = ExecutionMode.RESILIENT,
     ) -> PipelineResult:
@@ -371,7 +372,7 @@ class PipelineEventBridge:
         except Exception as e:
             logger.debug(f"事件发射失败 {event_type}: {e}")
 
-    def get_active_pipelines(self) -> List[dict]:
+    def get_active_pipelines(self) -> list[dict]:
         return list(self._active_pipelines.values())
 
 
@@ -383,8 +384,8 @@ async def create_event_driven_system(
     event_bus: Any,
     trigger_engine: Any,
     orch_engine: OrchestrationEngine,
-    registry: Optional[ModuleRegistry] = None,
-) -> Tuple[EventDrivenOrchestrator, PipelineEventBridge]:
+    registry: ModuleRegistry | None = None,
+) -> tuple[EventDrivenOrchestrator, PipelineEventBridge]:
     """一键创建事件驱动系统并启动"""
     if registry is None:
         registry = ModuleRegistry()

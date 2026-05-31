@@ -66,15 +66,15 @@ class SubTask:
     name: str
     module: str
     action: str
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     status: str = "pending"
     priority: int = 1
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     retry_count: int = 0
     max_retries: int = 3
     timeout: int = 30
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    result: dict[str, Any] | None = None
+    error: str | None = None
     created_at: float = 0.0
     started_at: float = 0.0
     completed_at: float = 0.0
@@ -85,8 +85,8 @@ class SubTask:
 class OrchestratorTask:
     id: str
     goal: str
-    context: Dict[str, Any] = field(default_factory=dict)
-    subtasks: List[SubTask] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
+    subtasks: list[SubTask] = field(default_factory=list)
     status: str = "pending"
     mode: str = "auto"
     priority: int = 1
@@ -94,6 +94,6 @@ class OrchestratorTask:
     created_at: float = 0.0
     updated_at: float = 0.0
     completed_at: float = 0.0
-    result: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    result: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+    tags: list[str] = field(default_factory=list)

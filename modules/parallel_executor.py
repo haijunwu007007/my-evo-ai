@@ -78,7 +78,8 @@ __module_meta__ = {
 import threading
 import time
 import traceback
-from typing import Any, Callable, Optional
+from typing import Any, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
@@ -178,7 +179,7 @@ class ProgressTracker:
         with self._lock:
             return dict(self._progress)
 
-    def get_result(self, task_id: str) -> Optional[TaskResult]:
+    def get_result(self, task_id: str) -> TaskResult | None:
         with self._lock:
             return self._results.get(task_id)
 
@@ -192,7 +193,7 @@ class ProgressTracker:
             completed = sum(1 for s in self._progress.values() if s in ("completed", "failed"))
             return completed / total if total > 0 else 0.0
 
-class DAGScheduler(object):
+class DAGScheduler:
     """DAG依赖调度器"""
 
     def __init__(self):
@@ -231,7 +232,7 @@ class DAGScheduler(object):
                 ready.append(tid)
         return sorted(ready, key=lambda t: -self._tasks[t].priority)
 
-    def detect_cycles(self) -> Optional[list[str]]:
+    def detect_cycles(self) -> list[str] | None:
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {tid: WHITE for tid in self._tasks}
         path = []
@@ -268,8 +269,8 @@ class ParallelExecutor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__("parallel_executor", "1.0.0")
-        self._thread_pool: Optional[ThreadPoolExecutor] = None
-        self._process_pool: Optional[ProcessPoolExecutor] = None
+        self._thread_pool: ThreadPoolExecutor | None = None
+        self._process_pool: ProcessPoolExecutor | None = None
         self._resource_limiter = ResourceLimiter()
         self._progress = ProgressTracker()
         self._dag = DAGScheduler()
@@ -440,7 +441,7 @@ class ParallelExecutor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if not future.done():
                 future.cancel()
 
-    def get_result(self, task_id: str) -> Optional[TaskResult]:
+    def get_result(self, task_id: str) -> TaskResult | None:
         return self._progress.get_result(task_id)
 
     def get_progress(self) -> dict[str, str]:

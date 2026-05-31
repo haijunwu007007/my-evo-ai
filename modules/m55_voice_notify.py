@@ -84,7 +84,8 @@ import json
 from core.logging_config import get_logger
 import threading
 import hashlib
-from typing import Dict, List, Optional, Callable, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
@@ -94,7 +95,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class M55VoiceNotifyAnalyzer(object):
+class M55VoiceNotifyAnalyzer:
     """m55_voice_notify 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -304,7 +305,7 @@ class VoiceProfile:
         if not self.profile_id:
             self.profile_id = str(uuid.uuid4())[:8]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "profile_id": self.profile_id,
             "name": self.name,
@@ -322,7 +323,7 @@ class VoiceTemplate:
     name: str = ""
     content: str = ""
     language: VoiceLanguage = VoiceLanguage.ZH_CN
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     category: str = "general"
     priority: NotifyPriority = NotifyPriority.NORMAL
     ttl: int = 3600
@@ -332,7 +333,7 @@ class VoiceTemplate:
             self.template_id = str(uuid.uuid4())[:8]
         self.variables = list(set(re.findall(r"\{\{(\w+)\}\}", self.content)))
 
-    def render(self, variables: Dict[str, str]) -> str:
+    def render(self, variables: dict[str, str]) -> str:
         text = self.content
         for var in self.variables:
             text = text.replace(f"{{{{{var}}}}}", variables.get(var, f"[{var}]"))
@@ -358,7 +359,7 @@ class VoiceNotification:
     audio_size: int = 0
     duration_ms: int = 0
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.notify_id:
@@ -369,7 +370,7 @@ class VoiceNotification:
     def is_expired(self) -> bool:
         return time.time() - self.created_at > self.ttl
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "notify_id": self.notify_id,
             "text": self.text[:200],
@@ -385,13 +386,13 @@ class VoiceNotification:
             "expired": self.is_expired(),
         }
 
-class TTSEngine(object):
+class TTSEngine:
     """Simulated text-to-speech engine with voice synthesis capabilities."""
 
     def __init__(self):
-        self._profiles: Dict[str, VoiceProfile] = {}
+        self._profiles: dict[str, VoiceProfile] = {}
         self._supported_languages = set(VoiceLanguage)
-        self._cache: Dict[str, Dict] = {}
+        self._cache: dict[str, dict] = {}
         self._lock = threading.Lock()
         self._stats = {"syntheses": 0, "cache_hits": 0, "cache_misses": 0, "errors": 0}
         self._register_default_profiles()
@@ -415,10 +416,10 @@ class TTSEngine(object):
     def register_profile(self, profile: VoiceProfile):
         self._profiles[profile.profile_id] = profile
 
-    def get_profile(self, profile_id: str) -> Optional[VoiceProfile]:
+    def get_profile(self, profile_id: str) -> VoiceProfile | None:
         return self._profiles.get(profile_id)
 
-    def synthesize(self, text: str, profile_id: str = "default") -> Dict[str, Any]:
+    def synthesize(self, text: str, profile_id: str = "default") -> dict[str, Any]:
         profile = self._profiles.get(profile_id)
         if not profile:
             self._stats["errors"] += 1
@@ -463,23 +464,23 @@ class TTSEngine(object):
     def _estimate_size(self, text: str) -> int:
         return len(text.encode("utf-8")) * 8
 
-    def list_profiles(self) -> List[Dict]:
+    def list_profiles(self) -> list[dict]:
         return [p.to_dict() for p in self._profiles.values()]
 
     @property
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         return dict(self._stats)
 
     def clear_cache(self):
         with self._lock:
             self._cache.clear()
 
-class NotificationScheduler(object):
+class NotificationScheduler:
     """Schedules voice notifications with priority queuing."""
 
     def __init__(self):
-        self._queues: Dict[int, deque] = defaultdict(deque)
-        self._scheduled: Dict[str, VoiceNotification] = {}
+        self._queues: dict[int, deque] = defaultdict(deque)
+        self._scheduled: dict[str, VoiceNotification] = {}
         self._lock = threading.Lock()
         self._stats = {"queued": 0, "dispatched": 0, "cancelled": 0}
 
@@ -493,7 +494,7 @@ class NotificationScheduler(object):
             self._stats["queued"] += 1
         return True
 
-    def dequeue(self) -> Optional[VoiceNotification]:
+    def dequeue(self) -> VoiceNotification | None:
         with self._lock:
             for priority in sorted(self._queues.keys(), reverse=True):
                 queue = self._queues[priority]
@@ -532,7 +533,7 @@ class NotificationScheduler(object):
         return removed
 
     @property
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         with self._lock:
             return {**self._stats, "pending": self.pending_count()}
 
@@ -541,7 +542,7 @@ class DeliveryTracker:
 
     def __init__(self, max_history: int = 10000):
         self._history: deque = deque(maxlen=max_history)
-        self._stats: Dict[str, int] = defaultdict(int)
+        self._stats: dict[str, int] = defaultdict(int)
         self._lock = threading.Lock()
 
     def record(self, notification: VoiceNotification, success: bool, error: str = ""):
@@ -563,16 +564,16 @@ class DeliveryTracker:
             else:
                 self._stats["failed"] += 1
 
-    def get_history(self, limit: int = 50) -> List[Dict]:
+    def get_history(self, limit: int = 50) -> list[dict]:
         with self._lock:
             items = list(self._history)
         return items[-limit:]
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         with self._lock:
             return dict(self._stats)
 
-class VoiceNotifyEngine(object):
+class VoiceNotifyEngine:
     def trace(self, name, *args, **kwargs):
         class _NS:
             def __enter__(self):
@@ -649,9 +650,9 @@ class VoiceNotifyEngine(object):
         self._tts = TTSEngine()
         self._scheduler = NotificationScheduler()
         self._tracker = DeliveryTracker()
-        self._templates: Dict[str, VoiceTemplate] = {}
+        self._templates: dict[str, VoiceTemplate] = {}
         self._running = False
-        self._dispatch_thread: Optional[threading.Thread] = None
+        self._dispatch_thread: threading.Thread | None = None
         self._stats = {
             "total_notifications": 0,
             "successful_deliveries": 0,
@@ -696,10 +697,10 @@ class VoiceNotifyEngine(object):
         target: str = "",
         profile_id: str = "default",
         priority: NotifyPriority = NotifyPriority.NORMAL,
-        language: Optional[VoiceLanguage] = None,
+        language: VoiceLanguage | None = None,
         scheduled_at: float = 0,
         ttl: int = 3600,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         notif = VoiceNotification(
             text=text,
             target=target,
@@ -717,8 +718,8 @@ class VoiceNotifyEngine(object):
         return {"notify_id": notif.notify_id, "status": notif.status.value, "queued": success}
 
     def notify_from_template(
-        self, template_id: str, variables: Dict[str, str], target: str = "", priority: Optional[NotifyPriority] = None
-    ) -> Dict[str, Any]:
+        self, template_id: str, variables: dict[str, str], target: str = "", priority: NotifyPriority | None = None
+    ) -> dict[str, Any]:
         template = self._templates.get(template_id)
         if not template:
             return {"status": "error", "error": "template_not_found", "template_id": template_id}
@@ -733,7 +734,7 @@ class VoiceNotifyEngine(object):
     def cancel_notification(self, notify_id: str) -> bool:
         return self._scheduler.cancel(notify_id)
 
-    def list_templates(self) -> List[Dict]:
+    def list_templates(self) -> list[dict]:
         return [
             {
                 "template_id": t.template_id,
@@ -745,7 +746,7 @@ class VoiceNotifyEngine(object):
             for t in self._templates.values()
         ]
 
-    def list_voice_profiles(self) -> List[Dict]:
+    def list_voice_profiles(self) -> list[dict]:
         return self._tts.list_profiles()
 
     def _dispatch_loop(self):
@@ -796,7 +797,7 @@ class VoiceNotifyEngine(object):
         if self._dispatch_thread:
             self._dispatch_thread.join(timeout=5)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         uptime = time.time() - self._stats["uptime_start"] if self._stats["uptime_start"] else 0
         return {
             "status": "healthy" if self._running else "stopped",

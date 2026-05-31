@@ -30,14 +30,15 @@ import time
 import uuid
 from core.logging_config import get_logger
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from collections import defaultdict, deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger("evo.event_bus")
 
-class EventBusAnalyzer(object):
+class EventBusAnalyzer:
     """event_bus 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -207,7 +208,7 @@ class EventBus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self, max_history: int = 1000):
         super().__init__()
 
-        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        self._subscribers: dict[str, list[Callable]] = defaultdict(list)
         self._history: deque = deque(maxlen=max_history)
         self.module_id = "event_bus"
         self._lock = asyncio.Lock()
@@ -225,7 +226,7 @@ class EventBus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if handler in self._subscribers[event_type]:
             self._subscribers[event_type].remove(handler)
 
-    async def publish(self, event_type: str, data: Any = None, source: str = None, metadata: Dict = None) -> str:
+    async def publish(self, event_type: str, data: Any = None, source: str = None, metadata: dict = None) -> str:
         """发布事件"""
         event = {
             "id": str(uuid.uuid4()),
@@ -280,14 +281,14 @@ class EventBus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return event["id"]
 
-    def get_history(self, event_type: str = None, limit: int = 50) -> List[Dict]:
+    def get_history(self, event_type: str = None, limit: int = 50) -> list[dict]:
         """获取事件历史"""
         events = list(self._history)
         if event_type:
             events = [e for e in events if e["type"] == event_type]
         return events[-limit:]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "published": self._stats["published"],
             "delivered": self._stats["delivered"],
@@ -304,8 +305,8 @@ class DataFlow:
 
     def __init__(self, event_bus: EventBus = None):
         self.event_bus = event_bus or EventBus()
-        self._pipelines: Dict[str, "Pipeline"] = {}
-        self._contexts: Dict[str, Dict] = {}
+        self._pipelines: dict[str, Pipeline] = {}
+        self._contexts: dict[str, dict] = {}
         self._mm = None
 
     def set_module_manager(self, mm):
@@ -314,7 +315,7 @@ class DataFlow:
         for pipe in self._pipelines.values():
             pipe._module_manager = mm
 
-    def create_pipeline(self, name: str) -> "Pipeline":
+    def create_pipeline(self, name: str) -> Pipeline:
         """创建数据处理管道"""
         pipe = Pipeline(name, self.event_bus)
         if self._mm:
@@ -322,7 +323,7 @@ class DataFlow:
         self._pipelines[name] = pipe
         return pipe
 
-    async def run_pipeline(self, name: str, initial_data: Dict = None) -> Dict:
+    async def run_pipeline(self, name: str, initial_data: dict = None) -> dict:
         """运行管道"""
         pipe = self._pipelines.get(name)
         if not pipe:
@@ -351,7 +352,7 @@ class DataFlow:
 
         return result
 
-    async def run_dag(self, dag_def: Dict, initial_data: Dict = None) -> Dict:
+    async def run_dag(self, dag_def: dict, initial_data: dict = None) -> dict:
         """
         运行DAG工作流
         dag_def 格式:
@@ -414,7 +415,7 @@ class DataFlow:
         dag_ctx["duration_ms"] = (time.time() - dag_ctx["start_time"]) * 1000
         return dag_ctx
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "pipelines": len(self._pipelines),
             "active_contexts": len(self._contexts),
@@ -430,25 +431,25 @@ class Pipeline:
     def __init__(self, name: str, event_bus: EventBus):
         self.name = name
         self.event_bus = event_bus
-        self._stages: List["Stage"] = []
+        self._stages: list[Stage] = []
         self._module_manager = None
 
     def stage(
-        self, name: str, module_id: str, input_mapping: Dict[str, str] = None, output_mapping: Dict[str, str] = None
-    ) -> "Pipeline":
+        self, name: str, module_id: str, input_mapping: dict[str, str] = None, output_mapping: dict[str, str] = None
+    ) -> Pipeline:
         """添加处理阶段"""
         stage = Stage(name, module_id, input_mapping or {}, output_mapping or {})
         self._stages.append(stage)
         return self
 
-    def parallel(self, name: str, module_ids: List[str], input_mapping: Dict[str, str] = None) -> "Pipeline":
+    def parallel(self, name: str, module_ids: list[str], input_mapping: dict[str, str] = None) -> Pipeline:
         """添加并行阶段（多个模块同时执行）"""
         stage = Stage(name, module_id="__parallel__", input_mapping=input_mapping or {}, output_mapping={})
         stage._parallel_modules = module_ids
         self._stages.append(stage)
         return self
 
-    async def run(self, ctx: Dict) -> Dict:
+    async def run(self, ctx: dict) -> dict:
         """运行管道"""
         ctx["pipeline"] = self.name
         ctx["start_time"] = time.time()
@@ -513,16 +514,16 @@ class Pipeline:
 class Stage:
     """管道阶段"""
 
-    def __init__(self, name: str, module_id: str, input_mapping: Dict[str, str], output_mapping: Dict[str, str]):
+    def __init__(self, name: str, module_id: str, input_mapping: dict[str, str], output_mapping: dict[str, str]):
         self.name = name
         self.module_id = module_id
         self.input_mapping = input_mapping
         self.output_mapping = output_mapping
-        self._parallel_modules: List[str] = []
+        self._parallel_modules: list[str] = []
 
 # 全局单例
-_event_bus: Optional[EventBus] = None
-_data_flow: Optional[DataFlow] = None
+_event_bus: EventBus | None = None
+_data_flow: DataFlow | None = None
 
 def get_event_bus() -> EventBus:
     """获取全局事件总线实例"""

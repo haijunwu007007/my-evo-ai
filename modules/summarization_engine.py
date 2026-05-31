@@ -164,8 +164,8 @@ class SummaryResult:
     summary_length: int
     compression_ratio: float
     score: float = 0.0
-    key_sentences: List[str] = field(default_factory=list)
-    key_phrases: List[str] = field(default_factory=list)
+    key_sentences: list[str] = field(default_factory=list)
+    key_phrases: list[str] = field(default_factory=list)
     duration_ms: float = 0.0
 
 class KeywordExtractor:
@@ -174,13 +174,13 @@ class KeywordExtractor:
     def __init__(self):
         self._window_size = 4  # TextRank共现窗口大小
 
-    def extract_tfidf_keywords(self, text: str, top_k: int = 10) -> List[Dict[str, Any]]:
+    def extract_tfidf_keywords(self, text: str, top_k: int = 10) -> list[dict[str, Any]]:
         """基于TF-IDF提取关键词"""
         tokens = re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", text.lower())
         if not tokens:
             return []
         total = len(tokens)
-        tf_counts: Dict[str, int] = {}
+        tf_counts: dict[str, int] = {}
         for t in tokens:
             tf_counts[t] = tf_counts.get(t, 0) + 1
         # 模拟IDF: 文本越长，词的权重越高（单文档近似）
@@ -195,13 +195,13 @@ class KeywordExtractor:
 
     def extract_textrank_keywords(
         self, text: str, top_k: int = 10, damping: float = 0.85, iterations: int = 30
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """基于TextRank图算法提取关键词"""
         tokens = re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", text.lower())
         if not tokens:
             return []
         # 构建共现图
-        graph: Dict[str, Dict[str, float]] = {}
+        graph: dict[str, dict[str, float]] = {}
         for i, word in enumerate(tokens):
             if word not in graph:
                 graph[word] = {}
@@ -211,10 +211,10 @@ class KeywordExtractor:
                     if neighbor != word:
                         graph[word][neighbor] = graph[word].get(neighbor, 0) + 1
         # 初始化分数
-        scores: Dict[str, float] = {w: 1.0 for w in graph}
+        scores: dict[str, float] = {w: 1.0 for w in graph}
         # 迭代
         for _ in range(iterations):
-            new_scores: Dict[str, float] = {}
+            new_scores: dict[str, float] = {}
             for word in graph:
                 rank_sum = 0.0
                 for neighbor, weight in graph[word].items():
@@ -229,7 +229,7 @@ class KeywordExtractor:
 class SummaryComparator:
     """摘要对比分析器 — 比较不同摘要质量、相似度、信息保留率"""
 
-    def compare_summaries(self, summary_a: str, summary_b: str, original: str = "") -> Dict[str, Any]:
+    def compare_summaries(self, summary_a: str, summary_b: str, original: str = "") -> dict[str, Any]:
         """对比两个摘要的质量差异"""
         tokens_a = set(re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", summary_a.lower()))
         tokens_b = set(re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", summary_b.lower()))
@@ -254,13 +254,13 @@ class SummaryComparator:
             result["recommended"] = "a" if result["coverage_a"] > result["coverage_b"] else "b"
         return result
 
-    def detect_information_loss(self, original: str, summary: str) -> Dict[str, Any]:
+    def detect_information_loss(self, original: str, summary: str) -> dict[str, Any]:
         """检测摘要中丢失的重要信息"""
         orig_tokens = set(re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", original.lower()))
         summ_tokens = set(re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", summary.lower()))
         lost = orig_tokens - summ_tokens
         # 按词频排序（高频词丢失更严重）
-        freq: Dict[str, int] = {}
+        freq: dict[str, int] = {}
         for t in re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z]{2,}", original.lower()):
             freq[t] = freq.get(t, 0) + 1
         lost_sorted = sorted(lost, key=lambda x: freq.get(x, 0), reverse=True)
@@ -314,7 +314,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "by",
             "from",
         }
-        self._summary_history: List[Dict] = []
+        self._summary_history: list[dict] = []
         self._keyword_extractor = KeywordExtractor()
         self._summary_comparator = SummaryComparator()
 
@@ -323,21 +323,21 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.record_metrics("unknown.init", 1)
         self.audit("initialized", "Unknown初始化完成")
 
-    def _split_sentences(self, text: str) -> List[str]:
+    def _split_sentences(self, text: str) -> list[str]:
         """分句"""
         sentences = re.split(r"[。！？\n.!?]+", text)
         return [s.strip() for s in sentences if len(s.strip()) > 5]
 
-    def _split_paragraphs(self, text: str) -> List[str]:
+    def _split_paragraphs(self, text: str) -> list[str]:
         """分段"""
         paragraphs = re.split(r"\n{2,}|\r\n{2,}", text)
         return [p.strip() for p in paragraphs if p.strip()]
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         tokens = re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z0-9]+", text.lower())
         return [t for t in tokens if t not in self._stop_words and len(t) > 1]
 
-    def _compute_sentence_score(self, sentence: str, all_tokens: List[str], position: int, total: int) -> float:
+    def _compute_sentence_score(self, sentence: str, all_tokens: list[str], position: int, total: int) -> float:
         """计算句子重要性分数"""
         tokens = set(self._tokenize(sentence))
         if not tokens:
@@ -373,7 +373,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         summary_type: SummaryType = SummaryType.EXTRACTIVE,
         max_length: SummaryLength = SummaryLength.MEDIUM,
         custom_max_sentences: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成摘要"""
         start = time.time()
 
@@ -600,7 +600,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         return min(max(score, 0), 1.0)
 
     @trace_operation("summarize_multi")
-    def summarize_multi_document(self, documents: List[str], max_sentences: int = 10) -> Dict[str, Any]:
+    def summarize_multi_document(self, documents: list[str], max_sentences: int = 10) -> dict[str, Any]:
         """多文档摘要"""
         if not documents:
             return {"summary": "", "documents": 0}
@@ -687,7 +687,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update({"summaries_generated": len(self._summary_history), "stop_words": len(self._stop_words)})
         return base

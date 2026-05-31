@@ -120,14 +120,14 @@ class PerformanceRating(Enum):
 class Department:
     dept_id: str = ""
     name: str = ""
-    parent_id: Optional[str] = None
-    head_id: Optional[str] = None
+    parent_id: str | None = None
+    head_id: str | None = None
     budget: float = 0.0
     headcount_limit: int = 0
     description: str = ""
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "dept_id": self.dept_id,
             "name": self.name,
@@ -152,9 +152,9 @@ class Employee:
     probation_end: str = ""
     salary_base: float = 0.0
     salary_bonus: float = 0.0
-    skills: List[str] = field(default_factory=list)
-    manager_id: Optional[str] = None
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    skills: list[str] = field(default_factory=list)
+    manager_id: str | None = None
+    attributes: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
     @property
@@ -171,7 +171,7 @@ class Employee:
         except Exception:
             return 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "emp_id": self.emp_id,
             "name": self.name,
@@ -194,15 +194,15 @@ class AttendanceRecord:
     record_id: str = ""
     emp_id: str = ""
     date: str = ""
-    check_in: Optional[str] = None
-    check_out: Optional[str] = None
+    check_in: str | None = None
+    check_out: str | None = None
     work_hours: float = 0.0
     overtime_hours: float = 0.0
     status: str = "normal"
     remark: str = ""
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "record_id": self.record_id,
             "emp_id": self.emp_id,
@@ -228,7 +228,7 @@ class PerformanceReview:
     promotion_recommendation: bool = False
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "review_id": self.review_id,
             "emp_id": self.emp_id,
@@ -246,7 +246,7 @@ class PerformanceReview:
 # 考勤引擎
 # ============================================================
 
-class AttendanceEngine(object):
+class AttendanceEngine:
     """考勤计算引擎 — 标准工时/迟到早退/加班统计"""
 
     LATE_THRESHOLD = "09:00"
@@ -254,9 +254,9 @@ class AttendanceEngine(object):
     STANDARD_HOURS = 8.0
 
     def __init__(self):
-        self._records: Dict[str, AttendanceRecord] = {}
+        self._records: dict[str, AttendanceRecord] = {}
 
-    def record_check_in(self, emp_id: str, check_time: str, record_date: Optional[str] = None) -> AttendanceRecord:
+    def record_check_in(self, emp_id: str, check_time: str, record_date: str | None = None) -> AttendanceRecord:
         today = record_date or date.today().isoformat()
         rid = hashlib.md5(f"{emp_id}:{today}".encode()).hexdigest()[:16]
         rec = self._records.get(rid, AttendanceRecord(record_id=rid, emp_id=emp_id, date=today))
@@ -267,8 +267,8 @@ class AttendanceEngine(object):
         return rec
 
     def record_check_out(
-        self, emp_id: str, check_time: str, record_date: Optional[str] = None
-    ) -> Optional[AttendanceRecord]:
+        self, emp_id: str, check_time: str, record_date: str | None = None
+    ) -> AttendanceRecord | None:
         today = record_date or date.today().isoformat()
         rid = hashlib.md5(f"{emp_id}:{today}".encode()).hexdigest()[:16]
         rec = self._records.get(rid)
@@ -289,7 +289,7 @@ class AttendanceEngine(object):
         self._records[rid] = rec
         return rec
 
-    def _calc_work_hours(self, check_in: Optional[str], check_out: Optional[str]) -> float:
+    def _calc_work_hours(self, check_in: str | None, check_out: str | None) -> float:
         if not check_in or not check_out:
             return 0.0
         try:
@@ -300,7 +300,7 @@ class AttendanceEngine(object):
         except Exception:
             return 0.0
 
-    def get_monthly_summary(self, emp_id: str, year_month: str) -> Dict:
+    def get_monthly_summary(self, emp_id: str, year_month: str) -> dict:
         records = [r for r in self._records.values() if r.emp_id == emp_id and r.date.startswith(year_month)]
         total_hours = sum(r.work_hours for r in records)
         overtime = sum(r.overtime_hours for r in records)
@@ -320,7 +320,7 @@ class AttendanceEngine(object):
 # 薪酬计算引擎
 # ============================================================
 
-class SalaryEngine(object):
+class SalaryEngine:
     """薪酬计算引擎 — 基本工资/绩效奖金/社保公积金/个税"""
 
     def __init__(self):
@@ -341,7 +341,7 @@ class SalaryEngine(object):
         ]
         self._threshold = 5000  # 起征点
 
-    def calculate_payslip(self, emp: Employee, month: str) -> Dict:
+    def calculate_payslip(self, emp: Employee, month: str) -> dict:
         """计算月度工资单"""
         base = emp.salary_base
         bonus = emp.salary_bonus
@@ -383,7 +383,7 @@ class SalaryEngine(object):
                 return round(taxable * rate - deduction, 2)
         return round(taxable * 0.45 - 181920, 2)
 
-    def calculate_dept_payroll(self, employees: List[Employee], month: str) -> Dict:
+    def calculate_dept_payroll(self, employees: list[Employee], month: str) -> dict:
         """计算部门薪资汇总"""
         total_gross = 0.0
         total_net = 0.0
@@ -440,7 +440,7 @@ class CompensationCalculator:
 
     def calculate_monthly(
         self, base_salary: float, performance: float = 0, allowances: float = 0, housing_fund_base: float = None
-    ) -> Dict:
+    ) -> dict:
         """计算月度工资明细"""
         gross = base_salary + performance + allowances
         # 五险一金
@@ -477,7 +477,7 @@ class CompensationCalculator:
                 return round(taxable_income * rate - quick_deduction, 2)
         return 0
 
-    def calculate_annual_bonus(self, bonus: float, method: str = "separate") -> Dict:
+    def calculate_annual_bonus(self, bonus: float, method: str = "separate") -> dict:
         """年终奖计税（单独计税/合并计税）"""
         if method == "separate":
             monthly_avg = bonus / 12
@@ -502,7 +502,7 @@ class CompensationCalculator:
                 return monthly_avg * rate - qd
         return 0
 
-    def estimate_annual_cost(self, base_salary: float, headcount: int = 1) -> Dict:
+    def estimate_annual_cost(self, base_salary: float, headcount: int = 1) -> dict:
         """估算企业年度用工成本（含雇主社保）"""
         monthly = self.calculate_monthly(base_salary)
         employer_cost = base_salary  # 基础薪资
@@ -524,14 +524,14 @@ class CompensationCalculator:
 class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Hera智能体 — 人力资源管理引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_hera", version="6.39.0", config=config)
-        self._employees: Dict[str, Employee] = {}
-        self._departments: Dict[str, Department] = {}
+        self._employees: dict[str, Employee] = {}
+        self._departments: dict[str, Department] = {}
         self._attendance = AttendanceEngine()
         self._salary_engine = SalaryEngine()
-        self._reviews: Dict[str, PerformanceReview] = {}
+        self._reviews: dict[str, PerformanceReview] = {}
         self._stats = {
             "total_employees": 0,
             "total_departments": 0,
@@ -551,8 +551,8 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         dept_id: str,
         name: str,
-        parent_id: Optional[str] = None,
-        head_id: Optional[str] = None,
+        parent_id: str | None = None,
+        head_id: str | None = None,
         budget: float = 0.0,
         headcount_limit: int = 50,
     ) -> Result:
@@ -579,7 +579,7 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 roots.append(self._build_dept_node(dept))
         return Result(success=True, data={"tree": roots})
 
-    def _build_dept_node(self, dept: Department) -> Dict:
+    def _build_dept_node(self, dept: Department) -> dict:
         children = [self._build_dept_node(d) for d in self._departments.values() if d.parent_id == dept.dept_id]
         member_count = sum(
             1 for e in self._employees.values() if e.dept_id == dept.dept_id and e.status == EmployeeStatus.ACTIVE
@@ -604,8 +604,8 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         salary_base: float,
         email: str = "",
         phone: str = "",
-        manager_id: Optional[str] = None,
-        skills: Optional[List[str]] = None,
+        manager_id: str | None = None,
+        skills: list[str] | None = None,
     ) -> Result:
         if emp_id in self._employees:
             return Result(success=False, message=f"员工 {emp_id} 已存在")
@@ -654,7 +654,7 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, message=f"员工 {emp_id} 已离职")
 
     async def list_employees(
-        self, dept_id: Optional[str] = None, status: Optional[EmployeeStatus] = None, limit: int = 100
+        self, dept_id: str | None = None, status: EmployeeStatus | None = None, limit: int = 100
     ) -> Result:
         emps = list(self._employees.values())
         if dept_id:
@@ -665,14 +665,14 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 考勤管理 ===
 
-    async def check_in(self, emp_id: str, check_time: str, record_date: Optional[str] = None) -> Result:
+    async def check_in(self, emp_id: str, check_time: str, record_date: str | None = None) -> Result:
         if emp_id not in self._employees:
             return Result(success=False, message=f"员工 {emp_id} 不存在")
         rec = self._attendance.record_check_in(emp_id, check_time, record_date)
         self._stats["total_attendance_records"] += 1
         return Result(success=True, data=rec.to_dict())
 
-    async def check_out(self, emp_id: str, check_time: str, record_date: Optional[str] = None) -> Result:
+    async def check_out(self, emp_id: str, check_time: str, record_date: str | None = None) -> Result:
         rec = self._attendance.record_check_out(emp_id, check_time, record_date)
         if not rec:
             return Result(success=False, message="未找到签到记录")
@@ -694,8 +694,8 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         goals_total: int,
         reviewer_id: str,
         feedback: str = "",
-        strengths: Optional[List[str]] = None,
-        improvements: Optional[List[str]] = None,
+        strengths: list[str] | None = None,
+        improvements: list[str] | None = None,
     ) -> Result:
         if emp_id not in self._employees:
             return Result(success=False, message=f"员工 {emp_id} 不存在")
@@ -809,7 +809,7 @@ class AgentHera(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 健康检查 ===
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — 团队管理路由"""
         _ = self.trace("execute")
         metrics_collector.counter("agent_hera_ops_total", labels={"action": action})

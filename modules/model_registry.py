@@ -76,7 +76,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -84,7 +84,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ModelRegistryAnalyzer(object):
+class ModelRegistryAnalyzer:
     """model_registry 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -281,7 +281,7 @@ class ModelRegistryModule:
 
     """模型注册中心 - 模型注册/版本管理/生命周期/元数据/兼容性检查"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -322,13 +322,13 @@ class ModelRegistryModule:
             "total_downloads": 0,
             "registrations_today": 0,
         }
-        self._models: Dict[str, Dict] = {}
-        self._versions: Dict[str, List[Dict]] = defaultdict(list)
-        self._tags: Dict[str, List[str]] = defaultdict(list)
-        self._audit_log: List[Dict] = []
+        self._models: dict[str, dict] = {}
+        self._versions: dict[str, list[dict]] = defaultdict(list)
+        self._tags: dict[str, list[str]] = defaultdict(list)
+        self._audit_log: list[dict] = []
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 4))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_builtin_models()
             self._initialized = True
@@ -346,7 +346,7 @@ class ModelRegistryModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -377,8 +377,8 @@ class ModelRegistryModule:
                 "max_context": ctx,
                 "latest_version": version,
                 "tags": [provider],
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
                 "downloads": 0,
                 "size_mb": 0,
             }
@@ -386,7 +386,7 @@ class ModelRegistryModule:
                 {
                     "version": version,
                     "status": ModelStatus.ACTIVE,
-                    "released_at": datetime.now(timezone.utc).isoformat(),
+                    "released_at": datetime.now(UTC).isoformat(),
                     "changelog": "Initial release",
                 }
             )
@@ -417,8 +417,8 @@ class ModelRegistryModule:
             "max_context": max_context,
             "latest_version": version,
             "tags": tags,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "downloads": 0,
             "size_mb": size_mb,
         }
@@ -426,7 +426,7 @@ class ModelRegistryModule:
             {
                 "version": version,
                 "status": ModelStatus.ACTIVE,
-                "released_at": datetime.now(timezone.utc).isoformat(),
+                "released_at": datetime.now(UTC).isoformat(),
                 "changelog": "Initial registration",
             }
         )
@@ -435,7 +435,7 @@ class ModelRegistryModule:
         self._stats["total_models"] = len(self._models)
         self._stats["active_models"] += 1
         self._stats["registrations_today"] += 1
-        self._audit_log.append({"action": "register", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
+        self._audit_log.append({"action": "register", "model": name, "timestamp": datetime.now(UTC).isoformat()})
         return {"success": True, "model": name, "version": version, "provider": provider}
 
     def update_model(self, params: dict) -> dict:
@@ -447,13 +447,13 @@ class ModelRegistryModule:
         for k in ("description", "status", "max_context", "size_mb", "tags"):
             if k in params:
                 model[k] = params[k]
-        model["updated_at"] = datetime.now(timezone.utc).isoformat()
+        model["updated_at"] = datetime.now(UTC).isoformat()
         self._audit_log.append(
             {
                 "action": "update",
                 "model": name,
                 "fields": list(params.keys()),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
         )
         return {"success": True, "model": name, "updated_fields": list(params.keys())}
@@ -464,9 +464,9 @@ class ModelRegistryModule:
         if not name or name not in self._models:
             return {"success": False, "error": f"Model {name} not found"}
         self._models[name]["status"] = ModelStatus.DEPRECATED
-        self._models[name]["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self._models[name]["updated_at"] = datetime.now(UTC).isoformat()
         self._stats["active_models"] = sum(1 for m in self._models.values() if m.get("status") == ModelStatus.ACTIVE)
-        self._audit_log.append({"action": "deprecate", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
+        self._audit_log.append({"action": "deprecate", "model": name, "timestamp": datetime.now(UTC).isoformat()})
         return {"success": True, "model": name, "status": "deprecated"}
 
     def delete_model(self, params: dict) -> dict:
@@ -477,7 +477,7 @@ class ModelRegistryModule:
         self._models[name]["status"] = ModelStatus.ARCHIVED
         self._stats["total_models"] = sum(1 for m in self._models.values() if m.get("status") != ModelStatus.ARCHIVED)
         self._stats["active_models"] = sum(1 for m in self._models.values() if m.get("status") == ModelStatus.ACTIVE)
-        self._audit_log.append({"action": "delete", "model": name, "timestamp": datetime.now(timezone.utc).isoformat()})
+        self._audit_log.append({"action": "delete", "model": name, "timestamp": datetime.now(UTC).isoformat()})
         return {"success": True, "model": name, "status": "archived"}
 
     def add_version(self, params: dict) -> dict:
@@ -493,12 +493,12 @@ class ModelRegistryModule:
             {
                 "version": version,
                 "status": ModelStatus.ACTIVE,
-                "released_at": datetime.now(timezone.utc).isoformat(),
+                "released_at": datetime.now(UTC).isoformat(),
                 "changelog": changelog,
             }
         )
         self._models[name]["latest_version"] = version
-        self._models[name]["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self._models[name]["updated_at"] = datetime.now(UTC).isoformat()
         self._stats["total_versions"] = sum(len(v) for v in self._versions.values())
         return {"success": True, "model": name, "version": version}
 

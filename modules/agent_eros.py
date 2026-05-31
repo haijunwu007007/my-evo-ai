@@ -134,12 +134,12 @@ class Entity:
     entity_id: str
     entity_type: str = "default"
     name: str = ""
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "entity_id": self.entity_id,
             "entity_type": self.entity_type,
@@ -160,10 +160,10 @@ class Relation:
     relation_type: RelationType = RelationType.COLLABORATION
     strength: float = 0.5
     weight: float = 1.0
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    ttl: Optional[float] = None  # 关系生存时间，None表示永久
+    ttl: float | None = None  # 关系生存时间，None表示永久
 
     def __post_init__(self):
         if not self.relation_id:
@@ -176,7 +176,7 @@ class Relation:
             return False
         return time.time() > self.created_at + self.ttl
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "relation_id": self.relation_id,
             "source_id": self.source_id,
@@ -195,13 +195,13 @@ class Community:
     """社区检测结果"""
 
     community_id: str = ""
-    members: List[str] = field(default_factory=list)
+    members: list[str] = field(default_factory=list)
     cohesion: float = 0.0
     density: float = 0.0
     central_entity: str = ""
     detected_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "community_id": self.community_id,
             "members": self.members,
@@ -215,7 +215,7 @@ class Community:
 # 关系强度评估器
 # ============================================================
 
-class RelationStrengthEvaluator(object):
+class RelationStrengthEvaluator:
     """关系强度评估引擎 — 基于多因子加权模型"""
 
     # 默认因子权重
@@ -229,10 +229,10 @@ class RelationStrengthEvaluator(object):
         "reciprocity": 0.05,
     }
 
-    def __init__(self, custom_weights: Optional[Dict[str, float]] = None):
+    def __init__(self, custom_weights: dict[str, float] | None = None):
         self.weights = custom_weights or self.DEFAULT_WEIGHTS.copy()
         self._validate_weights()
-        self._interaction_log: Dict[str, List[Dict]] = defaultdict(list)
+        self._interaction_log: dict[str, list[dict]] = defaultdict(list)
         self._decay_half_life = 7 * 86400  # 7天衰减半衰期
 
     def _validate_weights(self):
@@ -243,7 +243,7 @@ class RelationStrengthEvaluator(object):
                 self.weights[k] /= total
 
     def record_interaction(
-        self, source: str, target: str, interaction_type: str = "default", metadata: Optional[Dict] = None
+        self, source: str, target: str, interaction_type: str = "default", metadata: dict | None = None
     ):
         """记录一次交互事件"""
         event = {"timestamp": time.time(), "type": interaction_type, "metadata": metadata or {}}
@@ -322,7 +322,7 @@ class RelationStrengthEvaluator(object):
 
         return round(min(1.0, max(0.0, final_score)), 4)
 
-    def _find_response_pairs(self, fwd: List[Dict], bwd: List[Dict]) -> List[Tuple[float, float]]:
+    def _find_response_pairs(self, fwd: list[dict], bwd: list[dict]) -> list[tuple[float, float]]:
         """找到请求-响应对，返回 (请求时间, 响应延迟)"""
         pairs = []
         for f_event in fwd:
@@ -334,7 +334,7 @@ class RelationStrengthEvaluator(object):
                         break
         return pairs
 
-    def batch_evaluate(self, pairs: List[Tuple[str, str]]) -> Dict[str, float]:
+    def batch_evaluate(self, pairs: list[tuple[str, str]]) -> dict[str, float]:
         """批量评估多对实体的关系强度"""
         results = {}
         for source, target in pairs:
@@ -351,27 +351,27 @@ class RelationStrengthEvaluator(object):
 # 社区检测引擎
 # ============================================================
 
-class CommunityDetector(object):
+class CommunityDetector:
     """社区检测引擎 — 基于标签传播算法"""
 
     def __init__(self, max_iterations: int = 100, convergence_threshold: float = 0.99):
         self.max_iterations = max_iterations
         self.convergence_threshold = convergence_threshold
 
-    def detect(self, entities: Dict[str, Entity], relations: Dict[str, Relation]) -> List[Community]:
+    def detect(self, entities: dict[str, Entity], relations: dict[str, Relation]) -> list[Community]:
         """执行社区检测，返回社区列表"""
         if not entities:
             return []
 
         # 构建邻接表
-        adjacency: Dict[str, Dict[str, float]] = defaultdict(dict)
+        adjacency: dict[str, dict[str, float]] = defaultdict(dict)
         for rel in relations.values():
             if rel.source_id in entities and rel.target_id in entities:
                 adjacency[rel.source_id][rel.target_id] = rel.weight * rel.strength
                 adjacency[rel.target_id][rel.source_id] = rel.weight * rel.strength
 
         # 初始化标签
-        labels: Dict[str, str] = {eid: eid for eid in entities}
+        labels: dict[str, str] = {eid: eid for eid in entities}
 
         for iteration in range(self.max_iterations):
             changed = 0
@@ -388,7 +388,7 @@ class CommunityDetector(object):
                     continue
 
                 # 统计邻居标签频率（加权）
-                label_scores: Dict[str, float] = defaultdict(float)
+                label_scores: dict[str, float] = defaultdict(float)
                 for nid, weight in neighbors.items():
                     label = labels.get(nid, nid)
                     label_scores[label] += weight
@@ -407,7 +407,7 @@ class CommunityDetector(object):
                 break
 
         # 构建社区结果
-        groups: Dict[str, List[str]] = defaultdict(list)
+        groups: dict[str, list[str]] = defaultdict(list)
         for eid, label in labels.items():
             groups[label].append(eid)
 
@@ -434,7 +434,7 @@ class CommunityDetector(object):
         logger.info(f"检测到 {len(communities)} 个社区")
         return communities
 
-    def _calc_cohesion(self, members: List[str], adjacency: Dict[str, Dict[str, float]]) -> float:
+    def _calc_cohesion(self, members: list[str], adjacency: dict[str, dict[str, float]]) -> float:
         """计算社区凝聚度"""
         if len(members) < 2:
             return 0.0
@@ -451,7 +451,7 @@ class CommunityDetector(object):
             return 0.0
         return round(total_weight / max_edges, 4)
 
-    def _calc_density(self, members: List[str], adjacency: Dict[str, Dict[str, float]]) -> float:
+    def _calc_density(self, members: list[str], adjacency: dict[str, dict[str, float]]) -> float:
         """计算社区密度"""
         if len(members) < 2:
             return 0.0
@@ -463,7 +463,7 @@ class CommunityDetector(object):
         max_edges = len(members) * (len(members) - 1) / 2
         return round(edge_count / max_edges, 4) if max_edges > 0 else 0.0
 
-    def _find_central_entity(self, members: List[str], adjacency: Dict[str, Dict[str, float]]) -> str:
+    def _find_central_entity(self, members: list[str], adjacency: dict[str, dict[str, float]]) -> str:
         """找到社区中心实体（度中心性最高）"""
         if not members:
             return ""
@@ -473,7 +473,7 @@ class CommunityDetector(object):
         return max(scores, key=scores.get) if scores else members[0]
 
 # ============================================================
-class RelationGraphAnalyzer(object):
+class RelationGraphAnalyzer:
     """关系图谱分析器 - 计算关系网络的结构指标和演化趋势。
 
     企业场景：组织网络分析(ONA)、供应链依赖分析、社交关系挖掘。
@@ -481,15 +481,15 @@ class RelationGraphAnalyzer(object):
     """
 
     def __init__(self):
-        self._adjacency: Dict[str, Dict[str, RelationStrength]] = defaultdict(dict)
-        self._entity_attrs: Dict[str, Dict] = {}
+        self._adjacency: dict[str, dict[str, RelationStrength]] = defaultdict(dict)
+        self._entity_attrs: dict[str, dict] = {}
 
     def add_relation(self, source: str, target: str, rel_type: RelationType, strength: RelationStrength):
         """添加关系边"""
         self._adjacency[source][target] = strength
         self._entity_attrs.setdefault(source, {"types": set()})["types"].add(rel_type.value)
 
-    def degree_centrality(self) -> Dict[str, float]:
+    def degree_centrality(self) -> dict[str, float]:
         """计算所有节点的度中心度"""
         if not self._adjacency:
             return {}
@@ -497,7 +497,7 @@ class RelationGraphAnalyzer(object):
         max_deg = n - 1
         return {node: len(neighbors) / max_deg for node, neighbors in self._adjacency.items()}
 
-    def find_bridges(self) -> List[Dict]:
+    def find_bridges(self) -> list[dict]:
         """识别桥接节点 - 连接不同社区的枢纽"""
         bridges = []
         centrality = self.degree_centrality()
@@ -516,7 +516,7 @@ class RelationGraphAnalyzer(object):
                 )
         return sorted(bridges, key=lambda b: b["betweenness_score"], reverse=True)
 
-    def community_detect(self) -> List[List[str]]:
+    def community_detect(self) -> list[list[str]]:
         """简单的标签传播社区发现"""
         labels = {node: node for node in self._adjacency}
         for _ in range(10):  # 最多迭代10轮
@@ -540,7 +540,7 @@ class RelationGraphAnalyzer(object):
             communities[label].append(node)
         return list(communities.values())
 
-    def predict_decay(self, source: str, target: str, days: int = 30) -> Dict:
+    def predict_decay(self, source: str, target: str, days: int = 30) -> dict:
         """预测关系衰减概率 - 基于交互频率的时间衰减模型"""
         strength = self._adjacency.get(source, {}).get(target)
         if not strength:
@@ -573,17 +573,17 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 关系风险评估
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_eros", version="6.39.0", config=config)
-        self._entities: Dict[str, Entity] = {}
-        self._relations: Dict[str, Relation] = {}
-        self._source_index: Dict[str, Set[str]] = defaultdict(set)
-        self._target_index: Dict[str, Set[str]] = defaultdict(set)
-        self._type_index: Dict[RelationType, Set[str]] = defaultdict(set)
+        self._entities: dict[str, Entity] = {}
+        self._relations: dict[str, Relation] = {}
+        self._source_index: dict[str, set[str]] = defaultdict(set)
+        self._target_index: dict[str, set[str]] = defaultdict(set)
+        self._type_index: dict[RelationType, set[str]] = defaultdict(set)
         self._evaluator = RelationStrengthEvaluator()
         self._community_detector = CommunityDetector()
-        self._communities: List[Community] = []
+        self._communities: list[Community] = []
         self._community_cache_ts: float = 0
         self._community_cache_ttl: float = 300  # 5分钟缓存
         self._stats = {
@@ -610,8 +610,8 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         entity_id: str,
         entity_type: str = "default",
         name: str = "",
-        attributes: Optional[Dict] = None,
-        tags: Optional[List[str]] = None,
+        attributes: dict | None = None,
+        tags: list[str] | None = None,
     ) -> Result:
         """注册新实体"""
         try:
@@ -645,7 +645,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, data=entity.to_dict())
 
     async def list_entities(
-        self, entity_type: Optional[str] = None, tag: Optional[str] = None, limit: int = 100, offset: int = 0
+        self, entity_type: str | None = None, tag: str | None = None, limit: int = 100, offset: int = 0
     ) -> Result:
         """列出实体"""
         entities = list(self._entities.values())
@@ -688,8 +688,8 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         relation_type: RelationType = RelationType.COLLABORATION,
         strength: float = 0.5,
         weight: float = 1.0,
-        attributes: Optional[Dict] = None,
-        ttl: Optional[float] = None,
+        attributes: dict | None = None,
+        ttl: float | None = None,
     ) -> Result:
         """创建关系"""
         try:
@@ -746,7 +746,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, message="关系已移除")
 
     async def update_relation_strength(
-        self, relation_id: str, delta: float = 0.0, absolute: Optional[float] = None
+        self, relation_id: str, delta: float = 0.0, absolute: float | None = None
     ) -> Result:
         """更新关系强度"""
         rel = self._relations.get(relation_id)
@@ -765,7 +765,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, data={"strength": rel.strength})
 
     async def get_entity_relations(
-        self, entity_id: str, relation_type: Optional[RelationType] = None, direction: str = "both"
+        self, entity_id: str, relation_type: RelationType | None = None, direction: str = "both"
     ) -> Result:
         """获取实体的所有关系"""
         if entity_id not in self._entities:
@@ -806,7 +806,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
 
     async def record_interaction(
-        self, source_id: str, target_id: str, interaction_type: str = "default", metadata: Optional[Dict] = None
+        self, source_id: str, target_id: str, interaction_type: str = "default", metadata: dict | None = None
     ) -> Result:
         """记录交互事件"""
         self._evaluator.record_interaction(source_id, target_id, interaction_type, metadata)
@@ -830,7 +830,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # ========================================================
 
     async def find_shortest_path(
-        self, source_id: str, target_id: str, max_depth: int = 6, relation_types: Optional[List[RelationType]] = None
+        self, source_id: str, target_id: str, max_depth: int = 6, relation_types: list[RelationType] | None = None
     ) -> Result:
         """BFS最短路径搜索"""
         if source_id not in self._entities or target_id not in self._entities:
@@ -999,7 +999,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             avg_strength = sum(r.strength for r in active_rels) / len(active_rels)
 
         # 度分布
-        degree_dist: Dict[str, int] = {}
+        degree_dist: dict[str, int] = {}
         for eid in self._entities:
             out = len(self._source_index.get(eid, set()))
             inn = len(self._target_index.get(eid, set()))
@@ -1049,7 +1049,7 @@ class AgentEros(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 健康检查
     # ========================================================
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — 社交网络关系分析路由"""
         _ = self.trace("execute")
         metrics_collector.counter("agent_eros_ops_total", labels={"action": action})

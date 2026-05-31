@@ -83,13 +83,14 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ObsidianLinkAnalyzer(object):
+class ObsidianLinkAnalyzer:
     """obsidian_link 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -292,8 +293,8 @@ class WikiLink:
 class TagEntry:
     name: str
     count: int = 0
-    nested: List[str] = field(default_factory=list)
-    notes: Set[str] = field(default_factory=set)
+    nested: list[str] = field(default_factory=list)
+    notes: set[str] = field(default_factory=set)
     created_at: float = field(default_factory=time.time)
 
     @property
@@ -302,12 +303,12 @@ class TagEntry:
 
 @dataclass
 class NoteMetadata:
-    frontmatter: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
-    aliases: List[str] = field(default_factory=list)
+    frontmatter: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    aliases: list[str] = field(default_factory=list)
     created: float = field(default_factory=time.time)
     modified: float = 0.0
-    cssclasses: List[str] = field(default_factory=list)
+    cssclasses: list[str] = field(default_factory=list)
     publish: bool = False
     description: str = ""
     author: str = ""
@@ -319,11 +320,11 @@ class ObsidianNote:
     path: str = ""
     content: str = ""
     note_type: NoteType = NoteType.NOTE
-    links: List[WikiLink] = field(default_factory=list)
-    backlinks: List[WikiLink] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    links: list[WikiLink] = field(default_factory=list)
+    backlinks: list[WikiLink] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     metadata: NoteMetadata = field(default_factory=NoteMetadata)
-    outgoing_links: Set[str] = field(default_factory=set)
+    outgoing_links: set[str] = field(default_factory=set)
     word_count: int = 0
     char_count: int = 0
     created_at: float = field(default_factory=time.time)
@@ -334,8 +335,8 @@ class ObsidianNote:
 class GraphNode:
     note_id: str
     title: str
-    connections: Set[str] = field(default_factory=set)
-    tags: Set[str] = field(default_factory=set)
+    connections: set[str] = field(default_factory=set)
+    tags: set[str] = field(default_factory=set)
     note_type: NoteType = NoteType.NOTE
     weight: int = 1
 
@@ -349,13 +350,13 @@ class GraphEdge:
 @dataclass
 class SearchOptions:
     query: str = ""
-    tags: List[str] = field(default_factory=list)
-    link_target: Optional[str] = None
+    tags: list[str] = field(default_factory=list)
+    link_target: str | None = None
     case_sensitive: bool = False
     regex: bool = False
     content_only: bool = False
     frontmatter_only: bool = False
-    note_type: Optional[NoteType] = None
+    note_type: NoteType | None = None
     limit: int = 50
     offset: int = 0
 
@@ -389,14 +390,14 @@ class ObsidianLink:
     FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 
     def __init__(self):
-        self._notes: Dict[str, ObsidianNote] = {}
-        self._title_index: Dict[str, str] = {}
-        self._alias_index: Dict[str, str] = {}
-        self._tag_index: Dict[str, TagEntry] = {}
-        self._link_graph: Dict[str, Set[str]] = defaultdict(set)
-        self._backlink_graph: Dict[str, Set[str]] = defaultdict(set)
-        self._graph_nodes: Dict[str, GraphNode] = {}
-        self._graph_edges: List[GraphEdge] = []
+        self._notes: dict[str, ObsidianNote] = {}
+        self._title_index: dict[str, str] = {}
+        self._alias_index: dict[str, str] = {}
+        self._tag_index: dict[str, TagEntry] = {}
+        self._link_graph: dict[str, set[str]] = defaultdict(set)
+        self._backlink_graph: dict[str, set[str]] = defaultdict(set)
+        self._graph_nodes: dict[str, GraphNode] = {}
+        self._graph_edges: list[GraphEdge] = []
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -429,7 +430,7 @@ class ObsidianLink:
         )()
         self._lock = threading.RLock()
         self._initialized = False
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "on_note_create": [],
             "on_note_update": [],
             "on_link_change": [],
@@ -450,8 +451,8 @@ class ObsidianLink:
         content: str = "",
         path: str = "",
         note_type: NoteType = NoteType.NOTE,
-        tags: Optional[List[str]] = None,
-        frontmatter: Optional[Dict] = None,
+        tags: list[str] | None = None,
+        frontmatter: dict | None = None,
     ) -> ObsidianNote:
         metadata = NoteMetadata(frontmatter=frontmatter or {}, tags=tags or [], created=time.time())
         note = ObsidianNote(
@@ -483,8 +484,8 @@ class ObsidianLink:
         return note
 
     def update_note(
-        self, note_id: str, content: Optional[str] = None, title: Optional[str] = None
-    ) -> Optional[ObsidianNote]:
+        self, note_id: str, content: str | None = None, title: str | None = None
+    ) -> ObsidianNote | None:
         with self._lock:
             note = self._notes.get(note_id)
             if not note:
@@ -525,10 +526,10 @@ class ObsidianLink:
             self._rebuild_graph()
         return True
 
-    def get_note(self, note_id: str) -> Optional[ObsidianNote]:
+    def get_note(self, note_id: str) -> ObsidianNote | None:
         return self._notes.get(note_id)
 
-    def get_note_by_title(self, title: str) -> Optional[ObsidianNote]:
+    def get_note_by_title(self, title: str) -> ObsidianNote | None:
         nid = self._title_index.get(title.lower())
         if nid:
             return self._notes.get(nid)
@@ -537,7 +538,7 @@ class ObsidianLink:
             return self._notes.get(nid)
         return None
 
-    def get_backlinks(self, note_id: str) -> List[Dict[str, Any]]:
+    def get_backlinks(self, note_id: str) -> list[dict[str, Any]]:
         note = self._notes.get(note_id)
         if not note:
             return []
@@ -562,11 +563,11 @@ class ObsidianLink:
                         )
         return results
 
-    def get_outgoing_links(self, note_id: str) -> List[WikiLink]:
+    def get_outgoing_links(self, note_id: str) -> list[WikiLink]:
         note = self._notes.get(note_id)
         return note.links if note else []
 
-    def get_unlinked_mentions(self, note_id: str) -> List[Dict[str, Any]]:
+    def get_unlinked_mentions(self, note_id: str) -> list[dict[str, Any]]:
         note = self._notes.get(note_id)
         if not note:
             return []
@@ -594,7 +595,7 @@ class ObsidianLink:
                             break
         return mentions
 
-    def search(self, options: SearchOptions) -> List[Dict[str, Any]]:
+    def search(self, options: SearchOptions) -> list[dict[str, Any]]:
         results = []
         with self._lock:
             candidates = self._notes.values()
@@ -639,8 +640,8 @@ class ObsidianLink:
         ]
 
     def get_graph(
-        self, view: GraphView = GraphView.LOCAL, center_id: Optional[str] = None, max_depth: int = 2
-    ) -> Dict[str, Any]:
+        self, view: GraphView = GraphView.LOCAL, center_id: str | None = None, max_depth: int = 2
+    ) -> dict[str, Any]:
         nodes = {}
         edges = []
 
@@ -686,7 +687,7 @@ class ObsidianLink:
 
         return {"nodes": nodes, "edges": edges, "view": view.value}
 
-    def get_tags(self, sort_by: str = "count") -> List[Dict[str, Any]]:
+    def get_tags(self, sort_by: str = "count") -> list[dict[str, Any]]:
         with self._lock:
             tags = []
             for name, entry in self._tag_index.items():
@@ -705,7 +706,7 @@ class ObsidianLink:
                 tags.sort(key=lambda t: t["count"], reverse=True)
             return tags
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             total_links = sum(len(n.links) for n in self._notes.values())
             total_backlinks = sum(len(n.backlinks) for n in self._notes.values())
@@ -822,7 +823,7 @@ class ObsidianLink:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

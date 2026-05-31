@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class GoalTrackerAnalyzer(object):
+class GoalTrackerAnalyzer:
     """goal_tracker 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -272,8 +272,8 @@ class Milestone:
     name: str
     description: str = ""
     completed: bool = False
-    completed_at: Optional[str] = None
-    deadline: Optional[str] = None
+    completed_at: str | None = None
+    deadline: str | None = None
 
 @dataclass
 class Goal:
@@ -286,23 +286,23 @@ class Goal:
     priority: int = GoalPriority.MEDIUM.value
 
     # 关系
-    parent_id: Optional[str] = None
-    sub_goals: List[str] = field(default_factory=list)
-    milestones: List[Milestone] = field(default_factory=list)
+    parent_id: str | None = None
+    sub_goals: list[str] = field(default_factory=list)
+    milestones: list[Milestone] = field(default_factory=list)
 
     # 时间
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    deadline: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    deadline: str | None = None
 
     # 进度
     progress: float = 0.0  # 0-100
     completed_cycles: int = 0
 
     # 元数据
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
 
     def mark_started(self):
         self.status = GoalStatus.IN_PROGRESS.value
@@ -336,7 +336,7 @@ class GoalTracker:
     """
 
     def __init__(self):
-        self.goals: Dict[str, Goal] = {}
+        self.goals: dict[str, Goal] = {}
         self.cycle_interval = 60  # 默认60秒检查周期
 
         # 统计
@@ -351,7 +351,7 @@ class GoalTracker:
         priority: int = GoalPriority.MEDIUM.value,
         deadline: str = None,
         parent_id: str = None,
-        milestones: List[Dict] = None,
+        milestones: list[dict] = None,
     ) -> Goal:
         """创建目标"""
         goal = Goal(
@@ -377,23 +377,23 @@ class GoalTracker:
         logger.info(f"[Goal] 创建目标: {name} ({goal.id})")
         return goal
 
-    def get_goal(self, goal_id: str) -> Optional[Goal]:
+    def get_goal(self, goal_id: str) -> Goal | None:
         """获取目标"""
         return self.goals.get(goal_id)
 
-    def get_goals_by_status(self, status: str) -> List[Goal]:
+    def get_goals_by_status(self, status: str) -> list[Goal]:
         """按状态获取目标"""
         return [g for g in self.goals.values() if g.status == status]
 
-    def get_active_goals(self) -> List[Goal]:
+    def get_active_goals(self) -> list[Goal]:
         """获取活跃目标（未完成）"""
         return [g for g in self.goals.values() if g.status in [GoalStatus.PENDING.value, GoalStatus.IN_PROGRESS.value]]
 
-    def get_top_level_goals(self) -> List[Goal]:
+    def get_top_level_goals(self) -> list[Goal]:
         """获取顶级目标（无父目标）"""
         return [g for g in self.goals.values() if g.parent_id is None]
 
-    def get_prioritized_goals(self) -> List[Goal]:
+    def get_prioritized_goals(self) -> list[Goal]:
         """获取按优先级排序的目标"""
         return sorted(self.get_active_goals(), key=lambda g: (g.priority, g.created_at))
 
@@ -451,7 +451,7 @@ class GoalTracker:
 
     def add_milestone(
         self, goal_id: str, name: str, description: str = "", deadline: str = None
-    ) -> Optional[Milestone]:
+    ) -> Milestone | None:
         """添加里程碑"""
         goal = self.goals.get(goal_id)
         if not goal:
@@ -501,7 +501,7 @@ class GoalTracker:
         if parent.progress >= 100 and parent.status != GoalStatus.COMPLETED.value:
             self.complete_goal(parent_id)
 
-    def get_overdue_goals(self) -> List[Goal]:
+    def get_overdue_goals(self) -> list[Goal]:
         """获取逾期目标"""
         now = datetime.now()
         overdue = []
@@ -515,7 +515,7 @@ class GoalTracker:
 
         return overdue
 
-    def get_next_deadline(self) -> Optional[Dict]:
+    def get_next_deadline(self) -> dict | None:
         """获取最近的截止日期"""
         active = self.get_active_goals()
         with_deadline = [g for g in active if g.deadline]
@@ -531,7 +531,7 @@ class GoalTracker:
             "time_left": str(datetime.fromisoformat(next_goal.deadline) - datetime.now()),
         }
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> dict:
         """生成目标报告"""
         total = len(self.goals)
         completed = len([g for g in self.goals.values() if g.status == GoalStatus.COMPLETED.value])

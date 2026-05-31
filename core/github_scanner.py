@@ -366,7 +366,7 @@ class GitHubScannerEngine:
         raw = f"{scan_type}_{ts}"
         return hashlib.md5(raw.encode()).hexdigest()[:12] + f"_{ts}"
 
-    async def _fetch_json(self, url: str, timeout: int = 15) -> Optional[dict]:
+    async def _fetch_json(self, url: str, timeout: int = 15) -> dict | None:
         """安全获取JSON"""
         try:
             import httpx
@@ -498,7 +498,7 @@ class GitHubScannerEngine:
         unique.sort(key=lambda x: x.stars, reverse=True)
         return unique[:50]
 
-    def _parse_trending_item(self, item: dict, since: str) -> Optional[TrendingProject]:
+    def _parse_trending_item(self, item: dict, since: str) -> TrendingProject | None:
         """解析Trending项目"""
         desc = item.get("description") or ""
         topics = item.get("topics") or []
@@ -601,7 +601,7 @@ class GitHubScannerEngine:
         await asyncio.sleep(1)
         return updates
 
-    async def _check_repo_release(self, repo: str, info: dict) -> Optional[TrackedRepoUpdate]:
+    async def _check_repo_release(self, repo: str, info: dict) -> TrackedRepoUpdate | None:
         """查GitHub Release"""
         data = await self._fetch_json(f"https://api.github.com/repos/{repo}/releases/latest")
         if not data or "tag_name" not in data:
@@ -680,7 +680,7 @@ class GitHubScannerEngine:
     def get_reports(self, limit=20) -> list:
         return self.store.get_reports(limit)
 
-    def get_report(self, report_id: str) -> Optional[dict]:
+    def get_report(self, report_id: str) -> dict | None:
         return self.store.get_report(report_id)
 
     def get_latest_trending(self, limit=30) -> list:
@@ -690,7 +690,7 @@ class GitHubScannerEngine:
 # ─── 单例 + 包装方法 ───
 _gh_instance = None
 
-def get_github_scanner() -> "GitHubScannerEngine":
+def get_github_scanner() -> GitHubScannerEngine:
     global _gh_instance
     if _gh_instance is None:
         _gh_instance = GitHubScannerEngine()

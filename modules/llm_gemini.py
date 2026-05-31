@@ -77,7 +77,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LlmGeminiAnalyzer(object):
+class LlmGeminiAnalyzer:
     """llm_gemini 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -280,7 +280,7 @@ class LlmGeminiModule:
 
     """Google Gemini模型管理 - 限流/熔断/缓存/多模态/上下文窗口管理"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -322,16 +322,16 @@ class LlmGeminiModule:
             "total_latency_ms": 0,
             "multimodal_requests": 0,
         }
-        self._models: Dict[str, Dict] = {}
+        self._models: dict[str, dict] = {}
         self._default_model = self.config.get("default_model", "gemini-2.5-flash")
         self._api_key = self.config.get("api_key", "")
         self._base_url = self.config.get("base_url", "https://generativelanguage.googleapis.com/v1beta")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 60)
-        self._circuits: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
-        self._cache: Dict[str, Dict] = {}
+        self._circuits: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 3600)
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 10))
         # 多模态支持
@@ -346,7 +346,7 @@ class LlmGeminiModule:
             "application/pdf",
         ]
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_models()
             self._register_default_rate_limits()
@@ -361,7 +361,7 @@ class LlmGeminiModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -533,7 +533,7 @@ class LlmGeminiModule:
                     "output_tokens": out_tok,
                     "latency_ms": latency,
                     "multimodal": has_media,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -568,7 +568,7 @@ class LlmGeminiModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_model = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": [], "multimodal": 0})
         for r in recent:

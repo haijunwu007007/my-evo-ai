@@ -55,7 +55,7 @@ class TrendingReport:
     language: str = "python"
     total_repos: int = 0
     ai_repos: int = 0
-    repos: List[Dict] = field(default_factory=list)
+    repos: list[dict] = field(default_factory=list)
     summary: str = ""
 
 class TrendingPipeline:
@@ -70,9 +70,9 @@ class TrendingPipeline:
 
     def __init__(self, **kwargs):
         self._config = self._load_config()
-        self._history: List[Dict] = []
+        self._history: list[dict] = []
         self._lock = threading.Lock()
-        self._last_report: Optional[TrendingReport] = None
+        self._last_report: TrendingReport | None = None
         self._stats = {
             "total_scans": 0,
             "total_ai_found": 0,
@@ -84,11 +84,11 @@ class TrendingPipeline:
     # 配置管理
     # ═══════════════════════════════════════════════════
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """加载配置文件，不存在则使用默认值"""
         try:
             if CONFIG_FILE.exists():
-                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                with open(CONFIG_FILE, encoding="utf-8") as f:
                     cfg = json.load(f)
                     return {**DEFAULT_CONFIG, **cfg}
         except Exception as e:
@@ -104,7 +104,7 @@ class TrendingPipeline:
         except Exception as e:
             logger.error(f"配置保存失败: {e}")
 
-    def configure(self, **kwargs) -> Dict:
+    def configure(self, **kwargs) -> dict:
         """
         动态配置管线参数
 
@@ -131,7 +131,7 @@ class TrendingPipeline:
     # 核心执行入口
     # ═══════════════════════════════════════════════════
 
-    async def execute(self, action: str = "run", params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str = "run", params: dict | None = None) -> dict:
         """统一执行入口 — 兼容 scheduler 和 API 调用"""
         if isinstance(action, dict):
             params = action
@@ -159,7 +159,7 @@ class TrendingPipeline:
     # 管线执行
     # ═══════════════════════════════════════════════════
 
-    def _run_pipeline(self, params: Dict) -> Dict:
+    def _run_pipeline(self, params: dict) -> dict:
         """
         执行完整趋势分析管线
 
@@ -246,7 +246,7 @@ class TrendingPipeline:
             },
         }
 
-    def _call_scanner(self, language: str) -> Dict:
+    def _call_scanner(self, language: str) -> dict:
         """调用 GithubScanner 模块"""
         try:
             from modules.github_scanner import GithubScanner
@@ -262,7 +262,7 @@ class TrendingPipeline:
             logger.error(f"GithubScanner 调用失败: {e}")
             return {"success": False, "error": str(e)}
 
-    def _filter_ai_repos(self, repos: List[Dict], keywords: List[str], min_stars: int) -> List[Dict]:
+    def _filter_ai_repos(self, repos: list[dict], keywords: list[str], min_stars: int) -> list[dict]:
         """AI 关键词 + 星标阈值筛选"""
         filtered = []
         keyword_set = set(k.lower().strip() for k in keywords)
@@ -287,8 +287,8 @@ class TrendingPipeline:
 
         return filtered
 
-    def _build_report(self, all_repos: List[Dict], ai_repos: List[Dict],
-                      language: str, keywords: List[str]) -> Dict:
+    def _build_report(self, all_repos: list[dict], ai_repos: list[dict],
+                      language: str, keywords: list[str]) -> dict:
         """生成结构化报告"""
         import secrets
 
@@ -355,13 +355,13 @@ class TrendingPipeline:
     # 持久化
     # ═══════════════════════════════════════════════════
 
-    def _persist_report(self, report: Dict):
+    def _persist_report(self, report: dict):
         """持久化报告到本地 JSON 历史库"""
         try:
             HISTORY_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
             history = []
             if HISTORY_DB_PATH.exists():
-                with open(HISTORY_DB_PATH, "r", encoding="utf-8") as f:
+                with open(HISTORY_DB_PATH, encoding="utf-8") as f:
                     history = json.load(f)
 
             # 保留最近 90 天的记录
@@ -385,7 +385,7 @@ class TrendingPipeline:
     # 通知推送
     # ═══════════════════════════════════════════════════
 
-    def _send_notification(self, report: Dict) -> Dict:
+    def _send_notification(self, report: dict) -> dict:
         """通过所有已配置渠道发送通知"""
         results = []
 
@@ -416,7 +416,7 @@ class TrendingPipeline:
         all_ok = all(r.get("success") for r in results)
         return {"success": all_ok, "results": results}
 
-    def _send_feishu(self, report: Dict) -> Dict:
+    def _send_feishu(self, report: dict) -> dict:
         """发送飞书消息卡片"""
         import urllib.request as req
         import urllib.error
@@ -470,7 +470,7 @@ class TrendingPipeline:
             logger.error(f"飞书推送异常: {e}")
             return {"channel": "feishu", "success": False, "error": str(e)[:200]}
 
-    def _send_dingtalk(self, report: Dict) -> Dict:
+    def _send_dingtalk(self, report: dict) -> dict:
         """发送钉钉消息"""
         import urllib.request as req
 
@@ -500,7 +500,7 @@ class TrendingPipeline:
         except Exception as e:
             return {"channel": "dingtalk", "success": False, "error": str(e)[:200]}
 
-    def _send_wechat(self, report: Dict) -> Dict:
+    def _send_wechat(self, report: dict) -> dict:
         """发送企业微信消息"""
         import urllib.request as req
 
@@ -532,7 +532,7 @@ class TrendingPipeline:
     # Status / Health API
     # ═══════════════════════════════════════════════════
 
-    def _action_status(self, params: Dict) -> Dict:
+    def _action_status(self, params: dict) -> dict:
         return {
             "success": True,
             "data": {
@@ -547,18 +547,18 @@ class TrendingPipeline:
             },
         }
 
-    def _action_health(self, params: Dict) -> Dict:
+    def _action_health(self, params: dict) -> dict:
         return {
             "success": True,
             "status": "ok" if self._config.get("enabled", True) else "disabled",
             "version": self.VERSION,
         }
 
-    def _action_history(self, params: Dict) -> Dict:
+    def _action_history(self, params: dict) -> dict:
         """获取历史扫描记录"""
         try:
             if HISTORY_DB_PATH.exists():
-                with open(HISTORY_DB_PATH, "r", encoding="utf-8") as f:
+                with open(HISTORY_DB_PATH, encoding="utf-8") as f:
                     history = json.load(f)
                 limit = params.get("limit", 30)
                 return {"success": True, "history": history[-limit:], "total": len(history)}
@@ -566,7 +566,7 @@ class TrendingPipeline:
             logger.error(f"读取历史失败: {e}")
         return {"success": True, "history": [], "total": 0}
 
-    def _action_last_report(self, params: Dict) -> Dict:
+    def _action_last_report(self, params: dict) -> dict:
         if self._last_report:
             return {"success": True, "report": asdict(self._last_report)}
         return {"success": False, "error": "尚无报告，请先执行一次扫描"}

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - EnterpriseModule 企业级模块基类
 ====================================================
@@ -70,11 +69,11 @@ class ModuleStats:
     success_count: int = 0
     total_operations: int = 0
     total_latency_ms: float = 0.0
-    latencies: List[float] = field(default_factory=list)
-    last_request_time: Optional[str] = None
-    last_error_time: Optional[str] = None
-    last_error_message: Optional[str] = None
-    start_time: Optional[datetime] = None
+    latencies: list[float] = field(default_factory=list)
+    last_request_time: str | None = None
+    last_error_time: str | None = None
+    last_error_message: str | None = None
+    start_time: datetime | None = None
     uptime_seconds: float = 0.0
 
     def get(self, key: str, default=None):
@@ -116,7 +115,7 @@ class ModuleStats:
         idx = max(0, int(len(sorted_lat) * 0.99) - 1)
         return round(sorted_lat[idx], 2)
 
-    def record_request(self, latency_ms: float, success: bool, error: Optional[str] = None):
+    def record_request(self, latency_ms: float, success: bool, error: str | None = None):
         """记录一次请求"""
         self.request_count += 1
         self.total_latency_ms += latency_ms
@@ -133,7 +132,7 @@ class ModuleStats:
             self.last_error_time = now
             self.last_error_message = error
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典"""
         return {
             "request_count": self.request_count,
@@ -159,11 +158,11 @@ class HealthReport:
     uptime_seconds: float = 0.0
     checks_run: int = 0
     error_rate: float = 0.0
-    checks: Dict[str, Any] = field(default_factory=dict)
-    details: Optional[Dict[str, Any]] = None
+    checks: dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] | None = None
     version: str = "V0.1"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status,
             "healthy": self.healthy,
@@ -184,9 +183,9 @@ class Result:
 
     success: bool = True
     data: Any = None
-    error: Optional[str] = None
-    module_id: Optional[str] = None
-    trace_id: Optional[str] = None
+    error: str | None = None
+    module_id: str | None = None
+    trace_id: str | None = None
     latency_ms: float = 0.0
     timestamp: str = ""
 
@@ -194,7 +193,7 @@ class Result:
         if not self.timestamp:
             self.timestamp = datetime.now().isoformat()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "data": self.data,
@@ -370,7 +369,7 @@ class EnterpriseModule(ABC):
     #   version              → 版本信息
     #   stop / shutdown      → 停止模块
 
-    def _get_available_actions(self) -> List[str]:
+    def _get_available_actions(self) -> list[str]:
         """收集模块所有可用的action名称（子类可override）"""
         # 标准action始终可用
         standard = ["status", "health", "list_actions", "configure", "reset", "metrics", "version", "stop"]
@@ -382,7 +381,7 @@ class EnterpriseModule(ABC):
                     standard.append(action_name)
         return list(dict.fromkeys(standard))
 
-    def _handle_standard_action(self, action: str, params: Dict[str, Any]) -> Optional[Result]:
+    def _handle_standard_action(self, action: str, params: dict[str, Any]) -> Result | None:
         """
         处理标准action。返回Result表示已处理，返回None交给子类。
         """
@@ -426,7 +425,7 @@ class EnterpriseModule(ABC):
 
         return None  # 未处理，交给子类
 
-    def _action_status(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_status(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 返回模块完整状态"""
         try:
             status_val = self.status.value if hasattr(self.status, "value") else str(self.status)
@@ -458,7 +457,7 @@ class EnterpriseModule(ABC):
             "capabilities": caps,
         }
 
-    def _action_health(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_health(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 健康检查"""
         try:
             hc = self.health_check()
@@ -470,7 +469,7 @@ class EnterpriseModule(ABC):
             logger.warning(f"enterprise_module: {e}")
         return {"status": "unknown", "module_id": getattr(self, "module_id", "")}
 
-    def _action_list_actions(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_list_actions(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 列出所有可用操作"""
         actions = self._get_available_actions()
         return {
@@ -488,7 +487,7 @@ class EnterpriseModule(ABC):
             ],
         }
 
-    def _action_configure(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_configure(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 修改配置"""
         if not isinstance(params, dict) or not params:
             return {"message": "当前配置", "config": self.config}
@@ -500,12 +499,12 @@ class EnterpriseModule(ABC):
             updated.append(k)
         return {"success": True, "updated_keys": updated, "config": self.config}
 
-    def _action_reset(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_reset(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 重置统计"""
         self.stats = ModuleStats()
         return {"success": True, "message": "统计已重置"}
 
-    def _action_metrics(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_metrics(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 运行指标"""
         s = self.stats
         return {
@@ -518,7 +517,7 @@ class EnterpriseModule(ABC):
             "uptime_seconds": self._uptime(),
         }
 
-    def _action_version(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_version(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 版本信息"""
         return {
             "module_id": self.module_id,
@@ -528,12 +527,12 @@ class EnterpriseModule(ABC):
             "framework": "AUTO-EVO-AI EnterpriseModule V0.1",
         }
 
-    def _action_stop(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _action_stop(self, params: dict[str, Any]) -> dict[str, Any]:
         """标准action: 停止模块"""
         self.status = ModuleStatus.STOPPED
         return {"success": True, "message": f"模块 {self.module_id} 已停止"}
 
-    async def execute(self, action, params: Optional[Dict[str, Any]] = None) -> Any:
+    async def execute(self, action, params: dict[str, Any] | None = None) -> Any:
         """
         执行模块动作 — 带标准action路由
         A级要求：链路追踪 + 指标采集 + 审计日志 + try/except + stats记录
@@ -657,7 +656,7 @@ class EnterpriseModule(ABC):
         self.status = ModuleStatus.STOPPED
         self.info(f"模块 {self.module_id} 已关闭")
 
-    def get_status(self, *args, **kwargs) -> Dict[str, Any]:
+    def get_status(self, *args, **kwargs) -> dict[str, Any]:
         """获取模块状态信息（兼容带参调用）"""
         return {
             "module_id": self.module_id,
@@ -710,11 +709,11 @@ class EnterpriseModule(ABC):
 
         return _NoopSpan()
 
-    def record_metric(self, name: str, value: float = 1.0, tags: Optional[Dict] = None):
+    def record_metric(self, name: str, value: float = 1.0, tags: dict | None = None):
         """记录Prometheus指标（别名，兼容不同调用方式）"""
         self.record_metrics(name, value, tags)
 
-    def record_metrics(self, name: str, value: float = 1.0, tags: Optional[Dict] = None):
+    def record_metrics(self, name: str, value: float = 1.0, tags: dict | None = None):
         """记录Prometheus指标"""
         if self._metrics:
             if hasattr(self._metrics, "record"):
@@ -748,7 +747,7 @@ class EnterpriseModule(ABC):
             return (datetime.now() - self.stats.start_time).total_seconds()
         return 0.0
 
-    async def _safe_execute(self, action: str, params: Optional[Dict] = None, handler=None) -> Result:
+    async def _safe_execute(self, action: str, params: dict | None = None, handler=None) -> Result:
         """
         安全执行包装器 — 自动处理链路追踪、指标、审计、统计
         A级模块的execute()方法应使用此包装器
@@ -813,7 +812,7 @@ class EnterpriseModule(ABC):
     def debug(self, msg: str):
         self._logger.debug(f"[{self.module_id}] {msg}")
 
-    def _update_status(self, status: "ModuleStatus"):
+    def _update_status(self, status: ModuleStatus):
         """更新模块状态（兼容方法）"""
         self.status = status
 

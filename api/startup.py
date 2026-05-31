@@ -140,7 +140,7 @@ async def warmup_modules():
                 else:
                     init()
             ok += 1
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"[WARMUP] 预热超时: {name}")
         except Exception as e:
             logger.warning(f"[WARMUP] 预热失败: {name}: {e}")

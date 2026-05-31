@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class OffsetCommitAnalyzer(object):
+class OffsetCommitAnalyzer:
     """offset_commit 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -309,7 +310,7 @@ class ConsumerRecord:
     key: str = ""
     value: str = ""
     timestamp: float = field(default_factory=time.time)
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class ConsumerGroup:
@@ -318,13 +319,13 @@ class ConsumerGroup:
     protocol: str = "range"
     generation_id: int = 0
     state: ConsumerState = ConsumerState.STABLE
-    members: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    members: dict[str, dict[str, Any]] = field(default_factory=dict)
     leader_id: str = ""
-    assignment: Dict[str, List[TopicPartition]] = field(default_factory=dict)
-    subscription: List[str] = field(default_factory=list)
+    assignment: dict[str, list[TopicPartition]] = field(default_factory=dict)
+    subscription: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class OffsetCheckpoint:
@@ -350,8 +351,8 @@ class CommitResult:
 class RebalanceResult:
     group_id: str
     generation_id: int
-    new_assignment: Dict[str, List[TopicPartition]]
-    member_changes: Dict[str, str] = field(default_factory=dict)
+    new_assignment: dict[str, list[TopicPartition]]
+    member_changes: dict[str, str] = field(default_factory=dict)
     duration_ms: float = 0.0
 
 @dataclass
@@ -394,7 +395,7 @@ class OffsetCommit:
 
     """Enterprise consumer offset tracking with exactly-once semantics and group management."""
 
-    def __init__(self, config: Optional[OffsetConfig] = None):
+    def __init__(self, config: OffsetConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -427,17 +428,17 @@ class OffsetCommit:
         )()
 
         self._config = config or OffsetConfig()
-        self._groups: Dict[str, ConsumerGroup] = {}
-        self._offsets: Dict[str, Dict[TopicPartition, PartitionOffset]] = defaultdict(dict)
-        self._checkpoints: List[OffsetCheckpoint] = []
-        self._pending_commits: Dict[str, Dict[TopicPartition, PartitionOffset]] = defaultdict(dict)
+        self._groups: dict[str, ConsumerGroup] = {}
+        self._offsets: dict[str, dict[TopicPartition, PartitionOffset]] = defaultdict(dict)
+        self._checkpoints: list[OffsetCheckpoint] = []
+        self._pending_commits: dict[str, dict[TopicPartition, PartitionOffset]] = defaultdict(dict)
         self._committed_history: deque = deque(maxlen=100000)
-        self._heartbeats: Dict[str, Dict[str, float]] = defaultdict(dict)
+        self._heartbeats: dict[str, dict[str, float]] = defaultdict(dict)
         self._lock = threading.RLock()
         self._initialized = False
         self._auto_commit_thread = None
         self._checkpoint_thread = None
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "before_commit": [],
             "after_commit": [],
             "on_rebalance": [],
@@ -462,14 +463,14 @@ class OffsetCommit:
                 self._config.auto_commit_interval_ms,
             )
 
-    def create_group(self, group_id: str, subscription: Optional[List[str]] = None) -> ConsumerGroup:
+    def create_group(self, group_id: str, subscription: list[str] | None = None) -> ConsumerGroup:
         group = ConsumerGroup(group_id=group_id, subscription=subscription or [])
         with self._lock:
             self._groups[group_id] = group
         logger.info("Consumer group created: %s", group_id)
         return group
 
-    def join_group(self, group_id: str, member_id: str, metadata: Optional[Dict] = None) -> bool:
+    def join_group(self, group_id: str, member_id: str, metadata: dict | None = None) -> bool:
         with self._lock:
             group = self._groups.get(group_id)
             if not group:
@@ -522,7 +523,7 @@ class OffsetCommit:
             self._heartbeats[group_id][member_id] = time.time()
             return True
 
-    def subscribe(self, group_id: str, topics: List[str]) -> bool:
+    def subscribe(self, group_id: str, topics: list[str]) -> bool:
         with self._lock:
             group = self._groups.get(group_id)
             if not group:
@@ -542,7 +543,7 @@ class OffsetCommit:
                 partition_offset.committed = False
         return True
 
-    def seek_to_beginning(self, group_id: str, tps: List[TopicPartition]) -> int:
+    def seek_to_beginning(self, group_id: str, tps: list[TopicPartition]) -> int:
         count = 0
         for tp in tps:
             if self.seek(group_id, tp, 0):
@@ -550,7 +551,7 @@ class OffsetCommit:
         return count
 
     def seek_to_end(
-        self, group_id: str, tps: List[TopicPartition], end_offsets: Optional[Dict[TopicPartition, int]] = None
+        self, group_id: str, tps: list[TopicPartition], end_offsets: dict[TopicPartition, int] | None = None
     ) -> int:
         count = 0
         for tp in tps:
@@ -559,7 +560,7 @@ class OffsetCommit:
                 count += 1
         return count
 
-    def commit_sync(self, group_id: str, offsets: Optional[Dict[TopicPartition, int]] = None) -> List[CommitResult]:
+    def commit_sync(self, group_id: str, offsets: dict[TopicPartition, int] | None = None) -> list[CommitResult]:
         results = []
         with self._lock:
             if offsets:
@@ -574,7 +575,7 @@ class OffsetCommit:
         return results
 
     def commit_async(
-        self, group_id: str, offsets: Dict[TopicPartition, int], callback: Optional[Callable] = None
+        self, group_id: str, offsets: dict[TopicPartition, int], callback: Callable | None = None
     ) -> None:
         for tp, offset in offsets.items():
             with self._lock:
@@ -596,14 +597,14 @@ class OffsetCommit:
             po.offset = max(po.offset, record.offset)
             po.committed = False
 
-    def process_batch(self, group_id: str, records: List[ConsumerRecord]) -> int:
+    def process_batch(self, group_id: str, records: list[ConsumerRecord]) -> int:
         for record in records:
             self.process_record(group_id, record)
         if self._config.commit_strategy == CommitStrategy.AUTO:
             self.commit_sync(group_id)
         return len(records)
 
-    def get_committed_offset(self, group_id: str, tp: TopicPartition) -> Optional[int]:
+    def get_committed_offset(self, group_id: str, tp: TopicPartition) -> int | None:
         with self._lock:
             po = self._offsets.get(group_id, {}).get(tp)
             if po and po.committed:
@@ -616,7 +617,7 @@ class OffsetCommit:
             return po.offset if po else -1
         return -1
 
-    def get_all_offsets(self, group_id: str) -> Dict[str, Dict[str, int]]:
+    def get_all_offsets(self, group_id: str) -> dict[str, dict[str, int]]:
         result = {}
         with self._lock:
             for tp, po in self._offsets.get(group_id, {}).items():
@@ -627,7 +628,7 @@ class OffsetCommit:
                 }
         return result
 
-    def rebalance(self, group_id: str) -> Optional[RebalanceResult]:
+    def rebalance(self, group_id: str) -> RebalanceResult | None:
         start = time.time()
         with self._lock:
             group = self._groups.get(group_id)
@@ -672,7 +673,7 @@ class OffsetCommit:
                 pass
         return result
 
-    def get_group_info(self, group_id: str) -> Optional[Dict[str, Any]]:
+    def get_group_info(self, group_id: str) -> dict[str, Any] | None:
         with self._lock:
             group = self._groups.get(group_id)
             if not group:
@@ -690,7 +691,7 @@ class OffsetCommit:
                 },
             }
 
-    def list_groups(self) -> List[Dict[str, Any]]:
+    def list_groups(self) -> list[dict[str, Any]]:
         with self._lock:
             return [
                 {
@@ -747,7 +748,7 @@ class OffsetCommit:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             groups = self.list_groups()

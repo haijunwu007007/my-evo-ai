@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -129,7 +128,7 @@ class ChatMessage:
     role: MessageRole = MessageRole.USER
     content: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     tokens: int = 0
     confidence: float = 1.0
 
@@ -140,13 +139,13 @@ class Conversation:
     conversation_id: str = field(default_factory=lambda: f"conv_{uuid.uuid4().hex[:10]}")
     title: str = ""
     status: ConversationStatus = ConversationStatus.ACTIVE
-    messages: List[ChatMessage] = field(default_factory=list)
-    participants: List[str] = field(default_factory=list)
+    messages: list[ChatMessage] = field(default_factory=list)
+    participants: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    context: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class IntentResult:
@@ -154,13 +153,13 @@ class IntentResult:
 
     intent: IntentType = IntentType.UNKNOWN
     confidence: float = 0.0
-    entities: List[Dict[str, str]] = field(default_factory=list)
-    keywords: List[str] = field(default_factory=list)
+    entities: list[dict[str, str]] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
 
 class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """智能对话管理器"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config or {})
         self.module_name = "智能对话管理"
@@ -170,11 +169,11 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
 
         # 会话存储
-        self._conversations: Dict[str, Conversation] = {}
+        self._conversations: dict[str, Conversation] = {}
         # 用户会话映射
-        self._user_conversations: Dict[str, List[str]] = defaultdict(list)
+        self._user_conversations: dict[str, list[str]] = defaultdict(list)
         # 意图规则
-        self._intent_rules: Dict[IntentType, List[str]] = {
+        self._intent_rules: dict[IntentType, list[str]] = {
             IntentType.GREETING: ["你好", "hi", "hello", "嗨", "在吗", "早上好", "下午好", "晚上好"],
             IntentType.QUESTION: ["?", "？", "怎么", "为什么", "如何", "什么", "吗", "哪"],
             IntentType.COMMAND: ["帮我", "请", "执行", "启动", "停止", "创建", "删除", "设置"],
@@ -202,7 +201,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
         logger.info("[Chatwise] 已关闭")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         active = sum(1 for c in self._conversations.values() if c.status == ConversationStatus.ACTIVE)
         return {
             "status": "healthy" if self._initialized else "stopped",
@@ -213,7 +212,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "version": "V0.1",
         }
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "chatwise"})
         self.metrics_collector.counter("chatwise.execute.calls", 1)
         self.audit("execute", {"module": "chatwise"})
@@ -249,7 +248,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.error(f"[Chatwise] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _create_conversation(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_conversation(self, params: dict[str, Any]) -> dict[str, Any]:
         conv = Conversation(
             title=params.get("title", ""),
             participants=params.get("participants", []),
@@ -274,7 +273,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _send_message(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _send_message(self, params: dict[str, Any]) -> dict[str, Any]:
         conv_id = params.get("conversation_id", "")
         conv = self._conversations.get(conv_id)
         if not conv:
@@ -329,7 +328,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _get_conversation(self, conversation_id: str) -> Dict[str, Any]:
+    def _get_conversation(self, conversation_id: str) -> dict[str, Any]:
         conv = self._conversations.get(conversation_id)
         if not conv:
             return {"success": False, "error": "会话不存在"}
@@ -359,8 +358,8 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def _list_conversations(
-        self, user_id: Optional[str] = None, status: Optional[str] = None, limit: int = 50
-    ) -> Dict[str, Any]:
+        self, user_id: str | None = None, status: str | None = None, limit: int = 50
+    ) -> dict[str, Any]:
         convs = list(self._conversations.values())
         if user_id:
             user_conv_ids = set(self._user_conversations.get(user_id, []))
@@ -382,7 +381,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def _close_conversation(self, conversation_id: str) -> Dict[str, Any]:
+    def _close_conversation(self, conversation_id: str) -> dict[str, Any]:
         conv = self._conversations.get(conversation_id)
         if not conv:
             return {"success": False, "error": "会话不存在"}
@@ -393,7 +392,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._stats["active_conversations"] = max(0, self._stats["active_conversations"] - 1)
         return {"success": True, "result": {"status": "closed", "conversation_id": conversation_id}}
 
-    def _archive_conversation(self, conversation_id: str) -> Dict[str, Any]:
+    def _archive_conversation(self, conversation_id: str) -> dict[str, Any]:
         conv = self._conversations.get(conversation_id)
         if not conv:
             return {"success": False, "error": "会话不存在"}
@@ -403,7 +402,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._stats["active_conversations"] = max(0, self._stats["active_conversations"] - 1)
         return {"success": True, "result": {"status": "archived"}}
 
-    def _detect_intent(self, text: str) -> Dict[str, Any]:
+    def _detect_intent(self, text: str) -> dict[str, Any]:
         result = self._detect_intent_internal(text)
         self._stats["intents_resolved"] += 1
         return {
@@ -464,7 +463,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         options = replies.get(intent.intent, replies[IntentType.UNKNOWN])
         return options[int(text.__hash__()) % len(options)]
 
-    def _search_messages(self, query: str, limit: int = 20) -> Dict[str, Any]:
+    def _search_messages(self, query: str, limit: int = 20) -> dict[str, Any]:
         query_lower = query.lower()
         results = []
         for conv in self._conversations.values():
@@ -485,20 +484,20 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 break
         return {"success": True, "result": results}
 
-    def _get_context(self, conversation_id: str) -> Dict[str, Any]:
+    def _get_context(self, conversation_id: str) -> dict[str, Any]:
         conv = self._conversations.get(conversation_id)
         if not conv:
             return {"success": False, "error": "会话不存在"}
         return {"success": True, "result": conv.context}
 
-    def _set_context(self, conversation_id: str, key: str, value: Any) -> Dict[str, Any]:
+    def _set_context(self, conversation_id: str, key: str, value: Any) -> dict[str, Any]:
         conv = self._conversations.get(conversation_id)
         if not conv:
             return {"success": False, "error": "会话不存在"}
         conv.context[key] = value
         return {"success": True, "result": {"key": key, "set": True}}
 
-    def _get_analytics(self) -> Dict[str, Any]:
+    def _get_analytics(self) -> dict[str, Any]:
         total_msgs = sum(len(c.messages) for c in self._conversations.values())
         active = [c for c in self._conversations.values() if c.status == ConversationStatus.ACTIVE]
         avg_msgs = total_msgs / len(self._conversations) if self._conversations else 0
@@ -529,7 +528,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         english = len(text) - chinese
         return int(chinese / 1.5 + english / 4) + 1
 
-    def search_conversations(self, query: str, limit: int = 20) -> List[Dict]:
+    def search_conversations(self, query: str, limit: int = 20) -> list[dict]:
         """搜索对话内容。按关键词匹配消息正文，返回匹配的对话摘要。
         企业场景：客服质检、对话回溯、知识提取。
         """
@@ -559,7 +558,7 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     break
         return results
 
-    def export_conversation(self, conversation_id: str, format_type: str = "json") -> Dict:
+    def export_conversation(self, conversation_id: str, format_type: str = "json") -> dict:
         """导出单个对话。支持 json / markdown / plain_text 格式。
         企业场景：对话存档、知识库导入、合规审计导出。
         """

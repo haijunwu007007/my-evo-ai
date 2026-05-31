@@ -121,8 +121,8 @@ class DifyApp:
     api_key: str = ""
     endpoint: str = ""
     status: PublishStatus = PublishStatus.DRAFT
-    model_config: Dict[str, Any] = field(default_factory=dict)
-    variables: Dict[str, str] = field(default_factory=dict)
+    model_config: dict[str, Any] = field(default_factory=dict)
+    variables: dict[str, str] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
     invocation_count: int = 0
@@ -149,8 +149,8 @@ class WorkflowNode:
     node_id: str
     node_type: str  # llm, http, code, if-else, variable, template
     title: str
-    config: Dict[str, Any] = field(default_factory=dict)
-    position: Dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0})
+    config: dict[str, Any] = field(default_factory=dict)
+    position: dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0})
 
 class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Dify平台集成管理器 - 生产级实现"""
@@ -158,15 +158,15 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__()
-        self._apps: Dict[str, DifyApp] = {}
-        self._knowledge_bases: Dict[str, KnowledgeBase] = {}
-        self._workflows: Dict[str, List[WorkflowNode]] = {}
+        self._apps: dict[str, DifyApp] = {}
+        self._knowledge_bases: dict[str, KnowledgeBase] = {}
+        self._workflows: dict[str, list[WorkflowNode]] = {}
         self._api_base: str = os.getenv("DIFY_API_BASE", "https://api.dify.ai/v1")
         self._api_key: str = os.getenv("DIFY_API_KEY", "")
-        self._start_time: Optional[float] = None
+        self._start_time: float | None = None
         self._total_invocations: int = 0
         self._total_errors: int = 0
-        self._conversation_cache: Dict[str, List[Dict]] = {}
+        self._conversation_cache: dict[str, list[dict]] = {}
 
     def initialize(self) -> bool:
         """初始化Dify管理器"""
@@ -197,7 +197,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             kb_id="kb-default", name="默认知识库", description="系统默认知识库"
         )
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "status": "healthy" if self._start_time else "unhealthy",
@@ -218,7 +218,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         logger.info("Dify管理器已关闭")
         return True
 
-    async def execute(self, action: str = "", params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str = "", params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一执行入口"""
         self.trace("execute", {"module": "dify"})
         self.metrics_collector.counter("dify.execute.calls", 1)
@@ -250,7 +250,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._total_errors += 1
             return {"success": False, "error": str(e)}
 
-    async def _create_app(self, p: Dict) -> Dict:
+    async def _create_app(self, p: dict) -> dict:
         """创建应用"""
         name = p.get("name", "")
         app_type_str = p.get("app_type", "chatbot")
@@ -267,7 +267,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._apps[app_id] = app
         return {"app_id": app_id, "name": name, "type": app_type.value}
 
-    async def _delete_app(self, p: Dict) -> Dict:
+    async def _delete_app(self, p: dict) -> dict:
         """删除应用"""
         app_id = p.get("app_id", "")
         if app_id in self._apps:
@@ -275,7 +275,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"deleted": app_id}
         return {"error": f"应用不存在: {app_id}"}
 
-    async def _list_apps(self, p: Dict) -> Dict:
+    async def _list_apps(self, p: dict) -> dict:
         """列出所有应用"""
         apps = [
             {
@@ -289,7 +289,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
         return {"total": len(apps), "apps": apps}
 
-    async def _get_app(self, p: Dict) -> Dict:
+    async def _get_app(self, p: dict) -> dict:
         """获取应用详情"""
         app = self._apps.get(p.get("app_id", ""))
         if not app:
@@ -306,7 +306,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "error_count": app.error_count,
         }
 
-    async def _publish_app(self, p: Dict) -> Dict:
+    async def _publish_app(self, p: dict) -> dict:
         """发布应用"""
         app = self._apps.get(p.get("app_id", ""))
         if not app:
@@ -314,7 +314,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         app.status = PublishStatus.PUBLISHED
         return {"app_id": app.app_id, "status": "published"}
 
-    async def _invoke_app(self, p: Dict) -> Dict:
+    async def _invoke_app(self, p: dict) -> dict:
         """调用应用"""
         app = self._apps.get(p.get("app_id", ""))
         if not app:
@@ -336,7 +336,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"answer": response, "conversation_id": conv_id, "app_id": app.app_id, "user": user}
 
-    async def _create_kb(self, p: Dict) -> Dict:
+    async def _create_kb(self, p: dict) -> dict:
         """创建知识库"""
         name = p.get("name", "")
         kb_id = f"kb-{hashlib.md5(name.encode()).hexdigest()[:12]}"
@@ -351,7 +351,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._knowledge_bases[kb_id] = kb
         return {"kb_id": kb_id, "name": name}
 
-    async def _list_kbs(self, p: Dict) -> Dict:
+    async def _list_kbs(self, p: dict) -> dict:
         """列出知识库"""
         kbs = [
             {
@@ -365,7 +365,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
         return {"total": len(kbs), "knowledge_bases": kbs}
 
-    async def _upload_doc(self, p: Dict) -> Dict:
+    async def _upload_doc(self, p: dict) -> dict:
         """上传文档到知识库"""
         kb_id = p.get("kb_id", "")
         kb = self._knowledge_bases.get(kb_id)
@@ -383,13 +383,13 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_docs": kb.doc_count,
         }
 
-    async def _create_workflow(self, p: Dict) -> Dict:
+    async def _create_workflow(self, p: dict) -> dict:
         """创建工作流"""
         wf_id = p.get("workflow_id", f"wf-{hashlib.md5(p.get('name', '').encode()).hexdigest()[:12]}")
         self._workflows[wf_id] = []
         return {"workflow_id": wf_id, "name": p.get("name", "")}
 
-    async def _add_workflow_node(self, p: Dict) -> Dict:
+    async def _add_workflow_node(self, p: dict) -> dict:
         """添加工作流节点"""
         wf_id = p.get("workflow_id", "")
         if wf_id not in self._workflows:
@@ -403,7 +403,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._workflows[wf_id].append(node)
         return {"workflow_id": wf_id, "node_id": node.node_id, "total_nodes": len(self._workflows[wf_id])}
 
-    async def _run_workflow(self, p: Dict) -> Dict:
+    async def _run_workflow(self, p: dict) -> dict:
         """运行工作流"""
         wf_id = p.get("workflow_id", "")
         if wf_id not in self._workflows:
@@ -422,7 +422,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_steps": len(nodes),
         }
 
-    async def _list_workflows(self, p: Dict) -> Dict:
+    async def _list_workflows(self, p: dict) -> dict:
         """列出工作流"""
         wfs = [
             {"id": wf_id, "nodes": len(nodes), "node_types": [n.node_type for n in nodes]}
@@ -430,7 +430,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
         return {"total": len(wfs), "workflows": wfs}
 
-    async def _manage_conversation(self, p: Dict) -> Dict:
+    async def _manage_conversation(self, p: dict) -> dict:
         """管理对话历史"""
         op = p.get("operation", "list")
         conv_id = p.get("conversation_id", "")
@@ -445,7 +445,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"cleared": conv_id}
         return {"error": "无效操作"}
 
-    async def _get_stats(self, p: Dict) -> Dict:
+    async def _get_stats(self, p: dict) -> dict:
         """获取统计信息"""
         return {
             "uptime_seconds": time.time() - (self._start_time or time.time()),
@@ -460,7 +460,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "active_conversations": len(self._conversation_cache),
         }
 
-    def get_app_usage_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_app_usage_report(self, days: int = 7) -> dict[str, Any]:
         """Dify应用使用报告。企业场景：产品经理查看各Dify应用的调用量和满意度，
         辅助评估AI应用的业务价值。
         """
@@ -488,7 +488,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_invocations": sum(r["invocations"] for r in report),
         }
 
-    def get_knowledge_base_stats(self) -> Dict[str, Any]:
+    def get_knowledge_base_stats(self) -> dict[str, Any]:
         """知识库统计。企业场景：知识库管理员查看各知识库的文档数量和更新频率。"""
         kbs = getattr(self, "_knowledge_bases", {})
         stats = []
@@ -509,7 +509,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "knowledge_bases": stats,
         }
 
-    def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
+    def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
         """获取工作流执行状态。企业场景：排查Dify工作流执行失败原因，
         查看各节点的执行状态和输出。
         """
@@ -539,7 +539,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "nodes": node_status,
         }
 
-    def list_workflows(self, status: str = "all") -> Dict[str, Any]:
+    def list_workflows(self, status: str = "all") -> dict[str, Any]:
         """列出所有工作流。企业场景：管理Dify工作流清单。"""
         workflows = getattr(self, "_workflows", {})
         result = []
@@ -558,7 +558,7 @@ class DifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "total": len(result), "workflows": result}
 
-    def get_token_usage_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_token_usage_report(self, days: int = 7) -> dict[str, Any]:
         """Token使用报告。企业场景：财务部门统计Dify各应用的LLM Token消耗，
         按应用和模型分类统计成本。
         """

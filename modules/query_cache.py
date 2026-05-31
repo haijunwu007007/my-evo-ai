@@ -113,7 +113,7 @@ class CachedQuery:
     params_hash: str
     result: Any = None
     result_rows: int = 0
-    table_deps: List[str] = field(default_factory=list)
+    table_deps: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     ttl: float = 300.0
     hit_count: int = 0
@@ -132,7 +132,7 @@ class CachedQuery:
             params = {}
         return self.expired(**params)
 
-class QueryCacheAnalyzer(object):
+class QueryCacheAnalyzer:
     """query cache 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -291,8 +291,8 @@ class QueryCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self, config=None):
 
         super().__init__(config)
-        self._cache: Dict[str, CachedQuery] = {}
-        self._table_invalidation: Dict[str, float] = {}
+        self._cache: dict[str, CachedQuery] = {}
+        self._table_invalidation: dict[str, float] = {}
         self._lock = threading.Lock()
         self._max_entries = self.config.get("max_entries", 5000) if self.config else 5000
         self._default_ttl = self.config.get("default_ttl", 300) if self.config else 300

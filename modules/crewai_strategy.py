@@ -171,12 +171,12 @@ class AgentDefinition:
     agent_id: str
     name: str
     role: AgentRole
-    capabilities: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
     max_concurrent_tasks: int = 3
     success_rate: float = 1.0
     total_executions: int = 0
-    last_active: Optional[datetime] = None
-    config: Dict[str, Any] = field(default_factory=dict)
+    last_active: datetime | None = None
+    config: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class CrewTask:
@@ -186,14 +186,14 @@ class CrewTask:
     description: str
     assigned_role: AgentRole
     priority: TaskPriority = TaskPriority.MEDIUM
-    input_data: Dict[str, Any] = field(default_factory=dict)
-    expected_output: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
+    input_data: dict[str, Any] = field(default_factory=dict)
+    expected_output: str | None = None
+    dependencies: list[str] = field(default_factory=list)
     status: str = "pending"
     result: Any = None
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    error: str | None = None
+    started_at: float | None = None
+    completed_at: float | None = None
     retries: int = 0
     max_retries: int = 3
 
@@ -207,7 +207,7 @@ class CrewDefinition:
     execution_mode: ExecutionMode = ExecutionMode.HIERARCHICAL
     max_parallel_agents: int = 5
     timeout_seconds: int = 300
-    retry_policy: Dict[str, Any] = field(
+    retry_policy: dict[str, Any] = field(
         default_factory=lambda: {"max_retries": 3, "backoff_base": 2.0, "backoff_max": 60.0}
     )
 
@@ -218,20 +218,20 @@ class ExecutionResult:
     success: bool
     crew_id: str
     task_id: str
-    agent_id: Optional[str] = None
+    agent_id: str | None = None
     output: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: float = 0.0
     tokens_used: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-class TaskDecomposer(object):
+class TaskDecomposer:
     """任务分解器 — 将复杂任务拆解为子任务、估算工作量、分配Agent"""
 
     def __init__(self):
-        self._decomposition_history: List[Dict] = []
+        self._decomposition_history: list[dict] = []
 
-    def decompose(self, task: str, max_subtasks: int = 8) -> Dict[str, Any]:
+    def decompose(self, task: str, max_subtasks: int = 8) -> dict[str, Any]:
         """将高层任务分解为可执行的子任务链"""
         sentences = re.split(r"[。；\n]", task)
         subtasks = []
@@ -266,7 +266,7 @@ class TaskDecomposer(object):
         length_score = min(len(text) / 20, 3)
         return max(1, int(indicators + length_score))
 
-    def get_history_stats(self) -> Dict[str, Any]:
+    def get_history_stats(self) -> dict[str, Any]:
         if not self._decomposition_history:
             return {"total": 0}
         counts = [r["subtask_count"] for r in self._decomposition_history]
@@ -285,13 +285,13 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._agents: Dict[str, AgentDefinition] = {}
-        self._crews: Dict[str, CrewDefinition] = {}
-        self._tasks: Dict[str, CrewTask] = {}
-        self._crew_agents: Dict[str, List[str]] = {}
-        self._results: List[ExecutionResult] = []
-        self._strategies: Dict[str, Dict[str, Any]] = {}
-        self._active_executions: Dict[str, asyncio.Task] = {}
+        self._agents: dict[str, AgentDefinition] = {}
+        self._crews: dict[str, CrewDefinition] = {}
+        self._tasks: dict[str, CrewTask] = {}
+        self._crew_agents: dict[str, list[str]] = {}
+        self._results: list[ExecutionResult] = []
+        self._strategies: dict[str, dict[str, Any]] = {}
+        self._active_executions: dict[str, asyncio.Task] = {}
         self._max_crews = 100
         self._max_tasks_per_crew = 50
 
@@ -353,11 +353,11 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         name: str,
         description: str,
-        agent_ids: Optional[List[str]] = None,
+        agent_ids: list[str] | None = None,
         mode: ExecutionMode = ExecutionMode.HIERARCHICAL,
-        strategy: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        strategy: str | None = None,
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """创建智能体团队"""
         try:
             if len(self._crews) >= self._max_crews:
@@ -400,8 +400,8 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("register_agent")
     def register_agent(
-        self, name: str, role: AgentRole, capabilities: List[str], config: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, name: str, role: AgentRole, capabilities: list[str], config: dict | None = None
+    ) -> dict[str, Any]:
         """注册新的智能体"""
         agent_id = f"agent_{uuid.uuid4().hex[:12]}"
         agent = AgentDefinition(agent_id=agent_id, name=name, role=role, capabilities=capabilities, config=config or {})
@@ -429,10 +429,10 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         description: str,
         role: AgentRole,
         priority: TaskPriority = TaskPriority.MEDIUM,
-        input_data: Optional[Dict] = None,
-        dependencies: Optional[List[str]] = None,
-        expected_output: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        input_data: dict | None = None,
+        dependencies: list[str] | None = None,
+        expected_output: str | None = None,
+    ) -> dict[str, Any]:
         """向团队添加任务"""
         if crew_id not in self._crews:
             raise ValueError(f"团队 {crew_id} 不存在")
@@ -455,7 +455,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"task_id": task_id, "crew_id": crew_id, "status": "pending"}
 
     @trace_operation("execute_crew")
-    def execute_crew(self, crew_id: str, context: Optional[Dict] = None) -> Dict[str, Any]:
+    def execute_crew(self, crew_id: str, context: dict | None = None) -> dict[str, Any]:
         """执行团队任务"""
         try:
             if crew_id not in self._crews:
@@ -502,7 +502,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats["errors"] += 1
             raise
 
-    def _select_agent(self, role: AgentRole, crew_id: str) -> Optional[AgentDefinition]:
+    def _select_agent(self, role: AgentRole, crew_id: str) -> AgentDefinition | None:
         """选择最合适的智能体"""
         crew_agent_ids = self._crew_agents.get(crew_id, [])
         candidates = [
@@ -515,7 +515,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         candidates.sort(key=lambda a: (a.success_rate, -a.total_executions), reverse=True)
         return candidates[0]
 
-    def _execute_task(self, task: CrewTask, agent: AgentDefinition, context: Optional[Dict] = None) -> ExecutionResult:
+    def _execute_task(self, task: CrewTask, agent: AgentDefinition, context: dict | None = None) -> ExecutionResult:
         """执行单个任务"""
         start = time.time()
         task.status = "running"
@@ -576,7 +576,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 duration_ms=duration,
             )
 
-    def _simulate_agent_work(self, task: CrewTask, agent: AgentDefinition, context: Dict) -> Dict[str, Any]:
+    def _simulate_agent_work(self, task: CrewTask, agent: AgentDefinition, context: dict) -> dict[str, Any]:
         """模拟智能体工作输出"""
         role_handlers = {
             AgentRole.RESEARCHER: lambda: {
@@ -618,7 +618,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         handler = role_handlers.get(agent.role, role_handlers[AgentRole.EXECUTOR])
         return handler()
 
-    def _execute_sequential(self, crew, tasks, context) -> List[ExecutionResult]:
+    def _execute_sequential(self, crew, tasks, context) -> list[ExecutionResult]:
         """串行执行"""
         results = []
         for task in sorted(tasks, key=lambda t: t.priority.value):
@@ -635,7 +635,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 break
         return results
 
-    def _execute_parallel(self, crew, tasks, context) -> List[ExecutionResult]:
+    def _execute_parallel(self, crew, tasks, context) -> list[ExecutionResult]:
         """并行执行"""
         semaphore = asyncio.Semaphore(crew.max_parallel_agents)
 
@@ -651,7 +651,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         coros = [_guarded_execute(t) for t in tasks]
         return asyncio.gather(*coros, return_exceptions=False)
 
-    def _execute_hierarchical(self, crew, tasks, context) -> List[ExecutionResult]:
+    def _execute_hierarchical(self, crew, tasks, context) -> list[ExecutionResult]:
         """层级执行：先规划后执行"""
         results = []
         plan_tasks = [t for t in tasks if t.assigned_role == AgentRole.PLANNER]
@@ -671,7 +671,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return results
 
-    def _execute_consensus(self, crew, tasks, context) -> List[ExecutionResult]:
+    def _execute_consensus(self, crew, tasks, context) -> list[ExecutionResult]:
         """共识执行：多Agent投票"""
         results = []
         for task in tasks:
@@ -701,7 +701,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             results.append(final_result)
         return results
 
-    def _execute_round_robin(self, crew, tasks, context) -> List[ExecutionResult]:
+    def _execute_round_robin(self, crew, tasks, context) -> list[ExecutionResult]:
         """轮询执行"""
         results = []
         available_agents = list(self._agents.values())
@@ -712,7 +712,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return results
 
     @trace_operation("get_crew_status")
-    def get_crew_status(self, crew_id: str) -> Dict[str, Any]:
+    def get_crew_status(self, crew_id: str) -> dict[str, Any]:
         """获取团队状态"""
         if crew_id not in self._crews:
             raise ValueError(f"团队 {crew_id} 不存在")
@@ -735,7 +735,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("list_strategies")
-    def list_strategies(self) -> List[Dict[str, Any]]:
+    def list_strategies(self) -> list[dict[str, Any]]:
         """列出可用策略"""
         return [
             {"id": k, "name": v["name"], "pipeline": [r.value for r in v["pipeline"]], "timeout": v.get("timeout", 300)}
@@ -743,7 +743,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
 
     @trace_operation("get_agent_performance")
-    def get_agent_performance(self) -> List[Dict[str, Any]]:
+    def get_agent_performance(self) -> list[dict[str, Any]]:
         """获取智能体性能报告"""
         report = []
         for agent in self._agents.values():
@@ -807,7 +807,7 @@ class CrewAIStrategy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

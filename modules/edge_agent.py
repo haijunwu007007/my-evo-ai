@@ -78,7 +78,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class EdgeAgentAnalyzer(object):
+class EdgeAgentAnalyzer:
     """edge_agent 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -281,7 +281,7 @@ class EdgeAgentModule:
 
     """边缘计算智能体 - 设备管理/任务卸载/资源监控/OTA/数据同步/延迟优化"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -323,13 +323,13 @@ class EdgeAgentModule:
             "total_latency_saved_ms": 0,
             "total_data_synced_mb": 0.0,
         }
-        self._devices: Dict[str, Dict] = {}
-        self._tasks: Dict[str, Dict] = {}
-        self._deployments: Dict[str, Dict] = {}
-        self._sync_records: List[Dict] = []
+        self._devices: dict[str, dict] = {}
+        self._tasks: dict[str, dict] = {}
+        self._deployments: dict[str, dict] = {}
+        self._sync_records: list[dict] = []
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 8))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_sample_devices()
             self._initialized = True
@@ -338,7 +338,7 @@ class EdgeAgentModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         online = sum(1 for d in self._devices.values() if d["status"] == DeviceStatus.ONLINE)
@@ -363,7 +363,7 @@ class EdgeAgentModule:
                 "cpu_usage": round(((__import__('time').time()*1000)%(90-10))+10, 1),
                 "memory_usage": round(((__import__('time').time()*1000)%(85-20))+20, 1),
                 "disk_usage": round(((__import__('time').time()*1000)%(70-15))+15, 1),
-                "last_heartbeat": datetime.now(timezone.utc).isoformat(),
+                "last_heartbeat": datetime.now(UTC).isoformat(),
                 "capabilities": ["inference", "data_collection"],
                 "firmware_version": "2.1.0",
             }
@@ -385,7 +385,7 @@ class EdgeAgentModule:
             "cpu_usage": 0.0,
             "memory_usage": 0.0,
             "disk_usage": 0.0,
-            "last_heartbeat": datetime.now(timezone.utc).isoformat(),
+            "last_heartbeat": datetime.now(UTC).isoformat(),
             "capabilities": capabilities,
             "firmware_version": "1.0.0",
         }
@@ -438,7 +438,7 @@ class EdgeAgentModule:
             "estimated_latency_ms": est_latency,
             "priority": params.get("priority", "medium"),
             "status": "running",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         self._stats["total_tasks"] += 1
         self._stats["offloaded_tasks"] += 1
@@ -467,7 +467,7 @@ class EdgeAgentModule:
             "direction": direction,
             "data_types": data_types,
             "size_mb": round(synced, 2),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         self._sync_records.append(record)
         if len(self._sync_records) > 5000:
@@ -509,7 +509,7 @@ class EdgeAgentModule:
             "deployed": deployed,
             "failed": failed,
             "status": "completed",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         return {"success": True, "deployment_id": did, "deployed": len(deployed), "failed": len(failed)}
 

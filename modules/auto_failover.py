@@ -128,7 +128,7 @@ class ClusterNode:
     health_score: float = 1.0
     consecutive_failures: int = 0
     last_health_check: float = 0.0
-    last_failover: Optional[float] = None
+    last_failover: float | None = None
     total_failovers: int = 0
 
 @dataclass
@@ -141,7 +141,7 @@ class FailoverEvent:
     reason: str = ""
     state: FailoverState = FailoverState.NORMAL
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     verified: bool = False
 
 class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -152,14 +152,14 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._nodes: Dict[str, ClusterNode] = {}
-        self._events: List[FailoverEvent] = []
+        self._nodes: dict[str, ClusterNode] = {}
+        self._events: list[FailoverEvent] = []
         self._state: FailoverState = FailoverState.NORMAL
         self._counter: int = 0
         self._failure_threshold: int = 3
@@ -194,7 +194,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "auto_failover"})
         self.metrics_collector.counter("auto_failover.execute.calls", 1)
         self.audit("execute", {"module": "auto_failover"})
@@ -303,7 +303,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         faulted = sum(1 for n in self._nodes.values() if n.status in (NodeStatus.FAULTED, NodeStatus.RECOVERING))
         active = sum(1 for n in self._nodes.values() if n.status == NodeStatus.ACTIVE)
         return {
@@ -318,7 +318,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     def shutdown(self) -> None:
         pass
 
-    def _process_health_check(self, node_id: str, health: str) -> Dict:
+    def _process_health_check(self, node_id: str, health: str) -> dict:
         node = self._nodes.get(node_id)
         if not node:
             return {"error": "Node not found"}
@@ -345,7 +345,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "action": "none" if node.status == NodeStatus.ACTIVE else "monitoring",
         }
 
-    def _trigger_failover(self, from_node: str, reason: str) -> Dict:
+    def _trigger_failover(self, from_node: str, reason: str) -> dict:
         src = self._nodes.get(from_node)
         if not src:
             return {"error": "Source node not found"}
@@ -389,7 +389,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "duration_ms": round((event.completed_at - event.started_at) * 1000, 1),
         }
 
-    def _verify_recovery(self, node_id: str) -> Dict:
+    def _verify_recovery(self, node_id: str) -> dict:
         node = self._nodes.get(node_id)
         if not node:
             return {"error": "Node not found"}
@@ -409,7 +409,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "status": node.status.value,
         }
 
-    def get_failover_topology(self) -> Dict[str, Any]:
+    def get_failover_topology(self) -> dict[str, Any]:
         """获取故障转移拓扑图。企业场景：运维面板展示集群各节点状态、主备关系、转移路径。
         可视化哪个节点是主节点，哪些是备节点，最近的故障转移链路。
         """
@@ -461,7 +461,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
         return topology
 
-    def get_failover_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_failover_report(self, days: int = 7) -> dict[str, Any]:
         """获取故障转移统计报告。企业场景：SRE周报统计故障转移频率、平均恢复时间、节点可用性。
         用于评估集群稳定性，发现频繁故障的单点。
         """
@@ -470,7 +470,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         recent = [e for e in self._events if e.timestamp >= cutoff]
         total_events = len(recent)
         # 按节点统计故障次数
-        node_fail_count: Dict[str, int] = {}
+        node_fail_count: dict[str, int] = {}
         for e in recent:
             node_fail_count[e.from_node] = node_fail_count.get(e.from_node, 0) + 1
         # 计算平均恢复时间（从故障到验证恢复）
@@ -497,7 +497,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "top_failure_nodes": sorted(node_fail_count.items(), key=lambda x: -x[1])[:5],
         }
 
-    def configure_failover_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
+    def configure_failover_policy(self, policy: dict[str, Any]) -> dict[str, Any]:
         """配置故障转移策略。企业场景：根据业务重要级设置不同的转移策略。
         支持配置：健康检查间隔、失败阈值、恢复阈值、冷却时间、通知渠道。
         """
@@ -520,7 +520,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._policies[policy_id] = new_policy
         return {"success": True, "policy_id": policy_id, "configured_fields": list(new_policy.keys())}
 
-    def get_node_health_timeline(self, node_id: str, hours: int = 24) -> Dict[str, Any]:
+    def get_node_health_timeline(self, node_id: str, hours: int = 24) -> dict[str, Any]:
         """获取节点健康度时间线。企业场景：故障复盘时回溯节点健康变化趋势，
         发现慢退化模式（如内存泄漏导致的渐进性故障）。
         """
@@ -553,7 +553,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "trend": "degrading" if scores[-1] < scores[0] else "improving" if scores[-1] > scores[0] else "stable",
         }
 
-    def get_disaster_recovery_plan(self) -> Dict[str, Any]:
+    def get_disaster_recovery_plan(self) -> dict[str, Any]:
         """获取灾备恢复计划。企业场景：运维手册中记录完整的故障转移和恢复SOP，
         包含各节点角色、优先级、恢复步骤、联系信息。
         """
@@ -588,12 +588,12 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def get_alert_contacts(self) -> Dict[str, Any]:
+    def get_alert_contacts(self) -> dict[str, Any]:
         """获取故障通知联系人列表。企业场景：灾备手册中记录各服务负责人和升级联系人。"""
         contacts = getattr(self, "_alert_contacts", {})
         return {"success": True, "total_contacts": len(contacts), "contacts": contacts}
 
-    def get_failover_summary(self) -> Dict[str, Any]:
+    def get_failover_summary(self) -> dict[str, Any]:
         """故障转移简要统计。企业场景：运维快速了解近期故障转移情况。"""
         recent = self._events[-20:] if self._events else []
         return {
@@ -603,7 +603,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "total_nodes": len(self._nodes),
         }
 
-    def get_topology_map(self) -> Dict[str, Any]:
+    def get_topology_map(self) -> dict[str, Any]:
         """集群拓扑图数据。企业场景：运维看板展示主从节点关系和健康状态。
         返回节点列表和连接关系，前端渲染拓扑图。
         """
@@ -628,7 +628,7 @@ class AutoFailoverManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "health_rate": round(healthy / max(len(nodes), 1) * 100, 1),
         }
 
-    def get_failover_history(self, limit: int = 50) -> Dict[str, Any]:
+    def get_failover_history(self, limit: int = 50) -> dict[str, Any]:
         """故障转移历史记录。企业场景：故障复盘时回溯近期故障转移事件。"""
         events = list(self._events) if self._events else []
         events.sort(key=lambda x: getattr(x, "timestamp", x.get("timestamp", 0)), reverse=True)

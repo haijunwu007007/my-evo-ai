@@ -101,7 +101,7 @@ logger = logging.getLogger(__name__)
 class ProfileSample:
     timestamp: float = 0.0
     thread_id: str = ""
-    call_stack: List[str] = field(default_factory=list)
+    call_stack: list[str] = field(default_factory=list)
     cpu_usage_pct: float = 0.0
 
 @dataclass
@@ -127,15 +127,15 @@ class ProfileSession:
     target_module: str = ""
     started_at: float = 0.0
     finished_at: float = 0.0
-    samples: List[ProfileSample] = field(default_factory=list)
-    hotspots: List[HotSpot] = field(default_factory=list)
-    summary: Dict[str, Any] = field(default_factory=dict)
+    samples: list[ProfileSample] = field(default_factory=list)
+    hotspots: list[HotSpot] = field(default_factory=list)
+    summary: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class FlameGraphFrame:
     name: str = ""
     value: int = 0
-    children: List["FlameGraphFrame"] = field(default_factory=list)
+    children: list[FlameGraphFrame] = field(default_factory=list)
 
 class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     MODULE_ID = "cpu_profiler"
@@ -151,8 +151,8 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 "description": "CPU性能分析器：采样/热点检测/调用链/火焰图",
             }
         )
-        self._sessions: Dict[str, ProfileSession] = {}
-        self._active_session: Optional[str] = None
+        self._sessions: dict[str, ProfileSession] = {}
+        self._active_session: str | None = None
         self._initialized = False
 
     def initialize(self) -> None:
@@ -160,7 +160,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return
         self._initialized = True
 
-    def _generate_simulated_samples(self, count: int) -> List[ProfileSample]:
+    def _generate_simulated_samples(self, count: int) -> list[ProfileSample]:
         """生成模拟采样数据"""
         call_chains = [
             ["main()", "app.handle_request()", "api.process_order()", "db.query()", "sql.execute()"],
@@ -188,7 +188,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             )
         return samples
 
-    def _analyze_hotspots(self, samples: List[ProfileSample]) -> List[HotSpot]:
+    def _analyze_hotspots(self, samples: list[ProfileSample]) -> list[HotSpot]:
         """分析热点函数"""
         func_stats = defaultdict(lambda: {"samples": 0, "cpu_sum": 0, "modules": set()})
         categories = {
@@ -238,7 +238,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             )
         return hotspots
 
-    def _generate_flamegraph(self, hotspots: List[HotSpot]) -> Dict:
+    def _generate_flamegraph(self, hotspots: list[HotSpot]) -> dict:
         """生成火焰图数据"""
         root = FlameGraphFrame(name="root", value=0)
         for hs in hotspots[:15]:
@@ -247,10 +247,10 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             root.value += hs.samples
         return {"name": root.name, "value": root.value, "children": self._frame_to_dict(root.children)}
 
-    def _frame_to_dict(self, frames: List[FlameGraphFrame]) -> List[Dict]:
+    def _frame_to_dict(self, frames: list[FlameGraphFrame]) -> list[dict]:
         return [{"name": f.name, "value": f.value, "children": self._frame_to_dict(f.children)} for f in frames]
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "cpu_profiler"})
         self.metrics_collector.counter("cpu_profiler.execute.calls", 1)
         self.audit("execute", {"module": "cpu_profiler"})
@@ -396,7 +396,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.error(f"[CPUProfiler] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -411,7 +411,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     def start_profiling(
         self, session_name: str = "", duration_seconds: int = 60, sampling_interval_ms: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """启动CPU性能分析。企业场景：线上服务响应变慢时，oncall启动
         10秒轻量级profiling定位热点函数。
         """
@@ -435,7 +435,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "interval_ms": sampling_interval_ms,
         }
 
-    def stop_profiling(self, session_id: str) -> Dict[str, Any]:
+    def stop_profiling(self, session_id: str) -> dict[str, Any]:
         """停止profiling并生成火焰图数据。企业场景：profiling结束后
         自动生成top函数列表和调用树，供研发分析。
         """
@@ -457,7 +457,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "flame_layers": flame_data["flame_layers"],
         }
 
-    def _generate_flame_data(self, session) -> Dict[str, Any]:
+    def _generate_flame_data(self, session) -> dict[str, Any]:
         """生成火焰图数据。统计各函数的CPU占比和调用深度。"""
         function_time = {}
         for sample in session.samples:
@@ -472,7 +472,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "flame_layers": len(set(f for s in session.samples for f in getattr(s, "stack", []))),
         }
 
-    def compare_sessions(self, session_a: str, session_b: str) -> Dict[str, Any]:
+    def compare_sessions(self, session_a: str, session_b: str) -> dict[str, Any]:
         """对比两次profiling结果。企业场景：优化前后对比CPU热点变化，
         量化性能提升效果。
         """
@@ -507,7 +507,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "improved": [c for c in comparison if c["change"] < -1][:10],
         }
 
-    def detect_anomalies(self, baseline_minutes: int = 60) -> Dict[str, Any]:
+    def detect_anomalies(self, baseline_minutes: int = 60) -> dict[str, Any]:
         """检测CPU异常。企业场景：与过去1小时基线对比，发现CPU突增50%以上
         的进程，触发告警通知SRE团队。
         """
@@ -543,7 +543,7 @@ class CPUProfilerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "anomalies": anomalies,
         }
 
-    def get_top_consumers(self, limit: int = 10, sort_by: str = "cpu") -> Dict[str, Any]:
+    def get_top_consumers(self, limit: int = 10, sort_by: str = "cpu") -> dict[str, Any]:
         """获取Top N进程。企业场景：容量规划时分析哪些服务CPU消耗最大，
         决定是否需要扩容或优化。
         """

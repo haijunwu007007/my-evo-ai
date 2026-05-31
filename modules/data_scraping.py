@@ -169,20 +169,20 @@ class ScrapingTask:
 
     task_id: str
     name: str
-    urls: List[str]
+    urls: list[str]
     format: ScrapingFormat
-    selectors: Dict[str, str] = field(default_factory=dict)
+    selectors: dict[str, str] = field(default_factory=dict)
     depth: int = 1
     follow_links: bool = False
     max_pages: int = 100
     concurrency: int = 5
     status: ScrapingStatus = ScrapingStatus.PENDING
-    results: List[Dict[str, Any]] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    results: list[dict[str, Any]] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     pages_scraped: int = 0
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
-    dedup_hashes: Set[str] = field(default_factory=set)
+    started_at: float | None = None
+    completed_at: float | None = None
+    dedup_hashes: set[str] = field(default_factory=set)
 
 @dataclass
 class ScrapingResult:
@@ -190,17 +190,17 @@ class ScrapingResult:
 
     url: str
     content: Any = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    links: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    links: list[str] = field(default_factory=list)
     title: str = ""
     timestamp: float = field(default_factory=time.time)
     content_hash: str = ""
 
-class DataParserEngine(object):
+class DataParserEngine:
     """数据解析引擎 - 负责HTML/JSON/CSV等格式的结构化解析和数据清洗"""
 
     def __init__(self):
-        self._parsers: Dict[str, callable] = {}
+        self._parsers: dict[str, callable] = {}
         self._parsed_count: int = 0
         self._error_count: int = 0
 
@@ -208,7 +208,7 @@ class DataParserEngine(object):
         """注册格式解析器"""
         self._parsers[format_type.lower()] = parser_fn
 
-    def parse(self, raw_data: str, format_type: str = "auto") -> Dict:
+    def parse(self, raw_data: str, format_type: str = "auto") -> dict:
         """解析原始数据为结构化格式"""
         self._parsed_count += 1
         if format_type == "auto":
@@ -233,7 +233,7 @@ class DataParserEngine(object):
             return "csv"
         return "text"
 
-    def _default_parse(self, data: str, fmt: str) -> Dict:
+    def _default_parse(self, data: str, fmt: str) -> dict:
         """默认解析"""
         return {"format": fmt, "data": data[:1000], "success": True, "truncated": len(data) > 1000}
 
@@ -247,7 +247,7 @@ class DataParserEngine(object):
             text = _re.sub(r"\s+", " ", text).strip()
         return text
 
-    def extract_fields(self, data: Dict, field_mappings: Dict[str, str]) -> Dict:
+    def extract_fields(self, data: dict, field_mappings: dict[str, str]) -> dict:
         """按字段映射提取数据"""
         result = {}
         for target_field, source_path in field_mappings.items():
@@ -262,14 +262,14 @@ class DataParserEngine(object):
             result[target_field] = value
         return result
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "parsers_registered": len(self._parsers),
             "total_parsed": self._parsed_count,
             "errors": self._error_count,
         }
 
-    def validate_data(self, data: Dict, schema: Dict) -> Dict:
+    def validate_data(self, data: dict, schema: dict) -> dict:
         """按schema验证数据完整性"""
         errors = []
         for field_name, rules in schema.items():
@@ -284,7 +284,7 @@ class DataParserEngine(object):
                     errors.append({"field": field_name, "error": f"expected int, got {type(value).__name__}"})
         return {"valid": len(errors) == 0, "errors": errors}
 
-    def deduplicate(self, records: List[Dict], key_field: str) -> List[Dict]:
+    def deduplicate(self, records: list[dict], key_field: str) -> list[dict]:
         """按字段去重"""
         seen = set()
         unique = []
@@ -302,18 +302,18 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._tasks: Dict[str, ScrapingTask] = {}
-        self._results_store: Dict[str, List[ScrapingResult]] = defaultdict(list)
-        self._robots_cache: Dict[str, Set[str]] = {}
-        self._rate_limits: Dict[str, float] = {}
-        self._domain_last_access: Dict[str, float] = {}
+        self._tasks: dict[str, ScrapingTask] = {}
+        self._results_store: dict[str, list[ScrapingResult]] = defaultdict(list)
+        self._robots_cache: dict[str, set[str]] = {}
+        self._rate_limits: dict[str, float] = {}
+        self._domain_last_access: dict[str, float] = {}
         self._domain_rate: float = 1.0  # 每秒最大请求数
         self._user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
         ]
-        self._visited_urls: Set[str] = set()
+        self._visited_urls: set[str] = set()
 
     def initialize(self) -> None:
         logger.info("数据采集引擎初始化完成")
@@ -323,7 +323,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _content_hash(self, content: str) -> str:
         return hashlib.sha256(content.encode("utf-8", errors="replace")).hexdigest()[:16]
 
-    def _extract_links(self, html: str, base_url: str) -> List[str]:
+    def _extract_links(self, html: str, base_url: str) -> list[str]:
         """提取链接"""
         links = re.findall(r'href=["\'](https?://[^"\']+)["\']', html)
         # 相对链接转绝对
@@ -353,7 +353,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    def _extract_by_selectors(self, html: str, selectors: Dict[str, str]) -> Dict[str, Any]:
+    def _extract_by_selectors(self, html: str, selectors: dict[str, str]) -> dict[str, Any]:
         """使用CSS选择器提取数据"""
         results = {}
         for name, selector in selectors.items():
@@ -380,8 +380,8 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("scrape")
     def scrape(
-        self, url: str, selectors: Optional[Dict[str, str]] = None, format: ScrapingFormat = ScrapingFormat.TEXT
-    ) -> Dict[str, Any]:
+        self, url: str, selectors: dict[str, str] | None = None, format: ScrapingFormat = ScrapingFormat.TEXT
+    ) -> dict[str, Any]:
         """采集单个URL"""
         start = time.time()
         domain = urlparse(url).netloc
@@ -478,14 +478,14 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def create_task(
         self,
         name: str,
-        urls: List[str],
+        urls: list[str],
         format: ScrapingFormat = ScrapingFormat.TEXT,
-        selectors: Optional[Dict[str, str]] = None,
+        selectors: dict[str, str] | None = None,
         depth: int = 1,
         follow_links: bool = False,
         max_pages: int = 100,
         concurrency: int = 5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建采集任务"""
         task_id = f"scrape_{uuid.uuid4().hex[:10]}"
         task = ScrapingTask(
@@ -503,7 +503,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"task_id": task_id, "name": name, "urls": len(urls)}
 
     @trace_operation("run_scraping_task")
-    def run_task(self, task_id: str) -> Dict[str, Any]:
+    def run_task(self, task_id: str) -> dict[str, Any]:
         """执行采集任务"""
         if task_id not in self._tasks:
             raise ValueError(f"任务 {task_id} 不存在")
@@ -561,16 +561,16 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             else 0,
         }
 
-    def extract_structured(self, html: str, schema: Dict[str, str]) -> Dict[str, Any]:
+    def extract_structured(self, html: str, schema: dict[str, str]) -> dict[str, Any]:
         """结构化数据提取"""
         return self._extract_by_selectors(html, schema)
 
-    def get_task_results(self, task_id: str) -> List[Dict]:
+    def get_task_results(self, task_id: str) -> list[dict]:
         if task_id not in self._tasks:
             raise ValueError(f"任务 {task_id} 不存在")
         return self._tasks[task_id].results
 
-    def list_tasks(self) -> List[Dict]:
+    def list_tasks(self) -> list[dict]:
         return [
             {
                 "task_id": t.task_id,
@@ -628,7 +628,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {
@@ -647,7 +647,7 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             action="module_shutdown", resource="data_scraping", details=f"关闭，{len(self._tasks)} 个采集任务"
         )
 
-    def analyze_scrape_quality(self) -> Dict[str, Any]:
+    def analyze_scrape_quality(self) -> dict[str, Any]:
         """分析采集质量：成功率、去重率、平均响应时间"""
         tasks = self._tasks if hasattr(self, "_tasks") else {}
         total = len(tasks)

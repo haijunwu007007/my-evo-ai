@@ -82,7 +82,8 @@ from core.logging_config import get_logger
 from core.logging_config import get_logger
 import threading
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -91,7 +92,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 logging.basicConfig(level=logging.INFO)
 logger = get_logger("langgraph_decision")
 
-class LanggraphDecisionAnalyzer(object):
+class LanggraphDecisionAnalyzer:
     """langgraph_decision 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -276,11 +277,11 @@ class GraphStatus(str, Enum):
 class NodeDef:
     node_id: str
     name: str
-    handler: Optional[str] = None
+    handler: str | None = None
     timeout: float = 60.0
     retry_count: int = 0
     retry_delay: float = 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EdgeDef:
@@ -288,16 +289,16 @@ class EdgeDef:
     source: str
     target: str
     edge_type: EdgeType = EdgeType.DIRECT
-    condition: Optional[str] = None
+    condition: str | None = None
     weight: float = 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ExecutionResult:
     node_id: str
     status: NodeStatus
     output: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     start_time: float = 0.0
     end_time: float = 0.0
     duration_ms: float = 0.0
@@ -308,16 +309,16 @@ class GraphSnapshot:
     snapshot_id: str
     graph_id: str
     timestamp: float
-    node_states: Dict[str, NodeStatus]
-    context: Dict[str, Any]
-    execution_log: List[Dict[str, Any]]
+    node_states: dict[str, NodeStatus]
+    context: dict[str, Any]
+    execution_log: list[dict[str, Any]]
 
 class ExecutionContext:
     """执行上下文，支持变量读写和作用域"""
 
-    def __init__(self, initial: Optional[Dict[str, Any]] = None):
-        self._data: Dict[str, Any] = dict(initial or {})
-        self._history: List[Dict[str, Any]] = []
+    def __init__(self, initial: dict[str, Any] | None = None):
+        self._data: dict[str, Any] = dict(initial or {})
+        self._history: list[dict[str, Any]] = []
 
     def set(self, key: str, value: Any) -> None:
         self._data[key] = value
@@ -336,14 +337,14 @@ class ExecutionContext:
     def has(self, key: str) -> bool:
         return key in self._data
 
-    def update(self, data: Dict[str, Any]) -> None:
+    def update(self, data: dict[str, Any]) -> None:
         self._data.update(data)
         self._history.append({"op": "update", "keys": list(data.keys()), "timestamp": time.time()})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return dict(self._data)
 
-    def get_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 100) -> list[dict[str, Any]]:
         return self._history[-limit:]
 
     def clear(self) -> None:
@@ -359,20 +360,20 @@ class GraphBuilder:
     def __init__(self, graph_id: str, name: str = ""):
         self.graph_id = graph_id
         self.name = name or graph_id
-        self.nodes: Dict[str, NodeDef] = {}
-        self.edges: List[EdgeDef] = []
-        self._entry_node: Optional[str] = None
-        self._exit_nodes: Set[str] = set()
+        self.nodes: dict[str, NodeDef] = {}
+        self.edges: list[EdgeDef] = []
+        self._entry_node: str | None = None
+        self._exit_nodes: set[str] = set()
 
     def add_node(
         self,
         node_id: str,
         name: str = "",
-        handler: Optional[str] = None,
+        handler: str | None = None,
         timeout: float = 60.0,
         retry_count: int = 0,
         **kwargs,
-    ) -> "GraphBuilder":
+    ) -> GraphBuilder:
         self.nodes[node_id] = NodeDef(
             node_id=node_id,
             name=name or node_id,
@@ -385,17 +386,17 @@ class GraphBuilder:
             self._entry_node = node_id
         return self
 
-    def set_entry(self, node_id: str) -> "GraphBuilder":
+    def set_entry(self, node_id: str) -> GraphBuilder:
         self._entry_node = node_id
         return self
 
-    def add_exit(self, node_id: str) -> "GraphBuilder":
+    def add_exit(self, node_id: str) -> GraphBuilder:
         self._exit_nodes.add(node_id)
         return self
 
     def add_edge(
-        self, source: str, target: str, edge_type: EdgeType = EdgeType.DIRECT, condition: Optional[str] = None, **kwargs
-    ) -> "GraphBuilder":
+        self, source: str, target: str, edge_type: EdgeType = EdgeType.DIRECT, condition: str | None = None, **kwargs
+    ) -> GraphBuilder:
         edge_id = hashlib.sha256(f"{source}->{target}:{time.time()}".encode()).hexdigest()[:12]
         self.edges.append(
             EdgeDef(
@@ -409,7 +410,7 @@ class GraphBuilder:
         )
         return self
 
-    def validate(self) -> Tuple[bool, List[str]]:
+    def validate(self) -> tuple[bool, list[str]]:
         errors = []
         if not self._entry_node:
             errors.append("No entry node defined")
@@ -420,7 +421,7 @@ class GraphBuilder:
                 errors.append(f"Edge source '{edge.source}' not found")
             if edge.target not in self.nodes:
                 errors.append(f"Edge target '{edge.target}' not found")
-        adj: Dict[str, Set[str]] = defaultdict(set)
+        adj: dict[str, set[str]] = defaultdict(set)
         for e in self.edges:
             adj[e.source].add(e.target)
         visited, stack, path = set(), set(), []
@@ -446,7 +447,7 @@ class GraphBuilder:
             errors.append("No exit nodes defined")
         return len(errors) == 0, errors
 
-    def build(self) -> "DecisionGraph":
+    def build(self) -> DecisionGraph:
         valid, errors = self.validate()
         if not valid:
             raise ValueError(f"Invalid graph: {errors}")
@@ -466,10 +467,10 @@ class DecisionGraph:
         self,
         graph_id: str,
         name: str,
-        nodes: Dict[str, NodeDef],
-        edges: List[EdgeDef],
+        nodes: dict[str, NodeDef],
+        edges: list[EdgeDef],
         entry_node: str,
-        exit_nodes: Set[str],
+        exit_nodes: set[str],
     ):
         self.graph_id = graph_id
         self.name = name
@@ -478,15 +479,15 @@ class DecisionGraph:
         self.entry_node = entry_node
         self.exit_nodes = exit_nodes
         self.status = GraphStatus.IDLE
-        self._adj: Dict[str, List[EdgeDef]] = defaultdict(list)
+        self._adj: dict[str, list[EdgeDef]] = defaultdict(list)
         for edge in edges:
             self._adj[edge.source].append(edge)
-        self._handlers: Dict[str, Callable] = {}
-        self._node_results: Dict[str, ExecutionResult] = {}
+        self._handlers: dict[str, Callable] = {}
+        self._node_results: dict[str, ExecutionResult] = {}
         self._context = ExecutionContext()
-        self._snapshots: List[GraphSnapshot] = []
+        self._snapshots: list[GraphSnapshot] = []
         self._max_snapshots = 50
-        self._execution_log: List[Dict[str, Any]] = []
+        self._execution_log: list[dict[str, Any]] = []
         self._stats = {
             "total_runs": 0,
             "successful_runs": 0,
@@ -503,7 +504,7 @@ class DecisionGraph:
             if node_id not in self._handlers:
                 self._handlers[node_id] = handler
 
-    async def execute(self, initial_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, initial_context: dict[str, Any] | None = None) -> dict[str, Any]:
         with self._lock:
             if self.status == GraphStatus.RUNNING:
                 return {"error": "Graph already running", "status": "error"}
@@ -626,7 +627,7 @@ class DecisionGraph:
             retries=retries,
         )
 
-    def _evaluate_condition(self, condition: Optional[str]) -> bool:
+    def _evaluate_condition(self, condition: str | None) -> bool:
         if not condition:
             return True
         try:
@@ -681,7 +682,7 @@ class DecisionGraph:
                 return True
         return False
 
-    def _log(self, event: str, data: Dict[str, Any]) -> None:
+    def _log(self, event: str, data: dict[str, Any]) -> None:
         self._execution_log.append(
             {
                 "event": event,
@@ -690,13 +691,13 @@ class DecisionGraph:
             }
         )
 
-    def get_execution_log(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_execution_log(self, limit: int = 100) -> list[dict[str, Any]]:
         return self._execution_log[-limit:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return dict(self._stats)
 
-    def get_node_dependencies(self, node_id: str) -> Tuple[Set[str], Set[str]]:
+    def get_node_dependencies(self, node_id: str) -> tuple[set[str], set[str]]:
         upstream = set()
         downstream = set()
         for edge in self.edges:
@@ -706,9 +707,9 @@ class DecisionGraph:
                 downstream.add(edge.target)
         return upstream, downstream
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         in_degree = defaultdict(int)
-        adj: Dict[str, Set[str]] = defaultdict(set)
+        adj: dict[str, set[str]] = defaultdict(set)
         for edge in self.edges:
             in_degree[edge.target] += 1
             adj[edge.source].add(edge.target)
@@ -780,8 +781,8 @@ class LangGraphDecision:
 
         self._initialized = False
         self._start_time = 0.0
-        self._graphs: Dict[str, DecisionGraph] = {}
-        self._builders: Dict[str, GraphBuilder] = {}
+        self._graphs: dict[str, DecisionGraph] = {}
+        self._builders: dict[str, GraphBuilder] = {}
         self._stats = {
             "total_graphs": 0,
             "total_executions": 0,
@@ -816,7 +817,7 @@ class LangGraphDecision:
         except ValueError:
             pass
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "status": "not_initialized"}
         return {
@@ -834,10 +835,10 @@ class LangGraphDecision:
         self._stats["total_graphs"] += 1
         return graph
 
-    def get_graph(self, graph_id: str) -> Optional[DecisionGraph]:
+    def get_graph(self, graph_id: str) -> DecisionGraph | None:
         return self._graphs.get(graph_id)
 
-    def execute_graph(self, graph_id: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute_graph(self, graph_id: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         graph = self._graphs.get(graph_id)
         if not graph:
             return {"error": f"Graph '{graph_id}' not found", "status": "error"}
@@ -848,7 +849,7 @@ class LangGraphDecision:
     def delete_graph(self, graph_id: str) -> bool:
         return self._graphs.pop(graph_id, None) is not None
 
-    def list_graphs(self) -> List[Dict[str, Any]]:
+    def list_graphs(self) -> list[dict[str, Any]]:
         return [
             {
                 "graph_id": g.graph_id,

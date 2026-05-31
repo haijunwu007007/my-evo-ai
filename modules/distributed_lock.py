@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 分布式锁（A级）
 # Grade: A
 
@@ -13,7 +12,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="distributed-lock";MODULE_NAME="分布式锁";VERSION="v1.0";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config);self._lock_dir=os.path.join(tempfile.gettempdir(),"evo_locks")
-        self._held:Dict[str,str]={};os.makedirs(self._lock_dir,exist_ok=True)
+        self._held:dict[str,str]={};os.makedirs(self._lock_dir,exist_ok=True)
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:
         return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"held":len(self._held)})
@@ -26,14 +25,14 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             return True
         except FileExistsError:
             try:
-                with open(path,'r') as f:data=f.read().strip()
+                with open(path) as f:data=f.read().strip()
                 parts=data.split('|')
                 if len(parts)==2 and float(parts[1])<time.time():
                     os.remove(path)
                     return self._acquire_file(path,owner,ttl)
             except Exception: logger.warning("distributed_lock: acquire retry failed")
             return False
-    def _stats(self)->Dict:
+    def _stats(self)->dict:
         locks=os.listdir(self._lock_dir)if os.path.isdir(self._lock_dir)else[]
         active=0;expired=0
         for l in locks:
@@ -65,7 +64,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             path=self._lock_path(name)
             if os.path.exists(path):
                 try:
-                    with open(path,'r') as f:data=f.read().strip()
+                    with open(path) as f:data=f.read().strip()
                     if not owner or data.startswith(owner):os.remove(path)
                 except Exception as e:
                     logger.warning(f"distributed_lock: {e}")
@@ -75,7 +74,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             name=p.get("name","default");path=self._lock_path(name)
             if os.path.exists(path):
                 try:
-                    with open(path,'r') as f:data=f.read().strip().split('|')
+                    with open(path) as f:data=f.read().strip().split('|')
                     return{"success":True,"locked":True,"owner":data[0],"expires_at":float(data[1]),"remaining":max(0,float(data[1])-time.time())}
                 except Exception:return{"success":True,"locked":True}
             return{"success":True,"locked":False}
@@ -86,7 +85,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             path=self._lock_path(name)
             if os.path.exists(path):
                 try:
-                    with open(path,'r')as f:parts=f.read().strip().split('|')
+                    with open(path)as f:parts=f.read().strip().split('|')
                     owner=parts[0];now=time.time()
                     with open(path,'w')as f:f.write(f"{owner}|{now+ttl}")
                     return{"success":True,"lock":name,"extended_until":now+ttl}

@@ -133,7 +133,7 @@ class Application:
     sync_status: SyncStatus = SyncStatus.UNKNOWN
     health_status: HealthStatus = HealthStatus.MISSING
     deployed_revision: str = ""
-    deployed_at: Optional[float] = None
+    deployed_at: float | None = None
     replicas: int = 1
     enabled: bool = True
     created_at: float = field(default_factory=time.time)
@@ -149,7 +149,7 @@ class DeploymentRecord:
     status: str = "pending"
     operator: str = "system"
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     duration_ms: float = 0.0
     details: str = ""
 
@@ -161,14 +161,14 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._apps: Dict[str, Application] = {}
-        self._deployments: List[DeploymentRecord] = []
+        self._apps: dict[str, Application] = {}
+        self._deployments: list[DeploymentRecord] = []
         self._counter: int = 0
         self._dep_counter: int = 0
 
@@ -220,7 +220,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "argocd_deploy"})
         self.metrics_collector.counter("argocd_deploy.execute.calls", 1)
         self.audit("execute", {"module": "argocd_deploy"})
@@ -366,7 +366,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         unhealthy = sum(
             1 for a in self._apps.values() if a.health_status in (HealthStatus.DEGRADED, HealthStatus.MISSING)
         )
@@ -381,7 +381,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     def shutdown(self) -> None:
         pass
 
-    def _deploy(self, app_id: str, action: DeploymentAction, revision: str, extra: Optional[Dict] = None) -> Dict:
+    def _deploy(self, app_id: str, action: DeploymentAction, revision: str, extra: dict | None = None) -> dict:
         app = self._apps.get(app_id)
         if not app:
             return {"error": "App not found"}
@@ -430,7 +430,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "details": record.details,
         }
 
-    def rollback_deployment(self, app_id: str, target_revision: Optional[str] = None) -> Dict[str, Any]:
+    def rollback_deployment(self, app_id: str, target_revision: str | None = None) -> dict[str, Any]:
         """部署回滚。企业场景：发布后发现严重缺陷，一键回滚到上一稳定版本或指定revision。
         回滚前自动记录当前状态快照，支持后续重新升级。
         """
@@ -477,7 +477,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "snapshot_count": len(self._rollback_snapshots[app_id]),
         }
 
-    def get_deployment_pipeline(self, app_id: str) -> Dict[str, Any]:
+    def get_deployment_pipeline(self, app_id: str) -> dict[str, Any]:
         """获取应用部署流水线状态。企业场景：DevOps仪表板展示应用从代码提交到上线的全链路状态。
         包含Git仓库状态、CI构建、CD部署、健康检查各阶段信息。
         """
@@ -525,7 +525,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def create_deploy_strategy(self, name: str, strategy_type: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    def create_deploy_strategy(self, name: str, strategy_type: str, params: dict | None = None) -> dict[str, Any]:
         """创建部署策略。企业场景：为不同应用配置不同的部署方式（蓝绿/金丝雀/滚动），
         统一管理部署策略模板，复用最佳实践。
         """
@@ -558,7 +558,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._deploy_strategies[strategy_id] = strategy
         return {"success": True, "strategy_id": strategy_id, "name": name, "type": strategy_type, "params": merged}
 
-    def get_cluster_apps_status(self) -> Dict[str, Any]:
+    def get_cluster_apps_status(self) -> dict[str, Any]:
         """获取集群所有应用状态。企业场景：ArgoCD控制台展示整个集群的应用健康状态，
         快速发现异常应用（同步失败、健康检查未通过）。
         """
@@ -593,7 +593,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "apps": apps,
         }
 
-    def sync_all_apps(self, force: bool = False) -> Dict[str, Any]:
+    def sync_all_apps(self, force: bool = False) -> dict[str, Any]:
         """全量同步所有应用。企业场景：配置变更后一键同步所有ArgoCD应用，
         确保Git仓库声明状态与集群实际状态一致。
         """
@@ -611,7 +611,7 @@ class ArgocdDeployManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("sync_all_apps", {"synced": results["synced"], "failed": results["failed"]})
         return {"success": True, **results}
 
-    def get_app_config_diff(self, app_id: str) -> Dict[str, Any]:
+    def get_app_config_diff(self, app_id: str) -> dict[str, Any]:
         """查看应用配置差异。企业场景：ArgoCD检测Git声明状态与集群实际状态的差异。
         返回哪些配置项不一致（如镜像版本、环境变量、副本数）。
         """

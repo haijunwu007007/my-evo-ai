@@ -60,7 +60,7 @@ class PersistMixin:
             "DELETE FROM kv_store WHERE key=?", (key,))
         return r.get("success", False)
 
-    def kv_list(self, prefix: str = "") -> Dict[str, Any]:
+    def kv_list(self, prefix: str = "") -> dict[str, Any]:
         self._ensure_table()
         if prefix:
             r = self._client.sqlite_query(self._db_path,

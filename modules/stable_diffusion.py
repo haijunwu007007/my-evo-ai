@@ -77,7 +77,7 @@ import random
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class StableDiffusionAnalyzer(object):
+class StableDiffusionAnalyzer:
     """stable_diffusion 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -280,7 +280,7 @@ class StableDiffusionModule:
 
     """Stable Diffusion图像生成 - 文生图/图生图/Inpainting/超分辨率/批量"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -319,13 +319,13 @@ class StableDiffusionModule:
         self._api_key = self.config.get("api_key", "")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 120)
-        self._tasks: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
+        self._tasks: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 4))
         self._output_dir = self.config.get("output_dir", "./generated_images")
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             os.makedirs(self._output_dir, exist_ok=True)
             for m in SDModel:
@@ -340,7 +340,7 @@ class StableDiffusionModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         processing = sum(1 for t in self._tasks.values() if t.get("status") == TaskStatus.PROCESSING)
@@ -392,7 +392,7 @@ class StableDiffusionModule:
                     "width": width,
                     "height": height,
                     "steps": steps,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": datetime.now(UTC).isoformat(),
                 }
                 images.append({"task_id": tid, "seed": s, "width": width, "height": height})
             lat = int((time.time() - t0) * 1000)
@@ -423,7 +423,7 @@ class StableDiffusionModule:
                 "model": model,
                 "status": TaskStatus.COMPLETED,
                 "seed": s,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._stats["total_generations"] += 1
@@ -451,7 +451,7 @@ class StableDiffusionModule:
                 "model": model,
                 "status": TaskStatus.COMPLETED,
                 "seed": s,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._stats["total_generations"] += 1
@@ -475,7 +475,7 @@ class StableDiffusionModule:
             "type": "upscale",
             "scale": scale,
             "status": TaskStatus.COMPLETED,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         lat = int((time.time() - t0) * 1000)
         self._stats["total_images"] += 1
@@ -494,7 +494,7 @@ class StableDiffusionModule:
 
     def get_usage_stats(self, params: dict = None) -> dict:
         hours = (params or {}).get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         total = sum(r["images"] for r in recent)
         return {"success": True, "period_hours": hours, "requests": len(recent), "images": total}

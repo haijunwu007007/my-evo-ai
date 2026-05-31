@@ -164,15 +164,15 @@ class BuildConfig:
     build_command: str = ""
     test_command: str = ""
     lint_command: str = ""
-    env_vars: Dict[str, str] = field(default_factory=dict)
+    env_vars: dict[str, str] = field(default_factory=dict)
     timeout_seconds: int = 600
     max_retries: int = 2
     cache_enabled: bool = True
-    quality_gates: Dict[str, QualityGate] = field(default_factory=dict)
+    quality_gates: dict[str, QualityGate] = field(default_factory=dict)
     output_dir: str = ""
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "project_path": self.project_path,
             "language": self.language.value,
@@ -197,9 +197,9 @@ class BuildArtifact:
     checksum_md5: str = ""
     checksum_sha256: str = ""
     created_at: float = field(default_factory=time.time)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "artifact_id": self.artifact_id,
             "name": self.name,
@@ -224,8 +224,8 @@ class BuildResult:
     exit_code: int = -1
     stdout: str = ""
     stderr: str = ""
-    artifacts: List[BuildArtifact] = field(default_factory=list)
-    quality_report: Dict[str, Any] = field(default_factory=dict)
+    artifacts: list[BuildArtifact] = field(default_factory=list)
+    quality_report: dict[str, Any] = field(default_factory=dict)
     cache_hit: bool = False
     retry_count: int = 0
     error_message: str = ""
@@ -234,7 +234,7 @@ class BuildResult:
     def duration_ms(self) -> int:
         return int((self.finished_at - self.started_at) * 1000) if self.started_at else 0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "build_id": self.build_id,
             "status": self.status.value,
@@ -261,9 +261,9 @@ class DependencyNode:
     version: str = ""
     dep_type: str = "direct"  # direct / transitive
     resolved: bool = False
-    children: List["DependencyNode"] = field(default_factory=list)
+    children: list[DependencyNode] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
             "version": self.version,
@@ -276,7 +276,7 @@ class DependencyNode:
 # 构建缓存管理器
 # ============================================================
 
-class BuildCacheManager(object):
+class BuildCacheManager:
     """构建缓存管理器 — 基于内容哈希的增量编译缓存"""
 
     def __init__(self, cache_dir: str = "", max_cache_size_mb: int = 500):
@@ -287,7 +287,7 @@ class BuildCacheManager(object):
         self._misses = 0
         os.makedirs(self.cache_dir, exist_ok=True)
 
-    def compute_source_hash(self, project_path: str, include_patterns: Optional[List[str]] = None) -> str:
+    def compute_source_hash(self, project_path: str, include_patterns: list[str] | None = None) -> str:
         """计算源码目录的内容哈希"""
         hasher = hashlib.sha256()
         p = Path(project_path)
@@ -318,13 +318,13 @@ class BuildCacheManager(object):
 
         return hasher.hexdigest()
 
-    def get_cached_result(self, cache_key: str) -> Optional[BuildResult]:
+    def get_cached_result(self, cache_key: str) -> BuildResult | None:
         """获取缓存的构建结果"""
         cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
         with self._lock:
             if os.path.exists(cache_file):
                 try:
-                    with open(cache_file, "r", encoding="utf-8") as f:
+                    with open(cache_file, encoding="utf-8") as f:
                         data = json.load(f)
                     self._hits += 1
                     return BuildResult(**data)
@@ -379,7 +379,7 @@ class BuildCacheManager(object):
         total = self._hits + self._misses
         return self._hits / total if total > 0 else 0.0
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "hits": self._hits,
             "misses": self._misses,
@@ -391,14 +391,14 @@ class BuildCacheManager(object):
 # 依赖解析器
 # ============================================================
 
-class DependencyResolver(object):
+class DependencyResolver:
     """依赖解析器 — 解析项目依赖树，检测循环依赖"""
 
     def __init__(self):
-        self._resolved: Dict[str, DependencyNode] = {}
-        self._cycles: List[List[str]] = []
+        self._resolved: dict[str, DependencyNode] = {}
+        self._cycles: list[list[str]] = []
 
-    def resolve_python(self, project_path: str) -> Tuple[List[DependencyNode], List[List[str]]]:
+    def resolve_python(self, project_path: str) -> tuple[list[DependencyNode], list[list[str]]]:
         """解析Python项目依赖"""
         self._cycles = []
         nodes = []
@@ -428,7 +428,7 @@ class DependencyResolver(object):
 
         return nodes, self._cycles
 
-    def resolve_nodejs(self, project_path: str) -> Tuple[List[DependencyNode], List[List[str]]]:
+    def resolve_nodejs(self, project_path: str) -> tuple[list[DependencyNode], list[list[str]]]:
         """解析Node.js项目依赖"""
         self._cycles = []
         nodes = []
@@ -450,7 +450,7 @@ class DependencyResolver(object):
 
         return nodes, self._cycles
 
-    def _parse_requirements(self, filepath: Path) -> List[DependencyNode]:
+    def _parse_requirements(self, filepath: Path) -> list[DependencyNode]:
         """解析requirements.txt"""
         nodes = []
         try:
@@ -481,7 +481,7 @@ class DependencyResolver(object):
             logger.warning(f"解析requirements.txt失败: {e}")
         return nodes
 
-    def _parse_pyproject(self, filepath: Path) -> List[DependencyNode]:
+    def _parse_pyproject(self, filepath: Path) -> list[DependencyNode]:
         """解析pyproject.toml"""
         nodes = []
         try:
@@ -504,7 +504,7 @@ class DependencyResolver(object):
             pass
         return nodes
 
-    def _parse_setup_py(self, filepath: Path) -> List[DependencyNode]:
+    def _parse_setup_py(self, filepath: Path) -> list[DependencyNode]:
         """简单解析setup.py中的install_requires"""
         nodes = []
         try:
@@ -520,9 +520,9 @@ class DependencyResolver(object):
             pass
         return nodes
 
-    def _detect_python_import_cycles(self, project_path: Path, max_depth: int = 20) -> List[List[str]]:
+    def _detect_python_import_cycles(self, project_path: Path, max_depth: int = 20) -> list[list[str]]:
         """检测Python模块间循环导入"""
-        import_map: Dict[str, Set[str]] = defaultdict(set)
+        import_map: dict[str, set[str]] = defaultdict(set)
         for py_file in project_path.rglob("*.py"):
             module_name = py_file.stem
             try:
@@ -548,7 +548,7 @@ class DependencyResolver(object):
         return cycles[:10]  # 最多返回10个
 
     def _dfs_cycle(
-        self, current: str, target: str, graph: Dict[str, Set[str]], visited: Set[str], path: List[str], max_depth: int
+        self, current: str, target: str, graph: dict[str, set[str]], visited: set[str], path: list[str], max_depth: int
     ) -> bool:
         if len(path) > max_depth:
             return False
@@ -568,7 +568,7 @@ class DependencyResolver(object):
 # 质量门禁检查器
 # ============================================================
 
-class QualityGateChecker(object):
+class QualityGateChecker:
     """代码质量门禁检查器"""
 
     def __init__(self):
@@ -582,12 +582,12 @@ class QualityGateChecker(object):
             "max_duplicate_lines": {"threshold": 20, "gate": QualityGate.WARNING},
         }
 
-    def check_file(self, filepath: str, content: Optional[str] = None) -> Dict[str, Any]:
+    def check_file(self, filepath: str, content: str | None = None) -> dict[str, Any]:
         _ = self.trace("check_file")
         """检查单个文件"""
         if content is None:
             try:
-                with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                with open(filepath, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
             except Exception:
                 return {"passed": True, "issues": []}
@@ -649,7 +649,7 @@ class QualityGateChecker(object):
                 )
 
         # 重复行检测
-        line_counts: Dict[str, int] = defaultdict(int)
+        line_counts: dict[str, int] = defaultdict(int)
         for line in lines:
             if line.strip() and not line.strip().startswith("#"):
                 line_counts[line.strip()] += 1
@@ -669,7 +669,7 @@ class QualityGateChecker(object):
         critical = any(i["gate"] == QualityGate.CRITICAL.value for i in issues)
         return {"passed": not critical, "issues": issues, "file": filepath, "lines": len(lines)}
 
-    def check_project(self, project_path: str) -> Dict[str, Any]:
+    def check_project(self, project_path: str) -> dict[str, Any]:
         """检查整个项目"""
         p = Path(project_path)
         all_issues = []
@@ -701,7 +701,7 @@ class QualityGateChecker(object):
         }
 
 # ============================================================
-class BuildDependencyResolver(object):
+class BuildDependencyResolver:
     """构建依赖解析器 - 分析项目依赖树，检测版本冲突和循环引用。
 
     企业场景：单体仓库中数百个模块的依赖关系管理，
@@ -709,18 +709,18 @@ class BuildDependencyResolver(object):
     """
 
     def __init__(self):
-        self._deps: Dict[str, Dict] = {}  # package -> {version, dependencies[]}
+        self._deps: dict[str, dict] = {}  # package -> {version, dependencies[]}
         self._lock = threading.Lock()
 
-    def add_package(self, name: str, version: str, depends_on: List[str] = None):
+    def add_package(self, name: str, version: str, depends_on: list[str] = None):
         """注册包及其版本和依赖"""
         self._deps[name] = {"version": version, "depends": depends_on or []}
 
-    def detect_conflicts(self) -> List[Dict]:
+    def detect_conflicts(self) -> list[dict]:
         """检测版本冲突和循环依赖"""
         conflicts = []
         # 版本冲突：同一包不同版本
-        version_map: Dict[str, Set[str]] = defaultdict(set)
+        version_map: dict[str, set[str]] = defaultdict(set)
         for pkg, info in self._deps.items():
             for dep in info["depends"]:
                 dep_name = dep.split(">=")[0].split("==")[0].split("<")[0].strip()
@@ -738,7 +738,7 @@ class BuildDependencyResolver(object):
             )
         return conflicts
 
-    def _find_cycles(self) -> List[List[str]]:
+    def _find_cycles(self) -> list[list[str]]:
         """DFS检测循环依赖"""
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {pkg: WHITE for pkg in self._deps}
@@ -765,7 +765,7 @@ class BuildDependencyResolver(object):
                 dfs(pkg)
         return cycles
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """拓扑排序 - 返回安全的构建顺序"""
         in_degree = {pkg: 0 for pkg in self._deps}
         for pkg, info in self._deps.items():
@@ -804,7 +804,7 @@ class BuildDependencyResolver(object):
                     queue.append(dependent)
         return result
 
-    def estimate_build_impact(self, changed_package: str) -> Dict:
+    def estimate_build_impact(self, changed_package: str) -> dict:
         """估算变更包的影响范围 - 受影响的下游包数量和构建时间"""
         affected = set()
         queue = [changed_package]
@@ -841,19 +841,19 @@ class AgentHephaestus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 并行构建队列
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_hephaestus", version="6.39.0", config=config)
         self._builds: OrderedDict[str, BuildResult] = OrderedDict()
-        self._configs: Dict[str, BuildConfig] = {}
-        self._artifacts: Dict[str, BuildArtifact] = {}
+        self._configs: dict[str, BuildConfig] = {}
+        self._artifacts: dict[str, BuildArtifact] = {}
         self._cache = BuildCacheManager()
         self._dep_resolver = DependencyResolver()
         self._quality_checker = QualityGateChecker()
-        self._build_queue: List[str] = []
+        self._build_queue: list[str] = []
         self._queue_lock = threading.Lock()
         self._max_concurrent_builds = 2
-        self._active_builds: Set[str] = set()
+        self._active_builds: set[str] = set()
         self._build_counter = 0
         self._stats = {
             "total_builds": 0,
@@ -872,7 +872,7 @@ class AgentHephaestus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._update_status(ModuleStatus.READY)
         logger.info("AgentHephaestus 代码构建引擎初始化完成")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         """统一执行入口 — 路由到构建/质量检查/依赖解析"""
         _ = self.trace("execute")
         metrics_collector.counter("hephaestus_ops_total", labels={"action": action})
@@ -1095,7 +1095,7 @@ class AgentHephaestus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return defaults.get(language, "")
 
-    def _collect_artifacts(self, output_dir: str, build_id: str) -> List[BuildArtifact]:
+    def _collect_artifacts(self, output_dir: str, build_id: str) -> list[BuildArtifact]:
         """收集构建产物"""
         artifacts = []
         for root, _, files in os.walk(output_dir):
@@ -1130,7 +1130,7 @@ class AgentHephaestus(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True, data=result.to_dict())
 
     async def list_builds(
-        self, project_id: Optional[str] = None, status: Optional[BuildStatus] = None, limit: int = 50
+        self, project_id: str | None = None, status: BuildStatus | None = None, limit: int = 50
     ) -> Result:
         """列出构建历史"""
         builds = list(self._builds.values())

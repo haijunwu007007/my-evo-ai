@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # 原 system_coordinator_v3.py L717-1209 — 自主决策循环
 """自主决策循环"""
 import logging, time, re, os, sys, math, asyncio
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List
+from collections.abc import Callable
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -36,13 +36,13 @@ class AutonomousLoop:
     def __init__(self, coordinator):
         self.coordinator = coordinator
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._loop_interval = 30  # 30秒一轮，降低CPU负载
         self._last_decision_time = 0
-        self._decision_log: List[Dict] = []
+        self._decision_log: list[dict] = []
         self._task_index = 0  # 轮询任务索引
         self._execution_stats = {"total": 0, "success": 0, "failed": 0}
-        self._recent_executions: List[Dict] = []  # 模块执行记录供前端展示
+        self._recent_executions: list[dict] = []  # 模块执行记录供前端展示
 
         # v3.1 — 决策引擎集成
         self._decision_engine = None
@@ -129,7 +129,7 @@ class AutonomousLoop:
             # 4. 反馈学习
             await self._feedback(decision, result)
 
-    async def _perceive(self) -> Dict:
+    async def _perceive(self) -> dict:
         """感知当前环境"""
         perception = {
             "timestamp": datetime.now().isoformat(),
@@ -155,7 +155,7 @@ class AutonomousLoop:
                 pass
         return perception
 
-    def _decide(self, perception: Dict) -> List[Dict]:
+    def _decide(self, perception: dict) -> list[dict]:
         """基于感知做决策 — 决策引擎规则匹配 + 系统维护 + 主动业务任务"""
         decisions = []
 
@@ -272,7 +272,7 @@ class AutonomousLoop:
 
         return decisions
 
-    async def _execute_decision(self, decision: Dict) -> Dict:
+    async def _execute_decision(self, decision: dict) -> dict:
         """执行决策 — 返回结果供反馈"""
         decision["executed_at"] = datetime.now().isoformat()
         decision["success"] = False
@@ -369,7 +369,7 @@ class AutonomousLoop:
 
         return result
 
-    async def _execute_direct_module_task(self, task_text: str) -> Dict:
+    async def _execute_direct_module_task(self, task_text: str) -> dict:
         """直接对模块实例执行安全方法，绕过路由层"""
         instances = getattr(self.coordinator, "_module_instances", {})
         if not instances:
@@ -458,7 +458,7 @@ class AutonomousLoop:
             "result": f"任务已记录: {task_text[:80]}",
         }
 
-    async def _feedback(self, decision: Dict, result: Dict):
+    async def _feedback(self, decision: dict, result: dict):
         """执行反馈 — 结果回传经验库"""
         try:
             if self.coordinator._experience_base:
@@ -474,7 +474,7 @@ class AutonomousLoop:
         except Exception:
             pass
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """获取自主循环状态"""
         total = self._execution_stats["total"]
         status = {

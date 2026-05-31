@@ -90,7 +90,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class EvoSafetyAnalyzer(object):
+class EvoSafetyAnalyzer:
     """evo_safety 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,7 +277,7 @@ class SafetyRule:
     enabled: bool = True
     max_mutation_rate: float = 0.3
     max_changes_per_cycle: int = 50
-    forbidden_patterns: List[str] = field(
+    forbidden_patterns: list[str] = field(
         default_factory=lambda: [
             "os.system",
             "subprocess.call",
@@ -288,7 +288,7 @@ class SafetyRule:
             "os.remove",
         ]
     )
-    resource_limits: Dict[str, float] = field(
+    resource_limits: dict[str, float] = field(
         default_factory=lambda: {
             "max_memory_mb": 512.0,
             "max_cpu_percent": 80.0,
@@ -298,7 +298,7 @@ class SafetyRule:
     )
     created_at: float = field(default_factory=time.time)
     trigger_count: int = 0
-    last_triggered: Optional[float] = None
+    last_triggered: float | None = None
 
 @dataclass
 class MutationRecord:
@@ -312,7 +312,7 @@ class MutationRecord:
     safety_level: SafetyLevel
     action_taken: SafetyAction
     timestamp: float = field(default_factory=time.time)
-    approved_by: Optional[str] = None
+    approved_by: str | None = None
 
 @dataclass
 class QuarantineEntry:
@@ -324,7 +324,7 @@ class QuarantineEntry:
     risk_score: float
     quarantined_at: float = field(default_factory=time.time)
     reviewed: bool = False
-    reviewer: Optional[str] = None
+    reviewer: str | None = None
 
 class EvoSafety:
     def trace(self, name, *args, **kwargs):
@@ -349,19 +349,19 @@ class EvoSafety:
 
     """Enterprise-grade evolution safety controller with circuit-breaker pattern."""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or {}
         self._status = "initializing"
         self._lock = threading.RLock()
-        self._mutations: List[MutationRecord] = []
-        self._quarantine: List[QuarantineEntry] = []
-        self._rules: Dict[str, SafetyRule] = {}
+        self._mutations: list[MutationRecord] = []
+        self._quarantine: list[QuarantineEntry] = []
+        self._rules: dict[str, SafetyRule] = {}
         self._circuit_breaker_open = False
         self._circuit_breaker_threshold = self.config.get("circuit_breaker_threshold", 5)
         self._circuit_breaker_reset_seconds = self.config.get("circuit_breaker_reset_seconds", 300)
-        self._circuit_breaker_last_open: Optional[float] = None
+        self._circuit_breaker_last_open: float | None = None
         self._mutation_rate_window: deque = deque(maxlen=100)
-        self._rate_limit_tokens: Dict[str, Tuple[int, float]] = {}
+        self._rate_limit_tokens: dict[str, tuple[int, float]] = {}
         self._rate_limit_max = self.config.get("rate_limit_max", 20)
         self._rate_limit_window = self.config.get("rate_limit_window", 60.0)
         self._metrics = {
@@ -422,7 +422,7 @@ class EvoSafety:
         self._status = "running"
         logger.info("Evolution Safety Controller initialized with %d rules", len(self._rules))
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         self.trace("evo_safety.health_check", "start")
         """Return health status of the safety controller."""
         active_rules = sum(1 for r in self._rules.values() if r.enabled)
@@ -443,7 +443,7 @@ class EvoSafety:
         mutation_type: str,
         change_diff: str,
         safety_level: SafetyLevel = SafetyLevel.MEDIUM,
-    ) -> Tuple[SafetyAction, str]:
+    ) -> tuple[SafetyAction, str]:
         """Evaluate a proposed mutation against all safety rules.
 
         Returns (action, reason) tuple.
@@ -543,7 +543,7 @@ class EvoSafety:
         change_diff: str,
         risk_score: float,
         requested_level: SafetyLevel,
-    ) -> Tuple[SafetyAction, str]:
+    ) -> tuple[SafetyAction, str]:
         """Evaluate a single safety rule."""
         if rule.safety_level.value > requested_level.value:
             return SafetyAction.ESCALATE, f"Requires {rule.safety_level.value} clearance"
@@ -559,7 +559,7 @@ class EvoSafety:
 
         return SafetyAction.ALLOW, "OK"
 
-    def _check_rate_limit(self, module_name: str) -> Tuple[SafetyAction, str]:
+    def _check_rate_limit(self, module_name: str) -> tuple[SafetyAction, str]:
         """Check if module has exceeded mutation rate limit."""
         now = time.time()
         if module_name not in self._rate_limit_tokens:
@@ -597,7 +597,7 @@ class EvoSafety:
         risk_score: float,
         safety_level: SafetyLevel,
         action: SafetyAction,
-        approved_by: Optional[str] = None,
+        approved_by: str | None = None,
     ) -> None:
         """Record a mutation evaluation for audit."""
         record = MutationRecord(
@@ -664,9 +664,9 @@ class EvoSafety:
 
     def get_audit_trail(
         self,
-        module_name: Optional[str] = None,
+        module_name: str | None = None,
         limit: int = 50,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get mutation audit trail, optionally filtered by module."""
         records = self._mutations
         if module_name:
@@ -683,7 +683,7 @@ class EvoSafety:
             for r in records[-limit:]
         ]
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         self.trace("evo_safety.execute", "start", action=action)
 
         """Execute a safety command."""

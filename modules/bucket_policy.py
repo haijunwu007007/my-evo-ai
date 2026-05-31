@@ -116,13 +116,13 @@ class PolicyStatement:
 
     sid: str
     effect: str  # Allow / Deny
-    principal: Dict[str, Any]  # {"AWS": ["arn:aws:iam::123:user/alice"]} or {"Service": ["s3.amazonaws.com"]}
-    action: List[str]  # ["s3:GetObject", "s3:PutObject"]
-    resource: List[str]  # ["arn:aws:s3:::bucket/*"]
-    condition: Optional[Dict[str, Any]] = None
+    principal: dict[str, Any]  # {"AWS": ["arn:aws:iam::123:user/alice"]} or {"Service": ["s3.amazonaws.com"]}
+    action: list[str]  # ["s3:GetObject", "s3:PutObject"]
+    resource: list[str]  # ["arn:aws:s3:::bucket/*"]
+    condition: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
-        stmt: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        stmt: dict[str, Any] = {
             "Sid": self.sid,
             "Effect": self.effect,
             "Principal": self.principal,
@@ -134,7 +134,7 @@ class PolicyStatement:
         return stmt
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PolicyStatement":
+    def from_dict(cls, data: dict[str, Any]) -> PolicyStatement:
         return cls(
             sid=data["Sid"],
             effect=data["Effect"],
@@ -176,13 +176,13 @@ class BucketPolicy:
     policy_id: str
     bucket_name: str
     version: str = "2012-10-17"
-    statements: List[PolicyStatement] = field(default_factory=list)
+    statements: list[PolicyStatement] = field(default_factory=list)
     created_at: float = 0.0
     updated_at: float = 0.0
     checksum: str = ""
     is_active: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "Version": self.version,
             "Statement": [s.to_dict() for s in self.statements],
@@ -192,7 +192,7 @@ class BucketPolicy:
         raw = json.dumps(self.to_dict(), sort_keys=True)
         return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
-    def validate(self) -> List[Dict[str, Any]]:
+    def validate(self) -> list[dict[str, Any]]:
         """验证策略语法"""
         errors = []
         if not self.statements:
@@ -210,7 +210,7 @@ class BucketPolicy:
                 errors.append({"code": "MISSING_RESOURCE", "message": f"Statement {i}: 缺少Resource", "index": i})
         return errors
 
-    def scan_violations(self) -> List[Dict[str, Any]]:
+    def scan_violations(self) -> list[dict[str, Any]]:
         """扫描安全违规"""
         violations = []
         for stmt in self.statements:
@@ -285,11 +285,11 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     def __init__(self):
 
         super().__init__()
-        self._policies: Dict[str, BucketPolicy] = {}
-        self._acl: Dict[str, List[BucketACLEntry]] = {}
-        self._templates: Dict[str, Dict[str, Any]] = {}
-        self._access_logs: List[AccessLog] = []
-        self._audit_trail: List[Dict[str, Any]] = []
+        self._policies: dict[str, BucketPolicy] = {}
+        self._acl: dict[str, list[BucketACLEntry]] = {}
+        self._templates: dict[str, dict[str, Any]] = {}
+        self._access_logs: list[AccessLog] = []
+        self._audit_trail: list[dict[str, Any]] = []
         self._check_rate_limit = lambda *a, **k: True
         self._initialized = False
         self._counter = 0
@@ -411,7 +411,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         policy.checksum = policy.compute_checksum()
         return policy
 
-    def _add_audit(self, action: str, message: str, details: Dict[str, Any] = None) -> None:
+    def _add_audit(self, action: str, message: str, details: dict[str, Any] = None) -> None:
         self._audit_trail.append(
             {
                 "timestamp": time.time(),
@@ -421,7 +421,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             }
         )
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行策略管理操作"""
         _ = self.trace("execute")
         trace_id = f"bp-{operation}-{int(time.time() * 1000)}"
@@ -462,7 +462,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         except Exception as e:
             return {"success": False, "error": str(e), "error_code": "INTERNAL_ERROR"}
 
-    def _create_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         if not bucket_name:
             return {"success": False, "error": "缺少bucket_name"}
@@ -512,7 +512,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _get_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         policy = self._policies.get(bucket_name)
         if not policy:
@@ -531,7 +531,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _update_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _update_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         policy = self._policies.get(bucket_name)
         if not policy:
@@ -568,7 +568,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _delete_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _delete_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         if bucket_name not in self._policies:
             return {"success": False, "error": f"桶 {bucket_name} 未找到策略", "error_code": "NOT_FOUND"}
@@ -576,7 +576,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._add_audit("delete_policy", f"删除桶策略: {bucket_name}", {"policy_id": policy.policy_id})
         return {"success": True, "result": {"deleted_policy_id": policy.policy_id, "bucket_name": bucket_name}}
 
-    def _apply_statement(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _apply_statement(self, p: dict[str, Any]) -> dict[str, Any]:
         """追加或替换策略声明"""
         self.audit("execute", f"action={action}")
 
@@ -609,7 +609,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._add_audit("apply_statement", f"追加声明到 {bucket_name}", {"sid": stmt.sid, "effect": stmt.effect})
         return {"success": True, "result": {"sid": stmt.sid, "total_statements": len(policy.statements)}}
 
-    def _remove_statement(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _remove_statement(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         sid = p.get("sid", "")
         policy = self._policies.get(bucket_name)
@@ -626,7 +626,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._add_audit("remove_statement", f"移除声明 {sid} 从 {bucket_name}", {})
         return {"success": True, "result": {"removed_sid": sid, "remaining_statements": len(policy.statements)}}
 
-    def _validate_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         policy = self._policies.get(bucket_name)
         if not policy:
@@ -641,7 +641,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "result": {"valid": len(errors) == 0, "errors": errors, "statements_checked": len(policy.statements)},
         }
 
-    def _scan_violations(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _scan_violations(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         if bucket_name:
             policy = self._policies.get(bucket_name)
@@ -672,7 +672,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _fix_violations(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _fix_violations(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         if bucket_name:
             policy = self._policies.get(bucket_name)
@@ -704,7 +704,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._add_audit("fix_violations", f"自动修复 {len(policies)} 个桶", {"fixes_applied": len(fixes)})
         return {"success": True, "result": {"fixes_applied": len(fixes), "details": fixes}}
 
-    def _set_acl(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _set_acl(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         if bucket_name not in self._policies:
             return {"success": False, "error": f"桶 {bucket_name} 不存在", "error_code": "NOT_FOUND"}
@@ -730,7 +730,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "result": {"grantee": grantee, "permission": permission, "total_acls": len(self._acl[bucket_name])},
         }
 
-    def _get_acl(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_acl(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         acls = self._acl.get(bucket_name, [])
         return {
@@ -741,7 +741,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _evaluate_access(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _evaluate_access(self, p: dict[str, Any]) -> dict[str, Any]:
         """评估访问权限"""
         bucket_name = p.get("bucket_name", "")
         principal = p.get("principal", "")
@@ -817,7 +817,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _log_access(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _log_access(self, p: dict[str, Any]) -> dict[str, Any]:
         self._log_counter += 1
         log = AccessLog(
             log_id=f"alog_{self._log_counter}",
@@ -832,7 +832,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._access_logs.append(log)
         return {"success": True, "result": {"log_id": log.log_id}}
 
-    def _search_logs(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _search_logs(self, p: dict[str, Any]) -> dict[str, Any]:
         bucket_name = p.get("bucket_name", "")
         requester = p.get("requester", "")
         action = p.get("action", "")
@@ -869,7 +869,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _apply_template(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _apply_template(self, p: dict[str, Any]) -> dict[str, Any]:
         template_id = p.get("template_id", "")
         bucket_name = p.get("bucket_name", "")
         if template_id not in self._templates:
@@ -913,7 +913,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "result": {"template": template_id, "bucket_name": bucket_name, "statements_applied": len(new_statements)},
         }
 
-    def _list_templates(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_templates(self, p: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "result": [
@@ -922,7 +922,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def _list_buckets(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_buckets(self, p: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "result": [
@@ -936,7 +936,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def _list_policies(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_policies(self, p: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "result": [
@@ -951,7 +951,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def _get_audit_trail(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_audit_trail(self, p: dict[str, Any]) -> dict[str, Any]:
         limit = p.get("limit", 20)
         return {"success": True, "result": {"total": len(self._audit_trail), "entries": self._audit_trail[-limit:]}}
 
@@ -959,7 +959,7 @@ class BucketPolicyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._initialized = False
         self._add_audit("shutdown", "系统关闭", {})
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {} if hasattr(super(), "health_check") else {}
         result = dict(base)
         result.update(

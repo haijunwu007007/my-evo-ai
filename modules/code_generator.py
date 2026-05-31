@@ -174,8 +174,8 @@ class CodeTemplate:
     category: str
     description: str
     template_code: str
-    variables: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     quality_level: CodeQuality = CodeQuality.A
 
 @dataclass
@@ -186,10 +186,10 @@ class GenerationRequest:
     description: str
     language: Language
     code_type: str  # function, class, module, api, test, config
-    context: Optional[str] = None
-    requirements: List[str] = field(default_factory=list)
-    constraints: Dict[str, Any] = field(default_factory=dict)
-    style_guide: Optional[str] = None
+    context: str | None = None
+    requirements: list[str] = field(default_factory=list)
+    constraints: dict[str, Any] = field(default_factory=dict)
+    style_guide: str | None = None
 
 @dataclass
 class ReviewResult:
@@ -197,18 +197,18 @@ class ReviewResult:
 
     file_path: str
     quality: CodeQuality
-    issues: List[Dict[str, Any]] = field(default_factory=list)
-    suggestions: List[str] = field(default_factory=list)
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    issues: list[dict[str, Any]] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
+    metrics: dict[str, Any] = field(default_factory=dict)
     score: float = 0.0
 
-class TemplateAnalyzer(object):
+class TemplateAnalyzer:
     """模板分析引擎 — 评估模板质量、检测重复代码、推荐模板优化"""
 
     def __init__(self):
-        self._quality_metrics: Dict[str, float] = {}
+        self._quality_metrics: dict[str, float] = {}
 
-    def analyze_template(self, template: str, language: str = "python") -> Dict[str, Any]:
+    def analyze_template(self, template: str, language: str = "python") -> dict[str, Any]:
         """分析代码模板质量"""
         lines = template.strip().split("\n")
         total_lines = len(lines)
@@ -249,7 +249,7 @@ class TemplateAnalyzer(object):
             "grade": "A" if score >= 80 else "B" if score >= 60 else "C",
         }
 
-    def detect_duplicates(self, templates: Dict[str, str]) -> List[Dict[str, Any]]:
+    def detect_duplicates(self, templates: dict[str, str]) -> list[dict[str, Any]]:
         """检测模板间的代码重复"""
         from difflib import SequenceMatcher
 
@@ -295,9 +295,9 @@ class CodeGenerator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._templates: Dict[str, CodeTemplate] = {}
-        self._generation_history: List[Dict] = []
-        self._review_cache: Dict[str, ReviewResult] = {}
+        self._templates: dict[str, CodeTemplate] = {}
+        self._generation_history: list[dict] = []
+        self._review_cache: dict[str, ReviewResult] = {}
         self._output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "generated_code")
         self._template_analyzer = TemplateAnalyzer()
 
@@ -587,9 +587,9 @@ COMMIT;
         description: str,
         language: Language,
         code_type: str = "function",
-        context: Optional[str] = None,
-        requirements: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        context: str | None = None,
+        requirements: list[str] | None = None,
+    ) -> dict[str, Any]:
         """生成代码"""
         try:
             request_id = f"gen_{uuid.uuid4().hex[:10]}"
@@ -636,7 +636,7 @@ COMMIT;
             raise
 
     def _do_generate(
-        self, description: str, language: Language, code_type: str, context: Optional[str], requirements: List[str]
+        self, description: str, language: Language, code_type: str, context: str | None, requirements: list[str]
     ) -> str:
         """核心代码生成逻辑"""
         generators = {
@@ -649,7 +649,7 @@ COMMIT;
         gen = generators.get(language, self._gen_generic)
         return gen(description, code_type, context, requirements)
 
-    def _gen_python(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_python(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         """生成Python代码"""
         name = self._extract_name(desc)
 
@@ -710,7 +710,7 @@ module_class = {name}
             return f'''# Module: {name}\n# {desc}\n\nimport asyncio\nimport logging
 from _zhipu_helper import llm_chat  # LLM fallback\n\nlogger = logging.getLogger("{name}")\n\n'''
 
-    def _gen_javascript(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_javascript(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc)
         if code_type == "function":
             return f"""/**
@@ -737,7 +737,7 @@ module.exports = {{ {name} }};
 """
         return f"// {name}: {desc}\n// TODO: Implement\n"
 
-    def _gen_typescript(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_typescript(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc)
         return f"""/**
  * {desc}
@@ -768,7 +768,7 @@ async function _implement{name.charAt(0).toUpperCase()}{name.slice(1)}(params: {
 }}
 """
 
-    def _gen_sql(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_sql(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         table = self._extract_name(desc)
         return f"""-- {desc}
 -- Generated at {datetime.now().isoformat()}
@@ -788,7 +788,7 @@ CREATE INDEX idx_{table}_created ON {table}(created_at);
 -- SELECT * FROM {table} WHERE status = 'active' ORDER BY created_at DESC LIMIT 50;
 """
 
-    def _gen_shell(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_shell(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc).replace("_", "-")
         return f"""#!/bin/bash
 # {desc}
@@ -814,7 +814,7 @@ main() {{
 main "$@"
 """
 
-    def _gen_generic(self, desc: str, code_type: str, context: Optional[str], requirements: List[str]) -> str:
+    def _gen_generic(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         return f"// TODO: {desc}\n// Language: generic\n"
 
     def _extract_name(self, description: str) -> str:
@@ -823,7 +823,7 @@ main "$@"
         words = name.split()[:3]
         return "_".join(w.lower() for w in words) or "module"
 
-    def _generate_docstring(self, desc: str, code_type: str, requirements: List[str]) -> str:
+    def _generate_docstring(self, desc: str, code_type: str, requirements: list[str]) -> str:
         """生成文档字符串"""
         parts = [f"{desc}."]
         if requirements:
@@ -919,7 +919,7 @@ main "$@"
         )
 
     @trace_operation("review_code")
-    def review_code(self, code: str, language: Language = Language.PYTHON, file_path: str = "") -> Dict[str, Any]:
+    def review_code(self, code: str, language: Language = Language.PYTHON, file_path: str = "") -> dict[str, Any]:
         """详细代码审查"""
         review = self._quick_review(code, language)
         review.file_path = file_path
@@ -940,7 +940,7 @@ main "$@"
             "metrics": review.metrics,
         }
 
-    def _deep_python_review(self, code: str) -> List[str]:
+    def _deep_python_review(self, code: str) -> list[str]:
         """深度Python审查"""
         suggestions = []
         if "import *" in code:
@@ -956,7 +956,7 @@ main "$@"
         return suggestions
 
     @trace_operation("generate_from_template")
-    def generate_from_template(self, template_id: str, variables: Dict[str, str]) -> Dict[str, Any]:
+    def generate_from_template(self, template_id: str, variables: dict[str, str]) -> dict[str, Any]:
         """从模板生成代码"""
         if template_id not in self._templates:
             raise ValueError(f"模板 {template_id} 不存在")
@@ -977,7 +977,7 @@ main "$@"
             "missing_variables": [v for v in tmpl.variables if v not in variables],
         }
 
-    def list_templates(self, language: Optional[str] = None, category: Optional[str] = None) -> List[Dict]:
+    def list_templates(self, language: str | None = None, category: str | None = None) -> list[dict]:
         templates = list(self._templates.values())
         if language:
             templates = [t for t in templates if t.language.value == language]
@@ -995,7 +995,7 @@ main "$@"
             for t in templates
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total = len(self._generation_history)
         return {
             "total_generations": total,
@@ -1006,14 +1006,14 @@ main "$@"
             else 0,
         }
 
-    def _count_by(self, history: List[Dict], key: str) -> Dict[str, int]:
-        counts: Dict[str, int] = {}
+    def _count_by(self, history: list[dict], key: str) -> dict[str, int]:
+        counts: dict[str, int] = {}
         for h in history:
             val = h.get(key, "unknown")
             counts[val] = counts.get(val, 0) + 1
         return counts
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

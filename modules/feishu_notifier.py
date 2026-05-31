@@ -23,14 +23,14 @@ CONFIG = {
 
 _stats = {"sent": 0, "failed": 0, "history": []}
 
-def health_check() -> Dict:
+def health_check() -> dict:
     return {"module": "feishu_notifier", "status": "healthy", "channels": len(CONFIG["webhooks"]), "uptime": time.time()}
 
 def _sign(secret: str, timestamp: int) -> str:
     s = f"{timestamp}\n{secret}"
     return base64.b64encode(hmac.new(s.encode(), digestmod=hashlib.sha256).digest()).decode()
 
-def _send_webhook(name: str, payload: Dict, secret: str = "") -> Dict:
+def _send_webhook(name: str, payload: dict, secret: str = "") -> dict:
     import urllib.request, urllib.error
     url = CONFIG["webhooks"].get(name, name)
     if secret:
@@ -55,7 +55,7 @@ def _send_webhook(name: str, payload: Dict, secret: str = "") -> Dict:
     _stats["history"].append({"channel": name, "status": "fail", "ts": datetime.now().isoformat()})
     return {"success": False, "error": str(e)}
 
-def execute(action: str = "send", params: Dict = None) -> Dict:
+def execute(action: str = "send", params: dict = None) -> dict:
     p = params or {}
     if action == "health":
         return health_check()

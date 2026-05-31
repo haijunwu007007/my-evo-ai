@@ -86,7 +86,8 @@ __module_meta__ = {
     }
 import json, os, re, time, threading, traceback, logging
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, Callable, List
+from typing import Optional, Dict, Any, List
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -120,10 +121,10 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.data_dir = data_dir
         os.makedirs(data_dir, exist_ok=True)
         self.scheduler_type = scheduler_type if scheduler_type == "apscheduler" else "manual"
-        self._jobs: Dict[str, Dict] = {}  # name -> job config
-        self._handlers: Dict[str, Callable] = {}  # name -> callable handler
-        self._history: List[Dict] = []
-        self._error_callbacks: List[Callable] = []
+        self._jobs: dict[str, dict] = {}  # name -> job config
+        self._handlers: dict[str, Callable] = {}  # name -> callable handler
+        self._history: list[dict] = []
+        self._error_callbacks: list[Callable] = []
         self._started = False
         self._scheduler = None
         self._manual_thread = None
@@ -140,7 +141,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         fp = self._jobs_file()
         if os.path.exists(fp):
             try:
-                with open(fp, "r", encoding="utf-8") as f:
+                with open(fp, encoding="utf-8") as f:
                     data = json.load(f)
                 for name, cfg in data.get("jobs", {}).items():
                     self._jobs[name] = cfg
@@ -163,7 +164,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._history = self._history[-5000:]
 
     # ─── Cron表达式解析 ─────────────────────────────────
-    def parse_cron(self, expression: str) -> Dict:
+    def parse_cron(self, expression: str) -> dict:
         """验证和解析标准5字段Cron表达式 (分 时 日 月 周)"""
         try:
             parts = expression.strip().split()
@@ -182,7 +183,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "valid": False, "error": str(e)}
 
-    def _describe(self, parsed: Dict) -> str:
+    def _describe(self, parsed: dict) -> str:
         h, m, wd = parsed.get("hour", "*"), parsed.get("minute", "*"), parsed.get("weekday", "*")
         if h == "*" and m == "*":
             return "每分钟执行"
@@ -198,15 +199,15 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         trigger_type: str = "cron",
         trigger_expr: str = "*/5 * * * *",
-        handler: Optional[Callable] = None,
+        handler: Callable | None = None,
         description: str = "",
         misfire_grace_time: int = 60,
         max_instances: int = 1,
         coalesce: bool = True,
         timeout: int = 0,
-        chain: Optional[List[str]] = None,
+        chain: list[str] | None = None,
         replace: bool = True,
-    ) -> Dict:
+    ) -> dict:
         """
         添加调度任务
         Args:
@@ -263,7 +264,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._log("add_job", f"{name} [{trigger_type}] {trigger_expr}")
         return {"success": True, "job": name, "trigger_type": trigger_type, "expr": trigger_expr}
 
-    def _build_trigger(self, trigger_type: str, expr: str) -> Dict:
+    def _build_trigger(self, trigger_type: str, expr: str) -> dict:
         if trigger_type == "cron":
             parts = expr.split()
             return {
@@ -281,7 +282,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"type": "date", "run_date": expr}
         return {"type": "cron", "minute": "*", "hour": "*", "day": "*", "month": "*", "weekday": "*"}
 
-    def remove_job(self, name: str) -> Dict:
+    def remove_job(self, name: str) -> dict:
         if name not in self._jobs:
             return {"success": False, "error": "任务不存在"}
         if self._started and self._scheduler:
@@ -295,7 +296,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._log("remove_job", name)
         return {"success": True}
 
-    def pause_job(self, name: str) -> Dict:
+    def pause_job(self, name: str) -> dict:
         job = self._jobs.get(name)
         if not job:
             return {"success": False, "error": "任务不存在"}
@@ -308,7 +309,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._save_jobs()
         return {"success": True}
 
-    def resume_job(self, name: str) -> Dict:
+    def resume_job(self, name: str) -> dict:
         job = self._jobs.get(name)
         if not job:
             return {"success": False, "error": "任务不存在"}
@@ -321,14 +322,14 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._save_jobs()
         return {"success": True}
 
-    def run_job(self, name: str) -> Dict:
+    def run_job(self, name: str) -> dict:
         """手动立即执行任务"""
         job = self._jobs.get(name)
         if not job:
             return {"success": False, "error": "任务不存在"}
         return self._execute_job(job)
 
-    def _execute_job(self, job: Dict) -> Dict:
+    def _execute_job(self, job: dict) -> dict:
         """执行单个任务(含超时控制)"""
         name = job["name"]
         handler = self._handlers.get(name)
@@ -382,7 +383,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return result
 
     # ─── APScheduler 调度器 ──────────────────────────────
-    def _register_to_scheduler(self, job: Dict):
+    def _register_to_scheduler(self, job: dict):
         """将任务注册到调度器"""
         if not self._scheduler or job.get("status") != "active":
             return
@@ -440,7 +441,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._manual_stop.wait(1.0)
         logger.info("手动轮询模式停止")
 
-    def _calc_next_run_manual(self, job: Dict, after: datetime) -> Optional[datetime]:
+    def _calc_next_run_manual(self, job: dict, after: datetime) -> datetime | None:
         """计算下次执行时间(简化版cron匹配)"""
         tt = job["trigger_type"]
         expr = job["trigger_expr"]
@@ -478,7 +479,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return None
 
     # ─── 启动/停止 ──────────────────────────────────────
-    def start(self) -> Dict:
+    def start(self) -> dict:
         """启动调度器"""
         if self._started:
             return {"success": False, "error": "调度器已在运行"}
@@ -506,7 +507,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "jobs": len(active_jobs),
         }
 
-    def stop(self) -> Dict:
+    def stop(self) -> dict:
         """停止调度器"""
         if not self._started:
             return {"success": False, "error": "调度器未运行"}
@@ -538,7 +539,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._error_callbacks.append(callback)
 
     # ─── 查询 ──────────────────────────────────────────
-    def get_next_run_time(self, name: str) -> Optional[str]:
+    def get_next_run_time(self, name: str) -> str | None:
         job = self._jobs.get(name)
         if not job:
             return None
@@ -555,10 +556,10 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return job["next_run"].isoformat()
         return job.get("next_run")
 
-    def get_job_history(self, name: str, limit: int = 50) -> List[Dict]:
+    def get_job_history(self, name: str, limit: int = 50) -> list[dict]:
         return [h for h in self._history if name in h.get("detail", "") or name in h.get("action", "")][-limit:]
 
-    def list_jobs(self) -> Dict:
+    def list_jobs(self) -> dict:
         jobs_list = []
         for name, job in self._jobs.items():
             info = dict(job)
@@ -567,7 +568,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             jobs_list.append(info)
         return {"success": True, "jobs": jobs_list, "count": len(jobs_list), "scheduler_running": self._started}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         active = sum(1 for j in self._jobs.values() if j.get("status") == "active")
         total_runs = sum(j.get("run_count", 0) for j in self._jobs.values())
         total_fails = sum(j.get("fail_count", 0) for j in self._jobs.values())
@@ -584,7 +585,7 @@ class CronEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "version": self.VERSION,
         }
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         return {"healthy": True, "running": self._started, "jobs_count": len(self._jobs), "version": self.VERSION}
 
     # ─── 便捷函数 ──────────────────────────────────────────

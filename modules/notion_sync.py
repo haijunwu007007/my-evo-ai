@@ -84,7 +84,8 @@ import json
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -96,7 +97,7 @@ except ImportError:
 
 logger = get_logger(__name__)
 
-class NotionSyncAnalyzer(object):
+class NotionSyncAnalyzer:
     """notion_sync 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -307,8 +308,8 @@ class NotionPage:
     title: str = ""
     icon: str = ""
     cover: str = ""
-    properties: Dict[str, Any] = field(default_factory=dict)
-    children: List[str] = field(default_factory=list)
+    properties: dict[str, Any] = field(default_factory=dict)
+    children: list[str] = field(default_factory=list)
     content: str = ""
     status: str = "active"
     archived: bool = False
@@ -330,10 +331,10 @@ class NotionDatabase:
     db_id: str = field(default_factory=lambda: uuid.uuid4().hex[:14])
     title: str = ""
     parent_id: str = ""
-    properties: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    schema: List[Dict[str, Any]] = field(default_factory=list)
-    rows: List[Dict[str, Any]] = field(default_factory=list)
-    views: List[Dict[str, Any]] = field(default_factory=list)
+    properties: dict[str, dict[str, Any]] = field(default_factory=dict)
+    schema: list[dict[str, Any]] = field(default_factory=list)
+    rows: list[dict[str, Any]] = field(default_factory=list)
+    views: list[dict[str, Any]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
     archived: bool = False
@@ -345,8 +346,8 @@ class NotionBlock:
     page_id: str = ""
     type: str = "paragraph"
     content: str = ""
-    children: List[str] = field(default_factory=list)
-    properties: Dict[str, Any] = field(default_factory=dict)
+    children: list[str] = field(default_factory=list)
+    properties: dict[str, Any] = field(default_factory=dict)
     order: int = 0
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
@@ -393,9 +394,9 @@ class SyncConfig:
     incremental: bool = True
     sync_archived: bool = False
     sync_comments: bool = True
-    property_mapping: Dict[str, str] = field(default_factory=dict)
-    exclude_pages: List[str] = field(default_factory=list)
-    exclude_databases: List[str] = field(default_factory=list)
+    property_mapping: dict[str, str] = field(default_factory=dict)
+    exclude_pages: list[str] = field(default_factory=list)
+    exclude_databases: list[str] = field(default_factory=list)
     webhook_url: str = ""
     rate_limit_rps: float = 3.0
 
@@ -422,7 +423,7 @@ class NotionSync:
 
     """Enterprise bidirectional Notion synchronization with conflict resolution."""
 
-    def __init__(self, config: Optional[SyncConfig] = None):
+    def __init__(self, config: SyncConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -455,14 +456,14 @@ class NotionSync:
         )()
 
         self._config = config or SyncConfig()
-        self._pages: Dict[str, NotionPage] = {}
-        self._databases: Dict[str, NotionDatabase] = {}
-        self._blocks: Dict[str, NotionBlock] = {}
-        self._sync_records: Dict[str, SyncRecord] = {}
-        self._conflicts: Dict[str, ConflictEntry] = {}
-        self._page_tree: Dict[str, List[str]] = defaultdict(list)
-        self._search_index: Dict[str, Set[str]] = defaultdict(set)
-        self._hooks: Dict[str, List[Callable]] = {
+        self._pages: dict[str, NotionPage] = {}
+        self._databases: dict[str, NotionDatabase] = {}
+        self._blocks: dict[str, NotionBlock] = {}
+        self._sync_records: dict[str, SyncRecord] = {}
+        self._conflicts: dict[str, ConflictEntry] = {}
+        self._page_tree: dict[str, list[str]] = defaultdict(list)
+        self._search_index: dict[str, set[str]] = defaultdict(set)
+        self._hooks: dict[str, list[Callable]] = {
             "before_sync": [],
             "after_sync": [],
             "on_conflict": [],
@@ -507,7 +508,7 @@ class NotionSync:
             )
 
     def create_page(
-        self, title: str, content: str = "", parent_id: str = "", properties: Optional[Dict] = None
+        self, title: str, content: str = "", parent_id: str = "", properties: dict | None = None
     ) -> NotionPage:
         page = NotionPage(title=title, content=content, parent_id=parent_id, properties=properties or {})
         with self._lock:
@@ -525,10 +526,10 @@ class NotionSync:
     def update_page(
         self,
         page_id: str,
-        title: Optional[str] = None,
-        content: Optional[str] = None,
-        properties: Optional[Dict] = None,
-    ) -> Optional[NotionPage]:
+        title: str | None = None,
+        content: str | None = None,
+        properties: dict | None = None,
+    ) -> NotionPage | None:
         with self._lock:
             page = self._pages.get(page_id)
             if not page:
@@ -572,7 +573,7 @@ class NotionSync:
                 pass
         return True
 
-    def create_database(self, title: str, parent_id: str = "", schema: Optional[List[Dict]] = None) -> NotionDatabase:
+    def create_database(self, title: str, parent_id: str = "", schema: list[dict] | None = None) -> NotionDatabase:
         db = NotionDatabase(title=title, parent_id=parent_id, schema=schema or [])
         with self._lock:
             self._databases[db.db_id] = db
@@ -583,7 +584,7 @@ class NotionSync:
                 pass
         return db
 
-    def add_database_row(self, db_id: str, row: Dict[str, Any]) -> bool:
+    def add_database_row(self, db_id: str, row: dict[str, Any]) -> bool:
         with self._lock:
             db = self._databases.get(db_id)
             if not db:
@@ -594,7 +595,7 @@ class NotionSync:
             db.updated_at = time.time()
         return True
 
-    def update_database_row(self, db_id: str, row_id: str, updates: Dict[str, Any]) -> bool:
+    def update_database_row(self, db_id: str, row_id: str, updates: dict[str, Any]) -> bool:
         with self._lock:
             db = self._databases.get(db_id)
             if not db:
@@ -608,8 +609,8 @@ class NotionSync:
         return False
 
     def query_database(
-        self, db_id: str, filter_expr: Optional[Dict] = None, sorts: Optional[List[Dict]] = None, limit: int = 100
-    ) -> List[Dict[str, Any]]:
+        self, db_id: str, filter_expr: dict | None = None, sorts: list[dict] | None = None, limit: int = 100
+    ) -> list[dict[str, Any]]:
         with self._lock:
             db = self._databases.get(db_id)
             if not db:
@@ -621,7 +622,7 @@ class NotionSync:
                 results = self._apply_sort(results, sorts)
             return results[:limit]
 
-    def search(self, query: str, object_type: Optional[ObjectType] = None, limit: int = 20) -> List[Dict[str, Any]]:
+    def search(self, query: str, object_type: ObjectType | None = None, limit: int = 20) -> list[dict[str, Any]]:
         results = []
         query_lower = query.lower()
         with self._lock:
@@ -642,8 +643,8 @@ class NotionSync:
             results.sort(key=lambda x: x.get("updated_at", 0), reverse=True)
             return results[:limit]
 
-    def get_page_tree(self, root_id: Optional[str] = None, depth: int = 5) -> Dict[str, Any]:
-        def build_tree(page_id: str, current_depth: int) -> Optional[Dict]:
+    def get_page_tree(self, root_id: str | None = None, depth: int = 5) -> dict[str, Any]:
+        def build_tree(page_id: str, current_depth: int) -> dict | None:
             if current_depth > depth:
                 return None
             page = self._pages.get(page_id)
@@ -676,7 +677,7 @@ class NotionSync:
             "children": [build_tree(rid, 0) for rid in roots if build_tree(rid, 0)],
         }
 
-    def sync(self, direction: Optional[SyncDirection] = None) -> Dict[str, Any]:
+    def sync(self, direction: SyncDirection | None = None) -> dict[str, Any]:
         sync_dir = direction or self._config.direction
         start = time.time()
         self._sync_state = SyncStatus.SYNCING
@@ -742,7 +743,7 @@ class NotionSync:
             conflict.resolution = strategy.value
         return True
 
-    def get_sync_status(self) -> Dict[str, Any]:
+    def get_sync_status(self) -> dict[str, Any]:
         with self._lock:
             return {
                 "state": self._sync_state.value,
@@ -765,7 +766,7 @@ class NotionSync:
         for word in page.content.lower().split()[:50]:
             self._search_index[word].add(page.page_id)
 
-    def _apply_filter(self, rows: List[Dict], filter_expr: Dict) -> List[Dict]:
+    def _apply_filter(self, rows: list[dict], filter_expr: dict) -> list[dict]:
         prop = filter_expr.get("property", "")
         op = filter_expr.get("operator", "equals")
         value = filter_expr.get("value")
@@ -774,19 +775,11 @@ class NotionSync:
         result = []
         for row in rows:
             row_val = row.get(prop)
-            if op == "equals" and row_val == value:
-                result.append(row)
-            elif op == "contains" and value in str(row_val):
-                result.append(row)
-            elif op == "not_empty" and row_val:
-                result.append(row)
-            elif op == "empty" and not row_val:
-                result.append(row)
-            elif op == "greater_than" and isinstance(row_val, (int, float)) and row_val > (value or 0):
+            if op == "equals" and row_val == value or op == "contains" and value in str(row_val) or op == "not_empty" and row_val or op == "empty" and not row_val or op == "greater_than" and isinstance(row_val, (int, float)) and row_val > (value or 0):
                 result.append(row)
         return result
 
-    def _apply_sort(self, rows: List[Dict], sorts: List[Dict]) -> List[Dict]:
+    def _apply_sort(self, rows: list[dict], sorts: list[dict]) -> list[dict]:
         for sort in reversed(sorts):
             prop = sort.get("property", "")
             direction = sort.get("direction", "ascending")
@@ -798,7 +791,7 @@ class NotionSync:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             st = self.get_sync_status()

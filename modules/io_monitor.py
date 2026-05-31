@@ -99,7 +99,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class IoMonitorAnalyzer(object):
+class IoMonitorAnalyzer:
     """io_monitor 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -380,7 +380,7 @@ class CapacityPredictor:
     def record(self, device: str, value: float) -> None:
         self._history[device].append((time.time(), value))
 
-    def predict(self, device: str, hours: int = 24) -> Optional[dict]:
+    def predict(self, device: str, hours: int = 24) -> dict | None:
         history = list(self._history.get(device, []))
         if len(history) < 10:
             return None
@@ -571,7 +571,7 @@ class IOMonitor:
                 )
             )
 
-    def get_device_stats(self, device: Optional[str] = None) -> list[dict]:
+    def get_device_stats(self, device: str | None = None) -> list[dict]:
         if device:
             stats = self._devices.get(device)
             return [stats.to_dict()] if stats else []
@@ -581,10 +581,10 @@ class IOMonitor:
         key = f"{device}:{op_type}"
         return self._latency_tracker.get_stats(key)
 
-    def predict_capacity(self, device: str, hours: int = 24) -> Optional[dict]:
+    def predict_capacity(self, device: str, hours: int = 24) -> dict | None:
         return self._capacity_predictor.predict(device, hours)
 
-    def get_alerts(self, severity: Optional[Severity] = None, limit: int = 50) -> list[dict]:
+    def get_alerts(self, severity: Severity | None = None, limit: int = 50) -> list[dict]:
         alerts = self._alerts
         if severity:
             alerts = [a for a in alerts if a.severity == severity]

@@ -182,22 +182,22 @@ class ExportJob:
     name: str
     format: ExportFormat
     source_type: str
-    data: Optional[Any] = None
-    query: Optional[Dict[str, Any]] = None
-    output_path: Optional[str] = None
+    data: Any | None = None
+    query: dict[str, Any] | None = None
+    output_path: str | None = None
     storage_backend: StorageBackend = StorageBackend.LOCAL
     compression: CompressionType = CompressionType.NONE
     encrypt: bool = False
-    encryption_key: Optional[str] = None
+    encryption_key: str | None = None
     status: str = "pending"
     progress: float = 0.0
     total_rows: int = 0
     exported_rows: int = 0
     file_size_bytes: int = 0
-    checksum: Optional[str] = None
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    checksum: str | None = None
+    error: str | None = None
+    started_at: float | None = None
+    completed_at: float | None = None
     created_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -207,14 +207,14 @@ class ExportTemplate:
     template_id: str
     name: str
     format: ExportFormat
-    columns: List[Dict[str, str]]
-    filters: Dict[str, Any] = field(default_factory=dict)
-    sort_by: Optional[str] = None
+    columns: list[dict[str, str]]
+    filters: dict[str, Any] = field(default_factory=dict)
+    sort_by: str | None = None
     sort_desc: bool = False
     page_size: int = 10000
     storage_backend: StorageBackend = StorageBackend.LOCAL
     compression: CompressionType = CompressionType.NONE
-    schedule: Optional[str] = None
+    schedule: str | None = None
 
 @dataclass
 class ExportStats:
@@ -234,8 +234,8 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._jobs: Dict[str, ExportJob] = {}
-        self._templates: Dict[str, ExportTemplate] = {}
+        self._jobs: dict[str, ExportJob] = {}
+        self._templates: dict[str, ExportTemplate] = {}
         self._output_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "exports")
         self._stats = ExportStats()
         self._max_concurrent = 10
@@ -323,13 +323,13 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         name: str,
         format: ExportFormat,
-        data: Optional[Any] = None,
-        query: Optional[Dict] = None,
-        columns: Optional[List[Dict]] = None,
+        data: Any | None = None,
+        query: dict | None = None,
+        columns: list[dict] | None = None,
         storage: StorageBackend = StorageBackend.LOCAL,
         compression: CompressionType = CompressionType.NONE,
         encrypt: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建导出任务"""
         try:
             job_id = f"exp_{uuid.uuid4().hex[:10]}"
@@ -363,7 +363,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             raise
 
     @trace_operation("execute_export")
-    def execute_export(self, job_id: str) -> Dict[str, Any]:
+    def execute_export(self, job_id: str) -> dict[str, Any]:
         """执行导出任务"""
         try:
             if job_id not in self._jobs:
@@ -385,7 +385,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats["errors"] += 1
             raise
 
-    def _run_export(self, job: ExportJob) -> Dict[str, Any]:
+    def _run_export(self, job: ExportJob) -> dict[str, Any]:
         """执行导出流程"""
         start = time.time()
         job.status = "running"
@@ -475,7 +475,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return self._generate_sample_data(table, limit)
         return self._generate_sample_data("export", 100)
 
-    def _generate_sample_data(self, table: str, limit: int) -> List[Dict[str, Any]]:
+    def _generate_sample_data(self, table: str, limit: int) -> list[dict[str, Any]]:
         """生成示例数据"""
         rows = []
         for i in range(limit):
@@ -648,7 +648,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return content_bytes
 
     @trace_operation("batch_export")
-    def batch_export(self, job_configs: List[Dict]) -> List[Dict]:
+    def batch_export(self, job_configs: list[dict]) -> list[dict]:
         """批量导出"""
         results = []
         for config in job_configs:
@@ -667,7 +667,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return results
 
     @trace_operation("export_from_template")
-    def export_from_template(self, template_id: str, data: Any, name: Optional[str] = None) -> Dict:
+    def export_from_template(self, template_id: str, data: Any, name: str | None = None) -> dict:
         """从模板导出"""
         if template_id not in self._templates:
             raise ValueError(f"模板 {template_id} 不存在")
@@ -680,7 +680,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             storage=tmpl.storage_backend,
         )
 
-    def get_job_status(self, job_id: str) -> Dict:
+    def get_job_status(self, job_id: str) -> dict:
         if job_id not in self._jobs:
             raise ValueError(f"任务 {job_id} 不存在")
         job = self._jobs[job_id]
@@ -699,7 +699,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "completed_at": datetime.fromtimestamp(job.completed_at).isoformat() if job.completed_at else None,
         }
 
-    def list_jobs(self, limit: int = 50) -> List[Dict]:
+    def list_jobs(self, limit: int = 50) -> list[dict]:
         jobs = sorted(self._jobs.values(), key=lambda j: j.created_at, reverse=True)
         return [
             {
@@ -713,7 +713,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for j in jobs[:limit]
         ]
 
-    def list_templates(self) -> List[Dict]:
+    def list_templates(self) -> list[dict]:
         return [
             {
                 "template_id": t.template_id,
@@ -781,7 +781,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

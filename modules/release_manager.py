@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器
@@ -89,7 +88,8 @@ import re
 
 from core.logging_config import get_logger
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -158,7 +158,7 @@ class SemanticVersion:
         return version
 
     @staticmethod
-    def parse(version_str: str) -> "SemanticVersion":
+    def parse(version_str: str) -> SemanticVersion:
         pattern = r"^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.]+))?(?:\+([a-zA-Z0-9.]+))?$"
         match = re.match(pattern, version_str.strip())
         if not match:
@@ -171,7 +171,7 @@ class SemanticVersion:
             build_metadata=match.group(5) or "",
         )
 
-    def bump(self, bump_type: VersionBump) -> "SemanticVersion":
+    def bump(self, bump_type: VersionBump) -> SemanticVersion:
         new = SemanticVersion(self.major, self.minor, self.patch, self.pre_release, self.build_metadata)
         if bump_type == VersionBump.MAJOR:
             new.major += 1
@@ -208,7 +208,7 @@ class SemanticVersion:
                 new.build_metadata = "1"
         return new
 
-    def __lt__(self, other: "SemanticVersion") -> bool:
+    def __lt__(self, other: SemanticVersion) -> bool:
         if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
             return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
         return (self.pre_release or "z") < (other.pre_release or "z")
@@ -223,7 +223,7 @@ class ReleaseChecklistItem:
     required: bool = True
     checked: bool = False
     checked_by: str = ""
-    checked_at: Optional[str] = None
+    checked_at: str | None = None
     category: str = "general"
 
 @dataclass
@@ -236,7 +236,7 @@ class ReleaseApproval:
     status: str = "pending"
     comment: str = ""
     requested_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    resolved_at: Optional[str] = None
+    resolved_at: str | None = None
 
 @dataclass
 class ReleaseMetric:
@@ -263,24 +263,24 @@ class Release:
     strategy: DeployStrategy = DeployStrategy.ROLLING
     description: str = ""
     changelog: str = ""
-    artifacts: List[Dict[str, str]] = field(default_factory=list)
-    checklist: List[ReleaseChecklistItem] = field(default_factory=list)
-    approvals: List[ReleaseApproval] = field(default_factory=list)
-    environments: List[str] = field(default_factory=lambda: ["staging", "production"])
+    artifacts: list[dict[str, str]] = field(default_factory=list)
+    checklist: list[ReleaseChecklistItem] = field(default_factory=list)
+    approvals: list[ReleaseApproval] = field(default_factory=list)
+    environments: list[str] = field(default_factory=lambda: ["staging", "production"])
     target_environment: str = "production"
-    scheduled_at: Optional[str] = None
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
-    metrics: Optional[ReleaseMetric] = None
+    scheduled_at: str | None = None
+    started_at: str | None = None
+    finished_at: str | None = None
+    metrics: ReleaseMetric | None = None
     canary_percent: int = 5
     grayscale_percent: int = 10
     auto_rollback_threshold: float = 5.0  # 错误率超过5%自动回滚
-    rollback_version: Optional[str] = None
-    rollback_reason: Optional[str] = None
-    rollback_at: Optional[str] = None
+    rollback_version: str | None = None
+    rollback_reason: str | None = None
+    rollback_at: str | None = None
     created_by: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class ReleaseWindow:
@@ -290,7 +290,7 @@ class ReleaseWindow:
     name: str = ""
     start_time: str = ""
     end_time: str = ""
-    environments: List[str] = field(default_factory=list)
+    environments: list[str] = field(default_factory=list)
     max_releases: int = 5
     active_releases: int = 0
     blackout: bool = False  # 封锁期
@@ -321,20 +321,20 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 发布历史
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config)
         self.config = config or {}
         # 发布记录
-        self._releases: Dict[str, Release] = {}
+        self._releases: dict[str, Release] = {}
         # 项目最新版本
-        self._project_versions: Dict[str, SemanticVersion] = {}
+        self._project_versions: dict[str, SemanticVersion] = {}
         # 发布窗口
-        self._windows: Dict[str, ReleaseWindow] = {}
+        self._windows: dict[str, ReleaseWindow] = {}
         # 审批规则
-        self._approval_rules: Dict[str, List[str]] = defaultdict(lambda: ["tech-lead"])
+        self._approval_rules: dict[str, list[str]] = defaultdict(lambda: ["tech-lead"])
         # 通知回调
-        self._notification_callbacks: List[Callable] = []
+        self._notification_callbacks: list[Callable] = []
         # 统计
         self._rel_stats = {
             "releases_total": 0,
@@ -390,7 +390,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         self._update_status(ModuleStatus.STOPPED)
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Result:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> Result:
         """统一执行入口"""
         params = params or {}
         trace_id = f"release-{action}-{int(time.time() * 1000)}"
@@ -447,7 +447,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except ValueError as e:
             return Result(success=False, error=str(e))
 
-    def list_versions(self, project: str) -> List[str]:
+    def list_versions(self, project: str) -> list[str]:
         return [str(v) for r_id, r in self._releases.items() if r.project == project for v in [r.version]]
 
     # ----------------------------------------------------------------
@@ -459,13 +459,13 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         project: str,
         version: str,
         *,
-        strategy: Optional[DeployStrategy] = None,
+        strategy: DeployStrategy | None = None,
         description: str = "",
         changelog: str = "",
-        artifacts: Optional[List[Dict]] = None,
+        artifacts: list[dict] | None = None,
         created_by: str = "",
-        scheduled_at: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        scheduled_at: str | None = None,
+        tags: list[str] | None = None,
     ) -> Result:
         """创建发布"""
         start = time.time()
@@ -647,7 +647,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self._rel_stats,
             "releases": len(self._releases),
@@ -655,7 +655,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def list_releases(self, project: Optional[str] = None, limit: int = 20) -> List[Dict]:
+    def list_releases(self, project: str | None = None, limit: int = 20) -> list[dict]:
         result = []
         for r in sorted(self._releases.values(), key=lambda x: x.created_at, reverse=True):
             if project and r.project != project:
@@ -676,7 +676,7 @@ class ReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return result[:limit]
 
-    def get_release_detail(self, release_id: str) -> Optional[Dict]:
+    def get_release_detail(self, release_id: str) -> dict | None:
         r = self._releases.get(release_id)
         if not r:
             return None

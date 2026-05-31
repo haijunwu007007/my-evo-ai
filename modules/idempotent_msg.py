@@ -85,14 +85,15 @@ import time as tmod
 from core.logging_config import get_logger
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from collections import defaultdict, OrderedDict
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class IdempotentMsgAnalyzer(object):
+class IdempotentMsgAnalyzer:
     """idempotent_msg 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -282,7 +283,7 @@ class RetryConfig:
 class Message:
     msg_id: str
     topic: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     content_hash: str = ""
     status: MsgStatus = MsgStatus.RECEIVED
     attempt_count: int = 0
@@ -292,7 +293,7 @@ class Message:
     next_retry_at: float = 0.0
     error: str = ""
     result: Any = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     source: str = ""
     group_id: str = ""
 
@@ -319,17 +320,17 @@ class IdempotentMsgHandler:
 
     def __init__(self):
         self._messages: OrderedDict[str, Message] = {}
-        self._hash_index: Dict[str, str] = {}
-        self._dead_letters: List[Message] = []
-        self._handlers: Dict[str, Callable] = {}
+        self._hash_index: dict[str, str] = {}
+        self._dead_letters: list[Message] = []
+        self._handlers: dict[str, Callable] = {}
         self._retry_config = RetryConfig()
         self._lock = threading.RLock()
         self._created_at = time.time()
         self._op_stats = defaultdict(int)
         self._stats = DedupStats()
         self._msg_store_max = 10000
-        self._processing_times: List[float] = []
-        self._group_sequences: Dict[str, int] = defaultdict(int)
+        self._processing_times: list[float] = []
+        self._group_sequences: dict[str, int] = defaultdict(int)
         self._init_handlers()
 
     def _init_handlers(self):
@@ -343,12 +344,12 @@ class IdempotentMsgHandler:
             self._handlers[topic] = handler
             self._op_stats["register_handler"] += 1
 
-    def _compute_hash(self, topic: str, payload: Dict[str, Any]) -> str:
+    def _compute_hash(self, topic: str, payload: dict[str, Any]) -> str:
         canonical = f"{topic}:{sorted(payload.items())}"
         return hashlib.sha256(canonical.encode()).hexdigest()[:32]
 
     def submit(
-        self, topic: str, payload: Dict[str, Any], group_id: str = "", source: str = "", max_attempts: int = 3
+        self, topic: str, payload: dict[str, Any], group_id: str = "", source: str = "", max_attempts: int = 3
     ) -> ProcessResult:
         start = time.time()
         with self._lock:
@@ -450,7 +451,7 @@ class IdempotentMsgHandler:
         jitter = delay * cfg.jitter * (int(tmod.time()*1000000)%1000000/1000000)
         return min(delay + jitter, cfg.max_delay_ms)
 
-    def retry_pending(self) -> List[ProcessResult]:
+    def retry_pending(self) -> list[ProcessResult]:
         now = time.time()
         results = []
         with self._lock:
@@ -461,10 +462,10 @@ class IdempotentMsgHandler:
             results.append(result)
         return results
 
-    def get_message(self, msg_id: str) -> Optional[Message]:
+    def get_message(self, msg_id: str) -> Message | None:
         return self._messages.get(msg_id)
 
-    def get_dead_letters(self, limit: int = 50) -> List[Message]:
+    def get_dead_letters(self, limit: int = 50) -> list[Message]:
         return self._dead_letters[-limit:]
 
     def reprocess_dead_letter(self, msg_id: str) -> ProcessResult:
@@ -478,7 +479,7 @@ class IdempotentMsgHandler:
                 return self._process_message(msg, start)
         return ProcessResult(success=False, msg_id=msg_id, error="Not in dead letter queue")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         by_status = defaultdict(int)
         for m in self._messages.values():
             by_status[m.status.value] += 1
@@ -494,7 +495,7 @@ class IdempotentMsgHandler:
             "operations": dict(self._op_stats),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         stats = self.get_stats()
         return {
             "healthy": True,

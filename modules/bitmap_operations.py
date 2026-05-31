@@ -145,14 +145,14 @@ class Bitmap:
                 total += 1
         return total
 
-    def and_op(self, other: "Bitmap") -> "Bitmap":
+    def and_op(self, other: Bitmap) -> Bitmap:
         size = max(self._size, other._size)
         result = Bitmap(size)
         for i in range(min(len(self._words), len(other._words))):
             result._words[i] = self._words[i] & other._words[i]
         return result
 
-    def or_op(self, other: "Bitmap") -> "Bitmap":
+    def or_op(self, other: Bitmap) -> Bitmap:
         size = max(self._size, other._size)
         result = Bitmap(size)
         for i in range(min(len(self._words), len(result._words))):
@@ -161,7 +161,7 @@ class Bitmap:
             result._words[i] |= other._words[i]
         return result
 
-    def xor_op(self, other: "Bitmap") -> "Bitmap":
+    def xor_op(self, other: Bitmap) -> Bitmap:
         size = max(self._size, other._size)
         result = Bitmap(size)
         for i in range(min(len(self._words), len(result._words))):
@@ -170,7 +170,7 @@ class Bitmap:
             result._words[i] ^= other._words[i]
         return result
 
-    def not_op(self) -> "Bitmap":
+    def not_op(self) -> Bitmap:
         result = Bitmap(self._size)
         for i in range(len(self._words)):
             result._words[i] = ~self._words[i] & 0xFF
@@ -198,7 +198,7 @@ class Bitmap:
         return self.to_bytes().hex()
 
     @classmethod
-    def from_hex(cls, hex_str: str, size: int) -> "Bitmap":
+    def from_hex(cls, hex_str: str, size: int) -> Bitmap:
         bmp = cls(size)
         raw = bytes.fromhex(hex_str)
         for i in range(min(len(raw), len(bmp._words))):
@@ -313,7 +313,7 @@ class BitmapOperation:
     bitmap_id: str
     operation: str
     timestamp: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """位图操作管理器 - 生产级实现"""
@@ -322,11 +322,11 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
     MODULE_NAME = "位图操作"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._bitmaps: Dict[str, Bitmap] = {}
-        self._operations: List[BitmapOperation] = []
+        self._bitmaps: dict[str, Bitmap] = {}
+        self._operations: list[BitmapOperation] = []
         self._counter = 0
 
     def _next_id(self) -> str:
@@ -344,7 +344,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             logger.error(f"位图操作模块初始化失败: {e}")
             return False
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("bitmap_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
         actions = {
@@ -370,33 +370,33 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         return handler(params)
         return {"status": "healthy", "module": "bitmap_operations"}
 
-    def _exec_create(self, p: Dict) -> Dict:
+    def _exec_create(self, p: dict) -> dict:
         bid = self._next_id()
         size = p.get("size", 1024)
         self._bitmaps[bid] = Bitmap(size)
         return {"success": True, "result": {"bitmap_id": bid, "size": size}}
 
-    def _exec_set(self, p: Dict) -> Dict:
+    def _exec_set(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
         ok = self._bitmaps[bid].set(p["index"], p.get("value", True))
         return {"success": True, "result": {"index": p["index"], "value": p.get("value", True), "set": ok}}
 
-    def _exec_get(self, p: Dict) -> Dict:
+    def _exec_get(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
         return {"success": True, "result": {"index": p["index"], "value": self._bitmaps[bid].get(p["index"])}}
 
-    def _exec_flip(self, p: Dict) -> Dict:
+    def _exec_flip(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
         ok = self._bitmaps[bid].flip(p["index"])
         return {"success": True, "result": {"index": p["index"], "new_value": self._bitmaps[bid].get(p["index"])}}
 
-    def _exec_count(self, p: Dict) -> Dict:
+    def _exec_count(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -406,7 +406,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         count = bmp.count_range(start, end) if start > 0 or end < bmp.size else bmp.count()
         return {"success": True, "result": {"count": count, "total_bits": bmp.size, "range": [start, end]}}
 
-    def _exec_and(self, p: Dict) -> Dict:
+    def _exec_and(self, p: dict) -> dict:
         a, b = p["bitmap_id_a"], p["bitmap_id_b"]
         if a not in self._bitmaps or b not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -415,7 +415,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._bitmaps[rid] = result
         return {"success": True, "result": {"result_id": rid, "count": result.count()}}
 
-    def _exec_or(self, p: Dict) -> Dict:
+    def _exec_or(self, p: dict) -> dict:
         a, b = p["bitmap_id_a"], p["bitmap_id_b"]
         if a not in self._bitmaps or b not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -424,7 +424,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._bitmaps[rid] = result
         return {"success": True, "result": {"result_id": rid, "count": result.count()}}
 
-    def _exec_xor(self, p: Dict) -> Dict:
+    def _exec_xor(self, p: dict) -> dict:
         a, b = p["bitmap_id_a"], p["bitmap_id_b"]
         if a not in self._bitmaps or b not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -433,7 +433,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._bitmaps[rid] = result
         return {"success": True, "result": {"result_id": rid, "count": result.count()}}
 
-    def _exec_not(self, p: Dict) -> Dict:
+    def _exec_not(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -442,27 +442,27 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._bitmaps[rid] = result
         return {"success": True, "result": {"result_id": rid, "count": result.count()}}
 
-    def _exec_find_first_set(self, p: Dict) -> Dict:
+    def _exec_find_first_set(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
         idx = self._bitmaps[bid].find_first_set(p.get("start", 0))
         return {"success": True, "result": {"first_set_index": idx}}
 
-    def _exec_fill_rate(self, p: Dict) -> Dict:
+    def _exec_fill_rate(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
         return {"success": True, "result": {"fill_rate": round(self._bitmaps[bid].fill_rate(), 4)}}
 
-    def _exec_delete(self, p: Dict) -> Dict:
+    def _exec_delete(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid in self._bitmaps:
             del self._bitmaps[bid]
             return {"success": True, "result": {"deleted": True}}
         return {"success": False, "error": "位图不存在"}
 
-    def _exec_batch_set(self, p: Dict) -> Dict:
+    def _exec_batch_set(self, p: dict) -> dict:
         bid = p["bitmap_id"]
         if bid not in self._bitmaps:
             return {"success": False, "error": "位图不存在"}
@@ -474,7 +474,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
                 set_count += 1
         return {"success": True, "result": {"set_count": set_count, "total_bits": self._bitmaps[bid].count()}}
 
-    def _exec_list(self, p: Dict) -> Dict:
+    def _exec_list(self, p: dict) -> dict:
         return {
             "success": True,
             "result": {
@@ -486,7 +486,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         total_bits = sum(b.size for b in self._bitmaps.values())
         total_set = sum(b.count() for b in self._bitmaps.values())
         return {
@@ -499,7 +499,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -516,7 +516,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         logger.info("位图操作模块关闭")
         return True
 
-    def analyze_bitmap_distribution(self, bitmap_id: str) -> Dict[str, Any]:
+    def analyze_bitmap_distribution(self, bitmap_id: str) -> dict[str, Any]:
         """分析位图分布特征：填充率、稀疏度、聚集度、连续段统计"""
         bm = self._bitmaps.get(bitmap_id) if hasattr(self, "_bitmaps") else None
         if not bm:
@@ -554,7 +554,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "storage_efficiency": "high" if fill_rate < 0.01 else "medium" if fill_rate < 0.1 else "low",
         }
 
-    def compute_set_operations_stats(self, op: str, id_a: str, id_b: str) -> Dict[str, Any]:
+    def compute_set_operations_stats(self, op: str, id_a: str, id_b: str) -> dict[str, Any]:
         """计算两个位图集合运算结果：交集/并集/差集大小、Jaccard相似度"""
         bm_a = self._bitmaps.get(id_a) if hasattr(self, "_bitmaps") else None
         bm_b = self._bitmaps.get(id_b) if hasattr(self, "_bitmaps") else None
@@ -587,7 +587,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "overlap_ratio": round(count_result / max(count_a, 1), 4) if op == "and" else None,
         }
 
-    def estimate_roaring_compression(self, bitmap_id: str) -> Dict[str, Any]:
+    def estimate_roaring_compression(self, bitmap_id: str) -> dict[str, Any]:
         """估算Roaring Bitmap压缩效果：容器数、压缩率、内存节省建议"""
         bm = self._bitmaps.get(bitmap_id) if hasattr(self, "_bitmaps") else None
         if not bm:
@@ -615,7 +615,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "fill_rate": round(fill_rate, 4),
         }
 
-    def batch_analyze_all(self) -> Dict[str, Any]:
+    def batch_analyze_all(self) -> dict[str, Any]:
         """批量分析所有位图的统计摘要：总内存、填充率分布、推荐操作"""
         bitmaps = self._bitmaps if hasattr(self, "_bitmaps") else {}
         if not bitmaps:
@@ -652,7 +652,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "recommendation": "考虑对稀疏位图使用Roaring压缩" if sparse_count > len(bitmaps) * 0.3 else "位图使用正常",
         }
 
-    def compute_retention_analysis(self, bitmap_sets: Dict[str, "Bitmap"], period_labels: List[str]) -> Dict[str, Any]:
+    def compute_retention_analysis(self, bitmap_sets: dict[str, Bitmap], period_labels: list[str]) -> dict[str, Any]:
         """计算留存分析：多期位图的交集运算，计算1/3/7/N日留存率"""
         if len(bitmap_sets) < 2:
             return {"error": "need at least 2 period bitmaps"}
@@ -702,7 +702,7 @@ class BitmapOperationsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             else None,
         }
 
-    def find_similar_bitmaps(self, threshold: float = 0.8) -> List[Dict[str, Any]]:
+    def find_similar_bitmaps(self, threshold: float = 0.8) -> list[dict[str, Any]]:
         """发现相似位图：通过Jaccard相似度聚类，用于标签去重和合并建议"""
         bitmaps = self._bitmaps if hasattr(self, "_bitmaps") else {}
         ids = list(bitmaps.keys())

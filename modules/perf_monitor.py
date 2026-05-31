@@ -103,7 +103,7 @@ class SystemMetricsCollector:
 
     def __init__(self, history_size: int = 300):
         self.history_size = history_size
-        self._metrics: Dict[str, deque] = {
+        self._metrics: dict[str, deque] = {
             "cpu_usage": deque(maxlen=history_size),
             "memory_usage": deque(maxlen=history_size),
             "disk_usage": deque(maxlen=history_size),
@@ -115,7 +115,7 @@ class SystemMetricsCollector:
             "tcp_connections": deque(maxlen=history_size),
             "process_count": deque(maxlen=history_size),
         }
-        self._alerts: Dict[str, Dict] = {}
+        self._alerts: dict[str, dict] = {}
 
     def record(self, metric: str, value: float, timestamp: float = None):
         if metric in self._metrics:
@@ -125,7 +125,7 @@ class SystemMetricsCollector:
         q = self._metrics.get(metric)
         return q[-1][1] if q else 0
 
-    def get_stats(self, metric: str, window: int = 60) -> Dict:
+    def get_stats(self, metric: str, window: int = 60) -> dict:
         q = self._metrics.get(metric)
         if not q:
             return {"metric": metric, "error": "no_data"}
@@ -147,18 +147,18 @@ class SystemMetricsCollector:
             "p99": round(self._percentile(values, 99), 2),
         }
 
-    def get_all_stats(self, window: int = 60) -> Dict[str, Dict]:
+    def get_all_stats(self, window: int = 60) -> dict[str, dict]:
         return {m: self.get_stats(m, window) for m in self._metrics}
 
     @staticmethod
-    def _percentile(values: List[float], pct: float) -> float:
+    def _percentile(values: list[float], pct: float) -> float:
         if not values:
             return 0
         s = sorted(values)
         idx = int(len(s) * pct / 100)
         return s[min(idx, len(s) - 1)]
 
-    def check_threshold(self, metric: str, warning: float, critical: float) -> Optional[str]:
+    def check_threshold(self, metric: str, warning: float, critical: float) -> str | None:
         current = self.get_current(metric)
         if current >= critical:
             return "critical"
@@ -202,7 +202,7 @@ class SLACalculator:
 
     def __init__(self, target_sla: float = 99.9):
         self.target_sla = target_sla
-        self._incidents: List[Dict] = []
+        self._incidents: list[dict] = []
         self._uptime_seconds: float = 0
         self._downtime_seconds: float = 0
         self._window_start: float = time.time()
@@ -221,7 +221,7 @@ class SLACalculator:
             self._downtime_seconds += duration_sec
         self._uptime_seconds = max(0, time.time() - self._window_start - self._downtime_seconds)
 
-    def get_sla(self) -> Dict:
+    def get_sla(self) -> dict:
         total = self._uptime_seconds + self._downtime_seconds
         if total <= 0:
             return {"sla_pct": 100.0, "target": self.target_sla, "met": True}
@@ -237,13 +237,13 @@ class SLACalculator:
             "allowed_downtime_min": round((100 - self.target_sla) / 100 * total / 60, 2),
         }
 
-class BottleneckDetector(object):
+class BottleneckDetector:
     """瓶颈检测引擎"""
 
     def __init__(self):
-        self._patterns: List[Dict] = []
+        self._patterns: list[dict] = []
 
-    def analyze(self, metrics: Dict[str, Dict]) -> List[Dict]:
+    def analyze(self, metrics: dict[str, dict]) -> list[dict]:
         bottlenecks = []
         cpu = metrics.get("cpu_usage", {})
         mem = metrics.get("memory_usage", {})
@@ -289,11 +289,11 @@ class BottleneckDetector(object):
             )
         return bottlenecks
 
-class ProcessAnalyzer(object):
+class ProcessAnalyzer:
     """进程分析引擎"""
 
     def __init__(self):
-        self._processes: Dict[str, Dict] = {}
+        self._processes: dict[str, dict] = {}
 
     def register_process(self, pid: str, name: str, cmd: str = ""):
         self._processes[pid] = {
@@ -311,7 +311,7 @@ class ProcessAnalyzer(object):
             proc["cpu_samples"].append((time.time(), cpu))
             proc["mem_samples"].append((time.time(), memory))
 
-    def get_top_cpu(self, n: int = 10) -> List[Dict]:
+    def get_top_cpu(self, n: int = 10) -> list[dict]:
         results = []
         for pid, proc in self._processes.items():
             if proc["cpu_samples"]:
@@ -320,7 +320,7 @@ class ProcessAnalyzer(object):
         results.sort(key=lambda x: x["avg_cpu"], reverse=True)
         return results[:n]
 
-    def get_top_memory(self, n: int = 10) -> List[Dict]:
+    def get_top_memory(self, n: int = 10) -> list[dict]:
         results = []
         for pid, proc in self._processes.items():
             if proc["mem_samples"]:
@@ -332,13 +332,13 @@ class ProcessAnalyzer(object):
 class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """性能监控 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "samples_collected": 0,
@@ -346,7 +346,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -438,7 +438,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_performance_report(self, hours: int = 1) -> Dict[str, Any]:
+    def get_performance_report(self, hours: int = 1) -> dict[str, Any]:
         """性能报告。企业场景：SRE每小时生成系统性能快照，
         包含CPU/内存/磁盘/网络关键指标和趋势变化。
         """
@@ -464,7 +464,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "sla": self.sla.get_sla() if hasattr(self, "sla") else {},
         }
 
-    def get_alert_threshold_config(self) -> Dict[str, Any]:
+    def get_alert_threshold_config(self) -> dict[str, Any]:
         """获取告警阈值配置。企业场景：SRE团队查看当前各指标的告警阈值，
         根据业务变化调整阈值（如大促期间放宽CPU告警）。
         """
@@ -472,7 +472,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         mem_thresholds = getattr(getattr(self, "memory", None), "thresholds", {})
         return {"success": True, "cpu_alerts": cpu_thresholds, "memory_alerts": mem_thresholds}
 
-    def get_system_metrics_snapshot(self) -> Dict[str, Any]:
+    def get_system_metrics_snapshot(self) -> dict[str, Any]:
         """系统指标快照。企业场景：运维面板实时显示当前系统CPU、内存、
         磁盘、网络、文件描述符等核心指标，一屏总览集群健康。
         """
@@ -521,7 +521,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def get_metrics_trend(self, metric_name: str, hours: int = 6) -> Dict[str, Any]:
+    def get_metrics_trend(self, metric_name: str, hours: int = 6) -> dict[str, Any]:
         """指标趋势查询。企业场景：SRE查看过去6小时CPU/内存趋势图数据，
         判断是否存在持续上升趋势（内存泄漏、CPU死循环）。
         """
@@ -560,7 +560,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "slope_per_point": slope,
         }
 
-    def get_process_top(self, sort_by: str = "cpu", limit: int = 20) -> Dict[str, Any]:
+    def get_process_top(self, sort_by: str = "cpu", limit: int = 20) -> dict[str, Any]:
         """进程Top排行。企业场景：快速定位CPU/内存占用最高的进程，
         发现僵尸进程、内存泄漏的进程。
         """
@@ -588,7 +588,7 @@ class PerfMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "sort_by": key, "total_processes": len(procs), "top_processes": result}
 
-    def get_disk_usage_alerts(self, threshold_pct: int = 85) -> Dict[str, Any]:
+    def get_disk_usage_alerts(self, threshold_pct: int = 85) -> dict[str, Any]:
         """磁盘使用告警。企业场景：巡检磁盘空间，超过阈值预警，
         按挂载点列出使用率，避免磁盘写满导致服务不可用。
         """

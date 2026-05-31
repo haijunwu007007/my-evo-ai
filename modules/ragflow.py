@@ -93,7 +93,7 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -169,7 +169,7 @@ class DocumentMetadata:
     """Structured metadata for uploaded documents."""
 
     def __init__(
-        self, title: str, source_uri: str = "", author: str = "", language: str = "zh", tags: Optional[List[str]] = None
+        self, title: str, source_uri: str = "", author: str = "", language: str = "zh", tags: list[str] | None = None
     ):
         self.doc_id = str(uuid.uuid4())
         self.title = title
@@ -177,7 +177,7 @@ class DocumentMetadata:
         self.author = author
         self.language = language
         self.tags = tags or []
-        self.created_at = datetime.now(timezone.utc)
+        self.created_at = datetime.now(UTC)
         self.updated_at = self.created_at
         self.version = 1
         self.checksum = ""
@@ -185,7 +185,7 @@ class DocumentMetadata:
         self.word_count = 0
         self.char_count = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "doc_id": self.doc_id,
             "title": self.title,
@@ -203,7 +203,7 @@ class DocumentMetadata:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DocumentMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> DocumentMetadata:
         meta = cls(
             title=data["title"],
             source_uri=data.get("source_uri", ""),
@@ -226,22 +226,22 @@ class DocumentMetadata:
 class DocumentChunk:
     """A single chunk extracted from a document."""
 
-    def __init__(self, content: str, doc_id: str, chunk_index: int, metadata: Optional[Dict[str, Any]] = None):
+    def __init__(self, content: str, doc_id: str, chunk_index: int, metadata: dict[str, Any] | None = None):
         self.chunk_id = str(uuid.uuid4())
         self.content = content
         self.doc_id = doc_id
         self.chunk_index = chunk_index
         self.metadata = metadata or {}
-        self.embedding: Optional[List[float]] = None
-        self.bm25_tokens: List[str] = []
-        self.created_at = datetime.now(timezone.utc)
+        self.embedding: list[float] | None = None
+        self.bm25_tokens: list[str] = []
+        self.created_at = datetime.now(UTC)
         self.score = 0.0
 
     def compute_checksum(self) -> str:
         raw = f"{self.doc_id}:{self.chunk_index}:{self.content}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "chunk_id": self.chunk_id,
             "content": self.content,
@@ -258,7 +258,7 @@ class RetrievalResult:
     """Single retrieval result with scoring and provenance."""
 
     def __init__(
-        self, chunk: DocumentChunk, score: float, retriever_type: RetrieverType, highlights: Optional[List[str]] = None
+        self, chunk: DocumentChunk, score: float, retriever_type: RetrieverType, highlights: list[str] | None = None
     ):
         self.chunk = chunk
         self.score = score
@@ -266,7 +266,7 @@ class RetrievalResult:
         self.highlights = highlights or []
         self.citation = f"[{chunk.doc_id[:8]}-{chunk.chunk_index}]"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "chunk_id": self.chunk.chunk_id,
             "content": self.chunk.content[:500],
@@ -281,7 +281,7 @@ class RetrievalResult:
 class QAResult:
     """Question answering result with citations."""
 
-    def __init__(self, question: str, answer: str, sources: List[RetrievalResult], confidence: float):
+    def __init__(self, question: str, answer: str, sources: list[RetrievalResult], confidence: float):
         self.question = question
         self.answer = answer
         self.sources = sources
@@ -289,9 +289,9 @@ class QAResult:
         self.model_used = ""
         self.tokens_used = 0
         self.latency_ms = 0.0
-        self.created_at = datetime.now(timezone.utc)
+        self.created_at = datetime.now(UTC)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "question": self.question,
             "answer": self.answer,
@@ -308,7 +308,7 @@ class QAResult:
 # Chunking Engine
 # =============================================================================
 
-class ChunkingEngine(object):
+class ChunkingEngine:
     """Multi-strategy document chunking with configurable parameters."""
 
     # Default delimiters for recursive splitting
@@ -319,7 +319,7 @@ class ChunkingEngine(object):
         strategy: ChunkingStrategy = ChunkingStrategy.RECURSIVE,
         chunk_size: int = 512,
         chunk_overlap: int = 64,
-        separators: Optional[List[str]] = None,
+        separators: list[str] | None = None,
     ):
         self.strategy = strategy
         self.chunk_size = chunk_size
@@ -327,7 +327,7 @@ class ChunkingEngine(object):
         self.separators = separators or self.DEFAULT_SEPARATORS
         self._stats = {"total_chunks": 0, "total_chars": 0, "total_time_ms": 0.0}
 
-    def chunk_document(self, text: str, doc_id: str) -> List[DocumentChunk]:
+    def chunk_document(self, text: str, doc_id: str) -> list[DocumentChunk]:
         """Chunk a document text into DocumentChunk instances."""
         start = time.monotonic()
         if self.strategy == ChunkingStrategy.FIXED_SIZE:
@@ -357,7 +357,7 @@ class ChunkingEngine(object):
         self._stats["total_time_ms"] += elapsed
         return chunks
 
-    def _fixed_size_chunk(self, text: str) -> List[str]:
+    def _fixed_size_chunk(self, text: str) -> list[str]:
         """Split text into fixed-size chunks with overlap."""
         chunks = []
         step = self.chunk_size - self.chunk_overlap
@@ -365,7 +365,7 @@ class ChunkingEngine(object):
             chunks.append(text[i : i + self.chunk_size])
         return chunks
 
-    def _sliding_window_chunk(self, text: str) -> List[str]:
+    def _sliding_window_chunk(self, text: str) -> list[str]:
         """Sliding window with sentence boundary alignment."""
         sentences = re.split(r"(?<=[.!?。！？\n])\s*", text)
         chunks = []
@@ -381,7 +381,7 @@ class ChunkingEngine(object):
             chunks.append(current.strip())
         return chunks
 
-    def _paragraph_chunk(self, text: str) -> List[str]:
+    def _paragraph_chunk(self, text: str) -> list[str]:
         """Split on paragraph boundaries, merge short paragraphs."""
         paragraphs = re.split(r"\n\s*\n", text)
         chunks = []
@@ -399,11 +399,11 @@ class ChunkingEngine(object):
             chunks.append(current.strip())
         return chunks
 
-    def _recursive_chunk(self, text: str) -> List[str]:
+    def _recursive_chunk(self, text: str) -> list[str]:
         """Recursive character splitting with multiple separators."""
         return self._recursive_split(text, self.separators, self.chunk_size)
 
-    def _recursive_split(self, text: str, separators: List[str], max_size: int) -> List[str]:
+    def _recursive_split(self, text: str, separators: list[str], max_size: int) -> list[str]:
         """Recursively split text using progressively finer separators."""
         if len(text) <= max_size:
             return [text] if text.strip() else []
@@ -434,7 +434,7 @@ class ChunkingEngine(object):
             return merged
         return [text[:max_size]] if text else []
 
-    def _sentence_chunk(self, text: str) -> List[str]:
+    def _sentence_chunk(self, text: str) -> list[str]:
         """Split on sentence boundaries with grouping."""
         sentences = re.split(r"(?<=[.!?。！？])\s+", text)
         chunks = []
@@ -452,7 +452,7 @@ class ChunkingEngine(object):
             chunks.append(current.strip())
         return chunks
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return dict(self._stats)
 
 # =============================================================================
@@ -465,14 +465,14 @@ class BM25Retriever:
     def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
         self.b = b
-        self._doc_tokens: Dict[str, List[str]] = {}
-        self._doc_lengths: Dict[str, int] = {}
+        self._doc_tokens: dict[str, list[str]] = {}
+        self._doc_lengths: dict[str, int] = {}
         self._avg_dl = 0.0
-        self._vocab: Dict[str, int] = {}
-        self._doc_freq: Dict[str, int] = {}
+        self._vocab: dict[str, int] = {}
+        self._doc_freq: dict[str, int] = {}
         self._total_docs = 0
 
-    def index_chunks(self, chunks: List[DocumentChunk]):
+    def index_chunks(self, chunks: list[DocumentChunk]):
         """Index document chunks for BM25 retrieval."""
         self._doc_tokens.clear()
         self._doc_lengths.clear()
@@ -484,7 +484,7 @@ class BM25Retriever:
             self._doc_tokens[chunk.chunk_id] = tokens
             self._doc_lengths[chunk.chunk_id] = len(tokens)
             total_len += len(tokens)
-            seen: Set[str] = set()
+            seen: set[str] = set()
             for t in tokens:
                 self._vocab[t] = self._vocab.get(t, 0) + 1
                 if t not in seen:
@@ -493,10 +493,10 @@ class BM25Retriever:
         self._total_docs = len(chunks)
         self._avg_dl = total_len / self._total_docs if self._total_docs > 0 else 1.0
 
-    def retrieve(self, query: str, top_k: int = 10) -> List[Tuple[str, float]]:
+    def retrieve(self, query: str, top_k: int = 10) -> list[tuple[str, float]]:
         """Retrieve top-k chunks by BM25 score."""
         query_tokens = self._tokenize(query)
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for chunk_id, doc_tokens in self._doc_tokens.items():
             score = 0.0
             dl = self._doc_lengths[chunk_id]
@@ -513,7 +513,7 @@ class BM25Retriever:
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return ranked[:top_k]
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """Simple tokenization supporting CJK characters."""
         text = text.lower()
         # Extract CJK characters as individual tokens
@@ -548,16 +548,16 @@ class KnowledgeBase:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.status = KnowledgeBaseStatus.ACTIVE
-        self.created_at = datetime.now(timezone.utc)
+        self.created_at = datetime.now(UTC)
         self.updated_at = self.created_at
         self.document_count = 0
         self.chunk_count = 0
         self.total_size_bytes = 0
-        self.tags: List[str] = []
-        self.access_roles: List[str] = []
+        self.tags: list[str] = []
+        self.access_roles: list[str] = []
         self.version = 1
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "kb_id": self.kb_id,
             "name": self.name,
@@ -604,7 +604,7 @@ class QAPipeline:
             "total_tokens": 0,
         }
 
-    def build_prompt(self, question: str, sources: List[RetrievalResult]) -> str:
+    def build_prompt(self, question: str, sources: list[RetrievalResult]) -> str:
         """Build the LLM prompt with retrieved context."""
         context_parts = []
         for i, src in enumerate(sources[: self.max_sources], 1):
@@ -623,7 +623,7 @@ class QAPipeline:
         )
         return prompt
 
-    def compute_confidence(self, sources: List[RetrievalResult], answer: str) -> float:
+    def compute_confidence(self, sources: list[RetrievalResult], answer: str) -> float:
         """Estimate answer confidence based on retrieval scores and coverage."""
         if not sources:
             return 0.0
@@ -636,7 +636,7 @@ class QAPipeline:
         confidence = 0.4 * top_score + 0.3 * avg_score + 0.2 * citation_ratio + 0.1 * min(len(answer) / 200.0, 1.0)
         return min(confidence, 1.0)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return dict(self._stats)
 
 # =============================================================================
@@ -656,20 +656,20 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     6. Full observability via enterprise metrics and audit logging
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(module_name="ragflow_engine", module_version="6.39.0")
         self.config = config or {}
         # Knowledge bases: kb_id -> KnowledgeBase
-        self._knowledge_bases: Dict[str, KnowledgeBase] = {}
+        self._knowledge_bases: dict[str, KnowledgeBase] = {}
         # Documents: doc_id -> metadata
-        self._documents: Dict[str, DocumentMetadata] = {}
+        self._documents: dict[str, DocumentMetadata] = {}
         # Chunks: kb_id -> List[DocumentChunk]
-        self._chunks: Dict[str, List[DocumentChunk]] = {}
+        self._chunks: dict[str, list[DocumentChunk]] = {}
         # BM25 index: kb_id -> BM25Retriever
-        self._bm25_indices: Dict[str, BM25Retriever] = {}
+        self._bm25_indices: dict[str, BM25Retriever] = {}
         # Chunking engines: kb_id -> ChunkingEngine
-        self._chunkers: Dict[str, ChunkingEngine] = {}
+        self._chunkers: dict[str, ChunkingEngine] = {}
         # QA pipeline
         self._qa_pipeline = QAPipeline(
             model_name=self.config.get("qa_model", "gpt-4o"),
@@ -715,9 +715,9 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         chunking_strategy: str = "recursive",
         chunk_size: int = 512,
         chunk_overlap: int = 64,
-        tags: Optional[List[str]] = None,
-        access_roles: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        tags: list[str] | None = None,
+        access_roles: list[str] | None = None,
+    ) -> dict[str, Any]:
         """Create a new knowledge base."""
         start = time.monotonic()
         kb_id = f"kb_{uuid.uuid4().hex[:12]}"
@@ -748,11 +748,11 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     async def list_knowledge_bases(
         self,
-        status_filter: Optional[str] = None,
-        tag_filter: Optional[str] = None,
+        status_filter: str | None = None,
+        tag_filter: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """List all knowledge bases with optional filtering."""
         kbs = list(self._knowledge_bases.values())
         if status_filter:
@@ -769,7 +769,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "knowledge_bases": [kb.to_dict() for kb in kbs],
         }
 
-    async def delete_knowledge_base(self, kb_id: str, force: bool = False) -> Dict[str, Any]:
+    async def delete_knowledge_base(self, kb_id: str, force: bool = False) -> dict[str, Any]:
         """Delete a knowledge base and all associated documents."""
         if kb_id not in self._knowledge_bases:
             return {"status": "error", "message": f"Knowledge base {kb_id} not found"}
@@ -799,9 +799,9 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         source_uri: str = "",
         author: str = "",
         language: str = "zh",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         doc_format: str = "txt",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Ingest a document into a knowledge base."""
         start = time.monotonic()
         if kb_id not in self._knowledge_bases:
@@ -844,7 +844,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         kb.document_count += 1
         kb.chunk_count += len(chunks)
         kb.total_size_bytes += len(content.encode("utf-8"))
-        kb.updated_at = datetime.now(timezone.utc)
+        kb.updated_at = datetime.now(UTC)
         self._processing_stats["documents_ingested"] += 1
         self._processing_stats["chunks_created"] += len(chunks)
         elapsed = (time.monotonic() - start) * 1000
@@ -865,7 +865,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "metadata": meta.to_dict(),
         }
 
-    async def delete_document(self, kb_id: str, doc_id: str) -> Dict[str, Any]:
+    async def delete_document(self, kb_id: str, doc_id: str) -> dict[str, Any]:
         """Delete a document and its chunks from a knowledge base."""
         if kb_id not in self._knowledge_bases:
             return {"status": "error", "message": f"KB {kb_id} not found"}
@@ -880,7 +880,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         kb = self._knowledge_bases[kb_id]
         kb.document_count = max(0, kb.document_count - 1)
         kb.chunk_count = max(0, kb.chunk_count - removed_chunks)
-        kb.updated_at = datetime.now(timezone.utc)
+        kb.updated_at = datetime.now(UTC)
         await self._audit_log(
             "doc_delete",
             f"Deleted document from KB: {doc_id}",
@@ -899,7 +899,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         top_k: int = 10,
         retriever: str = "hybrid",
         min_score: float = 0.1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Retrieve relevant document chunks from a knowledge base."""
         start = time.monotonic()
         if kb_id not in self._knowledge_bases:
@@ -907,7 +907,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         chunks = self._chunks[kb_id]
         if not chunks:
             return {"status": "success", "results": [], "query": query}
-        results: List[RetrievalResult] = []
+        results: list[RetrievalResult] = []
         rtype = RetrieverType(retriever)
         if rtype in (RetrieverType.BM25, RetrieverType.HYBRID):
             bm25 = self._bm25_indices[kb_id]
@@ -944,7 +944,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "elapsed_ms": round(elapsed, 2),
         }
 
-    def _extract_highlights(self, content: str, query: str, max_highlights: int = 3) -> List[str]:
+    def _extract_highlights(self, content: str, query: str, max_highlights: int = 3) -> list[str]:
         """Extract highlight snippets from content matching query terms."""
         query_terms = set(query.lower().split())
         sentences = re.split(r"[.。！？\n]", content)
@@ -967,8 +967,8 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         question: str,
         top_k: int = 8,
         retriever: str = "hybrid",
-        model_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        model_name: str | None = None,
+    ) -> dict[str, Any]:
         """Answer a question using RAG pipeline."""
         start = time.monotonic()
         # Step 1: Retrieve relevant chunks
@@ -1032,7 +1032,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         await self._record_histogram("qa_latency_ms", qa.latency_ms, {"kb_id": kb_id})
         return {"status": "success", "answer": qa.to_dict()}
 
-    def _generate_answer(self, question: str, sources: List[RetrievalResult], prompt: str) -> str:
+    def _generate_answer(self, question: str, sources: list[RetrievalResult], prompt: str) -> str:
         """Generate a knowledge-grounded answer from retrieved sources."""
         if not sources:
             return "知识库中未找到相关信息。"
@@ -1051,12 +1051,12 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     async def search_documents(
         self,
-        kb_id: Optional[str] = None,
-        query: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        kb_id: str | None = None,
+        query: str | None = None,
+        tags: list[str] | None = None,
         limit: int = 20,
         offset: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Search documents across knowledge bases."""
         docs = list(self._documents.values())
         if kb_id:
@@ -1085,7 +1085,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Statistics and Health
     # =========================================================================
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """Get comprehensive RAGFlow engine statistics."""
         kb_stats = []
         for kb_id, kb in self._knowledge_bases.items():
@@ -1113,7 +1113,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "knowledge_bases": kb_stats,
         }
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — RAGFlow知识库路由"""
         _ = self.trace("execute")
         metrics_collector.counter("ragflow_ops_total", labels={"action": action})
@@ -1123,7 +1123,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "result": self.health_check()}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Health check for the RAGFlow engine."""
         checks = {
             "engine_initialized": self._initialized,
@@ -1137,7 +1137,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {
             "status": "healthy" if all_healthy else "degraded",
             "checks": checks,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     # =========================================================================
@@ -1162,7 +1162,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 continue
             filepath = os.path.join(load_dir, filename)
             try:
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     data = json.load(f)
                 kb = KnowledgeBase(
                     kb_id=data["kb_id"],
@@ -1193,10 +1193,10 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Enterprise Base Hooks
     # =========================================================================
 
-    async def _audit_log(self, action: str, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    async def _audit_log(self, action: str, message: str, details: dict[str, Any] | None = None) -> None:
         """Record audit log entry."""
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "module": self.module_name,
             "action": action,
             "message": message,
@@ -1204,11 +1204,11 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         logger.info(f"[RAGFlow_AUDIT] {json.dumps(entry, ensure_ascii=False)}")
 
-    async def _record_metric(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    async def _record_metric(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Record a Prometheus-compatible metric."""
         logger.debug(f"[RAGFlow_METRIC] {name}={value} labels={labels}")
 
-    async def _record_histogram(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    async def _record_histogram(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Record a histogram metric."""
         logger.debug(f"[RAGFlow_HISTOGRAM] {name}={value} labels={labels}")
 
@@ -1216,7 +1216,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 # Module Registration
 # =============================================================================
 
-_module_instance: Optional[RAGFlowEngine] = None
+_module_instance: RAGFlowEngine | None = None
 
 async def get_ragflow_engine() -> RAGFlowEngine:
     """Get or create the singleton RAGFlow engine instance."""
@@ -1226,14 +1226,14 @@ async def get_ragflow_engine() -> RAGFlowEngine:
         await _module_instance.initialize()
     return _module_instance
 
-async def initialize(config: Optional[Dict[str, Any]] = None) -> RAGFlowEngine:
+async def initialize(config: dict[str, Any] | None = None) -> RAGFlowEngine:
     """Initialize the RAGFlow module."""
     engine = RAGFlowEngine(config=config)
     await engine.initialize()
     _module_instance = engine
     return engine
 
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """Perform health check on the RAGFlow module."""
     engine = await get_ragflow_engine()
     return await engine.health_check()

@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class StreamAnalyzer(object):
+class StreamAnalyzer:
     """stream_process 运营分析引擎
 
     - 分析流处理吞吐量
@@ -116,7 +116,7 @@ class StreamAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "StreamAnalyzer", "module": "stream_process", "summary": summary}
 
-class StreamProcessAnalyzer(object):
+class StreamProcessAnalyzer:
     """stream process 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class StreamProcessAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class StreamProcessWorkflowProcessor(object):
+class StreamProcessWorkflowProcessor:
     """处理stream_process工作流和状态机管理
 
     为stream_process模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class StreamProcessWorkflowProcessor(object):
 class StreamProcess(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """流处理引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"stream_process")
 

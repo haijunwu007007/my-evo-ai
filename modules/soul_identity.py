@@ -143,10 +143,10 @@ class SoulProfile:
     包含4个核心文件的内容和元数据
     """
 
-    soul_md: Optional[SoulFile] = None
-    persona_md: Optional[SoulFile] = None
-    taste_md: Optional[SoulFile] = None
-    heartbeat_md: Optional[SoulFile] = None
+    soul_md: SoulFile | None = None
+    persona_md: SoulFile | None = None
+    taste_md: SoulFile | None = None
+    heartbeat_md: SoulFile | None = None
 
     @property
     def total_tokens(self) -> int:
@@ -170,7 +170,7 @@ class SoulProfile:
             ]
         )
 
-    def get_active_files(self) -> List[SoulFile]:
+    def get_active_files(self) -> list[SoulFile]:
         """获取所有活跃的Soul文件"""
         files = []
         for attr in ["soul_md", "persona_md", "taste_md", "heartbeat_md"]:
@@ -179,7 +179,7 @@ class SoulProfile:
                 files.append(file)
         return files
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         result = {}
         for attr in ["soul_md", "persona_md", "taste_md", "heartbeat_md"]:
@@ -200,14 +200,14 @@ class HeartbeatConfig:
     enabled: bool = True
     interval_seconds: int = 300  # 5分钟
     notify_on_error: bool = True
-    channels: List[str] = field(default_factory=lambda: ["log"])
-    health_check_urls: List[str] = field(default_factory=list)
+    channels: list[str] = field(default_factory=lambda: ["log"])
+    health_check_urls: list[str] = field(default_factory=list)
 
 # ============================================================================
 # 核心类
 # ============================================================================
 
-class SoulIdentityManager(object):
+class SoulIdentityManager:
     """
     Soul驱动身份管理器
 
@@ -237,7 +237,7 @@ class SoulIdentityManager(object):
     ```
     """
 
-    def __init__(self, soul_dir: Optional[str] = None, default_soul: str = "default"):
+    def __init__(self, soul_dir: str | None = None, default_soul: str = "default"):
         """
         初始化Soul身份管理器
 
@@ -247,8 +247,8 @@ class SoulIdentityManager(object):
         """
         self.soul_dir = Path(soul_dir or DEFAULT_SOUL_DIR).expanduser()
         self.default_soul = default_soul
-        self.current_soul: Optional[str] = None
-        self._profiles_cache: Dict[str, SoulProfile] = {}
+        self.current_soul: str | None = None
+        self._profiles_cache: dict[str, SoulProfile] = {}
 
         # 创建目录
         self.soul_dir.mkdir(parents=True, exist_ok=True)
@@ -357,7 +357,7 @@ class SoulIdentityManager(object):
         tokens = chinese_chars // 2 + english_words // 4 + other_chars // 4
         return max(1, tokens)
 
-    def _load_soul_file(self, soul_name: str, filename: str) -> Optional[SoulFile]:
+    def _load_soul_file(self, soul_name: str, filename: str) -> SoulFile | None:
         """加载单个Soul文件"""
         file_path = self.soul_dir / soul_name / filename
 
@@ -396,7 +396,7 @@ class SoulIdentityManager(object):
             is_active=True,
         )
 
-    def create_soul(self, name: str, content: Dict[str, str]) -> SoulProfile:
+    def create_soul(self, name: str, content: dict[str, str]) -> SoulProfile:
         """
         创建新的Soul配置
 
@@ -435,7 +435,7 @@ class SoulIdentityManager(object):
 
         return profile
 
-    def _dict_to_heartbeat(self, config: Dict) -> str:
+    def _dict_to_heartbeat(self, config: dict) -> str:
         """将字典转换为heartbeat markdown"""
         lines = ["# Heartbeat - 心跳配置\n", "## 监控设置"]
 
@@ -551,7 +551,7 @@ class SoulIdentityManager(object):
 
         return self.load_soul(name)
 
-    def list_souls(self) -> List[str]:
+    def list_souls(self) -> list[str]:
         """
         列出所有Soul配置
 
@@ -615,7 +615,7 @@ class SoulIdentityManager(object):
 
         return self.create_soul(target, content)
 
-    def get_soul_info(self, name: str) -> Dict[str, Any]:
+    def get_soul_info(self, name: str) -> dict[str, Any]:
         """
         获取Soul信息摘要
 
@@ -681,7 +681,7 @@ class SoulIdentityManager(object):
 
         return str(output)
 
-    def import_soul(self, zip_path: str, name: Optional[str] = None) -> str:
+    def import_soul(self, zip_path: str, name: str | None = None) -> str:
         """
         导入Soul配置
 
@@ -728,7 +728,7 @@ class SoulIdentityManager(object):
 
         return soul_name
 
-    def render_for_llm(self, name: str, system_prefix: str = "你是一个AI助手。") -> List[Dict[str, str]]:
+    def render_for_llm(self, name: str, system_prefix: str = "你是一个AI助手。") -> list[dict[str, str]]:
         """
         渲染适合LLM的消息格式
 

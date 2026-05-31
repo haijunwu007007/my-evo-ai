@@ -84,7 +84,8 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
 
 from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
@@ -96,19 +97,19 @@ try:
 except ImportError:
     MIXIN_AVAILABLE = False
 
-class FormValidationEngine(object):
+class FormValidationEngine:
     """表单验证引擎 - 规则匹配、联动校验、条件验证"""
 
     def __init__(self):
-        self._rules: Dict[str, List[Dict]] = {}
+        self._rules: dict[str, list[dict]] = {}
         self._validations: int = 0
         self._failures: int = 0
 
-    def add_rule(self, field: str, rule_type: str, params: Dict = None) -> None:
+    def add_rule(self, field: str, rule_type: str, params: dict = None) -> None:
         """为字段添加验证规则"""
         self._rules.setdefault(field, []).append({"type": rule_type, "params": params or {}})
 
-    def validate_field(self, field: str, value: Any) -> List[Dict]:
+    def validate_field(self, field: str, value: Any) -> list[dict]:
         """验证单个字段"""
         self._validations += 1
         errors = []
@@ -118,7 +119,7 @@ class FormValidationEngine(object):
                 self._failures += 1
         return errors
 
-    def validate_form(self, data: Dict) -> Dict:
+    def validate_form(self, data: dict) -> dict:
         """验证整个表单"""
         all_errors = []
         for field in self._rules:
@@ -126,7 +127,7 @@ class FormValidationEngine(object):
                 all_errors.extend(self.validate_field(field, data[field]))
         return {"valid": len(all_errors) == 0, "errors": all_errors}
 
-    def _check_rule(self, value: Any, rule_type: str, params: Dict) -> bool:
+    def _check_rule(self, value: Any, rule_type: str, params: dict) -> bool:
         """执行单条规则检查"""
         if rule_type == "required":
             return value is not None and value != ""
@@ -140,7 +141,7 @@ class FormValidationEngine(object):
             return bool(_re.match(params.get("regex", ".*"), str(value)))
         return True
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "rules": sum(len(v) for v in self._rules.values()),
             "validations": self._validations,
@@ -263,11 +264,11 @@ class FieldDef:
     readonly: bool = False
     hidden: bool = False
     description: str = ""
-    options: List[Dict[str, str]] = field(default_factory=list)
-    validations: List[Dict[str, Any]] = field(default_factory=list)
-    conditional: Optional[Dict[str, Any]] = None
-    props: Dict[str, Any] = field(default_factory=dict)
-    children: List["FieldDef"] = field(default_factory=list)  # for object/array types
+    options: list[dict[str, str]] = field(default_factory=list)
+    validations: list[dict[str, Any]] = field(default_factory=list)
+    conditional: dict[str, Any] | None = None
+    props: dict[str, Any] = field(default_factory=dict)
+    children: list[FieldDef] = field(default_factory=list)  # for object/array types
     section_title: str = ""  # for section type
 
 @dataclass
@@ -277,7 +278,7 @@ class FormSchema:
     name: str
     title: str = ""
     description: str = ""
-    fields: List[FieldDef] = field(default_factory=list)
+    fields: list[FieldDef] = field(default_factory=list)
     layout: str = "vertical"  # vertical, horizontal, inline
     label_width: str = "120px"
     submit_text: str = "提交"
@@ -285,7 +286,7 @@ class FormSchema:
     show_reset: bool = False
     reset_text: str = "重置"
     multi_step: bool = False
-    steps: List[List[str]] = field(default_factory=list)  # 每步的字段名列表
+    steps: list[list[str]] = field(default_factory=list)  # 每步的字段名列表
 
 @dataclass
 class ValidationError:
@@ -300,8 +301,8 @@ class ValidationError:
 class FormState:
     """表单状态"""
 
-    values: Dict[str, Any] = field(default_factory=dict)
-    errors: Dict[str, List[str]] = field(default_factory=dict)
+    values: dict[str, Any] = field(default_factory=dict)
+    errors: dict[str, list[str]] = field(default_factory=dict)
     touched: set = field(default_factory=set)
     dirty: set = field(default_factory=set)
     submitting: bool = False
@@ -333,19 +334,19 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 字段联动与计算字段
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__("form_builder", config=config or {})
-        self._schemas: Dict[str, FormSchema] = {}
-        self._states: Dict[str, FormState] = {}
-        self._custom_validators: Dict[str, Callable] = {}
-        self._before_submit_hooks: List[Callable] = []
+        self._schemas: dict[str, FormSchema] = {}
+        self._states: dict[str, FormState] = {}
+        self._custom_validators: dict[str, Callable] = {}
+        self._before_submit_hooks: list[Callable] = []
         self._metrics = _NoOpMetrics()
         self._audit_logger = _NoOpAuditLogger()
-        self._after_submit_hooks: List[Callable] = {}
+        self._after_submit_hooks: list[Callable] = {}
         self._stats = FormBuilderStats()
-        self._form_cache: Dict[str, str] = {}
-        self._computed_fields: Dict[str, Dict[str, Callable]] = {}
+        self._form_cache: dict[str, str] = {}
+        self._computed_fields: dict[str, dict[str, Callable]] = {}
         self._default_validations = self._build_default_validations()
 
     def initialize(self) -> None:
@@ -357,7 +358,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._metrics.increment("form_builder.init.errors")
             raise
 
-    def _build_default_validations(self) -> Dict[str, Dict[str, Any]]:
+    def _build_default_validations(self) -> dict[str, dict[str, Any]]:
         """构建默认验证规则配置"""
         return {
             ValidationRule.EMAIL.value: {
@@ -380,7 +381,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @staticmethod
-    def _validate_strong_password(value: Any, field_def: FieldDef, form_data: Dict) -> Optional[str]:
+    def _validate_strong_password(value: Any, field_def: FieldDef, form_data: dict) -> str | None:
         """强密码验证"""
         if not value:
             return None
@@ -407,27 +408,27 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._stats.total_forms += 1
         self._metrics.increment("form_builder.schemas.registered")
 
-    def register_validator(self, name: str, validator: Callable[[Any, FieldDef, Dict], Optional[str]]) -> None:
+    def register_validator(self, name: str, validator: Callable[[Any, FieldDef, dict], str | None]) -> None:
         """注册自定义验证器"""
         self._custom_validators[name] = validator
 
     def register_computed_field(
-        self, form_name: str, field_name: str, compute_fn: Callable[[Dict[str, Any]], Any]
+        self, form_name: str, field_name: str, compute_fn: Callable[[dict[str, Any]], Any]
     ) -> None:
         """注册计算字段"""
         if form_name not in self._computed_fields:
             self._computed_fields[form_name] = {}
         self._computed_fields[form_name][field_name] = compute_fn
 
-    def add_before_submit(self, form_name: str, hook: Callable[[Dict], Optional[Dict]]) -> None:
+    def add_before_submit(self, form_name: str, hook: Callable[[dict], dict | None]) -> None:
         """添加提交前钩子"""
         if form_name not in self._before_submit_hooks:
             self._before_submit_hooks[form_name] = []
         self._before_submit_hooks[form_name].append(hook)
 
     def validate_field(
-        self, form_name: str, field_name: str, value: Any, all_values: Optional[Dict] = None
-    ) -> List[ValidationError]:
+        self, form_name: str, field_name: str, value: Any, all_values: dict | None = None
+    ) -> list[ValidationError]:
         """验证单个字段"""
         start = time.monotonic()
         errors = []
@@ -468,8 +469,8 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         rule_value: Any,
         value: Any,
         rule_msg: str,
-        context: Dict,
-    ) -> Optional[ValidationError]:
+        context: dict,
+    ) -> ValidationError | None:
         """应用验证规则"""
         if rule_name == ValidationRule.MIN_LENGTH.value and value and len(str(value)) < rule_value:
             return ValidationError(field_name, rule_name, rule_msg or f"最小长度{rule_value}个字符", value)
@@ -493,13 +494,13 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return ValidationError(field_name, rule_name, rule_msg or "两次输入不一致", value)
         return None
 
-    def validate_form(self, form_name: str, data: Optional[Dict] = None) -> Dict[str, List[str]]:
+    def validate_form(self, form_name: str, data: dict | None = None) -> dict[str, list[str]]:
         """验证整个表单"""
         schema = self._schemas.get(form_name)
         if not schema:
             return {"_form": [f"表单 {form_name} 不存在"]}
         data = data or self._states.get(form_name, FormState()).values
-        all_errors: Dict[str, List[str]] = {}
+        all_errors: dict[str, list[str]] = {}
         for fld in schema.fields:
             if fld.type == FieldType.SECTION:
                 continue
@@ -513,7 +514,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._metrics.histogram("form_builder.validate.fields", len(schema.fields))
         return all_errors
 
-    def _evaluate_condition(self, condition: Dict[str, Any], data: Dict) -> bool:
+    def _evaluate_condition(self, condition: dict[str, Any], data: dict) -> bool:
         """评估条件表达式"""
         field = condition.get("field", "")
         op = condition.get("operator", "==")
@@ -533,7 +534,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return bool(actual)
         return True
 
-    def render_form(self, form_name: str, data: Optional[Dict] = None, form_id: Optional[str] = None) -> str:
+    def render_form(self, form_name: str, data: dict | None = None, form_id: str | None = None) -> str:
         """渲染完整表单HTML"""
         schema = self._schemas.get(form_name)
         if not schema:
@@ -587,7 +588,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._metrics.increment("form_builder.rendered")
         return html
 
-    def _render_field(self, fld: FieldDef, value: Any, errors: Dict[str, List[str]]) -> str:
+    def _render_field(self, fld: FieldDef, value: Any, errors: dict[str, list[str]]) -> str:
         """渲染单个字段"""
         label = fld.label or fld.name
         required_mark = '<span style="color:#EF4444;margin-left:2px">*</span>' if fld.required else ""
@@ -671,7 +672,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._states[form_name].values[field_name] = value
             self._states[form_name].dirty.add(field_name)
 
-    def get_values(self, form_name: str) -> Dict[str, Any]:
+    def get_values(self, form_name: str) -> dict[str, Any]:
         """获取表单所有值"""
         state = self._states.get(form_name, FormState())
         return dict(state.values)
@@ -687,8 +688,8 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                         self._states[form_name].values[fld.name] = fld.default
 
     def submit_form(
-        self, form_name: str, data: Optional[Dict] = None
-    ) -> Tuple[bool, Dict[str, List[str]], Dict[str, Any]]:
+        self, form_name: str, data: dict | None = None
+    ) -> tuple[bool, dict[str, list[str]], dict[str, Any]]:
         """提交表单"""
         schema = self._schemas.get(form_name)
         if not schema:
@@ -724,7 +725,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._metrics.increment("form_builder.submissions.success")
         return True, {}, submit_data
 
-    def build_schema_from_json(self, form_name: str, json_schema: Dict) -> FormSchema:
+    def build_schema_from_json(self, form_name: str, json_schema: dict) -> FormSchema:
         """从JSON Schema构建表单"""
         fields = []
         properties = json_schema.get("properties", {})
@@ -842,7 +843,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "total_forms": self._stats.total_forms,

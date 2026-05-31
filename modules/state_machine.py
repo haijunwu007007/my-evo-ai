@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class StateAnalyzer(object):
+class StateAnalyzer:
     """state_machine 运营分析引擎
 
     - 分析状态转换频率
@@ -116,7 +116,7 @@ class StateAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "StateAnalyzer", "module": "state_machine", "summary": summary}
 
-class StateMachineAnalyzer(object):
+class StateMachineAnalyzer:
     """state machine 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class StateMachineAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class StateMachineAnalyzer(object):
+class StateMachineAnalyzer:
     """state_machine核心分析引擎
 
     为state_machine模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class StateMachineAnalyzer(object):
 class StateMachine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """状态机引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"state_machine")
 

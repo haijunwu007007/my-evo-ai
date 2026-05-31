@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - 熔断器 Mixin
 =================================
@@ -30,7 +29,8 @@ import asyncio
 import threading
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Awaitable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable, Awaitable
 
 logger = logging.getLogger("evo.circuit_breaker")
 
@@ -62,11 +62,11 @@ class CircuitStats:
     total_failures: int = 0
     total_successes: int = 0
     total_rejected: int = 0  # 熔断期间拒绝的请求
-    last_failure_time: Optional[float] = None
-    last_state_change: Optional[float] = None
+    last_failure_time: float | None = None
+    last_state_change: float | None = None
     half_open_calls: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "state": self.state.value,
             "consecutive_failures": self.consecutive_failures,
@@ -82,7 +82,7 @@ class CircuitStats:
 class CircuitBreaker:
     """单个熔断器实例"""
 
-    def __init__(self, name: str, config: Optional[CircuitBreakerConfig] = None):
+    def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
         self.name = name
         self.config = config or CircuitBreakerConfig()
         self._stats = CircuitStats()
@@ -151,7 +151,7 @@ class CircuitBreaker:
             ):
                 self._transition(CircuitState.OPEN)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {"name": self.name, **self._stats.to_dict()}
 
     def reset(self):
@@ -177,9 +177,9 @@ class CircuitBreakerMixin:
                 )
     """
 
-    _circuits: Dict[str, CircuitBreaker] = {}
+    _circuits: dict[str, CircuitBreaker] = {}
 
-    def _get_circuit(self, name: str, config: Optional[CircuitBreakerConfig] = None) -> CircuitBreaker:
+    def _get_circuit(self, name: str, config: CircuitBreakerConfig | None = None) -> CircuitBreaker:
         """获取或创建熔断器"""
         if name not in self._circuits:
             self._circuits[name] = CircuitBreaker(name, config)
@@ -189,7 +189,7 @@ class CircuitBreakerMixin:
         self,
         name: str,
         func: Callable[[], Awaitable[Any]],
-        config: Optional[CircuitBreakerConfig] = None,
+        config: CircuitBreakerConfig | None = None,
         fallback: Any = None,
     ) -> Any:
         """
@@ -211,7 +211,7 @@ class CircuitBreakerMixin:
             result = await asyncio.wait_for(func(), timeout=self._get_circuit(name, config).config.timeout)
             cb.record_success()
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             cb.record_failure()
             logger.warning(f"[{name}] 调用超时")
             return fallback
@@ -220,7 +220,7 @@ class CircuitBreakerMixin:
             logger.error(f"[{name}] 调用失败: {e}")
             return fallback
 
-    def get_all_circuit_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_circuit_stats(self) -> dict[str, dict[str, Any]]:
         """获取所有熔断器状态"""
         return {name: cb.get_stats() for name, cb in self._circuits.items()}
 

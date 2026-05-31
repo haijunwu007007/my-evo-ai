@@ -201,13 +201,13 @@ class RetryPolicy:
     base_delay: float = 0.5
     max_delay: float = 5.0
     exponential_base: float = 2.0
-    retryable_exceptions: Tuple[type, ...] = (Exception,)
+    retryable_exceptions: tuple[type, ...] = (Exception,)
 
 # ============================================================================
 # MetricsEngine — 指标统计引擎
 # ============================================================================
 
-class MetricsEngine(object):
+class MetricsEngine:
     """
     内部指标引擎
     记录请求次数、成功率、延迟分布、缓存命中率、数据源降级次数
@@ -219,7 +219,7 @@ class MetricsEngine(object):
         self.total_requests: int = 0
         self.success_requests: int = 0
         self.error_requests: int = 0
-        self.latencies: List[float] = []
+        self.latencies: list[float] = []
         self.max_latency_items: int = 1000
         # 缓存指标
         self.cache_hits: int = 0
@@ -228,9 +228,9 @@ class MetricsEngine(object):
         self.fallback_count: int = 0
         self.fallback_errors: int = 0
         # 按action分类统计
-        self.action_stats: Dict[str, Dict[str, Any]] = {}
+        self.action_stats: dict[str, dict[str, Any]] = {}
         # 数据源可用性
-        self.datasource_status: Dict[str, Dict[str, Any]] = {
+        self.datasource_status: dict[str, dict[str, Any]] = {
             "akshare": {"available": False, "last_check": "", "latency_ms": 0.0},
             "web_fallback": {"available": False, "last_check": "", "latency_ms": 0.0},
         }
@@ -324,7 +324,7 @@ class MetricsEngine(object):
     def uptime_seconds(self) -> float:
         return (datetime.now() - self.start_time).total_seconds()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_requests": self.total_requests,
             "success_requests": self.success_requests,
@@ -347,7 +347,7 @@ class MetricsEngine(object):
 # FinanceEngine — 核心数据采集子引擎
 # ============================================================================
 
-class FinanceEngine(object):
+class FinanceEngine:
     """
     金融数据采集核心引擎
 
@@ -367,7 +367,7 @@ class FinanceEngine(object):
         self._cache_lock = threading.Lock()
         self._max_cache_size: int = 500
         # 默认TTL配置（秒）
-        self._ttl_config: Dict[str, float] = {
+        self._ttl_config: dict[str, float] = {
             "stock_spot": 30.0,
             "stock_hist": 3600.0,
             "fund_nav": 300.0,
@@ -383,7 +383,7 @@ class FinanceEngine(object):
             "default": 300.0,
         }
         # 限流器
-        self._rate_limiters: Dict[str, RateLimitBucket] = {
+        self._rate_limiters: dict[str, RateLimitBucket] = {
             "default": RateLimitBucket(max_tokens=30, refill_rate=1.0),
             "stock_spot": RateLimitBucket(max_tokens=10, refill_rate=0.5),
             "macro": RateLimitBucket(max_tokens=20, refill_rate=0.3),
@@ -411,12 +411,12 @@ class FinanceEngine(object):
 
     # ========== 缓存管理 ==========
 
-    def _cache_key(self, action: str, params: Optional[Dict] = None) -> str:
+    def _cache_key(self, action: str, params: dict | None = None) -> str:
         """生成缓存键"""
         raw = f"{action}:{json.dumps(params or {}, sort_keys=True)}"
         return hashlib.md5(raw.encode()).hexdigest()
 
-    def _get_cache(self, action: str, params: Optional[Dict] = None) -> Optional[Any]:
+    def _get_cache(self, action: str, params: dict | None = None) -> Any | None:
         """读取缓存"""
         key = self._cache_key(action, params)
         with self._cache_lock:
@@ -432,7 +432,7 @@ class FinanceEngine(object):
                     del self._cache[key]
         return None
 
-    def _set_cache(self, action: str, data: Any, params: Optional[Dict] = None):
+    def _set_cache(self, action: str, data: Any, params: dict | None = None):
         """写入缓存"""
         key = self._cache_key(action, params)
         ttl = self._ttl_config.get(action, self._ttl_config["default"])
@@ -446,7 +446,7 @@ class FinanceEngine(object):
             while len(self._cache) > self._max_cache_size:
                 self._cache.popitem(last=False)
 
-    def _invalidate_cache(self, pattern: Optional[str] = None):
+    def _invalidate_cache(self, pattern: str | None = None):
         """清除缓存"""
         with self._cache_lock:
             if pattern:
@@ -456,7 +456,7 @@ class FinanceEngine(object):
             else:
                 self._cache.clear()
 
-    def cache_stats(self) -> Dict[str, Any]:
+    def cache_stats(self) -> dict[str, Any]:
         """缓存统计"""
         with self._cache_lock:
             total = len(self._cache)
@@ -499,7 +499,7 @@ class FinanceEngine(object):
     # ========== 数据格式化 ==========
 
     @staticmethod
-    def _format_dataframe(df) -> List[Dict]:
+    def _format_dataframe(df) -> list[dict]:
         """统一DataFrame输出为字典列表"""
         if df is None:
             return []
@@ -519,7 +519,7 @@ class FinanceEngine(object):
     @staticmethod
     def _format_result(
         action: str, data: Any, cached: bool = False, source: str = "akshare", latency_ms: float = 0.0
-    ) -> Dict:
+    ) -> dict:
         """格式化统一输出"""
         return {
             "action": action,
@@ -533,7 +533,7 @@ class FinanceEngine(object):
 
     # ========== A股数据 ==========
 
-    def get_stock_spot(self, market: str = "A") -> Dict:
+    def get_stock_spot(self, market: str = "A") -> dict:
         """获取A股实时行情"""
         action = "get_stock_spot"
         cached_data = self._get_cache(action, {"market": market})
@@ -559,7 +559,7 @@ class FinanceEngine(object):
 
     def get_stock_hist(
         self, code: str, period: str = "daily", start_date: str = "20230101", end_date: str = "20260101"
-    ) -> Dict:
+    ) -> dict:
         """获取A股历史K线"""
         action = "get_stock_hist"
         params = {"code": code, "period": period, "start_date": start_date, "end_date": end_date}
@@ -583,7 +583,7 @@ class FinanceEngine(object):
             logger.error(f"[FinanceEngine] get_stock_hist失败: {e}")
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_stock_news(self, symbol: str = "全部") -> Dict:
+    def get_stock_news(self, symbol: str = "全部") -> dict:
         """获取个股新闻"""
         action = "get_stock_news"
         cached_data = self._get_cache(action, {"symbol": symbol})
@@ -605,7 +605,7 @@ class FinanceEngine(object):
 
     # ========== 港股/美股 ==========
 
-    def get_hk_stock_spot(self) -> Dict:
+    def get_hk_stock_spot(self) -> dict:
         """获取港股实时行情"""
         action = "get_hk_stock_spot"
         cached_data = self._get_cache(action)
@@ -625,7 +625,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_us_stock_spot(self) -> Dict:
+    def get_us_stock_spot(self) -> dict:
         """获取美股实时行情"""
         action = "get_us_stock_spot"
         cached_data = self._get_cache(action)
@@ -647,7 +647,7 @@ class FinanceEngine(object):
 
     # ========== 基金数据 ==========
 
-    def get_fund_nav(self, fund_code: str) -> Dict:
+    def get_fund_nav(self, fund_code: str) -> dict:
         """获取基金净值"""
         action = "get_fund_nav"
         params = {"fund_code": fund_code}
@@ -668,7 +668,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_fund_spot(self) -> Dict:
+    def get_fund_spot(self) -> dict:
         """获取公募基金实时行情"""
         action = "get_fund_spot"
         cached_data = self._get_cache(action)
@@ -690,7 +690,7 @@ class FinanceEngine(object):
 
     # ========== 期货数据 ==========
 
-    def get_futures_spot(self) -> Dict:
+    def get_futures_spot(self) -> dict:
         """获取期货实时行情"""
         action = "get_futures"
         cached_data = self._get_cache(action)
@@ -710,7 +710,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_futures_hist(self, symbol: str, period: str = "daily") -> Dict:
+    def get_futures_hist(self, symbol: str, period: str = "daily") -> dict:
         """获取期货历史数据"""
         action = "get_futures_hist"
         params = {"symbol": symbol, "period": period}
@@ -733,7 +733,7 @@ class FinanceEngine(object):
 
     # ========== 宏观数据 ==========
 
-    def get_cpi(self) -> Dict:
+    def get_cpi(self) -> dict:
         """获取CPI数据"""
         action = "get_cpi"
         cached_data = self._get_cache(action)
@@ -756,7 +756,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_gdp(self) -> Dict:
+    def get_gdp(self) -> dict:
         """获取GDP数据"""
         action = "get_gdp"
         cached_data = self._get_cache(action)
@@ -776,7 +776,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_pmi(self) -> Dict:
+    def get_pmi(self) -> dict:
         """获取PMI数据"""
         action = "get_pmi"
         cached_data = self._get_cache(action)
@@ -796,7 +796,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_macro(self) -> Dict:
+    def get_macro(self) -> dict:
         """获取综合宏观数据(CPI+GDP+PMI+M2)"""
         action = "get_macro"
         cached_data = self._get_cache(action)
@@ -829,7 +829,7 @@ class FinanceEngine(object):
 
     # ========== 指数数据 ==========
 
-    def get_index_spot(self) -> Dict:
+    def get_index_spot(self) -> dict:
         """获取指数实时行情"""
         action = "get_index_spot"
         cached_data = self._get_cache(action)
@@ -851,7 +851,7 @@ class FinanceEngine(object):
 
     # ========== 外汇数据 ==========
 
-    def get_forex(self) -> Dict:
+    def get_forex(self) -> dict:
         """获取外汇实时行情"""
         action = "get_forex"
         cached_data = self._get_cache(action)
@@ -873,7 +873,7 @@ class FinanceEngine(object):
 
     # ========== 加密货币 ==========
 
-    def get_crypto(self, symbol: str = "比特币") -> Dict:
+    def get_crypto(self, symbol: str = "比特币") -> dict:
         """获取加密货币数据"""
         action = "get_crypto"
         params = {"symbol": symbol}
@@ -901,7 +901,7 @@ class FinanceEngine(object):
 
     # ========== 搜索 & 工具 ==========
 
-    def search_stock(self, keyword: str) -> Dict:
+    def search_stock(self, keyword: str) -> dict:
         """搜索股票"""
         action = "search_stock"
         params = {"keyword": keyword}
@@ -931,7 +931,7 @@ class FinanceEngine(object):
             self.metrics.record_request(action, latency, False, error=str(e), cached=False)
             return self._format_result(action, [], cached=False, source="error", latency_ms=latency)
 
-    def get_trade_calendar(self, start: str = "", end: str = "") -> Dict:
+    def get_trade_calendar(self, start: str = "", end: str = "") -> dict:
         """获取交易日历"""
         action = "get_trade_calendar"
         params = {"start": start, "end": end}
@@ -966,7 +966,7 @@ class FinanceEngine(object):
 
     # ========== 数据源健康探测 ==========
 
-    def check_akshare(self) -> Dict[str, Any]:
+    def check_akshare(self) -> dict[str, Any]:
         """探测AKShare可用性"""
         start = time.time()
         try:
@@ -1035,7 +1035,7 @@ class FinanceDataModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._finance_engine = FinanceEngine(self._metrics_engine)
         # 状态
         self._initialized = False
-        self._init_time: Optional[datetime] = None
+        self._init_time: datetime | None = None
 
     # ========== 生命周期 ==========
 
@@ -1253,7 +1253,7 @@ class FinanceDataModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     # ========== 内部处理 ==========
 
-    def _handle_get_status(self, params: Dict) -> Dict:
+    def _handle_get_status(self, params: dict) -> dict:
         """获取模块状态，含链路追踪"""
         trace_id = f"finance-data-status-{int(time.time() * 1000)}"
         metrics_collector.counter("finance_data_status_queries_total")

@@ -90,7 +90,7 @@ class CTEParser:
 
     CTE_PATTERN = re.compile(r"WITH\s+(RECURSIVE\s+)?(?P<name>\w+)\s+AS\s*\((?P<body>.*?)\)", re.IGNORECASE | re.DOTALL)
 
-    def parse(self, sql: str) -> Dict:
+    def parse(self, sql: str) -> dict:
         ctes = []
         remaining = sql
         while True:
@@ -118,7 +118,7 @@ class CTEParser:
         main_query = remaining.strip()
         return {"ctes": ctes, "main_query": main_query, "has_recursive": any(c["recursive"] for c in ctes)}
 
-    def validate(self, sql: str) -> Dict:
+    def validate(self, sql: str) -> dict:
         errors = []
         if not sql.strip():
             errors.append("Empty query")
@@ -147,7 +147,7 @@ class CTEParser:
             params = {}
         return self.validate(**params)
 
-class RecursiveCTEEngine(object):
+class RecursiveCTEEngine:
     """递归CTE执行引擎"""
 
     def __init__(self, max_iterations: int = 1000, max_rows: int = 100000):
@@ -157,8 +157,8 @@ class RecursiveCTEEngine(object):
         self._rows_processed = 0
 
     def execute_recursive(
-        self, base_data: List[Dict], recursive_fn, anchor_filter=None, union_all: bool = True
-    ) -> Dict:
+        self, base_data: list[dict], recursive_fn, anchor_filter=None, union_all: bool = True
+    ) -> dict:
         self._iterations_used = 0
         self._rows_processed = 0
         result = []
@@ -209,10 +209,10 @@ class RecursiveCTEEngine(object):
         }
 
     @staticmethod
-    def _row_key(row: Dict) -> str:
+    def _row_key(row: dict) -> str:
         return "|".join(str(v) for v in sorted(row.values()))
 
-class WindowFunctionEngine(object):
+class WindowFunctionEngine:
     """窗口函数引擎"""
 
     def __init__(self):
@@ -232,8 +232,8 @@ class WindowFunctionEngine(object):
         }
 
     def apply(
-        self, data: List[Dict], func: str, order_by: str, partition_by: str = None, frame: Dict = None
-    ) -> List[Dict]:
+        self, data: list[dict], func: str, order_by: str, partition_by: str = None, frame: dict = None
+    ) -> list[dict]:
         handler = self._functions.get(func)
         if not handler:
             return data
@@ -249,7 +249,7 @@ class WindowFunctionEngine(object):
         return handler(data, order_by, frame)
 
     @staticmethod
-    def _sort_rows(data: List[Dict], order_by: str) -> List[Dict]:
+    def _sort_rows(data: list[dict], order_by: str) -> list[dict]:
         return sorted(data, key=lambda x: float(x.get(order_by, 0)))
 
     def _row_number(self, data, order_by, frame=None):
@@ -362,9 +362,9 @@ class QueryOptimizer:
     """查询优化器"""
 
     def __init__(self):
-        self._stats: Dict[str, Dict] = {}
+        self._stats: dict[str, dict] = {}
 
-    def analyze(self, sql: str) -> Dict:
+    def analyze(self, sql: str) -> dict:
         parsed = self._tokenize(sql)
         has_join = any(t.upper() == "JOIN" for t in parsed)
         has_where = any(t.upper() == "WHERE" for t in parsed)
@@ -399,26 +399,26 @@ class QueryOptimizer:
         }
 
     @staticmethod
-    def _tokenize(sql: str) -> List[str]:
+    def _tokenize(sql: str) -> list[str]:
         return re.findall(r"\b\w+\b|[(),*;=<>!]", sql)
 
 class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """CTE查询引擎 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "queries_executed": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -428,7 +428,7 @@ class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         self.window_engine = WindowFunctionEngine()
         self.optimizer = QueryOptimizer()
-        self._query_history: List[Dict] = []
+        self._query_history: list[dict] = []
         self._max_history = 200
 
     def initialize(self) -> dict:
@@ -523,7 +523,7 @@ class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def optimize_query(self, sql: str) -> Dict[str, Any]:
+    def optimize_query(self, sql: str) -> dict[str, Any]:
         """SQL优化建议。企业场景：DBA工具，分析SQL语句给出优化建议，
         如索引建议、JOIN优化、子查询改写等。
         """
@@ -573,7 +573,7 @@ class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "severity": "critical" if any(s["type"] == "warning" for s in suggestions) else "info",
         }
 
-    def explain_query_plan(self, sql: str) -> Dict[str, Any]:
+    def explain_query_plan(self, sql: str) -> dict[str, Any]:
         """模拟查询执行计划分析。企业场景：DBA分析慢查询的执行计划，
         识别全表扫描、嵌套循环等性能问题。
         """
@@ -594,12 +594,12 @@ class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return {"success": True, "sql": sql[:100], "plan": plan}
 
-    def get_query_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_query_history(self, limit: int = 20) -> dict[str, Any]:
         """获取查询历史。企业场景：用户查看之前执行过的CTE查询。"""
         history = getattr(self, "_query_history", [])
         return {"success": True, "total": len(history), "recent": history[-limit:]}
 
-    def validate_cte_syntax(self, sql: str) -> Dict[str, Any]:
+    def validate_cte_syntax(self, sql: str) -> dict[str, Any]:
         """验证CTE语法正确性。企业场景：IDE/SQL编辑器中实时校验CTE语法，
         在执行前发现语法错误，减少数据库错误日志。
         """
@@ -643,7 +643,7 @@ class CTEQuery(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "errors": errors,
         }
 
-    def get_query_performance_stats(self) -> Dict[str, Any]:
+    def get_query_performance_stats(self) -> dict[str, Any]:
         """查询性能统计。企业场景：慢查询分析，识别耗时最长的CTE查询。"""
         history = getattr(self, "_query_history", [])
         if not history:

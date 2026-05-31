@@ -161,24 +161,24 @@ class DBConfig:
 class QueryResult:
     """查询结果"""
 
-    columns: List[str] = field(default_factory=list)
-    rows: List[Dict[str, Any]] = field(default_factory=list)
+    columns: list[str] = field(default_factory=list)
+    rows: list[dict[str, Any]] = field(default_factory=list)
     affected: int = 0
     query_time_ms: float = 0.0
     row_count: int = 0
 
-    def to_dicts(self) -> List[Dict[str, Any]]:
+    def to_dicts(self) -> list[dict[str, Any]]:
         return self.rows
 
-    def to_list(self) -> List[List[Any]]:
+    def to_list(self) -> list[list[Any]]:
         if not self.columns:
             return []
         return [[row.get(c) for c in self.columns] for row in self.rows]
 
-    def first(self) -> Optional[Dict[str, Any]]:
+    def first(self) -> dict[str, Any] | None:
         return self.rows[0] if self.rows else None
 
-    def paginate(self, page: int, size: int) -> Dict[str, Any]:
+    def paginate(self, page: int, size: int) -> dict[str, Any]:
         total = len(self.rows)
         start = (page - 1) * size
         end = start + size
@@ -195,8 +195,8 @@ class ConnectionPool:
 
     def __init__(self, db_config: DBConfig):
         self.config = db_config
-        self._pool: List[Any] = []
-        self._in_use: Dict[int, Any] = {}
+        self._pool: list[Any] = []
+        self._in_use: dict[int, Any] = {}
         self._lock = threading.Lock()
         self._created = 0
 
@@ -279,7 +279,7 @@ class ConnectionPool:
             self._created = 0
 
     @property
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "pool_size": len(self._pool),
             "in_use": len(self._in_use),
@@ -293,13 +293,13 @@ class QueryBuilder:
 
     def __init__(self, table: str):
         self._table = table
-        self._wheres: List[str] = []
-        self._params: List[Any] = []
+        self._wheres: list[str] = []
+        self._params: list[Any] = []
         self._order_by: str = ""
         self._limit_val: int = 0
         self._offset_val: int = 0
         self._select_cols: str = "*"
-        self._joins: List[str] = []
+        self._joins: list[str] = []
         self._group_by: str = ""
         self._having: str = ""
 
@@ -322,7 +322,7 @@ class QueryBuilder:
         self._params.append(pattern)
         return self
 
-    def where_in(self, column: str, values: List[Any]):
+    def where_in(self, column: str, values: list[Any]):
         placeholders = ",".join(["?"] * len(values))
         self._wheres.append(f"{column} IN ({placeholders})")
         self._params.extend(values)
@@ -358,7 +358,7 @@ class QueryBuilder:
         self._joins.append(f"JOIN {table} ON {on}")
         return self
 
-    def build_select(self) -> Tuple[str, List[Any]]:
+    def build_select(self) -> tuple[str, list[Any]]:
         sql = f"SELECT {self._select_cols} FROM {self._table}"
         for j in self._joins:
             sql += f" {j}"
@@ -376,33 +376,33 @@ class QueryBuilder:
                 sql += f" OFFSET {self._offset_val}"
         return sql, self._params
 
-    def build_count(self) -> Tuple[str, List[Any]]:
+    def build_count(self) -> tuple[str, list[Any]]:
         sql = f"SELECT COUNT(*) as cnt FROM {self._table}"
         if self._wheres:
             sql += " WHERE " + " AND ".join(self._wheres)
         return sql, self._params
 
-    def build_delete(self) -> Tuple[str, List[Any]]:
+    def build_delete(self) -> tuple[str, list[Any]]:
         sql = f"DELETE FROM {self._table}"
         if self._wheres:
             sql += " WHERE " + " AND ".join(self._wheres)
         return sql, self._params
 
-    def build_update(self, sets: Dict[str, Any]) -> Tuple[str, List[Any]]:
-        set_clause = ", ".join([f"{k} = ?" for k in sets.keys()])
+    def build_update(self, sets: dict[str, Any]) -> tuple[str, list[Any]]:
+        set_clause = ", ".join([f"{k} = ?" for k in sets])
         sql = f"UPDATE {self._table} SET {set_clause}"
         params = list(sets.values()) + self._params
         if self._wheres:
             sql += " WHERE " + " AND ".join(self._wheres)
         return sql, params
 
-    def build_insert(self, data: Dict[str, Any]) -> Tuple[str, List[Any]]:
+    def build_insert(self, data: dict[str, Any]) -> tuple[str, list[Any]]:
         cols = ", ".join(data.keys())
         placeholders = ", ".join(["?"] * len(data))
         sql = f"INSERT INTO {self._table} ({cols}) VALUES ({placeholders})"
         return sql, list(data.values())
 
-    def build_insert_batch(self, records: List[Dict[str, Any]]) -> Tuple[str, List[Any]]:
+    def build_insert_batch(self, records: list[dict[str, Any]]) -> tuple[str, list[Any]]:
         if not records:
             return "", []
         cols = ", ".join(records[0].keys())
@@ -421,7 +421,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -436,9 +436,9 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.db_config.database = os.path.join(os.path.dirname(__file__), ".data", "evo.db")
         os.makedirs(os.path.dirname(self.db_config.database), exist_ok=True)
 
-        self._pool: Optional[ConnectionPool] = None
-        self._tables: Dict[str, Dict] = {}
-        self._query_log: List[Dict] = []
+        self._pool: ConnectionPool | None = None
+        self._tables: dict[str, dict] = {}
+        self._query_log: list[dict] = []
         self._slow_threshold = self.config.get("slow_threshold", 1000)  # 慢查询阈值ms
 
     def initialize(self) -> None:
@@ -587,7 +587,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             for table_name, schema in self._tables.items():
                 self._ensure_table(table_name, schema)
 
-    def _ensure_table(self, table_name: str, schema: Dict):
+    def _ensure_table(self, table_name: str, schema: dict):
         """确保表存在"""
         conn = self._pool.acquire()
         if not conn:
@@ -608,7 +608,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 查询接口 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "query": self._action_query,
@@ -629,14 +629,14 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _action_query(self, params: Dict) -> Dict:
+    def _action_query(self, params: dict) -> dict:
         """执行原生SQL查询"""
         sql = params.get("sql", "")
         if not sql:
             return {"error": "缺少sql参数"}
         return self._raw_query(sql, params.get("params", []))
 
-    def _action_execute_sql(self, params: Dict) -> Dict:
+    def _action_execute_sql(self, params: dict) -> dict:
         """执行DDL/DML"""
         sql = params.get("sql", "")
         conn = self._pool.acquire()
@@ -658,7 +658,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self._pool.release(conn)
 
-    def _action_insert(self, params: Dict) -> Dict:
+    def _action_insert(self, params: dict) -> dict:
         """插入数据"""
         table = params.get("table", "")
         data = params.get("data", {})
@@ -684,7 +684,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self._pool.release(conn)
 
-    def _action_insert_batch(self, params: Dict) -> Dict:
+    def _action_insert_batch(self, params: dict) -> dict:
         """批量插入"""
         table = params.get("table", "")
         records = params.get("records", [])
@@ -709,7 +709,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self._pool.release(conn)
 
-    def _action_update(self, params: Dict) -> Dict:
+    def _action_update(self, params: dict) -> dict:
         """更新数据"""
         table = params.get("table", "")
         sets = params.get("sets", {})
@@ -739,7 +739,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self._pool.release(conn)
 
-    def _action_delete(self, params: Dict) -> Dict:
+    def _action_delete(self, params: dict) -> dict:
         """删除数据"""
         table = params.get("table", "")
         where = params.get("where", "")
@@ -766,7 +766,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self._pool.release(conn)
 
-    def _action_select(self, params: Dict) -> Dict:
+    def _action_select(self, params: dict) -> dict:
         """查询数据"""
         table = params.get("table", "")
         columns = params.get("columns", "*")
@@ -790,7 +790,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         sql, sql_params = qb.build_select()
         return self._raw_query(sql, sql_params)
 
-    def _action_count(self, params: Dict) -> Dict:
+    def _action_count(self, params: dict) -> dict:
         """计数查询"""
         table = params.get("table", "")
         where = params.get("where", "")
@@ -804,7 +804,7 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"count": result["rows"][0].get("cnt", 0)}
         return {"count": 0}
 
-    def _action_create_table(self, params: Dict) -> Dict:
+    def _action_create_table(self, params: dict) -> dict:
         table = params.get("table", "")
         columns = params.get("columns", {})
         indexes = params.get("indexes", [])
@@ -815,28 +815,28 @@ class DatabaseClient(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._ensure_table(table, schema)
         return {"success": True, "table": table}
 
-    def _action_list_tables(self, params: Dict) -> Dict:
+    def _action_list_tables(self, params: dict) -> dict:
         result = self._raw_query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", [])
         return {"tables": [r["name"] for r in result.get("rows", [])]}
 
-    def _action_describe(self, params: Dict) -> Dict:
+    def _action_describe(self, params: dict) -> dict:
         table = params.get("table", "")
         if not table:
             return {"error": "缺少table参数"}
         result = self._raw_query(f"PRAGMA table_info({table})", [])
         return {"table": table, "columns": result.get("rows", [])}
 
-    def _action_pool_stats(self, params: Dict) -> Dict:
+    def _action_pool_stats(self, params: dict) -> dict:
         return self._pool.stats if self._pool else {"error": "连接池未初始化"}
 
-    def _action_slow_queries(self, params: Dict) -> Dict:
+    def _action_slow_queries(self, params: dict) -> dict:
         limit = params.get("limit", 20)
         slow = [q for q in self._query_log if q["time_ms"] > self._slow_threshold]
         return {"threshold_ms": self._slow_threshold, "total": len(slow), "queries": slow[-limit:]}
 
     # ── 底层执行 ──
 
-    def _raw_query(self, sql: str, params: List = None) -> Dict:
+    def _raw_query(self, sql: str, params: list = None) -> dict:
         """底层查询执行"""
         conn = self._pool.acquire()
         if not conn:

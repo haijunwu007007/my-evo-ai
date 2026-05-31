@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -140,8 +139,8 @@ class SteadyStateHypothesis:
     condition: str = "lt"  # lt, gt, eq, neq, contains
     threshold: float = 0.0
     tolerance: float = 0.05  # 5%容差
-    passed: Optional[bool] = None
-    actual_value: Optional[float] = None
+    passed: bool | None = None
+    actual_value: float | None = None
 
 @dataclass
 class FaultInjection:
@@ -150,7 +149,7 @@ class FaultInjection:
     fault_id: str = field(default_factory=lambda: f"flt_{uuid.uuid4().hex[:8]}")
     fault_type: FaultType = FaultType.NETWORK_DELAY
     target: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     duration_seconds: int = 60
     blast_radius: BlastRadius = BlastRadius.SINGLE_INSTANCE
     canary_pct: float = 100.0
@@ -163,9 +162,9 @@ class RollbackAction:
     action_id: str = field(default_factory=lambda: f"rb_{uuid.uuid4().hex[:8]}")
     action_type: str = "restart"  # restart, redeploy, config_restore, scale_up
     target: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     executed: bool = False
-    success: Optional[bool] = None
+    success: bool | None = None
 
 @dataclass
 class ChaosExperiment:
@@ -175,17 +174,17 @@ class ChaosExperiment:
     name: str = ""
     description: str = ""
     status: ExperimentStatus = ExperimentStatus.DRAFT
-    hypotheses: List[SteadyStateHypothesis] = field(default_factory=list)
-    faults: List[FaultInjection] = field(default_factory=list)
-    rollback_actions: List[RollbackAction] = field(default_factory=list)
+    hypotheses: list[SteadyStateHypothesis] = field(default_factory=list)
+    faults: list[FaultInjection] = field(default_factory=list)
+    rollback_actions: list[RollbackAction] = field(default_factory=list)
     blast_radius: BlastRadius = BlastRadius.SINGLE_INSTANCE
     dry_run: bool = False
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
     created_by: str = "system"
-    tags: List[str] = field(default_factory=list)
-    results: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    results: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class SLODefinition:
@@ -201,7 +200,7 @@ class SLODefinition:
 class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """混沌工程实践平台管理器"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config or {})
         self.module_name = "混沌工程实践平台"
@@ -211,13 +210,13 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._initialized = False
 
         # 实验存储
-        self._experiments: Dict[str, ChaosExperiment] = {}
+        self._experiments: dict[str, ChaosExperiment] = {}
         # SLO定义
-        self._slos: Dict[str, SLODefinition] = {}
+        self._slos: dict[str, SLODefinition] = {}
         # 活跃故障
-        self._active_faults: Dict[str, asyncio.Task] = {}
+        self._active_faults: dict[str, asyncio.Task] = {}
         # 实验历史
-        self._history: List[Dict[str, Any]] = []
+        self._history: list[dict[str, Any]] = []
         # 统计
         self._stats = {
             "experiments_total": 0,
@@ -267,7 +266,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._initialized = False
         logger.info("[ChaosEngineering] 平台已关闭")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "running" if self._initialized else "stopped",
             "healthy": True,
@@ -279,7 +278,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "version": "V0.1",
         }
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一执行入口"""
         _ = self.trace("execute")
         metrics_collector.counter("chaos_engineering_ops_total", labels={"action": action})
@@ -321,7 +320,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             logger.error(f"[ChaosEngineering] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _create_experiment(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_experiment(self, params: dict[str, Any]) -> dict[str, Any]:
         """创建混沌实验"""
         exp = ChaosExperiment(
             name=params.get("name", "未命名实验"),
@@ -395,7 +394,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _run_experiment(self, experiment_id: str) -> Dict[str, Any]:
+    def _run_experiment(self, experiment_id: str) -> dict[str, Any]:
         """执行混沌实验"""
         exp = self._experiments.get(experiment_id)
         if not exp:
@@ -464,7 +463,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             self._rollback_experiment(experiment_id)
             return {"success": False, "error": str(e), "result": {"status": "failed_rolled_back"}}
 
-    def _abort_experiment(self, experiment_id: str) -> Dict[str, Any]:
+    def _abort_experiment(self, experiment_id: str) -> dict[str, Any]:
         """中止实验"""
         exp = self._experiments.get(experiment_id)
         if not exp:
@@ -477,7 +476,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._rollback_experiment(experiment_id)
         return {"success": True, "result": {"status": "aborted", "rolled_back": True}}
 
-    def _get_experiment(self, experiment_id: str) -> Dict[str, Any]:
+    def _get_experiment(self, experiment_id: str) -> dict[str, Any]:
         """获取实验详情"""
         exp = self._experiments.get(experiment_id)
         if not exp:
@@ -522,7 +521,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _list_experiments(self, status: Optional[str] = None, limit: int = 50) -> Dict[str, Any]:
+    def _list_experiments(self, status: str | None = None, limit: int = 50) -> dict[str, Any]:
         """列出实验"""
         experiments = list(self._experiments.values())
         if status:
@@ -542,7 +541,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             ],
         }
 
-    def _inject_fault(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _inject_fault(self, params: dict[str, Any]) -> dict[str, Any]:
         """直接注入故障"""
         fault = FaultInjection(
             fault_type=FaultType(params.get("type", "network_delay")),
@@ -564,7 +563,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _rollback_experiment(self, experiment_id: str) -> Dict[str, Any]:
+    def _rollback_experiment(self, experiment_id: str) -> dict[str, Any]:
         """回滚实验"""
         exp = self._experiments.get(experiment_id)
         if not exp:
@@ -593,7 +592,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _validate_hypothesis(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_hypothesis(self, params: dict[str, Any]) -> dict[str, Any]:
         """验证稳态假设"""
         actual = params.get("actual_value", 0.0)
         condition = params.get("condition", "lt")
@@ -615,7 +614,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _add_slo(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_slo(self, params: dict[str, Any]) -> dict[str, Any]:
         """添加SLO定义"""
         slo = SLODefinition(
             name=params.get("name", ""),
@@ -627,7 +626,7 @@ class ChaosEngineeringManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._slos[slo.slo_id] = slo
         return {"success": True, "result": {"slo_id": slo.slo_id, "name": slo.name}}
 
-    def _check_slo(self, slo_id: str) -> Dict[str, Any]:
+    def _check_slo(self, slo_id: str) -> dict[str, Any]:
         """检查SLO合规状态"""
         slo = self._slos.get(slo_id)
         if not slo:

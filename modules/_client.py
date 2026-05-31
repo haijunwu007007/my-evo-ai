@@ -61,7 +61,7 @@ class RealClient:
         try:
             if not os.path.isfile(path):
                 return {"success": False, "error": "file not found"}
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
             return {"success": True, "data": content, "size": len(content)}
         except Exception as e:

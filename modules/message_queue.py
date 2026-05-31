@@ -88,7 +88,8 @@ import asyncio
 import time
 import logging
 import threading
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
@@ -120,7 +121,7 @@ class Message:
     msg_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
     topic: str = ""
     payload: Any = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     delivered: bool = False
     delivered_count: int = 0
@@ -134,18 +135,18 @@ class Topic:
 
     name: str
     messages: deque = field(default_factory=lambda: deque(maxlen=10000))
-    subscribers: Dict[str, Callable] = field(default_factory=dict)
+    subscribers: dict[str, Callable] = field(default_factory=dict)
     total_published: int = 0
     total_consumed: int = 0
     total_dead: int = 0
     created_at: str = ""
 
-class MessageRoutingEngine(object):
+class MessageRoutingEngine:
     """消息路由引擎 - 负责消息分发、主题匹配和消费者路由"""
 
     def __init__(self):
-        self._routes: Dict[str, List[str]] = {}
-        self._wildcard_routes: Dict[str, List[str]] = {}
+        self._routes: dict[str, list[str]] = {}
+        self._wildcard_routes: dict[str, list[str]] = {}
         self._routing_count: int = 0
         self._no_match_count: int = 0
 
@@ -168,7 +169,7 @@ class MessageRoutingEngine(object):
             return True
         return False
 
-    def match(self, topic: str) -> List[str]:
+    def match(self, topic: str) -> list[str]:
         """匹配主题到消费者列表"""
         self._routing_count += 1
         consumers = list(self._routes.get(topic, []))
@@ -185,7 +186,7 @@ class MessageRoutingEngine(object):
         parts_p = pattern.split(".")
         return self._match_parts(parts_t, parts_p, 0, 0)
 
-    def _match_parts(self, topic_parts: List[str], pattern_parts: List[str], ti: int, pi: int) -> bool:
+    def _match_parts(self, topic_parts: list[str], pattern_parts: list[str], ti: int, pi: int) -> bool:
         if pi == len(pattern_parts):
             return ti == len(topic_parts)
         if pattern_parts[pi] == ">":
@@ -196,10 +197,10 @@ class MessageRoutingEngine(object):
             return self._match_parts(topic_parts, pattern_parts, ti + 1, pi + 1)
         return False
 
-    def list_routes(self) -> Dict:
+    def list_routes(self) -> dict:
         return {"exact": dict(self._routes), "wildcard": dict(self._wildcard_routes)}
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "exact_routes": len(self._routes),
             "wildcard_routes": len(self._wildcard_routes),
@@ -213,7 +214,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def __init__(self):
 
         super().__init__()
-        self._topics: Dict[str, Topic] = {}
+        self._topics: dict[str, Topic] = {}
         self._dead_letters: deque = deque(maxlen=5000)
         self._delivery_mode = DeliveryMode.AT_LEAST_ONCE
         self._lock = threading.Lock()
@@ -240,7 +241,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         for name in ["events", "alerts", "tasks", "logs", "metrics"]:
             self._topics[name] = Topic(name=name, created_at=datetime.now().isoformat())
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         with self._lock:
             topic_info = {
                 name: {"messages": len(t.messages), "subscribers": len(t.subscribers)}
@@ -503,7 +504,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 return {"success": False, "error": str(e)}
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def batch_publish(self, messages: List[Dict]) -> Dict:
+    def batch_publish(self, messages: list[dict]) -> dict:
         """批量发布消息"""
         success = 0
         failed = 0
@@ -517,7 +518,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 failed += 1
         return {"success": success, "failed": failed, "total": len(messages)}
 
-    def replay_dead_letter(self, topic: str, max_count: int = 10) -> Dict:
+    def replay_dead_letter(self, topic: str, max_count: int = 10) -> dict:
         """重发死信队列消息"""
         dl_key = f"dl_{topic}"
         dl = self._dead_letters.get(dl_key, [])
@@ -532,21 +533,21 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         """获取队列深度"""
         return len(self._topics.get(topic, []))
 
-    def get_topic_summary(self) -> List[Dict]:
+    def get_topic_summary(self) -> list[dict]:
         """获取所有主题概览"""
         return [
             {"topic": t, "depth": len(m), "subscribers": len(self._subscribers.get(t, []))}
             for t, m in self._topics.items()
         ]
 
-    def create_consumer_group(self, group_id: str, topics: List[str]) -> Dict:
+    def create_consumer_group(self, group_id: str, topics: list[str]) -> dict:
         """创建消费者组"""
         if not hasattr(self, "_consumer_groups"):
-            self._consumer_groups: Dict[str, Dict] = {}
+            self._consumer_groups: dict[str, dict] = {}
         self._consumer_groups[group_id] = {"topics": topics, "consumers": [], "offsets": {t: 0 for t in topics}}
         return {"group_id": group_id, "topics": topics}
 
-    def get_consumer_group_lag(self, group_id: str) -> Dict:
+    def get_consumer_group_lag(self, group_id: str) -> dict:
         """获取消费者组延迟"""
         if not hasattr(self, "_consumer_groups"):
             return {"error": "consumer groups not initialized"}
@@ -560,7 +561,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             lags[topic] = max(0, queue_depth - offset)
         return {"group_id": group_id, "lags": lags}
 
-    def publish_with_priority(self, topic: str, data: Any, priority: int = 0) -> Dict:
+    def publish_with_priority(self, topic: str, data: Any, priority: int = 0) -> dict:
         """发布优先级消息（priority越大越优先）"""
         if topic not in self._topics:
             self._topics[topic] = []
@@ -571,7 +572,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._topics[topic].append({"data": data, "priority": priority})
         return {"success": True, "topic": topic, "depth": len(self._topics[topic])}
 
-    def drain_topic(self, topic: str, limit: int = 100) -> List:
+    def drain_topic(self, topic: str, limit: int = 100) -> list:
         """排空主题所有消息"""
         messages = self._topics.get(topic, [])[:limit]
         self._topics[topic] = self._topics.get(topic, [])[limit:]
@@ -580,14 +581,14 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def ack_message(self, topic: str, message_id: str) -> bool:
         """确认消息已处理"""
         if not hasattr(self, "_pending_acks"):
-            self._pending_acks: Dict[str, set] = {}
+            self._pending_acks: dict[str, set] = {}
         pending = self._pending_acks.get(topic, set())
         if message_id in pending:
             pending.discard(message_id)
             return True
         return False
 
-    def nack_message(self, topic: str, message_id: str, data: Any, retry_count: int = 0, max_retries: int = 3) -> Dict:
+    def nack_message(self, topic: str, message_id: str, data: Any, retry_count: int = 0, max_retries: int = 3) -> dict:
         """拒绝消息，触发重试或进入死信"""
         if retry_count >= max_retries:
             dl_key = f"dl_{topic}"
@@ -599,7 +600,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._topics[topic].insert(0, data)
         return {"action": "requeued", "topic": topic, "retry": retry_count + 1}
 
-    def get_throughput(self, window_seconds: int = 60) -> Dict:
+    def get_throughput(self, window_seconds: int = 60) -> dict:
         """获取吞吐量统计"""
         if not hasattr(self, "_publish_history"):
             return {"error": "history not available"}
@@ -611,7 +612,7 @@ class MessageQueueModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "rate_per_sec": round(len(recent) / window_seconds, 2),
         }
 
-    def analyze_consumer_lag(self) -> Dict[str, Any]:
+    def analyze_consumer_lag(self) -> dict[str, Any]:
         """分析消费者延迟：各队列积压深度、消费速率、预计消化时间"""
         queues = self._queues if hasattr(self, "_queues") else {}
         if not queues:

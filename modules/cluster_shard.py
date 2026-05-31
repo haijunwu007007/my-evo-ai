@@ -91,7 +91,7 @@ try:
 except ImportError:
 
     class EnterpriseModule:
-        def __init__(self, config: Dict = None):
+        def __init__(self, config: dict = None):
             self._config = config or {}
             self._initialized = False
 
@@ -191,8 +191,8 @@ class Shard:
     state: ShardState = ShardState.ACTIVE
     node_id: str = ""
     algorithm: ShardAlgorithm = ShardAlgorithm.HASH
-    range_start: Optional[int] = None
-    range_end: Optional[int] = None
+    range_start: int | None = None
+    range_end: int | None = None
     virtual_nodes: int = 150
     weight: int = 1
     capacity_mb: int = 1024
@@ -219,8 +219,8 @@ class MigrationTask:
     total_keys: int = 0
     migrated_keys: int = 0
     status: str = "pending"
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     error: str = ""
 
 class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -237,15 +237,15 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         )
         self.module_name = "cluster_shard"
         self.module_id = self.module_name
-        self._shards: Dict[str, Shard] = {}
-        self._key_mappings: Dict[str, ShardKey] = {}
-        self._migrations: Dict[str, MigrationTask] = {}
+        self._shards: dict[str, Shard] = {}
+        self._key_mappings: dict[str, ShardKey] = {}
+        self._migrations: dict[str, MigrationTask] = {}
         self._audit = AuditLogger()
         self._route_count = 0
         self._migrate_count = 0
-        self._startup_time: Optional[float] = None
+        self._startup_time: float | None = None
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         """统一执行入口 — 支持标准 action 路由"""
         params = params or {}
         metrics_collector.counter("cluster_shard_ops_total", labels={"action": action})
@@ -291,7 +291,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         """对键进行哈希"""
         return int(hashlib.md5(key.encode()).hexdigest()[:8], 16)
 
-    def _find_shard_hash(self, key: str) -> Optional[Shard]:
+    def _find_shard_hash(self, key: str) -> Shard | None:
         """哈希路由：找到目标分片"""
         active = [s for s in self._shards.values() if s.state == ShardState.ACTIVE]
         if not active:
@@ -305,7 +305,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 return s
         return active[-1]
 
-    def _find_shard_range(self, key: str) -> Optional[Shard]:
+    def _find_shard_range(self, key: str) -> Shard | None:
         """范围路由"""
         try:
             num = int(key)
@@ -346,7 +346,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         """分片集群状态"""
         return {"success": True, "action": "status", "module": "cluster_shard", "params": params}
 
-    def _route_key(self, p: Dict) -> Dict:
+    def _route_key(self, p: dict) -> dict:
         """路由单个键"""
         key = p.get("key", "")
         algo = p.get("algorithm", "hash")
@@ -371,7 +371,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _batch_route(self, p: Dict) -> Dict:
+    def _batch_route(self, p: dict) -> dict:
         """批量路由"""
         keys = p.get("keys", [])
         algo = p.get("algorithm", "hash")
@@ -396,7 +396,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _create_shard(self, p: Dict) -> Dict:
+    def _create_shard(self, p: dict) -> dict:
         """创建新分片"""
         idx = max((s.index for s in self._shards.values()), default=-1) + 1
         sid = p.get("shard_id", f"shard_{idx:03d}")
@@ -415,7 +415,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.record_metric("cluster_shard_created_total", 1)
         return {"success": True, "result": {"shard_id": sid, "index": idx, "node_id": shard.node_id}}
 
-    def _remove_shard(self, p: Dict) -> Dict:
+    def _remove_shard(self, p: dict) -> dict:
         """移除分片"""
         sid = p.get("shard_id", "")
         shard = self._shards.get(sid)
@@ -428,7 +428,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._audit.log("shard_removed", {"shard_id": sid})
         return {"success": True, "result": {"shard_id": sid, "removed": True}}
 
-    def _update_shard_state(self, p: Dict) -> Dict:
+    def _update_shard_state(self, p: dict) -> dict:
         """更新分片状态"""
         sid = p.get("shard_id", "")
         new_state = p.get("state", "")
@@ -444,7 +444,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         )
         return {"success": True, "result": {"shard_id": sid, "state": shard.state.value}}
 
-    def _start_migration(self, p: Dict) -> Dict:
+    def _start_migration(self, p: dict) -> dict:
         """开始分片迁移"""
         source = p.get("source_shard", "")
         target = p.get("target_shard", "")
@@ -489,7 +489,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _get_migration_status(self, p: Dict) -> Dict:
+    def _get_migration_status(self, p: dict) -> dict:
         """获取迁移状态"""
         tid = p.get("task_id", "")
         task = self._migrations.get(tid)
@@ -508,7 +508,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _list_migrations(self) -> Dict:
+    def _list_migrations(self) -> dict:
         """列出迁移历史"""
         tasks = list(self._migrations.values())
         return {
@@ -525,7 +525,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def _rebalance(self, p: Dict) -> Dict:
+    def _rebalance(self, p: dict) -> dict:
         """重新均衡分片"""
         active = [s for s in self._shards.values() if s.state == ShardState.ACTIVE]
         if not active:
@@ -549,7 +549,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "result": {"shards_rebalanced": len(active), "docs_moved": rebalanced, "avg_per_shard": target_per_shard},
         }
 
-    def _list_shards(self, p: Dict) -> Dict:
+    def _list_shards(self, p: dict) -> dict:
         """列出分片"""
         state_filter = p.get("state")
         shards = list(self._shards.values())
@@ -573,7 +573,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             ],
         }
 
-    def _get_shard_detail(self, p: Dict) -> Dict:
+    def _get_shard_detail(self, p: dict) -> dict:
         """获取分片详情"""
         sid = p.get("shard_id", "")
         s = self._shards.get(sid)
@@ -599,7 +599,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _get_distribution(self) -> Dict:
+    def _get_distribution(self) -> dict:
         """获取分片分布"""
         dist = {}
         for s in self._shards.values():
@@ -612,7 +612,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             dist[node]["used_mb"] += s.used_mb
         return {"success": True, "result": dist}
 
-    def _get_stats(self) -> Dict:
+    def _get_stats(self) -> dict:
         """获取统计信息"""
         active = sum(1 for s in self._shards.values() if s.state == ShardState.ACTIVE)
         total_docs = sum(s.doc_count for s in self._shards.values())
@@ -637,7 +637,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._initialized = False
         self._audit.log("shutdown", {"uptime": time.time() - (self._startup_time or time.time())})
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         active = sum(1 for s in self._shards.values() if s.state == ShardState.ACTIVE)
         failed = sum(1 for s in self._shards.values() if s.state == ShardState.FAILED)
@@ -655,7 +655,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         )
         return result
 
-    def analyze_data_distribution(self) -> Dict[str, Any]:
+    def analyze_data_distribution(self) -> dict[str, Any]:
         """分析分片数据分布：均匀度、倾斜检测、热点分片识别"""
         shards = self._shards if hasattr(self, "_shards") else {}
         if not shards:
@@ -684,7 +684,7 @@ class ClusterShardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "balance_score": round(min(avg, 1) / max(avg, 1), 3) if avg > 0 else 0,
         }
 
-    def suggest_rebalance_plan(self) -> Dict[str, Any]:
+    def suggest_rebalance_plan(self) -> dict[str, Any]:
         """建议数据重平衡方案：识别需要迁移的Key和目标分片"""
         shards = self._shards if hasattr(self, "_shards") else {}
         if not shards:

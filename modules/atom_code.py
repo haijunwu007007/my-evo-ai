@@ -130,7 +130,7 @@ class CodeSnippet:
     language: str
     code: str
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = 0.0
     usage_count: int = 0
 
@@ -139,7 +139,7 @@ class RefactorResult:
     original: str
     refactored: str
     refactor_type: str
-    changes: List[Dict] = field(default_factory=list)
+    changes: list[dict] = field(default_factory=list)
     score_improvement: float = 0.0
 
 @dataclass
@@ -167,8 +167,8 @@ class SnippetManager:
     """Manages reusable code snippets with search and tagging."""
 
     def __init__(self):
-        self._snippets: Dict[str, CodeSnippet] = {}
-        self._tag_index: Dict[str, List[str]] = defaultdict(list)
+        self._snippets: dict[str, CodeSnippet] = {}
+        self._tag_index: dict[str, list[str]] = defaultdict(list)
 
     def add(
         self,
@@ -177,8 +177,8 @@ class SnippetManager:
         language: str,
         code: str,
         description: str = "",
-        tags: Optional[List[str]] = None,
-    ) -> Dict:
+        tags: list[str] | None = None,
+    ) -> dict:
         snippet = CodeSnippet(
             snippet_id=snippet_id,
             name=name,
@@ -194,7 +194,7 @@ class SnippetManager:
                 self._tag_index[t].append(snippet_id)
         return {"snippet_id": snippet_id, "name": name, "tags": snippet.tags}
 
-    def get(self, snippet_id: str) -> Optional[Dict]:
+    def get(self, snippet_id: str) -> dict | None:
         s = self._snippets.get(snippet_id)
         if not s:
             return None
@@ -209,7 +209,7 @@ class SnippetManager:
             "usage_count": s.usage_count,
         }
 
-    def search(self, query: str, language: Optional[str] = None, tags: Optional[List[str]] = None) -> List[Dict]:
+    def search(self, query: str, language: str | None = None, tags: list[str] | None = None) -> list[dict]:
         results = []
         for s in self._snippets.values():
             if language and s.language != language:
@@ -237,13 +237,13 @@ class SnippetManager:
         results.sort(key=lambda x: -x["score"])
         return results
 
-    def list_all(self, language: Optional[str] = None) -> List[Dict]:
+    def list_all(self, language: str | None = None) -> list[dict]:
         snippets = list(self._snippets.values())
         if language:
             snippets = [s for s in snippets if s.language == language]
         return [self.get(s.snippet_id) for s in snippets]
 
-    def update(self, snippet_id: str, updates: Dict) -> Dict:
+    def update(self, snippet_id: str, updates: dict) -> dict:
         s = self._snippets.get(snippet_id)
         if not s:
             return {"error": "snippet_not_found"}
@@ -273,7 +273,7 @@ class SnippetManager:
             return True
         return False
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         by_lang = defaultdict(int)
         for s in self._snippets.values():
             by_lang[s.language] += 1
@@ -283,7 +283,7 @@ class CodeAnalyzer:
     """Analyzes code quality, complexity, and structure."""
 
     def __init__(self):
-        self._analysis_cache: Dict[str, CodeMetrics] = {}
+        self._analysis_cache: dict[str, CodeMetrics] = {}
 
     def analyze(self, code: str, language: str = "python") -> CodeMetrics:
         cache_key = hashlib.md5(code.encode()).hexdigest()
@@ -343,7 +343,7 @@ class CodeAnalyzer:
         metrics.classes_count = len(re.findall(r"class |struct |interface ", code))
         metrics.imports_count = len(re.findall(r"import |require |from ", code))
 
-    def find_duplicates(self, code: str, min_lines: int = 4) -> List[Dict]:
+    def find_duplicates(self, code: str, min_lines: int = 4) -> list[dict]:
         lines = [l.strip() for l in code.split("\n") if l.strip()]
         blocks = {}
         duplicates = []
@@ -356,7 +356,7 @@ class CodeAnalyzer:
                 blocks[bh] = i + 1
         return duplicates
 
-    def to_dict(self, metrics: CodeMetrics) -> Dict:
+    def to_dict(self, metrics: CodeMetrics) -> dict:
         return {
             "lines_of_code": metrics.lines_of_code,
             "cyclomatic_complexity": metrics.cyclomatic_complexity,
@@ -461,7 +461,7 @@ class ReviewEngine:
     def __init__(self):
         self._rules = self._default_rules()
 
-    def _default_rules(self) -> List[Dict]:
+    def _default_rules(self) -> list[dict]:
         return [
             {
                 "id": "E001",
@@ -549,7 +549,7 @@ class ReviewEngine:
             },
         ]
 
-    def review(self, code: str, language: str = "python") -> Dict:
+    def review(self, code: str, language: str = "python") -> dict:
         issues = []
         lines = code.split("\n")
         for rule in self._rules:
@@ -602,7 +602,7 @@ class CodeGenerator:
     def __init__(self):
         self._templates = self._default_templates()
 
-    def _default_templates(self) -> Dict:
+    def _default_templates(self) -> dict:
         return {
             "python_class": 'class {name}:\n    """{description}"""\n\n    def __init__(self{params}):\n{init_body}\n',
             "python_function": 'def {name}({params}):\n    """{description}"""\n{body}\n',
@@ -610,7 +610,7 @@ class CodeGenerator:
             "python_test": 'def test_{name}():\n    """Test {description}"""\n    # Arrange\n    {arrange}\n    # Act\n    {act}\n    # Assert\n    {asserts}\n',
         }
 
-    def generate(self, spec: Dict) -> Dict:
+    def generate(self, spec: dict) -> dict:
         template_name = spec.get("template", "python_class")
         template = self._templates.get(template_name)
         if not template:
@@ -618,10 +618,10 @@ class CodeGenerator:
         code = template.format(**spec)
         return {"code": code, "template": template_name, "language": spec.get("language", "python")}
 
-    def list_templates(self) -> Dict:
+    def list_templates(self) -> dict:
         return {"templates": list(self._templates.keys())}
 
-    def scaffold_project(self, name: str, language: str = "python", features: Optional[List[str]] = None) -> Dict:
+    def scaffold_project(self, name: str, language: str = "python", features: list[str] | None = None) -> dict:
         features = features or []
         files = {}
         if language == "python":

@@ -134,7 +134,7 @@ class APIRoute:
     path: str
     match_type: RouteMatchType
     target: str
-    methods: List[str] = field(default_factory=lambda: ["GET"])
+    methods: list[str] = field(default_factory=lambda: ["GET"])
     version: str = "v1"
     enabled: bool = True
     weight: int = 100
@@ -161,7 +161,7 @@ class GatewayRequest:
     request_id: str
     method: str
     path: str
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     matched_route: str = ""
     status: str = "pending"
     latency_ms: float = 0.0
@@ -175,29 +175,29 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._routes: Dict[str, APIRoute] = {}
-        self._rate_limits: Dict[str, RateLimitRule] = {}
-        self._request_log: List[GatewayRequest] = []
+        self._routes: dict[str, APIRoute] = {}
+        self._rate_limits: dict[str, RateLimitRule] = {}
+        self._request_log: list[GatewayRequest] = []
         self._route_counter: int = 0
         self._req_counter: int = 0
         # 熔断器状态
-        self._circuit_states: Dict[str, Dict] = {}  # route_id -> {state, failures, last_failure, half_open_calls}
+        self._circuit_states: dict[str, dict] = {}  # route_id -> {state, failures, last_failure, half_open_calls}
         self._circuit_threshold: int = 5
         self._circuit_timeout: float = 30.0
         self._circuit_half_open_max: int = 3
         # 流量染色
-        self._traffic_tags: Dict[str, List[str]] = {}  # header_key -> allowed_values
-        self._version_rules: Dict[str, List[Dict]] = {}  # path -> [{version, weight, target}]
+        self._traffic_tags: dict[str, list[str]] = {}  # header_key -> allowed_values
+        self._version_rules: dict[str, list[dict]] = {}  # path -> [{version, weight, target}]
         # 限流计数器
-        self._rl_counters: Dict[str, Dict] = {}  # rule_id -> {window_start, count}
+        self._rl_counters: dict[str, dict] = {}  # rule_id -> {window_start, count}
         # 健康检查
-        self._backend_health: Dict[str, Dict] = {}  # target -> {healthy, last_check, consecutive_failures}
+        self._backend_health: dict[str, dict] = {}  # target -> {healthy, last_check, consecutive_failures}
 
     def initialize(self) -> None:
         try:
@@ -255,7 +255,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.audit("execute", f"action={action}")
         _ = self.trace("execute")  # 链路追踪span注册
 
@@ -424,7 +424,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             metrics_collector.histogram("phoebus_execute_duration_ms", elapsed)
             self.stats.record_request(elapsed, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         total_req = sum(r.request_count for r in self._routes.values())
         total_err = sum(r.error_count for r in self._routes.values())
         open_cb = sum(1 for s in self._circuit_states.values() if s.get("state") == "open")
@@ -460,7 +460,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         if self._audit:
             self._audit.log("phoebus_shutdown", {"detail": "网关管理器已关闭"})
 
-    def _add_route(self, path: str, match_type: str, target: str, methods: List[str]) -> APIRoute:
+    def _add_route(self, path: str, match_type: str, target: str, methods: list[str]) -> APIRoute:
         """添加路由规则"""
         self._route_counter += 1
         try:
@@ -486,7 +486,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return route
 
-    def _remove_route(self, route_id: str) -> Dict:
+    def _remove_route(self, route_id: str) -> dict:
         """移除路由规则"""
         route = self._routes.pop(route_id, None)
         if not route:
@@ -497,7 +497,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("route_removed", {"route_id": route_id})
         return {"removed": route_id, "path": route.path}
 
-    def _route_request(self, method: str, path: str, headers: Optional[Dict[str, str]] = None) -> Dict:
+    def _route_request(self, method: str, path: str, headers: dict[str, str] | None = None) -> dict:
         """路由请求到匹配的后端（含熔断/限流/流量染色/健康检查）"""
         headers = headers or {}
 
@@ -508,10 +508,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 continue
             if method not in route.methods:
                 continue
-            if route.match_type == RouteMatchType.EXACT and route.path == path:
-                matched = route
-                break
-            elif route.match_type == RouteMatchType.PREFIX and path.startswith(route.path):
+            if route.match_type == RouteMatchType.EXACT and route.path == path or route.match_type == RouteMatchType.PREFIX and path.startswith(route.path):
                 matched = route
                 break
 
@@ -589,7 +586,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return {"routed": True, "target": target, "route_id": matched.route_id, "latency_ms": latency}
 
-    def _check_rate_limit(self, path: str, client_id: str) -> Dict:
+    def _check_rate_limit(self, path: str, client_id: str) -> dict:
         """检查请求是否被限流（滑动窗口/令牌桶/固定窗口）"""
         now = time.time()
         for rule in self._rate_limits.values():
@@ -600,15 +597,7 @@ class AgentPhoebusManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 counter = {"window_start": now, "count": 0, "tokens": float(rule.limit)}
                 self._rl_counters[rule.rule_id] = counter
 
-            if rule.strategy == RateLimitStrategy.FIXED_WINDOW:
-                if now - counter["window_start"] >= rule.window_seconds:
-                    counter["window_start"] = now
-                    counter["count"] = 0
-                counter["count"] += 1
-                if counter["count"] > rule.limit:
-                    return {"allowed": False, "rule": rule.rule_id, "remaining": 0}
-
-            elif rule.strategy == RateLimitStrategy.SLIDING_WINDOW:
+            if rule.strategy == RateLimitStrategy.FIXED_WINDOW or rule.strategy == RateLimitStrategy.SLIDING_WINDOW:
                 if now - counter["window_start"] >= rule.window_seconds:
                     counter["window_start"] = now
                     counter["count"] = 0

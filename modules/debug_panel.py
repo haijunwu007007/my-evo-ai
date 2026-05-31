@@ -84,7 +84,8 @@ import os
 import traceback
 import uuid
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any
+from collections.abc import Callable
 from collections import deque
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from functools import partial
@@ -141,7 +142,7 @@ class StepRecord:
             params = {}
         return self.to_dict(**params)
 
-class DebugPanelAnalyzer(object):
+class DebugPanelAnalyzer:
     """debug_panel 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -239,8 +240,8 @@ class BreakpointManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     def __init__(self):
         super().__init__()
-        self._breakpoints: Dict[str, bool] = {}  # action_name -> enabled
-        self._hit_count: Dict[str, int] = {}
+        self._breakpoints: dict[str, bool] = {}  # action_name -> enabled
+        self._hit_count: dict[str, int] = {}
         self._waiting = False
         self._wait_event = threading.Event()
 
@@ -271,7 +272,7 @@ class BreakpointManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         """继续执行"""
         self._wait_event.set()
 
-    def get_breakpoints(self) -> List[dict]:
+    def get_breakpoints(self) -> list[dict]:
         return [{"action": a, "enabled": e, "hits": self._hit_count.get(a, 0)} for a, e in self._breakpoints.items()]
 
     def is_waiting(self) -> bool:
@@ -281,7 +282,7 @@ class VariableWatcher:
     """变量监视器"""
 
     def __init__(self):
-        self._watched: Dict[str, Any] = {}
+        self._watched: dict[str, Any] = {}
         self._history: deque = deque(maxlen=1000)
 
     def watch(self, name: str, value: Any):
@@ -302,7 +303,7 @@ class VariableWatcher:
             return self._watched.get(name)
         return dict(self._watched)
 
-    def get_history(self, limit: int = 50) -> List[dict]:
+    def get_history(self, limit: int = 50) -> list[dict]:
         return list(self._history)[-limit:]
 
 class DebugPanel:
@@ -314,9 +315,9 @@ class DebugPanel:
         self._steps: deque = deque(maxlen=max_history)
         self.breakpoints = BreakpointManager()
         self.watcher = VariableWatcher()
-        self._http_server: Optional[HTTPServer] = None
-        self._http_thread: Optional[threading.Thread] = None
-        self._session_start: Optional[str] = None
+        self._http_server: HTTPServer | None = None
+        self._http_thread: threading.Thread | None = None
+        self._session_start: str | None = None
         self._session_step_count = 0
         self._error_count = 0
         self._debug_mode = False  # 调试模式开关
@@ -348,7 +349,7 @@ class DebugPanel:
 
     # --- 步骤记录 ---
     def record_step(
-        self, action: str, module: str = "", params: dict = None, fn: Optional[Callable] = None, *args, **kwargs
+        self, action: str, module: str = "", params: dict = None, fn: Callable | None = None, *args, **kwargs
     ) -> Any:
         """
         记录并执行一个步骤（核心方法）
@@ -403,7 +404,7 @@ class DebugPanel:
         self.breakpoints.continue_execution()
 
     # --- 查询接口 ---
-    def get_steps(self, limit: int = 100, status_filter: str = None) -> List[dict]:
+    def get_steps(self, limit: int = 100, status_filter: str = None) -> list[dict]:
         steps = list(self._steps)
         if status_filter:
             steps = [s for s in steps if s.status == status_filter]
@@ -419,11 +420,11 @@ class DebugPanel:
             "breakpoint_waiting": self.breakpoints.is_waiting(),
         }
 
-    def get_errors(self, limit: int = 20) -> List[dict]:
+    def get_errors(self, limit: int = 20) -> list[dict]:
         errors = [s for s in self._steps if s.status == "error"]
         return [s.to_dict() for s in errors[-limit:]]
 
-    def get_slow_steps(self, threshold_ms: float = None, limit: int = 20) -> List[dict]:
+    def get_slow_steps(self, threshold_ms: float = None, limit: int = 20) -> list[dict]:
         t = threshold_ms or self._slow_threshold_ms
         slow = [s for s in self._steps if s.duration_ms > t]
         return [s.to_dict() for s in sorted(slow, key=lambda x: -x.duration_ms)[:limit]]
@@ -540,7 +541,7 @@ class DebugPanel:
         }
 
 # --- 快捷函数 ---
-_instance: Optional[DebugPanel] = None
+_instance: DebugPanel | None = None
 
 def get_panel() -> DebugPanel:
     global _instance

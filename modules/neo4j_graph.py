@@ -82,13 +82,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class Neo4JGraphAnalyzer(object):
+class Neo4JGraphAnalyzer:
     """neo4j_graph 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -273,8 +274,8 @@ class IsolationLevel(Enum):
 @dataclass
 class GraphNode:
     node_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    labels: Set[str] = field(default_factory=set)
-    properties: Dict[str, Any] = field(default_factory=dict)
+    labels: set[str] = field(default_factory=set)
+    properties: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
 
@@ -284,29 +285,29 @@ class GraphRelationship:
     rel_type: str = ""
     source_id: str = ""
     target_id: str = ""
-    properties: Dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
 class GraphPath:
-    nodes: List[str] = field(default_factory=list)
-    relationships: List[str] = field(default_factory=list)
+    nodes: list[str] = field(default_factory=list)
+    relationships: list[str] = field(default_factory=list)
     length: int = 0
     total_weight: float = 0.0
 
 @dataclass
 class QueryResult:
-    columns: List[str] = field(default_factory=list)
-    rows: List[List[Any]] = field(default_factory=list)
+    columns: list[str] = field(default_factory=list)
+    rows: list[list[Any]] = field(default_factory=list)
     result_count: int = 0
     query_time_ms: float = 0.0
-    plan: Dict[str, Any] = field(default_factory=dict)
+    plan: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class GraphIndex:
     index_name: str
     label: str
-    properties: List[str] = field(default_factory=list)
+    properties: list[str] = field(default_factory=list)
     index_type: IndexType = IndexType.RANGE
     unique: bool = False
     state: str = "online"
@@ -315,7 +316,7 @@ class GraphIndex:
 class GraphConstraint:
     constraint_name: str
     label: str
-    properties: List[str] = field(default_factory=list)
+    properties: list[str] = field(default_factory=list)
     constraint_type: ConstraintType = ConstraintType.UNIQUE
     state: str = "active"
 
@@ -323,8 +324,8 @@ class GraphConstraint:
 class GraphStats:
     total_nodes: int = 0
     total_relationships: int = 0
-    label_counts: Dict[str, int] = field(default_factory=dict)
-    relationship_type_counts: Dict[str, int] = field(default_factory=dict)
+    label_counts: dict[str, int] = field(default_factory=dict)
+    relationship_type_counts: dict[str, int] = field(default_factory=dict)
     indexes: int = 0
     constraints: int = 0
     db_size_mb: float = 0.0
@@ -364,7 +365,7 @@ class Neo4jGraph:
 
     """Enterprise graph database operations with Cypher-like queries and algorithms."""
 
-    def __init__(self, config: Optional[Neo4jConfig] = None):
+    def __init__(self, config: Neo4jConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -397,15 +398,15 @@ class Neo4jGraph:
         )()
 
         self._config = config or Neo4jConfig()
-        self._nodes: Dict[str, GraphNode] = {}
-        self._relationships: Dict[str, GraphRelationship] = {}
-        self._label_index: Dict[str, Set[str]] = defaultdict(set)
-        self._type_index: Dict[str, Set[str]] = defaultdict(set)
-        self._outgoing: Dict[str, List[str]] = defaultdict(list)
-        self._incoming: Dict[str, List[str]] = defaultdict(list)
-        self._indexes: Dict[str, GraphIndex] = {}
-        self._constraints: Dict[str, GraphConstraint] = {}
-        self._prop_index: Dict[str, Dict[str, Set[str]]] = defaultdict(lambda: defaultdict(set))
+        self._nodes: dict[str, GraphNode] = {}
+        self._relationships: dict[str, GraphRelationship] = {}
+        self._label_index: dict[str, set[str]] = defaultdict(set)
+        self._type_index: dict[str, set[str]] = defaultdict(set)
+        self._outgoing: dict[str, list[str]] = defaultdict(list)
+        self._incoming: dict[str, list[str]] = defaultdict(list)
+        self._indexes: dict[str, GraphIndex] = {}
+        self._constraints: dict[str, GraphConstraint] = {}
+        self._prop_index: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
         self._lock = threading.RLock()
         self._initialized = False
         logger.info("Neo4jGraph created")
@@ -417,7 +418,7 @@ class Neo4jGraph:
             self._initialized = True
             logger.info("Neo4jGraph initialized: uri=%s, db=%s", self._config.uri, self._config.database)
 
-    def create_node(self, labels: List[str], properties: Optional[Dict[str, Any]] = None) -> GraphNode:
+    def create_node(self, labels: list[str], properties: dict[str, Any] | None = None) -> GraphNode:
         node = GraphNode(labels=set(labels), properties=properties or {})
         with self._lock:
             self._nodes[node.node_id] = node
@@ -428,7 +429,7 @@ class Neo4jGraph:
         return node
 
     def create_relationship(
-        self, source_id: str, target_id: str, rel_type: str, properties: Optional[Dict[str, Any]] = None
+        self, source_id: str, target_id: str, rel_type: str, properties: dict[str, Any] | None = None
     ) -> GraphRelationship:
         rel = GraphRelationship(
             rel_type=rel_type, source_id=source_id, target_id=target_id, properties=properties or {}
@@ -440,15 +441,15 @@ class Neo4jGraph:
             self._incoming[target_id].append(rel.rel_id)
         return rel
 
-    def get_node(self, node_id: str) -> Optional[GraphNode]:
+    def get_node(self, node_id: str) -> GraphNode | None:
         with self._lock:
             return self._nodes.get(node_id)
 
-    def get_relationship(self, rel_id: str) -> Optional[GraphRelationship]:
+    def get_relationship(self, rel_id: str) -> GraphRelationship | None:
         with self._lock:
             return self._relationships.get(rel_id)
 
-    def update_node(self, node_id: str, properties: Dict[str, Any]) -> Optional[GraphNode]:
+    def update_node(self, node_id: str, properties: dict[str, Any]) -> GraphNode | None:
         with self._lock:
             node = self._nodes.get(node_id)
             if not node:
@@ -490,8 +491,8 @@ class Neo4jGraph:
         return True
 
     def find_nodes(
-        self, label: Optional[str] = None, properties: Optional[Dict[str, Any]] = None, limit: int = 100
-    ) -> List[GraphNode]:
+        self, label: str | None = None, properties: dict[str, Any] | None = None, limit: int = 100
+    ) -> list[GraphNode]:
         with self._lock:
             if label:
                 candidate_ids = self._label_index.get(label, set())
@@ -509,9 +510,9 @@ class Neo4jGraph:
         self,
         node_id: str,
         direction: QueryDirection = QueryDirection.BOTH,
-        rel_types: Optional[List[str]] = None,
+        rel_types: list[str] | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         with self._lock:
             neighbor_ids = set()
             rel_ids = []
@@ -547,8 +548,8 @@ class Neo4jGraph:
             return results
 
     def find_shortest_path(
-        self, start_id: str, end_id: str, rel_types: Optional[List[str]] = None, max_depth: int = 10
-    ) -> Optional[GraphPath]:
+        self, start_id: str, end_id: str, rel_types: list[str] | None = None, max_depth: int = 10
+    ) -> GraphPath | None:
         if start_id == end_id:
             return GraphPath(nodes=[start_id], length=0)
 
@@ -574,7 +575,7 @@ class Neo4jGraph:
                 queue.append((nb_id, new_node_path, new_rel_path))
         return None
 
-    def find_all_paths(self, start_id: str, end_id: str, max_depth: int = 5, max_paths: int = 100) -> List[GraphPath]:
+    def find_all_paths(self, start_id: str, end_id: str, max_depth: int = 5, max_paths: int = 100) -> list[GraphPath]:
         all_paths = []
         self._dfs_paths(start_id, end_id, [], [], 0, max_depth, max_paths, all_paths, set())
         return all_paths
@@ -583,13 +584,13 @@ class Neo4jGraph:
         self,
         current: str,
         end: str,
-        node_path: List[str],
-        rel_path: List[str],
+        node_path: list[str],
+        rel_path: list[str],
         depth: int,
         max_depth: int,
         max_paths: int,
-        results: List[GraphPath],
-        visited: Set[str],
+        results: list[GraphPath],
+        visited: set[str],
     ):
         if len(results) >= max_paths:
             return
@@ -619,7 +620,7 @@ class Neo4jGraph:
                 )
         visited.remove(current)
 
-    def get_degree_centrality(self) -> Dict[str, float]:
+    def get_degree_centrality(self) -> dict[str, float]:
         with self._lock:
             max_degree = (
                 max((len(self._outgoing.get(nid, [])) + len(self._incoming.get(nid, []))) for nid in self._nodes)
@@ -632,7 +633,7 @@ class Neo4jGraph:
             }
 
     def create_index(
-        self, label: str, properties: List[str], index_type: IndexType = IndexType.RANGE, unique: bool = False
+        self, label: str, properties: list[str], index_type: IndexType = IndexType.RANGE, unique: bool = False
     ) -> GraphIndex:
         idx_name = f"idx_{label}_{'_'.join(properties)}"
         idx = GraphIndex(index_name=idx_name, label=label, properties=properties, index_type=index_type, unique=unique)
@@ -641,7 +642,7 @@ class Neo4jGraph:
         return idx
 
     def create_constraint(
-        self, label: str, properties: List[str], constraint_type: ConstraintType = ConstraintType.UNIQUE
+        self, label: str, properties: list[str], constraint_type: ConstraintType = ConstraintType.UNIQUE
     ) -> GraphConstraint:
         name = f"constraint_{label}_{'_'.join(properties)}"
         constraint = GraphConstraint(
@@ -667,7 +668,7 @@ class Neo4jGraph:
 
     def traverse(
         self, start_id: str, direction: QueryDirection = QueryDirection.OUTGOING, max_depth: int = 3
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         results = []
         visited = {start_id}
         queue = deque([(start_id, 0)])
@@ -691,7 +692,7 @@ class Neo4jGraph:
 
         return results
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

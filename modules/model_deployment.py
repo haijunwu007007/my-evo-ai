@@ -83,13 +83,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ModelDeploymentAnalyzer(object):
+class ModelDeploymentAnalyzer:
     """model_deployment 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -299,9 +300,9 @@ class ModelSpec:
     framework: str = "pytorch"
     runtime: ModelRuntime = ModelRuntime.ONNX_RUNTIME
     artifact_path: str = ""
-    input_schema: Dict[str, str] = field(default_factory=dict)
-    output_schema: Dict[str, str] = field(default_factory=dict)
-    requirements: List[str] = field(default_factory=list)
+    input_schema: dict[str, str] = field(default_factory=dict)
+    output_schema: dict[str, str] = field(default_factory=dict)
+    requirements: list[str] = field(default_factory=list)
     gpu_required: bool = False
     gpu_memory_mb: int = 0
     cpu_limit: int = 2
@@ -329,10 +330,10 @@ class Deployment:
     updated_at: float = field(default_factory=time.time)
     deployed_at: float = 0.0
     error: str = ""
-    rollback_from: Optional[str] = None
+    rollback_from: str | None = None
     canary_percent: int = 0
-    metrics: Dict[str, Any] = field(default_factory=dict)
-    config: Dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     health_checks_passed: int = 0
     health_checks_failed: int = 0
 
@@ -399,12 +400,12 @@ class ModelDeployment:
     """Enterprise ML model deployment with canary, rollback, and auto-scaling."""
 
     def __init__(self):
-        self._deployments: Dict[str, Deployment] = {}
-        self._specs: Dict[str, ModelSpec] = {}
-        self._monitors: Dict[str, ModelMonitor] = {}
-        self._scaling_events: List[ScalingEvent] = []
-        self._rollbacks: List[RollbackRecord] = []
-        self._env_deployments: Dict[DeploymentEnv, Dict[str, Deployment]] = defaultdict(dict)
+        self._deployments: dict[str, Deployment] = {}
+        self._specs: dict[str, ModelSpec] = {}
+        self._monitors: dict[str, ModelMonitor] = {}
+        self._scaling_events: list[ScalingEvent] = []
+        self._rollbacks: list[RollbackRecord] = []
+        self._env_deployments: dict[DeploymentEnv, dict[str, Deployment]] = defaultdict(dict)
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -437,7 +438,7 @@ class ModelDeployment:
         )()
         self._lock = threading.RLock()
         self._initialized = False
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "on_deploy": [],
             "on_rollback": [],
             "on_scale": [],
@@ -465,7 +466,7 @@ class ModelDeployment:
         version: str,
         env: DeploymentEnv = DeploymentEnv.STAGING,
         strategy: DeploymentStrategy = DeploymentStrategy.ROLLING,
-        config: Optional[Dict] = None,
+        config: dict | None = None,
     ) -> Deployment:
         spec_key = f"{model_name}:{version}"
         spec = self._specs.get(spec_key)
@@ -503,8 +504,8 @@ class ModelDeployment:
         return deploy
 
     def rollback(
-        self, deploy_id: str, to_version: Optional[str] = None, reason: str = "manual"
-    ) -> Optional[RollbackRecord]:
+        self, deploy_id: str, to_version: str | None = None, reason: str = "manual"
+    ) -> RollbackRecord | None:
         with self._lock:
             deploy = self._deployments.get(deploy_id)
             if not deploy:
@@ -547,7 +548,7 @@ class ModelDeployment:
                 pass
         return True
 
-    def get_deployment(self, deploy_id: str) -> Optional[Dict[str, Any]]:
+    def get_deployment(self, deploy_id: str) -> dict[str, Any] | None:
         with self._lock:
             deploy = self._deployments.get(deploy_id)
             if not deploy:
@@ -575,7 +576,7 @@ class ModelDeployment:
                 else None,
             }
 
-    def list_deployments(self, env: Optional[DeploymentEnv] = None) -> List[Dict[str, Any]]:
+    def list_deployments(self, env: DeploymentEnv | None = None) -> list[dict[str, Any]]:
         with self._lock:
             if env:
                 deploys = self._env_deployments.get(env, {}).values()
@@ -627,7 +628,7 @@ class ModelDeployment:
             self._monitors.pop(deploy_id, None)
             return True
 
-    def get_rollbacks(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_rollbacks(self, limit: int = 20) -> list[dict[str, Any]]:
         return [
             {
                 "rollback_id": r.rollback_id,
@@ -641,7 +642,7 @@ class ModelDeployment:
             for r in self._rollbacks[-limit:]
         ]
 
-    def _find_previous_version(self, deploy: Deployment) -> Optional[str]:
+    def _find_previous_version(self, deploy: Deployment) -> str | None:
         for d in self._deployments.values():
             if d.model_name == deploy.model_name and d.version != deploy.version:
                 return d.version
@@ -651,7 +652,7 @@ class ModelDeployment:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             total = len(self._deployments)

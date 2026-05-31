@@ -79,7 +79,8 @@ import re
 import time
 import uuid
 from collections import defaultdict, deque
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 from modules._base.metrics import prometheus_timer, metrics_collector
@@ -91,19 +92,19 @@ try:
 except ImportError:
     MIXIN_AVAILABLE = False
 
-class MemoryRetrievalEngine(object):
+class MemoryRetrievalEngine:
     """记忆检索引擎 - 相似度搜索、上下文关联、时间衰减加权"""
 
     def __init__(self):
-        self._index: Dict[str, List[float]] = {}
+        self._index: dict[str, list[float]] = {}
         self._retrievals: int = 0
-        self._cache: Dict[str, List[Dict]] = {}
+        self._cache: dict[str, list[dict]] = {}
 
-    def index_memory(self, memory_id: str, embedding: List[float]) -> None:
+    def index_memory(self, memory_id: str, embedding: list[float]) -> None:
         """索引记忆向量"""
         self._index[memory_id] = embedding
 
-    def search(self, query_vector: List[float], top_k: int = 10, threshold: float = 0.7) -> List[Dict]:
+    def search(self, query_vector: list[float], top_k: int = 10, threshold: float = 0.7) -> list[dict]:
         """相似度搜索"""
         self._retrievals += 1
         results = []
@@ -114,7 +115,7 @@ class MemoryRetrievalEngine(object):
         results.sort(key=lambda x: -x["score"])
         return results[:top_k]
 
-    def search_with_decay(self, query_vector: List[float], memories: Dict, top_k: int = 10) -> List[Dict]:
+    def search_with_decay(self, query_vector: list[float], memories: dict, top_k: int = 10) -> list[dict]:
         """带时间衰减的检索"""
         now = time.time()
         results = []
@@ -127,7 +128,7 @@ class MemoryRetrievalEngine(object):
         results.sort(key=lambda x: -x["score"])
         return results[:top_k]
 
-    def _cosine_sim(self, a: List[float], b: List[float]) -> float:
+    def _cosine_sim(self, a: list[float], b: list[float]) -> float:
         if not a or not b or len(a) != len(b):
             return 0.0
         dot = sum(x * y for x, y in zip(a, b))
@@ -135,7 +136,7 @@ class MemoryRetrievalEngine(object):
         nb = sum(x**2 for x in b) ** 0.5
         return dot / max(na * nb, 1e-10)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"indexed": len(self._index), "retrievals": self._retrievals}
 
     # --- Auto-generated action dispatch methods ---
@@ -176,7 +177,7 @@ class MemoryVector:
         self.dim = dim
         self.vector = self._text_to_vector(text)
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """中文+英文混合分词"""
         tokens = []
         # 提取英文单词
@@ -194,7 +195,7 @@ class MemoryVector:
                     tokens.append(segment[i : i + 3])
         return tokens
 
-    def _text_to_vector(self, text: str) -> List[float]:
+    def _text_to_vector(self, text: str) -> list[float]:
         """将文本转换为归一化向量"""
         tokens = self._tokenize(text)
         if not tokens:
@@ -213,7 +214,7 @@ class MemoryVector:
         return vec
 
     @staticmethod
-    def cosine_similarity(a: List[float], b: List[float]) -> float:
+    def cosine_similarity(a: list[float], b: list[float]) -> float:
         """计算余弦相似度"""
         if len(a) != len(b):
             return 0.0
@@ -230,13 +231,13 @@ class MemoryStore:
     def __init__(self, max_working: int = 1000, max_long_term: int = 100000):
         self.max_working = max_working
         self.max_long_term = max_long_term
-        self._working: Dict[str, Dict] = {}  # 工作记忆（短期）
-        self._long_term: Dict[str, Dict] = {}  # 长期记忆
+        self._working: dict[str, dict] = {}  # 工作记忆（短期）
+        self._long_term: dict[str, dict] = {}  # 长期记忆
         self._flash: deque = deque(maxlen=500)  # 闪存记忆（最快淘汰）
-        self._vectors: Dict[str, List[float]] = {}  # 记忆ID到向量的映射
-        self._tags_index: Dict[str, List[str]] = defaultdict(list)  # 标签到记忆ID的反向索引
-        self._access_count: Dict[str, int] = defaultdict(int)  # 访问频率统计
-        self._access_time: Dict[str, float] = {}  # 最近访问时间
+        self._vectors: dict[str, list[float]] = {}  # 记忆ID到向量的映射
+        self._tags_index: dict[str, list[str]] = defaultdict(list)  # 标签到记忆ID的反向索引
+        self._access_count: dict[str, int] = defaultdict(int)  # 访问频率统计
+        self._access_time: dict[str, float] = {}  # 最近访问时间
         self._stats = {
             "total_memories": 0,
             "working_count": 0,
@@ -250,10 +251,10 @@ class MemoryStore:
         self,
         content: str,
         memory_type: str = "semantic",
-        tags: List[str] = None,
+        tags: list[str] = None,
         priority: float = 1.0,
-        metadata: Dict = None,
-    ) -> Dict:
+        metadata: dict = None,
+    ) -> dict:
         """存储一条记忆"""
         memory_id = str(uuid.uuid4())[:12]
         ts = time.time()
@@ -299,8 +300,8 @@ class MemoryStore:
         return {"id": memory_id, "type": memory_type, "tags": len(tags)}
 
     def retrieve(
-        self, query: str, strategy: str = "semantic", limit: int = 10, threshold: float = 0.3, filters: Dict = None
-    ) -> List[Dict]:
+        self, query: str, strategy: str = "semantic", limit: int = 10, threshold: float = 0.3, filters: dict = None
+    ) -> list[dict]:
         """检索记忆，支持多种策略"""
         filters = filters or {}
         results = []
@@ -378,7 +379,7 @@ class MemoryStore:
 
         return results
 
-    def _match_filters(self, memory: Dict, filters: Dict) -> bool:
+    def _match_filters(self, memory: dict, filters: dict) -> bool:
         """检查记忆是否匹配过滤条件"""
         if filters.get("type") and memory.get("type") != filters["type"]:
             return False
@@ -392,7 +393,7 @@ class MemoryStore:
                 return False
         return True
 
-    def _auto_extract_tags(self, text: str) -> List[str]:
+    def _auto_extract_tags(self, text: str) -> list[str]:
         """自动从文本提取标签"""
         tags = []
         # 提取高频中文双字词
@@ -447,7 +448,7 @@ class MemoryStore:
                 if not self._tags_index[tag]:
                     del self._tags_index[tag]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取存储统计"""
         self._stats["working_count"] = len(self._working)
         self._stats["long_term_count"] = len(self._long_term)
@@ -459,12 +460,12 @@ class MemoryRelation:
     """记忆关联图谱"""
 
     def __init__(self):
-        self._edges: Dict[str, List[Dict]] = defaultdict(list)  # 节点 -> 边列表
+        self._edges: dict[str, list[dict]] = defaultdict(list)  # 节点 -> 边列表
         self._edge_count = 0
 
     def add_relation(
-        self, source_id: str, target_id: str, relation_type: str = "related", weight: float = 1.0, metadata: Dict = None
-    ) -> Dict:
+        self, source_id: str, target_id: str, relation_type: str = "related", weight: float = 1.0, metadata: dict = None
+    ) -> dict:
         """添加两条记忆之间的关联关系"""
         edge_id = str(uuid.uuid4())[:8]
         edge = {
@@ -480,7 +481,7 @@ class MemoryRelation:
         self._edge_count += 1
         return {"edge_id": edge_id, "type": relation_type}
 
-    def find_related(self, memory_id: str, max_depth: int = 2, min_weight: float = 0.5) -> List[Dict]:
+    def find_related(self, memory_id: str, max_depth: int = 2, min_weight: float = 0.5) -> list[dict]:
         """查找关联记忆（广度优先遍历）"""
         visited = {memory_id}
         queue = [(memory_id, 0)]
@@ -504,14 +505,14 @@ class MemoryRelation:
         results.sort(key=lambda r: r["weight"], reverse=True)
         return results
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"total_edges": self._edge_count, "node_count": len(self._edges)}
 
 class ForgettingCurve:
     """遗忘曲线管理 - 基于艾宾浩斯遗忘模型"""
 
     def __init__(self):
-        self._review_records: Dict[str, List[float]] = defaultdict(list)
+        self._review_records: dict[str, list[float]] = defaultdict(list)
         self._intervals = [1, 6, 24, 72, 168, 720]  # 复习间隔（小时）
 
     def record_access(self, memory_id: str):
@@ -542,7 +543,7 @@ class ForgettingCurve:
         next_interval = self._intervals[min(review_count, len(self._intervals) - 1)]
         return hours_since >= next_interval
 
-    def get_weak_memories(self, memory_ids: List[str], threshold: float = 0.3) -> List[str]:
+    def get_weak_memories(self, memory_ids: list[str], threshold: float = 0.3) -> list[str]:
         """获取需要加强的记忆列表"""
         weak = []
         for mid in memory_ids:
@@ -556,15 +557,15 @@ class AutoTagger:
     """自动标签引擎"""
 
     def __init__(self):
-        self._tag_rules: List[Dict] = []
-        self._category_keywords: Dict[str, List[str]] = defaultdict(list)
-        self._tag_stats: Dict[str, int] = defaultdict(int)
+        self._tag_rules: list[dict] = []
+        self._category_keywords: dict[str, list[str]] = defaultdict(list)
+        self._tag_stats: dict[str, int] = defaultdict(int)
 
-    def add_category(self, category: str, keywords: List[str]):
+    def add_category(self, category: str, keywords: list[str]):
         """添加分类关键词"""
         self._category_keywords[category] = keywords
 
-    def tag_content(self, content: str, existing_tags: List[str] = None) -> List[str]:
+    def tag_content(self, content: str, existing_tags: list[str] = None) -> list[str]:
         """自动为内容生成标签"""
         tags = set(existing_tags or [])
         content_lower = content.lower()
@@ -625,11 +626,11 @@ class SuperMemory(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     支持多模态记忆存储、语义检索、自动标签、关联图谱、遗忘曲线管理
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "memories_stored": 0,

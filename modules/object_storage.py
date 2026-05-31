@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 对象存储（A级）"""
 # Grade: A
 __module_meta__ = {"id":"object-storage","name":"ObjectStorage","version":"V0.1","group":"storage","grade":"B",
@@ -27,7 +26,7 @@ class ObjectStorage(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._db = DataEngine.get("object_storage")
         self._ensure_schema()
         self._max_objects = int(config.get("max_objects", 10_000))
-        self._cache: Dict[str, dict] = {}
+        self._cache: dict[str, dict] = {}
         self._load_cache()
 
     def _ensure_schema(self):

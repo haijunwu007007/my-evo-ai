@@ -24,8 +24,8 @@ class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._db = DataEngine.get("fts_query")
         self._ensure_schema()
         self._max_docs = int((config or {}).get("max_documents", 50_000))
-        self._cache_terms: Dict[str, Dict[str, int]] = defaultdict(dict)
-        self._cache_docs: Dict[str, dict] = {}
+        self._cache_terms: dict[str, dict[str, int]] = defaultdict(dict)
+        self._cache_docs: dict[str, dict] = {}
         self._total_docs = 0
         self._load_cache()
 
@@ -63,14 +63,14 @@ class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "unique_terms": unique_terms, "indexed_at": indexed_at
         }, "id")
 
-    def _save_terms_batch(self, term_data: List[Dict]):
+    def _save_terms_batch(self, term_data: list[dict]):
         if term_data:
             self._db.bulk_insert("terms", term_data)
 
     def _delete_doc_terms(self, doc_id: str):
         self._db.delete("terms", "doc_id=?", (doc_id,))
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """中文/英文分词 — 简单 unicode 分词"""
         text = text.lower()
         tokens = []
@@ -98,7 +98,7 @@ class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     async def execute(self, action=None, params=None):
         return await self._safe_execute(action, params, handler=self._dispatch)
 
-    def _tfidf_score(self, doc_id: str, tokens: List[str]) -> float:
+    def _tfidf_score(self, doc_id: str, tokens: list[str]) -> float:
         """TF-IDF 相关性评分"""
         score = 0.0
         doc = self._cache_docs.get(doc_id)
@@ -182,7 +182,7 @@ class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             query_tokens = self._tokenize(query)
             if not query_tokens:
                 return {"success": True, "results": [], "total": 0}
-            doc_scores: Dict[str, Set[str]] = defaultdict(set)
+            doc_scores: dict[str, set[str]] = defaultdict(set)
             for qt in query_tokens:
                 for doc_id in self._cache_terms.get(qt, {}):
                     doc_scores[doc_id].add(qt)
@@ -268,7 +268,7 @@ class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                     })
                 return {"success": True, "results": results, "total": len(results), "query": query}
             query_tokens = self._tokenize(query)
-            doc_scores: Dict[str, Set[str]] = defaultdict(set)
+            doc_scores: dict[str, set[str]] = defaultdict(set)
             for qt in query_tokens:
                 for doc_id in self._cache_terms.get(qt, {}):
                     doc_scores[doc_id].add(qt)

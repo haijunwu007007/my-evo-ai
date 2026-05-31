@@ -77,7 +77,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LlmClaudeAnalyzer(object):
+class LlmClaudeAnalyzer:
     """llm_claude 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,7 +277,7 @@ class LlmClaudeModule:
 
     """Anthropic Claude模型管理 - 限流/熔断/缓存/多模型路由/上下文窗口管理"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -319,20 +319,20 @@ class LlmClaudeModule:
             "total_errors": 0,
             "total_latency_ms": 0,
         }
-        self._models: Dict[str, Dict] = {}
+        self._models: dict[str, dict] = {}
         self._default_model = self.config.get("default_model", "claude-4-sonnet")
         self._api_key = self.config.get("api_key", "")
         self._base_url = self.config.get("base_url", "https://api.anthropic.com/v1")
         self._max_retries = self.config.get("max_retries", 3)
         self._timeout = self.config.get("timeout", 120)
-        self._circuits: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
-        self._cache: Dict[str, Dict] = {}
+        self._circuits: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 3600)
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 8))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_models()
             self._register_default_rate_limits()
@@ -342,7 +342,7 @@ class LlmClaudeModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -441,7 +441,7 @@ class LlmClaudeModule:
     def _estimate_tokens(self, text: str) -> int:
         return len(text) // 3
 
-    def _cache_key(self, model: str, messages: List[Dict], system: str, temperature: float) -> str:
+    def _cache_key(self, model: str, messages: list[dict], system: str, temperature: float) -> str:
         raw = json.dumps({"m": model, "msg": messages, "sys": system, "t": temperature}, sort_keys=True)
         return hashlib.sha256(raw.encode()).hexdigest()
 
@@ -498,7 +498,7 @@ class LlmClaudeModule:
                     "input_tokens": input_tokens,
                     "output_tokens": out_tok,
                     "latency_ms": latency,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -532,7 +532,7 @@ class LlmClaudeModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_model = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": []})
         for r in recent:

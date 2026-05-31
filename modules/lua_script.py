@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LuaScriptAnalyzer(object):
+class LuaScriptAnalyzer:
     """lua_script 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -281,13 +281,13 @@ class LuaScript:
     content: str = ""
     description: str = ""
     author: str = "system"
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     status: ScriptStatus = ScriptStatus.DRAFT
     sandbox_level: SandboxLevel = SandboxLevel.STANDARD
     timeout_ms: int = 5000
     max_memory_mb: int = 64
-    input_schema: Dict = field(default_factory=dict)
-    output_schema: Dict = field(default_factory=dict)
+    input_schema: dict = field(default_factory=dict)
+    output_schema: dict = field(default_factory=dict)
     checksum: str = ""
     created_at: float = 0.0
     updated_at: float = 0.0
@@ -295,8 +295,8 @@ class LuaScript:
     execution_count: int = 0
     avg_duration_ms: float = 0.0
     error_count: int = 0
-    dependencies: List[str] = field(default_factory=list)
-    metadata: Dict = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
 
     def compute_checksum(self) -> str:
         self.checksum = hashlib.sha256(self.content.encode()).hexdigest()[:16]
@@ -313,13 +313,13 @@ class ExecutionRecord:
     started_at: float
     finished_at: float = 0.0
     duration_ms: float = 0.0
-    input_data: Dict = field(default_factory=dict)
+    input_data: dict = field(default_factory=dict)
     output_data: Any = None
     error_message: str = ""
     memory_peak_mb: float = 0.0
     instruction_count: int = 0
     caller: str = ""
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
 @dataclass
 class HookPoint:
@@ -347,13 +347,13 @@ class LuaSandbox:
 
     def __init__(self, sandbox_level: SandboxLevel = SandboxLevel.STANDARD):
         self._level = sandbox_level
-        self._env: Dict[str, Any] = self._build_env()
+        self._env: dict[str, Any] = self._build_env()
         self._instruction_count = 0
         self._max_instructions = 1_000_000
         self._memory_used = 0
         self._max_memory = 64 * 1024 * 1024
 
-    def _build_env(self) -> Dict[str, Any]:
+    def _build_env(self) -> dict[str, Any]:
         base = {
             "math": __import__("math"),
             "string": __import__("string"),
@@ -381,13 +381,13 @@ class LuaSandbox:
             base["re"] = re
         return base
 
-    def validate_script(self, content: str) -> Tuple[bool, str]:
+    def validate_script(self, content: str) -> tuple[bool, str]:
         for pattern in self.FORBIDDEN_PATTERNS:
             if re.search(pattern, content):
                 return False, f"Forbidden pattern detected: {pattern}"
         return True, ""
 
-    async def execute(self, content: str, input_data: Dict = None) -> Tuple[Any, Optional[str]]:
+    async def execute(self, content: str, input_data: dict = None) -> tuple[Any, str | None]:
         self._instruction_count = 0
         self._memory_used = 0
         ok, err = self.validate_script(content)
@@ -412,20 +412,20 @@ class LuaSandbox:
     def check_memory(self) -> bool:
         return self._memory_used < self._max_memory
 
-class LuaScriptEngine(object):
+class LuaScriptEngine:
     """Enterprise Lua script engine with sandboxing, lifecycle management, and hooks."""
 
     def __init__(self):
         self._scripts: OrderedDict[str, LuaScript] = OrderedDict()
-        self._sandbox_cache: Dict[SandboxLevel, LuaSandbox] = {}
-        self._execution_log: List[ExecutionRecord] = []
-        self._hooks: Dict[str, List[HookPoint]] = {}
+        self._sandbox_cache: dict[SandboxLevel, LuaSandbox] = {}
+        self._execution_log: list[ExecutionRecord] = []
+        self._hooks: dict[str, list[HookPoint]] = {}
         self._max_scripts = 500
         self._max_log_size = 10000
         self._lock = threading.RLock()
         self._initialized = False
-        self._builtin_functions: Dict[str, callable] = {}
-        self._template_cache: Dict[str, str] = {}
+        self._builtin_functions: dict[str, callable] = {}
+        self._template_cache: dict[str, str] = {}
 
     def initialize(self) -> None:
         if self._initialized:
@@ -538,12 +538,12 @@ return validate(input)
                 return True
             return False
 
-    def get_script(self, script_id: str) -> Optional[LuaScript]:
+    def get_script(self, script_id: str) -> LuaScript | None:
         return self._scripts.get(script_id)
 
     def list_scripts(
         self, status: ScriptStatus = None, tag: str = None, limit: int = 100, offset: int = 0
-    ) -> List[LuaScript]:
+    ) -> list[LuaScript]:
         result = list(self._scripts.values())
         if status:
             result = [s for s in result if s.status == status]
@@ -558,7 +558,7 @@ return validate(input)
         return self.update_script(script_id, status=ScriptStatus.DEPRECATED)
 
     def execute_script(
-        self, script_id: str, input_data: Dict = None, caller: str = "system", timeout_override: int = None
+        self, script_id: str, input_data: dict = None, caller: str = "system", timeout_override: int = None
     ) -> ExecutionRecord:
         script = self._scripts.get(script_id)
         if not script:
@@ -609,8 +609,8 @@ return validate(input)
         return record
 
     def execute_raw(
-        self, content: str, input_data: Dict = None, sandbox_level: SandboxLevel = SandboxLevel.BASIC
-    ) -> Tuple[Any, Optional[str]]:
+        self, content: str, input_data: dict = None, sandbox_level: SandboxLevel = SandboxLevel.BASIC
+    ) -> tuple[Any, str | None]:
         sandbox = self._get_sandbox(sandbox_level)
         sandbox_env = dict(sandbox._env)
         sandbox_env.update({f"__builtin_{n}": f for n, f in self._builtin_functions.items()})
@@ -640,19 +640,19 @@ return validate(input)
                 except Exception as e:
                     logger.warning(f"Hook {hook.hook_id} failed: {e}")
 
-    def get_template(self, template_name: str) -> Optional[str]:
+    def get_template(self, template_name: str) -> str | None:
         return self._template_cache.get(template_name)
 
-    def list_templates(self) -> List[str]:
+    def list_templates(self) -> list[str]:
         return list(self._template_cache.keys())
 
-    def get_execution_history(self, script_id: str = None, limit: int = 50) -> List[ExecutionRecord]:
+    def get_execution_history(self, script_id: str = None, limit: int = 50) -> list[ExecutionRecord]:
         records = self._execution_log
         if script_id:
             records = [r for r in records if r.script_id == script_id]
         return records[-limit:]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         total = len(self._scripts)
         by_status = {}
         for s in ScriptStatus:
@@ -669,7 +669,7 @@ return validate(input)
             "history_size": len(self._execution_log),
         }
 
-    def validate_syntax(self, content: str) -> Tuple[bool, List[str]]:
+    def validate_syntax(self, content: str) -> tuple[bool, list[str]]:
         errors = []
         try:
             compile(content, "<validation>", "exec")
@@ -680,7 +680,7 @@ return validate(input)
             errors.append(msg)
         return len(errors) == 0, errors
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         try:
             self.initialize()
             stats = self.get_stats()

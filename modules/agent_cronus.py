@@ -106,7 +106,7 @@ import time
 import hashlib
 import threading
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from typing import Dict, List, Optional, Any, Tuple, Set
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -235,13 +235,13 @@ class CronExpression:
                 return True
         return False
 
-    def next_run_time(self, after: Optional[datetime] = None) -> datetime:
+    def next_run_time(self, after: datetime | None = None) -> datetime:
         """
         计算下次执行时间
         使用简单递推算法，最多扫描365天
         """
         if after is None:
-            after = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+            after = datetime.now(UTC).replace(second=0, microsecond=0)
         else:
             after = after.replace(second=0, microsecond=0)
 
@@ -259,7 +259,7 @@ class ScheduledTask:
     task_id: str
     name: str
     description: str = ""
-    cron_expr: Optional[str] = None
+    cron_expr: str | None = None
     interval_seconds: int = 0
     priority: TaskPriority = TaskPriority.NORMAL
     execution_mode: ExecutionMode = ExecutionMode.PERIODIC
@@ -268,14 +268,14 @@ class ScheduledTask:
     retry_delay_seconds: int = 60
     retry_count: int = 0
     state: TaskState = TaskState.PENDING
-    dependencies: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    last_run_at: Optional[str] = None
-    next_run_at: Optional[str] = None
-    last_result: Optional[str] = None
-    error_message: Optional[str] = None
+    dependencies: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    last_run_at: str | None = None
+    next_run_at: str | None = None
+    last_result: str | None = None
+    error_message: str | None = None
 
     def task_hash(self) -> str:
         """生成任务唯一哈希"""
@@ -292,25 +292,25 @@ class TaskExecution:
 
     execution_id: str
     task_id: str
-    started_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    finished_at: Optional[str] = None
+    started_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    finished_at: str | None = None
     duration_ms: int = 0
     state: TaskState = TaskState.RUNNING
-    result: Optional[str] = None
-    error: Optional[str] = None
+    result: str | None = None
+    error: str | None = None
     retry_attempt: int = 0
     node_id: str = "local"
 
-class CronusTimeWindowManager(object):
+class CronusTimeWindowManager:
     """
     时间窗口管理器
     管理任务的执行时间窗口、维护时段和静默时段
     """
 
     def __init__(self):
-        self._maintenance_windows: List[Dict[str, str]] = []
-        self._quiet_hours: List[Dict[str, str]] = []
-        self._blackout_periods: List[Dict[str, str]] = []
+        self._maintenance_windows: list[dict[str, str]] = []
+        self._quiet_hours: list[dict[str, str]] = []
+        self._blackout_periods: list[dict[str, str]] = []
         self._lock = threading.RLock()
 
     def add_maintenance_window(self, name: str, start: str, end: str, recurrence: str = "once") -> bool:
@@ -332,7 +332,7 @@ class CronusTimeWindowManager(object):
                     "start": start,
                     "end": end,
                     "recurrence": recurrence,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": datetime.now(UTC).isoformat(),
                 }
             )
         logger.info(f"添加维护窗口: {name} [{start} ~ {end}]")
@@ -354,7 +354,7 @@ class CronusTimeWindowManager(object):
                     "start_hour": start_hour,
                     "end_hour": end_hour,
                     "timezone_offset": timezone_offset,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": datetime.now(UTC).isoformat(),
                 }
             )
         logger.info(f"添加静默时段: {name} [{start_hour}:00~{end_hour}:00 UTC+{timezone_offset}]")
@@ -362,7 +362,7 @@ class CronusTimeWindowManager(object):
 
     def is_in_maintenance(self) -> bool:
         """检查当前是否处于维护窗口"""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         with self._lock:
             for window in self._maintenance_windows:
                 start = datetime.fromisoformat(window["start"])
@@ -373,7 +373,7 @@ class CronusTimeWindowManager(object):
 
     def is_quiet_hours(self) -> bool:
         """检查当前是否处于静默时段"""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         with self._lock:
             for qh in self._quiet_hours:
                 offset = timedelta(hours=qh["timezone_offset"])
@@ -388,7 +388,7 @@ class CronusTimeWindowManager(object):
                         return True
         return False
 
-    def is_execution_allowed(self, priority: TaskPriority) -> Tuple[bool, str]:
+    def is_execution_allowed(self, priority: TaskPriority) -> tuple[bool, str]:
         """
         检查指定优先级的任务是否允许执行
         返回 (是否允许, 原因说明)
@@ -405,14 +405,14 @@ class CronusTimeWindowManager(object):
 
         return True, "允许执行"
 
-    def get_active_windows(self) -> Dict[str, Any]:
+    def get_active_windows(self) -> dict[str, Any]:
         """获取当前活跃的所有时间窗口"""
         return {
             "maintenance": self.is_in_maintenance(),
             "quiet_hours": self.is_quiet_hours(),
             "maintenance_windows_count": len(self._maintenance_windows),
             "quiet_hours_count": len(self._quiet_hours),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
 class CronusDependencyGraph:
@@ -422,8 +422,8 @@ class CronusDependencyGraph:
     """
 
     def __init__(self):
-        self._graph: Dict[str, Set[str]] = defaultdict(set)  # task -> 依赖的task集合
-        self._reverse_graph: Dict[str, Set[str]] = defaultdict(set)  # task -> 依赖它的task集合
+        self._graph: dict[str, set[str]] = defaultdict(set)  # task -> 依赖的task集合
+        self._reverse_graph: dict[str, set[str]] = defaultdict(set)  # task -> 依赖它的task集合
         self._lock = threading.RLock()
 
     def add_dependency(self, task_id: str, depends_on: str) -> bool:
@@ -461,7 +461,7 @@ class CronusDependencyGraph:
 
         return dfs(start)
 
-    def get_ready_tasks(self, completed: Set[str]) -> List[str]:
+    def get_ready_tasks(self, completed: set[str]) -> list[str]:
         """获取依赖已满足、可以执行的任务列表"""
         ready = []
         with self._lock:
@@ -470,12 +470,12 @@ class CronusDependencyGraph:
                     ready.append(task_id)
         return ready
 
-    def get_blocking_tasks(self, task_id: str) -> List[str]:
+    def get_blocking_tasks(self, task_id: str) -> list[str]:
         """获取阻塞指定任务执行的依赖列表"""
         with self._lock:
             return list(self._graph.get(task_id, set()))
 
-    def get_dependents(self, task_id: str) -> List[str]:
+    def get_dependents(self, task_id: str) -> list[str]:
         """获取依赖指定任务的所有下游任务"""
         with self._lock:
             return list(self._reverse_graph.get(task_id, set()))
@@ -490,7 +490,7 @@ class CronusDependencyGraph:
             self._graph.pop(task_id, None)
             self._reverse_graph.pop(task_id, None)
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """拓扑排序，返回可执行顺序"""
         in_degree = defaultdict(int)
         with self._lock:
@@ -511,7 +511,7 @@ class CronusDependencyGraph:
 
         return result
 
-    def get_graph_summary(self) -> Dict[str, Any]:
+    def get_graph_summary(self) -> dict[str, Any]:
         """获取依赖图摘要"""
         with self._lock:
             return {
@@ -522,7 +522,7 @@ class CronusDependencyGraph:
                 "root_tasks": len([t for t in self._graph if not self._reverse_graph.get(t)]),
             }
 
-class ScheduleConflictResolver(object):
+class ScheduleConflictResolver:
     """调度冲突解析器 - 检测任务间的资源竞争和时间冲突。
 
     企业场景：数百个定时任务共享有限资源池（CPU/内存/IO），
@@ -530,11 +530,11 @@ class ScheduleConflictResolver(object):
     """
 
     def __init__(self):
-        self._task_graph: Dict[str, Set[str]] = defaultdict(set)  # task -> dependencies
-        self._resource_map: Dict[str, List[str]] = defaultdict(list)  # resource -> tasks
-        self._conflict_cache: Dict[str, List[Dict]] = {}
+        self._task_graph: dict[str, set[str]] = defaultdict(set)  # task -> dependencies
+        self._resource_map: dict[str, list[str]] = defaultdict(list)  # resource -> tasks
+        self._conflict_cache: dict[str, list[dict]] = {}
 
-    def register_task(self, task_id: str, resources: List[str], deps: List[str] = None):
+    def register_task(self, task_id: str, resources: list[str], deps: list[str] = None):
         """注册任务及其资源需求和依赖关系"""
         if deps:
             self._task_graph[task_id].update(deps)
@@ -542,7 +542,7 @@ class ScheduleConflictResolver(object):
             self._resource_map[res].append(task_id)
         self._conflict_cache.clear()  # 图变更后清缓存
 
-    def detect_conflicts(self, time_window: Tuple[datetime, datetime]) -> List[Dict]:
+    def detect_conflicts(self, time_window: tuple[datetime, datetime]) -> list[dict]:
         """检测指定时间窗口内的所有冲突"""
         cache_key = f"{time_window[0].isoformat()}_{time_window[1].isoformat()}"
         if cache_key in self._conflict_cache:
@@ -566,7 +566,7 @@ class ScheduleConflictResolver(object):
         self._conflict_cache[cache_key] = conflicts
         return conflicts
 
-    def _find_cycle(self) -> Optional[List[str]]:
+    def _find_cycle(self) -> list[str] | None:
         """DFS检测任务依赖图中的环"""
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {t: WHITE for t in self._task_graph}
@@ -595,7 +595,7 @@ class ScheduleConflictResolver(object):
                     return cycle
         return None
 
-    def resolve(self, conflicts: List[Dict]) -> Dict[str, Any]:
+    def resolve(self, conflicts: list[dict]) -> dict[str, Any]:
         """生成冲突解决方案"""
         resolution = {"actions": [], "estimated_delay": 0}
         for c in conflicts:
@@ -637,13 +637,13 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__(module_name="agent_cronus", module_version="6.39.0")
-        self._tasks: Dict[str, ScheduledTask] = {}
-        self._executions: Dict[str, TaskExecution] = {}
-        self._cron_cache: Dict[str, CronExpression] = {}
+        self._tasks: dict[str, ScheduledTask] = {}
+        self._executions: dict[str, TaskExecution] = {}
+        self._cron_cache: dict[str, CronExpression] = {}
         self._dependency_graph = CronusDependencyGraph()
         self._window_manager = CronusTimeWindowManager()
         self._execution_lock = threading.RLock()
-        self._scheduler_thread: Optional[threading.Thread] = None
+        self._scheduler_thread: threading.Thread | None = None
         self._running = False
         self._stats = {
             "total_scheduled": 0,
@@ -693,7 +693,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _check_and_schedule(self):
         """检查并调度到期任务"""
         with self.trace("check_and_schedule"):
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             with self._execution_lock:
                 for task_id, task in self._tasks.items():
                     if task.state not in (
@@ -756,15 +756,15 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         name: str,
         execution_mode: ExecutionMode,
-        cron_expr: Optional[str] = None,
+        cron_expr: str | None = None,
         interval_seconds: int = 0,
         priority: TaskPriority = TaskPriority.NORMAL,
         timeout_seconds: int = 3600,
         max_retries: int = 3,
-        dependencies: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None,
+        dependencies: list[str] | None = None,
+        tags: list[str] | None = None,
         description: str = "",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> Result:
         """
         创建新调度任务
@@ -844,7 +844,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._executions[execution_id] = execution
 
             task.state = TaskState.RUNNING
-            task.last_run_at = datetime.now(timezone.utc).isoformat()
+            task.last_run_at = datetime.now(UTC).isoformat()
             start_time = time.time()
 
             try:
@@ -854,7 +854,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
                 execution.duration_ms = int((time.time() - start_time) * 1000)
                 execution.state = TaskState.COMPLETED
-                execution.finished_at = datetime.now(timezone.utc).isoformat()
+                execution.finished_at = datetime.now(UTC).isoformat()
                 execution.result = str(result_data)
 
                 task.state = TaskState.COMPLETED
@@ -892,7 +892,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return Result.failure(f"执行异常: {str(e)}")
 
-    async def _execute_task_logic(self, task: ScheduledTask) -> Dict[str, Any]:
+    async def _execute_task_logic(self, task: ScheduledTask) -> dict[str, Any]:
         """
         执行任务核心逻辑
         生产环境中根据task.metadata中的handler信息调用对应处理器
@@ -995,7 +995,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
 
     async def list_tasks(
-        self, state_filter: Optional[str] = None, tag_filter: Optional[str] = None, limit: int = 50, offset: int = 0
+        self, state_filter: str | None = None, tag_filter: str | None = None, limit: int = 50, offset: int = 0
     ) -> Result:
         """列出任务"""
         tasks = list(self._tasks.values())
@@ -1068,7 +1068,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return Result.success(data={"task_id": task_id, "next_run_at": next_time.isoformat()})
         return Result.success(data={"task_id": task_id, "next_run_at": "需要手动触发"})
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         # 采集Prometheus指标
         metrics_collector.gauge("cronus_tasks_total", len(self._tasks))

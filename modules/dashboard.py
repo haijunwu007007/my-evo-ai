@@ -121,8 +121,8 @@ class Widget:
     title: str
     widget_type: WidgetType
     data_source: str = ""
-    position: Dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0, "w": 6, "h": 4})
-    config: Dict[str, Any] = field(default_factory=dict)
+    position: dict[str, int] = field(default_factory=lambda: {"x": 0, "y": 0, "w": 6, "h": 4})
+    config: dict[str, Any] = field(default_factory=dict)
     refresh_interval: int = 60  # seconds, 0=manual
 
 @dataclass
@@ -133,12 +133,12 @@ class DashboardPanel:
     name: str
     description: str = ""
     layout: PanelLayout = PanelLayout.GRID
-    widgets: List[Widget] = field(default_factory=list)
+    widgets: list[Widget] = field(default_factory=list)
     owner: str = "system"
     is_public: bool = True
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """仪表盘管理器"""
@@ -148,13 +148,13 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._panels: Dict[str, DashboardPanel] = {}
+        self._panels: dict[str, DashboardPanel] = {}
         self._counter: int = 0
         self._widget_counter: int = 0
 
@@ -243,7 +243,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._counter = 2
         self._widget_counter = 6
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "dashboard"})
         self.metrics_collector.counter("dashboard.execute.calls", 1)
         self.audit("execute", {"module": "dashboard"})
@@ -378,7 +378,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -390,7 +390,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._panels.clear()
         # super().shutdown() removed for sync
 
-    def _create_panel(self, name: str, desc: str, owner: str, tags: List[str]) -> Dict:
+    def _create_panel(self, name: str, desc: str, owner: str, tags: list[str]) -> dict:
         self._counter += 1
         pid = f"panel_{self._counter}"
         panel = DashboardPanel(panel_id=pid, name=name, description=desc, owner=owner, tags=tags)
@@ -400,7 +400,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"panel_id": pid, "name": name, "created": True}
 
-    def _add_widget(self, pid: str, title: str, wtype: str, ds: str, pos: Dict) -> Dict:
+    def _add_widget(self, pid: str, title: str, wtype: str, ds: str, pos: dict) -> dict:
         panel = self._panels.get(pid)
         if not panel:
             return {"error": "Panel not found"}
@@ -418,7 +418,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"widget_id": wid, "title": title, "type": wt.value}
 
-    def _remove_widget(self, pid: str, wid: str) -> Dict:
+    def _remove_widget(self, pid: str, wid: str) -> dict:
         panel = self._panels.get(pid)
         if not panel:
             return {"error": "Panel not found"}
@@ -427,7 +427,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats.success_count += 1
         return {"removed": wid}
 
-    def clone_panel(self, source_panel_id: str, new_name: str) -> Dict[str, Any]:
+    def clone_panel(self, source_panel_id: str, new_name: str) -> dict[str, Any]:
         """克隆面板。企业场景：新团队成员入职时复制标准运维面板作为基础，
         避免从零搭建。深拷贝面板配置和所有Widget。
         """
@@ -452,7 +452,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "cloned_from": source_panel_id,
         }
 
-    def export_panel_config(self, panel_id: str) -> Dict[str, Any]:
+    def export_panel_config(self, panel_id: str) -> dict[str, Any]:
         """导出面板配置为JSON。企业场景：跨环境迁移（dev→staging→prod）时
         导出面板配置，通过CI/CD自动化部署。
         """
@@ -478,7 +478,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "config": config, "widget_count": len(config["widgets"])}
 
-    def get_panel_usage_stats(self, days: int = 7) -> Dict[str, Any]:
+    def get_panel_usage_stats(self, days: int = 7) -> dict[str, Any]:
         """面板使用统计。企业场景：产品团队识别哪些面板被频繁查看，
         低频面板可归档，减少维护成本。
         """
@@ -511,7 +511,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "unused_panels": [p for p in panels if p["views"] == 0],
         }
 
-    def batch_update_refresh_interval(self, panel_ids: List[str], interval_seconds: int) -> Dict[str, Any]:
+    def batch_update_refresh_interval(self, panel_ids: list[str], interval_seconds: int) -> dict[str, Any]:
         """批量更新面板刷新间隔。企业场景：非工作时间降低刷新频率
         节省资源，工作时间恢复高频刷新。
         """
@@ -527,7 +527,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             updated += 1
         return {"success": True, "updated": updated, "not_found": not_found, "new_interval_s": interval_seconds}
 
-    def export_dashboard_config(self, dashboard_id: str, format: str = "json") -> Dict[str, Any]:
+    def export_dashboard_config(self, dashboard_id: str, format: str = "json") -> dict[str, Any]:
         """导出Dashboard配置。企业场景：从生产环境导出Dashboard配置，
         导入到预发/测试环境，保持监控一致性。
         """
@@ -575,7 +575,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": "PyYAML未安装"}
         return {"success": True, "format": "json", "config": config, "panel_count": len(panel_defs)}
 
-    def clone_dashboard(self, source_id: str, new_name: str) -> Dict[str, Any]:
+    def clone_dashboard(self, source_id: str, new_name: str) -> dict[str, Any]:
         """克隆Dashboard。企业场景：基于现有模板创建新Dashboard，
         如从"生产监控"克隆"预发监控"。
         """
@@ -609,7 +609,7 @@ class DashboardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         dashboards[new_id] = new_dash
         return {"success": True, "new_dashboard_id": new_id, "new_name": new_name, "cloned_panels": len(new_panel_ids)}
 
-    def get_dashboard_health(self, dashboard_id: str) -> Dict[str, Any]:
+    def get_dashboard_health(self, dashboard_id: str) -> dict[str, Any]:
         """Dashboard健康检查。企业场景：SRE检查监控面板数据源是否正常，
         哪些面板查询失败、响应超时。
         """

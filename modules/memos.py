@@ -92,7 +92,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MemosAnalyzer(object):
+class MemosAnalyzer:
     """memos 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -314,17 +314,17 @@ class Memo:
     content: str = ""
     format: MemoFormat = MemoFormat.MARKDOWN
     status: MemoStatus = MemoStatus.ACTIVE
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     importance: int = 3
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     version: int = 1
-    versions: List[MemoVersion] = field(default_factory=list)
+    versions: list[MemoVersion] = field(default_factory=list)
     share_permission: SharePermission = SharePermission.PRIVATE
-    shared_with: List[str] = field(default_factory=list)
-    reminders: List[Reminder] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    checklist_items: List[Dict[str, Any]] = field(default_factory=list)
+    shared_with: list[str] = field(default_factory=list)
+    reminders: list[Reminder] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    checklist_items: list[dict[str, Any]] = field(default_factory=list)
     word_count: int = 0
     checksum: str = ""
 
@@ -338,8 +338,8 @@ class SearchResult:
     title: str
     snippet: str
     score: float
-    matched_tags: List[str] = field(default_factory=list)
-    highlights: List[str] = field(default_factory=list)
+    matched_tags: list[str] = field(default_factory=list)
+    highlights: list[str] = field(default_factory=list)
 
 @dataclass
 class MemosConfig:
@@ -375,7 +375,7 @@ class Memos:
 
     """Enterprise memo management system with search, tags, and versioning."""
 
-    def __init__(self, config: Optional[MemosConfig] = None):
+    def __init__(self, config: MemosConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -408,12 +408,12 @@ class Memos:
         )()
 
         self._config = config or MemosConfig()
-        self._memos: Dict[str, Memo] = {}
-        self._tags: Dict[str, MemoTag] = {}
-        self._tag_index: Dict[str, Set[str]] = defaultdict(set)
-        self._trash: Dict[str, Memo] = {}
+        self._memos: dict[str, Memo] = {}
+        self._tags: dict[str, MemoTag] = {}
+        self._tag_index: dict[str, set[str]] = defaultdict(set)
+        self._trash: dict[str, Memo] = {}
         self._lock = threading.RLock()
-        self._reminder_thread: Optional[threading.Thread] = None
+        self._reminder_thread: threading.Thread | None = None
         self._running = False
         self._initialized = False
         logger.info("Memos instance created")
@@ -438,8 +438,8 @@ class Memos:
         self,
         title: str,
         content: str,
-        format: Optional[MemoFormat] = None,
-        tags: Optional[List[str]] = None,
+        format: MemoFormat | None = None,
+        tags: list[str] | None = None,
         importance: int = 3,
         status: MemoStatus = MemoStatus.ACTIVE,
     ) -> Memo:
@@ -461,19 +461,19 @@ class Memos:
             memo.versions.append(MemoVersion(version=1, content=memo.content, title=memo.title, checksum=memo.checksum))
         return memo
 
-    def get(self, memo_id: str) -> Optional[Memo]:
+    def get(self, memo_id: str) -> Memo | None:
         with self._lock:
             return self._memos.get(memo_id)
 
     def update(
         self,
         memo_id: str,
-        title: Optional[str] = None,
-        content: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        importance: Optional[int] = None,
-        status: Optional[MemoStatus] = None,
-    ) -> Optional[Memo]:
+        title: str | None = None,
+        content: str | None = None,
+        tags: list[str] | None = None,
+        importance: int | None = None,
+        status: MemoStatus | None = None,
+    ) -> Memo | None:
         with self._lock:
             memo = self._memos.get(memo_id)
             if not memo:
@@ -530,15 +530,15 @@ class Memos:
     def search(
         self,
         query: str,
-        tags: Optional[List[str]] = None,
-        status: Optional[MemoStatus] = None,
+        tags: list[str] | None = None,
+        status: MemoStatus | None = None,
         sort: SortField = SortField.UPDATED,
         order: SortOrder = SortOrder.DESC,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         query_lower = query.lower()
         query_terms = set(query_lower.split())
-        results: List[SearchResult] = []
+        results: list[SearchResult] = []
 
         with self._lock:
             for mid, memo in self._memos.items():
@@ -568,18 +568,18 @@ class Memos:
         results.sort(key=lambda x: x.score, reverse=True)
         return results[:limit]
 
-    def list_tags(self) -> List[MemoTag]:
+    def list_tags(self) -> list[MemoTag]:
         with self._lock:
             return sorted(self._tags.values(), key=lambda t: t.usage_count, reverse=True)
 
-    def get_by_tag(self, tag: str) -> List[Memo]:
+    def get_by_tag(self, tag: str) -> list[Memo]:
         with self._lock:
             ids = self._tag_index.get(tag, set())
             return [self._memos[mid] for mid in ids if mid in self._memos]
 
     def add_reminder(
         self, memo_id: str, trigger_at: float, message: str = "", recurring: bool = False, interval_seconds: float = 0.0
-    ) -> Optional[Reminder]:
+    ) -> Reminder | None:
         with self._lock:
             memo = self._memos.get(memo_id)
             if not memo:
@@ -594,7 +594,7 @@ class Memos:
             memo.reminders.append(reminder)
             return reminder
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             active = [m for m in self._memos.values() if m.status == MemoStatus.ACTIVE]
             return {
@@ -639,7 +639,7 @@ class Memos:
                 logger.error("Reminder loop error: %s", e)
             time.sleep(self._config.reminder_check_interval)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

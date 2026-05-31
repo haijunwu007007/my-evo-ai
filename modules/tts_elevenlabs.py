@@ -74,7 +74,7 @@ import hashlib
 from core.logging_config import get_logger
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -82,7 +82,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class TtsElevenlabsAnalyzer(object):
+class TtsElevenlabsAnalyzer:
     """tts_elevenlabs 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,7 +277,7 @@ class TtsElevenlabsModule:
 
     """ElevenLabs TTS - 语音合成/多语言/SSML/声音克隆/批量/流式/缓存"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -323,15 +323,15 @@ class TtsElevenlabsModule:
         self._default_voice = self.config.get("default_voice", "Rachel")
         self._default_language = self.config.get("default_language", "zh")
         self._timeout = self.config.get("timeout", 30)
-        self._tasks: Dict[str, Dict] = {}
-        self._voices: Dict[str, Dict] = {}
-        self._cache: Dict[str, Dict] = {}
+        self._tasks: dict[str, dict] = {}
+        self._voices: dict[str, dict] = {}
+        self._cache: dict[str, dict] = {}
         self._cache_ttl = self.config.get("cache_ttl", 86400)
-        self._rate_limits: Dict[str, Dict] = {}
-        self._request_log: List[Dict] = []
+        self._rate_limits: dict[str, dict] = {}
+        self._request_log: list[dict] = []
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 8))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_voices()
             for m in TTSModel:
@@ -351,7 +351,7 @@ class TtsElevenlabsModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -462,7 +462,7 @@ class TtsElevenlabsModule:
                 "similarity": similarity,
                 "output_format": output_format,
                 "estimated_duration_s": round(duration_estimate, 1),
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._rate_limits[model]["current_requests"] += 1

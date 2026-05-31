@@ -121,7 +121,7 @@ class TunnelRecord:
     idle_timeout_s: int = 3600
     auth_method: str = "key"
     owner: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class TrafficRecord:
@@ -135,7 +135,7 @@ class TrafficRecord:
 class TunnelHealthAnalyzer:
     """隧道健康分析引擎：延迟趋势、带宽利用率、异常检测。"""
 
-    def analyze_latency(self, tunnel: TunnelRecord, history: List[TrafficRecord]) -> Dict[str, Any]:
+    def analyze_latency(self, tunnel: TunnelRecord, history: list[TrafficRecord]) -> dict[str, Any]:
         """延迟分析。企业场景：排查跨区域隧道延迟问题，
         对比历史P50/P95/P99延迟判断网络是否恶化。
         """
@@ -172,7 +172,7 @@ class TunnelHealthAnalyzer:
             "trend": trend,
         }
 
-    def analyze_bandwidth(self, tunnel: TunnelRecord, history: List[TrafficRecord]) -> Dict[str, Any]:
+    def analyze_bandwidth(self, tunnel: TunnelRecord, history: list[TrafficRecord]) -> dict[str, Any]:
         """带宽分析。企业场景：评估隧道带宽利用率，判断是否需要升级线路。"""
         if len(history) < 2:
             return {"success": True, "tunnel_id": tunnel.tunnel_id, "message": "数据不足，需要至少2个采样点"}
@@ -196,7 +196,7 @@ class TunnelHealthAnalyzer:
             "recommendation": "upgrade" if utilization > 80 else "adequate",
         }
 
-    def detect_anomalies(self, tunnel: TunnelRecord, history: List[TrafficRecord]) -> Dict[str, Any]:
+    def detect_anomalies(self, tunnel: TunnelRecord, history: list[TrafficRecord]) -> dict[str, Any]:
         """异常检测。企业场景：自动发现流量异常（突增/突降），可能指示攻击或故障。"""
         if len(history) < 5:
             return {"success": True, "anomalies": [], "message": "数据不足"}
@@ -257,17 +257,17 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - CI/CD流水线安全访问私有资源
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._tunnels: Dict[str, TunnelRecord] = {}
-        self._traffic_history: Dict[str, List[TrafficRecord]] = {}
-        self._connection_pool: Dict[str, List[Dict]] = {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._tunnels: dict[str, TunnelRecord] = {}
+        self._traffic_history: dict[str, list[TrafficRecord]] = {}
+        self._connection_pool: dict[str, list[dict]] = {}
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
@@ -275,7 +275,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "tunnels_created": 0,
             "tunnels_closed": 0,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("tunnel_manager")
         self._analyzer = TunnelHealthAnalyzer()
@@ -378,7 +378,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("tunnel_closed", {"tunnel_id": tunnel_id, "name": tunnel.name, "active_connections": active_conns})
         return {"success": True, "tunnel_id": tunnel_id, "name": tunnel.name, "closed_connections": active_conns}
 
-    def list_tunnels(self, params: dict = None) -> Dict[str, Any]:
+    def list_tunnels(self, params: dict = None) -> dict[str, Any]:
         """列出隧道。企业场景：运维查看所有活跃隧道，发现未授权的隧道。"""
         params = params or {}
         status_filter = params.get("status", "active")
@@ -409,7 +409,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tunnel_list.sort(key=lambda x: x["idle_seconds"], reverse=True)
         return {"success": True, "total": len(tunnel_list), "status_filter": status_filter, "tunnels": tunnel_list}
 
-    def get_tunnel_stats(self, tunnel_id: str = "") -> Dict[str, Any]:
+    def get_tunnel_stats(self, tunnel_id: str = "") -> dict[str, Any]:
         """隧道统计。企业场景：查看单个隧道的流量、延迟、连接数等指标。"""
         tunnel = self._tunnels.get(tunnel_id)
         if not tunnel:
@@ -432,7 +432,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "anomalies": anomalies.get("anomalies", []),
         }
 
-    def close_idle_tunnels(self, params: dict = None) -> Dict[str, Any]:
+    def close_idle_tunnels(self, params: dict = None) -> dict[str, Any]:
         """批量关闭空闲隧道。企业场景：安全合规，自动关闭超时未使用的隧道。"""
         self.trace("close_idle_tunnels", {})
         self.metrics_collector.counter("tunnel_manager.close_idle_tunnels.calls", 1)
@@ -458,7 +458,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def record_traffic(
         self, tunnel_id: str, bytes_sent: int = 0, bytes_recv: int = 0, latency_ms: float = 0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """记录流量。企业场景：每次数据传输后更新统计，用于带宽计费和审计。"""
         tunnel = self._tunnels.get(tunnel_id)
         if not tunnel:
@@ -486,7 +486,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_recv_mb": round(tunnel.bytes_recv / 1048576, 2),
         }
 
-    def get_owner_summary(self, params: dict = None) -> Dict[str, Any]:
+    def get_owner_summary(self, params: dict = None) -> dict[str, Any]:
         """按owner汇总隧道。企业场景：部门级审计，查看每个团队开了多少隧道。"""
         owner_stats = {}
         for tunnel in self._tunnels.values():
@@ -515,7 +515,7 @@ class TunnelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         result.sort(key=lambda x: -x["tunnels"])
         return {"success": True, "owners": len(result), "summary": result}
 
-    def get_protocol_stats(self, params: dict = None) -> Dict[str, Any]:
+    def get_protocol_stats(self, params: dict = None) -> dict[str, Any]:
         """按协议统计隧道。企业场景：评估SSH/HTTP/SOCKS5使用分布，
         发现应该迁移到统一协议的隧道。
         """

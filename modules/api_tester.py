@@ -150,10 +150,10 @@ class TestCase:
     name: str
     method: HttpMethod
     url: str
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     body: str = ""
-    assertions: List[Assertion] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    assertions: list[Assertion] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     enabled: bool = True
 
 @dataclass
@@ -167,7 +167,7 @@ class TestResult:
     status_code: int = 0
     response_time_ms: float = 0.0
     response_body: str = ""
-    assertions: List[Dict] = field(default_factory=list)
+    assertions: list[dict] = field(default_factory=list)
     error: str = ""
     started_at: float = 0.0
     completed_at: float = 0.0
@@ -178,8 +178,8 @@ class TestSuite:
 
     suite_id: str
     name: str
-    test_ids: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    test_ids: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
 class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -190,15 +190,15 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._test_cases: Dict[str, TestCase] = {}
-        self._test_suites: Dict[str, TestSuite] = {}
-        self._results: List[TestResult] = []
+        self._test_cases: dict[str, TestCase] = {}
+        self._test_suites: dict[str, TestSuite] = {}
+        self._results: list[TestResult] = []
         self._tc_counter: int = 0
         self._suite_counter: int = 0
         self._result_counter: int = 0
@@ -242,7 +242,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "api_tester"})
         self.metrics_collector.counter("api_tester.execute.calls", 1)
         self.audit("execute", {"module": "api_tester"})
@@ -372,7 +372,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -384,7 +384,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         pass
 
-    def _run_test(self, test_id: str) -> Dict:
+    def _run_test(self, test_id: str) -> dict:
         tc = self._test_cases.get(test_id)
         if not tc:
             return {"error": "Test not found"}
@@ -460,7 +460,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "passed": all_passed,
         }
 
-    def _run_suite(self, suite_id: str) -> Dict:
+    def _run_suite(self, suite_id: str) -> dict:
         suite = self._test_suites.get(suite_id)
         if not suite:
             return {"error": "Suite not found"}
@@ -479,8 +479,8 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def compare_responses(
-        self, baseline_id: str, current_id: str, ignore_fields: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        self, baseline_id: str, current_id: str, ignore_fields: list[str] | None = None
+    ) -> dict[str, Any]:
         """API响应对比。企业场景：版本发布前对比新旧版本API响应差异，确保接口契约不被破坏。
         深度对比JSON结构、字段类型、值差异，支持忽略指定字段（如时间戳、随机ID）。
         """
@@ -519,7 +519,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "diff": diff,
         }
 
-    def generate_test_report(self, suite_id: Optional[str] = None, format_type: str = "summary") -> Dict[str, Any]:
+    def generate_test_report(self, suite_id: str | None = None, format_type: str = "summary") -> dict[str, Any]:
         """生成API测试报告。企业场景：CI/CD流水线中自动生成测试报告，通知团队接口质量趋势。
         包含通过率、响应时间P50/P95/P99、错误分布、失败用例详情。
         """
@@ -546,7 +546,7 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         failed_cases = [r for r in results if r.get("status") in ("failed", "error")]
         # 按错误类型统计
-        error_dist: Dict[str, int] = {}
+        error_dist: dict[str, int] = {}
         for r in failed_cases:
             err_type = r.get("error_type", "unknown")
             error_dist[err_type] = error_dist.get(err_type, 0) + 1
@@ -576,9 +576,9 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         method: str = "GET",
         concurrency: int = 10,
         total_requests: int = 100,
-        headers: Optional[Dict] = None,
-        body: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        headers: dict | None = None,
+        body: str | None = None,
+    ) -> dict[str, Any]:
         """执行API负载测试。企业场景：上线前验证接口性能是否满足SLA要求。
         模拟并发请求，统计响应时间分布、吞吐量、错误率。
         """
@@ -654,8 +654,8 @@ class ApiTesterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def compare_environments(
-        self, endpoint: str, environments: List[Dict[str, str]], method: str = "GET"
-    ) -> Dict[str, Any]:
+        self, endpoint: str, environments: list[dict[str, str]], method: str = "GET"
+    ) -> dict[str, Any]:
         """多环境接口对比。企业场景：发布前对比dev/staging/prod三个环境的API响应一致性，
          确保环境间配置差异不影响接口行为。
         每个environment: {name, base_url}。

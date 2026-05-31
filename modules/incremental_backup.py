@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 | 增量备份引擎
@@ -107,7 +106,8 @@ import threading
 import traceback
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -157,8 +157,8 @@ class FileChange:
 
     relative_path: str
     change_type: FileChangeType
-    old_snapshot: Optional[FileSnapshot] = None
-    new_snapshot: Optional[FileSnapshot] = None
+    old_snapshot: FileSnapshot | None = None
+    new_snapshot: FileSnapshot | None = None
 
 @dataclass
 class IncrementalBackupManifest:
@@ -168,11 +168,11 @@ class IncrementalBackupManifest:
     backup_type: BackupType
     source_path: str
     target_path: str
-    parent_backup_id: Optional[str] = None
+    parent_backup_id: str | None = None
     status: str = "pending"
     created_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
-    file_changes: List[Dict] = field(default_factory=list)
+    completed_at: datetime | None = None
+    file_changes: list[dict] = field(default_factory=list)
     added_count: int = 0
     modified_count: int = 0
     deleted_count: int = 0
@@ -194,14 +194,14 @@ class RestoreResult:
     duration_seconds: float = 0
     error: str = ""
 
-class SnapshotManager(object):
+class SnapshotManager:
     """快照管理器"""
 
     def __init__(self):
         super().__init__()
-        self._snapshots: Dict[str, Dict[str, FileSnapshot]] = {}  # backup_id -> {path -> snapshot}
+        self._snapshots: dict[str, dict[str, FileSnapshot]] = {}  # backup_id -> {path -> snapshot}
 
-    def create_snapshot(self, path: str) -> Dict[str, FileSnapshot]:
+    def create_snapshot(self, path: str) -> dict[str, FileSnapshot]:
         """创建目录快照"""
         snapshot = {}
         root = Path(path)
@@ -239,7 +239,7 @@ class SnapshotManager(object):
                 sha.update(chunk)
         return sha.hexdigest()
 
-    def compare_snapshots(self, old: Dict[str, FileSnapshot], new: Dict[str, FileSnapshot]) -> List[FileChange]:
+    def compare_snapshots(self, old: dict[str, FileSnapshot], new: dict[str, FileSnapshot]) -> list[FileChange]:
         """比较两个快照，返回变更列表"""
         changes = []
 
@@ -278,7 +278,7 @@ class SnapshotManager(object):
 
         return changes
 
-    def save_snapshot(self, backup_id: str, snapshot: Dict[str, FileSnapshot], target_dir: Path) -> None:
+    def save_snapshot(self, backup_id: str, snapshot: dict[str, FileSnapshot], target_dir: Path) -> None:
         _ = self.trace("save_snapshot")
         """持久化快照"""
         data = {}
@@ -298,7 +298,7 @@ class SnapshotManager(object):
         file_path = target_dir / f"{backup_id}.snapshot.json"
         file_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    def load_snapshot(self, backup_id: str, target_dir: Path) -> Dict[str, FileSnapshot]:
+    def load_snapshot(self, backup_id: str, target_dir: Path) -> dict[str, FileSnapshot]:
         """加载快照"""
         file_path = target_dir / f"{backup_id}.snapshot.json"
         if not file_path.exists():
@@ -316,17 +316,17 @@ class BackupChain:
     """备份链管理器"""
 
     def __init__(self):
-        self._manifests: Dict[str, IncrementalBackupManifest] = {}
+        self._manifests: dict[str, IncrementalBackupManifest] = {}
         self._lock = threading.Lock()
 
     def add(self, manifest: IncrementalBackupManifest) -> None:
         with self._lock:
             self._manifests[manifest.backup_id] = manifest
 
-    def get(self, backup_id: str) -> Optional[IncrementalBackupManifest]:
+    def get(self, backup_id: str) -> IncrementalBackupManifest | None:
         return self._manifests.get(backup_id)
 
-    def get_chain(self, backup_id: str) -> List[IncrementalBackupManifest]:
+    def get_chain(self, backup_id: str) -> list[IncrementalBackupManifest]:
         """获取备份链（从全量到指定备份）"""
         chain = []
         current = self._manifests.get(backup_id)
@@ -341,7 +341,7 @@ class BackupChain:
         chain.reverse()
         return chain
 
-    def get_latest(self, source_path: Optional[str] = None) -> Optional[IncrementalBackupManifest]:
+    def get_latest(self, source_path: str | None = None) -> IncrementalBackupManifest | None:
         """获取最新备份"""
         with self._lock:
             candidates = list(self._manifests.values())
@@ -351,7 +351,7 @@ class BackupChain:
                 return None
             return max(candidates, key=lambda m: m.created_at)
 
-    def list_all(self, limit: int = 50) -> List[Dict]:
+    def list_all(self, limit: int = 50) -> list[dict]:
         with self._lock:
             manifests = sorted(self._manifests.values(), key=lambda m: m.created_at, reverse=True)[:limit]
             return [
@@ -386,8 +386,8 @@ class IncrementalBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._chain = BackupChain()
         self._lock = threading.RLock()
         self._executor = ThreadPoolExecutor(max_workers=4)
-        self._running_backups: Set[str] = set()
-        self._cancelled: Set[str] = set()
+        self._running_backups: set[str] = set()
+        self._cancelled: set[str] = set()
         self._stats = {
             "total_backups": 0,
             "total_restores": 0,
@@ -403,7 +403,7 @@ class IncrementalBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         source_path: str,
         target_path: str,
         backup_type: BackupType = BackupType.INCREMENTAL,
-        parent_id: Optional[str] = None,
+        parent_id: str | None = None,
         max_workers: int = 4,
     ) -> IncrementalBackupManifest:
         """执行备份"""
@@ -592,7 +592,7 @@ class IncrementalBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             return True
         return False
 
-    def list_backups(self, limit: int = 50) -> List[Dict]:
+    def list_backups(self, limit: int = 50) -> list[dict]:
         return self._chain.list_all(limit)
 
     def _compute_dir_hash(self, directory: Path) -> str:
@@ -654,7 +654,7 @@ class IncrementalBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             avg_latency_ms=0,
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         """统一执行入口 — 根据action路由到增量备份业务方法"""
         _ = self.trace("execute")
         metrics_collector.counter("incremental_backup_ops_total", labels={"action": action})

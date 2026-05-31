@@ -40,7 +40,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         route_count = content.count('@app.')
         self.assertGreaterEqual(route_count, 10, f"路由定义数不足: {route_count}")
 
@@ -49,7 +49,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         # 检查def后的docstring
         docstring_count = content.count('\"\"\"')
         self.assertGreaterEqual(docstring_count, 10, "docstring 不足")
@@ -59,7 +59,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         methods = {'get': content.count('.get('), 'post': content.count('.post('),
                    'put': content.count('.put('), 'delete': content.count('.delete(')}
         self.assertGreater(methods['get'], 0, "无 GET 路由")
@@ -71,7 +71,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         lines = content.split('\n')
         api_routes = [l.strip() for l in lines if '@app.' in l and '("/api/' in l]
         non_prefixed = [r for r in api_routes if not '/api/' in r]
@@ -82,7 +82,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         # 允许 ':8765' 在 uvicorn.run 中，但不在路由路径中
         route_lines = [l for l in content.split('\n') if '@app.' in l]
         hardcoded = [l for l in route_lines if ':8765' in l or ':8766' in l]
@@ -93,7 +93,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         has_json_header = 'application/json' in content
         has_cors = 'Access-Control' in content
         self.assertTrue(has_json_header or has_cors, "缺少 JSON 或 CORS 头设置")
@@ -103,7 +103,7 @@ class TestAPIRouting(unittest.TestCase):
         api_path = os.path.join(self.root, 'api_server.py')
         if not os.path.exists(api_path):
             self.skipTest('api_server.py 不在根目录')
-        content = open(api_path, 'r', encoding='utf-8').read()
+        content = open(api_path, encoding='utf-8').read()
         has_exception_handler = 'exception_handler' in content or 'HTTPException' in content
         self.assertTrue(has_exception_handler, "缺少异常处理器")
 

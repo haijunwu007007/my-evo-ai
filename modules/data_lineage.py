@@ -129,10 +129,10 @@ class LineageNode:
     node_type: LineageNodeType
     source_system: str = ""
     schema_hash: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class LineageEdge:
@@ -142,7 +142,7 @@ class LineageEdge:
     source_node_id: str
     target_node_id: str
     transformation: str = ""  # 转换逻辑描述
-    column_mapping: Dict[str, str] = field(default_factory=dict)
+    column_mapping: dict[str, str] = field(default_factory=dict)
     confidence: float = 1.0
     created_at: float = field(default_factory=time.time)
 
@@ -150,8 +150,8 @@ class LineageEdge:
 class LineageImpact:
     """影响分析结果"""
 
-    affected_nodes: List[str] = field(default_factory=list)
-    affected_edges: List[str] = field(default_factory=list)
+    affected_nodes: list[str] = field(default_factory=list)
+    affected_edges: list[str] = field(default_factory=list)
     downstream_depth: int = 0
     risk_level: str = "low"  # low/medium/high/critical
     estimated_records_impact: int = 0
@@ -162,13 +162,13 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def __init__(self):
 
         super().__init__()
-        self._nodes: Dict[str, LineageNode] = {}
-        self._edges: Dict[str, LineageEdge] = {}
-        self._outgoing: Dict[str, Set[str]] = defaultdict(set)  # node_id -> [edge_ids]
-        self._incoming: Dict[str, Set[str]] = defaultdict(set)  # node_id -> [edge_ids]
+        self._nodes: dict[str, LineageNode] = {}
+        self._edges: dict[str, LineageEdge] = {}
+        self._outgoing: dict[str, set[str]] = defaultdict(set)  # node_id -> [edge_ids]
+        self._incoming: dict[str, set[str]] = defaultdict(set)  # node_id -> [edge_ids]
         self._lock = threading.RLock()
         self._audit = AuditLogger()
-        self._change_history: List[Dict[str, Any]] = []
+        self._change_history: list[dict[str, Any]] = []
         self._max_history = 10000
 
     def _generate_id(self, prefix: str, *parts: str) -> str:
@@ -178,7 +178,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     @trace_operation("lineage.add_node")
     def add_node(
         self, name: str, node_type: str, source_system: str = "", metadata: dict = None, tags: list = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """注册血缘节点"""
         try:
             nt = LineageNodeType(node_type) if isinstance(node_type, str) else node_type
@@ -203,7 +203,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     @trace_operation("lineage.add_edge")
     def add_edge(
         self, source_node_id: str, target_node_id: str, transformation: str = "", column_mapping: dict = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """添加血缘关系（数据流）"""
         try:
             with self._lock:
@@ -230,7 +230,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": False, "error": str(e)}
 
     @trace_operation("lineage.trace_upstream")
-    def trace_upstream(self, node_id: str, max_depth: int = 10) -> Dict[str, Any]:
+    def trace_upstream(self, node_id: str, max_depth: int = 10) -> dict[str, Any]:
         """向上溯源：找出影响该节点的所有上游节点"""
         try:
             visited = set()
@@ -275,7 +275,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": False, "error": str(e)}
 
     @trace_operation("lineage.trace_downstream")
-    def trace_downstream(self, node_id: str, max_depth: int = 10) -> Dict[str, Any]:
+    def trace_downstream(self, node_id: str, max_depth: int = 10) -> dict[str, Any]:
         """向下追踪：找出该节点影响的所有下游节点"""
         try:
             visited = set()
@@ -310,7 +310,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": False, "error": str(e)}
 
     @trace_operation("lineage.impact_analysis")
-    def impact_analysis(self, node_id: str) -> Dict[str, Any]:
+    def impact_analysis(self, node_id: str) -> dict[str, Any]:
         """变更影响分析：评估某节点变更的下游影响"""
         try:
             downstream = self.trace_downstream(node_id, max_depth=20)
@@ -346,7 +346,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": False, "error": str(e)}
 
     @trace_operation("lineage.get_full_graph")
-    def get_full_graph(self, include_edges: bool = True) -> Dict[str, Any]:
+    def get_full_graph(self, include_edges: bool = True) -> dict[str, Any]:
         """获取完整血缘图"""
         with self._lock:
             nodes = [
@@ -375,7 +375,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         return {"success": True, "nodes": nodes, "edges": edges, "node_count": len(nodes), "edge_count": len(edges)}
 
     @trace_operation("lineage.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         with self._lock:
             orphan_nodes = [nid for nid in self._nodes if not self._outgoing.get(nid) and not self._incoming.get(nid)]
@@ -398,7 +398,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._change_history = self._change_history[-self._max_history :]
 
     @trace_operation("lineage.get_statistics")
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取血缘统计"""
         with self._lock:
             by_type = defaultdict(int)
@@ -447,7 +447,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return handler()
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def analyze_impact(self, source_table: str, change_type: str = "schema") -> Dict[str, Any]:
+    def analyze_impact(self, source_table: str, change_type: str = "schema") -> dict[str, Any]:
         """变更影响分析：上游表变更后，自动计算影响范围和风险等级"""
         lineage = self._lineage if hasattr(self, "_lineage") else {}
         # 找到直接下游
@@ -495,7 +495,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         else:
             return f"影响{affected_count}张表，常规变更流程即可"
 
-    def check_lineage_completeness(self, schema_tables: List[str]) -> Dict[str, Any]:
+    def check_lineage_completeness(self, schema_tables: list[str]) -> dict[str, Any]:
         """血缘完整性检查：对比实际表与血缘图，发现未登记的数据依赖"""
         lineage = self._lineage if hasattr(self, "_lineage") else {}
         graph_tables = set()
@@ -523,7 +523,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "grade": "A" if coverage > 0.95 else "B" if coverage > 0.8 else "C" if coverage > 0.6 else "D",
         }
 
-    def trace_column_lineage(self, table: str, column: str, direction: str = "downstream") -> Dict[str, Any]:
+    def trace_column_lineage(self, table: str, column: str, direction: str = "downstream") -> dict[str, Any]:
         """字段级血缘追踪：追踪某个字段的数据流转路径"""
         lineage = self._lineage if hasattr(self, "_lineage") else {}
         column_edges = lineage.get("column_edges", [])
@@ -554,7 +554,7 @@ class DataLineageManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             depth += 1
         return {"start": f"{table}.{column}", "direction": direction, "path_length": len(path), "path": path[:50]}
 
-    def export_lineage_report(self, tables: List[str] = None, format: str = "dict") -> Dict[str, Any]:
+    def export_lineage_report(self, tables: list[str] = None, format: str = "dict") -> dict[str, Any]:
         """导出血缘报告：汇总指定表的上下游依赖关系"""
         lineage = self._lineage if hasattr(self, "_lineage") else {}
         edges = lineage.get("edges", [])

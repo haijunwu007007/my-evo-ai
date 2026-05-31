@@ -83,7 +83,7 @@ import time as tmod
 from typing import Any, Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from collections import defaultdict
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
@@ -118,28 +118,28 @@ class SamplingStrategy(Enum):
 class SpanEvent:
     name: str
     timestamp: float
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class SpanLink:
     trace_id: str
     span_id: str
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Span:
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str]
+    parent_span_id: str | None
     name: str
     kind: SpanKind
     start_time: float
-    end_time: Optional[float] = None
+    end_time: float | None = None
     status: SpanStatus = SpanStatus.UNSET
     status_message: str = ""
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[SpanEvent] = field(default_factory=list)
-    links: List[SpanLink] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[SpanEvent] = field(default_factory=list)
+    links: list[SpanLink] = field(default_factory=list)
 
     @property
     def duration_ms(self) -> float:
@@ -151,17 +151,17 @@ class Span:
         self.status = status
         self.status_message = message
 
-    def add_event(self, name: str, attributes: Optional[Dict] = None):
+    def add_event(self, name: str, attributes: dict | None = None):
         self.events.append(SpanEvent(name=name, timestamp=time.time(), attributes=attributes or {}))
 
-    def add_link(self, trace_id: str, span_id: str, attributes: Optional[Dict] = None):
+    def add_link(self, trace_id: str, span_id: str, attributes: dict | None = None):
         self.links.append(SpanLink(trace_id=trace_id, span_id=span_id, attributes=attributes or {}))
 
     def end(self):
         if self.end_time is None:
             self.end_time = time.time()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "trace_id": self.trace_id,
             "span_id": self.span_id,
@@ -182,7 +182,7 @@ class Span:
 class MetricPoint:
     timestamp: float
     value: float
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Metric:
@@ -190,11 +190,11 @@ class Metric:
     description: str
     unit: str
     metric_type: MetricType
-    points: List[MetricPoint] = field(default_factory=list)
+    points: list[MetricPoint] = field(default_factory=list)
     _counter: float = 0.0
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
-    def add(self, value: float, attributes: Optional[Dict] = None):
+    def add(self, value: float, attributes: dict | None = None):
         with self._lock:
             if self.metric_type == MetricType.COUNTER:
                 self._counter += value
@@ -204,19 +204,19 @@ class Metric:
             if len(self.points) > 10000:
                 self.points = self.points[-5000:]
 
-    def record(self, value: float, attributes: Optional[Dict] = None):
+    def record(self, value: float, attributes: dict | None = None):
         self.add(value, attributes)
 
-    def observe(self, value: float, attributes: Optional[Dict] = None):
+    def observe(self, value: float, attributes: dict | None = None):
         self.add(value, attributes)
 
     @property
-    def last_value(self) -> Optional[float]:
+    def last_value(self) -> float | None:
         if self.points:
             return self.points[-1].value
         return None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
             "description": self.description,
@@ -228,14 +228,14 @@ class Metric:
 
 @dataclass
 class LogRecord:
-    trace_id: Optional[str]
-    span_id: Optional[str]
+    trace_id: str | None
+    span_id: str | None
     severity: str
     body: str
     timestamp: float
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
-class SpanProcessor(object):
+class SpanProcessor:
     """Span处理器基类"""
 
     def on_start(self, span: Span):
@@ -257,7 +257,7 @@ class BatchSpanProcessor(SpanProcessor):
         self.batch_size = batch_size
         self.max_queue = max_queue
         self.schedule_delay = schedule_delay
-        self._queue: List[Span] = []
+        self._queue: list[Span] = []
         self._lock = threading.Lock()
         self._exported_count = 0
         self._dropped_count = 0
@@ -291,7 +291,7 @@ class BatchSpanProcessor(SpanProcessor):
         self._started = False
 
     @property
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "exported": self._exported_count,
             "dropped": self._dropped_count,
@@ -340,7 +340,7 @@ class Sampler:
         return False
 
     @property
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "strategy": self.strategy.value,
             "sampled": self._sampled_count,
@@ -354,11 +354,11 @@ class Propagator:
     TRACE_PARENT = "traceparent"
     TRACE_STATE = "tracestate"
 
-    def inject(self, carrier: Dict[str, str], trace_id: str, span_id: str, trace_flags: int = 1):
+    def inject(self, carrier: dict[str, str], trace_id: str, span_id: str, trace_flags: int = 1):
         version = "00"
         carrier[self.TRACE_PARENT] = f"{version}-{trace_id}-{span_id}-{trace_flags:02x}"
 
-    def extract(self, carrier: Dict[str, str]) -> Optional[Dict]:
+    def extract(self, carrier: dict[str, str]) -> dict | None:
         header = carrier.get(self.TRACE_PARENT)
         if not header:
             return None
@@ -374,11 +374,11 @@ class Propagator:
 class Tracer:
     """链路追踪器"""
 
-    def __init__(self, name: str, sampler: Optional[Sampler] = None, processors: Optional[List[SpanProcessor]] = None):
+    def __init__(self, name: str, sampler: Sampler | None = None, processors: list[SpanProcessor] | None = None):
         self.name = name
         self.sampler = sampler or Sampler()
         self.processors = processors or []
-        self._active_spans: Dict[str, Span] = {}
+        self._active_spans: dict[str, Span] = {}
         self._lock = threading.Lock()
         self._span_counter = 0
 
@@ -389,9 +389,9 @@ class Tracer:
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        parent: Optional[Span] = None,
-        attributes: Optional[Dict] = None,
-        links: Optional[List[SpanLink]] = None,
+        parent: Span | None = None,
+        attributes: dict | None = None,
+        links: list[SpanLink] | None = None,
     ) -> Span:
         trace_id = parent.trace_id if parent else self._gen_id(32)
         span_id = self._gen_id(16)
@@ -454,10 +454,10 @@ class MeterProvider:
     """指标提供器"""
 
     def __init__(self):
-        self._meters: Dict[str, "Meter"] = {}
+        self._meters: dict[str, Meter] = {}
         self._lock = threading.Lock()
 
-    def get_meter(self, name: str, version: str = "") -> "Meter":
+    def get_meter(self, name: str, version: str = "") -> Meter:
         key = f"{name}@{version}" if version else name
         with self._lock:
             if key not in self._meters:
@@ -474,7 +474,7 @@ class Meter:
     def __init__(self, name: str, version: str = ""):
         self.name = name
         self.version = version
-        self._metrics: Dict[str, Metric] = {}
+        self._metrics: dict[str, Metric] = {}
         self._lock = threading.Lock()
 
     def create_counter(self, name: str, description: str = "", unit: str = "1") -> Metric:
@@ -496,7 +496,7 @@ class Meter:
         return metric
 
     @property
-    def metrics(self) -> Dict[str, Metric]:
+    def metrics(self) -> dict[str, Metric]:
         return dict(self._metrics)
 
     @property
@@ -507,7 +507,7 @@ class LoggerProvider:
     """日志提供器 - 关联Trace上下文"""
 
     def __init__(self):
-        self._logs: List[LogRecord] = []
+        self._logs: list[LogRecord] = []
         self._lock = threading.Lock()
         self._max_logs = 50000
 
@@ -515,9 +515,9 @@ class LoggerProvider:
         self,
         severity: str,
         body: str,
-        trace_id: Optional[str] = None,
-        span_id: Optional[str] = None,
-        attributes: Optional[Dict] = None,
+        trace_id: str | None = None,
+        span_id: str | None = None,
+        attributes: dict | None = None,
     ):
         record = LogRecord(
             trace_id=trace_id,
@@ -532,7 +532,7 @@ class LoggerProvider:
             if len(self._logs) > self._max_logs:
                 self._logs = self._logs[-self._max_logs // 2 :]
 
-    def query(self, severity: Optional[str] = None, trace_id: Optional[str] = None, limit: int = 100) -> List[Dict]:
+    def query(self, severity: str | None = None, trace_id: str | None = None, limit: int = 100) -> list[dict]:
         with self._lock:
             filtered = self._logs
             if severity:
@@ -565,7 +565,7 @@ class Resource:
             "deployment.environment": deployment_environment,
         }
 
-    def merge(self, extra: Dict[str, str]):
+    def merge(self, extra: dict[str, str]):
         self.attributes.update(extra)
 
 class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
@@ -582,15 +582,15 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
     def __init__(self):
 
         super().__init__(module_id="opentelemetry_bridge", module_name="OpenTelemetry Bridge")
-        self._resource: Optional[Resource] = None
-        self._tracer: Optional[Tracer] = None
-        self._meter_provider: Optional[MeterProvider] = None
-        self._logger_provider: Optional[LoggerProvider] = None
+        self._resource: Resource | None = None
+        self._tracer: Tracer | None = None
+        self._meter_provider: MeterProvider | None = None
+        self._logger_provider: LoggerProvider | None = None
         self._propagator = Propagator()
-        self._samplers: Dict[str, Sampler] = {}
-        self._processors: List[SpanProcessor] = []
+        self._samplers: dict[str, Sampler] = {}
+        self._processors: list[SpanProcessor] = []
         self._initialized = False
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
 
     def initialize(self) -> ModuleStatus:
         _ = self.trace("initialize")
@@ -612,7 +612,7 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
             self._initialized = True
             self._status = ModuleStatus(status="healthy", message="OTel bridge initialized")
             self._audit_log.append(
-                {"action": "initialize", "status": "success", "timestamp": datetime.now(timezone.utc).isoformat()}
+                {"action": "initialize", "status": "success", "timestamp": datetime.now(UTC).isoformat()}
             )
             return self._status
         except Exception as e:
@@ -621,20 +621,20 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
                     "action": "initialize",
                     "status": "error",
                     "error": str(e),
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             self._status = ModuleStatus(status="error", message=str(e))
             return self._status
 
-    def create_tracer(self, name: str, sampler_name: Optional[str] = None) -> Tracer:
+    def create_tracer(self, name: str, sampler_name: str | None = None) -> Tracer:
         sampler = self._samplers.get(sampler_name) if sampler_name else None
         return Tracer(name, sampler, self._processors)
 
     def create_meter(self, name: str, version: str = "") -> Meter:
         return self._meter_provider.get_meter(name, version)
 
-    def start_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: Optional[Dict] = None) -> Span:
+    def start_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: dict | None = None) -> Span:
         self.audit("start_span", f"name={name}, kind={kind.value}")
         return self._tracer.start_span(name, kind, attributes=attributes)
 
@@ -642,11 +642,11 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
         self.audit("end_span", f"span={span.name}, status={status.value}")
         self._tracer.end_span(span, status, message)
 
-    def trace_context_inject(self, carrier: Dict[str, str], span: Span):
+    def trace_context_inject(self, carrier: dict[str, str], span: Span):
         self.audit("trace_inject", f"span={span.name}")
         self._propagator.inject(carrier, span.trace_id, span.span_id)
 
-    def trace_context_extract(self, carrier: Dict[str, str]) -> Optional[Dict]:
+    def trace_context_extract(self, carrier: dict[str, str]) -> dict | None:
         result = self._propagator.extract(carrier)
         self.audit("trace_extract", f"found={result is not None}")
         return result
@@ -655,16 +655,16 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
         self,
         severity: str,
         body: str,
-        trace_id: Optional[str] = None,
-        span_id: Optional[str] = None,
-        attributes: Optional[Dict] = None,
+        trace_id: str | None = None,
+        span_id: str | None = None,
+        attributes: dict | None = None,
     ):
         self.audit("log_emit", f"severity={severity}, trace_id={trace_id}")
         self._logger_provider.emit(severity, body, trace_id, span_id, attributes)
 
     def query_logs(
-        self, severity: Optional[str] = None, trace_id: Optional[str] = None, limit: int = 100
-    ) -> List[Dict]:
+        self, severity: str | None = None, trace_id: str | None = None, limit: int = 100
+    ) -> list[dict]:
         return self._logger_provider.query(severity, trace_id, limit)
 
     def force_flush(self):
@@ -698,7 +698,7 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
         else:
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "status": "not initialized"}
         return {
@@ -716,14 +716,14 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
             "resource": self._resource.attributes if self._resource else {},
         }
 
-    def get_audit_records(self, action: Optional[str] = None, limit: int = 50) -> List[Dict]:
+    def get_audit_records(self, action: str | None = None, limit: int = 50) -> list[dict]:
         """获取审计日志记录，可按操作类型筛选"""
         records = self._audit_log
         if action:
             records = [r for r in records if r.get("action") == action]
         return records[-limit:]
 
-    def get_bridge_stats(self) -> Dict[str, Any]:
+    def get_bridge_stats(self) -> dict[str, Any]:
         """获取桥接器综合统计信息"""
         return {
             "initialized": self._initialized,

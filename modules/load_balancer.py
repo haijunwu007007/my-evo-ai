@@ -94,7 +94,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LoadBalancerAnalyzer(object):
+class LoadBalancerAnalyzer:
     """load_balancer 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -280,7 +280,7 @@ class BackendServer:
     active_conns: int = 0
     healthy: bool = True
     status: HealthStatus = field(default_factory=HealthStatus)
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def address(self) -> str:
@@ -291,7 +291,7 @@ class MetricsSnapshot:
     total_requests: int = 0
     success_count: int = 0
     error_count: int = 0
-    latencies: List[float] = field(default_factory=list)
+    latencies: list[float] = field(default_factory=list)
 
     @property
     def error_rate(self) -> float:
@@ -327,7 +327,7 @@ class LoadBalancer:
 
     MODULE_ID = "load_balancer"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         config = config or {}
         self.metrics_collector = type(
             "_NMC",
@@ -360,21 +360,21 @@ class LoadBalancer:
             },
         )()
         self._lock = threading.RLock()
-        self._backends: Dict[str, BackendServer] = {}
-        self._backend_order: List[str] = []
+        self._backends: dict[str, BackendServer] = {}
+        self._backend_order: list[str] = []
         self._algorithm: LBAlgorithm = LBAlgorithm(config.get("algorithm", "round_robin"))
         self._rr_index: int = 0
         self._conn_threshold: int = config.get("conn_threshold", 0.8)
         self._health_interval: int = config.get("health_interval", 30)
         self._max_retries: int = config.get("max_retries", 3)
         self._retry_timeout: float = config.get("retry_timeout", 1.0)
-        self._consistent_ring: List[int] = []
-        self._consistent_map: Dict[int, str] = {}
+        self._consistent_ring: list[int] = []
+        self._consistent_map: dict[int, str] = {}
         self._virtual_nodes: int = config.get("virtual_nodes", 150)
-        self._metrics: Dict[str, MetricsSnapshot] = defaultdict(MetricsSnapshot)
+        self._metrics: dict[str, MetricsSnapshot] = defaultdict(MetricsSnapshot)
         self._global_metrics = MetricsSnapshot()
-        self._failover_history: List[Dict[str, Any]] = []
-        self._circuit_breaker: Dict[str, Dict[str, Any]] = {}
+        self._failover_history: list[dict[str, Any]] = []
+        self._circuit_breaker: dict[str, dict[str, Any]] = {}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -383,7 +383,7 @@ class LoadBalancer:
             self.add_backend("default", "127.0.0.1", 8080, weight=100)
         self._build_consistent_ring()
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         healthy = self._initialized
         backends_ok = sum(1 for b in self._backends.values() if b.healthy)
         total = len(self._backends)
@@ -412,8 +412,8 @@ class LoadBalancer:
         port: int,
         weight: int = 100,
         max_conns: int = 1000,
-        metadata: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             server = BackendServer(
                 id=backend_id,
@@ -429,7 +429,7 @@ class LoadBalancer:
             self._build_consistent_ring()
             return {"backend_id": backend_id, "address": server.address, "status": "added"}
 
-    def remove_backend(self, backend_id: str) -> Dict[str, Any]:
+    def remove_backend(self, backend_id: str) -> dict[str, Any]:
         with self._lock:
             if backend_id in self._backends:
                 del self._backends[backend_id]
@@ -438,7 +438,7 @@ class LoadBalancer:
                 return {"backend_id": backend_id, "status": "removed"}
             return {"backend_id": backend_id, "status": "not_found"}
 
-    def get_backends(self) -> List[Dict[str, Any]]:
+    def get_backends(self) -> list[dict[str, Any]]:
         with self._lock:
             return [
                 {
@@ -454,7 +454,7 @@ class LoadBalancer:
 
     # --- Routing algorithms ---
 
-    def select_backend(self, key: str = "") -> Optional[BackendServer]:
+    def select_backend(self, key: str = "") -> BackendServer | None:
         available = [
             b for b in self._backends.values() if b.healthy and b.active_conns < b.max_conns * self._conn_threshold
         ]
@@ -485,7 +485,7 @@ class LoadBalancer:
 
         return available[0]
 
-    def _weighted_select(self, backends: List[BackendServer]) -> BackendServer:
+    def _weighted_select(self, backends: list[BackendServer]) -> BackendServer:
         total = sum(b.weight for b in backends)
         r = self._rr_index % total
         self._rr_index += 1
@@ -507,7 +507,7 @@ class LoadBalancer:
                 self._consistent_map[h] = backend.id
         self._consistent_ring.sort()
 
-    def _consistent_hash_select(self, key: str) -> Optional[BackendServer]:
+    def _consistent_hash_select(self, key: str) -> BackendServer | None:
         if not self._consistent_ring or not key:
             return next(iter(self._backends.values()), None)
         h = int(hashlib.md5(key.encode()).hexdigest(), 16)
@@ -551,7 +551,7 @@ class LoadBalancer:
 
     # --- Circuit breaker ---
 
-    def get_circuit_state(self, backend_id: str) -> Dict[str, Any]:
+    def get_circuit_state(self, backend_id: str) -> dict[str, Any]:
         return self._circuit_breaker.get(
             backend_id, {"open": False, "failures": 0, "last_failure": 0, "half_open_since": 0}
         )
@@ -592,7 +592,7 @@ class LoadBalancer:
             if len(bm.latencies) > 1000:
                 bm.latencies = bm.latencies[-500:]
 
-    def get_metrics(self, backend_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_metrics(self, backend_id: str | None = None) -> dict[str, Any]:
         m = self._metrics[backend_id] if backend_id else self._global_metrics
         return {
             "total_requests": m.total_requests,
@@ -606,7 +606,7 @@ class LoadBalancer:
 
     # --- Configuration ---
 
-    def set_algorithm(self, algorithm: str) -> Dict[str, Any]:
+    def set_algorithm(self, algorithm: str) -> dict[str, Any]:
         try:
             algo = LBAlgorithm(algorithm)
             with self._lock:
@@ -616,7 +616,7 @@ class LoadBalancer:
         except ValueError:
             return {"error": f"Invalid algorithm: {algorithm}"}
 
-    def set_weight(self, backend_id: str, weight: int) -> Dict[str, Any]:
+    def set_weight(self, backend_id: str, weight: int) -> dict[str, Any]:
         with self._lock:
             if backend_id in self._backends:
                 self._backends[backend_id].weight = max(1, min(1000, weight))

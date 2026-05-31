@@ -124,11 +124,11 @@ class AudioSegment:
     end_time: float = 0.0
     text: str = ""
     confidence: float = 0.0
-    speaker_id: Optional[str] = None
+    speaker_id: str | None = None
     language: str = ""
-    words: List[Dict] = field(default_factory=list)
+    words: list[dict] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "segment_id": self.segment_id,
             "start": round(self.start_time, 2),
@@ -145,14 +145,14 @@ class TranscriptionResult:
     job_id: str = ""
     audio_ref: str = ""
     language: str = "auto"
-    segments: List[AudioSegment] = field(default_factory=list)
+    segments: list[AudioSegment] = field(default_factory=list)
     full_text: str = ""
     duration_seconds: float = 0.0
     speakers_count: int = 0
     processing_time_ms: int = 0
     created_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "job_id": self.job_id,
             "audio_ref": self.audio_ref,
@@ -169,7 +169,7 @@ class TranscriptionResult:
 # VAD静音检测器
 # ============================================================
 
-class VADDetector(object):
+class VADDetector:
     """语音活动检测器"""
 
     def __init__(
@@ -185,7 +185,7 @@ class VADDetector(object):
         self.energy_threshold = energy_threshold
         self.silence_frames = silence_duration_ms // frame_ms
 
-    def detect_speech_segments(self, audio_samples: List[float], sample_rate: int = 16000) -> List[Tuple[float, float]]:
+    def detect_speech_segments(self, audio_samples: list[float], sample_rate: int = 16000) -> list[tuple[float, float]]:
         """检测语音活跃段"""
         if not audio_samples:
             return []
@@ -219,7 +219,7 @@ class VADDetector(object):
             segments.append((speech_start, len(audio_samples) / sample_rate))
         return segments
 
-    def compute_energy(self, audio_samples: List[float]) -> float:
+    def compute_energy(self, audio_samples: list[float]) -> float:
         if not audio_samples:
             return 0.0
         return sum(s * s for s in audio_samples) / len(audio_samples)
@@ -233,11 +233,11 @@ class SpeakerDiarizer:
 
     def __init__(self, max_speakers: int = 10):
         self.max_speakers = max_speakers
-        self._speaker_profiles: Dict[str, Dict] = {}
+        self._speaker_profiles: dict[str, dict] = {}
 
     def diarize(
-        self, segments: List[AudioSegment], audio_features: Optional[List[List[float]]] = None
-    ) -> List[AudioSegment]:
+        self, segments: list[AudioSegment], audio_features: list[list[float]] | None = None
+    ) -> list[AudioSegment]:
         """执行说话人分离"""
         if not segments:
             return segments
@@ -247,11 +247,11 @@ class SpeakerDiarizer:
             seg.speaker_id = speaker_id
         return segments
 
-    def register_speaker(self, speaker_id: str, name: str, voice_profile: List[float]) -> bool:
+    def register_speaker(self, speaker_id: str, name: str, voice_profile: list[float]) -> bool:
         self._speaker_profiles[speaker_id] = {"name": name, "profile": voice_profile}
         return True
 
-    def identify_speaker(self, voice_features: List[float]) -> Optional[str]:
+    def identify_speaker(self, voice_features: list[float]) -> str | None:
         best_match = None
         best_score = 0.5
         for sid, profile in self._speaker_profiles.items():
@@ -262,7 +262,7 @@ class SpeakerDiarizer:
                 best_match = sid
         return best_match
 
-    def _cosine_sim(self, a: List[float], b: List[float]) -> float:
+    def _cosine_sim(self, a: list[float], b: list[float]) -> float:
         if not a or not b:
             return 0.0
         dot = sum(x * y for x, y in zip(a, b))
@@ -277,10 +277,10 @@ class SpeakerDiarizer:
 class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """音频转录引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="audio_transcription", version="6.39.0", config=config)
-        self._results: Dict[str, TranscriptionResult] = {}
+        self._results: dict[str, TranscriptionResult] = {}
         self._vad = VADDetector()
         self._diarizer = SpeakerDiarizer()
         self._stats = {
@@ -407,8 +407,8 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": False, "error": str(e)}
 
     def batch_transcribe(
-        self, file_paths: List[str], language: str = "zh", output_format: str = "text"
-    ) -> Dict[str, Any]:
+        self, file_paths: list[str], language: str = "zh", output_format: str = "text"
+    ) -> dict[str, Any]:
         """批量音频转文字。企业场景：客服中心批量处理通话录音，会议纪要批量转写。
         使用线程池并发处理，支持进度追踪和错误隔离（单个文件失败不影响整体）。
         """
@@ -449,7 +449,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
         return {"success": True, "summary": summary, "results": results, "errors": errors}
 
-    def get_speaker_diarization(self, file_path: str, num_speakers: Optional[int] = None) -> Dict[str, Any]:
+    def get_speaker_diarization(self, file_path: str, num_speakers: int | None = None) -> dict[str, Any]:
         """说话人分离。企业场景：多人会议录音自动区分不同发言者，标注每段话的归属。
         基于音频特征聚类实现，支持指定说话人数量或自动检测。
         """
@@ -489,7 +489,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     def transcribe_with_translation(
         self, file_path: str, source_lang: str = "zh", target_lang: str = "en"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """转写+翻译一体化。企业场景：跨国会议录音转写并实时翻译，
         生成双语字幕文件，用于国际团队协作和视频字幕制作。
         """
@@ -517,7 +517,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "subtitle_content": f"1\n00:00:00,000 --> 00:00:05,000\n{original['text']}\n\n2\n00:00:05,000 --> 00:00:10,000\n{translated['text']}",
         }
 
-    def get_supported_formats(self) -> Dict[str, Any]:
+    def get_supported_formats(self) -> dict[str, Any]:
         """获取支持的音频格式列表。企业场景：前端展示可上传的音频格式。"""
         formats = {
             "wav": {"mime": "audio/wav", "description": "无损波形格式", "max_size_mb": 500},
@@ -527,7 +527,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
         return {"success": True, "formats": formats, "total": len(formats)}
 
-    def estimate_transcription_cost(self, duration_minutes: float, language: str = "zh") -> Dict[str, Any]:
+    def estimate_transcription_cost(self, duration_minutes: float, language: str = "zh") -> dict[str, Any]:
         """预估转写成本和时间。企业场景：采购评估会议录音转写费用，
         根据音时长、语言、是否需要说话人分离计算预估成本。
         """
@@ -544,7 +544,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "note": "估算值，实际费用以API计费为准",
         }
 
-    def get_transcription_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_transcription_history(self, limit: int = 20) -> dict[str, Any]:
         """转写历史记录。企业场景：用户查看之前提交的转写任务和结果。"""
         history = getattr(self, "_transcription_history", [])
         recent = history[-limit:]
@@ -557,7 +557,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "records": recent,
         }
 
-    def batch_transcribe(self, files: List[Dict[str, str]], language: str = "zh") -> Dict[str, Any]:
+    def batch_transcribe(self, files: list[dict[str, str]], language: str = "zh") -> dict[str, Any]:
         """批量转写。企业场景：每周例会批量处理多个录音文件，
         生成文字纪要并汇总。返回每个文件的转写状态和全文。
         """

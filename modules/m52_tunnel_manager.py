@@ -85,7 +85,8 @@ import socket
 import struct
 from core.logging_config import get_logger
 import threading
-from typing import Dict, List, Optional, Callable, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Tuple, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
@@ -95,7 +96,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class M52TunnelManagerAnalyzer(object):
+class M52TunnelManagerAnalyzer:
     """m52_tunnel_manager 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -299,8 +300,8 @@ class TunnelConfig:
     compression: bool = False
     encryption: bool = True
     encryption_key: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.tunnel_id:
@@ -340,8 +341,8 @@ class ConnectionPool:
 
     def __init__(self, max_connections: int = 100):
         self._max = max_connections
-        self._connections: Dict[str, ConnectionInfo] = {}
-        self._tunnel_conns: Dict[str, Set[str]] = defaultdict(set)
+        self._connections: dict[str, ConnectionInfo] = {}
+        self._tunnel_conns: dict[str, set[str]] = defaultdict(set)
         self._lock = threading.Lock()
 
     def add(self, conn: ConnectionInfo) -> bool:
@@ -352,17 +353,17 @@ class ConnectionPool:
             self._tunnel_conns[conn.tunnel_id].add(conn.conn_id)
             return True
 
-    def remove(self, conn_id: str) -> Optional[ConnectionInfo]:
+    def remove(self, conn_id: str) -> ConnectionInfo | None:
         with self._lock:
             conn = self._connections.pop(conn_id, None)
             if conn:
                 self._tunnel_conns[conn.tunnel_id].discard(conn_id)
             return conn
 
-    def get(self, conn_id: str) -> Optional[ConnectionInfo]:
+    def get(self, conn_id: str) -> ConnectionInfo | None:
         return self._connections.get(conn_id)
 
-    def get_tunnel_connections(self, tunnel_id: str) -> List[ConnectionInfo]:
+    def get_tunnel_connections(self, tunnel_id: str) -> list[ConnectionInfo]:
         with self._lock:
             ids = list(self._tunnel_conns.get(tunnel_id, set()))
         return [self._connections[cid] for cid in ids if cid in self._connections]
@@ -377,7 +378,7 @@ class ConnectionPool:
                     closed += 1
         return closed
 
-    def cleanup(self, tunnel_id: Optional[str] = None) -> int:
+    def cleanup(self, tunnel_id: str | None = None) -> int:
         removed = 0
         with self._lock:
             if tunnel_id:
@@ -407,17 +408,17 @@ class TunnelHealthMonitor:
 
     def __init__(self, check_interval: float = 30.0):
         self._interval = check_interval
-        self._results: Dict[str, Dict[str, Any]] = {}
-        self._failures: Dict[str, int] = defaultdict(int)
+        self._results: dict[str, dict[str, Any]] = {}
+        self._failures: dict[str, int] = defaultdict(int)
         self._lock = threading.Lock()
         self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self._callbacks: List[Callable[[str, bool], None]] = []
+        self._thread: threading.Thread | None = None
+        self._callbacks: list[Callable[[str, bool], None]] = []
 
     def on_status_change(self, callback: Callable[[str, bool], None]):
         self._callbacks.append(callback)
 
-    def check(self, tunnel_id: str, host: str, port: int, timeout: float = 5.0) -> Dict[str, Any]:
+    def check(self, tunnel_id: str, host: str, port: int, timeout: float = 5.0) -> dict[str, Any]:
         start = time.time()
         result = {
             "tunnel_id": tunnel_id,
@@ -456,7 +457,7 @@ class TunnelHealthMonitor:
     def get_failure_count(self, tunnel_id: str) -> int:
         return self._failures.get(tunnel_id, 0)
 
-    def start(self, tunnels: Dict[str, Tuple[str, int]]):
+    def start(self, tunnels: dict[str, tuple[str, int]]):
         self._running = True
         self._tunnels = tunnels
         self._thread = threading.Thread(target=self._monitor_loop, daemon=True)
@@ -478,7 +479,7 @@ class TunnelHealthMonitor:
         if self._thread:
             self._thread.join(timeout=10)
 
-    def get_all(self) -> Dict[str, Dict]:
+    def get_all(self) -> dict[str, dict]:
         return dict(self._results)
 
 class BandwidthTracker:
@@ -486,7 +487,7 @@ class BandwidthTracker:
 
     def __init__(self, window_size: int = 3600):
         self._window = window_size
-        self._tunnel_bw: Dict[str, Dict[str, deque]] = defaultdict(
+        self._tunnel_bw: dict[str, dict[str, deque]] = defaultdict(
             lambda: {"send": deque(maxlen=1000), "recv": deque(maxlen=1000)}
         )
         self._lock = threading.Lock()
@@ -497,7 +498,7 @@ class BandwidthTracker:
             self._tunnel_bw[tunnel_id]["send"].append((now, bytes_sent))
             self._tunnel_bw[tunnel_id]["recv"].append((now, bytes_recv))
 
-    def get_rate(self, tunnel_id: str, window: int = 60) -> Dict[str, float]:
+    def get_rate(self, tunnel_id: str, window: int = 60) -> dict[str, float]:
         now = time.time()
         cutoff = now - window
         send_total = 0
@@ -518,7 +519,7 @@ class BandwidthTracker:
             "recv_total": recv_total,
         }
 
-class TunnelManager(object):
+class TunnelManager:
     def trace(self, name, *args, **kwargs):
         class _NS:
             def __enter__(self):
@@ -563,9 +564,9 @@ class TunnelManager(object):
     MODULE_CATEGORY = "networking"
 
     def __init__(self):
-        self._tunnels: Dict[str, TunnelConfig] = {}
-        self._status: Dict[str, TunnelStatus] = {}
-        self._metrics: Dict[str, TunnelMetrics] = defaultdict(TunnelMetrics)
+        self._tunnels: dict[str, TunnelConfig] = {}
+        self._status: dict[str, TunnelStatus] = {}
+        self._metrics: dict[str, TunnelMetrics] = defaultdict(TunnelMetrics)
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -618,7 +619,7 @@ class TunnelManager(object):
             self._status[tunnel_id] = TunnelStatus.RECONNECTING
             self._stats["reconnects"] += 1
 
-    def create_tunnel(self, config: TunnelConfig) -> Dict[str, Any]:
+    def create_tunnel(self, config: TunnelConfig) -> dict[str, Any]:
         with self._lock:
             self._tunnels[config.tunnel_id] = config
             self._status[config.tunnel_id] = TunnelStatus.CONNECTING
@@ -640,7 +641,7 @@ class TunnelManager(object):
                 return True
         return False
 
-    def start_tunnel(self, tunnel_id: str) -> Dict[str, Any]:
+    def start_tunnel(self, tunnel_id: str) -> dict[str, Any]:
         config = self._tunnels.get(tunnel_id)
         if not config:
             return {"status": "error", "error": "tunnel_not_found"}
@@ -650,7 +651,7 @@ class TunnelManager(object):
         logger.info(f"Tunnel started: {config.name} ({tunnel_id})")
         return {"tunnel_id": tunnel_id, "status": "active", "type": config.tunnel_type.value}
 
-    def start_all(self) -> Dict[str, int]:
+    def start_all(self) -> dict[str, int]:
         started = 0
         for tid in self._tunnels:
             result = self.start_tunnel(tid)
@@ -677,7 +678,7 @@ class TunnelManager(object):
         self._stats["total_bytes_recv"] += bytes_recv
         self._bandwidth.record(tunnel_id, bytes_sent, bytes_recv)
 
-    def get_tunnel_status(self, tunnel_id: str) -> Optional[Dict[str, Any]]:
+    def get_tunnel_status(self, tunnel_id: str) -> dict[str, Any] | None:
         config = self._tunnels.get(tunnel_id)
         if not config:
             return None
@@ -703,10 +704,10 @@ class TunnelManager(object):
             "bandwidth": self._bandwidth.get_rate(tunnel_id),
         }
 
-    def list_tunnels(self) -> List[Dict[str, Any]]:
+    def list_tunnels(self) -> list[dict[str, Any]]:
         return [self.get_tunnel_status(tid) for tid in self._tunnels]
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         uptime = time.time() - self._stats["uptime_start"] if self._stats["uptime_start"] else 0
         return {
             "status": "healthy" if self._running else "stopped",
@@ -742,7 +743,7 @@ class TunnelManager(object):
         self._running = False
         self.stop_all()
 
-    async def execute(self, action: str = "list", **kwargs) -> Dict[str, Any]:
+    async def execute(self, action: str = "list", **kwargs) -> dict[str, Any]:
         if action == "list":
             # Delegate standard actions to base class
             return {"action": "list", "tunnels": self.list_tunnels()}

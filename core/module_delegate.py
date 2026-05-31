@@ -53,7 +53,7 @@ class ModuleDelegate:
     """模块委托 - 单例，注册引擎服务供模块调用"""
 
     _instance = None
-    _services: Dict[str, _ServiceWrapper] = {}
+    _services: dict[str, _ServiceWrapper] = {}
 
     def __new__(cls):
         if cls._instance is None:

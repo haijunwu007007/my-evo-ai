@@ -22,7 +22,7 @@ mc_only = {
 
 
 def fix_config(filename):
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         content = f.read()
     content = content.replace("self._config", "self.config")
     with open(filename, "w", encoding="utf-8") as f:
@@ -31,7 +31,7 @@ def fix_config(filename):
 
 
 def add_module_class(filename, class_name):
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         content = f.read()
     export = f"\nmodule_class = {class_name}\n"
     if export.strip() not in content:
@@ -49,7 +49,7 @@ def add_module_class(filename, class_name):
 
 def add_config_attr(filename):
     """For elasticsearch_search which has no config usage at all"""
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         content = f.read()
     if "self.config" not in content:
         # Add after super().__init__(config) line

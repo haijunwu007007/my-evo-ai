@@ -16,7 +16,7 @@ AUTO-EVO-AI V0.1 — Enterprise Notifier (企业通知网关)
 from __future__ import annotations
 import os, sys, json, time, hashlib, hmac, logging, asyncio
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from urllib.parse import urlencode
 from base64 import b64encode, b64decode
 import urllib.request, urllib.error, urllib.parse
@@ -30,7 +30,7 @@ MODULE_LEVEL = "A"
 logger = logging.getLogger(f"evo.{MODULE_ID}")
 
 # ── 默认配置 ──
-_CONFIG: Dict[str, Any] = {
+_CONFIG: dict[str, Any] = {
     "wecom_webhook_url": "",
     "dingtalk_webhook_url": "",
     "dingtalk_secret": "",
@@ -39,14 +39,14 @@ _CONFIG: Dict[str, Any] = {
 }
 
 # ── 发送历史 ──
-_history: List[Dict] = []
-_stats: Dict[str, Any] = {"sent": 0, "failed": 0, "last_send": None}
+_history: list[dict] = []
+_stats: dict[str, Any] = {"sent": 0, "failed": 0, "last_send": None}
 
 # ═══════════════════════════════════════════════════════
 # 核心函数
 # ═══════════════════════════════════════════════════════
 
-async def execute(action: str, **kwargs) -> Dict:
+async def execute(action: str, **kwargs) -> dict:
     """模块执行入口"""
     if action == "send":
         return _send(
@@ -66,7 +66,7 @@ async def execute(action: str, **kwargs) -> Dict:
     else:
         return {"success": False, "error": f"Unknown action: {action}"}
 
-def health_check() -> Dict:
+def health_check() -> dict:
     return {"status": "healthy", "module": MODULE_ID, "version": VERSION,
             "channels": _active_channels(), "sent": _stats["sent"], "failed": _stats["failed"]}
 
@@ -75,7 +75,7 @@ def health_check() -> Dict:
 # ═══════════════════════════════════════════════════════
 
 def _send(channel: str, msg_type: str = "text", title: str = "",
-          content: str = "", url: str = "") -> Dict:
+          content: str = "", url: str = "") -> dict:
     """统一发送"""
     t0 = time.time()
     senders = {"wecom": _send_wecom, "dingtalk": _send_dingtalk}
@@ -88,10 +88,10 @@ def _send(channel: str, msg_type: str = "text", title: str = "",
     result["duration_ms"] = elapsed
 
     _history.append({"channel": channel, "msg_type": msg_type, "success": result["success"],
-                     "time": datetime.now(timezone.utc).isoformat()})
+                     "time": datetime.now(UTC).isoformat()})
     if result["success"]:
         _stats["sent"] += 1
-        _stats["last_send"] = datetime.now(timezone.utc).isoformat()
+        _stats["last_send"] = datetime.now(UTC).isoformat()
     else:
         _stats["failed"] += 1
     return result
@@ -100,7 +100,7 @@ def _send(channel: str, msg_type: str = "text", title: str = "",
 # 企业微信
 # ═══════════════════════════════════════════════════════
 
-def _send_wecom(msg_type: str, content: str, title: str = "", url: str = "") -> Dict:
+def _send_wecom(msg_type: str, content: str, title: str = "", url: str = "") -> dict:
     webhook = _CONFIG.get("wecom_webhook_url", "")
     if not webhook:
         return {"success": False, "error": "未配置 wecom_webhook_url"}
@@ -119,7 +119,7 @@ def _send_wecom(msg_type: str, content: str, title: str = "", url: str = "") -> 
 # 钉钉
 # ═══════════════════════════════════════════════════════
 
-def _send_dingtalk(msg_type: str, content: str, title: str = "", url: str = "") -> Dict:
+def _send_dingtalk(msg_type: str, content: str, title: str = "", url: str = "") -> dict:
     webhook = _CONFIG.get("dingtalk_webhook_url", "")
     if not webhook:
         return {"success": False, "error": "未配置 dingtalk_webhook_url"}
@@ -146,7 +146,7 @@ def _send_dingtalk(msg_type: str, content: str, title: str = "", url: str = "") 
 # HTTP 发送 (同步 + 重试)
 # ═══════════════════════════════════════════════════════
 
-def _http_post(channel: str, url: str, payload: Dict) -> Dict:
+def _http_post(channel: str, url: str, payload: dict) -> dict:
     """HTTP POST with retry"""
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     max_retries = _CONFIG.get("max_retries", 3)
@@ -180,21 +180,21 @@ def _http_post(channel: str, url: str, payload: Dict) -> Dict:
 # 辅助函数
 # ═══════════════════════════════════════════════════════
 
-def _active_channels() -> List[str]:
+def _active_channels() -> list[str]:
     return [k.replace("_webhook_url","") for k in ["wecom_webhook_url","dingtalk_webhook_url"] if _CONFIG.get(k)]
 
-def _test_channel(channel: str) -> Dict:
+def _test_channel(channel: str) -> dict:
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return _send(channel=channel, msg_type="text",
                  content=f"Enterprise Notifier 测试消息\n时间: {ts}\n状态: 通道正常")
 
-def get_config() -> Dict:
+def get_config() -> dict:
     safe = dict(_CONFIG)
     for k in ["dingtalk_secret"]:
         safe[k] = "***" if safe.get(k) else ""
     return {"success": True, "config": safe}
 
-def update_config(**kwargs) -> Dict:
+def update_config(**kwargs) -> dict:
     for k, v in kwargs.items():
         if k in _CONFIG:
             _CONFIG[k] = v if v != "***" else _CONFIG.get(k, "")

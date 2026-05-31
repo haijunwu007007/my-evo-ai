@@ -141,8 +141,8 @@ class _SparseSet:
 
     def __init__(self, precision: int = None):
         self._precision = precision
-        self._indices: List[int] = []
-        self._values: List[int] = []
+        self._indices: list[int] = []
+        self._values: list[int] = []
         self._size = 0
 
     def add(self, idx: int, val: int) -> None:
@@ -174,13 +174,13 @@ class _SparseSet:
                 return self._values[mid]
         return 0
 
-    def to_dense(self, num_registers: int) -> List[int]:
+    def to_dense(self, num_registers: int) -> list[int]:
         regs = [0] * num_registers
         for i, idx in enumerate(self._indices):
             regs[idx] = self._values[i]
         return regs
 
-    def merge(self, other: "_SparseSet") -> None:
+    def merge(self, other: _SparseSet) -> None:
         merged_i, merged_v = [], []
         i, j = 0, 0
         while i < len(self._indices) and j < len(other._indices):
@@ -231,7 +231,7 @@ class _DenseRegister:
     def get(self, idx: int) -> int:
         return self._registers[idx]
 
-    def merge(self, other: "_DenseRegister") -> None:
+    def merge(self, other: _DenseRegister) -> None:
         regs = other._registers
         for i in range(len(self._registers)):
             if regs[i] > self._registers[i]:
@@ -244,8 +244,8 @@ class HyperLogLog:
         self._precision = precision
         self._num_registers = 1 << precision
         self._sparse_threshold = sparse_threshold
-        self._sparse: Optional[_SparseSet] = _SparseSet(precision)
-        self._dense: Optional[_DenseRegister] = None
+        self._sparse: _SparseSet | None = _SparseSet(precision)
+        self._dense: _DenseRegister | None = None
         self._count = 0
 
     def add(self, value: str) -> int:
@@ -267,7 +267,7 @@ class HyperLogLog:
         self._count += 1
         return rho
 
-    def add_many(self, values: List[str]) -> int:
+    def add_many(self, values: list[str]) -> int:
         for v in values:
             self.add(v)
         return len(values)
@@ -330,7 +330,7 @@ class HyperLogLog:
             return 0.709
         return 0.7213 / (1 + 1.079 / m)
 
-    def merge(self, other: "HyperLogLog") -> None:
+    def merge(self, other: HyperLogLog) -> None:
         if other._dense is not None:
             if self._dense is None:
                 self._to_dense()
@@ -342,7 +342,7 @@ class HyperLogLog:
                     self._to_dense()
         self._count += other._count
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         if self._dense is not None:
             return {"mode": "dense", "precision": self._precision, "registers": list(self._dense._registers)}
         elif self._sparse is not None:
@@ -355,7 +355,7 @@ class HyperLogLog:
         return {"mode": "empty", "precision": self._precision}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HyperLogLog":
+    def from_dict(cls, data: dict[str, Any]) -> HyperLogLog:
         hll = cls(precision=data["precision"])
         if data["mode"] == "dense":
             hll._dense = _DenseRegister(hll._precision)
@@ -379,15 +379,15 @@ class HyperLogLog:
 class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Enterprise HyperLogLog cardinality estimation manager."""
 
-    def __init__(self, config: Optional[HLLConfig] = None):
+    def __init__(self, config: HLLConfig | None = None):
         super().__init__()
 
         self._config = config or HLLConfig()
-        self._sketches: Dict[str, HyperLogLog] = {}
+        self._sketches: dict[str, HyperLogLog] = {}
         self._lock = threading.RLock()
         self._created_at = time.time()
         self._operations = {"add": 0, "count": 0, "merge": 0, "delete": 0}
-        self._ttl_store: Dict[str, float] = {}
+        self._ttl_store: dict[str, float] = {}
         self._hit_count = 0
         self._miss_count = 0
 
@@ -396,7 +396,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.audit("初始化hyperloglog", level="info")
         pass
 
-    def create(self, key: str, precision: Optional[int] = None) -> HyperLogLog:
+    def create(self, key: str, precision: int | None = None) -> HyperLogLog:
         """Create a new HLL sketch for the given key."""
         self.metrics_collector.counter("hyperloglog.create.total", 1)
         with self._lock:
@@ -408,7 +408,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.info(f"Created HLL sketch '{key}' with precision={p}")
             return hll
 
-    async def execute(self, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, params: dict | None = None) -> dict:
         """统一执行入口 - HyperLogLog基数估计管理"""
         params = params or {}
         action = params.get("action", "status")
@@ -508,7 +508,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.trace("hyperloglog.execute", "end", action=action)
         return result
 
-    def add(self, key: str, value: str) -> Optional[int]:
+    def add(self, key: str, value: str) -> int | None:
         with self._lock:
             hll = self._sketches.get(key)
             if hll is None:
@@ -518,7 +518,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._operations["add"] += 1
             return hll.add(value)
 
-    def add_many(self, key: str, values: List[str]) -> int:
+    def add_many(self, key: str, values: list[str]) -> int:
         with self._lock:
             hll = self._sketches.get(key)
             if hll is None:
@@ -528,7 +528,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._operations["add"] += len(values)
             return hll.add_many(values)
 
-    def count(self, key: str) -> Optional[CardinalityResult]:
+    def count(self, key: str) -> CardinalityResult | None:
         with self._lock:
             hll = self._sketches.get(key)
             if hll is None:
@@ -538,7 +538,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._operations["count"] += 1
             return hll.count()
 
-    def merge(self, dest_key: str, source_keys: List[str]) -> Optional[CardinalityResult]:
+    def merge(self, dest_key: str, source_keys: list[str]) -> CardinalityResult | None:
         with self._lock:
             dest = self._sketches.get(dest_key)
             if dest is None:
@@ -550,7 +550,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._operations["merge"] += len(source_keys)
             return dest.count()
 
-    def union(self, keys: List[str]) -> Optional[CardinalityResult]:
+    def union(self, keys: list[str]) -> CardinalityResult | None:
         with self._lock:
             if not keys:
                 return None
@@ -563,7 +563,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             del self._sketches[f"_union_{time.time()}"]
             return result
 
-    def intersection_estimate(self, key_a: str, key_b: str) -> Optional[Tuple[int, float]]:
+    def intersection_estimate(self, key_a: str, key_b: str) -> tuple[int, float] | None:
         """Estimate intersection using inclusion-exclusion: |A∩B| ≈ |A| + |B| - |A∪B|."""
         with self._lock:
             hll_a = self._sketches.get(key_a)
@@ -589,12 +589,12 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 return True
             return False
 
-    def list_keys(self) -> List[str]:
+    def list_keys(self) -> list[str]:
         with self._lock:
             self._evict_expired()
             return list(self._sketches.keys())
 
-    def export(self, key: str) -> Optional[str]:
+    def export(self, key: str) -> str | None:
         with self._lock:
             hll = self._sketches.get(key)
             if hll is None:
@@ -635,7 +635,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 if fn.endswith(".hll"):
                     key = fn[:-4]
                     fp = os.path.join(self._config.save_path, fn)
-                    with open(fp, "r") as f:
+                    with open(fp) as f:
                         data = json.load(f)
                     self._sketches[key] = HyperLogLog.from_dict(data)
                     loaded += 1
@@ -666,7 +666,7 @@ class HyperLogLogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 miss_count=self._miss_count,
             )
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         self.trace("hyperloglog.health_check", "start")
         s = self.stats()
         return {
@@ -703,7 +703,7 @@ class EnterpriseModule:
         self.trace("hyperloglog.initialize", "end")
         self._manager = HyperLogLogManager()
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         self.trace("hyperloglog.health_check", "start")
         if self._manager:
             return self._manager.health_check()

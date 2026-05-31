@@ -78,7 +78,8 @@ import asyncio
 import time
 import logging
 import re
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
@@ -120,7 +121,7 @@ class ValidationRule:
     rule_id: str
     field: str
     rule_type: RuleType
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     severity: Severity = Severity.ERROR
     message: str = ""
 
@@ -144,9 +145,9 @@ class ValidationReport:
     total_records: int = 0
     valid_records: int = 0
     invalid_records: int = 0
-    issues: List[ValidationIssue] = field(default_factory=list)
+    issues: list[ValidationIssue] = field(default_factory=list)
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
 
     @property
     def pass_rate(self) -> float:
@@ -160,17 +161,17 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._rulesets: Dict[str, List[ValidationRule]] = {}
-        self._reports: List[ValidationReport] = []
+        self._rulesets: dict[str, list[ValidationRule]] = {}
+        self._reports: list[ValidationReport] = []
         self._counter: int = 0
         self._rule_counter: int = 0
-        self._custom_validators: Dict[str, Callable] = {}
+        self._custom_validators: dict[str, Callable] = {}
 
     def initialize(self) -> None:
         try:
@@ -234,7 +235,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "data_validator"})
         self.metrics_collector.counter("data_validator.execute.calls", 1)
         self.audit("execute", {"module": "data_validator"})
@@ -347,7 +348,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -361,7 +362,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._reports.clear()
         # super().shutdown() removed for sync
 
-    def _validate(self, data: List[Dict], ruleset: str) -> Dict:
+    def _validate(self, data: list[dict], ruleset: str) -> dict:
         rules = self._rulesets.get(ruleset, [])
         self._counter += 1
         report = ValidationReport(report_id=f"vr_{self._counter}", target=ruleset, total_records=len(data))
@@ -391,7 +392,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "issues": [self._issue_to_dict(i) for i in all_issues[:50]],
         }
 
-    def _validate_record(self, record: Dict, rules: List[ValidationRule]) -> List[ValidationIssue]:
+    def _validate_record(self, record: dict, rules: list[ValidationRule]) -> list[ValidationIssue]:
         issues = []
         for rule in rules:
             value = record.get(rule.field)
@@ -446,7 +447,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return value in allowed
         return True
 
-    def _issue_to_dict(self, issue: ValidationIssue) -> Dict:
+    def _issue_to_dict(self, issue: ValidationIssue) -> dict:
         return {
             "field": issue.field,
             "rule": issue.rule_id,
@@ -456,7 +457,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "value": issue.value,
         }
 
-    def batch_validate(self, records: List[Dict[str, Any]], rule_set_id: str) -> Dict[str, Any]:
+    def batch_validate(self, records: list[dict[str, Any]], rule_set_id: str) -> dict[str, Any]:
         """批量数据校验。企业场景：ETL流水线写入数据库前，批量校验
         上万条记录，返回每条记录的校验结果和错误详情。
         """
@@ -486,7 +487,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "sample_errors": error_details,
         }
 
-    def get_rule_effectiveness(self, days: int = 7) -> Dict[str, Any]:
+    def get_rule_effectiveness(self, days: int = 7) -> dict[str, Any]:
         """规则有效性统计。企业场景：数据团队定期回顾各规则的触发频率，
         识别"永远不触发"的死规则（可下线）和"触发过多"的噪音规则。
         """
@@ -522,7 +523,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_triggered_rules": top_triggered,
         }
 
-    def validate_batch(self, records: List[Dict], rules: Optional[List[str]] = None) -> Dict[str, Any]:
+    def validate_batch(self, records: list[dict], rules: list[str] | None = None) -> dict[str, Any]:
         """批量数据校验。企业场景：ETL管道入库前批量校验百万条记录，
         返回每条记录的校验结果和错误明细。
         """
@@ -573,7 +574,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         results["details"].append({"note": f"仅展示前20条，共{len(records)}条"})
         return {"success": True, **results}
 
-    def validate_email_batch(self, emails: List[str]) -> Dict[str, Any]:
+    def validate_email_batch(self, emails: list[str]) -> dict[str, Any]:
         """批量邮箱格式验证。企业场景：CRM系统导入用户数据时验证邮箱合法性，
         支持RFC 5322标准，输出无效邮箱及具体原因。
         """
@@ -605,7 +606,7 @@ class DataValidator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "invalid_details": results["invalid"][:50],
         }
 
-    def validate_phone_batch(self, phones: List[str], country_code: str = "CN") -> Dict[str, Any]:
+    def validate_phone_batch(self, phones: list[str], country_code: str = "CN") -> dict[str, Any]:
         """批量手机号验证。企业场景：营销平台发送短信前验证号码合法性，
         支持国际区号，去除前缀0/86等格式标准化。
         """

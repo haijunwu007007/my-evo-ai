@@ -6,7 +6,7 @@ logger = logging.getLogger("evo.batch_processor")
 
 class BatchProcessor:
     def __init__(self):
-        self._results: Dict[str,Any] = {}
+        self._results: dict[str,Any] = {}
         self._stats = {"completed":0,"failed":0,"total":0}
     def status(self,params=None):
         return {"success":True,"stats":self._stats,"pending":len(self._results)}

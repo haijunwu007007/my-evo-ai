@@ -166,7 +166,7 @@ class ForecastModel:
     model_id: str
     name: str
     model_type: str  # linear/exponential/moving_avg/regression
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     accuracy_score: float = 0.0
 
 @dataclass
@@ -176,7 +176,7 @@ class ForecastResult:
     forecast_id: str
     model_id: str
     metric_name: str
-    predictions: List[Dict[str, Any]]  # [{date, value, confidence_low, confidence_high}]
+    predictions: list[dict[str, Any]]  # [{date, value, confidence_low, confidence_high}]
     created_at: datetime = field(default_factory=datetime.now)
 
 @dataclass
@@ -189,16 +189,16 @@ class Insight:
     severity: InsightSeverity
     category: str
     metric: str
-    action_items: List[str] = field(default_factory=list)
+    action_items: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
 
-class KPITrendAnalyzer(object):
+class KPITrendAnalyzer:
     """KPI趋势分析引擎 — 多维度趋势分析、异常检测、同比环比计算"""
 
     def __init__(self):
-        self._kpi_history: Dict[str, List[Dict[str, Any]]] = {}
+        self._kpi_history: dict[str, list[dict[str, Any]]] = {}
 
-    def analyze_trend(self, metric_name: str, values: List[float], labels: List[str] = None) -> Dict[str, Any]:
+    def analyze_trend(self, metric_name: str, values: list[float], labels: list[str] = None) -> dict[str, Any]:
         """分析指标趋势，识别上升/下降/平稳"""
         n = len(values)
         if n < 2:
@@ -235,7 +235,7 @@ class KPITrendAnalyzer(object):
             "latest": round(values[-1], 4) if values else None,
         }
 
-    def compute_yoy_qoq(self, current: float, previous_period: float, year_ago: float) -> Dict[str, Any]:
+    def compute_yoy_qoq(self, current: float, previous_period: float, year_ago: float) -> dict[str, Any]:
         """计算同比和环比变化"""
         qoq = ((current - previous_period) / previous_period * 100) if previous_period != 0 else None
         yoy = ((current - year_ago) / year_ago * 100) if year_ago != 0 else None
@@ -258,7 +258,7 @@ class KPITrendAnalyzer(object):
             "momentum": momentum,
         }
 
-    def detect_anomalies(self, values: List[float], threshold: float = 2.0) -> List[Dict[str, Any]]:
+    def detect_anomalies(self, values: list[float], threshold: float = 2.0) -> list[dict[str, Any]]:
         """使用统计方法检测异常数据点"""
         if len(values) < 5:
             return []
@@ -283,7 +283,7 @@ class KPITrendAnalyzer(object):
                 )
         return anomalies
 
-    def generate_summary(self, metrics: Dict[str, List[float]]) -> Dict[str, Any]:
+    def generate_summary(self, metrics: dict[str, list[float]]) -> dict[str, Any]:
         """生成多指标综合分析摘要"""
         summary = {"total_metrics": len(metrics), "improving": [], "declining": [], "stable": []}
         for name, vals in metrics.items():
@@ -311,20 +311,20 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._initialized = False
 
         # KPI管理
-        self._kpi_definitions: Dict[str, KPIDefinition] = {}
-        self._kpi_history: Dict[str, List[KPIDataPoint]] = defaultdict(list)
+        self._kpi_definitions: dict[str, KPIDefinition] = {}
+        self._kpi_history: dict[str, list[KPIDataPoint]] = defaultdict(list)
 
         # 预测模型
-        self._forecast_models: Dict[str, ForecastModel] = {}
-        self._forecast_history: Dict[str, List[ForecastResult]] = defaultdict(list)
+        self._forecast_models: dict[str, ForecastModel] = {}
+        self._forecast_history: dict[str, list[ForecastResult]] = defaultdict(list)
 
         # 洞察库
-        self._insights: List[Insight] = []
+        self._insights: list[Insight] = []
         self._insight_counter = 0
 
         # 市场数据
-        self._market_data: Dict[str, List[Dict]] = defaultdict(list)
-        self._competitors: Dict[str, Dict] = {}
+        self._market_data: dict[str, list[dict]] = defaultdict(list)
+        self._competitors: dict[str, dict] = {}
 
         # 分析统计
         self._total_analyses = 0
@@ -391,7 +391,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._kpi_history[kpi_id].append(dp)
         return {"recorded": True, "data_points": len(self._kpi_history[kpi_id])}
 
-    def _get_kpi_status(self, kpi_id: str) -> Optional[KPIStatus]:
+    def _get_kpi_status(self, kpi_id: str) -> KPIStatus | None:
         """获取KPI当前状态"""
         defn = self._kpi_definitions.get(kpi_id)
         history = self._kpi_history.get(kpi_id, [])
@@ -441,7 +441,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             status=status,
         )
 
-    def _moving_average_forecast(self, values: List[float], window: int, periods: int) -> List[Dict]:
+    def _moving_average_forecast(self, values: list[float], window: int, periods: int) -> list[dict]:
         """移动平均预测"""
         if len(values) < window:
             return []
@@ -459,7 +459,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return predictions
 
-    def _linear_forecast(self, values: List[float], periods: int) -> List[Dict]:
+    def _linear_forecast(self, values: list[float], periods: int) -> list[dict]:
         """线性回归预测"""
         n = len(values)
         if n < 2:
@@ -491,7 +491,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return predictions
 
-    def _exponential_forecast(self, values: List[float], alpha: float, periods: int) -> List[Dict]:
+    def _exponential_forecast(self, values: list[float], alpha: float, periods: int) -> list[dict]:
         """指数平滑预测"""
         if not values:
             return []
@@ -512,7 +512,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return predictions
 
-    def _generate_insights(self) -> List[Insight]:
+    def _generate_insights(self) -> list[Insight]:
         """基于KPI数据自动生成洞察"""
         insights = []
         for kpi_id, defn in self._kpi_definitions.items():
@@ -557,7 +557,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._insight_counter += len(insights)
         return insights
 
-    async def execute(self, action: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行商业分析操作"""
         _ = self.trace("execute")
         metrics_collector.counter("business_analyst_ops_total", labels={"action": action})
@@ -817,7 +817,7 @@ class BusinessAnalystManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._initialized = False
         logger.info(f"[{self.module_name}] 已关闭")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         base = super().health_check() or {}
         result = dict(base)

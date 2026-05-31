@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - 限流器 Mixin
 ================================
@@ -48,7 +47,7 @@ class RateLimitConfig:
 class TokenBucket:
     """令牌桶限流器"""
 
-    def __init__(self, name: str, config: Optional[RateLimitConfig] = None):
+    def __init__(self, name: str, config: RateLimitConfig | None = None):
         self.name = name
         self.config = config or RateLimitConfig()
         self._tokens: float = self.config.burst
@@ -112,7 +111,7 @@ class TokenBucket:
             self._refill()
             return self._tokens
 
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> dict[str, any]:
         return {
             "name": self.name,
             "available_tokens": round(self.available_tokens, 1),
@@ -129,7 +128,7 @@ class SlidingWindowCounter:
 
     def __init__(self, window: float = 60.0):
         self.window = window
-        self._timestamps: List[float] = []
+        self._timestamps: list[float] = []
         self._lock = threading.Lock()
 
     def record(self):
@@ -168,9 +167,9 @@ class RateLimiterMixin:
                 ...
     """
 
-    _buckets: Dict[str, TokenBucket] = {}
-    _windows: Dict[str, SlidingWindowCounter] = {}
-    _rate_limit_config: Optional[RateLimitConfig] = None
+    _buckets: dict[str, TokenBucket] = {}
+    _windows: dict[str, SlidingWindowCounter] = {}
+    _rate_limit_config: RateLimitConfig | None = None
 
     def _setup_rate_limit(
         self,
@@ -217,7 +216,7 @@ class RateLimiterMixin:
         bucket = self._get_bucket(key)
         return bucket.get_wait_time(tokens)
 
-    def get_all_rate_limit_stats(self) -> Dict[str, Dict[str, any]]:
+    def get_all_rate_limit_stats(self) -> dict[str, dict[str, any]]:
         """获取所有限流器状态"""
         bucket_stats = {name: b.get_stats() for name, b in self._buckets.items()}
         window_stats = {name: {"count": w.count(), "window": w.window} for name, w in self._windows.items()}

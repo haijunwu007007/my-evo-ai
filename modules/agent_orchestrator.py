@@ -59,7 +59,8 @@ __module_meta__ = {
 import re, time, uuid, json, logging, threading
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple, Set
+from collections.abc import Callable
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -76,13 +77,13 @@ class ModuleCapability:
     """模块能力描述"""
     module_name: str
     display_name: str
-    capabilities: List[str]
-    intent_map: List[IntentCategory]
+    capabilities: list[str]
+    intent_map: list[IntentCategory]
     priority: TaskPriority = TaskPriority.MEDIUM
     timeout: float = 120.0
     is_blocking: bool = False
-    dependencies: List[str] = field(default_factory=list)
-    fallback: Optional[str] = None
+    dependencies: list[str] = field(default_factory=list)
+    fallback: str | None = None
 
 
 class ModuleRegistry:
@@ -94,8 +95,8 @@ class ModuleRegistry:
     def __init__(self):
         self._initialized = False
         self._status = "pending"
-        self._modules: Dict[str, ModuleCapability] = {}
-        self._intent_index: Dict[IntentCategory, List[str]] = defaultdict(list)
+        self._modules: dict[str, ModuleCapability] = {}
+        self._intent_index: dict[IntentCategory, list[str]] = defaultdict(list)
         self._load_builtin_registry()
 
     def _load_builtin_registry(self):
@@ -417,18 +418,18 @@ class ModuleRegistry:
             if capability.module_name not in self._intent_index[intent]:
                 self._intent_index[intent].append(capability.module_name)
 
-    def find_modules(self, intent: IntentCategory, limit: int = 3) -> List[ModuleCapability]:
+    def find_modules(self, intent: IntentCategory, limit: int = 3) -> list[ModuleCapability]:
         """根据意图查找匹配模块"""
         module_names = self._intent_index.get(intent, [])
         modules = [self._modules[m] for m in module_names if m in self._modules]
         modules.sort(key=lambda x: x.priority.value)
         return modules[:limit]
 
-    def get_module(self, name: str) -> Optional[ModuleCapability]:
+    def get_module(self, name: str) -> ModuleCapability | None:
         """获取模块能力描述"""
         return self._modules.get(name)
 
-    def list_all(self) -> Dict[str, ModuleCapability]:
+    def list_all(self) -> dict[str, ModuleCapability]:
         """列出所有注册模块"""
         return dict(self._modules)
 
@@ -472,7 +473,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._task_history: deque = deque(maxlen=100)
         self._running = False
         self._lock = threading.Lock()
-        self._progress_callbacks: List[Callable] = []
+        self._progress_callbacks: list[Callable] = []
 
         # AI 增强层
         self.ai_gateway = ai_gateway
@@ -490,7 +491,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     # ---- 公共接口 ----
 
     def run(
-        self, user_input: str, priority: TaskPriority = TaskPriority.HIGH, callback: Optional[Callable] = None
+        self, user_input: str, priority: TaskPriority = TaskPriority.HIGH, callback: Callable | None = None
     ) -> OrchestratorTask:
         """
         执行编排任务（主入口）
@@ -624,7 +625,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.run, user_input, *[], **kwargs)
 
-    def explain(self, user_input: str) -> Dict[str, Any]:
+    def explain(self, user_input: str) -> dict[str, Any]:
         """
         模拟执行计划（不实际执行，返回规划结果）
 
@@ -656,7 +657,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     # ---- 内部方法 ----
 
-    def _publish_event(self, event_type: str, data: Dict):
+    def _publish_event(self, event_type: str, data: dict):
         """发布事件（断点2 - EventBus激活）"""
         try:
             from modules.event_bus import get_event_bus
@@ -666,10 +667,10 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         except Exception:
             pass  # EventBus不可用时静默降级
 
-    def _execute_dag(self, task: OrchestratorTask, callback: Optional[Callable]):
+    def _execute_dag(self, task: OrchestratorTask, callback: Callable | None):
         """执行任务DAG（支持并行）"""
         tasks = {t.task_id: t for t in task.sub_tasks}
-        completed: Set[str] = set()
+        completed: set[str] = set()
         total = len(task.sub_tasks)
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
@@ -754,7 +755,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return max(0.0, min(1.0, completion_rate - error_penalty + speed_bonus))
 
-    def _extract_lessons(self, task: OrchestratorTask) -> List[str]:
+    def _extract_lessons(self, task: OrchestratorTask) -> list[str]:
         """提取经验教训"""
         lessons = []
         for st in task.sub_tasks:
@@ -825,7 +826,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         except Exception as e:
             self.logger.warning(f"[P2记忆] 归档失败: {e}")
 
-    def _notify(self, callback: Optional[Callable], task: OrchestratorTask, message: str, progress: int):
+    def _notify(self, callback: Callable | None, task: OrchestratorTask, message: str, progress: int):
         """进度通知"""
         if callback:
             try:
@@ -835,7 +836,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     # ---- 系统信息 ----
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """获取编排器状态"""
         total = len(self._task_history)
         completed = sum(1 for t in self._task_history if t.status == TaskStatus.COMPLETED)
@@ -856,7 +857,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "load_errors": list(self.executor._load_errors.keys()),
         }
 
-    def get_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 10) -> list[dict[str, Any]]:
         """获取最近任务历史"""
         history = list(self._task_history)[-limit:]
         return [
@@ -947,7 +948,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self.logger.info("%s initialized", self.__class__.__name__)
         return {"success": True, "module": self.__class__.__name__}
 
-_default_orchestrator: Optional[AgentOrchestrator] = None
+_default_orchestrator: AgentOrchestrator | None = None
 
 def get_orchestrator() -> AgentOrchestrator:
     """获取全局编排器实例（单例）"""
@@ -960,7 +961,7 @@ def run(user_input: str, **kwargs) -> OrchestratorTask:
     """快捷执行入口"""
     return get_orchestrator().run(user_input, **kwargs)
 
-def explain(user_input: str) -> Dict[str, Any]:
+def explain(user_input: str) -> dict[str, Any]:
     """快捷规划入口（只看计划不执行）"""
     return get_orchestrator().explain(user_input)
 

@@ -87,7 +87,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ExperienceBridgeAnalyzer(object):
+class ExperienceBridgeAnalyzer:
     """experience_bridge 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -275,12 +275,12 @@ class ExperienceEvent:
     page: str = ""
     element: str = ""
     value: float = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     platform: str = "web"
     app_version: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "event_id": self.event_id,
             "session_id": self.session_id,
@@ -299,7 +299,7 @@ class UserJourney:
     journey_id: str = ""
     user_id: str = ""
     session_id: str = ""
-    steps: List[Dict[str, Any]] = field(default_factory=list)
+    steps: list[dict[str, Any]] = field(default_factory=list)
     start_page: str = ""
     end_page: str = ""
     goal_achieved: bool = False
@@ -308,7 +308,7 @@ class UserJourney:
     events_count: int = 0
     created: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "journey_id": self.journey_id,
             "user_id": self.user_id,
@@ -340,7 +340,7 @@ class ExperimentVariant:
     visitors: int = 0
     conversions: int = 0
     conversion_rate: float = 0
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
 
 @dataclass
 class ABExperiment:
@@ -350,7 +350,7 @@ class ABExperiment:
     name: str = ""
     goal: str = ""
     status: str = "running"
-    variants: Dict[str, ExperimentVariant] = field(default_factory=dict)
+    variants: dict[str, ExperimentVariant] = field(default_factory=dict)
     created: float = field(default_factory=time.time)
     ended: float = 0
 
@@ -379,14 +379,14 @@ class ExperienceBridgeModule:
 
     def __init__(self):
         self._events: deque = deque(maxlen=100000)
-        self._sessions: Dict[str, Dict[str, Any]] = {}
-        self._journeys: Dict[str, UserJourney] = {}
-        self._metrics: Dict[str, Dict[str, Any]] = defaultdict(
+        self._sessions: dict[str, dict[str, Any]] = {}
+        self._journeys: dict[str, UserJourney] = {}
+        self._metrics: dict[str, dict[str, Any]] = defaultdict(
             lambda: {"type": "counter", "value": 0, "history": deque(maxlen=1000)}
         )
-        self._experiments: Dict[str, ABExperiment] = {}
-        self._funnels: Dict[str, List[FunnelStep]] = {}
-        self._page_stats: Dict[str, Dict[str, Any]] = defaultdict(lambda: {"views": 0, "avg_duration": 0, "errors": 0})
+        self._experiments: dict[str, ABExperiment] = {}
+        self._funnels: dict[str, list[FunnelStep]] = {}
+        self._page_stats: dict[str, dict[str, Any]] = defaultdict(lambda: {"views": 0, "avg_duration": 0, "errors": 0})
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -426,7 +426,7 @@ class ExperienceBridgeModule:
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._funnels["signup"] = [
                 FunnelStep(step_name="landing", step_index=0),
@@ -446,7 +446,7 @@ class ExperienceBridgeModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         return {
@@ -467,8 +467,8 @@ class ExperienceBridgeModule:
         page: str = "",
         element: str = "",
         value: float = 0,
-        metadata: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         try:
@@ -498,7 +498,7 @@ class ExperienceBridgeModule:
         return {"success": True, "event_id": event_id, "type": et.value}
 
     # --- Session ---
-    def start_session(self, user_id: str, platform: str = "web", app_version: str = "") -> Dict[str, Any]:
+    def start_session(self, user_id: str, platform: str = "web", app_version: str = "") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         session_id = f"sess_{uuid.uuid4().hex[:12]}"
@@ -513,7 +513,7 @@ class ExperienceBridgeModule:
         self._stats["sessions_active"] += 1
         return {"success": True, "session_id": session_id}
 
-    def end_session(self, session_id: str) -> Dict[str, Any]:
+    def end_session(self, session_id: str) -> dict[str, Any]:
         if session_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         sess = self._sessions.pop(session_id)
@@ -528,8 +528,8 @@ class ExperienceBridgeModule:
 
     # --- Metric ---
     def record_metric(
-        self, name: str, value: float = 1.0, metric_type: str = "counter", tags: Dict[str, str] = None
-    ) -> Dict[str, Any]:
+        self, name: str, value: float = 1.0, metric_type: str = "counter", tags: dict[str, str] = None
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         key = name
@@ -545,7 +545,7 @@ class ExperienceBridgeModule:
         self._stats["metrics_recorded"] += 1
         return {"success": True, "name": key, "value": metric["value"]}
 
-    def get_metric(self, name: str) -> Dict[str, Any]:
+    def get_metric(self, name: str) -> dict[str, Any]:
         if name in self._metrics:
             m = self._metrics[name]
             return {
@@ -558,7 +558,7 @@ class ExperienceBridgeModule:
         return {"success": False, "error": "not_found"}
 
     # --- Funnel ---
-    def analyze_funnel(self, funnel_name: str) -> Dict[str, Any]:
+    def analyze_funnel(self, funnel_name: str) -> dict[str, Any]:
         if funnel_name not in self._funnels:
             return {"success": False, "error": "funnel_not_found"}
         import random
@@ -581,7 +581,7 @@ class ExperienceBridgeModule:
         }
 
     # --- A/B ---
-    def create_experiment(self, name: str, goal: str, variants: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def create_experiment(self, name: str, goal: str, variants: list[dict[str, Any]]) -> dict[str, Any]:
         exp_id = f"exp_{uuid.uuid4().hex[:8]}"
         exp = ABExperiment(experiment_id=exp_id, name=name, goal=goal)
         for v in variants:
@@ -592,7 +592,7 @@ class ExperienceBridgeModule:
         self._experiments[exp_id] = exp
         return {"success": True, "experiment_id": exp_id, "variants": len(variants)}
 
-    def list_experiments(self) -> Dict[str, Any]:
+    def list_experiments(self) -> dict[str, Any]:
         items = [
             {
                 "experiment_id": e.experiment_id,
@@ -608,7 +608,7 @@ class ExperienceBridgeModule:
     # --- Query ---
     def query_events(
         self, session_id: str = "", user_id: str = "", event_type: str = "", page: str = "", limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         results = []
         for evt in reversed(self._events):
             if session_id and evt.session_id != session_id:
@@ -624,10 +624,10 @@ class ExperienceBridgeModule:
                 break
         return {"success": True, "events": results, "total": len(results)}
 
-    def get_page_stats(self) -> Dict[str, Any]:
+    def get_page_stats(self) -> dict[str, Any]:
         return {"success": True, "pages": dict(self._page_stats)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {"success": True, **self._stats, "events_buffer": len(self._events), "metrics": len(self._metrics)}
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

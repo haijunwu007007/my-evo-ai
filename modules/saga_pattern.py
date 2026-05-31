@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class SagaAnalyzer(object):
+class SagaAnalyzer:
     """saga_pattern 运营分析引擎
 
     - 分析事务补偿频率
@@ -116,7 +116,7 @@ class SagaAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "SagaAnalyzer", "module": "saga_pattern", "summary": summary}
 
-class SagaPatternAnalyzer(object):
+class SagaPatternAnalyzer:
     """saga pattern 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class SagaPatternAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class SagaPatternAnalyzer(object):
+class SagaPatternAnalyzer:
     """saga_pattern核心分析引擎
 
     为saga_pattern模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class SagaPatternAnalyzer(object):
 class SagaPattern(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Saga分布式事务"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"saga_pattern")
 

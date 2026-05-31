@@ -82,13 +82,14 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class OpenChronicleAnalyzer(object):
+class OpenChronicleAnalyzer:
     """open_chronicle 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -296,12 +297,12 @@ class TimelineEvent:
     end_timestamp: float = 0.0
     source: str = ""
     author: str = ""
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    related_events: List[str] = field(default_factory=list)
-    attachments: List[Dict[str, str]] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    related_events: list[str] = field(default_factory=list)
+    attachments: list[dict[str, str]] = field(default_factory=list)
     location: str = ""
-    participants: List[str] = field(default_factory=list)
+    participants: list[str] = field(default_factory=list)
     version: int = 1
     created_at: float = field(default_factory=time.time)
     updated_at: float = 0.0
@@ -310,12 +311,12 @@ class TimelineEvent:
 class TimelineFilter:
     start_time: float = 0.0
     end_time: float = 0.0
-    categories: List[EventCategory] = field(default_factory=list)
-    severities: List[EventSeverity] = field(default_factory=list)
-    event_types: List[EventType] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    sources: List[str] = field(default_factory=list)
-    authors: List[str] = field(default_factory=list)
+    categories: list[EventCategory] = field(default_factory=list)
+    severities: list[EventSeverity] = field(default_factory=list)
+    event_types: list[EventType] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    sources: list[str] = field(default_factory=list)
+    authors: list[str] = field(default_factory=list)
     search_query: str = ""
     limit: int = 100
     offset: int = 0
@@ -327,8 +328,8 @@ class ChronicleChapter:
     description: str = ""
     start_time: float = 0.0
     end_time: float = 0.0
-    event_ids: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    event_ids: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     is_public: bool = True
     created_at: float = field(default_factory=time.time)
     author: str = ""
@@ -338,7 +339,7 @@ class ChronicleTimeline:
     timeline_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     name: str = ""
     description: str = ""
-    chapters: List[ChronicleChapter] = field(default_factory=list)
+    chapters: list[ChronicleChapter] = field(default_factory=list)
     filters: TimelineFilter = field(default_factory=TimelineFilter)
     is_public: bool = True
     created_at: float = field(default_factory=time.time)
@@ -376,13 +377,13 @@ class OpenChronicle:
     """Enterprise chronological event recording with timelines and chapters."""
 
     def __init__(self):
-        self._events: Dict[str, TimelineEvent] = {}
-        self._timelines: Dict[str, ChronicleTimeline] = {}
-        self._chapters: Dict[str, ChronicleChapter] = {}
-        self._tag_index: Dict[str, Set[str]] = defaultdict(set)
-        self._category_index: Dict[str, Set[str]] = defaultdict(set)
-        self._time_index: List[str] = []
-        self._hooks: Dict[str, List[Callable]] = {
+        self._events: dict[str, TimelineEvent] = {}
+        self._timelines: dict[str, ChronicleTimeline] = {}
+        self._chapters: dict[str, ChronicleChapter] = {}
+        self._tag_index: dict[str, set[str]] = defaultdict(set)
+        self._category_index: dict[str, set[str]] = defaultdict(set)
+        self._time_index: list[str] = []
+        self._hooks: dict[str, list[Callable]] = {
             "on_event_create": [],
             "on_event_update": [],
             "on_event_delete": [],
@@ -436,11 +437,11 @@ class OpenChronicle:
         category: EventCategory = EventCategory.SYSTEM,
         severity: EventSeverity = EventSeverity.INFO,
         event_type: EventType = EventType.ANNOTATION,
-        timestamp: Optional[float] = None,
+        timestamp: float | None = None,
         source: str = "",
         author: str = "",
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict] = None,
+        tags: list[str] | None = None,
+        metadata: dict | None = None,
     ) -> TimelineEvent:
         event = TimelineEvent(
             title=title,
@@ -470,11 +471,11 @@ class OpenChronicle:
     def update_event(
         self,
         event_id: str,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        severity: Optional[EventSeverity] = None,
-        tags: Optional[List[str]] = None,
-    ) -> Optional[TimelineEvent]:
+        title: str | None = None,
+        description: str | None = None,
+        severity: EventSeverity | None = None,
+        tags: list[str] | None = None,
+    ) -> TimelineEvent | None:
         with self._lock:
             event = self._events.get(event_id)
             if not event:
@@ -529,7 +530,7 @@ class OpenChronicle:
                 b.related_events.append(event_id_a)
         return True
 
-    def query_events(self, filter_: Optional[TimelineFilter] = None) -> List[Dict[str, Any]]:
+    def query_events(self, filter_: TimelineFilter | None = None) -> list[dict[str, Any]]:
         f = filter_ or TimelineFilter()
         results = []
         with self._lock:
@@ -625,7 +626,7 @@ class OpenChronicle:
             self._timelines[timeline.timeline_id] = timeline
         return timeline
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             cat_counts = defaultdict(int)
             sev_counts = defaultdict(int)
@@ -648,7 +649,7 @@ class OpenChronicle:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

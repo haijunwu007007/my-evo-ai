@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: B
 AUTO-EVO-AI V0.1 - RBAC 权限管理（A级生产实现）
@@ -18,9 +17,9 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     MODULE_ID="permission-rbac"; MODULE_NAME="RBAC权限"; VERSION = "V0.1"; MODULE_LEVEL="A"
     def __init__(self, config=None):
         super().__init__(config)
-        self._roles: Dict[str, Dict] = {}  # role_id -> {name, permissions, description}
-        self._users: Dict[str, List[str]] = {}  # user_id -> [role_ids]
-        self._permissions: Dict[str, str] = {}  # perm_key -> description
+        self._roles: dict[str, dict] = {}  # role_id -> {name, permissions, description}
+        self._users: dict[str, list[str]] = {}  # user_id -> [role_ids]
+        self._permissions: dict[str, str] = {}  # perm_key -> description
         self._setup_rate_limit(rate=500, burst=1000)
     def initialize(self) -> None:
         self._add_default_permissions()
@@ -39,7 +38,7 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             checks={"roles":len(self._roles),"users":len(self._users),"perms":len(self._permissions)})
     async def execute(self, action, params=None):
         return await self._safe_execute(action, params, handler=self._dispatch)
-    def _dispatch(self, params: Dict) -> Dict:
+    def _dispatch(self, params: dict) -> dict:
         action=params.get("action","status")
         if action=="create_role": return self._create_role(params)
         elif action=="list_roles": return {"roles":self._roles}
@@ -52,14 +51,14 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         elif action=="delete_role": return self._delete_role(params)
         return {"success":False,"error":f"unknown:{action}"}
 
-    def _create_role(self, params: Dict) -> Dict:
+    def _create_role(self, params: dict) -> dict:
         role_id = params.get("role_id",f"role_{uuid.uuid4().hex[:6]}")
         if role_id in self._roles: return {"success":False,"error":"role exists"}
         self._roles[role_id] = {"name":params.get("name",role_id),"permissions":params.get("permissions",["read"]),
                                 "description":params.get("description",""),"builtin":False}
         return {"success":True,"role_id":role_id}
 
-    def _delete_role(self, params: Dict) -> Dict:
+    def _delete_role(self, params: dict) -> dict:
         role_id = params.get("role_id","")
         role = self._roles.get(role_id)
         if not role: return {"success":False,"error":"role not found"}
@@ -69,7 +68,7 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._users[uid] = [r for r in self._users[uid] if r != role_id]
         return {"success":True}
 
-    def _assign_role(self, params: Dict) -> Dict:
+    def _assign_role(self, params: dict) -> dict:
         user_id = params.get("user_id","")
         role_id = params.get("role_id","")
         if not user_id or not role_id: return {"success":False,"error":"user_id and role_id required"}
@@ -79,19 +78,19 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._users[user_id].append(role_id)
         return {"success":True,"user_id":user_id,"roles":self._users[user_id]}
 
-    def _remove_role(self, params: Dict) -> Dict:
+    def _remove_role(self, params: dict) -> dict:
         user_id=params.get("user_id",""); role_id=params.get("role_id","")
         if user_id in self._users and role_id:
             self._users[user_id] = [r for r in self._users[user_id] if r != role_id]
         return {"success":True}
 
-    def _check(self, params: Dict) -> Dict:
+    def _check(self, params: dict) -> dict:
         user_id=params.get("user_id",""); permission=params.get("permission","")
         perms = self._user_permissions({"user_id":user_id}).get("permissions",[])
         has_perm = permission in perms
         return {"success":True,"has_permission":has_perm,"permission":permission,"user_id":user_id}
 
-    def _user_permissions(self, params: Dict) -> Dict:
+    def _user_permissions(self, params: dict) -> dict:
         user_id=params.get("user_id","")
         role_ids = self._users.get(user_id,[])
         perms = set()
@@ -100,7 +99,7 @@ class PermissionRbac(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             perms.update(role.get("permissions",[]))
         return {"success":True,"user_id":user_id,"roles":role_ids,"permissions":sorted(perms)}
 
-    def _add_permission(self, params: Dict) -> Dict:
+    def _add_permission(self, params: dict) -> dict:
         key=params.get("key",""); desc=params.get("description","")
         self._permissions[key]=desc
         return {"success":True}

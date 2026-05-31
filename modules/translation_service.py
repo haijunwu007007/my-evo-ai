@@ -189,10 +189,10 @@ class TranslationResult:
     confidence: float
     from_cache: bool = False
     from_memory: bool = False
-    alternatives: List[str] = field(default_factory=list)
+    alternatives: list[str] = field(default_factory=list)
     duration_ms: float = 0.0
 
-class LanguageDetector(object):
+class LanguageDetector:
     """语言检测器 — 基于字符频率和常见词检测文本语言"""
 
     COMMON_PATTERNS = {
@@ -211,10 +211,10 @@ class LanguageDetector(object):
         "ko": ["의", "는", "이", "가", "을", "를", "에", "에서", "과", "와"],
     }
 
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         if not text or not text.strip():
             return {"language": "unknown", "confidence": 0}
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for lang, (pattern, threshold) in self.COMMON_PATTERNS.items():
             matches = re.findall(pattern, text)
             ratio = len(matches) / len(text) if text else 0
@@ -235,11 +235,11 @@ class LanguageDetector(object):
             "candidates": [{"language": l, "score": round(s, 4)} for l, s in sorted_scores[:3]],
         }
 
-    def batch_detect(self, texts: List[str]) -> List[Dict[str, Any]]:
+    def batch_detect(self, texts: list[str]) -> list[dict[str, Any]]:
         return [self.detect(t) for t in texts]
 
-    def detect_code_mixed(self, text: str) -> Dict[str, Any]:
-        segments: Dict[str, int] = {}
+    def detect_code_mixed(self, text: str) -> dict[str, Any]:
+        segments: dict[str, int] = {}
         for lang in list(self.COMMON_PATTERNS.keys()) + list(self.STOPWORDS.keys()):
             pattern = self.COMMON_PATTERNS.get(lang, (None, 0))[0]
             if pattern:
@@ -264,11 +264,11 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._translation_cache: Dict[str, TranslationResult] = {}
-        self._translation_memory: List[TranslationMemory] = []
-        self._glossary: List[GlossaryTerm] = []
-        self._language_profiles: Dict[str, Dict] = {}
-        self._supported_pairs: List[Tuple[str, str]] = []
+        self._translation_cache: dict[str, TranslationResult] = {}
+        self._translation_memory: list[TranslationMemory] = []
+        self._glossary: list[GlossaryTerm] = []
+        self._language_profiles: dict[str, dict] = {}
+        self._supported_pairs: list[tuple[str, str]] = []
         self._max_cache_size = 100000
 
     def initialize(self) -> None:
@@ -336,7 +336,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def _cache_key(self, text: str, source: str, target: str) -> str:
         return hashlib.md5(f"{source}:{target}:{text}".encode()).hexdigest()
 
-    def _find_in_memory(self, text: str, source: str, target: str) -> Optional[TranslationMemory]:
+    def _find_in_memory(self, text: str, source: str, target: str) -> TranslationMemory | None:
         """在翻译记忆中查找"""
         text_hash = hashlib.md5(f"{source}:{text}".encode()).hexdigest()[:16]
         for mem in self._translation_memory:
@@ -359,10 +359,10 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 best = mem
         return best
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         return re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z0-9]+", text.lower())
 
-    def _apply_glossary(self, text: str, source: str, target: str) -> Dict[str, str]:
+    def _apply_glossary(self, text: str, source: str, target: str) -> dict[str, str]:
         """应用术语表"""
         replacements = {}
         for term in self._glossary:
@@ -371,7 +371,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                     replacements[term.term] = term.translation
         return replacements
 
-    def _simulate_translation(self, text: str, source: str, target: str, glossary: Dict[str, str]) -> str:
+    def _simulate_translation(self, text: str, source: str, target: str, glossary: dict[str, str]) -> str:
         """Real LLM-based translation."""
         try:
             from _zhipu_helper import llm_chat
@@ -385,7 +385,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         return f"[{target}] {text[:50]}..."
 
     @trace_operation("translate")
-    def translate(self, text: str, source_lang: str = "auto", target_lang: str = "en-US") -> Dict[str, Any]:
+    def translate(self, text: str, source_lang: str = "auto", target_lang: str = "en-US") -> dict[str, Any]:
         """翻译文本"""
         start = time.time()
 
@@ -490,8 +490,8 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     @trace_operation("translate_batch")
     def translate_batch(
-        self, texts: List[str], source_lang: str = "auto", target_lang: str = "en-US"
-    ) -> Dict[str, Any]:
+        self, texts: list[str], source_lang: str = "auto", target_lang: str = "en-US"
+    ) -> dict[str, Any]:
         """批量翻译"""
         results = []
         for text in texts:
@@ -512,7 +512,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         source_lang: str = "zh-CN",
         target_lang: str = "en-US",
         domain: str = "general",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """添加术语"""
         glossary_term = GlossaryTerm(
             term=term, translation=translation, source_lang=source_lang, target_lang=target_lang, domain=domain
@@ -522,8 +522,8 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     @trace_operation("get_glossary")
     def get_glossary(
-        self, source_lang: Optional[str] = None, target_lang: Optional[str] = None, domain: Optional[str] = None
-    ) -> List[Dict]:
+        self, source_lang: str | None = None, target_lang: str | None = None, domain: str | None = None
+    ) -> list[dict]:
         """查询术语表"""
         results = self._glossary
         if source_lang:
@@ -544,7 +544,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             for t in results
         ]
 
-    def get_supported_languages(self) -> Dict[str, Any]:
+    def get_supported_languages(self) -> dict[str, Any]:
         """获取支持的语言"""
         languages = {}
         for code, profile in self._language_profiles.items():
@@ -555,7 +555,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "sample_pairs": [(s, t) for s, t in self._supported_pairs[:5]],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "total_translations": self.stats.get("translations", 0),
             "cache_size": len(self._translation_cache),
@@ -611,7 +611,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

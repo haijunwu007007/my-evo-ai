@@ -117,10 +117,10 @@ class BrowserSession:
     status: SessionStatus = SessionStatus.CREATING
     current_url: str = ""
     page_title: str = ""
-    tabs: List[str] = field(default_factory=list)
-    cookies: Dict[str, str] = field(default_factory=dict)
-    screenshots: List[str] = field(default_factory=list)
-    actions_log: List[Dict[str, Any]] = field(default_factory=list)
+    tabs: list[str] = field(default_factory=list)
+    cookies: dict[str, str] = field(default_factory=dict)
+    screenshots: list[str] = field(default_factory=list)
+    actions_log: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = ""
     last_active: float = 0.0
     timeout_seconds: int = 300
@@ -131,12 +131,12 @@ class ScrapingTask:
 
     task_id: str
     name: str
-    urls: List[str] = field(default_factory=list)
-    selectors: Dict[str, str] = field(default_factory=dict)
+    urls: list[str] = field(default_factory=list)
+    selectors: dict[str, str] = field(default_factory=dict)
     status: str = "pending"
-    results: List[Dict[str, Any]] = field(default_factory=list)
+    results: list[dict[str, Any]] = field(default_factory=list)
     pages_scraped: int = 0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     started_at: str = ""
     completed_at: str = ""
 
@@ -147,11 +147,11 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     MODULE_NAME = "浏览器自动化"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._sessions: Dict[str, BrowserSession] = {}
-        self._tasks: Dict[str, ScrapingTask] = {}
+        self._sessions: dict[str, BrowserSession] = {}
+        self._tasks: dict[str, ScrapingTask] = {}
         self._counter = 0
 
     def _next_id(self, prefix: str) -> str:
@@ -162,7 +162,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         logger.info("浏览器自动化模块初始化完成")
         return True
 
-    def _simulate_page_load(self, url: str) -> Dict[str, Any]:
+    def _simulate_page_load(self, url: str) -> dict[str, Any]:
         """模拟页面加载"""
         title_map = {
             "https://example.com": "Example Domain",
@@ -176,7 +176,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         domain = url.replace("https://", "").replace("http://", "").split("/")[0]
         return {"title": domain.capitalize(), "status": 200, "load_time_ms": 200, "content_length": 30000}
 
-    def _simulate_scrape(self, url: str, selectors: Dict[str, str]) -> Dict[str, Any]:
+    def _simulate_scrape(self, url: str, selectors: dict[str, str]) -> dict[str, Any]:
         """模拟爬取"""
         results = {}
         for key, selector in selectors.items():
@@ -184,7 +184,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         results["_meta"] = {"url": url, "scraped_at": datetime.now().isoformat(), "status": 200}
         return results
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("browser_auto_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
         actions = {
@@ -208,7 +208,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         return handler(params)
         return {"status": "healthy", "module": "browser_auto"}
 
-    def _exec_create_session(self, p: Dict) -> Dict:
+    def _exec_create_session(self, p: dict) -> dict:
         sid = self._next_id("sess")
         btype = BrowserType(p.get("browser_type", "headless"))
         session = BrowserSession(
@@ -222,7 +222,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._sessions[sid] = session
         return {"success": True, "result": {"session_id": sid, "browser": btype.value, "status": "active"}}
 
-    def _exec_navigate(self, p: Dict) -> Dict:
+    def _exec_navigate(self, p: dict) -> dict:
         sid = p["session_id"]
         url = p["url"]
         if sid not in self._sessions:
@@ -243,7 +243,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "result": {"title": page["title"], "status": page["status"], "load_ms": page["load_time_ms"]},
         }
 
-    def _exec_click(self, p: Dict) -> Dict:
+    def _exec_click(self, p: dict) -> dict:
         sid = p["session_id"]
         selector = p.get("selector", "body")
         if sid not in self._sessions:
@@ -253,7 +253,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         session.last_active = time.time()
         return {"success": True, "result": {"clicked": selector, "page": session.current_url}}
 
-    def _exec_fill_form(self, p: Dict) -> Dict:
+    def _exec_fill_form(self, p: dict) -> dict:
         sid = p["session_id"]
         fields = p.get("fields", {})
         if sid not in self._sessions:
@@ -266,7 +266,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         session.last_active = time.time()
         return {"success": True, "result": {"filled_fields": len(filled)}}
 
-    def _exec_screenshot(self, p: Dict) -> Dict:
+    def _exec_screenshot(self, p: dict) -> dict:
         sid = p["session_id"]
         if sid not in self._sessions:
             return {"success": False, "error": "会话不存在"}
@@ -285,7 +285,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_get_page_info(self, p: Dict) -> Dict:
+    def _exec_get_page_info(self, p: dict) -> dict:
         sid = p["session_id"]
         if sid not in self._sessions:
             return {"success": False, "error": "会话不存在"}
@@ -301,7 +301,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_execute_js(self, p: Dict) -> Dict:
+    def _exec_execute_js(self, p: dict) -> dict:
         sid = p["session_id"]
         script = p.get("script", "return document.title")
         if sid not in self._sessions:
@@ -312,7 +312,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         )
         return {"success": True, "result": {"executed": True, "result": session.page_title}}
 
-    def _exec_close_session(self, p: Dict) -> Dict:
+    def _exec_close_session(self, p: dict) -> dict:
         sid = p["session_id"]
         if sid not in self._sessions:
             return {"success": False, "error": "会话不存在"}
@@ -327,14 +327,14 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_create_task(self, p: Dict) -> Dict:
+    def _exec_create_task(self, p: dict) -> dict:
         tid = self._next_id("task")
         self._tasks[tid] = ScrapingTask(
             task_id=tid, name=p.get("name", f"task_{tid[:6]}"), urls=p.get("urls", []), selectors=p.get("selectors", {})
         )
         return {"success": True, "result": {"task_id": tid, "urls": len(p.get("urls", []))}}
 
-    def _exec_run_task(self, p: Dict) -> Dict:
+    def _exec_run_task(self, p: dict) -> dict:
         tid = p["task_id"]
         if tid not in self._tasks:
             return {"success": False, "error": "任务不存在"}
@@ -360,7 +360,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_get_task_status(self, p: Dict) -> Dict:
+    def _exec_get_task_status(self, p: dict) -> dict:
         tid = p["task_id"]
         if tid not in self._tasks:
             return {"success": False, "error": "任务不存在"}
@@ -378,7 +378,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_list_sessions(self, p: Dict) -> Dict:
+    def _exec_list_sessions(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -394,7 +394,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ],
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         active = sum(1 for s in self._sessions.values() if s.status == SessionStatus.ACTIVE)
         total_actions = sum(len(s.actions_log) for s in self._sessions.values())
         return {
@@ -409,7 +409,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -430,7 +430,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         logger.info("浏览器自动化模块关闭")
         return True
 
-    def get_session_analytics(self) -> Dict[str, Any]:
+    def get_session_analytics(self) -> dict[str, Any]:
         """获取会话分析统计：活跃数、平均时长、操作分布、错误率"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         if not sessions:
@@ -439,7 +439,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         total_duration = 0
         total_actions = 0
         total_errors = 0
-        status_dist: Dict[str, int] = {}
+        status_dist: dict[str, int] = {}
         for s in sessions.values():
             status = getattr(s, "status", "unknown")
             status_dist[status] = status_dist.get(status, 0) + 1
@@ -461,7 +461,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "status_distribution": status_dist,
         }
 
-    def detect_zombie_sessions(self, timeout_seconds: int = 3600) -> List[Dict[str, Any]]:
+    def detect_zombie_sessions(self, timeout_seconds: int = 3600) -> list[dict[str, Any]]:
         """检测僵尸会话：超时未操作、卡在中间状态"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         zombies = []
@@ -497,15 +497,15 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         zombies.sort(key=lambda x: x["idle_seconds"], reverse=True)
         return zombies
 
-    def generate_usage_report(self, hours: int = 24) -> Dict[str, Any]:
+    def generate_usage_report(self, hours: int = 24) -> dict[str, Any]:
         """生成浏览器自动化使用报告：操作频率、页面覆盖、资源消耗"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         cutoff = time.time() - hours * 3600
         recent_sessions = [(sid, s) for sid, s in sessions.items() if getattr(s, "created_at", 0) >= cutoff]
         if not recent_sessions:
             return {"period_hours": hours, "sessions_in_period": 0}
-        action_histogram: Dict[str, int] = {}
-        page_visits: Dict[str, int] = {}
+        action_histogram: dict[str, int] = {}
+        page_visits: dict[str, int] = {}
         total_memory_mb = 0
         for sid, s in recent_sessions:
             mem = getattr(s, "memory_usage_mb", 0)
@@ -530,7 +530,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "unique_pages_visited": len(page_visits),
         }
 
-    def health_deep_check(self) -> Dict[str, Any]:
+    def health_deep_check(self) -> dict[str, Any]:
         """深度健康检查：页面加载成功率、JS错误率、网络超时率、资源泄漏检测"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         metrics = self._metrics if hasattr(self, "_metrics") else {}
@@ -575,7 +575,7 @@ class BrowserAutoManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def cleanup_orphaned_resources(self, max_age_hours: int = 24) -> Dict[str, Any]:
+    def cleanup_orphaned_resources(self, max_age_hours: int = 24) -> dict[str, Any]:
         """清理孤儿资源：超时会话、残留Cookie、缓存文件"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         now = time.time()

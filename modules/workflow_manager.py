@@ -57,7 +57,7 @@ class RetryPolicy:
     """重试策略：指数退避 + 最大重试次数"""
 
     def __init__(
-        self, max_retries: int = 3, backoff_base: float = 2.0, backoff_max: float = 60.0, retry_on: List[str] = None
+        self, max_retries: int = 3, backoff_base: float = 2.0, backoff_max: float = 60.0, retry_on: list[str] = None
     ):
         self.max_retries = max_retries
         self.backoff_base = backoff_base
@@ -71,7 +71,7 @@ class RetryPolicy:
     def should_retry(self, state: str, attempt: int) -> bool:
         return state in self.retry_on and attempt < self.max_retries
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "max_retries": self.max_retries,
             "backoff_base": self.backoff_base,
@@ -80,7 +80,7 @@ class RetryPolicy:
         }
 
     @classmethod
-    def from_dict(cls, d: Dict) -> "RetryPolicy":
+    def from_dict(cls, d: dict) -> RetryPolicy:
         return cls(**{k: v for k, v in d.items() if k in cls.__init__.__code__.co_varnames})
 
 # ─── DAG 校验引擎 ────────────────────────────────────────────
@@ -89,13 +89,13 @@ class DAGValidator:
     """有向无环图校验：环检测、可达性分析、关键路径计算"""
 
     @staticmethod
-    def detect_cycle(nodes: Dict[str, Dict]) -> Optional[List[str]]:
+    def detect_cycle(nodes: dict[str, dict]) -> list[str] | None:
         """DFS检测环，返回环路径或None"""
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {nid: WHITE for nid in nodes}
         parent = {}
 
-        def dfs(node: str) -> Optional[List[str]]:
+        def dfs(node: str) -> list[str] | None:
             color[node] = GRAY
             for dep in nodes[node].get("depends_on", []):
                 if dep not in nodes:
@@ -128,7 +128,7 @@ class DAGValidator:
         return None
 
     @staticmethod
-    def topological_sort(nodes: Dict[str, Dict]) -> List[str]:
+    def topological_sort(nodes: dict[str, dict]) -> list[str]:
         """拓扑排序，返回执行顺序"""
         in_degree = {nid: 0 for nid in nodes}
         for nid, node in nodes.items():
@@ -148,7 +148,7 @@ class DAGValidator:
         return order
 
     @staticmethod
-    def get_parallel_groups(nodes: Dict[str, Dict]) -> List[List[str]]:
+    def get_parallel_groups(nodes: dict[str, dict]) -> list[list[str]]:
         """获取可并行执行的层级"""
         remaining = set(nodes.keys())
         groups = []
@@ -173,7 +173,7 @@ class DAGValidator:
         return groups
 
     @staticmethod
-    def critical_path(nodes: Dict[str, Dict]) -> Tuple[List[str], float]:
+    def critical_path(nodes: dict[str, dict]) -> tuple[list[str], float]:
         """关键路径分析：最长执行路径"""
         durations = {nid: node.get("timeout", node.get("estimated_duration", 1.0)) for nid, node in nodes.items()}
         topo = DAGValidator.topological_sort(nodes)
@@ -195,7 +195,7 @@ class DAGValidator:
         return path, dist.get(end_node, 0)
 
     @staticmethod
-    def validate(nodes: Dict[str, Dict]) -> Dict:
+    def validate(nodes: dict[str, dict]) -> dict:
         """完整校验"""
         errors = []
         warnings = []
@@ -235,13 +235,13 @@ class WorkflowExecutor:
     """工作流执行引擎：状态机驱动的DAG执行"""
 
     def __init__(self):
-        self._workflows: Dict[str, Dict] = {}
-        self._executions: Dict[str, Dict] = {}
-        self._approval_requests: Dict[str, Dict] = {}
+        self._workflows: dict[str, dict] = {}
+        self._executions: dict[str, dict] = {}
+        self._approval_requests: dict[str, dict] = {}
         self._lock = threading.Lock()
         self._max_executions = 500
 
-    def create_workflow(self, definition: Dict) -> Dict:
+    def create_workflow(self, definition: dict) -> dict:
         """创建工作流定义"""
         wf_id = definition.get("workflow_id", str(uuid.uuid4())[:8])
         nodes = definition.get("nodes", {})
@@ -270,7 +270,7 @@ class WorkflowExecutor:
         self._workflows[wf_id] = wf
         return {"success": True, "data": {"workflow_id": wf_id, "node_count": len(nodes)}}
 
-    def start_workflow(self, wf_id: str, input_vars: Dict = None) -> Dict:
+    def start_workflow(self, wf_id: str, input_vars: dict = None) -> dict:
         with self._lock:
             wf = self._workflows.get(wf_id)
             if not wf:
@@ -309,7 +309,7 @@ class WorkflowExecutor:
             self._executions[exec_id] = execution
             return {"success": True, "data": {"exec_id": exec_id, "workflow_id": wf_id, "state": "running"}}
 
-    def advance_execution(self, exec_id: str, node_id: str, result: Dict) -> Dict:
+    def advance_execution(self, exec_id: str, node_id: str, result: dict) -> dict:
         """推进执行：标记节点完成，触发下游"""
         with self._lock:
             execution = self._executions.get(exec_id)
@@ -393,7 +393,7 @@ class WorkflowExecutor:
                 },
             }
 
-    def approve(self, exec_id: str, node_id: str, approved: bool, approver: str = "system", comment: str = "") -> Dict:
+    def approve(self, exec_id: str, node_id: str, approved: bool, approver: str = "system", comment: str = "") -> dict:
         """处理审批请求"""
         key = f"{exec_id}:{node_id}"
         req = self._approval_requests.get(key)
@@ -421,7 +421,7 @@ class WorkflowExecutor:
                     return {"success": True, "data": {"state": "failed", "reason": "approval_rejected"}}
         return {"success": True, "data": {"status": req["status"]}}
 
-    def pause_workflow(self, exec_id: str) -> Dict:
+    def pause_workflow(self, exec_id: str) -> dict:
         with self._lock:
             execution = self._executions.get(exec_id)
             if execution and execution["state"] == "running":
@@ -429,7 +429,7 @@ class WorkflowExecutor:
                 return {"success": True}
         return {"success": False, "error": "Cannot pause"}
 
-    def resume_workflow(self, exec_id: str) -> Dict:
+    def resume_workflow(self, exec_id: str) -> dict:
         with self._lock:
             execution = self._executions.get(exec_id)
             if execution and execution["state"] == "paused":
@@ -437,7 +437,7 @@ class WorkflowExecutor:
                 return {"success": True}
         return {"success": False, "error": "Cannot resume"}
 
-    def cancel_workflow(self, exec_id: str) -> Dict:
+    def cancel_workflow(self, exec_id: str) -> dict:
         with self._lock:
             execution = self._executions.get(exec_id)
             if execution and execution["state"] in ("running", "paused", "waiting_approval"):
@@ -449,7 +449,7 @@ class WorkflowExecutor:
                 return {"success": True}
         return {"success": False, "error": "Cannot cancel"}
 
-    def _get_ready_nodes(self, wf: Dict, execution: Dict) -> List[str]:
+    def _get_ready_nodes(self, wf: dict, execution: dict) -> list[str]:
         """获取当前可执行的节点"""
         ready = []
         for nid, ns in execution["node_states"].items():
@@ -469,7 +469,7 @@ class WorkflowExecutor:
                 ready.append(nid)
         return ready
 
-    def _skip_downstream(self, wf: Dict, execution: Dict, failed_node: str):
+    def _skip_downstream(self, wf: dict, execution: dict, failed_node: str):
         """递归标记下游节点为skipped"""
         visited = set()
         queue = deque([failed_node])
@@ -484,10 +484,10 @@ class WorkflowExecutor:
                         execution["node_states"][nid]["state"] = "skipped"
                     queue.append(nid)
 
-    def get_execution(self, exec_id: str) -> Optional[Dict]:
+    def get_execution(self, exec_id: str) -> dict | None:
         return self._executions.get(exec_id)
 
-    def list_workflows(self, state: str = None) -> List[Dict]:
+    def list_workflows(self, state: str = None) -> list[dict]:
         results = []
         for wf in self._workflows.values():
             if state and wf["state"] != state:
@@ -495,7 +495,7 @@ class WorkflowExecutor:
             results.append({k: v for k, v in wf.items() if k != "nodes"})
         return results
 
-    def list_executions(self, wf_id: str = None, state: str = None, limit: int = 50) -> List[Dict]:
+    def list_executions(self, wf_id: str = None, state: str = None, limit: int = 50) -> list[dict]:
         results = []
         for ex in self._executions.values():
             if wf_id and ex["workflow_id"] != wf_id:
@@ -505,7 +505,7 @@ class WorkflowExecutor:
             results.append(ex)
         return results[-limit:]
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         wfs = list(self._workflows.values())
         exs = list(self._executions.values())
         return {
@@ -529,7 +529,7 @@ class WorkflowManager(EnterpriseModule):
         super().__init__(**kwargs)
         self._executor = WorkflowExecutor()
 
-    def _dispatch(self, action: str, params: Dict) -> Dict:
+    def _dispatch(self, action: str, params: dict) -> dict:
         handler = {
             "status": self._action_status,
             "stats": self._action_stats,
@@ -561,7 +561,7 @@ class WorkflowManager(EnterpriseModule):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    async def execute(self, action: str = "status", params: Dict = None) -> Dict:
+    async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}
         self.trace("execute", {"action": action})
         self.metrics_collector.counter("workflow_execute_total", labels={"action": action}).inc()
@@ -569,16 +569,16 @@ class WorkflowManager(EnterpriseModule):
 
     # ── 基础Action ──
 
-    def _action_status(self, params: Dict) -> Dict:
+    def _action_status(self, params: dict) -> dict:
         return {
             "success": True,
             "data": {"module": "WorkflowManager", "state": "active", "workflows": len(self._executor._workflows)},
         }
 
-    def _action_stats(self, params: Dict) -> Dict:
+    def _action_stats(self, params: dict) -> dict:
         return {"success": True, "data": self._executor.stats()}
 
-    def _action_health(self, params: Dict) -> Dict:
+    def _action_health(self, params: dict) -> dict:
         s = self._executor.stats()
         issues = []
         if s["failed"] > 5:
@@ -587,15 +587,15 @@ class WorkflowManager(EnterpriseModule):
             issues.append(f"{s['pending_approvals']} approvals pending")
         return {"success": True, "data": {"status": "healthy" if not issues else "degraded", "issues": issues}}
 
-    def _action_configure(self, params: Dict) -> Dict:
+    def _action_configure(self, params: dict) -> dict:
         return {"success": True, "data": {"message": "Configuration updated"}}
 
     # ── 工作流定义 ──
 
-    def _action_create(self, params: Dict) -> Dict:
+    def _action_create(self, params: dict) -> dict:
         return self._executor.create_workflow(params)
 
-    def _action_validate(self, params: Dict) -> Dict:
+    def _action_validate(self, params: dict) -> dict:
         nodes = params.get("nodes", {})
         result = DAGValidator.validate(nodes)
         cp, duration = DAGValidator.critical_path(nodes)
@@ -604,17 +604,17 @@ class WorkflowManager(EnterpriseModule):
         result["parallel_groups"] = DAGValidator.get_parallel_groups(nodes)
         return {"success": True, "data": result}
 
-    def _action_list(self, params: Dict) -> Dict:
+    def _action_list(self, params: dict) -> dict:
         wfs = self._executor.list_workflows(state=params.get("state"))
         return {"success": True, "data": {"workflows": wfs, "total": len(wfs)}}
 
-    def _action_get(self, params: Dict) -> Dict:
+    def _action_get(self, params: dict) -> dict:
         wf = self._executor._workflows.get(params.get("workflow_id", ""))
         if not wf:
             return {"success": False, "error": "Workflow not found"}
         return {"success": True, "data": wf}
 
-    def _action_remove(self, params: Dict) -> Dict:
+    def _action_remove(self, params: dict) -> dict:
         wf_id = params.get("workflow_id", "")
         if wf_id in self._executor._workflows:
             del self._executor._workflows[wf_id]
@@ -623,10 +623,10 @@ class WorkflowManager(EnterpriseModule):
 
     # ── 执行 ──
 
-    def _action_start(self, params: Dict) -> Dict:
+    def _action_start(self, params: dict) -> dict:
         return self._executor.start_workflow(params.get("workflow_id", ""), params.get("input_vars"))
 
-    def _action_advance(self, params: Dict) -> Dict:
+    def _action_advance(self, params: dict) -> dict:
         return self._executor.advance_execution(
             params.get("exec_id", ""),
             params.get("node_id", ""),
@@ -637,16 +637,16 @@ class WorkflowManager(EnterpriseModule):
             },
         )
 
-    def _action_pause(self, params: Dict) -> Dict:
+    def _action_pause(self, params: dict) -> dict:
         return self._executor.pause_workflow(params.get("exec_id", ""))
 
-    def _action_resume(self, params: Dict) -> Dict:
+    def _action_resume(self, params: dict) -> dict:
         return self._executor.resume_workflow(params.get("exec_id", ""))
 
-    def _action_cancel(self, params: Dict) -> Dict:
+    def _action_cancel(self, params: dict) -> dict:
         return self._executor.cancel_workflow(params.get("exec_id", ""))
 
-    def _action_approve(self, params: Dict) -> Dict:
+    def _action_approve(self, params: dict) -> dict:
         return self._executor.approve(
             params.get("exec_id", ""),
             params.get("node_id", ""),
@@ -655,7 +655,7 @@ class WorkflowManager(EnterpriseModule):
             params.get("comment", ""),
         )
 
-    def _action_reject(self, params: Dict) -> Dict:
+    def _action_reject(self, params: dict) -> dict:
         return self._executor.approve(
             params.get("exec_id", ""),
             params.get("node_id", ""),
@@ -666,13 +666,13 @@ class WorkflowManager(EnterpriseModule):
 
     # ── 查询 ──
 
-    def _action_executions(self, params: Dict) -> Dict:
+    def _action_executions(self, params: dict) -> dict:
         exs = self._executor.list_executions(
             wf_id=params.get("workflow_id"), state=params.get("state"), limit=params.get("limit", 50)
         )
         return {"success": True, "data": {"executions": exs, "total": len(exs)}}
 
-    def _action_execution_detail(self, params: Dict) -> Dict:
+    def _action_execution_detail(self, params: dict) -> dict:
         ex = self._executor.get_execution(params.get("exec_id", ""))
         if not ex:
             return {"success": False, "error": "Execution not found"}
@@ -683,18 +683,18 @@ class WorkflowManager(EnterpriseModule):
         ex["progress_pct"] = round(done / total * 100, 1) if total else 0
         return {"success": True, "data": ex}
 
-    def _action_pending_approvals(self, params: Dict) -> Dict:
+    def _action_pending_approvals(self, params: dict) -> dict:
         pending = [v for v in self._executor._approval_requests.values() if v["status"] == "pending"]
         return {"success": True, "data": {"approvals": pending, "total": len(pending)}}
 
-    def _action_critical_path(self, params: Dict) -> Dict:
+    def _action_critical_path(self, params: dict) -> dict:
         wf = self._executor._workflows.get(params.get("workflow_id", ""))
         if not wf:
             return {"success": False, "error": "Workflow not found"}
         path, duration = DAGValidator.critical_path(wf["nodes"])
         return {"success": True, "data": {"path": path, "estimated_duration": duration}}
 
-    def _action_reset(self, params: Dict) -> Dict:
+    def _action_reset(self, params: dict) -> dict:
         self._executor._executions.clear()
         self._executor._approval_requests.clear()
         return {"success": True, "data": {"message": "All executions and approvals cleared"}}

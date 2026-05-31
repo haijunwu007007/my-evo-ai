@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # 原 system_coordinator_v3.py L60-216 — 协调器分析器
 """系统协调器分析器"""
 import logging, time, re
@@ -7,7 +6,7 @@ from pathlib import Path
 from collections import defaultdict
 logger = logging.getLogger("evo.coordinator.v3")
 
-class SystemCoordinatorV3Analyzer(object):
+class SystemCoordinatorV3Analyzer:
     """system_coordinator_v3 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。

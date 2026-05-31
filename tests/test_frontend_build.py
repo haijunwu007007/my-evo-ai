@@ -24,7 +24,7 @@ class TestFrontendBuild(unittest.TestCase):
         """package.json 存在"""
         pkg = os.path.join(self.frontend_dir, 'package.json')
         self.assertTrue(os.path.isfile(pkg))
-        data = json.load(open(pkg, 'r', encoding='utf-8'))
+        data = json.load(open(pkg, encoding='utf-8'))
         self.assertIn('name', data)
         self.assertIn('version', data)
 
@@ -107,20 +107,20 @@ class TestFrontendBuild(unittest.TestCase):
 
     def test_016_package_json_dependencies(self):
         """package.json 有依赖声明"""
-        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), 'r', encoding='utf-8'))
+        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), encoding='utf-8'))
         deps = {**pkg.get('dependencies', {}), **pkg.get('devDependencies', {})}
         self.assertGreater(len(deps), 0)
 
     def test_017_has_vue_dependency(self):
         """依赖中包含 Vue 3"""
-        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), 'r', encoding='utf-8'))
+        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), encoding='utf-8'))
         deps = {**pkg.get('dependencies', {}), **pkg.get('devDependencies', {})}
         has_vue = any('vue' in k.lower() for k in deps)
         self.assertTrue(has_vue)
 
     def test_018_has_vite_dependency(self):
         """依赖中包含 Vite"""
-        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), 'r', encoding='utf-8'))
+        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), encoding='utf-8'))
         deps = {**pkg.get('dependencies', {}), **pkg.get('devDependencies', {})}
         has_vite = any('vite' in k.lower() for k in deps)
         self.assertTrue(has_vite)
@@ -158,7 +158,7 @@ class TestFrontendBuild(unittest.TestCase):
                 router_path = c
                 break
         self.assertIsNotNone(router_path)
-        content = open(router_path, 'r', encoding='utf-8').read()
+        content = open(router_path, encoding='utf-8').read()
         self.assertIn('path', content)
         self.assertIn('component', content)
 
@@ -171,7 +171,7 @@ class TestFrontendBuild(unittest.TestCase):
         self.assertGreater(len(store_files), 0)
         combined = ''
         for sf in store_files:
-            combined += open(os.path.join(stores_dir, sf), 'r', encoding='utf-8').read()
+            combined += open(os.path.join(stores_dir, sf), encoding='utf-8').read()
         self.assertIn('state', combined)
 
     def test_024_store_has_actions(self):
@@ -182,7 +182,7 @@ class TestFrontendBuild(unittest.TestCase):
         store_files = [f for f in os.listdir(stores_dir) if f.endswith(('.js', '.ts'))]
         combined = ''
         for sf in store_files:
-            combined += open(os.path.join(stores_dir, sf), 'r', encoding='utf-8').read()
+            combined += open(os.path.join(stores_dir, sf), encoding='utf-8').read()
         self.assertIn('actions', combined)
 
     def test_025_no_hardcoded_api_url(self):
@@ -193,7 +193,7 @@ class TestFrontendBuild(unittest.TestCase):
         for root, dirs, files in os.walk(src_dir):
             for f in files:
                 if f.endswith(('.js', '.ts', '.vue')):
-                    content = open(os.path.join(root, f), 'r', encoding='utf-8').read()
+                    content = open(os.path.join(root, f), encoding='utf-8').read()
                     ips = ip_pattern.findall(content)
                     for ip in ips:
                         if not ip.startswith('127.') and ip != '0.0.0.0':
@@ -227,12 +227,12 @@ class TestFrontendBuild(unittest.TestCase):
         for root, dirs, files in os.walk(src_dir):
             for f in files:
                 if f.endswith(('.js', '.ts')):
-                    combined += open(os.path.join(root, f), 'r', encoding='utf-8').read()
+                    combined += open(os.path.join(root, f), encoding='utf-8').read()
         self.assertTrue('axios' in combined or 'fetch(' in combined)
 
     def test_029_package_json_scripts(self):
         """package.json 有构建脚本"""
-        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), 'r', encoding='utf-8'))
+        pkg = json.load(open(os.path.join(self.frontend_dir, 'package.json'), encoding='utf-8'))
         scripts = pkg.get('scripts', {})
         has_build = any('build' in k for k in scripts)
         has_dev = any(('dev' in k or 'serve' in k) for k in scripts)
@@ -255,7 +255,7 @@ class TestFrontendBuild(unittest.TestCase):
                 router_path = c
                 break
         if router_path:
-            content = open(router_path, 'r', encoding='utf-8').read()
+            content = open(router_path, encoding='utf-8').read()
             has_guard = 'beforeEach' in content or 'beforeResolve' in content
             self.assertTrue(has_guard)
         else:
@@ -279,14 +279,14 @@ class TestFrontendBuild(unittest.TestCase):
         """App.vue 包含 <router-view>"""
         app_path = os.path.join(self.frontend_dir, 'src', 'App.vue')
         if os.path.isfile(app_path):
-            content = open(app_path, 'r', encoding='utf-8').read()
+            content = open(app_path, encoding='utf-8').read()
             self.assertIn('router-view', content)
 
     def test_034_app_has_transition(self):
         """App.vue 包含 <transition>"""
         app_path = os.path.join(self.frontend_dir, 'src', 'App.vue')
         if os.path.isfile(app_path):
-            content = open(app_path, 'r', encoding='utf-8').read()
+            content = open(app_path, encoding='utf-8').read()
             has_trans = 'transition' in content
             # 不强制要求
 
@@ -311,7 +311,7 @@ class TestFrontendBuild(unittest.TestCase):
         for root, dirs, files in os.walk(src_dir):
             for f in files:
                 if f.endswith(('.js', '.ts', '.vue')) and 'debug' not in f.lower():
-                    content = open(os.path.join(root, f), 'r', encoding='utf-8').read()
+                    content = open(os.path.join(root, f), encoding='utf-8').read()
                     count = content.count('console.log')
                     if count > 5:
                         violations.append((f, count))
@@ -327,7 +327,7 @@ class TestFrontendBuild(unittest.TestCase):
         ]
         for c in candidates:
             if os.path.isfile(c):
-                content = open(c, 'r', encoding='utf-8').read()
+                content = open(c, encoding='utf-8').read()
                 has_catch = 'catch' in content or '.catch(' in content or 'error' in content.lower()
                 self.assertTrue(has_catch)
                 return
@@ -339,7 +339,7 @@ class TestFrontendBuild(unittest.TestCase):
         for c in candidates:
             fp = os.path.join(self.frontend_dir, c)
             if os.path.isfile(fp):
-                content = open(fp, 'r', encoding='utf-8').read()
+                content = open(fp, encoding='utf-8').read()
                 if 'proxy' in content:
                     return
         # 允许没有 proxy（生产环境用 nginx）
@@ -350,7 +350,7 @@ class TestFrontendBuild(unittest.TestCase):
         for ef in env_files:
             fp = os.path.join(self.frontend_dir, ef)
             if os.path.isfile(fp):
-                content = open(fp, 'r', encoding='utf-8').read()
+                content = open(fp, encoding='utf-8').read()
                 if any(k in content for k in ['API', 'BASE_URL', 'VITE_API']):
                     return
         self.skipTest("未找到 API URL 配置")

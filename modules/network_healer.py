@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class NetworkHealerAnalyzer(object):
+class NetworkHealerAnalyzer:
     """network_healer 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -309,7 +310,7 @@ class FaultRecord:
     severity: str = "medium"
     detected_at: float = field(default_factory=time.time)
     resolved_at: float = 0.0
-    healing_actions: List[str] = field(default_factory=list)
+    healing_actions: list[str] = field(default_factory=list)
     root_cause: str = ""
     resolved: bool = False
 
@@ -318,8 +319,8 @@ class HealingRule:
     rule_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     name: str = ""
     condition: str = ""
-    fault_types: List[FaultType] = field(default_factory=list)
-    actions: List[HealingAction] = field(default_factory=list)
+    fault_types: list[FaultType] = field(default_factory=list)
+    actions: list[HealingAction] = field(default_factory=list)
     priority: int = 0
     max_retries: int = 3
     cooldown_seconds: float = 60.0
@@ -332,7 +333,7 @@ class RetryPolicy:
     max_delay_ms: float = 10000.0
     backoff_multiplier: float = 2.0
     jitter: bool = True
-    retryable_errors: List[str] = field(
+    retryable_errors: list[str] = field(
         default_factory=lambda: [
             "timeout",
             "connection_refused",
@@ -362,7 +363,7 @@ class DegradationLevel:
     name: str = "full"
     description: str = "Full functionality"
     max_requests_per_sec: float = float("inf")
-    features_disabled: List[str] = field(default_factory=list)
+    features_disabled: list[str] = field(default_factory=list)
     cache_ttl_override: int = 0
 
 @dataclass
@@ -400,7 +401,7 @@ class NetworkHealer:
 
     """Enterprise network self-healing with circuit breakers and auto-recovery."""
 
-    def __init__(self, config: Optional[NetworkHealerConfig] = None):
+    def __init__(self, config: NetworkHealerConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -433,14 +434,14 @@ class NetworkHealer:
         )()
 
         self._config = config or NetworkHealerConfig()
-        self._endpoints: Dict[str, EndpointHealth] = {}
-        self._faults: Dict[str, FaultRecord] = {}
-        self._rules: List[HealingRule] = []
-        self._failover_groups: Dict[str, List[FailoverTarget]] = defaultdict(list)
-        self._retry_policies: Dict[str, RetryPolicy] = {}
-        self._degradation_levels: List[DegradationLevel] = []
-        self._latency_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
-        self._hooks: Dict[str, List[Callable]] = {
+        self._endpoints: dict[str, EndpointHealth] = {}
+        self._faults: dict[str, FaultRecord] = {}
+        self._rules: list[HealingRule] = []
+        self._failover_groups: dict[str, list[FailoverTarget]] = defaultdict(list)
+        self._retry_policies: dict[str, RetryPolicy] = {}
+        self._degradation_levels: list[DegradationLevel] = []
+        self._latency_history: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._hooks: dict[str, list[Callable]] = {
             "on_fault": [],
             "on_heal": [],
             "on_state_change": [],
@@ -554,8 +555,8 @@ class NetworkHealer:
         self,
         endpoint_id: str,
         url: str = "",
-        failover_group: Optional[str] = None,
-        failover_targets: Optional[List[FailoverTarget]] = None,
+        failover_group: str | None = None,
+        failover_targets: list[FailoverTarget] | None = None,
     ) -> EndpointHealth:
         health = EndpointHealth(endpoint_id=endpoint_id, url=url)
         with self._lock:
@@ -614,7 +615,7 @@ class NetworkHealer:
 
     def record_failure(
         self, endpoint_id: str, fault_type: FaultType = FaultType.CONNECTION_TIMEOUT, error: str = ""
-    ) -> Optional[FaultRecord]:
+    ) -> FaultRecord | None:
         with self._lock:
             health = self._endpoints.get(endpoint_id)
             if not health:
@@ -663,7 +664,7 @@ class NetworkHealer:
             self._auto_heal(fault, health)
         return fault
 
-    def check_endpoint(self, endpoint_id: str) -> Optional[EndpointHealth]:
+    def check_endpoint(self, endpoint_id: str) -> EndpointHealth | None:
         with self._lock:
             health = self._endpoints.get(endpoint_id)
             if not health:
@@ -677,7 +678,7 @@ class NetworkHealer:
 
             return health
 
-    def attempt_failover(self, failover_group: str) -> Optional[FailoverTarget]:
+    def attempt_failover(self, failover_group: str) -> FailoverTarget | None:
         with self._lock:
             targets = self._failover_groups.get(failover_group, [])
             healthy_targets = [t for t in targets if t.healthy]
@@ -757,7 +758,7 @@ class NetworkHealer:
             except Exception:
                 pass
 
-    def get_dashboard(self) -> Dict[str, Any]:
+    def get_dashboard(self) -> dict[str, Any]:
         with self._lock:
             states = defaultdict(int)
             circuits = defaultdict(int)
@@ -779,7 +780,7 @@ class NetworkHealer:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             dashboard = self.get_dashboard()

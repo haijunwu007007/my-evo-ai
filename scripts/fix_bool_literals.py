@@ -7,7 +7,7 @@ MODULES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 def fix_booleans_in_meta(filepath: str) -> bool:
     """修复文件 __module_meta__ 块中的 true/false/null 为 Python 格式"""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # 定位 __module_meta__ 所在的逐行范围

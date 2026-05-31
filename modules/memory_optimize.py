@@ -84,7 +84,8 @@ import weakref
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Tuple
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -92,7 +93,7 @@ logger = get_logger(__name__)
 
 T = TypeVar("T")
 
-class MemoryOptimizeAnalyzer(object):
+class MemoryOptimizeAnalyzer:
     """memory_optimize 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -308,7 +309,7 @@ class ObjectPool(Generic[T]):
         factory: Callable[[], T],
         capacity: int = 1000,
         policy: PoolPolicy = PoolPolicy.LRU,
-        reset_fn: Optional[Callable[[T], None]] = None,
+        reset_fn: Callable[[T], None] | None = None,
     ):
         self._name = name
         self._factory = factory
@@ -321,7 +322,7 @@ class ObjectPool(Generic[T]):
         self._misses = 0
         self._evictions = 0
 
-    def acquire(self, key: Optional[str] = None) -> T:
+    def acquire(self, key: str | None = None) -> T:
         with self._lock:
             if key and key in self._pool:
                 obj = self._pool.pop(key)
@@ -364,14 +365,14 @@ class WeakRefCache:
     """Cache with weak references to allow GC of unused entries."""
 
     def __init__(self, max_size: int = 5000):
-        self._cache: Dict[str, weakref.ref] = {}
-        self._hard: Dict[str, Any] = OrderedDict()
+        self._cache: dict[str, weakref.ref] = {}
+        self._hard: dict[str, Any] = OrderedDict()
         self._max_hard = min(100, max_size // 10)
         self._lock = threading.Lock()
         self._hits = 0
         self._misses = 0
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         with self._lock:
             if key in self._hard:
                 self._hits += 1
@@ -409,15 +410,15 @@ class WeakRefCache:
 class MemoryOptimizer:
     """Enterprise memory optimization engine with multiple strategies."""
 
-    def __init__(self, config: Optional[OptimizerConfig] = None):
+    def __init__(self, config: OptimizerConfig | None = None):
         self._config = config or OptimizerConfig()
-        self._pools: Dict[str, ObjectPool] = {}
+        self._pools: dict[str, ObjectPool] = {}
         self._weak_cache = WeakRefCache(self._config.weakref_cache_size)
-        self._interned: Dict[str, int] = {}
+        self._interned: dict[str, int] = {}
         self._lock = threading.RLock()
         self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self._optimization_history: List[OptimizationResult] = []
+        self._thread: threading.Thread | None = None
+        self._optimization_history: list[OptimizationResult] = []
         self._total_saved_mb = 0.0
         self._initialized = False
         logger.info("MemoryOptimizer created")
@@ -446,9 +447,9 @@ class MemoryOptimizer:
         self,
         name: str,
         factory: Callable[[], Any],
-        capacity: Optional[int] = None,
+        capacity: int | None = None,
         policy: PoolPolicy = PoolPolicy.LRU,
-        reset_fn: Optional[Callable] = None,
+        reset_fn: Callable | None = None,
     ) -> ObjectPool:
         pool = ObjectPool(name, factory, capacity or self._config.pool_default_size, policy, reset_fn)
         with self._lock:
@@ -465,18 +466,18 @@ class MemoryOptimizer:
             self._interned[s] = 1
             return sys.intern(s)
 
-    def get_pool_stats(self) -> Dict[str, PoolStats]:
+    def get_pool_stats(self) -> dict[str, PoolStats]:
         with self._lock:
             return {name: pool.stats() for name, pool in self._pools.items()}
 
-    def optimize_gc(self) -> Tuple[int, float]:
+    def optimize_gc(self) -> tuple[int, float]:
         before = self._estimate_memory()
         collected = gc.collect()
         after = self._estimate_memory()
         saved = max(0, before - after)
         return collected, round(saved, 2)
 
-    def run_optimization(self) -> List[OptimizationResult]:
+    def run_optimization(self) -> list[OptimizationResult]:
         results = []
 
         if self._config.enable_generational_gc:
@@ -498,7 +499,7 @@ class MemoryOptimizer:
 
         return results
 
-    def get_report(self) -> Dict[str, Any]:
+    def get_report(self) -> dict[str, Any]:
         with self._lock:
             pool_stats = {
                 name: {
@@ -537,7 +538,7 @@ class MemoryOptimizer:
                 logger.error("Optimize loop error: %s", e)
             time.sleep(self._config.optimization_interval)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             report = self.get_report()

@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DocumentAutomation:
@@ -140,7 +140,7 @@ class DocumentAutomation:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, DocumentAutomation] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, DocumentAutomation] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-        return {"success": False, "error": "Unknown action: {}".format(action)}
+        return {"success": False, "error": f"Unknown action: {action}"}
 
-    def validate_template_variables(self, template: str, variables: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_template_variables(self, template: str, variables: dict[str, Any]) -> dict[str, Any]:
         """验证模板变量：检查必填字段、类型匹配、格式约束"""
         # 提取模板中的变量占位符
         required_vars = set(re.findall(r"\{\{(\w+)\}\}", template))
@@ -504,7 +504,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             "fill_rate": round(len(provided_vars & all_template_vars) / max(len(all_template_vars), 1), 4),
         }
 
-    def diff_documents(self, doc_a: str, doc_b: str, label_a: str = "before", label_b: str = "after") -> Dict[str, Any]:
+    def diff_documents(self, doc_a: str, doc_b: str, label_a: str = "before", label_b: str = "after") -> dict[str, Any]:
         """文档差异对比：逐段比较，生成结构化变更报告"""
         # 按段落分割
         paragraphs_a = [p.strip() for p in doc_a.split("\n\n") if p.strip()]
@@ -543,7 +543,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             return 0.0
         return len(words_a & words_b) / len(words_a | words_b)
 
-    def generate_bulk_documents(self, template: str, records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def generate_bulk_documents(self, template: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         """批量生成文档：基于模板和数据列表，带进度和错误收集"""
         results = []
         success_count = 0
@@ -573,7 +573,7 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             "results": results,
         }
 
-    def audit_document_generation(self, records: List[Dict[str, Any]], template_name: str = "") -> Dict[str, Any]:
+    def audit_document_generation(self, records: list[dict[str, Any]], template_name: str = "") -> dict[str, Any]:
         """文档生成审计：追踪生成记录，检测异常模式"""
         if not records:
             return {"audit_entries": 0}

@@ -96,7 +96,7 @@ from core.logging_config import get_logger
 import re
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -137,10 +137,10 @@ class ProjectMember:
     user_id: str
     role: str  # lead, developer, designer, qa, pm, stakeholder
     allocation_percent: int = 100
-    joined_at: Optional[datetime] = None
-    left_at: Optional[datetime] = None
+    joined_at: datetime | None = None
+    left_at: datetime | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "user_id": self.user_id,
             "role": self.role,
@@ -150,7 +150,7 @@ class ProjectMember:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ProjectMember":
+    def from_dict(cls, data: dict[str, Any]) -> ProjectMember:
         return cls(
             user_id=data["user_id"],
             role=data["role"],
@@ -169,10 +169,10 @@ class RiskItem:
     mitigation: str
     owner_id: str
     status: str = "open"
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "risk_id": self.risk_id,
             "description": self.description,
@@ -193,10 +193,10 @@ class Milestone:
     description: str
     target_date: datetime
     status: MilestoneStatus = MilestoneStatus.PENDING
-    deliverables: List[str] = field(default_factory=list)
-    completion_date: Optional[datetime] = None
+    deliverables: list[str] = field(default_factory=list)
+    completion_date: datetime | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "milestone_id": self.milestone_id,
             "name": self.name,
@@ -212,19 +212,19 @@ class TaskNode:
     task_id: str
     title: str
     description: str
-    assignee_id: Optional[str]
+    assignee_id: str | None
     priority: TaskPriority
     status: str = "todo"
     estimated_hours: float = 0.0
     actual_hours: float = 0.0
-    depends_on: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    depends_on: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "title": self.title,
@@ -246,9 +246,9 @@ class ResourceAllocator:
     """Intelligent resource allocation engine with capacity planning and conflict detection."""
 
     def __init__(self):
-        self._member_capacity: Dict[str, int] = {}
-        self._member_projects: Dict[str, Set[str]] = {}
-        self._allocation_history: List[Dict[str, Any]] = []
+        self._member_capacity: dict[str, int] = {}
+        self._member_projects: dict[str, set[str]] = {}
+        self._allocation_history: list[dict[str, Any]] = []
 
     def register_member(self, user_id: str, max_allocation: int = 100):
         self._member_capacity[user_id] = max_allocation
@@ -265,7 +265,7 @@ class ResourceAllocator:
     def _get_member_allocation_in_project(self, user_id: str, project_id: str) -> int:
         return 0
 
-    def check_allocation_conflicts(self, user_id: str, requested_percent: int) -> Tuple[bool, str]:
+    def check_allocation_conflicts(self, user_id: str, requested_percent: int) -> tuple[bool, str]:
         available = self.calculate_available_capacity(user_id)
         if available < requested_percent:
             return (
@@ -274,8 +274,8 @@ class ResourceAllocator:
             )
         return True, "No conflicts"
 
-    def suggest_allocation(self, team_size: int, total_effort_hours: float, deadline: datetime) -> Dict[str, Any]:
-        now = datetime.now(timezone.utc)
+    def suggest_allocation(self, team_size: int, total_effort_hours: float, deadline: datetime) -> dict[str, Any]:
+        now = datetime.now(UTC)
         working_days = max(1, (deadline - now).days // 7 * 5)
         hours_per_person = total_effort_hours / max(1, team_size)
         daily_hours = hours_per_person / max(1, working_days)
@@ -297,8 +297,8 @@ class DependencyGraph:
     """Directed acyclic graph for task dependency management with cycle detection."""
 
     def __init__(self):
-        self._adjacency: Dict[str, Set[str]] = {}
-        self._reverse: Dict[str, Set[str]] = {}
+        self._adjacency: dict[str, set[str]] = {}
+        self._reverse: dict[str, set[str]] = {}
 
     def add_node(self, node_id: str):
         if node_id not in self._adjacency:
@@ -329,8 +329,8 @@ class DependencyGraph:
             stack.extend(self._adjacency.get(current, set()))
         return False
 
-    def topological_sort(self) -> List[str]:
-        in_degree: Dict[str, int] = {n: 0 for n in self._adjacency}
+    def topological_sort(self) -> list[str]:
+        in_degree: dict[str, int] = {n: 0 for n in self._adjacency}
         for node, deps in self._reverse.items():
             in_degree[node] = len(deps)
         queue = [n for n, d in in_degree.items() if d == 0]
@@ -345,10 +345,10 @@ class DependencyGraph:
                     queue.append(neighbor)
         return result
 
-    def get_blocking_tasks(self, task_id: str) -> List[str]:
+    def get_blocking_tasks(self, task_id: str) -> list[str]:
         return list(self._adjacency.get(task_id, set()))
 
-    def get_dependent_tasks(self, task_id: str) -> List[str]:
+    def get_dependent_tasks(self, task_id: str) -> list[str]:
         return list(self._reverse.get(task_id, set()))
 
     def remove_node(self, node_id: str):
@@ -357,7 +357,7 @@ class DependencyGraph:
         for dep in self._reverse.pop(node_id, set()):
             self._adjacency[dep].discard(node_id)
 
-class RiskEngine(object):
+class RiskEngine:
     """Quantitative risk assessment engine with Monte Carlo simulation for schedule estimation."""
 
     def __init__(self):
@@ -373,7 +373,7 @@ class RiskEngine(object):
         level_weight = self._risk_thresholds.get(risk.level, 0.5)
         return round(level_weight * risk.probability * 10, 2)
 
-    def aggregate_project_risk(self, risks: List[RiskItem]) -> Dict[str, Any]:
+    def aggregate_project_risk(self, risks: list[RiskItem]) -> dict[str, Any]:
         if not risks:
             return {"overall_score": 0.0, "level": "none", "count": 0}
         scores = [self.calculate_risk_score(r) for r in risks if r.status == "open"]
@@ -403,7 +403,7 @@ class RiskEngine(object):
             "high_count": high_count,
         }
 
-    def monte_carlo_schedule(self, tasks: List[TaskNode], simulations: int = 1000) -> Dict[str, Any]:
+    def monte_carlo_schedule(self, tasks: list[TaskNode], simulations: int = 1000) -> dict[str, Any]:
         import random
 
         completion_times = []
@@ -449,22 +449,22 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__()
-        self._projects: Dict[str, Dict[str, Any]] = {}
-        self._tasks: Dict[str, TaskNode] = {}
-        self._milestones: Dict[str, Dict[str, Milestone]] = {}
-        self._risks: Dict[str, Dict[str, RiskItem]] = {}
-        self._members: Dict[str, Dict[str, ProjectMember]] = {}
+        self._projects: dict[str, dict[str, Any]] = {}
+        self._tasks: dict[str, TaskNode] = {}
+        self._milestones: dict[str, dict[str, Milestone]] = {}
+        self._risks: dict[str, dict[str, RiskItem]] = {}
+        self._members: dict[str, dict[str, ProjectMember]] = {}
         self._dependency_graph = DependencyGraph()
         self._resource_allocator = ResourceAllocator()
         self._risk_engine = RiskEngine()
-        self._audit_log: List[Dict[str, Any]] = []
+        self._audit_log: list[dict[str, Any]] = []
         self._version_counter = 0
 
     # --- Audit ---
 
-    def _audit(self, action: str, entity: str, entity_id: str, details: Dict[str, Any] = None):
+    def _audit(self, action: str, entity: str, entity_id: str, details: dict[str, Any] = None):
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "action": action,
             "entity": entity,
             "entity_id": entity_id,
@@ -482,13 +482,13 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         description: str,
         owner_id: str,
-        start_date: Optional[datetime] = None,
-        deadline: Optional[datetime] = None,
-        tags: Optional[List[str]] = None,
-        budget_hours: Optional[float] = None,
-    ) -> Dict[str, Any]:
+        start_date: datetime | None = None,
+        deadline: datetime | None = None,
+        tags: list[str] | None = None,
+        budget_hours: float | None = None,
+    ) -> dict[str, Any]:
         project_id = f"PRJ-{uuid.uuid4().hex[:8].upper()}"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         project = {
             "project_id": project_id,
             "name": name,
@@ -511,10 +511,10 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit("create", "project", project_id, {"name": name, "owner": owner_id})
         return project
 
-    def get_project(self, project_id: str) -> Optional[Dict[str, Any]]:
+    def get_project(self, project_id: str) -> dict[str, Any] | None:
         return self._projects.get(project_id)
 
-    def update_project(self, project_id: str, **updates: Any) -> Optional[Dict[str, Any]]:
+    def update_project(self, project_id: str, **updates: Any) -> dict[str, Any] | None:
         project = self._projects.get(project_id)
         if not project:
             return None
@@ -522,12 +522,12 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if key in ("project_id", "created_at"):
                 continue
             project[key] = value
-        project["updated_at"] = datetime.now(timezone.utc)
+        project["updated_at"] = datetime.now(UTC)
         project["version"] += 1
         self._audit("update", "project", project_id, updates)
         return project
 
-    def change_status(self, project_id: str, new_status: ProjectStatus) -> Optional[Dict[str, Any]]:
+    def change_status(self, project_id: str, new_status: ProjectStatus) -> dict[str, Any] | None:
         project = self._projects.get(project_id)
         if not project:
             return None
@@ -546,19 +546,19 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.warning(f"Invalid transition {old_status} -> {new_status}")
             return None
         project["status"] = new_status.value
-        project["updated_at"] = datetime.now(timezone.utc)
+        project["updated_at"] = datetime.now(UTC)
         project["version"] += 1
         if new_status == ProjectStatus.COMPLETED:
-            project.setdefault("completed_at", datetime.now(timezone.utc))
+            project.setdefault("completed_at", datetime.now(UTC))
         self._audit("status_change", "project", project_id, {"from": old_status, "to": new_status.value})
         return project
 
     def list_projects(
         self,
-        status: Optional[ProjectStatus] = None,
-        owner_id: Optional[str] = None,
-        tag: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        status: ProjectStatus | None = None,
+        owner_id: str | None = None,
+        tag: str | None = None,
+    ) -> list[dict[str, Any]]:
         results = list(self._projects.values())
         if status:
             results = [p for p in results if p["status"] == status.value]
@@ -586,12 +586,12 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         project_id: str,
         title: str,
         description: str,
-        assignee_id: Optional[str] = None,
+        assignee_id: str | None = None,
         priority: TaskPriority = TaskPriority.MEDIUM,
         estimated_hours: float = 0.0,
-        depends_on: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None,
-    ) -> Optional[TaskNode]:
+        depends_on: list[str] | None = None,
+        tags: list[str] | None = None,
+    ) -> TaskNode | None:
         if project_id not in self._projects:
             return None
         task_id = f"TSK-{uuid.uuid4().hex[:8].upper()}"
@@ -612,31 +612,31 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit("create", "task", task_id, {"project": project_id, "title": title, "priority": priority.value})
         return task
 
-    def update_task(self, project_id: str, task_id: str, **updates: Any) -> Optional[TaskNode]:
+    def update_task(self, project_id: str, task_id: str, **updates: Any) -> TaskNode | None:
         task = self._tasks.get(project_id, {}).get(task_id)
         if not task:
             return None
         for key, value in updates.items():
             if key == "status" and value == "in_progress" and not task.started_at:
-                task.started_at = datetime.now(timezone.utc)
+                task.started_at = datetime.now(UTC)
             if key == "status" and value == "done" and not task.completed_at:
-                task.completed_at = datetime.now(timezone.utc)
+                task.completed_at = datetime.now(UTC)
             if hasattr(task, key):
                 setattr(task, key, value)
-        task.updated_at = datetime.now(timezone.utc)
+        task.updated_at = datetime.now(UTC)
         self._audit("update", "task", task_id, updates)
         return task
 
-    def get_task(self, project_id: str, task_id: str) -> Optional[TaskNode]:
+    def get_task(self, project_id: str, task_id: str) -> TaskNode | None:
         return self._tasks.get(project_id, {}).get(task_id)
 
     def list_tasks(
         self,
         project_id: str,
-        status: Optional[str] = None,
-        assignee_id: Optional[str] = None,
-        priority: Optional[TaskPriority] = None,
-    ) -> List[TaskNode]:
+        status: str | None = None,
+        assignee_id: str | None = None,
+        priority: TaskPriority | None = None,
+    ) -> list[TaskNode]:
         tasks = list(self._tasks.get(project_id, {}).values())
         if status:
             tasks = [t for t in tasks if t.status == status]
@@ -646,7 +646,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             tasks = [t for t in tasks if t.priority == priority]
         return sorted(tasks, key=lambda x: x.priority.value, reverse=True)
 
-    def get_execution_order(self, project_id: str) -> List[str]:
+    def get_execution_order(self, project_id: str) -> list[str]:
         subgraph = DependencyGraph()
         for tid, task in self._tasks.get(project_id, {}).items():
             subgraph.add_node(tid)
@@ -663,8 +663,8 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         description: str,
         target_date: datetime,
-        deliverables: Optional[List[str]] = None,
-    ) -> Optional[Milestone]:
+        deliverables: list[str] | None = None,
+    ) -> Milestone | None:
         if project_id not in self._projects:
             return None
         ms_id = f"MS-{uuid.uuid4().hex[:8].upper()}"
@@ -679,17 +679,17 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit("create", "milestone", ms_id, {"project": project_id, "name": name})
         return milestone
 
-    def achieve_milestone(self, project_id: str, milestone_id: str) -> Optional[Milestone]:
+    def achieve_milestone(self, project_id: str, milestone_id: str) -> Milestone | None:
         ms = self._milestones.get(project_id, {}).get(milestone_id)
         if not ms:
             return None
         ms.status = MilestoneStatus.ACHIEVED
-        ms.completion_date = datetime.now(timezone.utc)
+        ms.completion_date = datetime.now(UTC)
         self._audit("achieve", "milestone", milestone_id)
         return ms
 
-    def check_overdue_milestones(self, project_id: str) -> List[Milestone]:
-        now = datetime.now(timezone.utc)
+    def check_overdue_milestones(self, project_id: str) -> list[Milestone]:
+        now = datetime.now(UTC)
         overdue = []
         for ms in self._milestones.get(project_id, {}).values():
             if ms.status in (MilestoneStatus.PENDING, MilestoneStatus.IN_PROGRESS) and ms.target_date < now:
@@ -697,7 +697,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 overdue.append(ms)
         return overdue
 
-    def get_milestone_progress(self, project_id: str) -> Dict[str, Any]:
+    def get_milestone_progress(self, project_id: str) -> dict[str, Any]:
         milestones = list(self._milestones.get(project_id, {}).values())
         if not milestones:
             return {"total": 0, "achieved": 0, "overdue": 0, "completion_ratio": 0.0}
@@ -722,7 +722,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         impact: str,
         mitigation: str,
         owner_id: str,
-    ) -> Optional[RiskItem]:
+    ) -> RiskItem | None:
         if project_id not in self._projects:
             return None
         risk_id = f"RSK-{uuid.uuid4().hex[:8].upper()}"
@@ -743,10 +743,10 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         project_id: str,
         risk_id: str,
-        status: Optional[str] = None,
-        level: Optional[RiskLevel] = None,
-        probability: Optional[float] = None,
-    ) -> Optional[RiskItem]:
+        status: str | None = None,
+        level: RiskLevel | None = None,
+        probability: float | None = None,
+    ) -> RiskItem | None:
         risk = self._risks.get(project_id, {}).get(risk_id)
         if not risk:
             return None
@@ -756,17 +756,17 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             risk.level = level
         if probability is not None:
             risk.probability = max(0.0, min(1.0, probability))
-        risk.updated_at = datetime.now(timezone.utc)
+        risk.updated_at = datetime.now(UTC)
         self._audit("update", "risk", risk_id, {"status": risk.status})
         return risk
 
-    def get_project_risk_report(self, project_id: str) -> Dict[str, Any]:
+    def get_project_risk_report(self, project_id: str) -> dict[str, Any]:
         risks = list(self._risks.get(project_id, {}).values())
         aggregation = self._risk_engine.aggregate_project_risk(risks)
         top_risks = sorted(
             [r.to_dict() for r in risks if r.status == "open"],
             key=lambda x: self._risk_engine.calculate_risk_score(
-                RiskItem(**{**x, "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)})
+                RiskItem(**{**x, "created_at": datetime.now(UTC), "updated_at": datetime.now(UTC)})
             ),
             reverse=True,
         )[:10]
@@ -780,7 +780,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def add_member(
         self, project_id: str, user_id: str, role: str, allocation_percent: int = 100
-    ) -> Optional[ProjectMember]:
+    ) -> ProjectMember | None:
         if project_id not in self._projects:
             return None
         ok, msg = self._resource_allocator.check_allocation_conflicts(user_id, allocation_percent)
@@ -791,7 +791,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             user_id=user_id,
             role=role,
             allocation_percent=allocation_percent,
-            joined_at=datetime.now(timezone.utc),
+            joined_at=datetime.now(UTC),
         )
         self._members[project_id][user_id] = member
         self._resource_allocator.register_member(user_id)
@@ -803,14 +803,14 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def remove_member(self, project_id: str, user_id: str) -> bool:
         member = self._members.get(project_id, {}).pop(user_id, None)
         if member:
-            member.left_at = datetime.now(timezone.utc)
+            member.left_at = datetime.now(UTC)
             self._audit("remove_member", "project", project_id, {"user_id": user_id})
             return True
         return False
 
     # --- Project Analytics ---
 
-    def get_project_dashboard(self, project_id: str) -> Dict[str, Any]:
+    def get_project_dashboard(self, project_id: str) -> dict[str, Any]:
         project = self._projects.get(project_id)
         if not project:
             return {}
@@ -849,10 +849,10 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "milestones": ms_progress,
             "risk_summary": risk_report.get("summary", {}),
             "team_size": team_size,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
         }
 
-    def estimate_completion(self, project_id: str, simulations: int = 1000) -> Dict[str, Any]:
+    def estimate_completion(self, project_id: str, simulations: int = 1000) -> dict[str, Any]:
         tasks = [t for t in self._tasks.get(project_id, {}).values() if t.status != "done" and t.estimated_hours > 0]
         if not tasks:
             return {"status": "complete", "remaining_hours": 0.0}
@@ -878,11 +878,11 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def get_audit_trail(
         self,
-        project_id: Optional[str] = None,
-        entity_type: Optional[str] = None,
-        since: Optional[datetime] = None,
+        project_id: str | None = None,
+        entity_type: str | None = None,
+        since: datetime | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         entries = self._audit_log
         if since:
             entries = [e for e in entries if datetime.fromisoformat(e["timestamp"]) >= since]
@@ -890,7 +890,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             entries = [e for e in entries if e["entity"] == entity_type]
         return entries[-limit:]
 
-    def export_project_data(self, project_id: str) -> Dict[str, Any]:
+    def export_project_data(self, project_id: str) -> dict[str, Any]:
         project = self._projects.get(project_id)
         if not project:
             return {}
@@ -901,11 +901,11 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "risks": [r.to_dict() for r in self._risks.get(project_id, {}).values()],
             "members": [m.to_dict() for m in self._members.get(project_id, {}).values()],
             "audit_log": self.get_audit_trail(project_id=project_id),
-            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "exported_at": datetime.now(UTC).isoformat(),
         }
 
 # Module-level singleton
-_manager: Optional[ProjectManager] = None
+_manager: ProjectManager | None = None
 
 def get_project_manager() -> ProjectManager:
     global _manager
@@ -913,7 +913,7 @@ def get_project_manager() -> ProjectManager:
         _manager = ProjectManager()
     return _manager
 
-def health_check() -> Dict[str, Any]:
+def health_check() -> dict[str, Any]:
     mgr = get_project_manager()
     total_projects = len(mgr._projects)
     total_tasks = sum(len(t) for t in mgr._tasks.values())

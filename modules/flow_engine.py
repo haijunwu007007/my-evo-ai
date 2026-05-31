@@ -97,7 +97,8 @@ import asyncio
 from core.logging_config import get_logger
 from enum import Enum
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Set
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import sys
@@ -207,8 +208,8 @@ class FlowNode:
     node_id: str
     node_type: NodeType
     name: str
-    config: Dict[str, Any] = field(default_factory=dict)
-    next_nodes: List[str] = field(default_factory=list)
+    config: dict[str, Any] = field(default_factory=dict)
+    next_nodes: list[str] = field(default_factory=list)
     timeout_seconds: int = 300
     retry_count: int = 0
     retry_delay: int = 5
@@ -216,7 +217,7 @@ class FlowNode:
     condition_expr: str = ""  # 条件表达式
     fallback_node: str = ""  # 回退节点ID
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "node_id": self.node_id,
             "node_type": self.node_type.value,
@@ -234,16 +235,16 @@ class NodeExecution:
 
     node_id: str
     status: NodeStatus = NodeStatus.PENDING
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    start_time: str | None = None
+    end_time: str | None = None
     duration_ms: float = 0.0
     input_data: Any = None
     output_data: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     retry_count: int = 0
     trace_id: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "node_id": self.node_id,
             "status": self.status.value,
@@ -262,9 +263,9 @@ class FlowDefinition:
     name: str
     description: str = ""
     version: str = "1.0"
-    nodes: Dict[str, FlowNode] = field(default_factory=dict)
-    variables: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    nodes: dict[str, FlowNode] = field(default_factory=dict)
+    variables: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
     created_at: str = ""
     updated_at: str = ""
 
@@ -280,12 +281,12 @@ class FlowInstance:
     instance_id: str
     flow_id: str
     status: FlowStatus = FlowStatus.PENDING
-    variables: Dict[str, Any] = field(default_factory=dict)
-    node_executions: Dict[str, NodeExecution] = field(default_factory=dict)
-    current_nodes: List[str] = field(default_factory=list)
-    error: Optional[str] = None
-    started_at: Optional[str] = None
-    ended_at: Optional[str] = None
+    variables: dict[str, Any] = field(default_factory=dict)
+    node_executions: dict[str, NodeExecution] = field(default_factory=dict)
+    current_nodes: list[str] = field(default_factory=list)
+    error: str | None = None
+    started_at: str | None = None
+    ended_at: str | None = None
     created_at: str = ""
 
     def __post_init__(self):
@@ -294,7 +295,7 @@ class FlowInstance:
         if not self.instance_id:
             self.instance_id = str(uuid.uuid4())[:12]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "instance_id": self.instance_id,
             "flow_id": self.flow_id,
@@ -321,25 +322,25 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
         # 工作流定义存储
-        self._definitions: Dict[str, FlowDefinition] = {}
+        self._definitions: dict[str, FlowDefinition] = {}
         # 运行实例存储
-        self._instances: Dict[str, FlowInstance] = {}
+        self._instances: dict[str, FlowInstance] = {}
         # 节点处理器注册
-        self._handlers: Dict[NodeType, Callable] = {}
+        self._handlers: dict[NodeType, Callable] = {}
         # 内置变量函数
-        self._variable_functions: Dict[str, Callable] = {}
+        self._variable_functions: dict[str, Callable] = {}
         # 配置
         self.max_concurrent_flows = self.config.get("max_concurrent_flows", 50)
         self.default_timeout = self.config.get("default_node_timeout", 300)
         self.history_limit = self.config.get("history_limit", 100)
         # 事件回调
-        self._on_node_complete: Optional[Callable] = None
-        self._on_flow_complete: Optional[Callable] = None
+        self._on_node_complete: Callable | None = None
+        self._on_flow_complete: Callable | None = None
 
     # ── 生命周期 ──
 
@@ -478,7 +479,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 流程定义管理 ──
 
-    def define_flow(self, definition: FlowDefinition) -> Dict[str, Any]:
+    def define_flow(self, definition: FlowDefinition) -> dict[str, Any]:
         """定义/更新工作流"""
         with self.trace("define_flow"):
             try:
@@ -498,7 +499,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             except Exception as e:
                 return {"success": False, "error": str(e)}
 
-    def _validate_dag(self, definition: FlowDefinition) -> List[str]:
+    def _validate_dag(self, definition: FlowDefinition) -> list[str]:
         """校验DAG合法性（检测循环）"""
         errors = []
         if not definition.nodes:
@@ -534,7 +535,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             errors.append("检测到循环依赖，工作流不是有效的DAG")
         return errors
 
-    def get_flow(self, flow_id: str) -> Optional[Dict[str, Any]]:
+    def get_flow(self, flow_id: str) -> dict[str, Any] | None:
         """获取流程定义"""
         defn = self._definitions.get(flow_id)
         if not defn:
@@ -549,7 +550,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "tags": defn.tags,
         }
 
-    def list_flows(self) -> List[Dict[str, Any]]:
+    def list_flows(self) -> list[dict[str, Any]]:
         """列出所有流程定义"""
         return [
             {
@@ -564,7 +565,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 流程执行 ──
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Result:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> Result:
         """执行工作流操作"""
         params = params or {}
         action_map = {
@@ -583,7 +584,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return Result(success=False, error=f"未知动作: {action}", module_id=self.module_id)
         return self._safe_execute(action, params, handler)
 
-    def _run_flow(self, params: Dict) -> Any:
+    def _run_flow(self, params: dict) -> Any:
         """运行工作流"""
         metrics_collector.counter("flow_ops_total")
 
@@ -651,7 +652,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if self._on_flow_complete:
             self._on_flow_complete(instance)
 
-    def _execute_node(self, instance: FlowInstance, defn: FlowDefinition, node_id: str) -> Optional[List[str]]:
+    def _execute_node(self, instance: FlowInstance, defn: FlowDefinition, node_id: str) -> list[str] | None:
         """执行单个节点"""
         node = defn.nodes.get(node_id)
         if not node:
@@ -699,7 +700,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 execution.status = NodeStatus.SUCCESS
                 execution.output_data = output
                 break
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 execution.status = NodeStatus.TIMEOUT
                 execution.error = f"超时 ({node.timeout_seconds}s)"
                 if attempt < node.retry_count:
@@ -747,17 +748,17 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 内置节点处理器 ──
 
-    def _handle_start(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_start(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """START节点：初始化上下文"""
         self.info(f"[{execution.trace_id}] START: {node.name}")
         return {"message": "流程启动", "started_at": self._now()}
 
-    def _handle_end(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_end(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """END节点：标记完成"""
         self.info(f"[{execution.trace_id}] END: {node.name}")
         return {"message": "流程结束", "ended_at": self._now()}
 
-    def _handle_http(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_http(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """HTTP节点：模拟HTTP调用"""
         cfg = node.config
         url = self._resolve_variables(cfg.get("url", ""), variables)
@@ -778,7 +779,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         variables["_last_http_response"] = response_data
         return response_data
 
-    def _handle_script(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_script(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """SCRIPT节点：安全执行脚本"""
         script = node.config.get("script", "")
         self.info(f"[{execution.trace_id}] SCRIPT: {script[:50]}...")
@@ -806,7 +807,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             raise RuntimeError(f"脚本执行失败: {e}")
 
-    def _handle_condition(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_condition(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """CONDITION节点：条件判断"""
         expr = node.condition_expr
         self.info(f"[{execution.trace_id}] CONDITION: {expr}")
@@ -817,7 +818,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             raise RuntimeError(f"条件表达式执行失败: {e}")
 
-    def _handle_transform(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_transform(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """TRANSFORM节点：数据转换"""
         mappings = node.config.get("mappings", {})
         self.info(f"[{execution.trace_id}] TRANSFORM: {len(mappings)} 个映射规则")
@@ -837,7 +838,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         variables["_transformed_data"] = result
         return {"transformed": result, "rules_applied": len(mappings)}
 
-    def _handle_subprocess(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_subprocess(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """SUBPROCESS节点：调用子流程"""
         sub_flow_id = node.config.get("flow_id", "")
         self.info(f"[{execution.trace_id}] SUBPROCESS: {sub_flow_id}")
@@ -851,7 +852,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "nodes": len(sub_defn.nodes),
         }
 
-    def _handle_parallel(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_parallel(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """PARALLEL节点：并行网关"""
         branches = node.config.get("branches", [])
         self.info(f"[{execution.trace_id}] PARALLEL: {len(branches)} 个分支")
@@ -861,14 +862,14 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             results.append({"branch": branch, "status": "completed"})
         return {"branches_completed": len(results), "results": results}
 
-    def _handle_wait(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_wait(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """WAIT节点：等待"""
         wait_seconds = node.config.get("seconds", 1)
         self.info(f"[{execution.trace_id}] WAIT: {wait_seconds}s")
         time.sleep(min(wait_seconds, 5))
         return {"waited_seconds": wait_seconds}
 
-    def _handle_notify(self, node: FlowNode, variables: Dict, execution: NodeExecution) -> Any:
+    def _handle_notify(self, node: FlowNode, variables: dict, execution: NodeExecution) -> Any:
         """NOTIFY节点：发送通知"""
         cfg = node.config
         channel = cfg.get("channel", "log")
@@ -887,7 +888,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 流程控制 ──
 
-    def _pause_flow(self, params: Dict) -> Any:
+    def _pause_flow(self, params: dict) -> Any:
         instance_id = params.get("instance_id")
         instance = self._instances.get(instance_id)
         if not instance:
@@ -897,7 +898,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         instance.status = FlowStatus.PAUSED
         return {"instance_id": instance_id, "status": "paused"}
 
-    def _resume_flow(self, params: Dict) -> Any:
+    def _resume_flow(self, params: dict) -> Any:
         instance_id = params.get("instance_id")
         instance = self._instances.get(instance_id)
         if not instance:
@@ -907,7 +908,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         instance.status = FlowStatus.RUNNING
         return {"instance_id": instance_id, "status": "resumed"}
 
-    def _cancel_flow(self, params: Dict) -> Any:
+    def _cancel_flow(self, params: dict) -> Any:
         instance_id = params.get("instance_id")
         instance = self._instances.get(instance_id)
         if not instance:
@@ -916,7 +917,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         instance.ended_at = self._now()
         return {"instance_id": instance_id, "status": "cancelled"}
 
-    def _get_instance(self, params: Dict) -> Any:
+    def _get_instance(self, params: dict) -> Any:
         instance_id = params.get("instance_id")
         instance = self._instances.get(instance_id)
         if not instance:
@@ -925,7 +926,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         result["node_executions"] = {nid: ne.to_dict() for nid, ne in instance.node_executions.items()}
         return result
 
-    def _list_instances(self, params: Dict) -> Any:
+    def _list_instances(self, params: dict) -> Any:
         flow_id = params.get("flow_id")
         status = params.get("status")
         instances = list(self._instances.values())
@@ -935,7 +936,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             instances = [i for i in instances if i.status.value == status]
         return {"total": len(instances), "instances": [i.to_dict() for i in instances[-50:]]}
 
-    def _define_flow_action(self, params: Dict) -> Any:
+    def _define_flow_action(self, params: dict) -> Any:
         definition_data = params.get("definition", {})
         flow_id = definition_data.get("flow_id", str(uuid.uuid4())[:8])
         nodes_data = definition_data.get("nodes", {})
@@ -960,7 +961,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return self.define_flow(defn)
 
-    def _delete_flow(self, params: Dict) -> Any:
+    def _delete_flow(self, params: dict) -> Any:
         flow_id = params.get("flow_id")
         if flow_id in self._definitions:
             del self._definitions[flow_id]
@@ -968,7 +969,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"deleted": flow_id}
         raise ValueError(f"流程不存在: {flow_id}")
 
-    def _dry_run(self, params: Dict) -> Any:
+    def _dry_run(self, params: dict) -> Any:
         """干跑：验证流程定义但不实际执行"""
         flow_id = params.get("flow_id")
         defn = self._definitions.get(flow_id)
@@ -977,7 +978,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         errors = self._validate_dag(defn)
         # 模拟执行路径
         path = []
-        visited: Set[str] = set()
+        visited: set[str] = set()
         queue = [nid for nid, n in defn.nodes.items() if n.node_type == NodeType.START]
         while queue and len(path) < 50:
             nid = queue.pop(0)
@@ -997,7 +998,7 @@ class FlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 变量解析 ──
 
-    def _resolve_variables(self, text: str, variables: Dict) -> str:
+    def _resolve_variables(self, text: str, variables: dict) -> str:
         """解析模板变量 {{var_name}}"""
         import re
 

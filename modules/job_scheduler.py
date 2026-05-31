@@ -123,11 +123,11 @@ class ScheduledJob:
     name: str
     job_type: JobType = JobType.ONCE
     target: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     cron_expr: str = ""
     interval_sec: float = 60
     next_run: float = 0
-    last_run: Optional[float] = None
+    last_run: float | None = None
     status: JobStatus = JobStatus.SCHEDULED
     retries: int = 0
     max_retries: int = 3
@@ -136,15 +136,15 @@ class ScheduledJob:
     fail_count: int = 0
     avg_duration_ms: float = 0
     created_at: float = field(default_factory=time.time)
-    dependencies: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class JobExecution:
     exec_id: str
     job_id: str
     start_time: float
-    end_time: Optional[float] = None
+    end_time: float | None = None
     status: str = "running"
     result: Any = None
     error: str = ""
@@ -156,14 +156,14 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._jobs: Dict[str, ScheduledJob] = {}
-        self._executions: List[JobExecution] = []
+        self._jobs: dict[str, ScheduledJob] = {}
+        self._executions: list[JobExecution] = []
         self._counter: int = 0
         self._exec_counter: int = 0
 
@@ -223,7 +223,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "job_scheduler"})
         self.metrics_collector.counter("job_scheduler.execute.calls", 1)
         self.audit("execute", {"module": "job_scheduler"})
@@ -367,7 +367,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         running = sum(1 for j in self._jobs.values() if j.status == JobStatus.RUNNING)
         failed = sum(1 for j in self._jobs.values() if j.status == JobStatus.FAILED)
         return {
@@ -385,7 +385,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 j.status = JobStatus.CANCELLED
         self._jobs.clear()
 
-    def _trigger_job(self, jid: str) -> Dict:
+    def _trigger_job(self, jid: str) -> dict:
         j = self._jobs.get(jid)
         if not j:
             return {"error": "Job not found"}
@@ -465,7 +465,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """Shutdown module"""
         self._status = "stopped"
 
-    def get_job_execution_report(self, hours: int = 24) -> Dict[str, Any]:
+    def get_job_execution_report(self, hours: int = 24) -> dict[str, Any]:
         """任务执行报告。企业场景：运维团队每日查看定时任务执行情况，
         识别失败率上升的任务，及时处理。
         """
@@ -502,7 +502,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "hours": hours, "total_executions": len(recent_execs), "jobs": report}
 
-    def enable_job(self, job_id: str) -> Dict[str, Any]:
+    def enable_job(self, job_id: str) -> dict[str, Any]:
         """启用任务。企业场景：问题修复后重新启用被暂停的定时任务。"""
         job = self._jobs.get(job_id)
         if not job:
@@ -510,7 +510,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         job.status = JobStatus.ACTIVE
         return {"success": True, "job_id": job_id, "name": job.name, "status": "active"}
 
-    def disable_job(self, job_id: str) -> Dict[str, Any]:
+    def disable_job(self, job_id: str) -> dict[str, Any]:
         """暂停任务。企业场景：发现任务异常时暂停，避免重复失败。"""
         job = self._jobs.get(job_id)
         if not job:
@@ -518,7 +518,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         job.status = JobStatus.PAUSED
         return {"success": True, "job_id": job_id, "name": job.name, "status": "paused"}
 
-    def get_job_execution_history(self, job_id: str, limit: int = 20) -> Dict[str, Any]:
+    def get_job_execution_history(self, job_id: str, limit: int = 20) -> dict[str, Any]:
         """获取任务执行历史。企业场景：排查任务失败原因，查看每次执行的
         开始时间、结束时间、耗时、状态、错误信息。
         """
@@ -545,7 +545,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recent_executions": executions,
         }
 
-    def get_scheduled_jobs_summary(self) -> Dict[str, Any]:
+    def get_scheduled_jobs_summary(self) -> dict[str, Any]:
         """所有定时任务概览。企业场景：运维面板展示任务调度总览，
         哪些任务运行中、暂停、失败率最高的任务排行。
         """
@@ -580,7 +580,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "all_jobs": summary,
         }
 
-    def get_job_execution_timeline(self, job_name: str, hours: int = 24) -> Dict[str, Any]:
+    def get_job_execution_timeline(self, job_name: str, hours: int = 24) -> dict[str, Any]:
         """任务执行时间线。企业场景：排查任务延迟问题时查看最近24h每次
         执行的开始/结束时间、耗时、状态，发现执行时间漂移。
         """
@@ -616,7 +616,7 @@ class JobScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "timeline": timeline,
         }
 
-    def pause_job(self, job_name: str, reason: str = "manual") -> Dict[str, Any]:
+    def pause_job(self, job_name: str, reason: str = "manual") -> dict[str, Any]:
         """暂停任务。企业场景：发布窗口期暂停定时任务，避免与发布冲突；
         或排查问题时临时暂停问题任务。
         """

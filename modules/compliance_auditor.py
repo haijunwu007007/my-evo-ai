@@ -170,9 +170,9 @@ class CompliancePolicy:
     name: str
     framework: FrameworkType
     description: str
-    controls: List[Dict[str, Any]] = field(default_factory=list)
+    controls: list[dict[str, Any]] = field(default_factory=list)
     enabled: bool = True
-    last_assessed: Optional[float] = None
+    last_assessed: float | None = None
     compliance_score: float = 0.0
 
 @dataclass
@@ -187,12 +187,12 @@ class AuditFinding:
     description: str
     severity: AuditSeverity
     status: ComplianceStatus = ComplianceStatus.NON_COMPLIANT
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
     remediation: str = ""
     owner: str = ""
-    due_date: Optional[str] = None
+    due_date: str | None = None
     created_at: float = field(default_factory=time.time)
-    resolved_at: Optional[float] = None
+    resolved_at: float | None = None
 
 @dataclass
 class AuditReport:
@@ -202,28 +202,28 @@ class AuditReport:
     name: str
     framework: FrameworkType
     policies_assessed: int = 0
-    findings: List[AuditFinding] = field(default_factory=list)
+    findings: list[AuditFinding] = field(default_factory=list)
     overall_score: float = 0.0
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     status: str = "running"
 
-class ComplianceEngine(object):
+class ComplianceEngine:
     """合规检测引擎 - 负责规则加载、检测执行和违规评分"""
 
     def __init__(self):
-        self._rule_sets: Dict[str, List[Dict]] = {}
+        self._rule_sets: dict[str, list[dict]] = {}
         self._detection_count: int = 0
         self._violation_count: int = 0
-        self._severity_distribution: Dict[str, int] = {}
-        self._scan_history: List[Dict] = []
+        self._severity_distribution: dict[str, int] = {}
+        self._scan_history: list[dict] = []
 
-    def load_rules(self, framework: str, rules: List[Dict]) -> int:
+    def load_rules(self, framework: str, rules: list[dict]) -> int:
         """加载合规规则集"""
         self._rule_sets[framework] = rules
         return len(rules)
 
-    def evaluate(self, target: Dict, rules: List[Dict]) -> Dict[str, Any]:
+    def evaluate(self, target: dict, rules: list[dict]) -> dict[str, Any]:
         """执行合规检测，返回违规列表和评分"""
         self._detection_count += 1
         violations = []
@@ -236,11 +236,11 @@ class ComplianceEngine(object):
         score = max(0, 100 - len(violations) * 10)
         return {"violations": violations, "score": score, "total_rules": len(rules)}
 
-    def _check_rule(self, target: Dict, rule: Dict) -> bool:
+    def _check_rule(self, target: dict, rule: dict) -> bool:
         """检查单条规则"""
         return False
 
-    def get_compliance_summary(self) -> Dict[str, Any]:
+    def get_compliance_summary(self) -> dict[str, Any]:
         """获取合规摘要"""
         return {
             "total_scans": self._detection_count,
@@ -262,10 +262,10 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             }
         )
         self._metrics = _MetricsAdapter()
-        self._policies: Dict[str, CompliancePolicy] = {}
-        self._audit_history: List[AuditReport] = []
-        self._audit_trail: List[Dict] = []
-        self._evidence_store: Dict[str, List[Dict]] = defaultdict(list)
+        self._policies: dict[str, CompliancePolicy] = {}
+        self._audit_history: list[AuditReport] = []
+        self._audit_trail: list[dict] = []
+        self._evidence_store: dict[str, list[dict]] = defaultdict(list)
 
     def initialize(self) -> None:
         self._register_default_policies()
@@ -446,8 +446,8 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("run_audit")
     def run_audit(
-        self, name: str, framework: Optional[FrameworkType] = None, policies: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        self, name: str, framework: FrameworkType | None = None, policies: list[str] | None = None
+    ) -> dict[str, Any]:
         """执行合规审计"""
         audit_id = f"audit_{uuid.uuid4().hex[:10]}"
         report = AuditReport(audit_id=audit_id, name=name, framework=framework or FrameworkType.INTERNAL)
@@ -509,7 +509,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return self._format_audit_report(report)
 
-    def _assess_control(self, control: Dict) -> Dict[str, Any]:
+    def _assess_control(self, control: dict) -> dict[str, Any]:
         """评估单个控制项（模拟）"""
         # 模拟合规检查：70%概率通过
         import time as tmod
@@ -525,7 +525,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 "remediation": f"请配置 {control['check']} 以满足 {control['name']} 要求",
             }
 
-    def _format_audit_report(self, report: AuditReport) -> Dict[str, Any]:
+    def _format_audit_report(self, report: AuditReport) -> dict[str, Any]:
         severity_counts = defaultdict(int)
         for f in report.findings:
             severity_counts[f.severity.value] += 1
@@ -557,13 +557,13 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     @trace_operation("add_evidence")
-    def add_evidence(self, finding_id: str, evidence: Dict) -> bool:
+    def add_evidence(self, finding_id: str, evidence: dict) -> bool:
         """添加审计证据"""
         self._evidence_store[finding_id].append({"data": evidence, "timestamp": time.time()})
         return True
 
     @trace_operation("resolve_finding")
-    def resolve_finding(self, finding_id: str, resolution: str) -> Dict:
+    def resolve_finding(self, finding_id: str, resolution: str) -> dict:
         """解决审计发现"""
         for report in self._audit_history:
             for f in report.findings:
@@ -581,7 +581,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                     return {"finding_id": finding_id, "status": "resolved"}
         raise ValueError(f"发现 {finding_id} 不存在")
 
-    def get_compliance_dashboard(self) -> Dict[str, Any]:
+    def get_compliance_dashboard(self) -> dict[str, Any]:
         """获取合规仪表盘"""
         framework_scores = defaultdict(list)
         for policy in self._policies.values():
@@ -608,7 +608,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "resolution_rate": round((total_findings - open_findings) / max(total_findings, 1), 4),
         }
 
-    def get_audit_trail(self, limit: int = 100) -> List[Dict]:
+    def get_audit_trail(self, limit: int = 100) -> list[dict]:
         return [
             {
                 "audit_id": e.get("audit_id"),
@@ -620,7 +620,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for e in reversed(self._audit_trail[-limit:])
         ]
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         metrics_collector.counter("compliance_auditor_ops_total", labels={"action": action})
         """统一execute入口"""
         _ = self.trace("execute")
@@ -667,7 +667,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             logger.error(f"[ComplianceAuditor] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -688,7 +688,7 @@ class ComplianceAuditor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def shutdown(self) -> None:
         self._initialized = False
 
-    def export_compliance_report(self, format_type: str = "dict") -> Dict[str, Any]:
+    def export_compliance_report(self, format_type: str = "dict") -> dict[str, Any]:
         """导出合规审计报告，支持dict/json/csv格式描述"""
         findings = self._audit_findings if hasattr(self, "_audit_findings") else []
         total = len(findings)

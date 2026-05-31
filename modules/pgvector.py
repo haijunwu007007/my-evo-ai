@@ -93,10 +93,10 @@ class VectorIndex:
         self.m = m
         self.ef_construction = ef_construction
         self.ef_search = ef_search
-        self._vectors: Dict[str, List[float]] = {}
-        self._metadata: Dict[str, Dict] = {}
+        self._vectors: dict[str, list[float]] = {}
+        self._metadata: dict[str, dict] = {}
 
-    def insert(self, vector_id: str, vector: List[float], metadata: Dict = None):
+    def insert(self, vector_id: str, vector: list[float], metadata: dict = None):
         if len(vector) != self.dim:
             raise ValueError(f"Dimension mismatch: expected {self.dim}, got {len(vector)}")
         self._vectors[vector_id] = vector
@@ -109,7 +109,7 @@ class VectorIndex:
             return True
         return False
 
-    def search(self, query: List[float], top_k: int = 10, metric: str = "cosine", filters: Dict = None) -> List[Dict]:
+    def search(self, query: list[float], top_k: int = 10, metric: str = "cosine", filters: dict = None) -> list[dict]:
         if len(query) != self.dim:
             raise ValueError(f"Query dimension mismatch: expected {self.dim}, got {len(query)}")
         candidates = []
@@ -132,19 +132,19 @@ class VectorIndex:
         candidates.sort(key=lambda x: x["distance"])
         return candidates[:top_k]
 
-    def upsert(self, vector_id: str, vector: List[float], metadata: Dict = None):
+    def upsert(self, vector_id: str, vector: list[float], metadata: dict = None):
         self._vectors[vector_id] = vector
         if metadata:
             self._metadata[vector_id] = metadata
 
-    def get(self, vector_id: str) -> Optional[Dict]:
+    def get(self, vector_id: str) -> dict | None:
         vec = self._vectors.get(vector_id)
         if vec is None:
             return None
         return {"id": vector_id, "vector": vec, "metadata": self._metadata[vector_id]}
 
     @staticmethod
-    def _distance(a: List[float], b: List[float], metric: str) -> float:
+    def _distance(a: list[float], b: list[float], metric: str) -> float:
         if metric == "cosine":
             dot = sum(x * y for x, y in zip(a, b))
             norm_a = math.sqrt(sum(x * x for x in a))
@@ -158,7 +158,7 @@ class VectorIndex:
             return round(-sum(x * y for x, y in zip(a, b)), 6)
         return round(sum((x - y) ** 2 for x, y in zip(a, b)), 6)
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "total_vectors": len(self._vectors),
             "dimension": self.dim,
@@ -204,14 +204,14 @@ class VectorIndex:
             params = {}
         return self.upsert(**params)
 
-class CollectionManager(object):
+class CollectionManager:
     """向量集合管理器"""
 
     def __init__(self, default_dim: int = 768):
         self.default_dim = default_dim
-        self._collections: Dict[str, VectorIndex] = {}
+        self._collections: dict[str, VectorIndex] = {}
 
-    def create_collection(self, name: str, dimension: int = 0, metric: str = "cosine", **kwargs) -> Dict:
+    def create_collection(self, name: str, dimension: int = 0, metric: str = "cosine", **kwargs) -> dict:
         if name in self._collections:
             return {"success": False, "error": "collection_exists"}
         dim = dimension or self.default_dim
@@ -221,13 +221,13 @@ class CollectionManager(object):
     def delete_collection(self, name: str) -> bool:
         return self._collections.pop(name, None) is not None
 
-    def get_collection(self, name: str) -> Optional[VectorIndex]:
+    def get_collection(self, name: str) -> VectorIndex | None:
         return self._collections.get(name)
 
-    def list_collections(self) -> List[Dict]:
+    def list_collections(self) -> list[dict]:
         return [{"name": name, **idx.stats()} for name, idx in self._collections.items()]
 
-    def collection_info(self, name: str) -> Optional[Dict]:
+    def collection_info(self, name: str) -> dict | None:
         idx = self._collections.get(name)
         if not idx:
             return None
@@ -239,7 +239,7 @@ class BulkOperations:
     def __init__(self, index: VectorIndex):
         self.index = index
 
-    def bulk_insert(self, vectors: List[Dict]) -> Dict:
+    def bulk_insert(self, vectors: list[dict]) -> dict:
         success = 0
         errors = 0
         for v in vectors:
@@ -250,11 +250,11 @@ class BulkOperations:
                 errors += 1
         return {"success": True, "inserted": success, "errors": errors, "total": len(vectors)}
 
-    def bulk_delete(self, ids: List[str]) -> Dict:
+    def bulk_delete(self, ids: list[str]) -> dict:
         deleted = sum(1 for i in ids if self.index.delete(i))
         return {"success": True, "deleted": deleted, "not_found": len(ids) - deleted}
 
-    def bulk_search(self, queries: List[Dict]) -> List[Dict]:
+    def bulk_search(self, queries: list[dict]) -> list[dict]:
         results = []
         for q in queries:
             try:
@@ -267,13 +267,13 @@ class BulkOperations:
 class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """PGVector向量存储 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "vectors_stored": 0,
@@ -281,7 +281,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -390,7 +390,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def list_collections(self) -> Dict[str, Any]:
+    def list_collections(self) -> dict[str, Any]:
         """列出所有向量集合。企业场景：开发团队查看已有向量集合，
         了解各集合的向量数量和维度配置。
         """
@@ -408,7 +408,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "total": len(result), "collections": result}
 
-    def get_storage_stats(self) -> Dict[str, Any]:
+    def get_storage_stats(self) -> dict[str, Any]:
         """存储统计。企业场景：运维查看向量库存储消耗，
         评估是否需要扩容或清理过期数据。
         """
@@ -428,7 +428,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "vectors_stored_total": self._metrics.get("vectors_stored", 0),
         }
 
-    def batch_upsert(self, collection_name: str, vectors: List[Dict]) -> Dict[str, Any]:
+    def batch_upsert(self, collection_name: str, vectors: list[dict]) -> dict[str, Any]:
         """批量写入向量。企业场景：Embedding服务批量生成1000+文本向量后
         一次性写入，比逐条插入快10倍以上。
         """
@@ -472,11 +472,11 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def search_with_filter(
         self,
         collection_name: str,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int = 10,
-        filters: Dict = None,
+        filters: dict = None,
         score_threshold: float = 0.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """带过滤条件的相似度搜索。企业场景：RAG检索时限定文档范围
         （如只搜"合同"类型、只搜"2024年"的文档）。
         """
@@ -501,15 +501,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                         op = list(val.keys())[0]
                         target = list(val.values())[0]
                         actual = meta.get(key)
-                        if op == "gt" and not (actual and actual > target):
-                            match = False
-                        elif op == "lt" and not (actual and actual < target):
-                            match = False
-                        elif op == "gte" and not (actual and actual >= target):
-                            match = False
-                        elif op == "lte" and not (actual and actual <= target):
-                            match = False
-                        elif op == "ne" and actual == target:
+                        if op == "gt" and not (actual and actual > target) or op == "lt" and not (actual and actual < target) or op == "gte" and not (actual and actual >= target) or op == "lte" and not (actual and actual <= target) or op == "ne" and actual == target:
                             match = False
                         break
                     else:
@@ -536,7 +528,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "results": results[:top_k],
         }
 
-    def delete_by_filter(self, collection_name: str, filters: Dict) -> Dict[str, Any]:
+    def delete_by_filter(self, collection_name: str, filters: dict) -> dict[str, Any]:
         """按条件删除向量。企业场景：清理过期 embedding（如文档已删除），
         或按部门/项目批量删除测试数据。
         """
@@ -561,7 +553,7 @@ class PGVector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.metrics_collector.counter("pgvector.delete_by_filter", count=len(to_delete))
         return {"success": True, "collection": collection_name, "deleted_count": len(to_delete)}
 
-    def get_index_stats(self, collection_name: str) -> Dict[str, Any]:
+    def get_index_stats(self, collection_name: str) -> dict[str, Any]:
         """索引统计。企业场景：调优HNSW参数时查看索引健康度，
         包括维度、向量数、索引构建参数等。
         """

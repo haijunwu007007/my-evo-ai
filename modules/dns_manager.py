@@ -115,11 +115,11 @@ class DNSRecord:
     status: RecordStatus = RecordStatus.ACTIVE
     created_at: float = 0.0
     updated_at: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    probe_ok: Optional[bool] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    probe_ok: bool | None = None
     last_probe: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "domain": self.domain,
@@ -139,11 +139,11 @@ class DNSRecord:
 class DNSZone:
     name: str = ""
     email: str = "admin@example.com"
-    nameservers: List[str] = field(default_factory=lambda: ["ns1.example.com"])
-    records: Dict[str, List[DNSRecord]] = field(default_factory=dict)
+    nameservers: list[str] = field(default_factory=lambda: ["ns1.example.com"])
+    records: dict[str, list[DNSRecord]] = field(default_factory=dict)
     created_at: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         recs = []
         for dom, rs in self.records.items():
             recs.extend(r.to_dict() for r in rs)
@@ -158,21 +158,21 @@ class DNSZone:
 
 @dataclass
 class CacheEntry:
-    answer: List[Dict] = field(default_factory=list)
+    answer: list[dict] = field(default_factory=list)
     cached_at: float = 0.0
     ttl: int = 60
 
     def is_expired(self) -> bool:
         return time.time() - self.cached_at > self.ttl
 
-class DNSHealthChecker(object):
+class DNSHealthChecker:
     """DNS健康检查器 — 多节点探测、延迟监控、可用性统计、异常告警"""
 
     def __init__(self):
-        self._check_history: List[Dict[str, Any]] = []
-        self._node_stats: Dict[str, Dict[str, Any]] = {}
+        self._check_history: list[dict[str, Any]] = []
+        self._node_stats: dict[str, dict[str, Any]] = {}
 
-    def check_resolution(self, domain: str, dns_servers: List[str] = None, timeout: float = 3.0) -> Dict[str, Any]:
+    def check_resolution(self, domain: str, dns_servers: list[str] = None, timeout: float = 3.0) -> dict[str, Any]:
         """检查域名在多个DNS服务器上的解析结果和延迟"""
         if dns_servers is None:
             dns_servers = ["8.8.8.8", "1.1.1.1", "114.114.114.114", "223.5.5.5"]
@@ -225,7 +225,7 @@ class DNSHealthChecker(object):
             "results": results,
         }
 
-    def monitor_dns_servers(self, servers: List[str], interval_seconds: float = 30) -> Dict[str, Any]:
+    def monitor_dns_servers(self, servers: list[str], interval_seconds: float = 30) -> dict[str, Any]:
         """监控DNS服务器健康状态：可用性、平均延迟、历史趋势"""
         now = time.time()
         for server in servers:
@@ -263,7 +263,7 @@ class DNSHealthChecker(object):
             )
         return {"servers": summary, "checked_at": now}
 
-    def detect_anomalies(self, window_minutes: int = 60) -> Dict[str, Any]:
+    def detect_anomalies(self, window_minutes: int = 60) -> dict[str, Any]:
         """检测DNS解析异常：延迟突增、失败率升高、解析不一致"""
         cutoff = time.time() - window_minutes * 60
         recent = [h for h in self._check_history if h.get("timestamp", 0) > cutoff]
@@ -300,7 +300,7 @@ class DNSHealthChecker(object):
             "failure_rate": round(fail_rate, 3),
         }
 
-    def generate_health_report(self) -> Dict[str, Any]:
+    def generate_health_report(self) -> dict[str, Any]:
         """生成DNS健康报告"""
         anomalies = self.detect_anomalies()
         node_summary = []
@@ -320,15 +320,15 @@ class DNSHealthChecker(object):
 class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """DNS域名管理：记录CRUD、区域管理、DNS缓存、健康探测、DNSSEC验证"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._zones: Dict[str, DNSZone] = {}
-        self._cache: Dict[str, CacheEntry] = {}
-        self._records: Dict[str, DNSRecord] = {}
+        self._zones: dict[str, DNSZone] = {}
+        self._cache: dict[str, CacheEntry] = {}
+        self._records: dict[str, DNSRecord] = {}
         self._ops_count = 0
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             default_zone = DNSZone(
                 name="example.com", created_at=time.time(), nameservers=["ns1.example.com", "ns2.example.com"]
@@ -341,7 +341,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         total_records = sum(len(z.records.get(d, [])) for z in self._zones.values() for d in z.records)
         active_records = sum(
             1 for z in self._zones.values() for d in z.records.values() for r in d if r.status == RecordStatus.ACTIVE
@@ -364,7 +364,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         raw = f"{domain}:{rtype}:{value}"
         return hashlib.md5(raw.encode()).hexdigest()[:12]
 
-    def add_record(self, params: Optional[Dict] = None) -> Dict:
+    def add_record(self, params: dict | None = None) -> dict:
         params = params or {}
         domain = params.get("domain", "")
         rtype = params.get("type", "A")
@@ -401,7 +401,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("add_record", f"{domain} {rtype} {value}")
         return {"success": True, "record": rec.to_dict()}
 
-    def get_record(self, params: Optional[Dict] = None) -> Dict:
+    def get_record(self, params: dict | None = None) -> dict:
         params = params or {}
         domain = params.get("domain", "")
         rtype = params.get("type")
@@ -412,7 +412,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "domain": domain, "type": rtype, "records": records, "count": len(records)}
 
-    def update_record(self, params: Optional[Dict] = None) -> Dict:
+    def update_record(self, params: dict | None = None) -> dict:
         params = params or {}
         rid = params.get("id", "")
         if rid not in self._records:
@@ -431,7 +431,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("update_record", rid)
         return {"success": True, "record": rec.to_dict()}
 
-    def delete_record(self, params: Optional[Dict] = None) -> Dict:
+    def delete_record(self, params: dict | None = None) -> dict:
         params = params or {}
         rid = params.get("id", "")
         rec = self._records.pop(rid, None)
@@ -444,7 +444,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("delete_record", rid)
         return {"success": True, "deleted": rid}
 
-    def lookup(self, params: Optional[Dict] = None) -> Dict:
+    def lookup(self, params: dict | None = None) -> dict:
         params = params or {}
         domain = params.get("domain", "")
         rtype = params.get("type")
@@ -463,12 +463,12 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("lookup", f"{domain} {rtype or 'ANY'}")
         return {"success": True, "source": "auth", "answers": records.get("records", [])}
 
-    def list_zones(self, params: Optional[Dict] = None) -> Dict:
+    def list_zones(self, params: dict | None = None) -> dict:
         result = {name: z.to_dict() for name, z in self._zones.items()}
         self._ops_count += 1
         return {"success": True, "zones": result, "count": len(result)}
 
-    def add_zone(self, params: Optional[Dict] = None) -> Dict:
+    def add_zone(self, params: dict | None = None) -> dict:
         params = params or {}
         name = params.get("name", "")
         email = params.get("email", "admin@example.com")
@@ -481,7 +481,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("add_zone", name)
         return {"success": True, "zone": zone.to_dict()}
 
-    def probe_health(self, params: Optional[Dict] = None) -> Dict:
+    def probe_health(self, params: dict | None = None) -> dict:
         params = params or {}
         domain = params.get("domain", "")
         now = time.time()
@@ -494,7 +494,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "probed": len(results), "results": results}
 
-    def flush_cache(self, params: Optional[Dict] = None) -> Dict:
+    def flush_cache(self, params: dict | None = None) -> dict:
         count = len(self._cache)
         self._cache.clear()
         self._ops_count += 1
@@ -506,7 +506,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._cache.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         _ = self.trace("execute")
         metrics_collector.counter("dns_manager_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -519,7 +519,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def analyze_zone_configuration(self, zone: str = "default") -> Dict[str, Any]:
+    def analyze_zone_configuration(self, zone: str = "default") -> dict[str, Any]:
         """分析DNS区域配置质量：TTL合理性、记录完整性、安全配置"""
         records = self._records if hasattr(self, "_records") else {}
         zone_records = {k: v for k, v in records.items() if zone in k or zone == "default"}
@@ -553,7 +553,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "config_score": max(0, 100 - len(issues) * 15),
         }
 
-    def export_zone_backup(self, zone: str = "default") -> Dict[str, Any]:
+    def export_zone_backup(self, zone: str = "default") -> dict[str, Any]:
         """导出DNS区域备份：完整记录快照、元数据、恢复指令
         支持增量备份和完整备份两种模式，可指定备份格式为JSON或BIND格式"""
         records = self._records if hasattr(self, "_records") else {}
@@ -578,7 +578,7 @@ class DNSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "restore_command": f"execute action=import_zone zone={zone} data=<export>",
         }
 
-    def batch_check_domains(self, domains: List[str]) -> Dict[str, Any]:
+    def batch_check_domains(self, domains: list[str]) -> dict[str, Any]:
         """批量检查域名解析状态：多域名并发探测、汇总统计、异常标记"""
         if not domains:
             return {"checked": 0, "results": []}

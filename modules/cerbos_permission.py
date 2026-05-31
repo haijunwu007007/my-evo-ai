@@ -122,9 +122,9 @@ class PolicyRule:
     resource: str
     action: str
     effect: Effect
-    roles: List[str] = field(default_factory=list)
-    conditions: List[Condition] = field(default_factory=list)
-    derived_roles: List[str] = field(default_factory=list)
+    roles: list[str] = field(default_factory=list)
+    conditions: list[Condition] = field(default_factory=list)
+    derived_roles: list[str] = field(default_factory=list)
     priority: int = 100
     enabled: bool = True
     created_at: datetime = field(default_factory=datetime.now)
@@ -135,9 +135,9 @@ class RoleDefinition:
     role_id: str
     name: str
     description: str = ""
-    parent_roles: List[str] = field(default_factory=list)
-    permissions: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    parent_roles: list[str] = field(default_factory=list)
+    permissions: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DerivedRole:
@@ -148,14 +148,14 @@ class DerivedRole:
 @dataclass
 class Principal:
     id: str
-    roles: List[str] = field(default_factory=list)
-    attr: Dict[str, Any] = field(default_factory=dict)
+    roles: list[str] = field(default_factory=list)
+    attr: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Resource:
     id: str
     kind: str
-    attr: Dict[str, Any] = field(default_factory=dict)
+    attr: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AccessLog:
@@ -184,11 +184,11 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.module_id = self.module_name
         self.module_version = "2.0.0"
         self._initialized = False
-        self._policies: Dict[str, PolicyRule] = {}
-        self._roles: Dict[str, RoleDefinition] = {}
-        self._derived_roles: Dict[str, DerivedRole] = {}
-        self._access_logs: List[AccessLog] = []
-        self._decision_cache: Dict[str, Tuple[str, float]] = {}
+        self._policies: dict[str, PolicyRule] = {}
+        self._roles: dict[str, RoleDefinition] = {}
+        self._derived_roles: dict[str, DerivedRole] = {}
+        self._access_logs: list[AccessLog] = []
+        self._decision_cache: dict[str, tuple[str, float]] = {}
         self._cache_ttl = 300
         self._eval_count = 0
         self._allow_count = 0
@@ -295,7 +295,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             f"[{self.module_name}] 初始化完成，策略:{len(self._policies)} 角色:{len(self._roles)} 派生角色:{len(self._derived_roles)}"
         )
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("cerbos_ops_total", labels={"action": operation})
         self.audit("execute", f"operation={operation}")
@@ -380,7 +380,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
         return not result if condition.negate else result
 
-    def _match_derived_roles(self, principal: Principal, resource: Resource) -> List[str]:
+    def _match_derived_roles(self, principal: Principal, resource: Resource) -> list[str]:
         """计算派生角色"""
         matched = []
         for role_id, dr in self._derived_roles.items():
@@ -392,7 +392,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
                     pass
         return matched
 
-    def _resolve_roles(self, role_ids: List[str]) -> Set[str]:
+    def _resolve_roles(self, role_ids: list[str]) -> set[str]:
         """递归解析角色继承"""
         resolved = set()
         queue = list(role_ids)
@@ -407,7 +407,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
                         queue.append(parent)
         return resolved
 
-    def _evaluate_single(self, principal: Principal, resource: Resource, action: str) -> Tuple[Effect, str]:
+    def _evaluate_single(self, principal: Principal, resource: Resource, action: str) -> tuple[Effect, str]:
         """评估单个权限请求"""
         # 按优先级排序策略
         sorted_policies = sorted(self._policies.values(), key=lambda p: p.priority)
@@ -458,13 +458,13 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
     def _check_permission(
         self,
         principal_id: str,
-        roles: List[str],
+        roles: list[str],
         resource_kind: str,
         resource_id: str,
         action: str = "read",
-        principal_attr: Dict = None,
-        resource_attr: Dict = None,
-    ) -> Dict:
+        principal_attr: dict = None,
+        resource_attr: dict = None,
+    ) -> dict:
         t0 = time.time()
         principal = Principal(principal_id, roles, principal_attr or {})
         resource = Resource(resource_id, resource_kind, resource_attr or {})
@@ -523,7 +523,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             },
         }
 
-    def _check_batch(self, requests: List[Dict]) -> Dict:
+    def _check_batch(self, requests: list[dict]) -> dict:
         results = []
         for req in requests:
             r = self._check_permission(**req)
@@ -537,11 +537,11 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         resource: str,
         action: str,
         effect: str,
-        roles: List[str] = None,
-        derived_roles: List[str] = None,
-        conditions: List[Dict] = None,
+        roles: list[str] = None,
+        derived_roles: list[str] = None,
+        conditions: list[dict] = None,
         priority: int = 100,
-    ) -> Dict:
+    ) -> dict:
         if rule_id in self._policies:
             return {"success": False, "error": f"策略 {rule_id} 已存在"}
         cond_list = []
@@ -561,13 +561,13 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._policies[rule_id] = policy
         return {"success": True, "result": {"policy_id": rule_id, "effect": effect}}
 
-    def _remove_policy(self, rule_id: str) -> Dict:
+    def _remove_policy(self, rule_id: str) -> dict:
         if rule_id not in self._policies:
             return {"success": False, "error": f"策略 {rule_id} 不存在"}
         del self._policies[rule_id]
         return {"success": True, "result": {"policy_id": rule_id, "removed": True}}
 
-    def _list_policies(self, resource: str = None) -> Dict:
+    def _list_policies(self, resource: str = None) -> dict:
         policies = list(self._policies.values())
         if resource:
             policies = [p for p in policies if p.resource == resource or p.resource == "*"]
@@ -593,9 +593,9 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         role_id: str,
         name: str,
         description: str = "",
-        parent_roles: List[str] = None,
-        permissions: List[str] = None,
-    ) -> Dict:
+        parent_roles: list[str] = None,
+        permissions: list[str] = None,
+    ) -> dict:
         if role_id in self._roles:
             return {"success": False, "error": f"角色 {role_id} 已存在"}
         role = RoleDefinition(
@@ -604,13 +604,13 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._roles[role_id] = role
         return {"success": True, "result": {"role_id": role_id, "name": name}}
 
-    def _remove_role(self, role_id: str) -> Dict:
+    def _remove_role(self, role_id: str) -> dict:
         if role_id not in self._roles:
             return {"success": False, "error": f"角色 {role_id} 不存在"}
         del self._roles[role_id]
         return {"success": True, "result": {"role_id": role_id, "removed": True}}
 
-    def _list_roles(self) -> Dict:
+    def _list_roles(self) -> dict:
         result = [
             {
                 "role_id": r.role_id,
@@ -623,7 +623,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         ]
         return {"success": True, "result": {"roles": result, "total": len(result)}}
 
-    def _assign_role(self, principal_id: str, role_id: str) -> Dict:
+    def _assign_role(self, principal_id: str, role_id: str) -> dict:
         if role_id not in self._roles:
             return {"success": False, "error": f"角色 {role_id} 不存在"}
         return {
@@ -638,21 +638,21 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
     def _check_attribute(
         self,
         principal_id: str,
-        roles: List[str],
+        roles: list[str],
         resource_kind: str,
         resource_id: str,
         action: str,
         field: str,
         op: str,
         value: Any,
-    ) -> Dict:
+    ) -> dict:
         principal = Principal(principal_id, roles)
         resource = Resource(resource_id, resource_kind, {field: value})
         condition = Condition(field, ConditionOp(op), value)
         result = self._evaluate_condition(condition, principal, resource)
         return {"success": True, "result": {"condition_met": result, "field": field, "op": op, "value": value}}
 
-    def _get_access_logs(self, principal_id: str = None, limit: int = 50) -> Dict:
+    def _get_access_logs(self, principal_id: str = None, limit: int = 50) -> dict:
         logs = self._access_logs
         if principal_id:
             logs = [l for l in logs if l.principal_id == principal_id]
@@ -672,7 +672,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         ]
         return {"success": True, "result": {"logs": result, "total": len(result)}}
 
-    def _get_stats(self) -> Dict:
+    def _get_stats(self) -> dict:
         return {
             "success": True,
             "result": {
@@ -691,13 +691,13 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
     def _simulate(
         self,
         principal_id: str,
-        roles: List[str],
+        roles: list[str],
         resource_kind: str,
         resource_id: str,
-        actions: List[str] = None,
-        principal_attr: Dict = None,
-        resource_attr: Dict = None,
-    ) -> Dict:
+        actions: list[str] = None,
+        principal_attr: dict = None,
+        resource_attr: dict = None,
+    ) -> dict:
         actions = actions or ["read", "write", "delete", "list"]
         results = []
         for action in actions:
@@ -726,7 +726,7 @@ class CerbosPermissionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self._initialized = False
         logger.info(f"[{self.module_name}] 已关闭")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() if hasattr(super(), "health_check") else None
         result = dict(base) if base else {}
         result.update(

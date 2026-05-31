@@ -87,18 +87,18 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("bot_detection")
 
-class BehavioralAnalyzer(object):
+class BehavioralAnalyzer:
     """行为特征分析引擎"""
 
     def __init__(self, window_size: int = 100):
         self.window_size = window_size
-        self._request_windows: Dict[str, deque] = {}
-        self._path_patterns: Dict[str, deque] = defaultdict(lambda: deque(maxlen=window_size))
-        self._velocity_tracker: Dict[str, List[float]] = defaultdict(list)
+        self._request_windows: dict[str, deque] = {}
+        self._path_patterns: dict[str, deque] = defaultdict(lambda: deque(maxlen=window_size))
+        self._velocity_tracker: dict[str, list[float]] = defaultdict(list)
 
     def record_request(
         self, session_id: str, path: str, method: str = "GET", user_agent: str = "", referer: str = ""
-    ) -> Dict:
+    ) -> dict:
         ts = time.time()
         if session_id not in self._request_windows:
             self._request_windows[session_id] = deque(maxlen=self.window_size)
@@ -124,7 +124,7 @@ class BehavioralAnalyzer(object):
             "is_bot": score > 0.7,
         }
 
-    def _calculate_score(self, session_id: str, count: int, velocities: List[float]) -> float:
+    def _calculate_score(self, session_id: str, count: int, velocities: list[float]) -> float:
         score = 0.0
         if count > 50:
             score += min(0.3, (count - 50) / 200)
@@ -155,7 +155,7 @@ class BehavioralAnalyzer(object):
         return min(1.0, score)
 
     @staticmethod
-    def _std(values: List[float]) -> float:
+    def _std(values: list[float]) -> float:
         if len(values) < 2:
             return 0
         mean = sum(values) / len(values)
@@ -168,19 +168,19 @@ class BehavioralAnalyzer(object):
             params = {}
         return self.record_request(**params)
 
-class FingerprintEngine(object):
+class FingerprintEngine:
     """设备指纹识别引擎"""
 
     def __init__(self):
-        self._fingerprints: Dict[str, Dict] = {}
-        self._ua_patterns: List[Tuple[str, float]] = [
+        self._fingerprints: dict[str, dict] = {}
+        self._ua_patterns: list[tuple[str, float]] = [
             (r"bot|crawl|spider|scraper", 0.8),
             (r"curl|wget|python-requests|httpclient|java/", 0.9),
             (r"headless|phantomjs|selenium|puppeteer", 0.95),
             (r"googlebot|bingbot|slurp|duckduckbot", 0.6),
         ]
 
-    def analyze_user_agent(self, ua: str) -> Dict:
+    def analyze_user_agent(self, ua: str) -> dict:
         score = 0.0
         matches = []
         for pattern, weight in self._ua_patterns:
@@ -206,17 +206,17 @@ class FingerprintEngine(object):
             self._fingerprints[fp]["request_count"] += 1
         return fp
 
-    def get_fingerprint_info(self, fp: str) -> Optional[Dict]:
+    def get_fingerprint_info(self, fp: str) -> dict | None:
         return self._fingerprints.get(fp)
 
-class ChallengeEngine(object):
+class ChallengeEngine:
     """挑战验证引擎 - CAPTCHA/JS/行为挑战"""
 
     def __init__(self):
-        self._challenges: Dict[str, Dict] = {}
+        self._challenges: dict[str, dict] = {}
         self._challenge_ttl = 600
 
-    def create_challenge(self, session_id: str, challenge_type: str = "js") -> Dict:
+    def create_challenge(self, session_id: str, challenge_type: str = "js") -> dict:
         challenge_id = str(uuid.uuid4())[:12]
         import random
 
@@ -245,7 +245,7 @@ class ChallengeEngine(object):
             "data": {k: v for k, v in challenge_data.items() if k != "answer"},
         }
 
-    def verify(self, challenge_id: str, response: str) -> Dict:
+    def verify(self, challenge_id: str, response: str) -> dict:
         ch = self._challenges.get(challenge_id)
         if not ch:
             return {"success": False, "error": "Challenge not found or expired"}
@@ -272,9 +272,9 @@ class RateLimiter:
     def __init__(self, max_requests: int = 60, window_sec: float = 60.0):
         self.max_requests = max_requests
         self.window_sec = window_sec
-        self._counters: Dict[str, deque] = {}
+        self._counters: dict[str, deque] = {}
 
-    def check(self, key: str) -> Dict:
+    def check(self, key: str) -> dict:
         now = time.time()
         if key not in self._counters:
             self._counters[key] = deque(maxlen=self.max_requests + 10)
@@ -295,13 +295,13 @@ class RateLimiter:
 class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """机器人检测 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "requests_analyzed": 0,
@@ -311,7 +311,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -449,7 +449,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def analyze_traffic_pattern(self, ip_address: str, hours: int = 24) -> Dict[str, Any]:
+    def analyze_traffic_pattern(self, ip_address: str, hours: int = 24) -> dict[str, Any]:
         """分析IP流量模式。企业场景：安全团队审查可疑IP的历史行为模式，
         判断是否为自动化脚本/爬虫/暴力破解，提供详细分析报告。
         """
@@ -498,7 +498,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "unique_paths": list(paths)[:20],
         }
 
-    def get_bot_statistics(self, days: int = 7) -> Dict[str, Any]:
+    def get_bot_statistics(self, days: int = 7) -> dict[str, Any]:
         """获取机器人检测统计。企业场景：安全周报展示恶意流量概况，
         包括检测到的机器人数量、拦截次数、攻击类型分布、Top恶意IP。
         """
@@ -508,8 +508,8 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "message": "暂无检测记录"}
         recent = [d for d in self._detection_log if d.get("timestamp", 0) >= cutoff]
         total = len(recent)
-        by_type: Dict[str, int] = {}
-        by_ip: Dict[str, int] = {}
+        by_type: dict[str, int] = {}
+        by_ip: dict[str, int] = {}
         blocked = sum(1 for d in recent if d.get("action") == "blocked")
         for d in recent:
             bot_type = d.get("bot_type", "unknown")
@@ -527,7 +527,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_ips": [{"ip": ip, "count": c} for ip, c in top_ips],
         }
 
-    def generate_blacklist_rules(self, confidence_threshold: float = 0.9, days: int = 30) -> Dict[str, Any]:
+    def generate_blacklist_rules(self, confidence_threshold: float = 0.9, days: int = 30) -> dict[str, Any]:
         """自动生成黑名单规则。企业场景：基于历史检测结果自动提炼IP黑名单，
         导出为防火墙/WAF可用的规则格式，减少人工维护成本。
         """
@@ -536,7 +536,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         now = time.time()
         cutoff = now - days * 86400
         recent = [d for d in self._detection_log if d.get("timestamp", 0) >= cutoff]
-        ip_scores: Dict[str, Dict] = {}
+        ip_scores: dict[str, dict] = {}
         for d in recent:
             ip = d.get("ip", "")
             if not ip:

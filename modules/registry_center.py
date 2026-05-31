@@ -96,7 +96,7 @@ class ServiceInstance:
         host: str,
         port: int,
         instance_id: str = None,
-        metadata: Dict = None,
+        metadata: dict = None,
         weight: int = 100,
         enabled: bool = True,
         protocol: str = "http",
@@ -117,7 +117,7 @@ class ServiceInstance:
         self.last_heartbeat = time.time()
         self.status = "healthy"
         self.health_check_failures = 0
-        self._health_history: List[Dict] = []
+        self._health_history: list[dict] = []
 
     @property
     def address(self) -> str:
@@ -148,7 +148,7 @@ class ServiceInstance:
         """检查实例是否过期"""
         return time.time() - self.last_heartbeat > ttl_seconds
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "instance_id": self.instance_id,
             "service_name": self.service_name,
@@ -205,17 +205,17 @@ class ServiceInstance:
             params = {}
         return self.to_dict(**params)
 
-class HealthChecker(object):
+class HealthChecker:
     """健康检查引擎 - 支持TCP/HTTP/心跳多模式检查"""
 
     def __init__(self, check_interval: float = 10.0, timeout: float = 5.0, max_failures: int = 3):
         self.check_interval = check_interval
         self.timeout = timeout
         self.max_failures = max_failures
-        self._check_results: Dict[str, List[Dict]] = defaultdict(list)
-        self._last_check: Dict[str, float] = {}
+        self._check_results: dict[str, list[dict]] = defaultdict(list)
+        self._last_check: dict[str, float] = {}
 
-    def check_heartbeat(self, instance: ServiceInstance, current_time: float = None) -> Dict:
+    def check_heartbeat(self, instance: ServiceInstance, current_time: float = None) -> dict:
         """心跳模式健康检查 - 基于TTL判断"""
         now = current_time or time.time()
         elapsed = now - instance.last_heartbeat
@@ -232,7 +232,7 @@ class HealthChecker(object):
         self._record_result(instance.instance_id, result)
         return result
 
-    def check_http(self, instance: ServiceInstance, path: str = "/health", current_time: float = None) -> Dict:
+    def check_http(self, instance: ServiceInstance, path: str = "/health", current_time: float = None) -> dict:
         """HTTP模式健康检查 - 模拟检测"""
         now = current_time or time.time()
         is_healthy = instance.enabled and not instance.is_expired(self.check_interval * self.max_failures)
@@ -249,7 +249,7 @@ class HealthChecker(object):
         self._record_result(instance.instance_id, result)
         return result
 
-    def check_tcp(self, instance: ServiceInstance, current_time: float = None) -> Dict:
+    def check_tcp(self, instance: ServiceInstance, current_time: float = None) -> dict:
         """TCP模式健康检查 - 模拟端口探测"""
         now = current_time or time.time()
         is_healthy = instance.enabled and instance.health_check_failures < self.max_failures
@@ -265,16 +265,16 @@ class HealthChecker(object):
         self._record_result(instance.instance_id, result)
         return result
 
-    def _record_result(self, instance_id: str, result: Dict) -> None:
+    def _record_result(self, instance_id: str, result: dict) -> None:
         self._check_results[instance_id].append(result)
         if len(self._check_results[instance_id]) > 200:
             self._check_results[instance_id] = self._check_results[instance_id][-200:]
         self._last_check[instance_id] = time.time()
 
-    def get_check_history(self, instance_id: str, limit: int = 20) -> List[Dict]:
+    def get_check_history(self, instance_id: str, limit: int = 20) -> list[dict]:
         return self._check_results.get(instance_id, [])[-limit:]
 
-    def get_uptime_stats(self, instance_id: str) -> Dict:
+    def get_uptime_stats(self, instance_id: str) -> dict:
         """获取实例可用率统计"""
         history = self._check_results.get(instance_id, [])
         if not history:
@@ -293,11 +293,11 @@ class ServiceRegistry:
     """内存服务注册表 - 高性能服务存储与检索"""
 
     def __init__(self):
-        self._services: Dict[str, Dict[str, ServiceInstance]] = defaultdict(dict)
-        self._metadata_index: Dict[str, Dict[str, set]] = defaultdict(lambda: defaultdict(set))
-        self._version_index: Dict[str, Dict[str, set]] = defaultdict(lambda: defaultdict(set))
+        self._services: dict[str, dict[str, ServiceInstance]] = defaultdict(dict)
+        self._metadata_index: dict[str, dict[str, set]] = defaultdict(lambda: defaultdict(set))
+        self._version_index: dict[str, dict[str, set]] = defaultdict(lambda: defaultdict(set))
 
-    def register(self, instance: ServiceInstance) -> Dict:
+    def register(self, instance: ServiceInstance) -> dict:
         """注册服务实例"""
         self._services[instance.service_name][instance.instance_id] = instance
         for k, v in instance.metadata.items():
@@ -310,7 +310,7 @@ class ServiceRegistry:
             "address": instance.address,
         }
 
-    def deregister(self, service_name: str, instance_id: str) -> Dict:
+    def deregister(self, service_name: str, instance_id: str) -> dict:
         """注销服务实例"""
         svc_map = self._services.get(service_name, {})
         instance = svc_map.pop(instance_id, None)
@@ -325,8 +325,8 @@ class ServiceRegistry:
         return {"success": True, "instance_id": instance_id, "service_name": service_name}
 
     def discover(
-        self, service_name: str, healthy_only: bool = True, tags: Dict = None, version: str = None
-    ) -> List[ServiceInstance]:
+        self, service_name: str, healthy_only: bool = True, tags: dict = None, version: str = None
+    ) -> list[ServiceInstance]:
         """服务发现"""
         svc_map = self._services.get(service_name, {})
         if not svc_map:
@@ -344,10 +344,10 @@ class ServiceRegistry:
             instances = [i for i in instances if i.enabled and i.status == "healthy"]
         return instances
 
-    def get_all_services(self) -> Dict[str, int]:
+    def get_all_services(self) -> dict[str, int]:
         return {name: len(instances) for name, instances in self._services.items()}
 
-    def get_instance(self, service_name: str, instance_id: str) -> Optional[ServiceInstance]:
+    def get_instance(self, service_name: str, instance_id: str) -> ServiceInstance | None:
         return self._services.get(service_name, {}).get(instance_id)
 
     def total_instances(self) -> int:
@@ -358,13 +358,13 @@ class LoadBalancer:
 
     def __init__(self, strategy: str = "weighted_round_robin"):
         self.strategy = strategy
-        self._round_robin_index: Dict[str, int] = defaultdict(int)
-        self._consistent_hash_ring: Dict[str, List[int]] = {}
-        self._consistent_hash_map: Dict[str, Dict[int, str]] = {}
+        self._round_robin_index: dict[str, int] = defaultdict(int)
+        self._consistent_hash_ring: dict[str, list[int]] = {}
+        self._consistent_hash_map: dict[str, dict[int, str]] = {}
 
     def select(
-        self, instances: List[ServiceInstance], service_name: str = "", key: str = ""
-    ) -> Optional[ServiceInstance]:
+        self, instances: list[ServiceInstance], service_name: str = "", key: str = ""
+    ) -> ServiceInstance | None:
         """根据策略选择实例"""
         if not instances:
             return None
@@ -385,12 +385,12 @@ class LoadBalancer:
             return min(candidates, key=lambda i: i.health_check_failures)
         return candidates[0]
 
-    def _round_robin(self, instances: List[ServiceInstance], service_name: str) -> ServiceInstance:
+    def _round_robin(self, instances: list[ServiceInstance], service_name: str) -> ServiceInstance:
         idx = self._round_robin_index[service_name] % len(instances)
         self._round_robin_index[service_name] += 1
         return instances[idx]
 
-    def _weighted_round_robin(self, instances: List[ServiceInstance], service_name: str) -> ServiceInstance:
+    def _weighted_round_robin(self, instances: list[ServiceInstance], service_name: str) -> ServiceInstance:
         expanded = []
         for i in instances:
             w = max(1, i.weight // 10)
@@ -401,7 +401,7 @@ class LoadBalancer:
         self._round_robin_index[service_name] += 1
         return expanded[idx]
 
-    def _weighted_random(self, instances: List[ServiceInstance]) -> ServiceInstance:
+    def _weighted_random(self, instances: list[ServiceInstance]) -> ServiceInstance:
         weights = [max(1, i.weight) for i in instances]
         total = sum(weights)
         r = total * 0.5
@@ -412,7 +412,7 @@ class LoadBalancer:
                 return inst
         return instances[-1]
 
-    def _consistent_hash(self, instances: List[ServiceInstance], service_name: str, key: str) -> ServiceInstance:
+    def _consistent_hash(self, instances: list[ServiceInstance], service_name: str, key: str) -> ServiceInstance:
         if not key:
             key = str(time.time())
         ring_size = 150
@@ -432,15 +432,15 @@ class RegistryAdapter:
 
     ADAPTER_TYPES = ["consul", "etcd", "nacos", "eureka", "zookeeper"]
 
-    def __init__(self, adapter_type: str = "consul", config: Dict = None):
+    def __init__(self, adapter_type: str = "consul", config: dict = None):
         self.adapter_type = adapter_type.lower()
         self.config = config or {}
         self._connected = False
         self._session_id = str(uuid.uuid4())[:8]
-        self._operations_log: List[Dict] = []
-        self._kv_store: Dict[str, str] = {}
+        self._operations_log: list[dict] = []
+        self._kv_store: dict[str, str] = {}
 
-    def connect(self) -> Dict:
+    def connect(self) -> dict:
         """连接注册中心"""
         if self.adapter_type not in self.ADAPTER_TYPES:
             return {"success": False, "error": f"Unsupported adapter: {self.adapter_type}"}
@@ -448,13 +448,13 @@ class RegistryAdapter:
         self._log_operation("connect", {"adapter_type": self.adapter_type})
         return {"success": True, "adapter_type": self.adapter_type, "session_id": self._session_id, "connected": True}
 
-    def disconnect(self) -> Dict:
+    def disconnect(self) -> dict:
         """断开注册中心连接"""
         self._connected = False
         self._log_operation("disconnect", {})
         return {"success": True, "connected": False}
 
-    def put_kv(self, key: str, value: str) -> Dict:
+    def put_kv(self, key: str, value: str) -> dict:
         """写入键值对"""
         if not self._connected:
             return {"success": False, "error": "Not connected"}
@@ -462,7 +462,7 @@ class RegistryAdapter:
         self._log_operation("put_kv", {"key": key})
         return {"success": True, "key": key, "version": 1}
 
-    def get_kv(self, key: str) -> Dict:
+    def get_kv(self, key: str) -> dict:
         """读取键值对"""
         value = self._kv_store.get(key)
         self._log_operation("get_kv", {"key": key})
@@ -470,7 +470,7 @@ class RegistryAdapter:
             return {"success": True, "key": key, "value": value}
         return {"success": False, "error": "Key not found"}
 
-    def delete_kv(self, key: str) -> Dict:
+    def delete_kv(self, key: str) -> dict:
         """删除键值对"""
         if key in self._kv_store:
             del self._kv_store[key]
@@ -478,7 +478,7 @@ class RegistryAdapter:
             return {"success": True, "key": key}
         return {"success": False, "error": "Key not found"}
 
-    def _log_operation(self, operation: str, params: Dict) -> None:
+    def _log_operation(self, operation: str, params: dict) -> None:
         self._operations_log.append(
             {"operation": operation, "params": params, "adapter_type": self.adapter_type, "timestamp": time.time()}
         )
@@ -488,11 +488,11 @@ class RegistryAdapter:
 class RegistryCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """服务注册中心 - 支持Consul/Etcd/Nacos多注册中心适配"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "registrations": 0,
@@ -502,7 +502,7 @@ class RegistryCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
         self._instance_id = str(uuid.uuid4())[:8]
@@ -515,10 +515,10 @@ class RegistryCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         lb_strategy = self.config.get("load_balance_strategy", "weighted_round_robin")
         self.load_balancer = LoadBalancer(strategy=lb_strategy)
-        self._adapters: Dict[str, RegistryAdapter] = {}
-        self._primary_adapter: Optional[str] = self.config.get("primary_adapter")
+        self._adapters: dict[str, RegistryAdapter] = {}
+        self._primary_adapter: str | None = self.config.get("primary_adapter")
         self._ttl = self.config.get("ttl", 30)
-        self._watchers: Dict[str, List[Dict]] = defaultdict(list)
+        self._watchers: dict[str, list[dict]] = defaultdict(list)
 
     def initialize(self) -> dict:
         try:
@@ -756,7 +756,7 @@ class RegistryCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "supported_types": RegistryAdapter.ADAPTER_TYPES,
             }
 
-    def _notify_watchers(self, service_name: str, event_type: str, data: Dict) -> None:
+    def _notify_watchers(self, service_name: str, event_type: str, data: dict) -> None:
         """通知服务变更观察者"""
         watchers = self._watchers.get(service_name, [])
         for watcher in watchers:

@@ -55,7 +55,7 @@ def _init_db():
     conn.commit()
     return conn
 
-def _persist_metrics(metrics: Dict[str,float]):
+def _persist_metrics(metrics: dict[str,float]):
     try:
         conn = sqlite3.connect(_DB_PATH, timeout=5)
         conn.execute(
@@ -93,7 +93,7 @@ def _persist_alert(rule_id, metric, value, threshold, severity, msg):
 class MetricPoint:
     timestamp: float
     value: float
-    tags: Dict[str, str] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class AlertRule:
@@ -123,7 +123,7 @@ class Alert:
 class ResourceTrendAnalyzer:
     """资源趋势分析器"""
     def __init__(self):
-        self._history: List[Dict[str, Any]] = []
+        self._history: list[dict[str, Any]] = []
         self._max_points = 1440
 
     def record_snapshot(self, cpu_percent, memory_percent, disk_percent,
@@ -186,15 +186,15 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
 
     def __init__(self):
         super().__init__()
-        self._metric_history: Dict[str, deque] = {}
+        self._metric_history: dict[str, deque] = {}
         self._max_history = 3600
-        self._alert_rules: Dict[str, AlertRule] = {}
-        self._active_alerts: Dict[str, Alert] = {}
-        self._alert_history: List[Alert] = []
+        self._alert_rules: dict[str, AlertRule] = {}
+        self._active_alerts: dict[str, Alert] = {}
+        self._alert_history: list[Alert] = []
         self._collect_interval = 5
-        self._collect_thread: Optional[threading.Thread] = None
+        self._collect_thread: threading.Thread | None = None
         self._collecting = False
-        self._last_metrics: Dict[str, float] = {}
+        self._last_metrics: dict[str, float] = {}
         self._lock = threading.Lock()
         self._persist_interval = 60  # 每60秒持久化一次
         self._last_persist = 0.0
@@ -263,7 +263,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
         except ImportError:
             return round(35.0 + 15.0*(time.time()%10)/10, 1)
 
-    def _get_memory_info(self) -> Dict[str, float]:
+    def _get_memory_info(self) -> dict[str, float]:
         try:
             import psutil; mem = psutil.virtual_memory()
             return {"memory_percent": round(mem.percent,1), "memory_used_gb": round(mem.used/1073741824,2),
@@ -271,7 +271,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
         except ImportError:
             return {"memory_percent": 62.3, "memory_used_gb": 9.97, "memory_total_gb": 16.0, "memory_available_gb": 6.03}
 
-    def _get_disk_info(self, path="/") -> Dict[str, float]:
+    def _get_disk_info(self, path="/") -> dict[str, float]:
         try:
             import psutil; d = psutil.disk_usage(path)
             return {"disk_percent": round(d.percent,1), "disk_used_gb": round(d.used/1073741824,2),
@@ -279,7 +279,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
         except ImportError:
             return {"disk_percent": 45.2, "disk_used_gb": 228.8, "disk_free_gb": 277.6, "disk_total_gb": 506.4}
 
-    def _get_network_info(self) -> Dict[str, float]:
+    def _get_network_info(self) -> dict[str, float]:
         try:
             import psutil; n = psutil.net_io_counters()
             return {"bytes_sent_mb": round(n.bytes_sent/1048576,2), "bytes_recv_mb": round(n.bytes_recv/1048576,2),
@@ -295,7 +295,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
         except ImportError:
             return 256
 
-    def _get_load_average(self) -> Dict[str, float]:
+    def _get_load_average(self) -> dict[str, float]:
         try:
             if hasattr(os, "getloadavg"):
                 l1,l5,l15 = os.getloadavg()
@@ -304,7 +304,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
         cpu = self._last_metrics.get("cpu_percent",0)/100.0
         return {"1min": round(cpu*3,2), "5min": round(cpu*2.5,2), "15min": round(cpu*2,2)}
 
-    def _push_to_prometheus(self, metrics: Dict[str,float]):
+    def _push_to_prometheus(self, metrics: dict[str,float]):
         """通过 Pushgateway 推送关键指标"""
         lines = [f"# HELP sysmon_cpu CPU usage percent",
                  f"# TYPE sysmon_cpu gauge",
@@ -346,11 +346,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
             value = self._last_metrics.get(rule.metric_name)
             if value is None: continue
             triggered = False
-            if rule.operator == "gt" and value > rule.threshold: triggered = True
-            elif rule.operator == "lt" and value < rule.threshold: triggered = True
-            elif rule.operator == "gte" and value >= rule.threshold: triggered = True
-            elif rule.operator == "lte" and value <= rule.threshold: triggered = True
-            elif rule.operator == "eq" and abs(value-rule.threshold) < 0.01: triggered = True
+            if rule.operator == "gt" and value > rule.threshold or rule.operator == "lt" and value < rule.threshold or rule.operator == "gte" and value >= rule.threshold or rule.operator == "lte" and value <= rule.threshold or rule.operator == "eq" and abs(value-rule.threshold) < 0.01: triggered = True
             if triggered:
                 rule.last_triggered = now
                 alert = Alert(alert_id=f"{rule_id}_{int(now)}", rule_id=rule_id,
@@ -379,7 +375,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
                 # ── 持久化告警 ──
                 _persist_alert(rule_id, rule.metric_name, value, rule.threshold, rule.severity, alert.message)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         with self._lock:
             metrics_ok = len(self._last_metrics) > 0
             collect_ok = self._collect_thread and self._collect_thread.is_alive()

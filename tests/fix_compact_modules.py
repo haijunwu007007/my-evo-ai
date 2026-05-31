@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """修复紧凑格式模块的缩进问题"""
 import ast, os, sys, re
 from pathlib import Path

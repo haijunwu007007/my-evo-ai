@@ -143,9 +143,9 @@ class StatisticalAnalyzer:
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_stat_ds ON stat_analyses(dataset_id)")
                 conn.commit()
         except Exception as e:
-            logger.warning("Stat DB init failed: {}".format(e))
+            logger.warning(f"Stat DB init failed: {e}")
 
-    def describe(self, data: List[float]) -> Dict[str, Any]:
+    def describe(self, data: list[float]) -> dict[str, Any]:
         """描述性统计分析"""
         self._operation_count += 1
         if not data:
@@ -174,7 +174,7 @@ class StatisticalAnalyzer:
             "cv": round(stdev_val / mean_val, 6) if mean_val != 0 else None,
         }
         with self.lock:
-            aid = hashlib.md5("{}:{}".format(time.time(), json.dumps(data[:10])).encode()).hexdigest()[:16]
+            aid = hashlib.md5(f"{time.time()}:{json.dumps(data[:10])}".encode()).hexdigest()[:16]
             try:
                 with sqlite3.connect(self.db_path) as conn:
                     conn.execute(
@@ -186,7 +186,7 @@ class StatisticalAnalyzer:
                 pass
         return result
 
-    def correlation(self, series_a: List[float], series_b: List[float]) -> Dict[str, Any]:
+    def correlation(self, series_a: list[float], series_b: list[float]) -> dict[str, Any]:
         """Pearson相关系数"""
         self._operation_count += 1
         if len(series_a) != len(series_b) or len(series_a) < 2:
@@ -216,7 +216,7 @@ class StatisticalAnalyzer:
             "covariance": round(cov, 6),
         }
 
-    def trend(self, time_series: List[Tuple[float, float]]) -> Dict[str, Any]:
+    def trend(self, time_series: list[tuple[float, float]]) -> dict[str, Any]:
         """线性回归趋势检测"""
         self._operation_count += 1
         if len(time_series) < 2:
@@ -243,7 +243,7 @@ class StatisticalAnalyzer:
             "data_points": n,
         }
 
-    def distribution_fit(self, data: List[float]) -> Dict[str, Any]:
+    def distribution_fit(self, data: list[float]) -> dict[str, Any]:
         """分布拟合检测（偏度+峰度）"""
         self._operation_count += 1
         if len(data) < 3:
@@ -302,7 +302,7 @@ class AnomalyDetector:
         except Exception:
             pass
 
-    def _save_result(self, method: str, result: Dict[str, Any]):
+    def _save_result(self, method: str, result: dict[str, Any]):
         rid = hashlib.md5(
             "{}:{}:{}".format(method, time.time(), len(result.get("anomalies", []))).encode()
         ).hexdigest()[:16]
@@ -316,7 +316,7 @@ class AnomalyDetector:
         except Exception:
             pass
 
-    def zscore_detect(self, data: List[float], threshold: float = 3.0) -> Dict[str, Any]:
+    def zscore_detect(self, data: list[float], threshold: float = 3.0) -> dict[str, Any]:
         """Z-Score异常检测"""
         self._operation_count += 1
         if len(data) < 2:
@@ -343,11 +343,11 @@ class AnomalyDetector:
         self._save_result("zscore", result)
         return result
 
-    def moving_window_detect(self, data: List[float], window_size: int = 10, threshold: float = 2.0) -> Dict[str, Any]:
+    def moving_window_detect(self, data: list[float], window_size: int = 10, threshold: float = 2.0) -> dict[str, Any]:
         """移动窗口异常检测"""
         self._operation_count += 1
         if len(data) < window_size:
-            return {"error": "need at least {} data points".format(window_size), "anomalies": []}
+            return {"error": f"need at least {window_size} data points", "anomalies": []}
         anomalies = []
         for i in range(window_size, len(data)):
             win = data[i - window_size : i]
@@ -368,7 +368,7 @@ class AnomalyDetector:
         self._save_result("moving_window", result)
         return result
 
-    def threshold_detect(self, data: List[float], lower: float = None, upper: float = None) -> Dict[str, Any]:
+    def threshold_detect(self, data: list[float], lower: float = None, upper: float = None) -> dict[str, Any]:
         """阈值异常检测"""
         self._operation_count += 1
         anomalies = []
@@ -390,7 +390,7 @@ class AnomalyDetector:
         self._save_result("threshold", result)
         return result
 
-    def isolation_forest_detect(self, data: List[List[float]], contamination: float = 0.1) -> Dict[str, Any]:
+    def isolation_forest_detect(self, data: list[list[float]], contamination: float = 0.1) -> dict[str, Any]:
         """简化版Isolation Forest异常检测"""
         self._operation_count += 1
         n = len(data)
@@ -447,7 +447,7 @@ class InsightGenerator:
         except Exception:
             pass
 
-    def _save_insight(self, insight: Dict[str, Any]):
+    def _save_insight(self, insight: dict[str, Any]):
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(
@@ -470,8 +470,8 @@ class InsightGenerator:
             pass
 
     def generate_trend_insight(
-        self, time_series: List[Tuple[str, float]], metric_name: str = "metric"
-    ) -> Dict[str, Any]:
+        self, time_series: list[tuple[str, float]], metric_name: str = "metric"
+    ) -> dict[str, Any]:
         """生成趋势洞察"""
         self._operation_count += 1
         if len(time_series) < 2:
@@ -482,27 +482,27 @@ class InsightGenerator:
         slope = trend_result.get("slope", 0)
         direction = trend_result.get("direction", "stable")
         if direction == "increasing":
-            title = "{} 呈上升趋势".format(metric_name)
+            title = f"{metric_name} 呈上升趋势"
             desc = "{} 持续上升，斜率 {:.4f}，拟合优度 {:.4f}".format(
                 metric_name, slope, trend_result.get("r_squared", 0)
             )
             severity = "high" if abs(slope) > 1.0 else "medium"
         elif direction == "decreasing":
-            title = "{} 呈下降趋势".format(metric_name)
+            title = f"{metric_name} 呈下降趋势"
             desc = "{} 持续下降，斜率 {:.4f}，拟合优度 {:.4f}".format(
                 metric_name, slope, trend_result.get("r_squared", 0)
             )
             severity = "high" if abs(slope) > 1.0 else "medium"
         else:
-            title = "{} 保持平稳".format(metric_name)
-            desc = "{} 无明显趋势".format(metric_name)
+            title = f"{metric_name} 保持平稳"
+            desc = f"{metric_name} 无明显趋势"
             severity = "low"
         if direction == "increasing":
-            rec = "{} 持续上升，建议评估资源".format(metric_name)
+            rec = f"{metric_name} 持续上升，建议评估资源"
         elif direction == "decreasing":
-            rec = "{} 持续下降，建议排查原因".format(metric_name)
+            rec = f"{metric_name} 持续下降，建议排查原因"
         else:
-            rec = "{} 保持平稳，保持当前策略".format(metric_name)
+            rec = f"{metric_name} 保持平稳，保持当前策略"
         insight = {
             "id": str(uuid.uuid4())[:8],
             "type": InsightType.TREND.value,
@@ -521,7 +521,7 @@ class InsightGenerator:
         self._save_insight(insight)
         return {"insights": [insight], "summary": "生成 1 条趋势洞察"}
 
-    def generate_anomaly_insights(self, anomaly_result: Dict[str, Any], metric_name: str = "metric") -> Dict[str, Any]:
+    def generate_anomaly_insights(self, anomaly_result: dict[str, Any], metric_name: str = "metric") -> dict[str, Any]:
         """基于异常检测结果生成洞察"""
         self._operation_count += 1
         anomalies = anomaly_result.get("anomalies", [])
@@ -531,7 +531,7 @@ class InsightGenerator:
         insight = {
             "id": str(uuid.uuid4())[:8],
             "type": InsightType.ANOMALY.value,
-            "title": "{} 检测到 {} 个异常点".format(metric_name, len(anomalies)),
+            "title": f"{metric_name} 检测到 {len(anomalies)} 个异常点",
             "description": "异常率 {:.2%}，方法: {}".format(
                 anomaly_result.get("anomaly_rate", 0), anomaly_result.get("method", "unknown")
             ),
@@ -549,8 +549,8 @@ class InsightGenerator:
         return {"insights": [insight], "summary": "生成 1 条异常洞察"}
 
     def generate_correlation_insights(
-        self, corr_result: Dict[str, Any], series_a_name: str, series_b_name: str
-    ) -> Dict[str, Any]:
+        self, corr_result: dict[str, Any], series_a_name: str, series_b_name: str
+    ) -> dict[str, Any]:
         """生成相关性洞察"""
         self._operation_count += 1
         if "error" in corr_result:
@@ -563,7 +563,7 @@ class InsightGenerator:
         insight = {
             "id": str(uuid.uuid4())[:8],
             "type": InsightType.CORRELATION.value,
-            "title": "{} 与 {} 存在 {} {}相关".format(series_a_name, series_b_name, strength, direction),
+            "title": f"{series_a_name} 与 {series_b_name} 存在 {strength} {direction}相关",
             "description": "Pearson相关系数 {:.4f}，样本量 {}".format(corr_val, corr_result.get("sample_size", 0)),
             "severity": "medium" if abs(corr_val) > 0.6 else "low",
             "confidence": round(abs(corr_val), 4),
@@ -573,12 +573,12 @@ class InsightGenerator:
                 "correlation": corr_val,
                 "strength": strength,
             },
-            "recommendation": "可将 {} 作为 {} 的领先/滞后指标".format(series_b_name, series_a_name),
+            "recommendation": f"可将 {series_b_name} 作为 {series_a_name} 的领先/滞后指标",
         }
         self._save_insight(insight)
         return {"insights": [insight], "summary": "生成 1 条相关性洞察"}
 
-    def list_insights(self, insight_type: str = None, severity: str = None, limit: int = 50) -> Dict[str, Any]:
+    def list_insights(self, insight_type: str = None, severity: str = None, limit: int = 50) -> dict[str, Any]:
         """查询已生成的洞察"""
         with self.lock:
             try:
@@ -635,24 +635,23 @@ class KnowledgeGraphEngine:
         except Exception:
             pass
 
-    def add_entity(self, name: str, entity_type: str = "concept", properties: Dict[str, Any] = None) -> Dict[str, Any]:
+    def add_entity(self, name: str, entity_type: str = "concept", properties: dict[str, Any] = None) -> dict[str, Any]:
         """添加实体"""
         self._operation_count += 1
-        eid = hashlib.md5("{}:{}".format(name, entity_type).encode()).hexdigest()[:16]
+        eid = hashlib.md5(f"{name}:{entity_type}".encode()).hexdigest()[:16]
         try:
-            with self.lock:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.execute(
-                        "INSERT OR REPLACE INTO kg_entities VALUES (?,?,?,?,?)",
-                        (eid, name, entity_type, json.dumps(properties or {}), time.time()),
-                    )
-                    conn.commit()
+            with self.lock, sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO kg_entities VALUES (?,?,?,?,?)",
+                    (eid, name, entity_type, json.dumps(properties or {}), time.time()),
+                )
+                conn.commit()
             return {"entity_id": eid, "name": name, "type": entity_type}
         except Exception as e:
             self._error_count += 1
             return {"error": str(e)}
 
-    def _get_or_create_entity(self, name: str, entity_type: str) -> Dict[str, Any]:
+    def _get_or_create_entity(self, name: str, entity_type: str) -> dict[str, Any]:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
@@ -670,8 +669,8 @@ class KnowledgeGraphEngine:
         relation_type: str = "related_to",
         target_name: str = "",
         confidence: float = 1.0,
-        properties: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         """添加关系"""
         self._operation_count += 1
         if not source_name or not target_name:
@@ -682,21 +681,20 @@ class KnowledgeGraphEngine:
             "{}:{}:{}".format(source["entity_id"], target["entity_id"], relation_type).encode()
         ).hexdigest()[:16]
         try:
-            with self.lock:
-                with sqlite3.connect(self.db_path) as conn:
-                    conn.execute(
-                        "INSERT OR REPLACE INTO kg_relations VALUES (?,?,?,?,?,?,?)",
-                        (
-                            rid,
-                            source["entity_id"],
-                            target["entity_id"],
-                            relation_type,
-                            json.dumps(properties or {}),
-                            confidence,
-                            time.time(),
-                        ),
-                    )
-                    conn.commit()
+            with self.lock, sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO kg_relations VALUES (?,?,?,?,?,?,?)",
+                    (
+                        rid,
+                        source["entity_id"],
+                        target["entity_id"],
+                        relation_type,
+                        json.dumps(properties or {}),
+                        confidence,
+                        time.time(),
+                    ),
+                )
+                conn.commit()
             return {
                 "relation_id": rid,
                 "source": source_name,
@@ -708,7 +706,7 @@ class KnowledgeGraphEngine:
             self._error_count += 1
             return {"error": str(e)}
 
-    def query_entity(self, entity_name: str) -> Dict[str, Any]:
+    def query_entity(self, entity_name: str) -> dict[str, Any]:
         """查询实体及其关联关系"""
         self._operation_count += 1
         try:
@@ -716,7 +714,7 @@ class KnowledgeGraphEngine:
                 conn.row_factory = sqlite3.Row
                 er = conn.execute("SELECT * FROM kg_entities WHERE name = ?", (entity_name,)).fetchone()
                 if not er:
-                    return {"error": "entity '{}' not found".format(entity_name)}
+                    return {"error": f"entity '{entity_name}' not found"}
                 out_r = conn.execute(
                     "SELECT r.*, e.name as target_name FROM kg_relations r JOIN kg_entities e ON r.target_id = e.id WHERE r.source_id = ?",
                     (er["id"],),
@@ -734,14 +732,14 @@ class KnowledgeGraphEngine:
             self._error_count += 1
             return {"error": str(e)}
 
-    def search_entities(self, keyword: str, entity_type: str = None) -> Dict[str, Any]:
+    def search_entities(self, keyword: str, entity_type: str = None) -> dict[str, Any]:
         """搜索实体"""
         self._operation_count += 1
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 q = "SELECT * FROM kg_entities WHERE name LIKE ?"
-                p = ["%{}%".format(keyword)]
+                p = [f"%{keyword}%"]
                 if entity_type:
                     q += " AND entity_type = ?"
                     p.append(entity_type)
@@ -751,7 +749,7 @@ class KnowledgeGraphEngine:
             self._error_count += 1
             return {"entities": [], "error": str(e)}
 
-    def get_graph_summary(self) -> Dict[str, Any]:
+    def get_graph_summary(self) -> dict[str, Any]:
         """获取图谱概要统计"""
         self._operation_count += 1
         try:
@@ -1058,7 +1056,7 @@ class KeyInsights(EnterpriseModule):
                 return result
             return {
                 "success": False,
-                "error": "unknown action: {}".format(action),
+                "error": f"unknown action: {action}",
                 "available_actions": list(action_map.keys()),
             }
         except Exception as e:

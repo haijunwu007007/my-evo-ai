@@ -89,7 +89,7 @@ class BuildInfo:
 class WebhookEvent:
     source: str = ""
     event_type: str = ""
-    payload: Dict = field(default_factory=dict)
+    payload: dict = field(default_factory=dict)
     received_at: float = 0.0
 
 
@@ -104,19 +104,19 @@ class GitHubIntegration:
         self.token = token or os.environ.get("GITHUB_TOKEN", "")
         self.base_url = base_url
 
-    def _headers(self) -> Dict:
+    def _headers(self) -> dict:
         h = {"Accept": "application/vnd.github.v3+json", "Content-Type": "application/json"}
         if self.token:
             h["Authorization"] = f"Bearer {self.token}"
         return h
 
-    def _get(self, path: str) -> Dict:
+    def _get(self, path: str) -> dict:
         url = f"{self.base_url}{path}"
         req = urllib.request.Request(url, headers=self._headers())
         resp = urllib.request.urlopen(req, timeout=15)
         return json.loads(resp.read().decode())
 
-    def _post(self, path: str, data: Dict) -> Dict:
+    def _post(self, path: str, data: dict) -> dict:
         url = f"{self.base_url}{path}"
         payload = json.dumps(data).encode()
         req = urllib.request.Request(url, data=payload, method="POST", headers=self._headers())
@@ -126,13 +126,13 @@ class GitHubIntegration:
     def is_configured(self) -> bool:
         return bool(self.token)
 
-    def get_user(self) -> Dict:
+    def get_user(self) -> dict:
         try:
             return self._get("/user")
         except Exception as e:
             return {"error": str(e)}
 
-    def list_repos(self, org: str = "", sort: str = "updated", per_page: int = 20) -> List[Dict]:
+    def list_repos(self, org: str = "", sort: str = "updated", per_page: int = 20) -> list[dict]:
         """列出仓库"""
         try:
             path = f"/orgs/{org}/repos" if org else "/user/repos"
@@ -146,14 +146,14 @@ class GitHubIntegration:
         except Exception as e:
             return [{"error": str(e)}]
 
-    def list_branches(self, repo: str) -> List[Dict]:
+    def list_branches(self, repo: str) -> list[dict]:
         try:
             result = self._get(f"/repos/{repo}/branches?per_page=30")
             return [{"name": b["name"], "sha": b["commit"]["sha"][:8]} for b in result]
         except Exception as e:
             return [{"error": str(e)}]
 
-    def list_issues(self, repo: str, state: str = "open", per_page: int = 20) -> List[Dict]:
+    def list_issues(self, repo: str, state: str = "open", per_page: int = 20) -> list[dict]:
         try:
             result = self._get(f"/repos/{repo}/issues?state={state}&per_page={per_page}")
             return [{"number": i["number"], "title": i["title"],
@@ -163,7 +163,7 @@ class GitHubIntegration:
             return [{"error": str(e)}]
 
     def create_issue(self, repo: str, title: str, body: str = "",
-                      labels: List[str] = None, assignees: List[str] = None) -> Dict:
+                      labels: list[str] = None, assignees: list[str] = None) -> dict:
         try:
             data = {"title": title, "body": body}
             if labels:
@@ -175,7 +175,7 @@ class GitHubIntegration:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def list_workflows(self, repo: str) -> List[Dict]:
+    def list_workflows(self, repo: str) -> list[dict]:
         try:
             result = self._get(f"/repos/{repo}/actions/workflows")
             return [{"id": w["id"], "name": w["name"], "path": w["path"],
@@ -184,7 +184,7 @@ class GitHubIntegration:
             return [{"error": str(e)}]
 
     def trigger_workflow(self, repo: str, workflow_id: str, ref: str = "main",
-                          inputs: Dict = None) -> Dict:
+                          inputs: dict = None) -> dict:
         try:
             data = {"ref": ref}
             if inputs:
@@ -194,7 +194,7 @@ class GitHubIntegration:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def list_prs(self, repo: str, state: str = "open") -> List[Dict]:
+    def list_prs(self, repo: str, state: str = "open") -> list[dict]:
         try:
             result = self._get(f"/repos/{repo}/pulls?state={state}&per_page=20")
             return [{"number": pr["number"], "title": pr["title"],
@@ -213,7 +213,7 @@ class GitOperations:
     """本地Git操作"""
 
     @staticmethod
-    def _run(cmd: List[str], cwd: str, timeout: int = 30) -> Dict:
+    def _run(cmd: list[str], cwd: str, timeout: int = 30) -> dict:
         try:
             result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
             return {"success": result.returncode == 0, "stdout": result.stdout.strip()[-500:],
@@ -223,7 +223,7 @@ class GitOperations:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def status(self, repo_path: str) -> Dict:
+    def status(self, repo_path: str) -> dict:
         """Git status"""
         if not os.path.isdir(os.path.join(repo_path, ".git")):
             return {"success": False, "error": "不是Git仓库"}
@@ -239,35 +239,35 @@ class GitOperations:
             r["clean"] = len(lines) == 0
         return r
 
-    def branch(self, repo_path: str) -> Dict:
+    def branch(self, repo_path: str) -> dict:
         """当前分支"""
         r = self._run(["git", "branch", "--show-current"], repo_path)
         if r["success"]:
             r["branch"] = r["stdout"]
         return r
 
-    def log(self, repo_path: str, n: int = 10) -> Dict:
+    def log(self, repo_path: str, n: int = 10) -> dict:
         """最近提交"""
         r = self._run(["git", "log", f"-{n}", "--oneline", "--date=short", "--format=%h %ad %s"], repo_path)
         if r["success"]:
             r["commits"] = [l for l in r["stdout"].split("\n") if l.strip()]
         return r
 
-    def pull(self, repo_path: str, remote: str = "origin", branch: str = "") -> Dict:
+    def pull(self, repo_path: str, remote: str = "origin", branch: str = "") -> dict:
         """Pull更新"""
         cmd = ["git", "pull", remote]
         if branch:
             cmd.append(branch)
         return self._run(cmd, repo_path, timeout=60)
 
-    def push(self, repo_path: str, remote: str = "origin", branch: str = "") -> Dict:
+    def push(self, repo_path: str, remote: str = "origin", branch: str = "") -> dict:
         """Push"""
         cmd = ["git", "push", remote]
         if branch:
             cmd.append(branch)
         return self._run(cmd, repo_path, timeout=60)
 
-    def add_commit_push(self, repo_path: str, message: str, add_all: bool = True) -> Dict:
+    def add_commit_push(self, repo_path: str, message: str, add_all: bool = True) -> dict:
         """Add + Commit + Push 一条龙"""
         if add_all:
             r = self._run(["git", "add", "-A"], repo_path)
@@ -287,7 +287,7 @@ class DeployManager:
     """部署管理器"""
 
     @staticmethod
-    def docker_build(repo_path: str, tag: str = "latest") -> Dict:
+    def docker_build(repo_path: str, tag: str = "latest") -> dict:
         """Docker构建"""
         try:
             result = subprocess.run(
@@ -302,7 +302,7 @@ class DeployManager:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def docker_compose_up(repo_path: str, detach: bool = True) -> Dict:
+    def docker_compose_up(repo_path: str, detach: bool = True) -> dict:
         """Docker Compose启动"""
         try:
             cmd = ["docker", "compose", "up", "-d"] if detach else ["docker", "compose", "up"]
@@ -314,7 +314,7 @@ class DeployManager:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def docker_compose_down(repo_path: str) -> Dict:
+    def docker_compose_down(repo_path: str) -> dict:
         try:
             result = subprocess.run(["docker", "compose", "down"], cwd=repo_path, capture_output=True, text=True, timeout=60)
             return {"success": result.returncode == 0}
@@ -337,12 +337,12 @@ class CICDEngine:
         self._github = GitHubIntegration()
         self._git = GitOperations()
         self._deploy = DeployManager()
-        self._webhook_events: List[WebhookEvent] = []
-        self._builds: List[BuildInfo] = []
+        self._webhook_events: list[WebhookEvent] = []
+        self._builds: list[BuildInfo] = []
 
     # ─── GitHub ───
 
-    def github_config(self) -> Dict:
+    def github_config(self) -> dict:
         return {
             "configured": self._github.is_configured(),
             "base_url": self._github.base_url,
@@ -350,70 +350,70 @@ class CICDEngine:
             "user": self._github.get_user() if self._github.is_configured() else {},
         }
 
-    def github_repos(self, org: str = "") -> List[Dict]:
+    def github_repos(self, org: str = "") -> list[dict]:
         return self._github.list_repos(org)
 
-    def github_branches(self, repo: str) -> List[Dict]:
+    def github_branches(self, repo: str) -> list[dict]:
         return self._github.list_branches(repo)
 
-    def github_issues(self, repo: str, state: str = "open") -> List[Dict]:
+    def github_issues(self, repo: str, state: str = "open") -> list[dict]:
         return self._github.list_issues(repo, state)
 
     def github_create_issue(self, repo: str, title: str, body: str = "",
-                             labels: List[str] = None) -> Dict:
+                             labels: list[str] = None) -> dict:
         return self._github.create_issue(repo, title, body, labels)
 
-    def github_prs(self, repo: str, state: str = "open") -> List[Dict]:
+    def github_prs(self, repo: str, state: str = "open") -> list[dict]:
         return self._github.list_prs(repo, state)
 
-    def github_workflows(self, repo: str) -> List[Dict]:
+    def github_workflows(self, repo: str) -> list[dict]:
         return self._github.list_workflows(repo)
 
     def github_trigger_workflow(self, repo: str, workflow: str, ref: str = "main",
-                                 inputs: Dict = None) -> Dict:
+                                 inputs: dict = None) -> dict:
         return self._github.trigger_workflow(repo, workflow, ref, inputs)
 
     # ─── Git ───
 
-    def git_status(self, path: str) -> Dict:
+    def git_status(self, path: str) -> dict:
         return self._git.status(path)
 
-    def git_branch(self, path: str) -> Dict:
+    def git_branch(self, path: str) -> dict:
         return self._git.branch(path)
 
-    def git_log(self, path: str, n: int = 10) -> Dict:
+    def git_log(self, path: str, n: int = 10) -> dict:
         return self._git.log(path, n)
 
-    def git_pull(self, path: str) -> Dict:
+    def git_pull(self, path: str) -> dict:
         return self._git.pull(path)
 
-    def git_push(self, path: str) -> Dict:
+    def git_push(self, path: str) -> dict:
         return self._git.push(path)
 
-    def git_commit_push(self, path: str, message: str) -> Dict:
+    def git_commit_push(self, path: str, message: str) -> dict:
         return self._git.add_commit_push(path, message)
 
     # ─── Deploy ───
 
-    def deploy_docker_build(self, path: str, tag: str = "latest") -> Dict:
+    def deploy_docker_build(self, path: str, tag: str = "latest") -> dict:
         return self._deploy.docker_build(path, tag)
 
-    def deploy_docker_up(self, path: str) -> Dict:
+    def deploy_docker_up(self, path: str) -> dict:
         return self._deploy.docker_compose_up(path)
 
-    def deploy_docker_down(self, path: str) -> Dict:
+    def deploy_docker_down(self, path: str) -> dict:
         return self._deploy.docker_compose_down(path)
 
     # ─── Webhook ───
 
-    def receive_webhook(self, source: str, event_type: str, payload: Dict) -> Dict:
+    def receive_webhook(self, source: str, event_type: str, payload: dict) -> dict:
         event = WebhookEvent(source=source, event_type=event_type, payload=payload, received_at=time.time())
         self._webhook_events.append(event)
         if len(self._webhook_events) > 500:
             self._webhook_events = self._webhook_events[-200:]
         return {"success": True, "event_id": len(self._webhook_events)}
 
-    def list_webhooks(self, limit: int = 50) -> List[Dict]:
+    def list_webhooks(self, limit: int = 50) -> list[dict]:
         return [
             {"source": e.source, "event_type": e.event_type, "received_at": e.received_at,
              "payload_summary": {k: str(v)[:80] for k, v in e.payload.items()} if isinstance(e.payload, dict) else str(e.payload)[:100]}
@@ -425,7 +425,7 @@ class CICDEngine:
 # 全局单例
 # ═══════════════════════════════════════════════════
 
-_cicd_engine: Optional[CICDEngine] = None
+_cicd_engine: CICDEngine | None = None
 
 
 def get_cicd_engine() -> CICDEngine:

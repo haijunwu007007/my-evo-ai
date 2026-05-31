@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class KnowledgeGraph:
@@ -140,7 +140,7 @@ class KnowledgeGraph:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, KnowledgeGraph] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, KnowledgeGraph] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,16 +465,16 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-            return {"success": False, "error": "Unknown action: {}".format(action)}
+            return {"success": False, "error": f"Unknown action: {action}"}
 
-    def detect_communities(self, min_size: int = 3) -> Dict[str, Any]:
+    def detect_communities(self, min_size: int = 3) -> dict[str, Any]:
         """社区检测：基于连接密度发现图中的社区/集群结构"""
         nodes = self._nodes if hasattr(self, "_nodes") else {}
         edges = self._edges if hasattr(self, "_edges") else []
         if not nodes:
             return {"communities": [], "total_nodes": 0}
         # 构建邻接表
-        adjacency: Dict[str, Set[str]] = {n: set() for n in nodes}
+        adjacency: dict[str, Set[str]] = {n: set() for n in nodes}
         for edge in edges:
             src = edge.get("source", "") if isinstance(edge, dict) else ""
             tgt = edge.get("target", "") if isinstance(edge, dict) else ""
@@ -517,12 +517,12 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         communities.sort(key=lambda x: x["size"], reverse=True)
         return {"total_nodes": len(nodes), "total_communities": len(communities), "communities": communities[:50]}
 
-    def find_shortest_path(self, source: str, target: str, max_depth: int = 10) -> Dict[str, Any]:
+    def find_shortest_path(self, source: str, target: str, max_depth: int = 10) -> dict[str, Any]:
         """查找两个实体间的最短路径（BFS广度优先搜索）"""
         if source == target:
             return {"found": True, "path": [source], "length": 0}
         edges = self._edges if hasattr(self, "_edges") else []
-        adjacency: Dict[str, Set[str]] = {}
+        adjacency: dict[str, Set[str]] = {}
         for edge in edges:
             src = edge.get("source", "") if isinstance(edge, dict) else ""
             tgt = edge.get("target", "") if isinstance(edge, dict) else ""
@@ -548,12 +548,12 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "nodes_explored": len(visited),
         }
 
-    def analyze_graph_health(self) -> Dict[str, Any]:
+    def analyze_graph_health(self) -> dict[str, Any]:
         """图健康分析：孤立节点、悬挂边、连通性、 schema一致性"""
         nodes = self._nodes if hasattr(self, "_nodes") else {}
         edges = self._edges if hasattr(self, "_edges") else []
         connected_nodes: Set[str] = set()
-        degree_map: Dict[str, int] = {}
+        degree_map: dict[str, int] = {}
         for edge in edges:
             src = edge.get("source", "") if isinstance(edge, dict) else ""
             tgt = edge.get("target", "") if isinstance(edge, dict) else ""
@@ -582,7 +582,7 @@ class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "avg_degree": round(sum(degree_map.values()) / max(len(degree_map), 1), 2) if degree_map else 0,
         }
 
-    def export_graph_summary(self, format_type: str = "dict") -> Dict[str, Any]:
+    def export_graph_summary(self, format_type: str = "dict") -> dict[str, Any]:
         """导出图谱摘要：节点/边统计、类型分布、连通性概览"""
         health = self.analyze_graph_health()
         communities = self.detect_communities()

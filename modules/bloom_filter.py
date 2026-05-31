@@ -152,7 +152,7 @@ class FilterConfig:
     false_positive_rate: float = 0.01  # 1%
     filter_type: FilterType = FilterType.STANDARD
     hash_functions: int = 0  # 0=自动计算
-    ttl_seconds: Optional[int] = None  # 过期时间
+    ttl_seconds: int | None = None  # 过期时间
     partition_count: int = 1  # 分区数
     backup_count: int = 3  # 计数过滤器备份位
 
@@ -184,7 +184,7 @@ class FilterConfig:
             return (bits * (self.backup_count + 1) + 7) // 8
         return (bits + 7) // 8
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "expected_insertions": self.expected_insertions,
@@ -214,7 +214,7 @@ class FilterStats:
     last_access: str = ""
     memory_bytes: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "state": self.state.value,
@@ -232,7 +232,7 @@ class FilterStats:
 # 哈希引擎 — 多哈希函数生成
 # ============================================================================
 
-class HashEngine(object):
+class HashEngine:
     """多哈希函数引擎 — 基于双重哈希扩展"""
 
     def __init__(self, hash_count: int = 7, seed: int = 0):
@@ -250,12 +250,12 @@ class HashEngine(object):
 
         return hash_fn
 
-    def get_positions(self, key: str, bit_count: int) -> List[int]:
+    def get_positions(self, key: str, bit_count: int) -> list[int]:
         """获取元素在位数组中的所有位置"""
         data = key.encode("utf-8")
         return [fn(data) % bit_count for fn in self._hash_funcs]
 
-    def get_partitioned_positions(self, key: str, bit_count: int, partitions: int) -> List[int]:
+    def get_partitioned_positions(self, key: str, bit_count: int, partitions: int) -> list[int]:
         """获取分区布隆的位置 — 每个哈希映射到独立分区"""
         data = key.encode("utf-8")
         partition_size = bit_count // partitions
@@ -316,7 +316,7 @@ class StandardBloomFilter:
             self.stats.true_positives += 1
             return True
 
-    def bulk_add(self, keys: List[str]) -> int:
+    def bulk_add(self, keys: list[str]) -> int:
         """批量添加元素"""
         new_count = 0
         with self._lock.gen_wlock():  # type: ignore
@@ -336,7 +336,7 @@ class StandardBloomFilter:
             self.stats.last_access = datetime.now().isoformat()
         return new_count
 
-    def bulk_contains(self, keys: List[str]) -> Dict[str, bool]:
+    def bulk_contains(self, keys: list[str]) -> dict[str, bool]:
         """批量检查元素"""
         results = {}
         with self._lock.gen_rlock():  # type: ignore
@@ -464,8 +464,8 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
-        self._filters: Dict[str, Any] = {}
-        self._configs: Dict[str, FilterConfig] = {}
+        self._filters: dict[str, Any] = {}
+        self._configs: dict[str, FilterConfig] = {}
         self._rwlock = threading.RLock()
         self._snapshot_dir = self.config.get("snapshot_dir", "./data/bloom_snapshots")
         self._auto_expand_ratio = self.config.get("auto_expand_ratio", 0.8)
@@ -508,7 +508,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             self._logger.error(f"初始化失败: {e}", exc_info=True)
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Result:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter('bloom_filter_ops_total', labels={'action': action if 'action' in dir() or True else ''})
         """执行布隆过滤器操作"""
@@ -686,9 +686,9 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         capacity: int,
         fpr: float,
         filter_type: FilterType = FilterType.STANDARD,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
         partitions: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建过滤器"""
         with self._rwlock:
             if self._audit:
@@ -727,20 +727,20 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 "created": True,
             }
 
-    async def _add_element(self, filter_name: str, key: str) -> Dict[str, Any]:
+    async def _add_element(self, filter_name: str, key: str) -> dict[str, Any]:
         """添加元素"""
         bf = self._get_filter(filter_name)
         is_new = bf.add(key)
         self._check_auto_expand(filter_name, bf)
         return {"key": key, "is_new": is_new}
 
-    async def _check_element(self, filter_name: str, key: str) -> Dict[str, Any]:
+    async def _check_element(self, filter_name: str, key: str) -> dict[str, Any]:
         """检查元素"""
         bf = self._get_filter(filter_name)
         exists = bf.contains(key)
         return {"key": key, "exists": exists}
 
-    async def _remove_element(self, filter_name: str, key: str) -> Dict[str, Any]:
+    async def _remove_element(self, filter_name: str, key: str) -> dict[str, Any]:
         """删除元素（仅计数过滤器）"""
         bf = self._get_filter(filter_name)
         if not isinstance(bf, CountingBloomFilter):
@@ -748,14 +748,14 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         removed = bf.remove(key)
         return {"key": key, "removed": removed}
 
-    async def _bulk_add_elements(self, filter_name: str, keys: List[str]) -> Dict[str, Any]:
+    async def _bulk_add_elements(self, filter_name: str, keys: list[str]) -> dict[str, Any]:
         """批量添加"""
         bf = self._get_filter(filter_name)
         new_count = bf.bulk_add(keys)
         self._check_auto_expand(filter_name, bf)
         return {"total": len(keys), "new": new_count, "existing": len(keys) - new_count}
 
-    async def _bulk_check_elements(self, filter_name: str, keys: List[str]) -> Dict[str, Any]:
+    async def _bulk_check_elements(self, filter_name: str, keys: list[str]) -> dict[str, Any]:
         """批量检查"""
         bf = self._get_filter(filter_name)
         results = bf.bulk_contains(keys)
@@ -767,13 +767,13 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "missing_count": len(keys) - true_count,
         }
 
-    async def _clear_filter(self, filter_name: str) -> Dict[str, Any]:
+    async def _clear_filter(self, filter_name: str) -> dict[str, Any]:
         """清空过滤器"""
         bf = self._get_filter(filter_name)
         bf.clear()
         return {"name": filter_name, "cleared": True}
 
-    async def _delete_filter(self, filter_name: str) -> Dict[str, Any]:
+    async def _delete_filter(self, filter_name: str) -> dict[str, Any]:
         """删除过滤器"""
         with self._rwlock:
             if filter_name not in self._filters:
@@ -790,7 +790,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 os.remove(snap_path)
             return {"name": filter_name, "deleted": True}
 
-    async def _get_filter_info(self, filter_name: str) -> Dict[str, Any]:
+    async def _get_filter_info(self, filter_name: str) -> dict[str, Any]:
         """获取过滤器详情"""
         bf = self._get_filter(filter_name)
         config = self._configs.get(filter_name)
@@ -799,7 +799,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "config": config.to_dict() if config else {},
         }
 
-    async def _list_filters(self) -> List[Dict[str, Any]]:
+    async def _list_filters(self) -> list[dict[str, Any]]:
         """列出所有过滤器"""
         result = []
         for name, bf in self._filters.items():
@@ -813,7 +813,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
         return result
 
-    async def _get_global_stats(self) -> Dict[str, Any]:
+    async def _get_global_stats(self) -> dict[str, Any]:
         """获取全局统计"""
         total_insertions = 0
         total_queries = 0
@@ -832,7 +832,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "engine_stats": self.stats.to_dict(),
         }
 
-    async def _save_snapshot(self, filter_name: Optional[str]) -> Dict[str, Any]:
+    async def _save_snapshot(self, filter_name: str | None) -> dict[str, Any]:
         """保存快照到磁盘"""
         if filter_name:
             bf = self._get_filter(filter_name)
@@ -860,7 +860,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                     self._logger.error(f"保存 {name} 快照失败: {e}")
             return {"saved_count": len(saved), "details": saved}
 
-    async def _restore_snapshot(self, filter_name: str) -> Dict[str, Any]:
+    async def _restore_snapshot(self, filter_name: str) -> dict[str, Any]:
         """从快照恢复过滤器"""
         snap_path = os.path.join(self._snapshot_dir, f"{filter_name}.bloom")
         if not os.path.exists(snap_path):
@@ -884,7 +884,7 @@ class BloomFilterEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "saved_at": data.get("saved_at"),
         }
 
-    async def _optimize_filter(self, filter_name: str) -> Dict[str, Any]:
+    async def _optimize_filter(self, filter_name: str) -> dict[str, Any]:
         """优化过滤器 — 重建以降低误判率"""
         bf = self._get_filter(filter_name)
         config = self._configs[filter_name]

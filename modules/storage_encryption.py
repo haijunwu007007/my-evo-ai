@@ -39,9 +39,9 @@ module_class = None
 class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
     """存储加密模块——使用 cryptography.fernet 提供真实 AES 加密"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__(config)
-        self._fernet: Optional[Fernet] = None
+        self._fernet: Fernet | None = None
         self._status = ModuleStatus.UNINITIALIZED
         self._encrypt_count = 0
         self._decrypt_count = 0
@@ -71,7 +71,7 @@ class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
             self._last_error = str(e)
             return {"success": False, "error": str(e)}
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         params = params or {}
         try:
             if action == "encrypt":
@@ -92,7 +92,7 @@ class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
             self._last_error = str(e)
             return Result(success=False, error=str(e))
 
-    def _encrypt(self, params: Dict) -> Result:
+    def _encrypt(self, params: dict) -> Result:
         data = params.get("data", "")
         if not data:
             return Result(success=False, error="data required")
@@ -100,7 +100,7 @@ class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
         self._encrypt_count += 1
         return Result(success=True, data={"token": token.decode(), "algorithm": "AES-256-CBC"})
 
-    def _decrypt(self, params: Dict) -> Result:
+    def _decrypt(self, params: dict) -> Result:
         token = params.get("data", "")
         if not token:
             return Result(success=False, error="data required")
@@ -112,7 +112,7 @@ class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
         except InvalidToken:
             return Result(success=False, error="解密失败：无效的令牌或密钥不匹配")
 
-    def _encrypt_file(self, params: Dict) -> Result:
+    def _encrypt_file(self, params: dict) -> Result:
         path = params.get("path", "")
         if not path or not os.path.isfile(path):
             return Result(success=False, error="文件不存在")
@@ -125,7 +125,7 @@ class StorageEncryptionModule(EnterpriseModule, CircuitBreakerMixin):
         self._encrypt_count += 1
         return Result(success=True, data={"output_path": out_path, "size": len(token)})
 
-    def _decrypt_file(self, params: Dict) -> Result:
+    def _decrypt_file(self, params: dict) -> Result:
         path = params.get("path", "")
         if not path or not os.path.isfile(path):
             return Result(success=False, error="文件不存在")

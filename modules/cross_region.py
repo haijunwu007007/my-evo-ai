@@ -116,7 +116,7 @@ class Region:
     location: str = ""
     status: str = "active"
     primary: bool = False
-    endpoints: List[str] = field(default_factory=list)
+    endpoints: list[str] = field(default_factory=list)
     weight: int = 100
     latency_ms: float = 0.0
     health_score: float = 100.0
@@ -129,9 +129,9 @@ class ReplicationRule:
     rule_id: str = ""
     name: str = ""
     source_region: str = ""
-    target_regions: List[str] = field(default_factory=list)
+    target_regions: list[str] = field(default_factory=list)
     mode: str = "async"
-    tables: List[str] = field(default_factory=list)
+    tables: list[str] = field(default_factory=list)
     lag_threshold_ms: int = 5000
     enabled: bool = True
     last_sync: float = 0.0
@@ -153,7 +153,7 @@ class RoutingRule:
     rule_id: str = ""
     name: str = ""
     priority: int = 0
-    match_criteria: Dict[str, str] = field(default_factory=dict)
+    match_criteria: dict[str, str] = field(default_factory=dict)
     target_region: str = ""
     weight: int = 100
     enabled: bool = True
@@ -172,10 +172,10 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 "description": "跨区域管理：多区域/数据复制/流量调度/故障切换",
             }
         )
-        self._regions: Dict[str, Region] = {}
-        self._replication_rules: Dict[str, ReplicationRule] = {}
-        self._failover_history: List[FailoverRecord] = []
-        self._routing_rules: Dict[str, RoutingRule] = {}
+        self._regions: dict[str, Region] = {}
+        self._replication_rules: dict[str, ReplicationRule] = {}
+        self._failover_history: list[FailoverRecord] = []
+        self._routing_rules: dict[str, RoutingRule] = {}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -221,7 +221,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 current_lag_ms=int((__import__('time').time()*1000)%(200-0+1))+0,
             )
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "cross_region"})
         self.metrics_collector.counter("cross_region.execute.calls", 1)
         self.audit("execute", {"module": "cross_region"})
@@ -449,7 +449,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.error(f"[CrossRegion] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -470,7 +470,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_region_latency_matrix(self) -> Dict[str, Any]:
+    def get_region_latency_matrix(self) -> dict[str, Any]:
         """跨区域延迟矩阵。企业场景：全球部署时评估各区域间网络延迟，
         辅助用户路由策略（就近接入、灾备切换）决策。
         """
@@ -487,7 +487,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                     matrix[src][dst] = lat
         return {"success": True, "regions": regions, "matrix": matrix}
 
-    def failover_region(self, from_region: str, to_region: str) -> Dict[str, Any]:
+    def failover_region(self, from_region: str, to_region: str) -> dict[str, Any]:
         """区域故障转移。企业场景：某区域机房故障时将流量切换到备用区域，
         自动更新DNS路由和负载均衡配置。
         """
@@ -507,7 +507,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "message": f"流量已从 {from_region} 切换到 {to_region}",
         }
 
-    def get_latency_matrix(self) -> Dict[str, Any]:
+    def get_latency_matrix(self) -> dict[str, Any]:
         """跨区域延迟矩阵。企业场景：网络团队评估各区域间网络质量，
         识别延迟异常链路，辅助CDN/边缘节点部署决策。
         """
@@ -532,7 +532,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "matrix": matrix,
         }
 
-    def get_region_health_summary(self) -> Dict[str, Any]:
+    def get_region_health_summary(self) -> dict[str, Any]:
         """区域健康汇总。企业场景：SRE看板展示各区域服务健康状态，
         快速发现某区域全站故障。
         """
@@ -564,7 +564,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "regions": summary,
         }
 
-    def get_latency_matrix(self) -> Dict[str, Any]:
+    def get_latency_matrix(self) -> dict[str, Any]:
         """获取跨区域延迟矩阵。企业场景：全球部署时评估用户到各Region的
         网络延迟，辅助CDN和流量调度决策。
         """
@@ -598,7 +598,7 @@ class CrossRegionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "slowest_routes": optimal_pairs[-5:],
         }
 
-    def failover_region(self, source_region: str, target_region: str) -> Dict[str, Any]:
+    def failover_region(self, source_region: str, target_region: str) -> dict[str, Any]:
         """跨区域故障转移。企业场景：某Region宕机时，将该Region的
         流量切换到备用Region，保证服务连续性。
         """

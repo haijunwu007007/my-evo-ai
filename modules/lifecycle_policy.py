@@ -131,10 +131,10 @@ class TransitionRule:
     from_state: LifecycleState
     to_state: LifecycleState
     trigger: TransitionTrigger = TransitionTrigger.MANUAL
-    conditions: Dict[str, Any] = field(default_factory=dict)
-    actions: List[PolicyAction] = field(default_factory=list)
+    conditions: dict[str, Any] = field(default_factory=dict)
+    actions: list[PolicyAction] = field(default_factory=list)
     requires_approval: bool = False
-    approval_roles: List[str] = field(default_factory=list)
+    approval_roles: list[str] = field(default_factory=list)
     cooldown_seconds: int = 0
     max_per_hour: int = 0
 
@@ -145,11 +145,11 @@ class LifecyclePolicy:
     policy_id: str = ""
     name: str = ""
     description: str = ""
-    resource_types: List[str] = field(default_factory=list)
+    resource_types: list[str] = field(default_factory=list)
     initial_state: LifecycleState = LifecycleState.PENDING
     default_ttl_seconds: int = 0
-    transitions: List[TransitionRule] = field(default_factory=list)
-    tags: Dict[str, str] = field(default_factory=dict)
+    transitions: list[TransitionRule] = field(default_factory=list)
+    tags: dict[str, str] = field(default_factory=dict)
     priority: int = 100
     enabled: bool = True
     created_at: float = field(default_factory=time.time)
@@ -166,9 +166,9 @@ class ResourceRecord:
     state: LifecycleState
     entered_at: float = field(default_factory=time.time)
     ttl_seconds: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: Dict[str, str] = field(default_factory=dict)
-    labels: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
+    labels: list[str] = field(default_factory=list)
     transition_count: int = 0
     created_at: float = field(default_factory=time.time)
     last_transition_at: float = 0.0
@@ -187,9 +187,9 @@ class TransitionEvent:
     trigger: TransitionTrigger
     initiated_by: str
     timestamp: float = field(default_factory=time.time)
-    actions_taken: List[str] = field(default_factory=list)
+    actions_taken: list[str] = field(default_factory=list)
     duration_in_state: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     success: bool = True
     error_message: str = ""
 
@@ -216,16 +216,16 @@ class LifecyclePolicyManager(
     def __init__(self):
         super().__init__()
         self._lock = threading.RLock()
-        self._policies: Dict[str, LifecyclePolicy] = {}
-        self._resources: Dict[str, ResourceRecord] = {}
-        self._events: List[TransitionEvent] = []
-        self._event_index: Dict[str, List[int]] = defaultdict(list)
-        self._state_index: Dict[LifecycleState, Set[str]] = defaultdict(set)
-        self._policy_index: Dict[str, Set[str]] = defaultdict(set)
-        self._type_index: Dict[str, Set[str]] = defaultdict(set)
-        self._transition_rules: Dict[str, Dict[Tuple[LifecycleState, LifecycleState], TransitionRule]] = {}
-        self._rate_counter: Dict[str, List[float]] = defaultdict(list)
-        self._approval_requests: Dict[str, Dict[str, Any]] = {}
+        self._policies: dict[str, LifecyclePolicy] = {}
+        self._resources: dict[str, ResourceRecord] = {}
+        self._events: list[TransitionEvent] = []
+        self._event_index: dict[str, list[int]] = defaultdict(list)
+        self._state_index: dict[LifecycleState, set[str]] = defaultdict(set)
+        self._policy_index: dict[str, set[str]] = defaultdict(set)
+        self._type_index: dict[str, set[str]] = defaultdict(set)
+        self._transition_rules: dict[str, dict[tuple[LifecycleState, LifecycleState], TransitionRule]] = {}
+        self._rate_counter: dict[str, list[float]] = defaultdict(list)
+        self._approval_requests: dict[str, dict[str, Any]] = {}
         self._stats = {
             "total_transitions": 0,
             "total_policies": 0,
@@ -336,7 +336,7 @@ class LifecyclePolicyManager(
                 )
                 self._transition_rules[pid][(from_s, to_s)] = rule
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一执行入口 — 资源生命周期管理操作路由"""
         _ = self.trace("execute")
         metrics_collector.counter("lifecycle_policy_ops_total", labels={"action": action})
@@ -389,9 +389,9 @@ class LifecyclePolicyManager(
         resource_id: str,
         resource_type: str,
         policy_id: str,
-        metadata: Optional[Dict] = None,
-        ttl: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict | None = None,
+        ttl: int | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             policy = self._policies.get(policy_id)
             if not policy:
@@ -419,8 +419,8 @@ class LifecyclePolicyManager(
         target_state: LifecycleState,
         trigger: TransitionTrigger = TransitionTrigger.MANUAL,
         initiated_by: str = "system",
-        metadata: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             record = self._resources.get(resource_id)
             if not record:
@@ -496,7 +496,7 @@ class LifecyclePolicyManager(
                 "duration": round(duration, 2),
             }
 
-    def approve_transition(self, request_id: str, approver: str, approved: bool) -> Dict[str, Any]:
+    def approve_transition(self, request_id: str, approver: str, approved: bool) -> dict[str, Any]:
         with self._lock:
             req = self._approval_requests.pop(request_id, None)
             if not req:
@@ -509,7 +509,7 @@ class LifecyclePolicyManager(
             result["approval_id"] = request_id
             return result
 
-    def enforce_ttl(self) -> Dict[str, Any]:
+    def enforce_ttl(self) -> dict[str, Any]:
         with self._lock:
             now = time.time()
             expired = []
@@ -528,7 +528,7 @@ class LifecyclePolicyManager(
                             self._stats["ttl_expirations"] += 1
             return {"processed": len(expired), "transitions": expired}
 
-    def get_resource(self, resource_id: str) -> Optional[Dict[str, Any]]:
+    def get_resource(self, resource_id: str) -> dict[str, Any] | None:
         record = self._resources.get(resource_id)
         if not record:
             return None
@@ -546,10 +546,10 @@ class LifecyclePolicyManager(
             "metadata": record.metadata,
         }
 
-    def get_resources_by_state(self, state: LifecycleState) -> List[str]:
+    def get_resources_by_state(self, state: LifecycleState) -> list[str]:
         return list(self._state_index.get(state, set()))
 
-    def get_events(self, resource_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_events(self, resource_id: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         if resource_id:
             indices = self._event_index.get(resource_id, [])
             events = [self._events[i] for i in indices if i < len(self._events)]
@@ -569,7 +569,7 @@ class LifecyclePolicyManager(
             for e in events[-limit:]
         ]
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         active = len(self._state_index.get(LifecycleState.ACTIVE, set()))
         total = len(self._resources)
         degraded = len(self._state_index.get(LifecycleState.DEGRADED, set()))
@@ -591,7 +591,7 @@ class LifecyclePolicyManager(
             "timestamp": time.time(),
         }
 
-    def generate_compliance_report(self, policy_id: str) -> Dict[str, Any]:
+    def generate_compliance_report(self, policy_id: str) -> dict[str, Any]:
         """生成策略合规报告 - 统计资源状态分布、过期率、异常率"""
         policy = self._policies.get(policy_id)
         if not policy:
@@ -612,7 +612,7 @@ class LifecyclePolicyManager(
             "compliance_rate": round((len(resources) - expired) / max(len(resources), 1), 4),
         }
 
-    def batch_get_resources(self, state: Optional[str] = None, limit: int = 100) -> List[Dict]:
+    def batch_get_resources(self, state: str | None = None, limit: int = 100) -> list[dict]:
         """批量查询资源"""
         results = []
         seen = set()
@@ -633,7 +633,7 @@ class LifecyclePolicyManager(
                 break
         return results
 
-    def get_transition_history(self, resource_id: str, limit: int = 20) -> List[Dict]:
+    def get_transition_history(self, resource_id: str, limit: int = 20) -> list[dict]:
         """获取资源状态变更历史"""
         events = [e for e in self._transition_log if hasattr(e, "resource_id") and e.resource_id == resource_id]
         return [

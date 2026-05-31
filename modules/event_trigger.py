@@ -85,14 +85,15 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 
 from modules._base.metrics import prometheus_timer, metrics_collector
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("event_trigger")
 
-class EventFlowAnalyzer(object):
+class EventFlowAnalyzer:
     """event_trigger 运营分析引擎
 
     - 分析事件触发频率
@@ -147,16 +148,16 @@ class TriggerRule:
     name: str = ""
     trigger_type: TriggerType = TriggerType.EVENT
     pattern: str = ""
-    condition: Dict[str, Any] = field(default_factory=dict)
-    actions: List[Dict[str, Any]] = field(default_factory=list)
+    condition: dict[str, Any] = field(default_factory=dict)
+    actions: list[dict[str, Any]] = field(default_factory=list)
     status: TriggerStatus = TriggerStatus.ACTIVE
     created_at: float = 0.0
-    last_fired: Optional[float] = None
+    last_fired: float | None = None
     fire_count: int = 0
     error_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
@@ -176,12 +177,12 @@ class EventRecord:
     id: str = ""
     event_type: str = ""
     source: str = ""
-    payload: Dict[str, Any] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)
     timestamp: float = 0.0
-    matched_rules: List[str] = field(default_factory=list)
-    actions_executed: List[str] = field(default_factory=list)
+    matched_rules: list[str] = field(default_factory=list)
+    actions_executed: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "type": self.event_type,
@@ -199,9 +200,9 @@ class ActionResult:
     success: bool = False
     result: Any = None
     elapsed_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "trigger_id": self.trigger_id,
             "action": self.action_type,
@@ -214,16 +215,16 @@ class ActionResult:
 class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """事件触发器：事件匹配、条件触发、动作调度、Webhook回调、事件链"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._rules: Dict[str, TriggerRule] = {}
-        self._history: List[EventRecord] = []
+        self._rules: dict[str, TriggerRule] = {}
+        self._history: list[EventRecord] = []
         self._max_history = 1000
-        self._listeners: Dict[str, List[Callable]] = defaultdict(list)
+        self._listeners: dict[str, list[Callable]] = defaultdict(list)
         self._stats = {"events_received": 0, "rules_matched": 0, "actions_executed": 0, "errors": 0}
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("event_trigger.initialize", "start")
         self.trace("event_trigger.initialize", "end")
         try:
@@ -243,7 +244,7 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         active = sum(1 for r in self._rules.values() if r.status == TriggerStatus.ACTIVE)
         return {
             "healthy": self.status == ModuleStatus.RUNNING,
@@ -266,7 +267,7 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except re.error:
             return pattern == event_type
 
-    def _check_condition(self, payload: Dict, condition: Dict) -> bool:
+    def _check_condition(self, payload: dict, condition: dict) -> bool:
         if not condition:
             return True
         for key, expected in condition.items():
@@ -282,21 +283,13 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if isinstance(expected, dict):
                 op = expected.get("op", "eq")
                 target = expected.get("value")
-                if op == "gt" and not (isinstance(val, (int, float)) and val > target):
-                    return False
-                elif op == "lt" and not (isinstance(val, (int, float)) and val < target):
-                    return False
-                elif op == "eq" and val != target:
-                    return False
-                elif op == "ne" and val == target:
-                    return False
-                elif op == "contains" and target not in str(val):
+                if op == "gt" and not (isinstance(val, (int, float)) and val > target) or op == "lt" and not (isinstance(val, (int, float)) and val < target) or op == "eq" and val != target or op == "ne" and val == target or op == "contains" and target not in str(val):
                     return False
             elif val != expected:
                 return False
         return True
 
-    def _execute_action(self, action: Dict, event: EventRecord, trigger: TriggerRule) -> ActionResult:
+    def _execute_action(self, action: dict, event: EventRecord, trigger: TriggerRule) -> ActionResult:
         action_type = action.get("type", "log")
         t0 = time.time()
         try:
@@ -327,7 +320,7 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 trigger_id=trigger.id, action_type=action_type, success=False, elapsed_ms=elapsed, error=str(e)
             )
 
-    def emit(self, params: Optional[Dict] = None) -> Dict:
+    def emit(self, params: dict | None = None) -> dict:
         params = params or {}
         event_type = params.get("type", "")
         source = params.get("source", "unknown")
@@ -372,7 +365,7 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "actions": len(event.actions_executed),
         }
 
-    def create_rule(self, params: Optional[Dict] = None) -> Dict:
+    def create_rule(self, params: dict | None = None) -> dict:
         params = params or {}
         name = params.get("name", "")
         trigger_type = params.get("type", "event")
@@ -400,11 +393,11 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("create_rule", f"{name}({tt.value})")
         return {"success": True, "rule": rule.to_dict()}
 
-    def list_rules(self, params: Optional[Dict] = None) -> Dict:
+    def list_rules(self, params: dict | None = None) -> dict:
         result = [r.to_dict() for r in self._rules.values()]
         return {"success": True, "rules": result, "count": len(result)}
 
-    def disable_rule(self, params: Optional[Dict] = None) -> Dict:
+    def disable_rule(self, params: dict | None = None) -> dict:
         params = params or {}
         rid = params.get("id", "")
         rule = self._rules.get(rid)
@@ -413,13 +406,13 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         rule.status = TriggerStatus.DISABLED
         return {"success": True, "rule_id": rid, "status": "disabled"}
 
-    def get_history(self, params: Optional[Dict] = None) -> Dict:
+    def get_history(self, params: dict | None = None) -> dict:
         params = params or {}
         limit = params.get("limit", 50)
         events = [e.to_dict() for e in self._history[-limit:]]
         return {"success": True, "events": events, "count": len(events)}
 
-    def get_stats(self, params: Optional[Dict] = None) -> Dict:
+    def get_stats(self, params: dict | None = None) -> dict:
         return {"success": True, "stats": self._stats}
 
     def shutdown(self) -> None:
@@ -428,7 +421,7 @@ class EventTrigger(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._listeners.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

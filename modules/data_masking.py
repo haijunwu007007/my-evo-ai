@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 数据脱敏引擎（上市公司级）
 # Grade: A
 
@@ -15,7 +14,8 @@ __module_meta__ = {
     "description": "企业级数据脱敏引擎 — 电话/邮箱/身份证/银行卡/姓名/地址/自定义",
 }
 import time, uuid, logging, re, json, hashlib
-from typing import Any, Dict, List, Optional, Callable, Union
+from typing import Any, Dict, List, Optional, Union
+from collections.abc import Callable
 from modules._base.enterprise_module import (
     EnterpriseModule, ModuleStatus, HealthReport,
     CircuitBreakerMixin, RateLimiterMixin,
@@ -24,7 +24,7 @@ from modules._base.enterprise_module import (
 logger = logging.getLogger("evo.data-masking")
 
 # ─── 内置脱敏规则 ─────────────────────────────────────
-MASK_RULES: Dict[str, Dict] = {
+MASK_RULES: dict[str, dict] = {
     "phone": {
         "pattern": r"(1[3-9]\d)\d{4}(\d{4})",
         "replacement": r"\1****\2",
@@ -71,17 +71,17 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
     VERSION = "v3.0"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__(config)
-        self._rules: Dict[str, Dict] = dict(MASK_RULES)
-        self._custom_rules: Dict[str, Dict] = {}
+        self._rules: dict[str, dict] = dict(MASK_RULES)
+        self._custom_rules: dict[str, dict] = {}
         self._stats = {
             "total_masks": 0,
             "total_batches": 0,
             "by_type": {},
             "started_at": time.time(),
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING
@@ -104,7 +104,7 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
         return await self._safe_execute(action, params, handler=self._dispatch)
 
     # ─── 脱敏核心 ──────────────────────────────────────
-    def _apply_rule(self, value: str, rule: Dict) -> str:
+    def _apply_rule(self, value: str, rule: dict) -> str:
         """对单值应用单条脱敏规则"""
         try:
             return re.sub(rule["pattern"], rule["replacement"], str(value))
@@ -122,8 +122,8 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
         self._stats["by_type"][mask_type] = self._stats["by_type"].get(mask_type, 0) + 1
         return result
 
-    def mask_dict(self, data: Dict, fields: Optional[List[str]] = None,
-                  field_types: Optional[Dict[str, str]] = None) -> Dict:
+    def mask_dict(self, data: dict, fields: list[str] | None = None,
+                  field_types: dict[str, str] | None = None) -> dict:
         """对字典指定字段脱敏
 
         Args:
@@ -158,8 +158,8 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
             result[key] = self.mask_value(str(val), mask_type)
         return result
 
-    def mask_batch(self, records: List[Dict], fields: Optional[List[str]] = None,
-                   field_types: Optional[Dict[str, str]] = None) -> List[Dict]:
+    def mask_batch(self, records: list[dict], fields: list[str] | None = None,
+                   field_types: dict[str, str] | None = None) -> list[dict]:
         """批量脱敏
 
         Args:
@@ -206,7 +206,7 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
 
     # ─── 规则管理 ──────────────────────────────────────
     def add_custom_rule(self, name: str, pattern: str, replacement: str,
-                        description: str = "") -> Dict:
+                        description: str = "") -> dict:
         """添加自定义脱敏规则"""
         if not pattern or not replacement:
             return {"success": False, "error": "pattern和replacement必填"}
@@ -222,7 +222,7 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
         self._audit("add_rule", f"添加自定义规则: {name}")
         return {"success": True, "rule": name}
 
-    def remove_rule(self, name: str) -> Dict:
+    def remove_rule(self, name: str) -> dict:
         """删除自定义规则（内置规则不可删除）"""
         if name in MASK_RULES:
             return {"success": False, "error": f"内置规则不可删除: {name}"}
@@ -233,7 +233,7 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
         return {"success": False, "error": f"规则不存在: {name}"}
 
     # ─── 分发器 ────────────────────────────────────────
-    def _dispatch(self, p: Dict) -> Dict:
+    def _dispatch(self, p: dict) -> dict:
         a = p.get("action", "status")
 
         try:
@@ -344,7 +344,7 @@ class DataMaskingEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule)
             logger.error("[DataMasking] %s 失败: %s", a, e, exc_info=True)
             return {"success": False, "error": str(e)}
 
-    def _mask_json_recursive(self, obj: Any, keys: List[str]) -> Any:
+    def _mask_json_recursive(self, obj: Any, keys: list[str]) -> Any:
         """递归脱敏 JSON 对象中的指定字段"""
         if isinstance(obj, dict):
             return {

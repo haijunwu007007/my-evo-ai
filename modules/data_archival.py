@@ -100,7 +100,7 @@ class EnterpriseModule:
         self._components = {}
         self._lock = threading.RLock()
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         self._status = ModuleStatus.INITIALIZED
         self._start_time = time.time()
         self._setup_components()
@@ -111,7 +111,7 @@ class EnterpriseModule:
 
     pass
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "healthy": self.status in (ModuleStatus.RUNNING, ModuleStatus.INITIALIZED),
             "status": self.status,
@@ -218,7 +218,7 @@ class ArchivePolicy:
     schedule_cron: str = "0 2 * * *"
     enabled: bool = True
     max_size_mb: int = 10240
-    patterns: List[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
     dedup: bool = True
     checksum: bool = True
 
@@ -227,7 +227,7 @@ class ArchiveJob:
     id: str = ""
     policy_id: str = ""
     status: ArchiveStatus = ArchiveStatus.PENDING
-    source_files: List[str] = field(default_factory=list)
+    source_files: list[str] = field(default_factory=list)
     target_path: str = ""
     archived_count: int = 0
     total_size: int = 0
@@ -243,14 +243,14 @@ class ArchiveStats:
     total_size: int = 0
     compression_ratio: float = 0.0
     active_jobs: int = 0
-    by_tier: Dict[str, int] = field(default_factory=dict)
+    by_tier: dict[str, int] = field(default_factory=dict)
 
-class ArchiveSizeAnalyzer(object):
+class ArchiveSizeAnalyzer:
     """归档大小分析器 — 预估归档文件大小、存储成本、压缩率建议"""
 
     def estimate_archive_size(
         self, source_size_bytes: int, format: str = "parquet", compression: str = "gzip"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """根据源数据大小估算归档后的文件大小"""
         format_ratios = {"parquet": 0.25, "csv": 1.0, "json": 1.2, "avro": 0.7, "orc": 0.3}
         compression_ratios = {"gzip": 0.3, "snappy": 0.5, "zstd": 0.25, "lz4": 0.4, "none": 1.0}
@@ -267,7 +267,7 @@ class ArchiveSizeAnalyzer(object):
             "estimated_size_human": self._human_size(int(estimated)),
         }
 
-    def recommend_compression(self, data_type: str = "structured", access_pattern: str = "rare") -> Dict[str, Any]:
+    def recommend_compression(self, data_type: str = "structured", access_pattern: str = "rare") -> dict[str, Any]:
         """根据数据类型和访问模式推荐压缩算法"""
         if access_pattern == "rare" or access_pattern == "archive":
             recommendations = [
@@ -291,7 +291,7 @@ class ArchiveSizeAnalyzer(object):
             "alternatives": recommendations[1:],
         }
 
-    def estimate_storage_cost(self, total_size_bytes: int, tier: str = "warm", months: int = 12) -> Dict[str, Any]:
+    def estimate_storage_cost(self, total_size_bytes: int, tier: str = "warm", months: int = 12) -> dict[str, Any]:
         """估算归档存储成本"""
         tier_costs = {"hot": 0.023, "warm": 0.012, "cold": 0.004, "frozen": 0.00099}
         cost_per_gb = tier_costs.get(tier, 0.012)
@@ -329,8 +329,8 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
         super().__init__(config)
         DataArchivalModule._counter += 1
-        self._policies: Dict[str, ArchivePolicy] = {}
-        self._jobs: Dict[str, ArchiveJob] = {}
+        self._policies: dict[str, ArchivePolicy] = {}
+        self._jobs: dict[str, ArchiveJob] = {}
         self._stats = ArchiveStats()
         self._job_queue: deque = deque()
         self._worker_running = False
@@ -349,7 +349,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._status = ModuleStatus.RUNNING
 
     # ── 归档策略管理 ──
-    def _create_policy(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_policy(self, params: dict[str, Any]) -> dict[str, Any]:
         if not self._rl_acquire():
             return {"success": False, "error": "rate_limited"}
         pid = params.get("id", f"pol_{int(time.time())}")
@@ -372,7 +372,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._record_metric("policies_total", len(self._policies))
         return {"success": True, "policy_id": pid, "name": policy.name}
 
-    def _get_policy(self, policy_id: str) -> Optional[Dict[str, Any]]:
+    def _get_policy(self, policy_id: str) -> dict[str, Any] | None:
         p = self._policies.get(policy_id)
         if not p:
             return None
@@ -387,17 +387,17 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "enabled": p.enabled,
         }
 
-    def _list_policies(self) -> List[Dict[str, Any]]:
+    def _list_policies(self) -> list[dict[str, Any]]:
         return [self._get_policy(pid) for pid in self._policies if self._get_policy(pid)]
 
-    def _delete_policy(self, policy_id: str) -> Dict[str, Any]:
+    def _delete_policy(self, policy_id: str) -> dict[str, Any]:
         if policy_id not in self._policies:
             return {"success": False, "error": "policy_not_found"}
         del self._policies[policy_id]
         return {"success": True}
 
     # ── 归档作业管理 ──
-    def _submit_archive(self, policy_id: str, files: List[str] = None) -> Dict[str, Any]:
+    def _submit_archive(self, policy_id: str, files: list[str] = None) -> dict[str, Any]:
         if not self._rl_acquire():
             return {"success": False, "error": "rate_limited"}
         policy = self._policies.get(policy_id)
@@ -411,7 +411,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._record_metric("jobs_submitted", len(self._jobs))
         return {"success": True, "job_id": job_id, "files": len(files or [])}
 
-    def _execute_job(self, job_id: str) -> Dict[str, Any]:
+    def _execute_job(self, job_id: str) -> dict[str, Any]:
         job = self._jobs.get(job_id)
         if not job:
             return {"success": False, "error": "job_not_found"}
@@ -458,7 +458,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._stats.active_jobs = max(0, self._stats.active_jobs - 1)
             return {"success": False, "error": str(e)}
 
-    def _get_job_status(self, job_id: str) -> Optional[Dict[str, Any]]:
+    def _get_job_status(self, job_id: str) -> dict[str, Any] | None:
         j = self._jobs.get(job_id)
         if not j:
             return None
@@ -474,7 +474,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
 
     # ── 冷热分层管理 ──
-    def _tier_data(self, source: str, tier: StorageTier) -> Dict[str, Any]:
+    def _tier_data(self, source: str, tier: StorageTier) -> dict[str, Any]:
         if not self._rl_acquire():
             return {"success": False, "error": "rate_limited"}
         tier_key = tier.value
@@ -489,7 +489,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ),
         }
 
-    def _get_storage_tiers(self) -> Dict[str, Any]:
+    def _get_storage_tiers(self) -> dict[str, Any]:
         return {
             "success": True,
             "tiers": {
@@ -499,7 +499,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
 
     # ── 保留策略管理 ──
-    def _apply_retention(self, level: RetentionLevel = None) -> Dict[str, Any]:
+    def _apply_retention(self, level: RetentionLevel = None) -> dict[str, Any]:
         expired = 0
         now = time.time()
         for jid, job in list(self._jobs.items()):
@@ -512,7 +512,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._record_metric("retention_expired", expired)
         return {"success": True, "expired_count": expired, "level": (level or RetentionLevel.MEDIUM).value}
 
-    def _get_stats(self) -> Dict[str, Any]:
+    def _get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             "stats": {
@@ -527,7 +527,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         }
 
     # ── 搜索与查询 ──
-    def _search_archives(self, query: str = "", tier: str = None, limit: int = 50) -> Dict[str, Any]:
+    def _search_archives(self, query: str = "", tier: str = None, limit: int = 50) -> dict[str, Any]:
         results = []
         for jid, job in self._jobs.items():
             if tier:
@@ -539,7 +539,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             results.append(self._get_job_status(jid))
         return {"success": True, "results": results[:limit], "total": len(results)}
 
-    def _cleanup_expired(self, dry_run: bool = True) -> Dict[str, Any]:
+    def _cleanup_expired(self, dry_run: bool = True) -> dict[str, Any]:
         expired_ids = []
         now = time.time()
         for jid, job in self._jobs.items():
@@ -556,7 +556,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "freed_mb": round(len(expired_ids) * 15.7, 2),
         }
 
-    async def execute(self, action: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """统一执行入口 — 数据归档操作路由"""
         _ = self.trace("execute")
         metrics_collector.counter("data_archival_ops_total", labels={"action": action})
@@ -602,7 +602,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._cb_record_failure()
             return {"success": False, "error": str(e)}
 
-    def get_archival_summary(self) -> Dict[str, Any]:
+    def get_archival_summary(self) -> dict[str, Any]:
         """获取归档摘要：总归档数、存储使用、策略分布、最近归档状态"""
         jobs = self._archive_jobs if hasattr(self, "_archive_jobs") else {}
         policies = self._policies if hasattr(self, "_policies") else {}
@@ -625,7 +625,7 @@ class DataArchivalModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "active_policies": len(policies),
         }
 
-    def cleanup_expired_archives(self, dry_run: bool = True) -> Dict[str, Any]:
+    def cleanup_expired_archives(self, dry_run: bool = True) -> dict[str, Any]:
         """清理过期归档：根据保留策略识别可删除的归档，统计可回收空间"""
         jobs = self._archive_jobs if hasattr(self, "_archive_jobs") else {}
         expired = []

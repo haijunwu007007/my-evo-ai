@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 — 测试基础设施
 上市公司级：pytest fixtures、mock 服务、共享工具
@@ -75,7 +74,7 @@ def import_module_class(module_name: str):
         return None, None
 
 
-def get_all_module_files() -> List[Path]:
+def get_all_module_files() -> list[Path]:
     """获取所有模块文件路径"""
     modules_dir = BASE / "modules"
     return sorted([f for f in modules_dir.iterdir() if f.suffix == ".py" and not f.name.startswith("_")])
@@ -96,7 +95,7 @@ def server_status():
 
 
 @pytest.fixture(scope="session")
-def all_module_paths() -> List[Path]:
+def all_module_paths() -> list[Path]:
     return get_all_module_files()
 
 

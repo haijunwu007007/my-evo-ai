@@ -83,13 +83,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MulticaTeamAnalyzer(object):
+class MulticaTeamAnalyzer:
     """multica_team 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -311,14 +312,14 @@ class AgentProfile:
     agent_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     name: str = ""
     role: AgentRole = AgentRole.CUSTOM
-    capabilities: List[str] = field(default_factory=list)
-    expertise: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
+    expertise: list[str] = field(default_factory=list)
     status: AgentStatus = AgentStatus.IDLE
-    current_task: Optional[str] = None
+    current_task: str | None = None
     capacity: int = 5
     completed_tasks: int = 0
     performance_score: float = 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class TeamTask:
@@ -327,17 +328,17 @@ class TeamTask:
     description: str = ""
     priority: TaskPriority = TaskPriority.MEDIUM
     status: TaskStatus = TaskStatus.PENDING
-    assigned_to: Optional[str] = None
+    assigned_to: str | None = None
     created_by: str = ""
     created_at: float = field(default_factory=time.time)
     started_at: float = 0.0
     completed_at: float = 0.0
     due_at: float = 0.0
-    dependencies: List[str] = field(default_factory=list)
-    subtasks: List[str] = field(default_factory=list)
-    parent_task: Optional[str] = None
-    required_role: Optional[AgentRole] = None
-    tags: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    subtasks: list[str] = field(default_factory=list)
+    parent_task: str | None = None
+    required_role: AgentRole | None = None
+    tags: list[str] = field(default_factory=list)
     result: Any = None
     review_notes: str = ""
     retry_count: int = 0
@@ -351,10 +352,10 @@ class Message:
     team_id: str = ""
     subject: str = ""
     content: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     read: bool = False
-    in_reply_to: Optional[str] = None
+    in_reply_to: str | None = None
     priority: int = 0
 
 @dataclass
@@ -379,7 +380,7 @@ class ConsensusResult:
     total_voters: int
     passed: bool
     result: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 class MulticaTeam:
     def trace(self, name, *args, **kwargs):
@@ -405,12 +406,12 @@ class MulticaTeam:
     """Enterprise multi-agent collaboration framework with task management and consensus."""
 
     def __init__(self):
-        self._teams: Dict[str, TeamConfig] = {}
-        self._agents: Dict[str, Dict[str, AgentProfile]] = defaultdict(dict)
-        self._tasks: Dict[str, Dict[str, TeamTask]] = defaultdict(dict)
-        self._messages: Dict[str, deque] = defaultdict(lambda: deque(maxlen=5000))
-        self._votes: Dict[str, Dict[str, str]] = {}
-        self._hooks: Dict[str, List[Callable]] = {
+        self._teams: dict[str, TeamConfig] = {}
+        self._agents: dict[str, dict[str, AgentProfile]] = defaultdict(dict)
+        self._tasks: dict[str, dict[str, TeamTask]] = defaultdict(dict)
+        self._messages: dict[str, deque] = defaultdict(lambda: deque(maxlen=5000))
+        self._votes: dict[str, dict[str, str]] = {}
+        self._hooks: dict[str, list[Callable]] = {
             "on_task_assign": [],
             "on_task_complete": [],
             "on_message": [],
@@ -486,8 +487,8 @@ class MulticaTeam:
         priority: TaskPriority = TaskPriority.MEDIUM,
         created_by: str = "",
         due_at: float = 0.0,
-        required_role: Optional[AgentRole] = None,
-        dependencies: Optional[List[str]] = None,
+        required_role: AgentRole | None = None,
+        dependencies: list[str] | None = None,
     ) -> TeamTask:
         task = TeamTask(
             title=title,
@@ -608,7 +609,7 @@ class MulticaTeam:
         msg_type: MessageType,
         subject: str = "",
         content: str = "",
-        data: Optional[Dict] = None,
+        data: dict | None = None,
     ) -> Message:
         return self._send_message(team_id, sender_id, receiver_id, msg_type, subject, content, data)
 
@@ -620,7 +621,7 @@ class MulticaTeam:
         msg_type: MessageType,
         subject: str = "",
         content: str = "",
-        data: Optional[Dict] = None,
+        data: dict | None = None,
     ) -> Message:
         msg = Message(
             msg_type=msg_type,
@@ -640,7 +641,7 @@ class MulticaTeam:
                 pass
         return msg
 
-    def get_messages(self, team_id: str, receiver_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_messages(self, team_id: str, receiver_id: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         msgs = list(self._messages.get(team_id, []))
         if receiver_id:
             msgs = [m for m in msgs if m.receiver_id == receiver_id or m.receiver_id == "all"]
@@ -663,7 +664,7 @@ class MulticaTeam:
         proposal_id: str,
         proposer_id: str,
         description: str = "",
-        votes_needed: Optional[int] = None,
+        votes_needed: int | None = None,
     ) -> None:
         with self._lock:
             self._votes[proposal_id] = {}
@@ -724,7 +725,7 @@ class MulticaTeam:
             best = max(available, key=lambda a: a.performance_score)
         return self.assign_task(team_id, task.task_id, best.agent_id)
 
-    def get_team_status(self, team_id: str) -> Optional[Dict[str, Any]]:
+    def get_team_status(self, team_id: str) -> dict[str, Any] | None:
         with self._lock:
             team = self._teams.get(team_id)
             if not team:
@@ -748,7 +749,7 @@ class MulticaTeam:
                 "pending_proposals": len(self._votes),
             }
 
-    def list_teams(self) -> List[Dict[str, Any]]:
+    def list_teams(self) -> list[dict[str, Any]]:
         return [
             {
                 "team_id": t.team_id,
@@ -763,7 +764,7 @@ class MulticaTeam:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             teams = self.list_teams()

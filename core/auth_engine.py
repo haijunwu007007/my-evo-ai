@@ -22,7 +22,7 @@ def _b64url_decode(s: str) -> bytes:
     return base64.urlsafe_b64decode(s)
 
 def _hmac_sign(header_b64: str, payload_b64: str, secret: str) -> str:
-    msg = f"{header_b64}.{payload_b64}".encode('utf-8')
+    msg = f"{header_b64}.{payload_b64}".encode()
     sig = hmac.new(secret.encode('utf-8'), msg, hashlib.sha256).digest()
     return _b64url_encode(sig)
 
@@ -81,7 +81,7 @@ class Role(Enum):
     VIEWER = "viewer"              # 只读：仅查看
 
 # 角色权限矩阵
-ROLE_PERMISSIONS: Dict[str, List[str]] = {
+ROLE_PERMISSIONS: dict[str, list[str]] = {
     Role.SUPER_ADMIN.value: ["*"],
     Role.ADMIN.value: [
         "modules:*", "execute:*", "pipelines:*", "config:*",
@@ -111,7 +111,7 @@ class User:
     role: str = Role.VIEWER.value
     enabled: bool = True
     created_at: float = field(default_factory=time.time)
-    last_login: Optional[float] = None
+    last_login: float | None = None
     login_count: int = 0
     failed_attempts: int = 0
     locked_until: float = 0.0
@@ -127,17 +127,17 @@ class AuthEngine:
     def __init__(self, secret: str = None, persistence_dir: str = ".evo_data/auth"):
         self.jwt = JWTEngine(secret)
         self.persistence_dir = persistence_dir
-        self.users: Dict[str, User] = {}
-        self.refresh_tokens: Dict[str, dict] = {}  # jti -> {username, exp}
+        self.users: dict[str, User] = {}
+        self.refresh_tokens: dict[str, dict] = {}  # jti -> {username, exp}
         self.blacklist: set = set()  # 被注销的jti
-        self.login_history: List[dict] = []
+        self.login_history: list[dict] = []
         self.max_login_history = 1000
         self._lock = threading.Lock()
         
         # 暴力破解防护
         self.max_failed_attempts = 5
         self.lockout_duration = 300  # 5分钟锁定
-        self._failed_ip: Dict[str, dict] = {}  # IP -> {count, locked_until}
+        self._failed_ip: dict[str, dict] = {}  # IP -> {count, locked_until}
         self.max_ip_attempts = 10
         
         # 令牌配置
@@ -171,7 +171,7 @@ class AuthEngine:
         users_file = os.path.join(self.persistence_dir, "users.json")
         if os.path.exists(users_file):
             try:
-                with open(users_file, 'r') as f:
+                with open(users_file) as f:
                     data = json.load(f)
                 for u in data:
                     self.users[u['username']] = User(**u)
@@ -439,7 +439,7 @@ class AuthEngine:
 # ═══════════════════════════════════════════════════════
 
 # 全局实例
-_auth_engine: Optional[AuthEngine] = None
+_auth_engine: AuthEngine | None = None
 _auth_enabled = False
 
 def init_auth(secret: str = None, enabled: bool = False) -> AuthEngine:

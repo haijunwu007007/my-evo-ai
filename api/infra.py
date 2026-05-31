@@ -79,12 +79,12 @@ manager = ConnectionManager()
 # 全局指标 & API 缓存
 # ════════════════════════════════════════════════════════════
 _START_TIME = time.time()
-_request_counter: Dict[str, int] = defaultdict(int)
-_request_errors: Dict[str, int] = defaultdict(int)
-_request_latency: Dict[str, List[float]] = defaultdict(list)
-_request_latency_ms: Dict[str, float] = {}
+_request_counter: dict[str, int] = defaultdict(int)
+_request_errors: dict[str, int] = defaultdict(int)
+_request_latency: dict[str, list[float]] = defaultdict(list)
+_request_latency_ms: dict[str, float] = {}
 
-_api_cache: Dict[str, dict] = {}
+_api_cache: dict[str, dict] = {}
 _CACHE_TTL = 5.0
 _cache_hits = 0
 _CACHEABLE_PATHS = {
@@ -97,7 +97,7 @@ _CACHEABLE_PATHS = {
 _CACHE_SHORT_PATHS = {"/api/search/modules"}
 
 # 模块活跃度计数
-_module_activity: Dict[str, int] = {}
+_module_activity: dict[str, int] = {}
 
 
 # ════════════════════════════════════════════════════════════
@@ -123,14 +123,14 @@ class RateLimiter:
     def __init__(self, max_requests: int = 1000, window_seconds: int = 60):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._requests: Dict[str, List[float]] = defaultdict(list)
+        self._requests: dict[str, list[float]] = defaultdict(list)
         self._lock = asyncio.Lock()
-        self._endpoint_limits: Dict[str, int] = {
+        self._endpoint_limits: dict[str, int] = {
             "POST:": 120, "PUT:": 120, "DELETE:": 60,
             "GET:/api/execute": 30, "POST:/api/execute": 30,
         }
         self._total_blocked = 0
-        self._blocked_ips: Dict[str, int] = defaultdict(int)
+        self._blocked_ips: dict[str, int] = defaultdict(int)
 
     async def is_allowed(self, client_ip: str, method: str = "GET", path: str = "/") -> tuple:
         now = time.time()
@@ -176,7 +176,7 @@ rate_limiter = RateLimiter(max_requests=1000, window_seconds=60)
 # ════════════════════════════════════════════════════════════
 # 审计日志
 # ════════════════════════════════════════════════════════════
-_audit_log: List[Dict] = []
+_audit_log: list[dict] = []
 _MAX_AUDIT = 1000
 
 
@@ -236,12 +236,12 @@ def classify_module(name: str) -> str:
 class ModuleRegistry:
     """模块注册表 — 自动发现、加载、管理所有模块"""
     def __init__(self):
-        self.modules: Dict[str, Any] = {}
-        self.classes: Dict[str, type] = {}
-        self.endpoints: Dict[str, Dict] = {}
-        self.health: Dict[str, Dict] = {}
-        self._pending_modules: Dict[str, Dict] = {}
-        self._pending_init: Dict[str, Any] = {}
+        self.modules: dict[str, Any] = {}
+        self.classes: dict[str, type] = {}
+        self.endpoints: dict[str, dict] = {}
+        self.health: dict[str, dict] = {}
+        self._pending_modules: dict[str, dict] = {}
+        self._pending_init: dict[str, Any] = {}
 
     def auto_discover(self, modules_dir: str = "modules"):
         mod_path = BASE_DIR / modules_dir
@@ -348,7 +348,7 @@ class ModuleRegistry:
                 stub_names.add(name)
         return len(stub_names)
 
-    def get_stubs(self) -> List[Dict]:
+    def get_stubs(self) -> list[dict]:
         """返回所有桩模块的详细信息"""
         stubs = []
         for name in set(self._pending_modules.keys()) | set(self.classes.keys()):
@@ -378,7 +378,7 @@ class ModuleRegistry:
                 timeout=15.0
             )
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.health[name] = {"status": "timeout", "error": "模块加载超时(15s)", "grade": "E"}
             logger.error(f"[LAZY-TIMEOUT] {name}: 加载超时")
             return None
@@ -467,7 +467,7 @@ class ModuleRegistry:
     def get(self, name: str) -> Any:
         return self.modules.get(name)
 
-    def call(self, name: str, method: str, *args, **kwargs) -> Dict:
+    def call(self, name: str, method: str, *args, **kwargs) -> dict:
         mod = self.modules.get(name)
         if not mod:
             return {"success": False, "error": f"模块不存在: {name}"}
@@ -483,7 +483,7 @@ class ModuleRegistry:
             logger.error(f"调用失败 {name}.{method}: {e}")
             return {"success": False, "error": str(e)}
 
-    def get_all_health(self) -> Dict:
+    def get_all_health(self) -> dict:
         return dict(self.health)
 
 
@@ -535,23 +535,23 @@ except ImportError:
 class ModuleCallRequest(BaseModel):
     module: str
     method: str
-    args: List[Any] = []
-    kwargs: Dict[str, Any] = {}
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
 
 
 class ExecuteRequest(BaseModel):
     task: str
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
 
 
 class PlannerChatRequest(BaseModel):
     message: str
-    context: Optional[Dict[str, Any]] = None
+    context: dict[str, Any] | None = None
 
 
 class PlannerTaskRequest(BaseModel):
     task: str
-    params: Optional[Dict[str, Any]] = None
+    params: dict[str, Any] | None = None
 
 
 class EmailConfigRequest(BaseModel):
@@ -575,7 +575,7 @@ class NotificationRequest(BaseModel):
 
 class LLMChatRequest(BaseModel):
     prompt: str = ""
-    messages: List[Dict] = []
+    messages: list[dict] = []
     model: str = ""
     session_id: str = ""
     system_prompt: str = ""
@@ -590,26 +590,26 @@ class LLMProviderRequest(BaseModel):
     provider_type: str = "openai_compatible"
     base_url: str = ""
     api_key: str = ""
-    models: List[str] = []
+    models: list[str] = []
     priority: int = 10
 
 
 class DocReportRequest(BaseModel):
     title: str = "报告"
-    sections: List[Dict] = []
+    sections: list[dict] = []
     format: str = "markdown"
-    metadata: Dict = None
+    metadata: dict = None
 
 
 class DocPresentationRequest(BaseModel):
     title: str = "演示文稿"
-    slides: List[Dict] = []
+    slides: list[dict] = []
 
 
 # ════════════════════════════════════════════════════════════
 # 缓存/执行日志 辅助函数
 # ════════════════════════════════════════════════════════════
-_execution_log: List[Dict] = []
+_execution_log: list[dict] = []
 _MAX_LOG = 200
 
 
@@ -637,7 +637,7 @@ def _append_exec_log(module, action, status, duration_ms, summary=""):
 # 全局状态
 # ════════════════════════════════════════════════════════════
 _START_TIME: float = time.time()
-_module_activity: Dict[str, int] = {}
+_module_activity: dict[str, int] = {}
 
 _coord_v3: Any = None
 
@@ -790,9 +790,7 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
         import inspect as _insp
         sig = _insp.signature(handler)
         args_needed = [p for p in sig.parameters.values() if p.default == _insp.Parameter.empty]
-        if len(args_needed) == 0:
-            result = handler()
-        elif action == "health_check":
+        if len(args_needed) == 0 or action == "health_check":
             result = handler()
         elif "params" in sig.parameters:
             result = handler(params)

@@ -105,7 +105,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LocalMonitorAnalyzer(object):
+class LocalMonitorAnalyzer:
     """local_monitor 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -298,7 +298,7 @@ class MetricSample:
     metric_type: MetricType
     value: float
     unit: str
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
 
 @dataclass
@@ -315,7 +315,7 @@ class AlertRule:
     cooldown_seconds: int = 300
     enabled: bool = True
     description: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class Alert:
@@ -330,7 +330,7 @@ class Alert:
     timestamp: float = field(default_factory=time.time)
     resolved: bool = False
     resolved_at: float = 0.0
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class SystemSnapshot:
@@ -338,7 +338,7 @@ class SystemSnapshot:
 
     timestamp: float
     cpu_percent: float
-    cpu_per_core: List[float]
+    cpu_per_core: list[float]
     memory_total_mb: float
     memory_used_mb: float
     memory_percent: float
@@ -424,15 +424,15 @@ class LocalMonitor:
         )()
 
         self._lock = threading.RLock()
-        self._metrics: Dict[str, deque] = defaultdict(lambda: deque(maxlen=3600))
-        self._alert_rules: Dict[str, AlertRule] = {}
-        self._active_alerts: Dict[str, Alert] = {}
-        self._alert_history: List[Alert] = []
+        self._metrics: dict[str, deque] = defaultdict(lambda: deque(maxlen=3600))
+        self._alert_rules: dict[str, AlertRule] = {}
+        self._active_alerts: dict[str, Alert] = {}
+        self._alert_history: list[Alert] = []
         self._snapshots: deque = deque(maxlen=288)
-        self._process_cache: Dict[int, Dict] = {}
+        self._process_cache: dict[int, dict] = {}
         self._disk_io_counters = {"read": 0.0, "write": 0.0}
         self._net_io_counters = {"sent": 0.0, "recv": 0.0}
-        self._last_snapshot: Optional[SystemSnapshot] = None
+        self._last_snapshot: SystemSnapshot | None = None
         self._stats = {
             "total_samples": 0,
             "total_alerts": 0,
@@ -542,7 +542,7 @@ class LocalMonitor:
             raise
 
     def _record_metric(
-        self, metric_id: str, metric_type: MetricType, value: float, unit: str, labels: Optional[Dict] = None
+        self, metric_id: str, metric_type: MetricType, value: float, unit: str, labels: dict | None = None
     ) -> None:
         sample = MetricSample(metric_id=metric_id, metric_type=metric_type, value=value, unit=unit, labels=labels or {})
         self._metrics[metric_id].append(sample)
@@ -560,13 +560,7 @@ class LocalMonitor:
             if value is None:
                 continue
             triggered = False
-            if rule.condition == "gt" and value > rule.threshold:
-                triggered = True
-            elif rule.condition == "lt" and value < rule.threshold:
-                triggered = True
-            elif rule.condition == "gte" and value >= rule.threshold:
-                triggered = True
-            elif rule.condition == "lte" and value <= rule.threshold:
+            if rule.condition == "gt" and value > rule.threshold or rule.condition == "lt" and value < rule.threshold or rule.condition == "gte" and value >= rule.threshold or rule.condition == "lte" and value <= rule.threshold:
                 triggered = True
             if triggered and rid not in self._active_alerts:
                 alert_id = hashlib.md5(f"{rid}:{time.time()}".encode()).hexdigest()[:12]
@@ -588,7 +582,7 @@ class LocalMonitor:
                 alert.resolved_at = time.time()
                 self._stats["total_resolved"] += 1
 
-    def collect(self) -> Dict[str, Any]:
+    def collect(self) -> dict[str, Any]:
         with self._lock:
             snapshot = self._collect_system_info()
             return {
@@ -599,7 +593,7 @@ class LocalMonitor:
                 "timestamp": snapshot.timestamp,
             }
 
-    def get_snapshot(self) -> Optional[Dict[str, Any]]:
+    def get_snapshot(self) -> dict[str, Any] | None:
         if not self._last_snapshot:
             self._collect_system_info()
         s = self._last_snapshot
@@ -618,7 +612,7 @@ class LocalMonitor:
             "open_fds": s.open_file_descriptors,
         }
 
-    def get_metric_history(self, metric_id: str, minutes: int = 60) -> List[Dict[str, Any]]:
+    def get_metric_history(self, metric_id: str, minutes: int = 60) -> list[dict[str, Any]]:
         samples = self._metrics.get(metric_id, deque())
         cutoff = time.time() - minutes * 60
         return [
@@ -627,7 +621,7 @@ class LocalMonitor:
             if s.timestamp >= cutoff
         ]
 
-    def get_alerts(self, active_only: bool = True) -> List[Dict[str, Any]]:
+    def get_alerts(self, active_only: bool = True) -> list[dict[str, Any]]:
         if active_only:
             return [
                 {
@@ -662,7 +656,7 @@ class LocalMonitor:
         alert_penalty = len(self._active_alerts) * 0.05
         return max(0.0, min(1.0, (cpu_score * 0.4 + mem_score * 0.35 + disk_score * 0.25) - alert_penalty))
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         score = self.compute_health_score()
         snap = self.get_snapshot() or {}
         return {

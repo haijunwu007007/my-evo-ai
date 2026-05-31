@@ -129,8 +129,8 @@ class TaskDefinition:
     retry_base_delay: float = 5.0
     retry_max_delay: float = 3600.0
     priority: int = 5
-    tags: List[str] = field(default_factory=list)
-    dependencies: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     enabled: bool = True
     created_at: float = field(default_factory=time.time)
     last_run_at: float = 0.0
@@ -170,7 +170,7 @@ class WorkerInfo:
     capacity: int = 10
     active_tasks: int = 0
     last_heartbeat: float = 0.0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 class CronExpressionParser:
     """CRON表达式解析器。支持标准5段CRON（分 时 日 月 周）和6段（含秒）。
@@ -194,9 +194,9 @@ class CronExpressionParser:
     DOW_MAP = {"SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6}
 
     def __init__(self):
-        self._cache: Dict[str, Tuple] = {}
+        self._cache: dict[str, tuple] = {}
 
-    def parse(self, expression: str) -> Dict[str, List[int]]:
+    def parse(self, expression: str) -> dict[str, list[int]]:
         """解析CRON表达式为各字段允许值列表"""
         if expression in self._cache:
             return self._cache[expression]
@@ -230,7 +230,7 @@ class CronExpressionParser:
         self._cache[expression] = result
         return result
 
-    def _parse_field(self, field_str: str, min_val: int, max_val: int, name_map: Dict[str, int] = None) -> List[int]:
+    def _parse_field(self, field_str: str, min_val: int, max_val: int, name_map: dict[str, int] = None) -> list[int]:
         """解析单个CRON字段（支持 * , - / 和名称别名）"""
         values = set()
         for part in field_str.split(","):
@@ -260,14 +260,14 @@ class CronExpressionParser:
                 values.add(self._resolve_value(part, name_map))
         return sorted(v for v in values if min_val <= v <= max_val)
 
-    def _resolve_value(self, val: str, name_map: Dict[str, int] = None) -> int:
+    def _resolve_value(self, val: str, name_map: dict[str, int] = None) -> int:
         """解析值（支持数字和名称别名）"""
         val = val.strip()
         if name_map and val.upper() in name_map:
             return name_map[val.upper()]
         return int(val)
 
-    def get_next_run_time(self, expression: str, after: float = None) -> Optional[float]:
+    def get_next_run_time(self, expression: str, after: float = None) -> float | None:
         """计算CRON表达式的下一次执行时间（unix timestamp）"""
         if after is None:
             after = time.time()
@@ -290,7 +290,7 @@ class CronExpressionParser:
             dt += timedelta(minutes=1)
         return None
 
-    def validate(self, expression: str) -> Dict[str, Any]:
+    def validate(self, expression: str) -> dict[str, Any]:
         """验证CRON表达式语法"""
         try:
             fields = self.parse(expression)
@@ -305,15 +305,15 @@ class TaskDependencyResolver:
     """
 
     def __init__(self):
-        self._graph: Dict[str, Set[str]] = {}
+        self._graph: dict[str, set[str]] = {}
 
-    def build_graph(self, tasks: Dict[str, TaskDefinition]) -> None:
+    def build_graph(self, tasks: dict[str, TaskDefinition]) -> None:
         """从任务定义构建依赖图"""
         self._graph = {}
         for tid, task in tasks.items():
             self._graph[tid] = set(task.dependencies)
 
-    def detect_cycles(self) -> List[List[str]]:
+    def detect_cycles(self) -> list[list[str]]:
         """检测循环依赖，返回所有环路"""
         cycles = []
         visited = set()
@@ -338,7 +338,7 @@ class TaskDependencyResolver:
                 dfs(node)
         return cycles
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """拓扑排序，返回执行顺序"""
         in_degree = {n: 0 for n in self._graph}
         for node, deps in self._graph.items():
@@ -357,7 +357,7 @@ class TaskDependencyResolver:
                         queue.append(other)
         return order
 
-    def get_ready_tasks(self, completed: Set[str], running: Set[str]) -> List[str]:
+    def get_ready_tasks(self, completed: set[str], running: set[str]) -> list[str]:
         """获取可执行任务（依赖全部完成且未在运行）"""
         ready = []
         for tid, deps in self._graph.items():
@@ -368,7 +368,7 @@ class TaskDependencyResolver:
             ready.append(tid)
         return ready
 
-    def get_dependency_chain(self, task_id: str) -> Dict[str, Any]:
+    def get_dependency_chain(self, task_id: str) -> dict[str, Any]:
         """获取任务的完整依赖链（递归上游+下游）"""
         upstream = set()
         queue = list(self._graph.get(task_id, set()))
@@ -395,14 +395,14 @@ class LoadBalancer:
     """
 
     def __init__(self):
-        self._workers: Dict[str, WorkerInfo] = {}
+        self._workers: dict[str, WorkerInfo] = {}
 
-    def register_worker(self, worker_id: str, capacity: int = 10, tags: List[str] = None) -> None:
+    def register_worker(self, worker_id: str, capacity: int = 10, tags: list[str] = None) -> None:
         self._workers[worker_id] = WorkerInfo(
             worker_id=worker_id, capacity=capacity, tags=tags or [], last_heartbeat=time.time()
         )
 
-    def select_worker(self, task_tags: List[str] = None) -> Optional[str]:
+    def select_worker(self, task_tags: list[str] = None) -> str | None:
         """选择最优Worker：优先匹配标签，其次最少负载"""
         best = None
         best_score = float("inf")
@@ -419,7 +419,7 @@ class LoadBalancer:
                 best = wid
         return best
 
-    def get_worker_load(self) -> List[Dict[str, Any]]:
+    def get_worker_load(self) -> list[dict[str, Any]]:
         """获取所有Worker负载"""
         return [
             {
@@ -479,11 +479,11 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.version = "1.0.0"
         self.description = "智能任务调度引擎 - CRON/DAG/重试/负载均衡"
 
-        self._tasks: Dict[str, TaskDefinition] = {}
-        self._executions: Dict[str, TaskExecution] = {}
-        self._execution_history: List[TaskExecution] = []
-        self._running_tasks: Dict[str, TaskExecution] = {}
-        self._completed_set: Set[str] = set()
+        self._tasks: dict[str, TaskDefinition] = {}
+        self._executions: dict[str, TaskExecution] = {}
+        self._execution_history: list[TaskExecution] = []
+        self._running_tasks: dict[str, TaskExecution] = {}
+        self._completed_set: set[str] = set()
         self._cron_parser = CronExpressionParser()
         self._dep_resolver = TaskDependencyResolver()
         self._load_balancer = LoadBalancer()
@@ -491,7 +491,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._lock = threading.RLock()
         self._max_history = 10000
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化调度器"""
         self.trace("smart_scheduler.initialize", "start")
         self.metrics_collector.gauge("scheduler.tasks_registered", 0)
@@ -500,7 +500,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.trace("smart_scheduler.initialize", "end")
         return {"success": True, "message": "调度器初始化完成"}
 
-    def register_task(self, name: str, cron_expression: str, command: str, **kwargs) -> Dict[str, Any]:
+    def register_task(self, name: str, cron_expression: str, command: str, **kwargs) -> dict[str, Any]:
         """注册定时任务"""
         self.trace("smart_scheduler.register_task", "start", {"name": name})
         task_id = kwargs.get("task_id", f"task_{uuid.uuid4().hex[:8]}")
@@ -535,7 +535,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.trace("smart_scheduler.register_task", "end")
         return {"success": True, "task_id": task_id, "next_run": task.next_run_at}
 
-    def unregister_task(self, task_id: str) -> Dict[str, Any]:
+    def unregister_task(self, task_id: str) -> dict[str, Any]:
         """注销任务"""
         with self._lock:
             task = self._tasks.pop(task_id, None)
@@ -545,7 +545,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit(f"注销任务 {task.name} (ID: {task_id})")
         return {"success": True, "task_id": task_id, "name": task.name}
 
-    def trigger_task(self, task_id: str) -> Dict[str, Any]:
+    def trigger_task(self, task_id: str) -> dict[str, Any]:
         """手动触发任务执行"""
         with self._lock:
             task = self._tasks.get(task_id)
@@ -571,7 +571,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.trace("smart_scheduler.trigger_task", "executed", {"task_id": task_id, "execution_id": execution_id})
         return {"success": True, "execution_id": execution_id, "task_name": task.name}
 
-    def complete_task(self, execution_id: str, success: bool, error_message: str = "") -> Dict[str, Any]:
+    def complete_task(self, execution_id: str, success: bool, error_message: str = "") -> dict[str, Any]:
         """标记任务执行完成"""
         with self._lock:
             execution = self._executions.get(execution_id)
@@ -625,7 +625,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "will_retry": success is False and execution.next_retry_at > 0,
         }
 
-    def cancel_task(self, execution_id: str) -> Dict[str, Any]:
+    def cancel_task(self, execution_id: str) -> dict[str, Any]:
         """取消正在运行的任务"""
         with self._lock:
             execution = self._running_tasks.get(execution_id)
@@ -638,7 +638,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit(f"取消任务 {execution.task_name} (ID: {execution_id})")
         return {"success": True, "execution_id": execution_id}
 
-    def check_timeouts(self) -> Dict[str, Any]:
+    def check_timeouts(self) -> dict[str, Any]:
         """检查超时任务。企业场景：定时扫描执行中的任务，
         超过timeout_seconds的标记为超时并释放资源。
         """
@@ -660,11 +660,11 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.metrics_collector.counter("scheduler.task_timeout", len(timed_out))
         return {"success": True, "timed_out_count": len(timed_out), "timed_out_executions": timed_out}
 
-    def validate_cron(self, expression: str) -> Dict[str, Any]:
+    def validate_cron(self, expression: str) -> dict[str, Any]:
         """验证CRON表达式"""
         return self._cron_parser.validate(expression)
 
-    def get_task_list(self, status_filter: str = None, tag: str = None) -> Dict[str, Any]:
+    def get_task_list(self, status_filter: str = None, tag: str = None) -> dict[str, Any]:
         """获取任务列表"""
         tasks = []
         for task in self._tasks.values():
@@ -703,7 +703,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tasks.sort(key=lambda x: x.get("next_run", ""))
         return {"success": True, "total": len(tasks), "tasks": tasks}
 
-    def get_execution_history(self, task_id: str = None, limit: int = 50) -> Dict[str, Any]:
+    def get_execution_history(self, task_id: str = None, limit: int = 50) -> dict[str, Any]:
         """获取执行历史"""
         history = self._execution_history
         if task_id:
@@ -728,7 +728,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         records.reverse()
         return {"success": True, "total": len(records), "records": records}
 
-    def get_pending_retries(self) -> Dict[str, Any]:
+    def get_pending_retries(self) -> dict[str, Any]:
         """获取待重试任务列表。企业场景：SRE查看哪些任务需要关注，
         判断是否需要手动干预或调整重试策略。
         """
@@ -754,7 +754,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         pending.sort(key=lambda x: x.get("wait_seconds", 0))
         return {"success": True, "total": len(pending), "pending": pending}
 
-    def get_scheduler_summary(self) -> Dict[str, Any]:
+    def get_scheduler_summary(self) -> dict[str, Any]:
         """调度器总览。企业场景：运维大盘展示调度系统健康状态。"""
         total = len(self._tasks)
         enabled = sum(1 for t in self._tasks.values() if t.enabled)
@@ -784,7 +784,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_failing_tasks": ([{"task_id": tid, "fail_rate_pct": rate} for tid, rate in top_failing]),
         }
 
-    def check_dependencies(self, task_id: str) -> Dict[str, Any]:
+    def check_dependencies(self, task_id: str) -> dict[str, Any]:
         """检查任务依赖。企业场景：注册新任务前检查依赖是否合法，
         检测循环依赖和不存在的依赖。
         """
@@ -802,7 +802,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "cycle_paths": cycles[:3] if cycles else [],
         }
 
-    def batch_update_schedule(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def batch_update_schedule(self, updates: list[dict[str, Any]]) -> dict[str, Any]:
         """批量更新任务调度时间。企业场景：夏令时切换或维护窗口调整时，
         批量修改多个任务的CRON表达式。
         """
@@ -830,7 +830,7 @@ class SmartScheduler(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit(f"批量更新调度: {updated}成功, {len(errors)}失败")
         return {"success": True, "updated": updated, "errors": errors}
 
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "status": "healthy",

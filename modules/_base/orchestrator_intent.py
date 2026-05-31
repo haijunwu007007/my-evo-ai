@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 from modules._base.orchestrator_types import IntentCategory
 logger = logging.getLogger(__name__)
-class AIIntentAnalyzer(object):
+class AIIntentAnalyzer:
     """
     AI 增强的意图理解器
     使用 LLM 做深度意图解析、回退到规则引擎
@@ -47,7 +47,7 @@ class AIIntentAnalyzer(object):
         self.ai_gateway = ai_gateway
         self._rule_analyzer = IntentAnalyzer
 
-    async def analyze(self, user_input: str) -> Tuple[IntentCategory, float, List[IntentCategory]]:
+    async def analyze(self, user_input: str) -> tuple[IntentCategory, float, list[IntentCategory]]:
         """
         AI 增强的意图分析
 
@@ -64,7 +64,7 @@ class AIIntentAnalyzer(object):
         # 降级到规则引擎
         return self._rule_analyzer.analyze(user_input)
 
-    async def _ai_analyze(self, user_input: str) -> Tuple[IntentCategory, float, List[IntentCategory]]:
+    async def _ai_analyze(self, user_input: str) -> tuple[IntentCategory, float, list[IntentCategory]]:
         """使用 LLM 分析意图"""
         messages = [
             {"role": "system", "content": self.SYSTEM_PROMPT},
@@ -128,14 +128,14 @@ class AIIntentAnalyzer(object):
 # 意图理解器
 # ============================================================================
 
-class IntentAnalyzer(object):
+class IntentAnalyzer:
     """
     自然语言意图分析器
     基于关键词匹配 + 模式识别（无需外部LLM，可离线运行）
     """
 
     # 意图关键词映射
-    INTENT_KEYWORDS: Dict[IntentCategory, List[str]] = {
+    INTENT_KEYWORDS: dict[IntentCategory, list[str]] = {
         IntentCategory.DATA_ANALYSIS: [
             "分析",
             "统计",
@@ -350,7 +350,7 @@ class IntentAnalyzer(object):
     }
 
     # 复合意图模式
-    COMPOUND_PATTERNS: List[Tuple[str, IntentCategory, IntentCategory]] = [
+    COMPOUND_PATTERNS: list[tuple[str, IntentCategory, IntentCategory]] = [
         # (模式, 主要意图, 次要意图)
         (r"分析.*(?:发|通知|邮件)", IntentCategory.DATA_ANALYSIS, IntentCategory.COMMUNICATION),
         (r"生成.*(?:发|通知|邮件)", IntentCategory.DOCUMENT_GEN, IntentCategory.COMMUNICATION),
@@ -362,7 +362,7 @@ class IntentAnalyzer(object):
     ]
 
     @classmethod
-    def analyze(cls, user_input: str) -> Tuple[IntentCategory, float, List[IntentCategory]]:
+    def analyze(cls, user_input: str) -> tuple[IntentCategory, float, list[IntentCategory]]:
         """
         分析用户输入意图
 
@@ -370,7 +370,7 @@ class IntentAnalyzer(object):
             (主意图, 置信度, 次要意图列表)
         """
         text = user_input.lower().strip()
-        scores: Dict[IntentCategory, float] = {}
+        scores: dict[IntentCategory, float] = {}
 
         # 1. 关键词评分
         for intent, keywords in cls.INTENT_KEYWORDS.items():
@@ -380,7 +380,7 @@ class IntentAnalyzer(object):
             scores[intent] = score
 
         # 2. 复合模式检测
-        secondary_intents: List[IntentCategory] = []
+        secondary_intents: list[IntentCategory] = []
         for pattern, primary, secondary in cls.COMPOUND_PATTERNS:
             if re.search(pattern, text):
                 scores[primary] = scores.get(primary, 0) + 3.0

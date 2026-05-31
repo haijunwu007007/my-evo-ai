@@ -166,11 +166,11 @@ class Dataset:
     name: str
     rows: int = 0
     columns: int = 0
-    features: List[str] = field(default_factory=list)
+    features: list[str] = field(default_factory=list)
     target: str = ""
-    data_types: Dict[str, str] = field(default_factory=dict)
+    data_types: dict[str, str] = field(default_factory=dict)
     missing_values: int = 0
-    statistics: Dict[str, Any] = field(default_factory=dict)
+    statistics: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -180,14 +180,14 @@ class ModelConfig:
     model_id: str
     name: str
     algorithm: str
-    hyperparameters: Dict[str, Any] = field(default_factory=dict)
-    features: List[str] = field(default_factory=list)
+    hyperparameters: dict[str, Any] = field(default_factory=dict)
+    features: list[str] = field(default_factory=list)
     target: str = ""
     status: ModelStatus = ModelStatus.DRAFT
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     version: int = 1
     created_at: float = field(default_factory=time.time)
-    trained_at: Optional[float] = None
+    trained_at: float | None = None
 
 @dataclass
 class PipelineResult:
@@ -195,13 +195,13 @@ class PipelineResult:
 
     pipeline_id: str
     name: str
-    stages_completed: List[str] = field(default_factory=list)
+    stages_completed: list[str] = field(default_factory=list)
     status: str = "running"
     duration_ms: float = 0.0
-    model_id: Optional[str] = None
-    metrics: Dict[str, float] = field(default_factory=dict)
-    artifacts: Dict[str, str] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
+    model_id: str | None = None
+    metrics: dict[str, float] = field(default_factory=dict)
+    artifacts: dict[str, str] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
 @dataclass
 class Experiment:
@@ -210,22 +210,22 @@ class Experiment:
     experiment_id: str
     name: str
     description: str = ""
-    config: Dict[str, Any] = field(default_factory=dict)
-    results: Dict[str, Any] = field(default_factory=dict)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
+    results: dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     status: str = "pending"
     created_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
 
-class ModelPerformanceEvaluator(object):
+class ModelPerformanceEvaluator:
     """模型性能追踪器 — 记录训练/推理指标、对比版本性能、检测退化"""
 
     def __init__(self):
-        self._run_history: List[Dict[str, Any]] = []
+        self._run_history: list[dict[str, Any]] = []
 
     def record_training_run(
-        self, model_id: str, metrics: Dict[str, float], duration_seconds: float, dataset_size: int
-    ) -> Dict[str, Any]:
+        self, model_id: str, metrics: dict[str, float], duration_seconds: float, dataset_size: int
+    ) -> dict[str, Any]:
         """记录一次训练运行的关键指标"""
         run = {
             "model_id": model_id,
@@ -238,7 +238,7 @@ class ModelPerformanceEvaluator(object):
         self._run_history.append(run)
         return run
 
-    def compare_versions(self, model_id: str, top_n: int = 5) -> Dict[str, Any]:
+    def compare_versions(self, model_id: str, top_n: int = 5) -> dict[str, Any]:
         """对比同一模型不同版本的训练指标"""
         runs = [r for r in self._run_history if r["model_id"] == model_id]
         if len(runs) < 2:
@@ -263,7 +263,7 @@ class ModelPerformanceEvaluator(object):
             "top_runs": sorted_runs[:top_n],
         }
 
-    def detect_regression(self, model_id: str, threshold: float = 0.05) -> Dict[str, Any]:
+    def detect_regression(self, model_id: str, threshold: float = 0.05) -> dict[str, Any]:
         """检测模型性能退化：对比最近两次运行"""
         runs = [r for r in self._run_history if r["model_id"] == model_id]
         if len(runs) < 2:
@@ -293,10 +293,10 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._datasets: Dict[str, Dataset] = {}
-        self._models: Dict[str, ModelConfig] = {}
-        self._pipelines: Dict[str, PipelineResult] = {}
-        self._experiments: Dict[str, Experiment] = {}
+        self._datasets: dict[str, Dataset] = {}
+        self._models: dict[str, ModelConfig] = {}
+        self._pipelines: dict[str, PipelineResult] = {}
+        self._experiments: dict[str, Experiment] = {}
         self._artifact_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ml_artifacts")
 
     def initialize(self) -> None:
@@ -311,11 +311,11 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         rows: int,
         columns: int,
-        features: List[str],
+        features: list[str],
         target: str,
-        data_types: Optional[Dict[str, str]] = None,
-        statistics: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        data_types: dict[str, str] | None = None,
+        statistics: dict | None = None,
+    ) -> dict[str, Any]:
         """注册数据集"""
         dataset_id = f"ds_{uuid.uuid4().hex[:10]}"
         dataset = Dataset(
@@ -334,8 +334,8 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("ml_ingest_data")
     def ingest_data(
-        self, data: List[List[Any]], columns: List[str], target: str, name: str = "dataset"
-    ) -> Dict[str, Any]:
+        self, data: list[list[Any]], columns: list[str], target: str, name: str = "dataset"
+    ) -> dict[str, Any]:
         """数据导入"""
         rows = len(data)
         cols = len(columns)
@@ -386,7 +386,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
 
     @trace_operation("ml_feature_engineering")
-    def feature_engineering(self, dataset_id: str, operations: List[Dict]) -> Dict[str, Any]:
+    def feature_engineering(self, dataset_id: str, operations: list[dict]) -> dict[str, Any]:
         """特征工程"""
         if dataset_id not in self._datasets:
             raise ValueError(f"数据集 {dataset_id} 不存在")
@@ -428,9 +428,9 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         dataset_id: str,
         algorithm: str = "random_forest",
-        hyperparameters: Optional[Dict] = None,
+        hyperparameters: dict | None = None,
         name: str = "model",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """训练模型"""
         start = time.time()
         if dataset_id not in self._datasets:
@@ -481,7 +481,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "duration_ms": round(duration, 2),
         }
 
-    def _default_params(self, algorithm: str) -> Dict[str, Any]:
+    def _default_params(self, algorithm: str) -> dict[str, Any]:
         defaults = {
             "random_forest": {"n_estimators": 100, "max_depth": 10, "min_samples_split": 5},
             "gradient_boosting": {"n_estimators": 100, "learning_rate": 0.1, "max_depth": 5},
@@ -494,7 +494,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return defaults.get(algorithm, {"n_estimators": 100})
 
-    def _simulate_metrics(self, algorithm: str, data_size: int) -> Dict[str, float]:
+    def _simulate_metrics(self, algorithm: str, data_size: int) -> dict[str, float]:
         """模拟评估指标"""
         _seed_v = data_size % (2**32)
         base = min(0.7 + data_size / 100000, 0.98)
@@ -516,7 +516,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("ml_evaluate")
-    def evaluate_model(self, model_id: str) -> Dict[str, Any]:
+    def evaluate_model(self, model_id: str) -> dict[str, Any]:
         """评估模型"""
         if model_id not in self._models:
             raise ValueError(f"模型 {model_id} 不存在")
@@ -536,9 +536,9 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         dataset_id: str,
         algorithm: str = "random_forest",
-        hyperparameters: Optional[Dict] = None,
-        feature_ops: Optional[List[Dict]] = None,
-    ) -> Dict[str, Any]:
+        hyperparameters: dict | None = None,
+        feature_ops: list[dict] | None = None,
+    ) -> dict[str, Any]:
         """执行完整ML管道"""
         start = time.time()
         pipeline_id = f"pipe_{uuid.uuid4().hex[:10]}"
@@ -593,7 +593,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("ml_compare_models")
-    def compare_models(self, model_ids: List[str]) -> Dict[str, Any]:
+    def compare_models(self, model_ids: list[str]) -> dict[str, Any]:
         """对比模型"""
         comparison = []
         for mid in model_ids:
@@ -627,14 +627,14 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("ml_create_experiment")
-    def create_experiment(self, name: str, description: str = "", config: Optional[Dict] = None) -> Dict[str, Any]:
+    def create_experiment(self, name: str, description: str = "", config: dict | None = None) -> dict[str, Any]:
         """创建实验"""
         exp_id = f"exp_{uuid.uuid4().hex[:10]}"
         experiment = Experiment(experiment_id=exp_id, name=name, description=description, config=config or {})
         self._experiments[exp_id] = experiment
         return {"experiment_id": exp_id, "name": name}
 
-    def list_models(self, status: Optional[ModelStatus] = None) -> List[Dict]:
+    def list_models(self, status: ModelStatus | None = None) -> list[dict]:
         models = list(self._models.values())
         if status:
             models = [m for m in models if m.status == status]
@@ -651,7 +651,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for m in models
         ]
 
-    def list_datasets(self) -> List[Dict]:
+    def list_datasets(self) -> list[dict]:
         return [
             {
                 "dataset_id": d.dataset_id,
@@ -713,7 +713,7 @@ class MLPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

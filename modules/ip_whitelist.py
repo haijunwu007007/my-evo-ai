@@ -79,7 +79,7 @@ import fnmatch
 from core.logging_config import get_logger
 import hashlib
 import ipaddress
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass, field
@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class IpWhitelistAnalyzer(object):
+class IpWhitelistAnalyzer:
     """ip_whitelist 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -283,11 +283,11 @@ class WhitelistEntry:
         if not self.entry_id:
             self.entry_id = hashlib.md5(f"{self.ip_value}{self.created_at}".encode()).hexdigest()[:16]
         if not self.created_at:
-            self.created_at = datetime.now(timezone.utc).isoformat()
+            self.created_at = datetime.now(UTC).isoformat()
         if self.expires_at and self.expires_at != "":
             try:
                 exp = datetime.fromisoformat(self.expires_at.replace("Z", "+00:00"))
-                if datetime.now(timezone.utc) > exp:
+                if datetime.now(UTC) > exp:
                     self.status = WhitelistStatus.EXPIRED
             except ValueError:
                 pass
@@ -303,7 +303,7 @@ class AuditEntry:
     operator: str = ""
     details: str = ""
 
-class IPWhitelistManager(object):
+class IPWhitelistManager:
     def trace(self, name, *args, **kwargs):
 
         class _NS:
@@ -441,7 +441,7 @@ class IPWhitelistManager(object):
         ip_value: str,
         description: str = "",
         tags: list = None,
-        match_type: Optional[MatchType] = None,
+        match_type: MatchType | None = None,
         priority: int = 100,
         expires_in_hours: int = 0,
         created_by: str = "user",
@@ -459,7 +459,7 @@ class IPWhitelistManager(object):
             metadata=metadata or {},
         )
         if expires_in_hours > 0:
-            exp = datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
+            exp = datetime.now(UTC) + timedelta(hours=expires_in_hours)
             entry.expires_at = exp.isoformat()
         self._entries[entry.entry_id] = entry
         self._audit("add", entry.entry_id, ip_value, created_by, description)
@@ -472,7 +472,7 @@ class IPWhitelistManager(object):
         self._audit("remove", entry_id, entry.ip_value, operator, "")
         return True
 
-    def update_entry(self, entry_id: str, **kwargs) -> Optional[dict]:
+    def update_entry(self, entry_id: str, **kwargs) -> dict | None:
         if entry_id not in self._entries:
             return None
         entry = self._entries[entry_id]
@@ -485,7 +485,7 @@ class IPWhitelistManager(object):
     def is_whitelisted(self, ip_address: str) -> dict:
         """Check if an IP is in any active whitelist entry."""
         self._check_count += 1
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         active_entries = sorted(
             [e for e in self._entries.values() if e.status == WhitelistStatus.ACTIVE], key=lambda e: e.priority
         )
@@ -511,7 +511,7 @@ class IPWhitelistManager(object):
                 }
         return {"whitelisted": False, "entry_id": None}
 
-    def get_entries(self, status: Optional[WhitelistStatus] = None, tag: str = "", limit: int = 100) -> list[dict]:
+    def get_entries(self, status: WhitelistStatus | None = None, tag: str = "", limit: int = 100) -> list[dict]:
         entries = list(self._entries.values())
         if status:
             entries = [e for e in entries if e.status == status]
@@ -529,7 +529,7 @@ class IPWhitelistManager(object):
 
     def purge_expired(self) -> int:
         count = 0
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for eid, entry in list(self._entries.items()):
             if entry.expires_at:
                 try:
@@ -594,7 +594,7 @@ class IPWhitelistManager(object):
 
     def _audit(self, action: str, entry_id: str, ip_value: str, operator: str, details: str):
         entry = AuditEntry(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             action=action,
             entry_id=entry_id,
             ip_value=ip_value,
@@ -634,7 +634,7 @@ class IPWhitelistManager(object):
             "total_checks": self._check_count,
             "total_hits": self._hit_count,
             "audit_entries": len(self._audit_log),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

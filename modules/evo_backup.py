@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 | EVO备份引擎
@@ -112,7 +111,8 @@ import gzip
 import tarfile
 import zipfile
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -175,20 +175,20 @@ class BackupManifest:
     target_path: str
     status: BackupStatus = BackupStatus.PENDING
     created_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
     file_count: int = 0
     total_size_bytes: int = 0
     compressed_size_bytes: int = 0
     compression_type: CompressionType = CompressionType.GZIP
     encrypted: bool = False
     checksum: str = ""
-    parent_backup_id: Optional[str] = None
-    changed_files: List[str] = field(default_factory=list)
-    skipped_files: List[str] = field(default_factory=list)
-    error_files: List[str] = field(default_factory=list)
+    parent_backup_id: str | None = None
+    changed_files: list[str] = field(default_factory=list)
+    skipped_files: list[str] = field(default_factory=list)
+    error_files: list[str] = field(default_factory=list)
     duration_seconds: float = 0
-    tags: Dict[str, str] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class BackupPolicy:
@@ -204,8 +204,8 @@ class BackupPolicy:
     schedule_cron: str = "0 2 * * *"  # 每天凌晨2点
     max_versions: int = 30
     max_age_days: int = 90
-    include_patterns: List[str] = field(default_factory=list)
-    exclude_patterns: List[str] = field(default_factory=list)
+    include_patterns: list[str] = field(default_factory=list)
+    exclude_patterns: list[str] = field(default_factory=list)
     checksum_verify: bool = True
     parallel_workers: int = 4
     enabled: bool = True
@@ -233,13 +233,13 @@ class BackupVerificationError(Exception):
 
     pass
 
-class FileChangeDetector(object):
+class FileChangeDetector:
     """文件变更检测器"""
 
     def __init__(self):
-        self._snapshot_cache: Dict[str, Dict[str, float]] = {}
+        self._snapshot_cache: dict[str, dict[str, float]] = {}
 
-    def compute_snapshot(self, path: str) -> Dict[str, float]:
+    def compute_snapshot(self, path: str) -> dict[str, float]:
         """计算目录快照（文件路径 -> mtime+size）"""
         snapshot = {}
         p = Path(path)
@@ -255,7 +255,7 @@ class FileChangeDetector(object):
                     pass
         return snapshot
 
-    def detect_changes(self, base_snapshot: Dict[str, float], current_path: str) -> List[str]:
+    def detect_changes(self, base_snapshot: dict[str, float], current_path: str) -> list[str]:
         """检测变更文件"""
         current = self.compute_snapshot(current_path)
         changed = []
@@ -264,7 +264,7 @@ class FileChangeDetector(object):
                 changed.append(key)
         return changed
 
-    def detect_deleted(self, base_snapshot: Dict[str, float], current_path: str) -> List[str]:
+    def detect_deleted(self, base_snapshot: dict[str, float], current_path: str) -> list[str]:
         """检测删除文件"""
         current = self.compute_snapshot(current_path)
         return [k for k in base_snapshot if k not in current]
@@ -275,7 +275,7 @@ class BackupCompressor:
     @staticmethod
     def compress(
         source_path: str, target_path: str, compression: CompressionType = CompressionType.GZIP
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """压缩文件/目录"""
         source = Path(source_path)
         target = Path(target_path)
@@ -287,9 +287,8 @@ class BackupCompressor:
                 shutil.copy2(source, target)
                 return original_size, original_size
             elif compression == CompressionType.GZIP:
-                with open(source, "rb") as f_in:
-                    with gzip.open(target, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+                with open(source, "rb") as f_in, gzip.open(target, "wb") as f_out:
+                    shutil.copyfileobj(f_in, f_out)
                 compressed_size = target.stat().st_size
                 return original_size, compressed_size
             else:
@@ -324,9 +323,8 @@ class BackupCompressor:
 
         if str(archive).endswith(".gz") and not str(archive).endswith(".tar.gz"):
             target_file = target / archive.stem
-            with gzip.open(archive, "rb") as f_in:
-                with open(target_file, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+            with gzip.open(archive, "rb") as f_in, open(target_file, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
             return True
         elif str(archive).endswith(".zip"):
             with zipfile.ZipFile(archive, "r") as zf:
@@ -358,13 +356,13 @@ class BackupEncryptor:
         """解密文件"""
         return BackupEncryptor.encrypt_file(source_path, target_path, key)
 
-class BackupRetentionManager(object):
+class BackupRetentionManager:
     """备份保留策略管理器"""
 
     def __init__(self):
-        self._policies: Dict[str, BackupPolicy] = {}
+        self._policies: dict[str, BackupPolicy] = {}
 
-    def apply_retention(self, target_path: str, policy: BackupPolicy) -> Dict[str, Any]:
+    def apply_retention(self, target_path: str, policy: BackupPolicy) -> dict[str, Any]:
         """应用保留策略，清理过期备份"""
         now = datetime.now()
         target_dir = Path(target_path)
@@ -424,13 +422,13 @@ class EvoBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__(module_id="evo_backup", module_name="EVO备份引擎")
-        self._manifests: Dict[str, BackupManifest] = {}
-        self._policies: Dict[str, BackupPolicy] = {}
+        self._manifests: dict[str, BackupManifest] = {}
+        self._policies: dict[str, BackupPolicy] = {}
         self._change_detector = FileChangeDetector()
         self._compressor = BackupCompressor()
         self._encryptor = BackupEncryptor()
         self._retention_mgr = BackupRetentionManager()
-        self._snapshots: Dict[str, Dict[str, float]] = {}
+        self._snapshots: dict[str, dict[str, float]] = {}
         self._lock = threading.RLock()
         self._executor = ThreadPoolExecutor(max_workers=4)
         self._stats = {
@@ -452,8 +450,8 @@ class EvoBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         compression: CompressionType = CompressionType.GZIP,
         encrypt: bool = False,
         encryption_key: str = "",
-        tags: Optional[Dict[str, str]] = None,
-        exclude_patterns: Optional[List[str]] = None,
+        tags: dict[str, str] | None = None,
+        exclude_patterns: list[str] | None = None,
     ) -> BackupManifest:
         """
         执行备份
@@ -664,7 +662,7 @@ class EvoBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit_log("create_policy", policy.name)
         return policy.name
 
-    def list_policies(self) -> List[Dict]:
+    def list_policies(self) -> list[dict]:
         """列出备份策略"""
         return [
             {
@@ -681,7 +679,7 @@ class EvoBackup(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for p in self._policies.values()
         ]
 
-    def list_backups(self, limit: int = 50) -> List[Dict]:
+    def list_backups(self, limit: int = 50) -> list[dict]:
         """列出备份记录"""
         backups = sorted(self._manifests.values(), key=lambda m: m.created_at, reverse=True)[:limit]
         return [

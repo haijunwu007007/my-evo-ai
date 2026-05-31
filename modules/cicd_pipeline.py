@@ -93,7 +93,8 @@ from core.logging_config import get_logger
 import re
 import hashlib
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -116,7 +117,7 @@ class Result:
         self.data = data
         self.error = error
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         r = {"success": self.success}
         if self.data is not None:
             r["result"] = self.data
@@ -165,12 +166,12 @@ class StageStep:
 
     name: str = ""
     command: str = ""
-    script: List[str] = field(default_factory=list)
+    script: list[str] = field(default_factory=list)
     timeout_seconds: float = 600.0
     working_dir: str = ""
-    env: Dict[str, str] = field(default_factory=dict)
+    env: dict[str, str] = field(default_factory=dict)
     continue_on_error: bool = False
-    condition: Optional[str] = None  # when条件
+    condition: str | None = None  # when条件
     retry_count: int = 0
     retry_delay: float = 5.0
 
@@ -179,15 +180,15 @@ class PipelineStage:
     """阶段"""
 
     name: str = ""
-    steps: List[StageStep] = field(default_factory=list)
-    depends_on: List[str] = field(default_factory=list)
+    steps: list[StageStep] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     allow_failure: bool = False
     timeout_seconds: float = 1800.0
-    when: Optional[str] = None
+    when: str | None = None
     approval_required: bool = False
-    approvers: List[str] = field(default_factory=list)
+    approvers: list[str] = field(default_factory=list)
     environment: str = ""  # 部署目标环境
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class PipelineDefinition:
@@ -196,13 +197,13 @@ class PipelineDefinition:
     pipeline_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
     name: str = ""
     description: str = ""
-    stages: List[PipelineStage] = field(default_factory=list)
-    variables: Dict[str, str] = field(default_factory=dict)
-    triggers: List[str] = field(default_factory=lambda: [t.value for t in TriggerType])
+    stages: list[PipelineStage] = field(default_factory=list)
+    variables: dict[str, str] = field(default_factory=dict)
+    triggers: list[str] = field(default_factory=lambda: [t.value for t in TriggerType])
     timeout_seconds: float = 3600.0
     retry_on_failure: bool = False
     max_retries: int = 1
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -212,13 +213,13 @@ class StageExecution:
 
     stage_name: str = ""
     status: StageStatus = StageStatus.PENDING
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
+    started_at: str | None = None
+    finished_at: str | None = None
     duration_seconds: float = 0.0
     steps_executed: int = 0
     steps_total: int = 0
-    logs: List[str] = field(default_factory=list)
-    error_message: Optional[str] = None
+    logs: list[str] = field(default_factory=list)
+    error_message: str | None = None
     retry_count: int = 0
 
 @dataclass
@@ -233,15 +234,15 @@ class PipelineRun:
     ref: str = ""  # Git ref (branch/tag/commit)
     commit_sha: str = ""
     commit_message: str = ""
-    variables: Dict[str, str] = field(default_factory=dict)
+    variables: dict[str, str] = field(default_factory=dict)
     status: StageStatus = StageStatus.PENDING
-    stage_executions: Dict[str, StageExecution] = field(default_factory=dict)
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
+    stage_executions: dict[str, StageExecution] = field(default_factory=dict)
+    started_at: str | None = None
+    finished_at: str | None = None
     duration_seconds: float = 0.0
-    artifacts: List[str] = field(default_factory=list)
+    artifacts: list[str] = field(default_factory=list)
     deploy_target: str = ""
-    approved_by: Optional[str] = None
+    approved_by: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 @dataclass
@@ -255,7 +256,7 @@ class ArtifactInfo:
     type: str = "docker"  # docker/jar/npm/deb
     size_bytes: int = 0
     registry: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 @dataclass
@@ -267,21 +268,21 @@ class ApprovalRequest:
     stage_name: str = ""
     pipeline_name: str = ""
     requested_by: str = "system"
-    approvers: List[str] = field(default_factory=list)
+    approvers: list[str] = field(default_factory=list)
     status: str = "pending"  # pending/approved/rejected
     comments: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    resolved_at: Optional[str] = None
+    resolved_at: str | None = None
 
 # ============================================================================
 # CICDPipeline 主类
 # ============================================================================
 
-class PipelineAnalyzer(object):
+class PipelineAnalyzer:
     """流水线分析器 — 分析构建耗时、失败模式、部署频率"""
 
     def __init__(self):
-        self._build_history: List[Dict] = []
+        self._build_history: list[dict] = []
 
     def record_build(self, pipeline_id: str, stage: str, duration_ms: int, success: bool, error: str = "") -> None:
         self._build_history.append(
@@ -297,12 +298,12 @@ class PipelineAnalyzer(object):
         if len(self._build_history) > 5000:
             self._build_history = self._build_history[-3000:]
 
-    def get_failure_patterns(self, top_n: int = 5) -> List[Dict[str, Any]]:
+    def get_failure_patterns(self, top_n: int = 5) -> list[dict[str, Any]]:
         """识别失败模式：按错误类型和阶段聚合"""
         failures = [b for b in self._build_history if not b["success"]]
         if not failures:
             return []
-        by_error: Dict[str, List[Dict]] = {}
+        by_error: dict[str, list[dict]] = {}
         for f in failures:
             key = f["error"] or f["stage"]
             by_error.setdefault(key, []).append(f)
@@ -315,13 +316,13 @@ class PipelineAnalyzer(object):
             )
         return patterns[:top_n]
 
-    def get_stage_performance(self, pipeline_id: str = "") -> Dict[str, Any]:
+    def get_stage_performance(self, pipeline_id: str = "") -> dict[str, Any]:
         """各阶段性能统计：平均耗时、P95、成功率"""
         builds = [b for b in self._build_history if not pipeline_id or b["pipeline_id"] == pipeline_id]
         if not builds:
             return {"total": 0}
-        by_stage: Dict[str, List[int]] = {}
-        by_stage_success: Dict[str, List[bool]] = {}
+        by_stage: dict[str, list[int]] = {}
+        by_stage_success: dict[str, list[bool]] = {}
         for b in builds:
             by_stage.setdefault(b["stage"], []).append(b["duration_ms"])
             by_stage_success.setdefault(b["stage"], []).append(b["success"])
@@ -354,7 +355,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 流水线模板
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config or {})
         self.module_name = "CI/CD流水线引擎"
@@ -363,19 +364,19 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.version = "V0.1"
         self.config = config or {}
         # Pipeline定义注册
-        self._pipelines: Dict[str, PipelineDefinition] = {}
+        self._pipelines: dict[str, PipelineDefinition] = {}
         # 运行记录
-        self._runs: Dict[str, PipelineRun] = {}
+        self._runs: dict[str, PipelineRun] = {}
         # 审批队列
-        self._approvals: Dict[str, ApprovalRequest] = {}
+        self._approvals: dict[str, ApprovalRequest] = {}
         # 制品库
-        self._artifacts: Dict[str, ArtifactInfo] = {}
+        self._artifacts: dict[str, ArtifactInfo] = {}
         # 构建缓存
-        self._build_cache: Dict[str, Any] = {}
+        self._build_cache: dict[str, Any] = {}
         # 活跃运行任务
-        self._active_tasks: Dict[str, asyncio.Task] = {}
+        self._active_tasks: dict[str, asyncio.Task] = {}
         # 环境状态
-        self._environments: Dict[str, Dict[str, str]] = {
+        self._environments: dict[str, dict[str, str]] = {
             "dev": {"status": "active", "last_deploy": "", "version": ""},
             "staging": {"status": "active", "last_deploy": "", "version": ""},
             "production": {"status": "active", "last_deploy": "", "version": ""},
@@ -407,7 +408,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.register_pipeline(pipe_cfg)
         logger.info(f"[CICDPipeline] 初始化完成: {len(self._pipelines)} pipelines")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         active = sum(1 for r in self._runs.values() if r.status == StageStatus.RUNNING)
         checks = {
             "pipelines_registered": len(self._pipelines),
@@ -429,7 +430,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Pipeline管理
     # ----------------------------------------------------------------
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         """统一执行入口"""
         trace_id = f"cicd-{action}-{int(time.time() * 1000)}"
@@ -484,7 +485,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def register_pipeline(self, config: Dict[str, Any]) -> Result:
+    def register_pipeline(self, config: dict[str, Any]) -> Result:
         """注册Pipeline定义"""
         stages = []
         for stage_cfg in config.get("stages", []):
@@ -523,7 +524,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._cicd_stats["pipelines_registered"] = len(self._pipelines)
         return Result(success=True, data={"pipeline_id": pipeline.pipeline_id, "name": pipeline.name})
 
-    def list_pipelines(self) -> List[Dict]:
+    def list_pipelines(self) -> list[dict]:
         return [
             {
                 "id": p.pipeline_id,
@@ -547,7 +548,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         trigger_type: TriggerType = TriggerType.MANUAL,
         trigger_user: str = "",
         ref: str = "",
-        variables: Optional[Dict] = None,
+        variables: dict | None = None,
     ) -> Result:
         """触发Pipeline运行"""
         pipeline = self._pipelines.get(pipeline_id)
@@ -610,10 +611,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 tasks.append(self._execute_stage(run, stage))
             results = asyncio.gather(*tasks, return_exceptions=True)
             for i, result in enumerate(results):
-                if isinstance(result, Exception) or not result:
-                    if not ready[i].allow_failure:
-                        failed = True
-                elif not result:
+                if isinstance(result, Exception) or not result or not result:
                     if not ready[i].allow_failure:
                         failed = True
         run.status = StageStatus.FAILED if failed else StageStatus.SUCCESS
@@ -627,7 +625,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._cicd_stats["avg_duration_seconds"] * 0.8 + run.duration_seconds * 0.2
         )
 
-    def _build_stage_graph(self, stages: List[PipelineStage]) -> Dict[str, List[str]]:
+    def _build_stage_graph(self, stages: list[PipelineStage]) -> dict[str, list[str]]:
         """构建阶段依赖图"""
         return {s.name: s.depends_on for s in stages}
 
@@ -718,7 +716,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._cicd_stats["deployments_total"] += 1
         return stage_exec.status == StageStatus.SUCCESS
 
-    def _execute_step(self, step: StageStep, variables: Dict[str, str]) -> str:
+    def _execute_step(self, step: StageStep, variables: dict[str, str]) -> str:
         """执行步骤"""
         cmd = step.command
         if step.script:
@@ -734,7 +732,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return f"完成 ({len(cmd)} chars)"
 
     @staticmethod
-    def _evaluate_condition(condition: str, variables: Dict[str, str]) -> bool:
+    def _evaluate_condition(condition: str, variables: dict[str, str]) -> bool:
         """评估when条件"""
         try:
             for key, value in variables.items():
@@ -765,7 +763,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         approval.comments = comment
         return Result(success=True)
 
-    def list_pending_approvals(self) -> List[Dict]:
+    def list_pending_approvals(self) -> list[dict]:
         return [
             {
                 "request_id": a.request_id,
@@ -819,7 +817,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(1 for r in self._runs.values() if r.status == StageStatus.RUNNING)
         success_rate = 0.0
         if self._cicd_stats["runs_total"] > 0:
@@ -833,7 +831,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def get_run_detail(self, run_id: str) -> Optional[Dict]:
+    def get_run_detail(self, run_id: str) -> dict | None:
         run = self._runs.get(run_id)
         if not run:
             return None
@@ -857,7 +855,7 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def list_runs(self, pipeline_id: Optional[str] = None, limit: int = 20) -> List[Dict]:
+    def list_runs(self, pipeline_id: str | None = None, limit: int = 20) -> list[dict]:
         result = []
         for run in sorted(self._runs.values(), key=lambda r: r.created_at, reverse=True):
             if pipeline_id and run.pipeline_id != pipeline_id:

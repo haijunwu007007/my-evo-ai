@@ -140,24 +140,24 @@ class Decision:
     """决策记录"""
 
     decision_id: str
-    context: Dict[str, Any]
-    rules_matched: List[str]
+    context: dict[str, Any]
+    rules_matched: list[str]
     outcome: DecisionOutcome
     confidence: float
     reason: str = ""
     decided_at: float = field(default_factory=time.time)
 
-class ReasoningEngine(object):
+class ReasoningEngine:
     """Minerva推理引擎 - 多策略决策推理、置信度评估、决策回溯"""
 
     def __init__(self):
-        self._strategies: Dict[str, callable] = {}
-        self._reasoning_log: List[Dict] = []
+        self._strategies: dict[str, callable] = {}
+        self._reasoning_log: list[dict] = []
 
     def register_strategy(self, name: str, fn: callable) -> None:
         self._strategies[name] = fn
 
-    def reason(self, context: Dict, strategy: str = "default") -> Dict:
+    def reason(self, context: dict, strategy: str = "default") -> dict:
         """执行推理"""
         fn = self._strategies.get(strategy)
         result = fn(context) if fn else {"conclusion": "no_strategy", "confidence": 0.0}
@@ -166,7 +166,7 @@ class ReasoningEngine(object):
         )
         return result
 
-    def evaluate_confidence(self, evidence: List[Dict]) -> float:
+    def evaluate_confidence(self, evidence: list[dict]) -> float:
         """基于证据评估决策置信度"""
         if not evidence:
             return 0.0
@@ -177,12 +177,12 @@ class ReasoningEngine(object):
             return 0.0
         return round(sum(w * s for w, s in zip(weights, scores)) / total_weight, 3)
 
-    def backtrack(self, decision_id: str, max_depth: int = 10) -> List[Dict]:
+    def backtrack(self, decision_id: str, max_depth: int = 10) -> list[dict]:
         """决策回溯"""
         related = [entry for entry in self._reasoning_log if entry.get("decision_id") == decision_id]
         return related[-max_depth:]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "strategies": len(self._strategies),
             "reasoning_count": len(self._reasoning_log),
@@ -199,14 +199,14 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._rules: Dict[str, DecisionRule] = {}
-        self._decisions: List[Decision] = []
+        self._rules: dict[str, DecisionRule] = {}
+        self._decisions: list[Decision] = []
         self._rule_counter: int = 0
         self._dec_counter: int = 0
 
@@ -236,7 +236,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_minerva_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -339,7 +339,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -352,7 +352,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     def shutdown(self) -> None:
         pass  # super().shutdown() removed for sync compatibility
 
-    def _decide(self, context: Dict[str, Any]) -> Dict:
+    def _decide(self, context: dict[str, Any]) -> dict:
         """执行决策"""
         matched_rules = []
         action = "approve"
@@ -404,7 +404,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "reason": reason,
         }
 
-    def _evaluate_condition(self, condition: str, context: Dict) -> bool:
+    def _evaluate_condition(self, condition: str, context: dict) -> bool:
         """评估规则条件（简化实现）"""
         parts = condition.split(" AND ")
         for part in parts:
@@ -441,7 +441,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                     return False
         return True
 
-    def _batch_evaluate(self, decisions: List[Dict]) -> List[Dict]:
+    def _batch_evaluate(self, decisions: list[dict]) -> list[dict]:
         """批量评估决策"""
         results = []
         for d in decisions:
@@ -449,14 +449,14 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             results.append({"decision_id": d.get("id", ""), "result": r})
         return results
 
-    def _get_rule_stats(self) -> Dict:
+    def _get_rule_stats(self) -> dict:
         """规则使用统计"""
         stats = {}
         for rule in self._rules:
             stats[rule.rule_id] = {"name": rule.name, "priority": rule.priority, "enabled": rule.enabled}
         return {"total_rules": len(self._rules), "enabled": sum(1 for r in self._rules if r.enabled), "rules": stats}
 
-    def _export_rules(self, format: str = "json") -> Dict:
+    def _export_rules(self, format: str = "json") -> dict:
         """导出规则"""
         exported = [
             {
@@ -471,7 +471,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         ]
         return {"format": format, "count": len(exported), "rules": exported}
 
-    def _import_rules(self, rules_data: List[Dict]) -> Dict:
+    def _import_rules(self, rules_data: list[dict]) -> dict:
         """导入规则"""
         imported, skipped = 0, 0
         for rd in rules_data:
@@ -493,7 +493,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("rules_imported", {"imported": imported, "skipped": skipped})
         return {"imported": imported, "skipped": skipped}
 
-    def _find_conflicting_rules(self) -> List[Dict]:
+    def _find_conflicting_rules(self) -> list[dict]:
         """找出冲突规则（同优先级+同条件）"""
         conflicts = []
         seen = {}
@@ -505,11 +505,11 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 seen[key] = r.rule_id
         return conflicts
 
-    def _get_decision_history(self, limit: int = 20) -> List[Dict]:
+    def _get_decision_history(self, limit: int = 20) -> list[dict]:
         """获取决策历史"""
         return self._decisions[-limit:] if hasattr(self, "_decisions") else []
 
-    def _simulate_scenario(self, context: Dict, rules: List[Dict]) -> Dict:
+    def _simulate_scenario(self, context: dict, rules: list[dict]) -> dict:
         """模拟场景：给定上下文和规则，预测决策结果"""
         would_fire = []
         for rd in rules:
@@ -526,7 +526,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "predicted_action": would_fire[0]["action"] if would_fire else "no_match",
         }
 
-    def _enable_rule(self, rule_id: str) -> Dict:
+    def _enable_rule(self, rule_id: str) -> dict:
         """启用规则"""
         for r in self._rules:
             if r.rule_id == rule_id:
@@ -534,7 +534,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 return {"enabled": True, "rule_id": rule_id}
         return {"error": "rule_not_found"}
 
-    def _disable_rule(self, rule_id: str) -> Dict:
+    def _disable_rule(self, rule_id: str) -> dict:
         """禁用规则"""
         for r in self._rules:
             if r.rule_id == rule_id:
@@ -542,7 +542,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 return {"disabled": True, "rule_id": rule_id}
         return {"error": "rule_not_found"}
 
-    def _delete_rule(self, rule_id: str) -> Dict:
+    def _delete_rule(self, rule_id: str) -> dict:
         """删除规则"""
         before = len(self._rules)
         self._rules = [r for r in self._rules if r.rule_id != rule_id]
@@ -551,7 +551,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("rule_deleted", {"rule_id": rule_id})
         return {"deleted": removed > 0, "rule_id": rule_id}
 
-    def _validate_rules_integrity(self) -> Dict:
+    def _validate_rules_integrity(self) -> dict:
         """验证规则完整性"""
         issues = []
         for r in self._rules:
@@ -563,9 +563,9 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 issues.append({"rule_id": r.rule_id, "issue": "invalid_priority", "value": r.priority})
         return {"valid": len(issues) == 0, "total_rules": len(self._rules), "issues": issues}
 
-    def _get_rule_dependencies(self) -> Dict[str, List[str]]:
+    def _get_rule_dependencies(self) -> dict[str, list[str]]:
         """分析规则间依赖关系（通过action引用）"""
-        deps: Dict[str, List[str]] = {}
+        deps: dict[str, list[str]] = {}
         action_map = {r.action: r.rule_id for r in self._rules if r.action}
         for r in self._rules:
             referenced = []
@@ -576,10 +576,10 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 deps[r.rule_id] = referenced
         return deps
 
-    def _optimize_rule_order(self) -> List[str]:
+    def _optimize_rule_order(self) -> list[str]:
         """优化规则执行顺序（拓扑排序）"""
         deps = self._get_rule_dependencies()
-        in_degree: Dict[str, int] = {r.rule_id: 0 for r in self._rules}
+        in_degree: dict[str, int] = {r.rule_id: 0 for r in self._rules}
         for targets in deps.values():
             for t in targets:
                 if t in in_degree:
@@ -602,7 +602,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             else [r.rule_id for r in sorted(self._rules, key=lambda x: -x.priority)]
         )
 
-    def _get_rules_by_priority(self, min_p: int = 1, max_p: int = 10) -> List[Dict]:
+    def _get_rules_by_priority(self, min_p: int = 1, max_p: int = 10) -> list[dict]:
         """按优先级范围筛选规则"""
         return [
             {"id": r.rule_id, "name": r.name, "priority": r.priority, "enabled": r.enabled}
@@ -610,7 +610,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             if min_p <= r.priority <= max_p
         ]
 
-    def _bulk_toggle(self, rule_ids: List[str], enabled: bool) -> Dict:
+    def _bulk_toggle(self, rule_ids: list[str], enabled: bool) -> dict:
         """批量启用/禁用规则"""
         toggled = 0
         for rid in rule_ids:
@@ -623,7 +623,7 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("bulk_toggle", {"enabled": enabled, "toggled": toggled})
         return {"toggled": toggled, "target": len(rule_ids)}
 
-    def _clone_rule(self, source_id: str, new_id: str) -> Dict:
+    def _clone_rule(self, source_id: str, new_id: str) -> dict:
         """克隆规则"""
         for r in self._rules:
             if r.rule_id == source_id:
@@ -639,14 +639,14 @@ class AgentMinervaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 return {"cloned": True, "new_id": new_id}
         return {"error": "source_not_found"}
 
-    def generate_knowledge_insights(self, limit: int = 10) -> Dict[str, Any]:
+    def generate_knowledge_insights(self, limit: int = 10) -> dict[str, Any]:
         """生成知识洞察：按领域统计知识覆盖度、识别知识盲区"""
         knowledge = self._knowledge if hasattr(self, "_knowledge") else {}
         if not knowledge:
             return {"total_entries": 0}
-        domain_stats: Dict[str, int] = {}
-        source_stats: Dict[str, int] = {}
-        freshness_days: List[float] = []
+        domain_stats: dict[str, int] = {}
+        source_stats: dict[str, int] = {}
+        freshness_days: list[float] = []
         for kid, entry in knowledge.items():
             domain = entry.get("domain", "general")
             source = entry.get("source", "unknown")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 通用限流器（A级）— Token Bucket + Sliding Window 真实实现"""
 # Grade: A
 
@@ -38,7 +37,7 @@ class TokenBucket:
     令牌不足时请求被拒绝，直到桶中重新积累足够令牌。
     """
 
-    def __init__(self, capacity: float, fill_rate: float, initial_tokens: Optional[float] = None) -> None:
+    def __init__(self, capacity: float, fill_rate: float, initial_tokens: float | None = None) -> None:
         """
         Args:
             capacity: 桶最大容量（峰值突发请求数）
@@ -60,7 +59,7 @@ class TokenBucket:
             self._tokens = min(self.capacity, self._tokens + new_tokens)
             self._last_time = now
 
-    def allow_request(self, tokens: float = 1.0) -> Tuple[bool, float]:
+    def allow_request(self, tokens: float = 1.0) -> tuple[bool, float]:
         """检查是否允许请求消耗 tokens 个令牌。
 
         Returns:
@@ -73,7 +72,7 @@ class TokenBucket:
                 return True, self._tokens
             return False, self._tokens
 
-    def wait_if_needed(self, tokens: float = 1.0, timeout: Optional[float] = None) -> bool:
+    def wait_if_needed(self, tokens: float = 1.0, timeout: float | None = None) -> bool:
         """阻塞直到获取到令牌或超时。
 
         Returns:
@@ -124,7 +123,7 @@ class SlidingWindow:
         while self._timestamps and self._timestamps[0] < cutoff:
             self._timestamps.popleft()
 
-    def allow_request(self) -> Tuple[bool, int]:
+    def allow_request(self) -> tuple[bool, int]:
         """检查是否允许请求。
 
         Returns:
@@ -138,7 +137,7 @@ class SlidingWindow:
                 return True, self.max_requests - len(self._timestamps)
             return False, 0
 
-    def wait_if_needed(self, timeout: Optional[float] = None) -> bool:
+    def wait_if_needed(self, timeout: float | None = None) -> bool:
         """阻塞直到窗口有空位或超时。"""
         deadline = None if timeout is None else time.monotonic() + timeout
         while True:
@@ -168,12 +167,12 @@ class RateLimiter(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         super().__init__(config)
-        self._buckets: Dict[str, TokenBucket] = {}
-        self._windows: Dict[str, SlidingWindow] = {}
+        self._buckets: dict[str, TokenBucket] = {}
+        self._windows: dict[str, SlidingWindow] = {}
         self._lock = threading.Lock()
-        self._configs: Dict[str, Dict] = {}
+        self._configs: dict[str, dict] = {}
         self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
@@ -192,7 +191,7 @@ class RateLimiter(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             },
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
     async def shutdown(self) -> None:
@@ -221,7 +220,7 @@ class RateLimiter(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 self.logger.debug("Created sliding window '%s': window=%ss limit=%s", key, window_size, max_requests)
             return self._windows[key]
 
-    def allow_request(self, key: str, method: str = "token_bucket", **kwargs) -> Dict:
+    def allow_request(self, key: str, method: str = "token_bucket", **kwargs) -> dict:
         """统一接口：检查是否允许请求。
 
         Args:
@@ -254,7 +253,7 @@ class RateLimiter(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     # Dispatch（保持向后兼容）
     # ------------------------------------------------------------------
 
-    def _dispatch(self, p: Dict) -> Dict:
+    def _dispatch(self, p: dict) -> dict:
         action = {"check": "token_bucket", "stats": "config_list"}.get(
             p.get("action", "status"), p.get("action", "status")
         )

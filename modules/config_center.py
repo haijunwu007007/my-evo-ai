@@ -115,7 +115,7 @@ class ConfigVersion:
     """配置版本"""
 
     version: int
-    content: Dict[str, Any]
+    content: dict[str, Any]
     checksum: str
     created_at: str
     created_by: str
@@ -127,13 +127,13 @@ class ConfigNamespace:
     """配置命名空间"""
 
     namespace: str
-    configs: Dict[str, Any] = field(default_factory=dict)
+    configs: dict[str, Any] = field(default_factory=dict)
     format: ConfigFormat = ConfigFormat.JSON
-    versions: List[ConfigVersion] = field(default_factory=list)
+    versions: list[ConfigVersion] = field(default_factory=list)
     current_version: int = 0
     max_versions: int = 50
-    encrypted_keys: Set[str] = field(default_factory=set)
-    watchers: Set[str] = field(default_factory=set)  # watcher callback ids
+    encrypted_keys: set[str] = field(default_factory=set)
+    watchers: set[str] = field(default_factory=set)  # watcher callback ids
     last_updated: str = ""
     created_at: str = ""
 
@@ -149,13 +149,13 @@ class ConfigChange:
     operator: str
     timestamp: str
 
-class ConfigDiffEngine(object):
+class ConfigDiffEngine:
     """配置差异引擎 — 对比配置版本、检测漂移、生成迁移计划"""
 
     def __init__(self):
-        self._snapshots: Dict[str, List[Dict[str, Any]]] = {}
+        self._snapshots: dict[str, list[dict[str, Any]]] = {}
 
-    def diff_configs(self, base: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+    def diff_configs(self, base: dict[str, Any], target: dict[str, Any]) -> dict[str, Any]:
         """对比两个配置，返回差异详情"""
         all_keys = set(list(base.keys()) + list(target.keys()))
         added, removed, modified, unchanged = [], [], [], []
@@ -182,8 +182,8 @@ class ConfigDiffEngine(object):
         }
 
     def detect_drift(
-        self, expected: Dict[str, Any], actual: Dict[str, Any], environment: str = "production"
-    ) -> Dict[str, Any]:
+        self, expected: dict[str, Any], actual: dict[str, Any], environment: str = "production"
+    ) -> dict[str, Any]:
         """检测配置漂移"""
         diffs = self.diff_configs(expected, actual)
         drift_items = []
@@ -211,7 +211,7 @@ class ConfigDiffEngine(object):
             "high_severity": sum(1 for d in drift_items if d["severity"] == "high"),
         }
 
-    def generate_migration_plan(self, current: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_migration_plan(self, current: dict[str, Any], target: dict[str, Any]) -> dict[str, Any]:
         """生成从当前配置到目标配置的迁移计划"""
         diffs = self.diff_configs(current, target)
         steps = []
@@ -253,14 +253,14 @@ class ConfigDiffEngine(object):
             "estimated_downtime": "zero" if all(s["risk"] == "low" for s in steps) else "minimal",
         }
 
-    def snapshot(self, name: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    def snapshot(self, name: str, config: dict[str, Any]) -> dict[str, Any]:
         """保存配置快照"""
         self._snapshots.setdefault(name, []).append(
             {"config": dict(config), "timestamp": time.time(), "key_count": len(config)}
         )
         return {"snapshot_name": name, "version": len(self._snapshots[name])}
 
-    def _flatten(self, d: Dict, prefix: str = "") -> Dict[str, Any]:
+    def _flatten(self, d: dict, prefix: str = "") -> dict[str, Any]:
         result = {}
         for k, v in d.items():
             full_key = f"{prefix}.{k}" if prefix else k
@@ -276,10 +276,10 @@ class ConfigCenterModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def __init__(self):
 
         super().__init__()
-        self._namespaces: Dict[str, ConfigNamespace] = {}
+        self._namespaces: dict[str, ConfigNamespace] = {}
         self._change_log: deque = deque(maxlen=5000)
-        self._watchers: Dict[str, callable] = {}  # watcher_id -> callback
-        self._file_store: Optional[str] = None  # 配置文件存储路径
+        self._watchers: dict[str, callable] = {}  # watcher_id -> callback
+        self._file_store: str | None = None  # 配置文件存储路径
         self._lock = threading.RLock()
         self._stats = {
             "total_reads": 0,
@@ -424,7 +424,7 @@ class ConfigCenterModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             except Exception:
                 pass
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "status": "healthy",

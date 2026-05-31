@@ -126,10 +126,10 @@ class ApiVersion:
     base_path: str
     status: VersionStatus = VersionStatus.ACTIVE
     changelog: str = ""
-    breaking_changes: List[str] = field(default_factory=list)
-    deprecated_at: Optional[float] = None
-    sunset_at: Optional[float] = None
-    retired_at: Optional[float] = None
+    breaking_changes: list[str] = field(default_factory=list)
+    deprecated_at: float | None = None
+    sunset_at: float | None = None
+    retired_at: float | None = None
     request_count: int = 0
     created_at: float = field(default_factory=time.time)
 
@@ -142,7 +142,7 @@ class VersionRoute:
     path_pattern: str
     version: str
     target: str
-    methods: List[str] = field(default_factory=lambda: ["GET"])
+    methods: list[str] = field(default_factory=lambda: ["GET"])
     enabled: bool = True
 
 @dataclass
@@ -153,8 +153,8 @@ class CompatibilityReport:
     from_version: str
     to_version: str
     compatible: bool
-    breaking_changes: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    breaking_changes: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     generated_at: float = field(default_factory=time.time)
 
 class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -165,15 +165,15 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._versions: Dict[str, ApiVersion] = {}
-        self._routes: Dict[str, VersionRoute] = {}
-        self._compat_reports: List[CompatibilityReport] = []
+        self._versions: dict[str, ApiVersion] = {}
+        self._routes: dict[str, VersionRoute] = {}
+        self._compat_reports: list[CompatibilityReport] = []
         self._counter: int = 0
         self._route_counter: int = 0
 
@@ -216,7 +216,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "api_versioning"})
         self.metrics_collector.counter("api_versioning.execute.calls", 1)
         self.audit("execute", {"module": "api_versioning"})
@@ -349,7 +349,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         sunset = sum(1 for v in self._versions.values() if v.status == VersionStatus.SUNSET)
         return {
             "status": "degraded" if sunset > 0 else "healthy",
@@ -363,7 +363,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def shutdown(self) -> None:
         pass
 
-    def _resolve(self, api_name: str, version: str) -> Optional[ApiVersion]:
+    def _resolve(self, api_name: str, version: str) -> ApiVersion | None:
         candidates = [
             v for v in self._versions.values() if v.api_name == api_name and v.status != VersionStatus.RETIRED
         ]
@@ -393,7 +393,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     def deprecate_version(
         self, version: str, sunset_date: str, migration_guide: str, notify_callers: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """标记API版本为废弃状态。企业场景：V1→V2迁移期，提前通知调用方迁移，
          提供迁移指南，到期后自动返回410 Gone和Deprecated头。
         sunset_date格式: ISO 8601日期，如 2026-12-31。
@@ -421,7 +421,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             callers_notified = len(callers)
         return {"success": True, "version": version, "sunset_date": sunset_date, "callers_notified": callers_notified}
 
-    def get_version_traffic(self, days: int = 7) -> Dict[str, Any]:
+    def get_version_traffic(self, days: int = 7) -> dict[str, Any]:
         """获取各API版本的流量分布统计。企业场景：判断旧版本是否可以安全下线，
         统计各版本调用次数、错误率、P95延迟，辅助版本淘汰决策。
         """
@@ -430,7 +430,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         if not hasattr(self, "_access_log"):
             return {"success": True, "message": "暂无访问日志", "versions": {}}
         recent = [l for l in self._access_log if l.get("timestamp", 0) >= cutoff]
-        version_stats: Dict[str, Dict] = {}
+        version_stats: dict[str, dict] = {}
         for log in recent:
             ver = log.get("version", "unknown")
             if ver not in version_stats:
@@ -455,8 +455,8 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         return {"success": True, "period_days": days, "total_requests": len(recent), "versions": result}
 
     def create_api_changelog(
-        self, version: str, changes: List[Dict[str, str]], author: str = "system"
-    ) -> Dict[str, Any]:
+        self, version: str, changes: list[dict[str, str]], author: str = "system"
+    ) -> dict[str, Any]:
         """创建API变更日志。企业场景：版本发布时记录接口变更详情，
         自动生成CHANGELOG供前端团队和第三方接入方参考。
         """
@@ -486,7 +486,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "breaking": entry["breaking_count"],
         }
 
-    def get_migration_status(self, from_version: str, to_version: str) -> Dict[str, Any]:
+    def get_migration_status(self, from_version: str, to_version: str) -> dict[str, Any]:
         """API迁移进度。企业场景：V1→V2迁移过程中，追踪各客户端的迁移状态，
         识别未迁移的客户端并发送通知。生产环境在大版本废弃前跟踪迁移率。
         """
@@ -509,7 +509,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "migration_rate": migration_rate,
         }
 
-    def deprecate_version(self, version: str, sunset_date: str, migration_guide_url: str = "") -> Dict[str, Any]:
+    def deprecate_version(self, version: str, sunset_date: str, migration_guide_url: str = "") -> dict[str, Any]:
         """废弃API版本。企业场景：大版本升级时设置废弃日期，
         在响应头中添加Deprecation和Sunset头部，引导客户端迁移。
         """
@@ -526,7 +526,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "warning": f"版本 {version} 将于 {sunset_date} 后停止服务",
         }
 
-    def get_version_compatibility_matrix(self) -> Dict[str, Any]:
+    def get_version_compatibility_matrix(self) -> dict[str, Any]:
         """版本兼容性矩阵。企业场景：前端/移动端开发团队查看各API版本间
         的兼容性关系，识别breaking changes影响范围。
         """
@@ -549,7 +549,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         matrix.sort(key=lambda x: x["version"], reverse=True)
         return {"success": True, "versions": matrix, "deprecated_count": sum(1 for m in matrix if m["deprecated"])}
 
-    def get_version_request_stats(self, days: int = 7) -> Dict[str, Any]:
+    def get_version_request_stats(self, days: int = 7) -> dict[str, Any]:
         """API版本请求统计。企业场景：评估各版本API的调用量，辅助废弃决策。
         如果某版本调用量降至阈值以下，可安全废弃。
         """
@@ -562,7 +562,7 @@ class ApiVersioningManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         stats.sort(key=lambda x: -x["requests"])
         return {"success": True, "period_days": days, "total_versions": len(stats), "stats": stats}
 
-    def batch_add_version_headers(self, routes: List[Dict[str, str]]) -> Dict[str, Any]:
+    def batch_add_version_headers(self, routes: list[dict[str, str]]) -> dict[str, Any]:
         """批量设置路由版本头。企业场景：微服务网关上线时，一次性为数百个路由
         配置 X-API-Version 响应头，确保客户端能感知API版本变化。
         """

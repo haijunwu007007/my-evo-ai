@@ -83,7 +83,7 @@ from core.logging_config import get_logger
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -110,7 +110,7 @@ class IndexType(Enum):
 
 @dataclass
 class VectorPayload:
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     content_hash: str = ""
     created_at: str = ""
     updated_at: str = ""
@@ -118,7 +118,7 @@ class VectorPayload:
     namespace: str = "default"
 
     def __post_init__(self):
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         if not self.created_at:
             self.created_at = now
         if not self.updated_at:
@@ -149,8 +149,8 @@ class CollectionConfig:
 class SearchResult:
     id: str
     score: float
-    payload: Dict[str, Any]
-    vector: Optional[List[float]] = None
+    payload: dict[str, Any]
+    vector: list[float] | None = None
 
 @dataclass
 class CollectionStats:
@@ -160,25 +160,25 @@ class CollectionStats:
     payload_size_mb: float
     avg_vector_dimension: int
     index_type: str
-    last_optimized: Optional[str] = None
+    last_optimized: str | None = None
     segments_count: int = 0
 
 # ──────────────────────────────────────────────
 # 向量嵌入引擎
 # ──────────────────────────────────────────────
 
-class EmbeddingEngine(object):
+class EmbeddingEngine:
     """多模型嵌入引擎，支持文本/图像/多模态向量化"""
 
     def __init__(self, default_model: str = "text-embedding-3-small", dimensions: int = 1536):
         self.default_model = default_model
         self.default_dimensions = dimensions
-        self._model_cache: Dict[str, List[float]] = {}
+        self._model_cache: dict[str, list[float]] = {}
         self._embedding_count = 0
         self._cache_hits = 0
         self._cache_max = 5000
 
-    async def embed_text(self, text: str, model: Optional[str] = None, dimensions: Optional[int] = None) -> List[float]:
+    async def embed_text(self, text: str, model: str | None = None, dimensions: int | None = None) -> list[float]:
         cache_key = hashlib.md5(f"{model or self.default_model}:{text}".encode()).hexdigest()
         if cache_key in self._model_cache:
             self._cache_hits += 1
@@ -199,23 +199,23 @@ class EmbeddingEngine(object):
         return hash_values
 
     async def embed_batch(
-        self, texts: List[str], model: Optional[str] = None, dimensions: Optional[int] = None
-    ) -> List[List[float]]:
+        self, texts: list[str], model: str | None = None, dimensions: int | None = None
+    ) -> list[list[float]]:
         results = []
         for text in texts:
             results.append(await self.embed_text(text, model, dimensions))
         return results
 
-    async def embed_query(self, query: str, model: Optional[str] = None) -> List[float]:
+    async def embed_query(self, query: str, model: str | None = None) -> list[float]:
         return await self.embed_text(query, model)
 
-    def normalize(self, vector: List[float]) -> List[float]:
+    def normalize(self, vector: list[float]) -> list[float]:
         norm = sum(v * v for v in vector) ** 0.5
         if norm < 1e-10:
             return vector
         return [v / norm for v in vector]
 
-    def cosine_similarity(self, a: List[float], b: List[float]) -> float:
+    def cosine_similarity(self, a: list[float], b: list[float]) -> float:
         dot = sum(x * y for x, y in zip(a, b))
         norm_a = sum(x * x for x in a) ** 0.5
         norm_b = sum(x * x for x in b) ** 0.5
@@ -223,10 +223,10 @@ class EmbeddingEngine(object):
             return 0.0
         return dot / (norm_a * norm_b)
 
-    def euclidean_distance(self, a: List[float], b: List[float]) -> float:
+    def euclidean_distance(self, a: list[float], b: list[float]) -> float:
         return sum((x - y) ** 2 for x, y in zip(a, b)) ** 0.5
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "embedding_count": self._embedding_count,
             "cache_size": len(self._model_cache),
@@ -245,7 +245,7 @@ class HybridRetriever:
 
     def __init__(self, embedding_engine: EmbeddingEngine):
         self.embedding = embedding_engine
-        self._keyword_index: Dict[str, List[str]] = {}
+        self._keyword_index: dict[str, list[str]] = {}
 
     def index_keywords(self, doc_id: str, text: str):
         tokens = set(text.lower().split())
@@ -255,9 +255,9 @@ class HybridRetriever:
             if doc_id not in self._keyword_index[token]:
                 self._keyword_index[token].append(doc_id)
 
-    def keyword_search(self, query: str, top_k: int = 10) -> List[Tuple[str, float]]:
+    def keyword_search(self, query: str, top_k: int = 10) -> list[tuple[str, float]]:
         tokens = set(query.lower().split())
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for token in tokens:
             for doc_id in self._keyword_index.get(token, []):
                 scores[doc_id] = scores.get(doc_id, 0) + 1.0
@@ -266,15 +266,15 @@ class HybridRetriever:
         return [(doc_id, score / max_score) for doc_id, score in ranked]
 
     async def hybrid_search(
-        self, query: str, vector_results: List[SearchResult], top_k: int = 10, alpha: float = 0.7, rrf_k: int = 60
-    ) -> List[SearchResult]:
+        self, query: str, vector_results: list[SearchResult], top_k: int = 10, alpha: float = 0.7, rrf_k: int = 60
+    ) -> list[SearchResult]:
         keyword_results = self.keyword_search(query, top_k * 2)
         keyword_scores = {doc_id: score for doc_id, score in keyword_results}
 
         vector_scores = {r.id: r.score for r in vector_results}
 
         all_ids = set(vector_scores.keys()) | set(keyword_scores.keys())
-        fused: Dict[str, float] = {}
+        fused: dict[str, float] = {}
         for doc_id in all_ids:
             v_rank = (
                 sorted(vector_scores.keys(), key=lambda x: -vector_scores[x]).index(doc_id) + 1
@@ -308,7 +308,7 @@ class HybridRetriever:
             if not self._keyword_index[token]:
                 del self._keyword_index[token]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "indexed_tokens": len(self._keyword_index),
             "total_documents": len(set(doc_id for docs in self._keyword_index.values() for doc_id in docs)),
@@ -318,16 +318,16 @@ class HybridRetriever:
 # 集合同步管理器
 # ──────────────────────────────────────────────
 
-class CollectionSyncManager(object):
+class CollectionSyncManager:
     """多节点集合同步、故障转移、分片路由"""
 
     def __init__(self):
-        self._shards: Dict[str, List[Dict[str, Any]]] = {}
-        self._replicas: Dict[str, List[str]] = {}
-        self._replication_log: List[Dict[str, Any]] = []
-        self._leader_nodes: Dict[str, str] = {}
+        self._shards: dict[str, list[dict[str, Any]]] = {}
+        self._replicas: dict[str, list[str]] = {}
+        self._replication_log: list[dict[str, Any]] = []
+        self._leader_nodes: dict[str, str] = {}
 
-    def create_shards(self, collection: str, shard_count: int = 3, node_pool: List[str] = None):
+    def create_shards(self, collection: str, shard_count: int = 3, node_pool: list[str] = None):
         if node_pool is None:
             node_pool = [f"node-{i}" for i in range(shard_count * 2)]
         shards = []
@@ -349,7 +349,7 @@ class CollectionSyncManager(object):
         self._leader_nodes[collection] = shards[0]["primary"]
         logger.info(f"Created {shard_count} shards for collection '{collection}'")
 
-    def route_to_shard(self, collection: str, vector_hash: int) -> Optional[Dict[str, Any]]:
+    def route_to_shard(self, collection: str, vector_hash: int) -> dict[str, Any] | None:
         shards = self._shards.get(collection, [])
         if not shards:
             return None
@@ -358,7 +358,7 @@ class CollectionSyncManager(object):
 
     def record_replication(self, collection: str, operation: str, shard_id: str, success: bool, latency_ms: float):
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collection": collection,
             "operation": operation,
             "shard_id": shard_id,
@@ -382,7 +382,7 @@ class CollectionSyncManager(object):
                 return True
         return False
 
-    def get_collection_topology(self, collection: str) -> Dict[str, Any]:
+    def get_collection_topology(self, collection: str) -> dict[str, Any]:
         shards = self._shards.get(collection, [])
         return {
             "collection": collection,
@@ -400,14 +400,14 @@ class IndexOptimizer:
     """自动索引优化、压缩、垃圾回收"""
 
     def __init__(self):
-        self._optimization_history: List[Dict[str, Any]] = []
+        self._optimization_history: list[dict[str, Any]] = []
         self._thresholds = {
             "segment_max_size_mb": 512,
             "deleted_ratio_trigger": 0.2,
             "optimization_interval_sec": 3600,
         }
 
-    async def should_optimize(self, collection: str, stats: CollectionStats) -> Tuple[bool, str]:
+    async def should_optimize(self, collection: str, stats: CollectionStats) -> tuple[bool, str]:
         reasons = []
         if stats.segments_count > 20:
             reasons.append(f"Too many segments: {stats.segments_count}")
@@ -415,7 +415,7 @@ class IndexOptimizer:
             reasons.append(f"Index too large: {stats.index_size_mb:.1f}MB")
         return len(reasons) > 0, "; ".join(reasons)
 
-    async def optimize_collection(self, collection: str, stats: CollectionStats) -> Dict[str, Any]:
+    async def optimize_collection(self, collection: str, stats: CollectionStats) -> dict[str, Any]:
         start = time.time()
         operations = [
             "merge_small_segments",
@@ -435,7 +435,7 @@ class IndexOptimizer:
 
         total_ms = (time.time() - start) * 1000
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collection": collection,
             "operations": operations,
             "total_time_ms": round(total_ms, 2),
@@ -444,7 +444,7 @@ class IndexOptimizer:
         self._optimization_history.append(entry)
         return {"operations": results, "total_time_ms": round(total_ms, 2), "status": "success"}
 
-    def get_optimization_history(self, collection: Optional[str] = None, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_optimization_history(self, collection: str | None = None, limit: int = 20) -> list[dict[str, Any]]:
         history = self._optimization_history
         if collection:
             history = [e for e in history if e["collection"] == collection]
@@ -468,14 +468,14 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.hybrid = HybridRetriever(self.embedding)
         self.sync_manager = CollectionSyncManager()
         self.optimizer = IndexOptimizer()
-        self._collections: Dict[str, Dict[str, Any]] = {}
-        self._vectors: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        self._collections: dict[str, dict[str, Any]] = {}
+        self._vectors: dict[str, dict[str, dict[str, Any]]] = {}
         self._operation_count = 0
         self._error_count = 0
 
     # ── 集合管理 ──
 
-    async def create_collection(self, config: CollectionConfig) -> Dict[str, Any]:
+    async def create_collection(self, config: CollectionConfig) -> dict[str, Any]:
         start = time.time()
         if config.name in self._collections:
             return {"status": "error", "message": f"Collection '{config.name}' already exists"}
@@ -483,7 +483,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._collections[config.name] = {
             "config": config,
             "vectors": {},
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "status": "active",
             "vector_count": 0,
             "index_built": False,
@@ -496,7 +496,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._record_audit("create_collection", {"collection": config.name, "dimension": config.dimension})
         return {"status": "success", "collection": config.name, "time_ms": elapsed}
 
-    async def delete_collection(self, name: str) -> Dict[str, Any]:
+    async def delete_collection(self, name: str) -> dict[str, Any]:
         if name not in self._collections:
             return {"status": "error", "message": f"Collection '{name}' not found"}
         vector_count = len(self._vectors.get(name, {}))
@@ -507,7 +507,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._record_audit("delete_collection", {"collection": name, "deleted_vectors": vector_count})
         return {"status": "success", "collection": name, "deleted_vectors": vector_count}
 
-    async def list_collections(self) -> List[Dict[str, Any]]:
+    async def list_collections(self) -> list[dict[str, Any]]:
         result = []
         for name, data in self._collections.items():
             cfg = data["config"]
@@ -524,7 +524,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
         return result
 
-    async def get_collection_info(self, name: str) -> Optional[Dict[str, Any]]:
+    async def get_collection_info(self, name: str) -> dict[str, Any] | None:
         if name not in self._collections:
             return None
         data = self._collections[name]
@@ -549,7 +549,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     # ── 向量操作 ──
 
-    async def upsert_vectors(self, collection: str, points: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def upsert_vectors(self, collection: str, points: list[dict[str, Any]]) -> dict[str, Any]:
         if collection not in self._collections:
             return {"status": "error", "message": f"Collection '{collection}' not found"}
         start = time.time()
@@ -618,13 +618,13 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     async def search_vectors(
         self,
         collection: str,
-        query: Optional[str] = None,
-        query_vector: Optional[List[float]] = None,
+        query: str | None = None,
+        query_vector: list[float] | None = None,
         top_k: int = 10,
-        filter_conditions: Optional[Dict] = None,
+        filter_conditions: dict | None = None,
         hybrid: bool = False,
         alpha: float = 0.7,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         trace_id = f"qdrant-search-{collection}-{int(time.time() * 1000)}"
         metrics_collector.counter("qdrant_search_total", labels={"collection": collection})
         self.audit("vector_search", f"collection={collection}, query={str(query)[:60]}, top_k={top_k}")
@@ -692,7 +692,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "search_type": "hybrid" if hybrid else "vector",
         }
 
-    async def delete_vectors(self, collection: str, point_ids: List[str]) -> Dict[str, Any]:
+    async def delete_vectors(self, collection: str, point_ids: list[str]) -> dict[str, Any]:
         if collection not in self._collections:
             return {"status": "error", "message": f"Collection '{collection}' not found"}
         deleted = 0
@@ -705,7 +705,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._operation_count += 1
         return {"status": "success", "collection": collection, "deleted": deleted}
 
-    async def get_vector(self, collection: str, point_id: str) -> Optional[Dict[str, Any]]:
+    async def get_vector(self, collection: str, point_id: str) -> dict[str, Any] | None:
         vectors = self._vectors.get(collection, {})
         if point_id not in vectors:
             return None
@@ -719,7 +719,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     # ── 索引与优化 ──
 
-    async def build_index(self, collection: str) -> Dict[str, Any]:
+    async def build_index(self, collection: str) -> dict[str, Any]:
         if collection not in self._collections:
             return {"status": "error", "message": f"Collection '{collection}' not found"}
         start = time.time()
@@ -742,7 +742,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "time_ms": elapsed,
         }
 
-    async def optimize(self, collection: str) -> Dict[str, Any]:
+    async def optimize(self, collection: str) -> dict[str, Any]:
         if collection not in self._collections:
             return {"status": "error", "message": f"Collection '{collection}' not found"}
         vectors = self._vectors.get(collection, {})
@@ -763,7 +763,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     # ── 监控与统计 ──
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         collection_stats = []
         for name in self._collections:
             vectors = self._vectors.get(name, {})
@@ -786,7 +786,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "uptime_hours": self._get_uptime_hours(),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         checks = []
         for name, data in self._collections.items():
             is_healthy = data["status"] == "active"

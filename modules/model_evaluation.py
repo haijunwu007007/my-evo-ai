@@ -77,7 +77,7 @@ import random
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ModelEvaluationAnalyzer(object):
+class ModelEvaluationAnalyzer:
     """model_evaluation 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -285,7 +285,7 @@ class ModelEvaluationModule:
 
     """模型评估 - 基准测试/A-B对比/自动评分/报告生成/历史追踪"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -326,13 +326,13 @@ class ModelEvaluationModule:
             "total_test_cases": 0,
             "avg_score": 0.0,
         }
-        self._evaluations: Dict[str, Dict] = {}
-        self._benchmarks: Dict[str, Dict] = {}
-        self._results_history: List[Dict] = []
-        self._test_suites: Dict[str, Dict] = {}
+        self._evaluations: dict[str, dict] = {}
+        self._benchmarks: dict[str, dict] = {}
+        self._results_history: list[dict] = []
+        self._test_suites: dict[str, dict] = {}
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 4))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_benchmarks()
             self._register_default_test_suites()
@@ -346,7 +346,7 @@ class ModelEvaluationModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         running = sum(1 for e in self._evaluations.values() if e.get("status") == EvalStatus.RUNNING)
@@ -426,7 +426,7 @@ class ModelEvaluationModule:
             "metrics": metrics,
             "sample_size": sample_size,
             "status": EvalStatus.PENDING,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "results": {},
             "score": 0.0,
         }
@@ -440,7 +440,7 @@ class ModelEvaluationModule:
             return {"success": False, "error": f"Evaluation {eval_id} not found"}
         ev = self._evaluations[eval_id]
         ev["status"] = EvalStatus.RUNNING
-        ev["started_at"] = datetime.now(timezone.utc).isoformat()
+        ev["started_at"] = datetime.now(UTC).isoformat()
         t0 = time.time()
         try:
             benchmark = ev.get("benchmark", "mmlu")
@@ -464,7 +464,7 @@ class ModelEvaluationModule:
             ev["test_cases_run"] = sample_size
             ev["duration_ms"] = int((time.time() - t0) * 1000)
             ev["status"] = EvalStatus.COMPLETED
-            ev["completed_at"] = datetime.now(timezone.utc).isoformat()
+            ev["completed_at"] = datetime.now(UTC).isoformat()
             self._stats["completed_evals"] += 1
             self._stats["total_test_cases"] += sample_size
             self._results_history.append(
@@ -473,7 +473,7 @@ class ModelEvaluationModule:
                     "model": ev["model"],
                     "score": ev["score"],
                     "results": results,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             )
             return {"success": True, "eval_id": eval_id, "score": ev["score"], "results": results}

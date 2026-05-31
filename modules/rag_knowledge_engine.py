@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - RAG 知识引擎（A级）
 # Grade: A
 
@@ -40,7 +39,7 @@ def _call_llm(prompt: str, api_key: str = "", provider: str = "zhipu") -> str:
         logger.error(f"LLM call failed: {e}")
         return f"LLM Error: {e}"
 
-def _query_vector_db(query: str, collection: str = "default", top_k: int = 5) -> List[str]:
+def _query_vector_db(query: str, collection: str = "default", top_k: int = 5) -> list[str]:
     """真实向量数据库查询（支持 sqlite-vss / pgvector）"""
     try:
         # Try sqlite-vss first
@@ -58,18 +57,18 @@ def _query_vector_db(query: str, collection: str = "default", top_k: int = 5) ->
 class RAGKnowledgeEngine(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="rag-knowledge-engine";MODULE_NAME="RAG 知识引擎";VERSION="v1.0";MODULE_LEVEL="A"
     def __init__(self,config=None):
-        super().__init__(config);self._documents:List[Dict]=[];self._embeddings_cache:Dict[str,List[float]]={}
+        super().__init__(config);self._documents:list[dict]=[];self._embeddings_cache:dict[str,list[float]]={}
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:
         return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"documents":len(self._documents)})
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
-    def _tokenize(self,text:str)->List[str]:
+    def _tokenize(self,text:str)->list[str]:
         import re;return re.findall(r'\w+',text.lower())
-    def _tfidf_vector(self,tokens:List[str])->Dict[str,float]:
+    def _tfidf_vector(self,tokens:list[str])->dict[str,float]:
         from collections import Counter
         tf=Counter(tokens);max_f=max(tf.values()) if tf else 1
         return{k:v/max_f for k,v in tf.items()}
-    def _cosine_similarity(self,v1:Dict[str,float],v2:Dict[str,float])->float:
+    def _cosine_similarity(self,v1:dict[str,float],v2:dict[str,float])->float:
         all_keys=set(v1)|set(v2)
         dot=sum(v1.get(k,0)*v2.get(k,0) for k in all_keys)
         n1=math.sqrt(sum(v*v for v in v1.values()));n2=math.sqrt(sum(v*v for v in v2.values()))

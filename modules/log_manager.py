@@ -140,8 +140,8 @@ class LogEntry:
     process_id: int = 0
     trace_id: str = ""
     span_id: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
-    context: Dict[str, Any] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     stack_trace: str = ""
     source_ip: str = ""
     user_id: str = ""
@@ -156,7 +156,7 @@ class LogSink:
     min_level: LogLevel = LogLevel.DEBUG
     max_level: LogLevel = LogLevel.FATAL
     enabled: bool = True
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     format_template: str = "{timestamp} [{level}] {logger}: {message}"
     buffer_size: int = 1000
     async_mode: bool = True
@@ -181,8 +181,8 @@ class SearchQuery:
     """Log search query specification."""
 
     query_id: str = ""
-    terms: List[str] = field(default_factory=list)
-    level: Optional[LogLevel] = None
+    terms: list[str] = field(default_factory=list)
+    level: LogLevel | None = None
     logger_pattern: str = ""
     module_pattern: str = ""
     trace_id: str = ""
@@ -192,7 +192,7 @@ class SearchQuery:
     offset: int = 0
     sort_desc: bool = True
     operator: SearchOperator = SearchOperator.CONTAINS
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class AlertRule:
@@ -207,7 +207,7 @@ class AlertRule:
     enabled: bool = True
     description: str = ""
 
-class LogManagerAnalyzer(object):
+class LogManagerAnalyzer:
     """log_manager 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -328,15 +328,15 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         self._lock = threading.RLock()
         self._logs: deque = deque(maxlen=50000)
-        self._sinks: Dict[str, LogSink] = {}
-        self._retention_policies: Dict[str, RetentionPolicy] = {}
-        self._alert_rules: Dict[str, AlertRule] = {}
-        self._alert_fires: List[Dict[str, Any]] = []
-        self._level_counts: Dict[LogLevel, int] = defaultdict(int)
-        self._logger_counts: Dict[str, int] = defaultdict(int)
-        self._trace_index: Dict[str, List[int]] = defaultdict(list)
-        self._level_index: Dict[LogLevel, List[int]] = defaultdict(list)
-        self._module_index: Dict[str, List[int]] = defaultdict(list)
+        self._sinks: dict[str, LogSink] = {}
+        self._retention_policies: dict[str, RetentionPolicy] = {}
+        self._alert_rules: dict[str, AlertRule] = {}
+        self._alert_fires: list[dict[str, Any]] = []
+        self._level_counts: dict[LogLevel, int] = defaultdict(int)
+        self._logger_counts: dict[str, int] = defaultdict(int)
+        self._trace_index: dict[str, list[int]] = defaultdict(list)
+        self._level_index: dict[LogLevel, list[int]] = defaultdict(list)
+        self._module_index: dict[str, list[int]] = defaultdict(list)
         self._stats = {
             "total_entries": 0,
             "total_searches": 0,
@@ -445,10 +445,10 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         trace_id: str = "",
         module: str = "",
         function: str = "",
-        context: Optional[Dict] = None,
+        context: dict | None = None,
         stack_trace: str = "",
-        labels: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        labels: dict | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             entry_id = hashlib.md5(f"{time.time()}:{message[:50]}".encode()).hexdigest()[:16]
             entry = LogEntry(
@@ -501,7 +501,7 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 )
                 self._stats["total_alerts"] += 1
 
-    def search(self, query: Optional[SearchQuery] = None, **kwargs) -> Dict[str, Any]:
+    def search(self, query: SearchQuery | None = None, **kwargs) -> dict[str, Any]:
         with self._lock:
             if query is None:
                 query = SearchQuery(**{k: v for k, v in kwargs.items() if k in SearchQuery.__dataclass_fields__})
@@ -557,7 +557,7 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             paged = results[query.offset : query.offset + query.limit]
             return {"total": total_matching, "offset": query.offset, "limit": query.limit, "results": paged}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         top_loggers = sorted(self._logger_counts.items(), key=lambda x: -x[1])[:10]
         return {
             **self._stats,
@@ -568,7 +568,7 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "active_alert_rules": sum(1 for r in self._alert_rules.values() if r.enabled),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "healthy": True,
             "status": "healthy",

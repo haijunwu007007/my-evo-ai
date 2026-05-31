@@ -135,9 +135,9 @@ class BrowserTask:
     instruction: str
     status: TaskStatus = TaskStatus.PENDING
     url: str = ""
-    steps: List[AgentStep] = field(default_factory=list)
+    steps: list[AgentStep] = field(default_factory=list)
     current_step: int = 0
-    extracted_data: Dict[str, Any] = field(default_factory=dict)
+    extracted_data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     created_at: str = ""
 
@@ -148,11 +148,11 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     MODULE_NAME = "Browser Use AI"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._tasks: Dict[str, BrowserTask] = {}
-        self._history: List[Dict[str, Any]] = []
+        self._tasks: dict[str, BrowserTask] = {}
+        self._history: list[dict[str, Any]] = []
         self._counter = 0
 
     def _next_id(self, prefix: str) -> str:
@@ -163,7 +163,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         logger.info("Browser Use模块初始化完成")
         return True
 
-    def _parse_instruction(self, instruction: str) -> List[NLAction]:
+    def _parse_instruction(self, instruction: str) -> list[NLAction]:
         """解析自然语言指令为操作序列"""
         actions = []
         instruction_lower = instruction.lower()
@@ -220,7 +220,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             return f"等待 {action.value} 秒"
         return f"执行: {action.action_type}"
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("browser_use_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
         actions = {
@@ -239,7 +239,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return handler(params)
         return {"status": "healthy", "module": "browser_use"}
 
-    def _exec_run(self, p: Dict) -> Dict:
+    def _exec_run(self, p: dict) -> dict:
         """执行完整AI浏览器任务"""
         instruction = p["instruction"]
         tid = self._next_id("bt")
@@ -285,7 +285,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _exec_plan(self, p: Dict) -> Dict:
+    def _exec_plan(self, p: dict) -> dict:
         """仅规划不执行"""
         instruction = p["instruction"]
         actions = self._parse_instruction(instruction)
@@ -307,7 +307,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _exec_get_task(self, p: Dict) -> Dict:
+    def _exec_get_task(self, p: dict) -> dict:
         tid = p["task_id"]
         if tid not in self._tasks:
             return {"success": False, "error": "任务不存在"}
@@ -333,7 +333,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _exec_list_tasks(self, p: Dict) -> Dict:
+    def _exec_list_tasks(self, p: dict) -> dict:
         status = p.get("status", "")
         tasks = [t for t in self._tasks.values() if not status or t.status.value == status]
         return {
@@ -352,14 +352,14 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _exec_cancel_task(self, p: Dict) -> Dict:
+    def _exec_cancel_task(self, p: dict) -> dict:
         tid = p["task_id"]
         if tid in self._tasks:
             self._tasks[tid].status = TaskStatus.CANCELLED
             return {"success": True, "result": {"task_id": tid, "cancelled": True}}
         return {"success": False, "error": "任务不存在"}
 
-    def _exec_parse_instruction(self, p: Dict) -> Dict:
+    def _exec_parse_instruction(self, p: dict) -> dict:
         """仅解析指令返回操作计划"""
         actions = self._parse_instruction(p["instruction"])
         return {
@@ -378,7 +378,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         completed = sum(1 for t in self._tasks.values() if t.status == TaskStatus.COMPLETED)
         return {
             "success": True,
@@ -391,7 +391,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -410,7 +410,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     # === 企业级浏览器管理 ===
 
-    def analyze_session_health(self, session_id: str) -> Dict[str, Any]:
+    def analyze_session_health(self, session_id: str) -> dict[str, Any]:
         """分析浏览器会话健康状态：内存占用、页面加载耗时、错误率、资源泄漏检测"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         sess = sessions.get(session_id) if isinstance(sessions, dict) else None
@@ -434,7 +434,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         health["healthy"] = health.get("error_rate", 0) < 0.1 and not health.get("memory_warning", False)
         return health
 
-    def get_browser_pool_stats(self) -> Dict[str, Any]:
+    def get_browser_pool_stats(self) -> dict[str, Any]:
         """浏览器连接池统计：活跃/空闲/总数、平均生命周期、资源利用率"""
         pool = self._pool if hasattr(self, "_pool") else {}
         if not pool:
@@ -460,7 +460,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             stats["stale_sessions"] = stale
         return stats
 
-    def detect_zombie_sessions(self, max_idle_seconds: int = 600) -> List[Dict[str, Any]]:
+    def detect_zombie_sessions(self, max_idle_seconds: int = 600) -> list[dict[str, Any]]:
         """检测僵尸会话：超过空闲时间未操作、无响应的浏览器实例"""
         zombies = []
         sessions = self._sessions if hasattr(self, "_sessions") else {}
@@ -484,7 +484,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         zombies.sort(key=lambda x: x["idle_seconds"], reverse=True)
         return zombies
 
-    def cleanup_resources(self, session_id: str = "") -> Dict[str, Any]:
+    def cleanup_resources(self, session_id: str = "") -> dict[str, Any]:
         """清理浏览器资源：关闭多余标签页、释放内存、清除缓存"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         cleaned = {"sessions_cleaned": 0, "pages_closed": 0, "cache_cleared": False}
@@ -509,7 +509,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             cleaned["sessions_cleaned"] += 1
         return cleaned
 
-    def get_usage_report(self, hours: int = 24) -> Dict[str, Any]:
+    def get_usage_report(self, hours: int = 24) -> dict[str, Any]:
         """浏览器使用报告：操作统计、页面访问排行、错误趋势、资源消耗"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         history = self._history if hasattr(self, "_history") else []
@@ -517,8 +517,8 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         cutoff = now - hours * 3600
         recent = [h for h in history if hasattr(h, "timestamp") and h.timestamp >= cutoff] if history else []
         total_ops = len(recent)
-        by_action: Dict[str, int] = {}
-        by_page: Dict[str, int] = {}
+        by_action: dict[str, int] = {}
+        by_page: dict[str, int] = {}
         errors = 0
         total_latency = 0
         for entry in recent:
@@ -549,8 +549,8 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     def validate_page_load(
-        self, url: str, expected_elements: List[str] = None, timeout_ms: int = 10000
-    ) -> Dict[str, Any]:
+        self, url: str, expected_elements: list[str] = None, timeout_ms: int = 10000
+    ) -> dict[str, Any]:
         """页面加载验证：检查关键元素、加载时间、HTTP状态、资源完整性"""
         start = time.time()
         result = {
@@ -584,7 +584,7 @@ class BrowserUseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             result["status"] = "partial"
         return result
 
-    def generate_screenshot_comparison(self, session_a: str, session_b: str) -> Dict[str, Any]:
+    def generate_screenshot_comparison(self, session_a: str, session_b: str) -> dict[str, Any]:
         """对比两个浏览器会话的页面截图差异，用于视觉回归测试"""
         sessions = self._sessions if hasattr(self, "_sessions") else {}
         sa = sessions.get(session_a) if isinstance(sessions, dict) else None

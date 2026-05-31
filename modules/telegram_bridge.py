@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Telegram 桥接器（A级）
 # Grade: A
 
@@ -46,7 +45,7 @@ def send_markdown(token: str, chat_id: str, md_text: str) -> bool:
         logger.error("telegram: send_markdown 失败: %s", e)
         return False
 
-def get_updates(token: str, offset: int = 0, timeout: int = 10) -> List[Dict]:
+def get_updates(token: str, offset: int = 0, timeout: int = 10) -> list[dict]:
     """轮询 Bot 的更新列表。
     返回 update 对象列表，失败时返回空列表。"""
     try:

@@ -102,7 +102,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class CryptoOpAnalyzer(object):
+class CryptoOpAnalyzer:
     """crypto_api 运营分析引擎
 
     - 分析加密操作耗时分布
@@ -128,10 +128,10 @@ class CryptoOpAnalyzer(object):
 class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """加密货币API网关 — 行情聚合、价格预警、订阅推送"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self._metrics = {
             "total_requests": 0,
             "cache_hits": 0,
@@ -142,14 +142,14 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("crypto_api")
         # 行情缓存
-        self._price_cache: Dict[str, Dict] = {}
+        self._price_cache: dict[str, dict] = {}
         self._cache_ttl: int = self.config.get("cache_ttl", 30)
         # 价格预警
-        self._alerts: Dict[str, Dict] = {}
+        self._alerts: dict[str, dict] = {}
         # 行情订阅
-        self._subscriptions: Dict[str, List[str]] = defaultdict(list)
+        self._subscriptions: dict[str, list[str]] = defaultdict(list)
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("crypto_api.initialize", "start")
         self.trace("crypto_api.initialize", "end")
         self._data["instance_id"] = str(uuid.uuid4())[:8]
@@ -162,7 +162,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("initialized", f"symbols={len(self._data['symbols'])}")
         return {"success": True, "instance_id": self._data["instance_id"]}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         cache_fresh = (
             all(time.time() - p.get("timestamp", 0) < self._cache_ttl * 2 for p in self._price_cache.values())
             if self._price_cache
@@ -184,7 +184,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_requests": self._metrics["total_requests"],
         }
 
-    def shutdown(self) -> Dict:
+    def shutdown(self) -> dict:
         self._price_cache.clear()
         self._alerts.clear()
         self._subscriptions.clear()
@@ -194,7 +194,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ---- 业务方法 ----
 
-    def _simulate_price(self, symbol: str) -> Dict:
+    def _simulate_price(self, symbol: str) -> dict:
         """模拟行情数据"""
         bases = {
             "BTC": 65000,
@@ -226,7 +226,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "source": "aggregated",
         }
 
-    def get_price(self, params: Dict = None) -> Dict:
+    def get_price(self, params: dict = None) -> dict:
         """查询单个或多个交易对行情"""
         params = params or {}
         symbols = params.get("symbols", [])
@@ -247,7 +247,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results[sym] = fresh
         return {"success": True, "data": results, "count": len(results)}
 
-    def get_ticker(self, params: Dict = None) -> Dict:
+    def get_ticker(self, params: dict = None) -> dict:
         """获取行情摘要"""
         params = params or {}
         self.get_price({"symbols": []})  # 刷新缓存
@@ -264,7 +264,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tickers.sort(key=lambda x: abs(x.get("change", 0)), reverse=True)
         return {"success": True, "data": tickers, "count": len(tickers)}
 
-    def set_alert(self, params: Dict = None) -> Dict:
+    def set_alert(self, params: dict = None) -> dict:
         """设置价格预警"""
         params = params or {}
         symbol = params.get("symbol", "").upper()
@@ -284,7 +284,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("alert_set", f"{symbol} {condition} {target_price}")
         return {"success": True, "alert_id": alert_id, "alert": self._alerts[alert_id]}
 
-    def check_alerts(self, params: Dict = None) -> Dict:
+    def check_alerts(self, params: dict = None) -> dict:
         """检查并触发价格预警"""
         self.get_price({"symbols": []})
         triggered = []
@@ -307,7 +307,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.audit("alerts_triggered", f"{len(triggered)} alerts fired")
         return {"success": True, "triggered": triggered, "total_alerts": len(self._alerts)}
 
-    def subscribe(self, params: Dict = None) -> Dict:
+    def subscribe(self, params: dict = None) -> dict:
         """订阅行情推送"""
         params = params or {}
         channel = params.get("channel", "default")
@@ -320,7 +320,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("subscribe", f"channel={channel} symbols={symbols}")
         return {"success": True, "channel": channel, "subscribed": self._subscriptions[channel]}
 
-    def get_history(self, params: Dict = None) -> Dict:
+    def get_history(self, params: dict = None) -> dict:
         """获取历史K线（模拟）"""
         params = params or {}
         symbol = params.get("symbol", "BTC/USDT").upper()
@@ -348,7 +348,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "symbol": symbol, "interval": interval, "data": candles}
 
-    def convert(self, params: Dict = None) -> Dict:
+    def convert(self, params: dict = None) -> dict:
         """币种兑换计算"""
         params = params or {}
         amount = float(params.get("amount", 0))
@@ -374,7 +374,7 @@ class CryptoApi(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "to_price_usdt": to_price,
         }
 
-    async def execute(self, action: str, params: Dict = None) -> Dict:
+    async def execute(self, action: str, params: dict = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

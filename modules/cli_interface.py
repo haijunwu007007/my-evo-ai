@@ -109,7 +109,8 @@ except ImportError:
 import argparse
 import textwrap
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, TypeVar, Coroutine
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -162,11 +163,11 @@ class CommandDef:
     name: str
     handler: Callable
     help_text: str = ""
-    aliases: List[str] = field(default_factory=list)
+    aliases: list[str] = field(default_factory=list)
     permission: CommandPermission = CommandPermission.PUBLIC
     cmd_type: CommandType = CommandType.BUILT_IN
-    arguments: List[Dict[str, Any]] = field(default_factory=list)
-    examples: List[str] = field(default_factory=list)
+    arguments: list[dict[str, Any]] = field(default_factory=list)
+    examples: list[str] = field(default_factory=list)
     category: str = "general"
     hidden: bool = False
     deprecated: bool = False
@@ -179,11 +180,11 @@ class CommandContext:
 
     command_name: str
     raw_args: str
-    parsed_args: Dict[str, Any] = field(default_factory=dict)
+    parsed_args: dict[str, Any] = field(default_factory=dict)
     user_role: str = "public"
     session_id: str = ""
     timestamp: datetime = field(default_factory=datetime.now)
-    env_vars: Dict[str, str] = field(default_factory=dict)
+    env_vars: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class CommandResult:
@@ -272,10 +273,10 @@ class CLITheme:
         """信息样式"""
         return self.colored(f"ℹ {text}", self.info_color)
 
-class HistoryManager(object):
+class HistoryManager:
     """历史记录管理器"""
 
-    def __init__(self, max_entries: int = 10000, persist_file: Optional[str] = None):
+    def __init__(self, max_entries: int = 10000, persist_file: str | None = None):
         self.max_entries = max_entries
         self.persist_file = persist_file
         self._history: deque = deque(maxlen=max_entries)
@@ -292,13 +293,13 @@ class HistoryManager(object):
                 if prev.command == curr.command:
                     self._history.remove(prev)
 
-    def search(self, keyword: str, limit: int = 20) -> List[HistoryEntry]:
+    def search(self, keyword: str, limit: int = 20) -> list[HistoryEntry]:
         """搜索历史记录"""
         with self._lock:
             keyword_lower = keyword.lower()
             return [e for e in reversed(list(self._history)) if keyword_lower in e.command.lower()][:limit]
 
-    def get_recent(self, count: int = 20) -> List[HistoryEntry]:
+    def get_recent(self, count: int = 20) -> list[HistoryEntry]:
         """获取最近记录"""
         with self._lock:
             return list(reversed(list(self._history)))[:count]
@@ -338,7 +339,7 @@ class HistoryManager(object):
         if not self.persist_file or not os.path.exists(self.persist_file):
             return 0
         try:
-            with open(self.persist_file, "r", encoding="utf-8") as f:
+            with open(self.persist_file, encoding="utf-8") as f:
                 data = json.load(f)
             count = 0
             with self._lock:
@@ -361,12 +362,12 @@ class HistoryManager(object):
         with self._lock:
             return len(self._history)
 
-class CompletionEngine(object):
+class CompletionEngine:
     """自动补全引擎"""
 
     def __init__(self):
-        self._completers: Dict[str, Callable] = {}
-        self._global_completers: List[Callable] = []
+        self._completers: dict[str, Callable] = {}
+        self._global_completers: list[Callable] = []
 
     def register(self, command_name: str, completer: Callable) -> None:
         """注册命令级补全器"""
@@ -380,9 +381,9 @@ class CompletionEngine(object):
         self,
         text: str,
         line: str,
-        command_name: Optional[str] = None,
-        all_commands: Optional[Set[str]] = None,
-    ) -> List[str]:
+        command_name: str | None = None,
+        all_commands: set[str] | None = None,
+    ) -> list[str]:
         """执行补全"""
         candidates = []
 
@@ -412,17 +413,17 @@ class CompletionEngine(object):
         # 去重排序
         return sorted(set(candidates))
 
-class OutputFormatter(object):
+class OutputFormatter:
     """输出格式化器"""
 
-    def __init__(self, theme: Optional[CLITheme] = None):
+    def __init__(self, theme: CLITheme | None = None):
         self.theme = theme or CLITheme()
 
     def format_table(
         self,
-        headers: List[str],
-        rows: List[List[Any]],
-        title: Optional[str] = None,
+        headers: list[str],
+        rows: list[list[Any]],
+        title: str | None = None,
         max_width: int = 80,
     ) -> str:
         """格式化表格输出"""
@@ -476,12 +477,12 @@ class OutputFormatter(object):
         """格式化JSON输出"""
         return json.dumps(data, ensure_ascii=False, indent=indent, default=str)
 
-    def format_kv(self, data: Dict[str, Any], title: Optional[str] = None) -> str:
+    def format_kv(self, data: dict[str, Any], title: str | None = None) -> str:
         """格式化键值对输出"""
         lines = []
         if title:
             lines.append(self.theme.colored(f"\n── {title} ──", self.theme.header_color))
-        max_key_len = max(len(str(k)) for k in data.keys()) if data else 0
+        max_key_len = max(len(str(k)) for k in data) if data else 0
         for key, value in data.items():
             lines.append(f"  {str(key):<{max_key_len}}  {self.theme.muted_color}→{self.theme.reset}  {value}")
         return "\n".join(lines)
@@ -495,19 +496,19 @@ class OutputFormatter(object):
         bar = "█" * filled + "░" * (width - filled)
         return f"{prefix} [{bar}] {pct * 100:.1f}% ({current}/{total})"
 
-class ScriptEngine(object):
+class ScriptEngine:
     """脚本执行引擎"""
 
     def __init__(self, command_registry):
         self.registry = command_registry
-        self._variables: Dict[str, str] = {}
-        self._functions: Dict[str, Callable] = {}
+        self._variables: dict[str, str] = {}
+        self._functions: dict[str, Callable] = {}
 
     def set_variable(self, name: str, value: str) -> None:
         """设置变量"""
         self._variables[name] = value
 
-    def get_variable(self, name: str) -> Optional[str]:
+    def get_variable(self, name: str) -> str | None:
         """获取变量"""
         return self._variables.get(name)
 
@@ -519,7 +520,7 @@ class ScriptEngine(object):
             result = result.replace(f"${{{name}}}", value)
         return result
 
-    def execute_script(self, script_path: str, env: Optional[Dict] = None) -> List[CommandResult]:
+    def execute_script(self, script_path: str, env: dict | None = None) -> list[CommandResult]:
         """执行脚本文件"""
         if env:
             self._variables.update(env)
@@ -566,9 +567,9 @@ class CommandRegistry:
     """命令注册中心"""
 
     def __init__(self):
-        self._commands: Dict[str, CommandDef] = OrderedDict()
-        self._aliases: Dict[str, str] = {}
-        self._categories: Dict[str, List[str]] = {}
+        self._commands: dict[str, CommandDef] = OrderedDict()
+        self._aliases: dict[str, str] = {}
+        self._categories: dict[str, list[str]] = {}
 
     def register(self, cmd_def: CommandDef) -> None:
         """注册命令"""
@@ -592,7 +593,7 @@ class CommandRegistry:
             return True
         return False
 
-    def get(self, name: str) -> Optional[CommandDef]:
+    def get(self, name: str) -> CommandDef | None:
         """获取命令定义"""
         resolved = self._aliases.get(name, name)
         return self._commands.get(resolved)
@@ -601,16 +602,16 @@ class CommandRegistry:
         """解析命令名（处理别名）"""
         return self._aliases.get(name, name)
 
-    def get_all_names(self) -> Set[str]:
+    def get_all_names(self) -> set[str]:
         """获取所有命令名和别名"""
         return set(self._commands.keys()) | set(self._aliases.keys())
 
-    def get_by_category(self, category: str) -> List[CommandDef]:
+    def get_by_category(self, category: str) -> list[CommandDef]:
         """按分类获取命令"""
         names = self._categories.get(category, [])
         return [self._commands[n] for n in names if n in self._commands]
 
-    def search(self, keyword: str) -> List[CommandDef]:
+    def search(self, keyword: str) -> list[CommandDef]:
         """搜索命令"""
         keyword_lower = keyword.lower()
         results = []
@@ -626,14 +627,14 @@ class CommandRegistry:
         return results
 
     @property
-    def categories(self) -> Dict[str, List[str]]:
+    def categories(self) -> dict[str, list[str]]:
         return dict(self._categories)
 
     @property
     def count(self) -> int:
         return len(self._commands)
 
-    async def execute(self, input_line: str, context: Optional[CommandContext] = None) -> CommandResult:
+    async def execute(self, input_line: str, context: CommandContext | None = None) -> CommandResult:
         """执行命令"""
         _ = self.trace("execute")
         trace_id = f"cli-execute-{int(time.time() * 1000)}"
@@ -1186,7 +1187,7 @@ class CLIInterface(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ),
         )
 
-    def execute_batch(self, commands: List[str]) -> List[CommandResult]:
+    def execute_batch(self, commands: list[str]) -> list[CommandResult]:
         """批量执行命令"""
         results = []
         for cmd in commands:
@@ -1273,7 +1274,7 @@ class CLIInterface(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 """
         print(banner)
 
-    def _readline_completer(self, text: str, state: int) -> Optional[str]:
+    def _readline_completer(self, text: str, state: int) -> str | None:
         """readline补全回调"""
         line = readline.get_line_buffer()
         command_parts = line.split()

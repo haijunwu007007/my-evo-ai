@@ -94,20 +94,20 @@ except ImportError:
 
 logger = get_logger("rpa_controller")
 
-class ScriptExecutionEngine(object):
+class ScriptExecutionEngine:
     """RPA脚本执行引擎 - 负责脚本解析、执行、断点续跑"""
 
     def __init__(self):
-        self._scripts: Dict[str, Dict] = {}
-        self._snapshots: Dict[str, Dict] = {}
+        self._scripts: dict[str, dict] = {}
+        self._snapshots: dict[str, dict] = {}
         self._executions: int = 0
         self._errors: int = 0
 
-    def register_script(self, script_id: str, steps: List[Dict], metadata: Dict = None) -> None:
+    def register_script(self, script_id: str, steps: list[dict], metadata: dict = None) -> None:
         """注册RPA脚本"""
         self._scripts[script_id] = {"steps": steps, "metadata": metadata or {}, "status": "registered"}
 
-    def execute_from_step(self, script_id: str, from_step: int = 0) -> Dict:
+    def execute_from_step(self, script_id: str, from_step: int = 0) -> dict:
         """从指定步骤开始执行脚本"""
         script = self._scripts.get(script_id)
         if not script:
@@ -119,15 +119,15 @@ class ScriptExecutionEngine(object):
         script["status"] = "completed"
         return {"success": True, "script_id": script_id, "steps_executed": len(results)}
 
-    def save_snapshot(self, execution_id: str, step_index: int, context: Dict) -> None:
+    def save_snapshot(self, execution_id: str, step_index: int, context: dict) -> None:
         """保存执行快照（断点续跑）"""
         self._snapshots[execution_id] = {"step_index": step_index, "context": context, "timestamp": time.time()}
 
-    def restore_snapshot(self, execution_id: str) -> Optional[Dict]:
+    def restore_snapshot(self, execution_id: str) -> dict | None:
         """恢复执行快照"""
         return self._snapshots.get(execution_id)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "scripts": len(self._scripts),
             "executions": self._executions,
@@ -141,12 +141,12 @@ class BrowserAutomator:
     def __init__(self, headless: bool = True, timeout: int = 30):
         self.headless = headless
         self.timeout = timeout
-        self._sessions: Dict[str, Dict] = {}
-        self._page_cache: Dict[str, List[Dict]] = {}
-        self._interaction_log: List[Dict] = []
+        self._sessions: dict[str, dict] = {}
+        self._page_cache: dict[str, list[dict]] = {}
+        self._interaction_log: list[dict] = []
         self._max_log = 500
 
-    def create_session(self, url: str, browser_type: str = "chromium") -> Dict:
+    def create_session(self, url: str, browser_type: str = "chromium") -> dict:
         """创建浏览器会话"""
         session_id = str(uuid.uuid4())[:12]
         session = {
@@ -170,7 +170,7 @@ class BrowserAutomator:
             "initial_url": url,
         }
 
-    def navigate(self, session_id: str, url: str) -> Dict:
+    def navigate(self, session_id: str, url: str) -> dict:
         """导航到指定URL"""
         session = self._sessions.get(session_id)
         if not session:
@@ -190,7 +190,7 @@ class BrowserAutomator:
             "dom_elements": session["dom_elements"],
         }
 
-    def click_element(self, session_id: str, selector: str) -> Dict:
+    def click_element(self, session_id: str, selector: str) -> dict:
         """点击页面元素"""
         session = self._sessions.get(session_id)
         if not session:
@@ -208,7 +208,7 @@ class BrowserAutomator:
         self._log_interaction(session_id, "click", element_info)
         return {"success": True, "session_id": session_id, "element": element_info, "clicked": True}
 
-    def fill_input(self, session_id: str, selector: str, value: str) -> Dict:
+    def fill_input(self, session_id: str, selector: str, value: str) -> dict:
         """填充输入框"""
         session = self._sessions.get(session_id)
         if not session:
@@ -225,7 +225,7 @@ class BrowserAutomator:
         self._log_interaction(session_id, "fill", element_info)
         return {"success": True, "session_id": session_id, "element": element_info}
 
-    def extract_data(self, session_id: str, selectors: Dict[str, str]) -> Dict:
+    def extract_data(self, session_id: str, selectors: dict[str, str]) -> dict:
         """从页面提取结构化数据"""
         session = self._sessions.get(session_id)
         if not session:
@@ -242,7 +242,7 @@ class BrowserAutomator:
         self._log_interaction(session_id, "extract", {"fields": list(extracted.keys())})
         return {"success": True, "session_id": session_id, "data": extracted, "fields_count": len(extracted)}
 
-    def close_session(self, session_id: str) -> Dict:
+    def close_session(self, session_id: str) -> dict:
         """关闭浏览器会话"""
         session = self._sessions.get(session_id)
         if not session:
@@ -257,7 +257,7 @@ class BrowserAutomator:
             "pages_visited": len(session.get("pages", [])),
         }
 
-    def get_session_stats(self) -> Dict:
+    def get_session_stats(self) -> dict:
         """获取所有会话统计"""
         active = sum(1 for s in self._sessions.values() if s["status"] == "active")
         return {
@@ -267,7 +267,7 @@ class BrowserAutomator:
             "browsers": list(set(s["browser_type"] for s in self._sessions.values())),
         }
 
-    def _log_interaction(self, session_id: str, action: str, details: Dict):
+    def _log_interaction(self, session_id: str, action: str, details: dict):
         self._interaction_log.append(
             {"session_id": session_id, "action": action, "details": details, "timestamp": time.time()}
         )
@@ -275,7 +275,7 @@ class BrowserAutomator:
             self._interaction_log = self._interaction_log[-self._max_log :]
 
     @staticmethod
-    def _parse_selector(selector: str) -> Tuple[str, str]:
+    def _parse_selector(selector: str) -> tuple[str, str]:
         if selector.startswith("//") or selector.startswith("/"):
             return ("xpath", selector)
         if selector.startswith("#"):
@@ -302,12 +302,12 @@ class DesktopAutomator:
     """桌面自动化引擎 - 窗口管理和键盘鼠标模拟"""
 
     def __init__(self):
-        self._windows: Dict[str, Dict] = {}
+        self._windows: dict[str, dict] = {}
         self._clipboard: str = ""
-        self._hotkeys: Dict[str, str] = {}
-        self._macro_registry: Dict[str, List[Dict]] = {}
+        self._hotkeys: dict[str, str] = {}
+        self._macro_registry: dict[str, list[dict]] = {}
 
-    def find_window(self, title_pattern: str) -> Dict:
+    def find_window(self, title_pattern: str) -> dict:
         """查找匹配标题的窗口"""
         matched = []
         for wid, win in self._windows.items():
@@ -324,7 +324,7 @@ class DesktopAutomator:
                 )
         return {"success": True, "matches": matched, "count": len(matched), "pattern": title_pattern}
 
-    def activate_window(self, window_id: str) -> Dict:
+    def activate_window(self, window_id: str) -> dict:
         """激活指定窗口"""
         win = self._windows.get(window_id)
         if not win:
@@ -335,7 +335,7 @@ class DesktopAutomator:
         win["last_activated"] = time.time()
         return {"success": True, "window_id": window_id, "title": win["title"], "focused": True}
 
-    def send_keys(self, window_id: str, text: str) -> Dict:
+    def send_keys(self, window_id: str, text: str) -> dict:
         """向窗口发送按键"""
         win = self._windows.get(window_id)
         if not win:
@@ -346,7 +346,7 @@ class DesktopAutomator:
         self._clipboard = text
         return {"success": True, "window_id": window_id, "characters_sent": keys_sent, "special_keys": special_keys}
 
-    def click_at(self, window_id: str, x: int, y: int, button: str = "left", clicks: int = 1) -> Dict:
+    def click_at(self, window_id: str, x: int, y: int, button: str = "left", clicks: int = 1) -> dict:
         """在指定坐标点击"""
         win = self._windows.get(window_id)
         if not win:
@@ -362,7 +362,7 @@ class DesktopAutomator:
             "clicks": clicks,
         }
 
-    def register_hotkey(self, hotkey: str, action_name: str) -> Dict:
+    def register_hotkey(self, hotkey: str, action_name: str) -> dict:
         """注册全局快捷键"""
         if not re.match(r"^[A-Za-z]+(\+[A-Za-z]+)*$", hotkey.replace(" ", "")):
             return {"success": False, "error": "Invalid hotkey format"}
@@ -370,7 +370,7 @@ class DesktopAutomator:
         self._hotkeys[normalized] = action_name
         return {"success": True, "hotkey": normalized, "action": action_name}
 
-    def record_macro(self, macro_name: str, actions: List[Dict]) -> Dict:
+    def record_macro(self, macro_name: str, actions: list[dict]) -> dict:
         """录制宏操作序列"""
         if len(actions) > 1000:
             return {"success": False, "error": "Macro too long (max 1000 actions)"}
@@ -383,7 +383,7 @@ class DesktopAutomator:
         }
         return {"success": True, "macro_name": macro_name, "action_count": len(actions)}
 
-    def play_macro(self, macro_name: str) -> Dict:
+    def play_macro(self, macro_name: str) -> dict:
         """回放宏操作序列"""
         macro = self._macro_registry.get(macro_name)
         if not macro:
@@ -395,12 +395,12 @@ class DesktopAutomator:
             "total_duration_ms": macro["total_duration_ms"],
         }
 
-    def list_windows(self) -> Dict:
+    def list_windows(self) -> dict:
         """列出所有已知窗口"""
         windows = [{"window_id": wid, **{k: v for k, v in info.items()}} for wid, info in self._windows.items()]
         return {"success": True, "windows": windows, "count": len(windows)}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取桌面自动化统计"""
         return {
             "registered_windows": len(self._windows),
@@ -415,13 +415,13 @@ class TaskOrchestrator:
     def __init__(self, max_concurrent: int = 5, retry_limit: int = 3):
         self.max_concurrent = max_concurrent
         self.retry_limit = retry_limit
-        self._workflows: Dict[str, Dict] = {}
-        self._executions: Dict[str, Dict] = {}
+        self._workflows: dict[str, dict] = {}
+        self._executions: dict[str, dict] = {}
         self._queue: deque = deque()
-        self._execution_history: List[Dict] = []
+        self._execution_history: list[dict] = []
         self._max_history = 200
 
-    def define_workflow(self, name: str, steps: List[Dict], variables: Dict = None) -> Dict:
+    def define_workflow(self, name: str, steps: list[dict], variables: dict = None) -> dict:
         """定义RPA工作流"""
         workflow_id = str(uuid.uuid4())[:8]
         if not steps:
@@ -447,7 +447,7 @@ class TaskOrchestrator:
             "variables_count": len(workflow["variables"]),
         }
 
-    def execute_workflow(self, workflow_id: str, input_params: Dict = None) -> Dict:
+    def execute_workflow(self, workflow_id: str, input_params: dict = None) -> dict:
         """执行工作流"""
         workflow = self._workflows.get(workflow_id)
         if not workflow:
@@ -493,7 +493,7 @@ class TaskOrchestrator:
             "error": execution["error"],
         }
 
-    def retry_execution(self, execution_id: str) -> Dict:
+    def retry_execution(self, execution_id: str) -> dict:
         """重试失败的工作流执行"""
         execution = self._executions.get(execution_id)
         if not execution:
@@ -538,7 +538,7 @@ class TaskOrchestrator:
             "duration_ms": round(duration * 1000, 2),
         }
 
-    def schedule_workflow(self, workflow_id: str, cron_expr: str, params: Dict = None) -> Dict:
+    def schedule_workflow(self, workflow_id: str, cron_expr: str, params: dict = None) -> dict:
         """定时调度工作流"""
         workflow = self._workflows.get(workflow_id)
         if not workflow:
@@ -554,12 +554,12 @@ class TaskOrchestrator:
             "status": "scheduled",
         }
 
-    def get_execution_history(self, limit: int = 20) -> Dict:
+    def get_execution_history(self, limit: int = 20) -> dict:
         """获取执行历史"""
         history = self._execution_history[-limit:]
         return {"success": True, "executions": history, "count": len(history), "total": len(self._execution_history)}
 
-    def get_workflow_stats(self) -> Dict:
+    def get_workflow_stats(self) -> dict:
         """获取工作流统计"""
         total = len(self._execution_history)
         success = sum(1 for h in self._execution_history if h.get("status") == "completed")
@@ -572,7 +572,7 @@ class TaskOrchestrator:
             "pending_in_queue": len(self._queue),
         }
 
-    def _execute_step(self, step: Dict, variables: Dict) -> Dict:
+    def _execute_step(self, step: dict, variables: dict) -> dict:
         action = step.get("action", "unknown")
         step_name = step.get("name", "")
         target = step.get("target", step.get("selector", ""))
@@ -589,7 +589,7 @@ class TaskOrchestrator:
             "duration_ms": round(int(hashlib.md5(step_name.encode()).hexdigest()[:4], 16) % 500 + 50, 2),
         }
 
-    def _record_execution(self, execution_id: str, execution: Dict, duration: float):
+    def _record_execution(self, execution_id: str, execution: dict, duration: float):
         record = {
             "execution_id": execution_id,
             "workflow_id": execution["workflow_id"],
@@ -605,17 +605,17 @@ class TaskOrchestrator:
         if len(self._execution_history) > self._max_history:
             self._execution_history = self._execution_history[-self._max_history :]
 
-class ResourceScheduler(object):
+class ResourceScheduler:
     """RPA资源调度器 - 机器人池和负载均衡"""
 
     def __init__(self, max_robots: int = 10):
         self.max_robots = max_robots
-        self._robot_pool: Dict[str, Dict] = {}
+        self._robot_pool: dict[str, dict] = {}
         self._task_queue: deque = deque()
-        self._assignments: Dict[str, str] = {}
+        self._assignments: dict[str, str] = {}
         self._usage_history: deque = deque(maxlen=1000)
 
-    def register_robot(self, robot_id: str, capabilities: List[str], metadata: Dict = None) -> Dict:
+    def register_robot(self, robot_id: str, capabilities: list[str], metadata: dict = None) -> dict:
         """注册RPA机器人到资源池"""
         if len(self._robot_pool) >= self.max_robots:
             return {"success": False, "error": f"Robot pool full (max {self.max_robots})"}
@@ -636,7 +636,7 @@ class ResourceScheduler(object):
         self._robot_pool[robot_id] = robot
         return {"success": True, "robot_id": robot_id, "capabilities": capabilities, "status": "idle"}
 
-    def assign_task(self, task_id: str, required_capabilities: List[str], priority: int = 0) -> Dict:
+    def assign_task(self, task_id: str, required_capabilities: list[str], priority: int = 0) -> dict:
         """分配任务给可用机器人"""
         available = [
             r
@@ -673,7 +673,7 @@ class ResourceScheduler(object):
             "robot_capabilities": robot["capabilities"],
         }
 
-    def complete_task(self, task_id: str, success: bool = True) -> Dict:
+    def complete_task(self, task_id: str, success: bool = True) -> dict:
         """标记任务完成"""
         robot_id = self._assignments.get(task_id)
         if not robot_id:
@@ -695,7 +695,7 @@ class ResourceScheduler(object):
         self._process_queue()
         return {"success": True, "task_id": task_id, "robot_id": robot_id, "robot_status": "idle"}
 
-    def heartbeat(self, robot_id: str) -> Dict:
+    def heartbeat(self, robot_id: str) -> dict:
         """机器人心跳"""
         robot = self._robot_pool.get(robot_id)
         if not robot:
@@ -703,7 +703,7 @@ class ResourceScheduler(object):
         robot["last_heartbeat"] = time.time()
         return {"success": True, "robot_id": robot_id, "status": robot["status"]}
 
-    def get_pool_status(self) -> Dict:
+    def get_pool_status(self) -> dict:
         """获取资源池状态"""
         robots = list(self._robot_pool.values())
         idle = sum(1 for r in robots if r["status"] == "idle")
@@ -750,11 +750,11 @@ _RPA_BASES = (EnterpriseModule,) if not MIXIN_AVAILABLE else (EnterpriseModule, 
 class RpaController(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """RPA机器人控制器 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "robots_active": 0,
@@ -764,7 +764,7 @@ class RpaController(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 

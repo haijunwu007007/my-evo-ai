@@ -128,7 +128,7 @@ class BlockDevice:
     iops_read: int = 0
     iops_write: int = 0
     latency_ms: float = 0.0
-    partitions: List[Dict[str, Any]] = field(default_factory=list)
+    partitions: list[dict[str, Any]] = field(default_factory=list)
 
 @dataclass
 class IORecord:
@@ -159,7 +159,7 @@ class StoragePool:
     pool_id: str
     name: str
     raid_level: str
-    member_devices: List[str] = field(default_factory=list)
+    member_devices: list[str] = field(default_factory=list)
     total_gb: float = 0.0
     used_gb: float = 0.0
 
@@ -170,13 +170,13 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     MODULE_NAME = "块设备管理"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._devices: Dict[str, BlockDevice] = {}
-        self._io_history: Dict[str, List[IORecord]] = {}
-        self._snapshots: Dict[str, Snapshot] = {}
-        self._pools: Dict[str, StoragePool] = {}
+        self._devices: dict[str, BlockDevice] = {}
+        self._io_history: dict[str, list[IORecord]] = {}
+        self._snapshots: dict[str, Snapshot] = {}
+        self._pools: dict[str, StoragePool] = {}
         self._counter = 0
         self._io_threshold_warn_ms = 50.0
         self._io_threshold_crit_ms = 200.0
@@ -259,7 +259,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             if len(self._io_history[device_id]) > 1000:
                 self._io_history[device_id] = self._io_history[device_id][-500:]
 
-    def _get_io_stats(self, device_id: str) -> Dict:
+    def _get_io_stats(self, device_id: str) -> dict:
         records = self._io_history.get(device_id, [])
         if not records:
             return {"total_ops": 0, "avg_latency_ms": 0, "throughput_mb": 0}
@@ -280,7 +280,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "total_data_mb": round(total_kb / 1024, 2),
         }
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("block_device_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
         actions = {
@@ -302,7 +302,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         return handler(params)
         return {"status": "healthy", "module": "block_device"}
 
-    def _exec_register_device(self, p: Dict) -> Dict:
+    def _exec_register_device(self, p: dict) -> dict:
         did = self._next_id("dev")
         self._devices[did] = BlockDevice(
             device_id=did,
@@ -316,7 +316,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._io_history[did] = []
         return {"success": True, "result": {"device_id": did}}
 
-    def _exec_list_devices(self, p: Dict) -> Dict:
+    def _exec_list_devices(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -335,7 +335,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ],
         }
 
-    def _exec_get_device(self, p: Dict) -> Dict:
+    def _exec_get_device(self, p: dict) -> dict:
         did = p["device_id"]
         if did not in self._devices:
             return {"success": False, "error": "设备不存在"}
@@ -361,13 +361,13 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_get_io_stats(self, p: Dict) -> Dict:
+    def _exec_get_io_stats(self, p: dict) -> dict:
         did = p["device_id"]
         if did not in self._devices:
             return {"success": False, "error": "设备不存在"}
         return {"success": True, "result": self._get_io_stats(did)}
 
-    def _exec_simulate_io(self, p: Dict) -> Dict:
+    def _exec_simulate_io(self, p: dict) -> dict:
         """模拟IO操作用于测试和基准"""
         did = p["device_id"]
         if did not in self._devices:
@@ -382,7 +382,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         io = self._get_io_stats(did)
         return {"success": True, "result": {"simulated_ops": ops, "io_stats": io}}
 
-    def _exec_create_snapshot(self, p: Dict) -> Dict:
+    def _exec_create_snapshot(self, p: dict) -> dict:
         did = p["device_id"]
         if did not in self._devices:
             return {"success": False, "error": "设备不存在"}
@@ -398,7 +398,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         )
         return {"success": True, "result": {"snap_id": sid, "size_gb": round(dev.used_gb, 1)}}
 
-    def _exec_list_snapshots(self, p: Dict) -> Dict:
+    def _exec_list_snapshots(self, p: dict) -> dict:
         did = p.get("device_id", "")
         snaps = [s for s in self._snapshots.values() if not did or s.device_id == did]
         return {
@@ -418,7 +418,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_create_pool(self, p: Dict) -> Dict:
+    def _exec_create_pool(self, p: dict) -> dict:
         pid = self._next_id("pool")
         members = p.get("members", [])
         total = sum(self._devices[m].size_gb for m in members if m in self._devices)
@@ -431,7 +431,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         )
         return {"success": True, "result": {"pool_id": pid, "total_gb": total, "members": len(members)}}
 
-    def _exec_list_pools(self, p: Dict) -> Dict:
+    def _exec_list_pools(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -448,7 +448,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ],
         }
 
-    def _exec_get_pool_info(self, p: Dict) -> Dict:
+    def _exec_get_pool_info(self, p: dict) -> dict:
         pid = p["pool_id"]
         if pid not in self._pools:
             return {"success": False, "error": "存储池不存在"}
@@ -471,7 +471,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         total_size = sum(d.size_gb for d in self._devices.values())
         total_used = sum(d.used_gb for d in self._devices.values())
         return {
@@ -488,7 +488,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -507,7 +507,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         logger.info("块设备管理关闭")
         return True
 
-    def assess_device_health(self, device_id: str) -> Dict[str, Any]:
+    def assess_device_health(self, device_id: str) -> dict[str, Any]:
         """评估块设备健康状态：坏扇区趋势、SMART指标分析、剩余寿命预测"""
         device = None
         for d in self._devices if hasattr(self, "_devices") else []:
@@ -587,7 +587,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return "设备有一定老化指标，建议增加监控频率并准备备件"
         return "设备状态良好，继续保持例行监控"
 
-    def analyze_iops_performance(self, hours: int = 1) -> Dict[str, Any]:
+    def analyze_iops_performance(self, hours: int = 1) -> dict[str, Any]:
         """分析块设备IOPS性能：读写IOPS、吞吐量、延迟分布、队列深度"""
         metrics = self._metrics_history if hasattr(self, "_metrics_history") else []
         cutoff = time.time() - hours * 3600
@@ -640,7 +640,7 @@ class BlockDeviceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def forecast_capacity(self, device_id: str, days_forecast: int = 30) -> Dict[str, Any]:
+    def forecast_capacity(self, device_id: str, days_forecast: int = 30) -> dict[str, Any]:
         """预测块设备容量消耗趋势，计算预计耗尽时间"""
         device = None
         for d in self._devices if hasattr(self, "_devices") else []:

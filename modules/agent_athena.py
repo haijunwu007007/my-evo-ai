@@ -135,12 +135,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class LifecyclePolicy:
@@ -150,7 +150,7 @@ class LifecyclePolicy:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -173,15 +173,15 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, LifecyclePolicy] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, LifecyclePolicy] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = None
         self._metrics = metrics_collector
 
@@ -269,7 +269,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 component_id=comp_id, name=name, state=LifecycleState.INITIALIZING, priority=priority
             )
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         metrics_collector.counter("agent_athena_ops_total", labels={"action": action})
         """执行生命周期管理动作"""
         params = params or {}
@@ -321,7 +321,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 duration_ms = (time.time() - start_time) * 1000
             self.stats.record_request(duration_ms, success, error_msg)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         self.audit("execute", f"action={action}")
 
@@ -429,7 +429,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.info(f"关闭完成，耗时 {shutdown_duration:.2f} 秒")
 
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: Optional[List[str]] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] | None = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -451,7 +451,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.stats.error_count += 1
             return False
 
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -467,7 +467,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "dependencies": comp.dependencies,
         }
 
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -479,7 +479,7 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -494,15 +494,15 @@ class AgentAthenaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
 module_class = AgentAthenaManager
 
-class AnalysisEngine(object):
+class AnalysisEngine:
     """数据分析引擎 - 多维分析、趋势检测、异常识别"""
 
     def __init__(self):
-        self._datasets: Dict[str, List[Dict]] = {}
-        self._analysis_cache: Dict[str, Dict] = {}
-        self._trend_models: Dict[str, Dict] = {}
+        self._datasets: dict[str, list[dict]] = {}
+        self._analysis_cache: dict[str, dict] = {}
+        self._trend_models: dict[str, dict] = {}
 
-    def ingest(self, dataset_id: str, records: List[Dict]) -> int:
+    def ingest(self, dataset_id: str, records: list[dict]) -> int:
         """导入数据集"""
         if dataset_id not in self._datasets:
             self._datasets[dataset_id] = []
@@ -510,7 +510,7 @@ class AnalysisEngine(object):
         self._analysis_cache.pop(dataset_id, None)
         return len(self._datasets[dataset_id])
 
-    def get_statistics(self, dataset_id: str, field: str) -> Dict[str, Any]:
+    def get_statistics(self, dataset_id: str, field: str) -> dict[str, Any]:
         """计算字段统计"""
         data = self._datasets.get(dataset_id, [])
         values = [r.get(field) for r in data if isinstance(r.get(field), (int, float))]
@@ -534,7 +534,7 @@ class AnalysisEngine(object):
             "q3": sorted_vals[3 * n // 4],
         }
 
-    def detect_anomalies(self, dataset_id: str, field: str, threshold: float = 2.0) -> List[Dict]:
+    def detect_anomalies(self, dataset_id: str, field: str, threshold: float = 2.0) -> list[dict]:
         """异常值检测"""
         stats = self.get_statistics(dataset_id, field)
         if stats["count"] == 0:
@@ -551,7 +551,7 @@ class AnalysisEngine(object):
                     anomalies.append({"index": i, "value": v, "z_score": round(z, 4)})
         return anomalies
 
-    def detect_trend(self, dataset_id: str, field: str) -> Dict[str, Any]:
+    def detect_trend(self, dataset_id: str, field: str) -> dict[str, Any]:
         """简单趋势检测"""
         data = self._datasets.get(dataset_id, [])
         values = [r.get(field) for r in data if isinstance(r.get(field), (int, float))]
@@ -570,26 +570,26 @@ class AnalysisEngine(object):
             "second_avg": round(avg_second, 4),
         }
 
-    def group_by(self, dataset_id: str, field: str) -> Dict[str, int]:
+    def group_by(self, dataset_id: str, field: str) -> dict[str, int]:
         """分组统计"""
         data = self._datasets.get(dataset_id, [])
-        groups: Dict[str, int] = {}
+        groups: dict[str, int] = {}
         for r in data:
             key = str(r.get(field, "unknown"))
             groups[key] = groups.get(key, 0) + 1
         return dict(sorted(groups.items(), key=lambda x: -x[1]))
 
-    def get_dataset_info(self, dataset_id: str) -> Dict[str, Any]:
+    def get_dataset_info(self, dataset_id: str) -> dict[str, Any]:
         data = self._datasets.get(dataset_id, [])
         if not data:
             return {"dataset_id": dataset_id, "records": 0}
         fields = list(data[0].keys()) if data else []
         return {"dataset_id": dataset_id, "records": len(data), "fields": fields}
 
-    def list_datasets(self) -> List[str]:
+    def list_datasets(self) -> list[str]:
         return list(self._datasets.keys())
 
-    def correlate(self, dataset_id: str, field_a: str, field_b: str) -> Dict[str, Any]:
+    def correlate(self, dataset_id: str, field_a: str, field_b: str) -> dict[str, Any]:
         """计算两字段相关性"""
         data = self._datasets.get(dataset_id, [])
         pairs = [
@@ -609,17 +609,17 @@ class AnalysisEngine(object):
         corr = (n * sum_ab - sum_a * sum_b) / max(denom, 1e-8)
         return {"correlation": round(corr, 4), "pairs": n, "field_a": field_a, "field_b": field_b}
 
-    def top_values(self, dataset_id: str, field: str, n: int = 10) -> List[Dict]:
+    def top_values(self, dataset_id: str, field: str, n: int = 10) -> list[dict]:
         """获取字段Top N值"""
         data = self._datasets.get(dataset_id, [])
-        counter: Dict[str, int] = {}
+        counter: dict[str, int] = {}
         for r in data:
             v = str(r.get(field, ""))
             counter[v] = counter.get(v, 0) + 1
         sorted_items = sorted(counter.items(), key=lambda x: -x[1])
         return [{"value": k, "count": v} for k, v in sorted_items[:n]]
 
-    def assess_data_quality(self, dataset_id: str) -> Dict[str, Any]:
+    def assess_data_quality(self, dataset_id: str) -> dict[str, Any]:
         """评估数据集质量: 完整性、一致性、唯一性"""
         data = self._datasets.get(dataset_id, [])
         if not data:
@@ -628,7 +628,7 @@ class AnalysisEngine(object):
         if total_rows == 0:
             return {"total_rows": 0, "quality_score": 1.0}
         fields = list(data[0].keys()) if data else []
-        null_counts: Dict[str, int] = {}
+        null_counts: dict[str, int] = {}
         for row in data:
             for field in fields:
                 if row.get(field) is None or str(row.get(field, "")).strip() == "":

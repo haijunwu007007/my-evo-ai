@@ -87,7 +87,8 @@ import json
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List, Callable
+from typing import Optional, Dict, Any, List
+from collections.abc import Callable
 from datetime import datetime, timedelta, date
 from enum import Enum
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -132,7 +133,7 @@ class BudgetStatus:
     days_until_reset: int
     estimated_cost_usd: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "daily_limit": self.daily_limit,
             "used_today": self.used_today,
@@ -160,7 +161,7 @@ class UsageRecord:
 # 核心类
 # ============================================================================
 
-class TokenBudgetManager(object):
+class TokenBudgetManager:
     """
     Token预算管理器
 
@@ -192,7 +193,7 @@ class TokenBudgetManager(object):
     ```
     """
 
-    def __init__(self, config_path: Optional[str] = None, daily_limit: Optional[int] = None):
+    def __init__(self, config_path: str | None = None, daily_limit: int | None = None):
         """
         初始化Token预算管理器
 
@@ -447,7 +448,7 @@ class TokenBudgetManager(object):
         """
         return self.record_usage(tokens, model, conversation_id)
 
-    def get_usage_history(self, days: int = 7) -> List[Dict[str, Any]]:
+    def get_usage_history(self, days: int = 7) -> list[dict[str, Any]]:
         """
         获取使用历史
 
@@ -476,7 +477,7 @@ class TokenBudgetManager(object):
             for r in records
         ]
 
-    def get_weekly_report(self) -> Dict[str, Any]:
+    def get_weekly_report(self) -> dict[str, Any]:
         """
         获取周报
 
@@ -510,7 +511,7 @@ class TokenBudgetManager(object):
 
         return self.remaining // daily_rate if hasattr(self, "remaining") else 999
 
-    def estimate_cost(self, tokens: int, model: Optional[str] = None) -> float:
+    def estimate_cost(self, tokens: int, model: str | None = None) -> float:
         """
         估算成本
 
@@ -599,7 +600,7 @@ class TokenBudgetManager(object):
         self.model_pricing[model] = price_per_1k
         self._save_config()
 
-    def get_cost_breakdown(self) -> Dict[str, float]:
+    def get_cost_breakdown(self) -> dict[str, float]:
         """获取按模型分类的成本"""
         breakdown = {}
 
@@ -639,7 +640,7 @@ class TokenBudgetManager(object):
 # 快捷函数
 # ============================================================================
 
-_manager_instance: Optional[TokenBudgetManager] = None
+_manager_instance: TokenBudgetManager | None = None
 
 def get_manager() -> TokenBudgetManager:
     """获取单例预算管理器"""

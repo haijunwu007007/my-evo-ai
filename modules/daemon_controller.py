@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 守护进程控制器（A级）
 # Grade: B
 
@@ -11,7 +10,7 @@ logger=logging.getLogger("evo.daemon-controller")
 class DaemonController(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="daemon-controller";MODULE_NAME="守护进程";VERSION = "V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
-        super().__init__(config);self._daemons:Dict[str,Dict]={};self._events:List[Dict]=[]
+        super().__init__(config);self._daemons:dict[str,dict]={};self._events:list[dict]=[]
         self._is_windows = platform.system() == "Windows"
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:
@@ -21,7 +20,7 @@ class DaemonController(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
         if pid<=0:return False
         try:
             if self._is_windows:
-                r=subprocess.run(["tasklist","/FI","PID eq {}".format(pid)],capture_output=True,text=True,timeout=3)
+                r=subprocess.run(["tasklist","/FI",f"PID eq {pid}"],capture_output=True,text=True,timeout=3)
                 return str(pid) in r.stdout
             else:
                 os.kill(pid,0);return True

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """上市公司级业务单元测试 — 直接测模块真实业务逻辑，不走API"""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

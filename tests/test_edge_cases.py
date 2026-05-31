@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 边缘用例测试 (60+)
 
 覆盖：空值、超长输入、并发、边界条件、异常恢复"""
@@ -478,7 +477,7 @@ class TestStringEdgeCases(unittest.TestCase):
         """字符串格式化"""
         name = "world"
         self.assertEqual(f"hello {name}", "hello world")
-        self.assertEqual("hello {}".format(name), "hello world")
+        self.assertEqual(f"hello {name}", "hello world")
         self.assertEqual("hello %s" % name, "hello world")
 
     def test_050_regex_edge_cases(self):

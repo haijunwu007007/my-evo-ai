@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Excel 引擎（A级）"""
 # Grade: A
 __module_meta__ = {"id":"excel-engine","name":"Excel Engine","version":"V0.1","group":"data","grade":"A",
@@ -31,7 +30,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     def __init__(self, config=None):
         super().__init__(config)
-        self._dataframes: Dict[str, Dict] = {}
+        self._dataframes: dict[str, dict] = {}
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING
@@ -79,7 +78,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"error": f"unknown:{a}"}
 
     # ── public API: read_excel ──────────────────────────────────────────
-    def read_excel(self, path: str, sheet_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    def read_excel(self, path: str, sheet_name: str | None = None) -> list[dict[str, Any]]:
         """读取 Excel 或 CSV 文件，返回 list[dict]"""
         if not os.path.isfile(path):
             logger.error("read_excel: file not found: %s", path)
@@ -91,7 +90,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return self._read_csv_as_dicts(path)
 
     # ── public API: write_excel ─────────────────────────────────────────
-    def write_excel(self, path: str, data: List[Dict[str, Any]],
+    def write_excel(self, path: str, data: list[dict[str, Any]],
                     sheet_name: str = "Sheet1") -> bool:
         """将 list[dict] 写入 Excel（优先 .xlsx，fallback .csv）"""
         if not data:
@@ -104,7 +103,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return self._write_csv(path, data)
 
     # ── public API: detect_format ───────────────────────────────────────
-    def detect_format(self, path: str) -> Dict[str, Any]:
+    def detect_format(self, path: str) -> dict[str, Any]:
         """检测文件格式，返回格式信息"""
         if not os.path.isfile(path):
             return {"path": path, "exists": False}
@@ -131,7 +130,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         elif ext == ".csv":
             result["type"] = "csv"
             try:
-                with open(path, "r", encoding="utf-8-sig") as f:
+                with open(path, encoding="utf-8-sig") as f:
                     reader = csv.reader(f)
                     rows = sum(1 for _ in reader)
                 result["row_count"] = rows
@@ -171,7 +170,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"success": ok, "path": path, "rows": len(data)}
 
     # ── helpers: xlsx ───────────────────────────────────────────────────
-    def _read_xlsx(self, path: str, sheet_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    def _read_xlsx(self, path: str, sheet_name: str | None = None) -> list[dict[str, Any]]:
         if not HAS_OPENPYXL:
             logger.warning("_read_xlsx: openpyxl unavailable, trying CSV fallback")
             return self._read_csv_as_dicts(path)
@@ -193,7 +192,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             logger.error("_read_xlsx: error reading %s: %s", path, e)
             return []
 
-    def _write_xlsx(self, path: str, data: List[Dict[str, Any]],
+    def _write_xlsx(self, path: str, data: list[dict[str, Any]],
                     sheet_name: str = "Sheet1") -> bool:
         if not HAS_OPENPYXL:
             logger.warning("_write_xlsx: openpyxl unavailable, falling back to CSV")
@@ -215,9 +214,9 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return False
 
     # ── helpers: CSV ────────────────────────────────────────────────────
-    def _read_csv_as_dicts(self, path: str) -> List[Dict[str, Any]]:
+    def _read_csv_as_dicts(self, path: str) -> list[dict[str, Any]]:
         try:
-            with open(path, "r", encoding="utf-8-sig") as f:
+            with open(path, encoding="utf-8-sig") as f:
                 reader = csv.DictReader(f)
                 result = [dict(row) for row in reader]
             logger.info("_read_csv: loaded %d rows from %s", len(result), path)
@@ -226,7 +225,7 @@ class ExcelEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             logger.error("_read_csv: error reading %s: %s", path, e)
             return []
 
-    def _write_csv(self, path: str, data: List[Dict[str, Any]]) -> bool:
+    def _write_csv(self, path: str, data: list[dict[str, Any]]) -> bool:
         try:
             with open(path, "w", encoding="utf-8-sig", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=list(data[0].keys()))

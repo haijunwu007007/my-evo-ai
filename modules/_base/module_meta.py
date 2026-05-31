@@ -34,7 +34,8 @@ import time
 import hashlib
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Callable
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from datetime import datetime
 from dataclasses import dataclass, field, asdict, is_dataclass
 from collections import defaultdict
@@ -128,7 +129,7 @@ class ModuleTrigger:
     """
 
     type: str = "manual"  # event, schedule, webhook, file_watch, dependent, manual
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         valid_types = {"event", "schedule", "webhook", "file_watch", "dependent", "manual"}
@@ -164,7 +165,7 @@ class ModuleHealthCheck:
     timeout_seconds: int = 10  # 超时时间
     expected_status: str = "active"  # 期望状态
     retry_count: int = 3  # 重试次数
-    fallback_module: Optional[str] = None  # 降级替代模块ID
+    fallback_module: str | None = None  # 降级替代模块ID
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -210,12 +211,12 @@ class ModuleMeta:
     name: str = ""
     version: str = "1.0.0"
     group: str = "uncategorized"
-    inputs: List[ModuleIO] = field(default_factory=list)
-    outputs: List[ModuleIO] = field(default_factory=list)
-    triggers: List[ModuleTrigger] = field(default_factory=list)
-    depends_on: List[str] = field(default_factory=list)
-    health_check: Optional[ModuleHealthCheck] = None
-    tags: List[str] = field(default_factory=list)
+    inputs: list[ModuleIO] = field(default_factory=list)
+    outputs: list[ModuleIO] = field(default_factory=list)
+    triggers: list[ModuleTrigger] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
+    health_check: ModuleHealthCheck | None = None
+    tags: list[str] = field(default_factory=list)
     grade: str = "B"
     author: str = "AUTO-EVO-AI"
     license: str = "GPL-3.0"
@@ -248,10 +249,10 @@ class ModuleMeta:
             seen = set()
             self.outputs = [io for io in self.outputs if not (io.name in seen or seen.add(io.name))]
 
-    def get_required_inputs(self) -> List[str]:
+    def get_required_inputs(self) -> list[str]:
         return [io.name for io in self.inputs if io.required]
 
-    def get_optional_inputs(self) -> List[str]:
+    def get_optional_inputs(self) -> list[str]:
         return [io.name for io in self.inputs if not io.required]
 
     def has_event_trigger(self, event_name: str = "") -> bool:
@@ -265,10 +266,10 @@ class ModuleMeta:
     def has_schedule(self) -> bool:
         return any(t.type == "schedule" for t in self.triggers)
 
-    def input_types(self) -> Dict[str, str]:
+    def input_types(self) -> dict[str, str]:
         return {io.name: io.type for io in self.inputs}
 
-    def output_types(self) -> Dict[str, str]:
+    def output_types(self) -> dict[str, str]:
         return {io.name: io.type for io in self.outputs}
 
     def to_dict(self) -> dict:
@@ -317,7 +318,7 @@ class ModuleMeta:
         )
 
     @staticmethod
-    def from_module(module: Any) -> Optional[ModuleMeta]:
+    def from_module(module: Any) -> ModuleMeta | None:
         """从模块对象中提取 __module_meta__"""
         raw = getattr(module, "__module_meta__", None)
         if raw is None:
@@ -369,7 +370,7 @@ class ModuleMeta:
             return None
 
     @staticmethod
-    def from_file(filepath: str) -> Optional[ModuleMeta]:
+    def from_file(filepath: str) -> ModuleMeta | None:
         """从 Python 文件提取元数据（AST解析，不执行模块）
 
         生产级实现：
@@ -379,7 +380,7 @@ class ModuleMeta:
         """
         import ast as _ast
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 tree = _ast.parse(f.read())
         except Exception as e:
             logger.debug(f"从 {filepath} 解析AST失败: {e}")
@@ -437,9 +438,9 @@ class SchemaValidator:
     }
 
     @classmethod
-    def validate(cls, params: Dict[str, Any], io_list: List[ModuleIO]) -> List[str]:
+    def validate(cls, params: dict[str, Any], io_list: list[ModuleIO]) -> list[str]:
         """验证参数是否符合 IO 规范，返回错误列表（空=全部通过）"""
-        errors: List[str] = []
+        errors: list[str] = []
         io_map = {io.name: io for io in io_list}
 
         # 检查必填字段
@@ -493,18 +494,18 @@ class DependencyResolver:
     """
 
     def __init__(self):
-        self._module_metas: Dict[str, ModuleMeta] = {}
+        self._module_metas: dict[str, ModuleMeta] = {}
 
     def register(self, meta: ModuleMeta):
         self._module_metas[meta.id] = meta
 
-    def register_many(self, metas: List[ModuleMeta]):
+    def register_many(self, metas: list[ModuleMeta]):
         for m in metas:
             self.register(m)
 
-    def resolve(self, target_ids: List[str]) -> Tuple[List[str], List[str]]:
+    def resolve(self, target_ids: list[str]) -> tuple[list[str], list[str]]:
         """拓扑排序，返回 (有序列表, 错误列表)"""
-        graph: Dict[str, Set[str]] = {}
+        graph: dict[str, set[str]] = {}
         for mid in target_ids:
             meta = self._module_metas.get(mid)
             if not meta:
@@ -534,14 +535,14 @@ class DependencyResolver:
             return [], missing
 
         # Kahn 拓扑排序
-        in_degree: Dict[str, int] = {n: 0 for n in graph}
+        in_degree: dict[str, int] = {n: 0 for n in graph}
         for n, deps in graph.items():
             for d in deps:
                 in_degree[n] = in_degree.get(n, 0) + 1  # 反向：依赖多→入度大
 
         # 重新初始化：边方向为 A→B 表示 A依赖B
         in_degree = {n: 0 for n in graph}
-        reverse_graph: Dict[str, Set[str]] = {n: set() for n in graph}
+        reverse_graph: dict[str, set[str]] = {n: set() for n in graph}
         for n, deps in graph.items():
             for d in deps:
                 reverse_graph[d].add(n)
@@ -563,12 +564,12 @@ class DependencyResolver:
 
         return ordered, []
 
-    def _detect_cycles(self, graph: Dict[str, Set[str]]) -> List[str]:
+    def _detect_cycles(self, graph: dict[str, set[str]]) -> list[str]:
         """DFS环检测"""
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {n: WHITE for n in graph}
-        parent: Dict[str, Optional[str]] = {n: None for n in graph}
-        cycles: List[str] = []
+        parent: dict[str, str | None] = {n: None for n in graph}
+        cycles: list[str] = []
 
         def dfs(node: str):
             color[node] = GRAY
@@ -596,14 +597,14 @@ class DependencyResolver:
 
         return cycles
 
-    def get_parallel_groups(self, target_ids: List[str]) -> List[List[str]]:
+    def get_parallel_groups(self, target_ids: list[str]) -> list[list[str]]:
         """将依赖解析结果分组为并行执行层"""
         ordered, errors = self.resolve(target_ids)
         if errors:
             return [target_ids]  # 出错则全串行
 
         # 按依赖深度分层
-        depth: Dict[str, int] = {}
+        depth: dict[str, int] = {}
         for mid in ordered:
             meta = self._module_metas.get(mid)
             if not meta:
@@ -612,7 +613,7 @@ class DependencyResolver:
             dep_depths = [depth.get(d, 0) for d in meta.depends_on if d in depth]
             depth[mid] = max(dep_depths) + 1 if dep_depths else 0
 
-        groups: Dict[int, List[str]] = defaultdict(list)
+        groups: dict[int, list[str]] = defaultdict(list)
         for mid, d in depth.items():
             groups[d].append(mid)
 
@@ -631,7 +632,7 @@ class ModuleRegistry:
     提供按ID/分组/标签/触发类型查询的能力。
     """
 
-    _instance: Optional[ModuleRegistry] = None
+    _instance: ModuleRegistry | None = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -643,8 +644,8 @@ class ModuleRegistry:
         if getattr(self, "_initialized", False):
             return
         self._initialized = True
-        self._metas: Dict[str, ModuleMeta] = {}
-        self._source_files: Dict[str, str] = {}  # module_id → filepath
+        self._metas: dict[str, ModuleMeta] = {}
+        self._source_files: dict[str, str] = {}  # module_id → filepath
         self._resolver = DependencyResolver()
 
     # ── 注册 ──
@@ -656,7 +657,7 @@ class ModuleRegistry:
         self._resolver.register(meta)
         logger.info(f"模块注册: {module_id} v{meta.version} [{meta.group}]")
 
-    def register_from_file(self, filepath: str, module_id: Optional[str] = None):
+    def register_from_file(self, filepath: str, module_id: str | None = None):
         meta = ModuleMeta.from_file(filepath)
         if meta:
             mid = module_id or meta.id
@@ -671,28 +672,28 @@ class ModuleRegistry:
 
     # ── 查询 ──
 
-    def get(self, module_id: str) -> Optional[ModuleMeta]:
+    def get(self, module_id: str) -> ModuleMeta | None:
         return self._metas.get(module_id)
 
-    def get_all(self) -> List[ModuleMeta]:
+    def get_all(self) -> list[ModuleMeta]:
         return list(self._metas.values())
 
-    def get_by_group(self, group: str) -> List[ModuleMeta]:
+    def get_by_group(self, group: str) -> list[ModuleMeta]:
         return [m for m in self._metas.values() if m.group == group]
 
-    def get_by_tag(self, tag: str) -> List[ModuleMeta]:
+    def get_by_tag(self, tag: str) -> list[ModuleMeta]:
         return [m for m in self._metas.values() if tag in m.tags]
 
-    def get_by_grade(self, grade: str) -> List[ModuleMeta]:
+    def get_by_grade(self, grade: str) -> list[ModuleMeta]:
         return [m for m in self._metas.values() if m.grade == grade]
 
-    def get_triggered_by_event(self, event_name: str) -> List[ModuleMeta]:
+    def get_triggered_by_event(self, event_name: str) -> list[ModuleMeta]:
         return [m for m in self._metas.values() if m.has_event_trigger(event_name)]
 
-    def get_scheduled(self) -> List[ModuleMeta]:
+    def get_scheduled(self) -> list[ModuleMeta]:
         return [m for m in self._metas.values() if m.has_schedule()]
 
-    def get_with_dep(self, dep_module_id: str) -> List[ModuleMeta]:
+    def get_with_dep(self, dep_module_id: str) -> list[ModuleMeta]:
         """返回所有依赖了 dep_module_id 的模块"""
         return [m for m in self._metas.values() if dep_module_id in m.depends_on]
 
@@ -702,9 +703,9 @@ class ModuleRegistry:
     def source_of(self, module_id: str) -> str:
         return self._source_files.get(module_id, "")
 
-    def groups(self) -> Dict[str, int]:
+    def groups(self) -> dict[str, int]:
         """返回分组统计：group_name → count"""
-        result: Dict[str, int] = defaultdict(int)
+        result: dict[str, int] = defaultdict(int)
         for m in self._metas.values():
             result[m.group] += 1
         return dict(sorted(result.items()))
@@ -738,17 +739,17 @@ class ModuleRegistry:
             "dependencies": self._resolve_dependency_graph(),
         }
 
-    def _resolve_dependency_graph(self) -> Dict[str, List[str]]:
-        graph: Dict[str, List[str]] = {}
+    def _resolve_dependency_graph(self) -> dict[str, list[str]]:
+        graph: dict[str, list[str]] = {}
         for mid, meta in self._metas.items():
             graph[mid] = meta.depends_on
         return graph
 
-    def resolve_pipeline(self, module_ids: List[str]) -> Tuple[List[str], List[str]]:
+    def resolve_pipeline(self, module_ids: list[str]) -> tuple[list[str], list[str]]:
         """解析执行顺序，返回 (有序模块ID列表, 错误列表)"""
         return self._resolver.resolve(module_ids)
 
-    def get_parallel_layers(self, module_ids: List[str]) -> List[List[str]]:
+    def get_parallel_layers(self, module_ids: list[str]) -> list[list[str]]:
         """返回分层并行执行计划"""
         return self._resolver.get_parallel_groups(module_ids)
 
@@ -758,22 +759,22 @@ class ModuleRegistry:
 # ============================================================
 
 
-def extract_meta_from_file(filepath: str) -> Optional[ModuleMeta]:
+def extract_meta_from_file(filepath: str) -> ModuleMeta | None:
     """从 Python 文件提取模块元数据"""
     return ModuleMeta.from_file(filepath)
 
 
-def extract_meta_from_object(obj: Any) -> Optional[ModuleMeta]:
+def extract_meta_from_object(obj: Any) -> ModuleMeta | None:
     """从模块对象提取 __module_meta__"""
     return ModuleMeta.from_module(obj)
 
 
-def validate_input(params: Dict[str, Any], io_list: List[ModuleIO]) -> List[str]:
+def validate_input(params: dict[str, Any], io_list: list[ModuleIO]) -> list[str]:
     """快速验证输入参数"""
     return SchemaValidator.validate(params, io_list)
 
 
-def validate_output(results: Dict[str, Any], io_list: List[ModuleIO]) -> List[str]:
+def validate_output(results: dict[str, Any], io_list: list[ModuleIO]) -> list[str]:
     """快速验证输出结果"""
     return SchemaValidator.validate(results, io_list)
 

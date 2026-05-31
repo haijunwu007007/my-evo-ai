@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -145,9 +144,9 @@ class EvolutionReport:
     report_id: str = ""
     phase: EvolutionPhase = EvolutionPhase.OBSERVE
     timestamp: str = ""
-    findings: List[Dict[str, Any]] = field(default_factory=list)
-    actions_taken: List[str] = field(default_factory=list)
-    grade_changes: Dict[str, Tuple[str, str]] = field(default_factory=dict)
+    findings: list[dict[str, Any]] = field(default_factory=list)
+    actions_taken: list[str] = field(default_factory=list)
+    grade_changes: dict[str, tuple[str, str]] = field(default_factory=dict)
     overall_score: float = 0.0
     next_phase: EvolutionPhase = EvolutionPhase.STABLE
 
@@ -157,16 +156,16 @@ class EvolutionReport:
         if not self.timestamp:
             self.timestamp = datetime.now().isoformat()
 
-class NexusPluginManager(object):
+class NexusPluginManager:
     """插件管理引擎 - 负责插件注册、加载、卸载和生命周期管理"""
 
     def __init__(self):
-        self._plugins: Dict[str, Dict] = {}
-        self._load_order: List[str] = []
+        self._plugins: dict[str, dict] = {}
+        self._load_order: list[str] = []
         self._load_count: int = 0
         self._error_count: int = 0
 
-    def register(self, plugin_id: str, plugin_config: Dict) -> bool:
+    def register(self, plugin_id: str, plugin_config: dict) -> bool:
         """注册插件"""
         if plugin_id in self._plugins:
             return False
@@ -174,7 +173,7 @@ class NexusPluginManager(object):
         self._load_order.append(plugin_id)
         return True
 
-    def load(self, plugin_id: str) -> Dict:
+    def load(self, plugin_id: str) -> dict:
         """加载插件"""
         self._load_count += 1
         plugin = self._plugins.get(plugin_id)
@@ -183,18 +182,18 @@ class NexusPluginManager(object):
             return {"status": "error", "message": f"Plugin {plugin_id} not found"}
         return {"status": "loaded", "plugin_id": plugin_id, "config": plugin}
 
-    def unload(self, plugin_id: str) -> Dict:
+    def unload(self, plugin_id: str) -> dict:
         """卸载插件"""
         if plugin_id in self._plugins:
             del self._plugins[plugin_id]
             self._load_order.remove(plugin_id)
         return {"status": "unloaded", "plugin_id": plugin_id}
 
-    def list_plugins(self) -> List[Dict]:
+    def list_plugins(self) -> list[dict]:
         """列出所有插件"""
         return [{"id": pid, "config": cfg} for pid, cfg in self._plugins.items()]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "registered": len(self._plugins),
             "load_count": self._load_count,
@@ -209,7 +208,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._circuits = {}
@@ -223,13 +222,13 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         # 状态
         self.current_phase = EvolutionPhase.STABLE
-        self._evolution_history: List[EvolutionReport] = []
-        self._module_grades: Dict[str, ModuleGrade] = {}
-        self._performance_baseline: Dict[str, float] = {}
-        self._anomaly_patterns: List[Dict] = []
+        self._evolution_history: list[EvolutionReport] = []
+        self._module_grades: dict[str, ModuleGrade] = {}
+        self._performance_baseline: dict[str, float] = {}
+        self._anomaly_patterns: list[dict] = []
 
         # 后台任务
-        self._bg_tasks: List[asyncio.Task] = []
+        self._bg_tasks: list[asyncio.Task] = []
 
     # ── 生命周期 ──
 
@@ -246,7 +245,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._bg_tasks.append(asyncio.create_task(self._evolution_loop()))
         self.info(f"自进化引擎就绪，评估间隔={self.eval_interval}s，进化间隔={self.evolve_interval}s")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         params = params or {}
         trace_id = f"nexus-{action}-{int(time.time() * 1000)}"
@@ -277,7 +276,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 动作分发 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action_map = {
             "evaluate": self._evaluate_all_modules,
             "evaluate_module": self._evaluate_single_module,
@@ -297,7 +296,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心能力：模块评估 ──
 
-    def _evaluate_all_modules(self, params: Dict = None) -> Dict:
+    def _evaluate_all_modules(self, params: dict = None) -> dict:
         """评估所有模块健康度并打分"""
         self.current_phase = EvolutionPhase.ANALYZE
         params = params or {}
@@ -334,7 +333,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "modules": results,
         }
 
-    def _evaluate_single_module_internals(self, module_id: str, info: Any) -> Tuple[ModuleGrade, Dict]:
+    def _evaluate_single_module_internals(self, module_id: str, info: Any) -> tuple[ModuleGrade, dict]:
         """评估单个模块"""
         details = {
             "initialized": info.instance is not None,
@@ -391,7 +390,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return grade, details
 
-    def _check_base_features(self, instance) -> Dict[str, bool]:
+    def _check_base_features(self, instance) -> dict[str, bool]:
         """检查7大基类特性"""
         checks = {
             "enterprise_module": isinstance(instance, EnterpriseModule),
@@ -404,7 +403,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
         return checks
 
-    def _evaluate_single_module(self, params: Dict) -> Dict:
+    def _evaluate_single_module(self, params: dict) -> dict:
         """评估指定模块"""
         module_id = params.get("module_id", "")
         registry = get_registry()
@@ -417,7 +416,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心能力：进化循环 ──
 
-    def _run_evolution_cycle(self, params: Dict = None) -> Dict:
+    def _run_evolution_cycle(self, params: dict = None) -> dict:
         """执行一次完整进化周期"""
         self.info("开始进化周期...")
         report = EvolutionReport(phase=EvolutionPhase.OBSERVE)
@@ -472,7 +471,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "report_id": report.report_id,
         }
 
-    def _detect_anomalies(self, eval_result: Dict) -> List[Dict]:
+    def _detect_anomalies(self, eval_result: dict) -> list[dict]:
         """检测异常模块"""
         anomalies = []
         modules = eval_result.get("modules", {})
@@ -503,7 +502,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return anomalies
 
-    def _plan_improvements(self, eval_result: Dict, anomalies: List[Dict]) -> List[Dict]:
+    def _plan_improvements(self, eval_result: dict, anomalies: list[dict]) -> list[dict]:
         """制定改进计划"""
         improvements = []
 
@@ -545,7 +544,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
         return sorted(improvements, key=lambda x: {"high": 0, "medium": 1, "low": 2}[x["priority"]])
 
-    def _execute_improvements(self, improvements: List[Dict]) -> List[str]:
+    def _execute_improvements(self, improvements: list[dict]) -> list[str]:
         """执行改进"""
         actions = []
         registry = get_registry()
@@ -575,7 +574,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心能力：策略优化 ──
 
-    def _optimize_routing_strategy(self, params: Dict) -> Dict:
+    def _optimize_routing_strategy(self, params: dict) -> dict:
         """优化路由策略（基于历史执行数据）"""
         registry = get_registry()
         strategy = {}
@@ -607,7 +606,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "low_modules": dict(list(sorted_strategy.items())[-5:]),
         }
 
-    def _analyze_anomalies(self, params: Dict) -> Dict:
+    def _analyze_anomalies(self, params: dict) -> dict:
         """分析系统异常模式"""
         registry = get_registry()
         eval_result = self._evaluate_all_modules()
@@ -627,7 +626,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "recommendation": self._generate_recommendation(anomalies, patterns),
         }
 
-    def _generate_recommendation(self, anomalies: List[Dict], patterns: Dict) -> str:
+    def _generate_recommendation(self, anomalies: list[dict], patterns: dict) -> str:
         """生成改进建议"""
         if not anomalies:
             return "系统运行正常，无需干预"
@@ -639,7 +638,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 查询接口 ──
 
-    def _get_latest_report(self, params: Dict) -> Dict:
+    def _get_latest_report(self, params: dict) -> dict:
         """获取最新进化报告"""
         if not self._evolution_history:
             return {"error": "暂无进化报告"}
@@ -653,7 +652,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "actions": report.actions_taken,
         }
 
-    def _get_all_grades(self, params: Dict) -> Dict:
+    def _get_all_grades(self, params: dict) -> dict:
         """获取所有模块评级"""
         return {
             "total": len(self._module_grades),
@@ -661,7 +660,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "distribution": self._grade_distribution(),
         }
 
-    def _get_evolution_history(self, params: Dict) -> Dict:
+    def _get_evolution_history(self, params: dict) -> dict:
         """获取进化历史"""
         limit = params.get("limit", 10)
         reports = self._evolution_history[-limit:]
@@ -679,7 +678,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _set_phase(self, params: Dict) -> Dict:
+    def _set_phase(self, params: dict) -> dict:
         """设置进化阶段"""
         phase = params.get("phase", "stable")
         try:
@@ -690,7 +689,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 工具方法 ──
 
-    def _calculate_overall_score(self, results: Dict) -> float:
+    def _calculate_overall_score(self, results: dict) -> float:
         """计算系统整体评分"""
         if not results:
             return 0.0
@@ -698,7 +697,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         total = sum(grade_scores.get(r.get("grade", "F"), 0) for r in results.values())
         return total / len(results)
 
-    def _grade_distribution(self) -> Dict[str, int]:
+    def _grade_distribution(self) -> dict[str, int]:
         dist = defaultdict(int)
         for grade in self._module_grades.values():
             dist[grade.value] += 1
@@ -713,7 +712,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         hist_file = os.path.join(os.path.dirname(__file__), ".evolution_history.json")
         try:
             if os.path.exists(hist_file):
-                with open(hist_file, "r", encoding="utf-8") as f:
+                with open(hist_file, encoding="utf-8") as f:
                     data = json.load(f)
                     for r in data.get("reports", []):
                         rep = EvolutionReport(

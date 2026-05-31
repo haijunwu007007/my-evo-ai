@@ -88,17 +88,17 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("plugin_loader")
 
-class PluginDependencyResolver(object):
+class PluginDependencyResolver:
     """插件依赖解析器"""
 
     def __init__(self):
-        self._dependencies: Dict[str, Dict] = {}
+        self._dependencies: dict[str, dict] = {}
         self._loaded: set = set()
 
-    def register(self, plugin_id: str, dependencies: List[str], version: str = "1.0.0"):
+    def register(self, plugin_id: str, dependencies: list[str], version: str = "1.0.0"):
         self._dependencies[plugin_id] = {"deps": dependencies, "version": version, "resolved": False, "missing": []}
 
-    def resolve(self, plugin_id: str) -> Dict:
+    def resolve(self, plugin_id: str) -> dict:
         if plugin_id not in self._dependencies:
             return {"success": False, "error": "plugin_not_registered"}
         order = []
@@ -148,7 +148,7 @@ class PluginSandbox:
     """插件沙箱环境"""
 
     def __init__(self):
-        self._sandboxes: Dict[str, Dict] = {}
+        self._sandboxes: dict[str, dict] = {}
         self._allowed_modules = {
             "json",
             "math",
@@ -163,7 +163,7 @@ class PluginSandbox:
         }
         self._blocked_modules = {"os", "sys", "subprocess", "shutil", "socket", "ctypes", "signal", "importlib"}
 
-    def create_sandbox(self, plugin_id: str) -> Dict:
+    def create_sandbox(self, plugin_id: str) -> dict:
         sandbox = {
             "id": str(uuid.uuid4())[:8],
             "plugin_id": plugin_id,
@@ -183,19 +183,19 @@ class PluginSandbox:
     def destroy_sandbox(self, plugin_id: str):
         self._sandboxes.pop(plugin_id, None)
 
-    def get_sandbox(self, plugin_id: str) -> Optional[Dict]:
+    def get_sandbox(self, plugin_id: str) -> dict | None:
         return self._sandboxes.get(plugin_id)
 
-class PluginLifecycleManager(object):
+class PluginLifecycleManager:
     """插件生命周期管理器"""
 
     STATES = ["registered", "initialized", "started", "stopped", "error"]
 
     def __init__(self):
-        self._plugins: Dict[str, Dict] = {}
-        self._state_history: Dict[str, List[Dict]] = defaultdict(list)
+        self._plugins: dict[str, dict] = {}
+        self._state_history: dict[str, list[dict]] = defaultdict(list)
 
-    def register(self, plugin_id: str, entry_point: str, metadata: Dict = None) -> Dict:
+    def register(self, plugin_id: str, entry_point: str, metadata: dict = None) -> dict:
         self._plugins[plugin_id] = {
             "id": plugin_id,
             "entry_point": entry_point,
@@ -210,7 +210,7 @@ class PluginLifecycleManager(object):
         self._state_history[plugin_id].append({"from": None, "to": "registered", "ts": time.time()})
         return {"success": True, "id": plugin_id, "state": "registered"}
 
-    def initialize(self, plugin_id: str) -> Dict:
+    def initialize(self, plugin_id: str) -> dict:
         plugin = self._plugins.get(plugin_id)
         if not plugin:
             return {"success": False, "error": "plugin_not_found"}
@@ -219,7 +219,7 @@ class PluginLifecycleManager(object):
         self._transition(plugin_id, "initialized")
         return {"success": True, "id": plugin_id, "state": "initialized"}
 
-    def start(self, plugin_id: str) -> Dict:
+    def start(self, plugin_id: str) -> dict:
         plugin = self._plugins.get(plugin_id)
         if not plugin:
             return {"success": False, "error": "plugin_not_found"}
@@ -230,7 +230,7 @@ class PluginLifecycleManager(object):
         plugin["start_time"] = time.time()
         return {"success": True, "id": plugin_id, "state": "started", "start_count": plugin["start_count"]}
 
-    def stop(self, plugin_id: str) -> Dict:
+    def stop(self, plugin_id: str) -> dict:
         plugin = self._plugins.get(plugin_id)
         if not plugin:
             return {"success": False, "error": "plugin_not_found"}
@@ -239,10 +239,10 @@ class PluginLifecycleManager(object):
         self._transition(plugin_id, "stopped")
         return {"success": True, "id": plugin_id, "state": "stopped"}
 
-    def get_plugin(self, plugin_id: str) -> Optional[Dict]:
+    def get_plugin(self, plugin_id: str) -> dict | None:
         return self._plugins.get(plugin_id)
 
-    def list_plugins(self, state: str = None) -> List[Dict]:
+    def list_plugins(self, state: str = None) -> list[dict]:
         plugins = list(self._plugins.values())
         if state:
             plugins = [p for p in plugins if p["state"] == state]
@@ -257,13 +257,13 @@ class PluginLifecycleManager(object):
 class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """插件加载器 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "plugins_loaded": 0,
@@ -271,7 +271,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -355,7 +355,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_dependency_graph(self) -> Dict[str, Any]:
+    def get_dependency_graph(self) -> dict[str, Any]:
         """插件依赖图。企业场景：架构师查看插件间依赖关系，
         评估引入新插件的影响范围和循环依赖风险。
         """
@@ -375,7 +375,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "edges": edges,
         }
 
-    def get_plugin_health_summary(self) -> Dict[str, Any]:
+    def get_plugin_health_summary(self) -> dict[str, Any]:
         """插件健康汇总。企业场景：运维看板展示所有插件运行状态，
         快速发现异常插件。
         """
@@ -392,7 +392,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "started": self._metrics.get("plugins_started", 0),
         }
 
-    def get_plugin_dependencies(self, plugin_name: str) -> Dict[str, Any]:
+    def get_plugin_dependencies(self, plugin_name: str) -> dict[str, Any]:
         """查看插件依赖树。企业场景：安装/卸载前检查依赖链，
         避免卸载被其他插件依赖的核心模块导致连锁失败。
         """
@@ -435,7 +435,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "safe_to_remove": len(depended_by) == 0,
         }
 
-    def reload_plugin(self, plugin_name: str) -> Dict[str, Any]:
+    def reload_plugin(self, plugin_name: str) -> dict[str, Any]:
         """热重载插件。企业场景：开发环境修改插件代码后热重载，
         无需重启主进程，加速开发迭代。
         """
@@ -477,7 +477,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "message": "插件热重载完成",
         }
 
-    def get_plugin_resource_usage(self) -> Dict[str, Any]:
+    def get_plugin_resource_usage(self) -> dict[str, Any]:
         """插件资源使用统计。企业场景：发现资源占用异常的插件
         （如内存泄漏、线程未释放），指导优化或替换决策。
         """
@@ -508,7 +508,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_by_memory": usage[:10],
         }
 
-    def get_plugin_api_summary(self) -> Dict[str, Any]:
+    def get_plugin_api_summary(self) -> dict[str, Any]:
         """插件API汇总。企业场景：API网关配置时需要知道每个插件
         注册了哪些API端点，避免路由冲突。
         """
@@ -534,7 +534,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         total_routes = sum(s["route_count"] for s in summary)
         return {"success": True, "total_plugins": len(summary), "total_routes": total_routes, "plugins": summary}
 
-    def validate_all_plugins(self) -> Dict[str, Any]:
+    def validate_all_plugins(self) -> dict[str, Any]:
         """验证所有插件完整性。企业场景：启动时或发布前检查所有插件的
         接口实现、依赖满足、配置完整，提前暴露问题。
         """
@@ -577,7 +577,7 @@ class PluginLoader(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "validation_passed": len(invalid) == 0,
         }
 
-    def get_plugin_load_order(self) -> Dict[str, Any]:
+    def get_plugin_load_order(self) -> dict[str, Any]:
         """计算插件加载顺序。企业场景：确保插件按依赖关系顺序加载，
         被依赖的插件先于依赖它的插件启动。
         """

@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EmbeddingHuggingface:
@@ -140,7 +140,7 @@ class EmbeddingHuggingface:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, EmbeddingHuggingface] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, EmbeddingHuggingface] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-            return {"success": False, "error": "Unknown action: {}".format(action)}
+            return {"success": False, "error": f"Unknown action: {action}"}
 
-    def benchmark_model(self, text_samples: List[str], model_name: str = "") -> Dict[str, Any]:
+    def benchmark_model(self, text_samples: list[str], model_name: str = "") -> dict[str, Any]:
         """基准测试嵌入模型：推理速度、内存占用、维度质量、吞吐量"""
         import time
 
@@ -515,7 +515,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
             "dimensions": list(dims),
         }
 
-    def analyze_embedding_distribution(self, embeddings: List[List[float]]) -> Dict[str, Any]:
+    def analyze_embedding_distribution(self, embeddings: list[list[float]]) -> dict[str, Any]:
         """分析嵌入向量分布特征：均值、方差、维度覆盖率、聚类倾向"""
         if not embeddings:
             return {"error": "no embeddings"}
@@ -557,7 +557,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
             "cluster_tendency": "high" if avg_sim > 0.8 else "medium" if avg_sim > 0.5 else "low",
         }
 
-    def _embed_single(self, text: str, model_name: str = "") -> List[float]:
+    def _embed_single(self, text: str, model_name: str = "") -> list[float]:
         """单条文本嵌入（供基准测试使用）"""
         words = text.lower().split()
         if not words:
@@ -576,7 +576,7 @@ class EmbeddingHuggingfaceManager(EnterpriseModule, CircuitBreakerMixin, RateLim
 
     def estimate_storage_requirements(
         self, num_records: int, dimension: int = 384, precision: str = "float32"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """估算嵌入存储需求：原始向量、索引开销、压缩后大小"""
         bytes_per_elem = {"float32": 4, "float16": 2, "int8": 1, "bfloat16": 2}
         elem_size = bytes_per_elem.get(precision, 4)

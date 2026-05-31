@@ -122,7 +122,7 @@ except ImportError:
 
 logger = logging.getLogger("database_connector")
 
-class QueryPerformanceAnalyzer(object):
+class QueryPerformanceAnalyzer:
     """database_connector 运营分析引擎
 
     - 分析慢查询与执行计划
@@ -145,7 +145,7 @@ class QueryPerformanceAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "QueryPerformanceAnalyzer", "module": "database_connector", "summary": summary}
 
-        class QueryPerfAnalyzer(object):
+        class QueryPerfAnalyzer:
             """database_connector analysis engine
 
                                 - 分析慢查询
@@ -204,7 +204,7 @@ class QueryResult:
     sql: str
     status: QueryStatus
     rows_affected: int = 0
-    data: List[Dict] = field(default_factory=list)
+    data: list[dict] = field(default_factory=list)
     duration_ms: float = 0
     error: str = ""
 
@@ -226,15 +226,15 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._connections: Dict[str, DBConnection] = {}
-        self._query_history: List[QueryResult] = []
-        self._slow_queries: List[SlowQuery] = []
+        self._connections: dict[str, DBConnection] = {}
+        self._query_history: list[QueryResult] = []
+        self._slow_queries: list[SlowQuery] = []
         self._query_counter: int = 0
         self._slow_threshold: float = 1000  # ms
 
@@ -271,7 +271,7 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         ok = False
@@ -399,7 +399,7 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         disconnected = sum(1 for c in self._connections.values() if c.status != "connected")
         return {
             "status": "healthy" if disconnected == 0 else "degraded",
@@ -507,7 +507,7 @@ class DatabaseConnector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         conn.idle_conns = min(conn.pool_size, conn.idle_conns + 1)
         return result
 
-    def _result_to_dict(self, r: QueryResult) -> Dict:
+    def _result_to_dict(self, r: QueryResult) -> dict:
         return {
             "query_id": r.query_id,
             "sql": r.sql[:100],

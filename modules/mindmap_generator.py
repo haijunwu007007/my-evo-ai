@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MindmapGeneratorAnalyzer(object):
+class MindmapGeneratorAnalyzer:
     """mindmap_generator 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -294,17 +295,17 @@ class MindmapNode:
     y: float = 0.0
     width: float = 120.0
     height: float = 40.0
-    parent_id: Optional[str] = None
-    children_ids: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    parent_id: str | None = None
+    children_ids: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     collapsed: bool = False
     priority: int = 0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class MindmapStyle:
     root_color: str = "#2C3E50"
-    branch_colors: List[str] = field(
+    branch_colors: list[str] = field(
         default_factory=lambda: ["#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#E67E22", "#34495E"]
     )
     leaf_color: str = "#ECF0F1"
@@ -318,9 +319,9 @@ class MindmapStyle:
 
 @dataclass
 class LayoutResult:
-    nodes: Dict[str, Dict[str, float]] = field(default_factory=dict)
-    connections: List[Dict[str, Any]] = field(default_factory=list)
-    bounds: Dict[str, float] = field(default_factory=dict)
+    nodes: dict[str, dict[str, float]] = field(default_factory=dict)
+    connections: list[dict[str, Any]] = field(default_factory=list)
+    bounds: dict[str, float] = field(default_factory=dict)
 
 @dataclass
 class ExportResult:
@@ -334,16 +335,16 @@ class ExportResult:
 class MindmapDocument:
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     title: str = "Untitled Mindmap"
-    root: Optional[MindmapNode] = None
+    root: MindmapNode | None = None
     style: MindmapStyle = field(default_factory=MindmapStyle)
     layout_type: LayoutType = LayoutType.RADIAL
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     version: int = 1
     author: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def _all_nodes_flat(self) -> List[MindmapNode]:
+    def _all_nodes_flat(self) -> list[MindmapNode]:
         result = []
         if not self.root:
             return result
@@ -378,7 +379,7 @@ class MindmapGenerator:
     """Enterprise mindmap generation with multiple layout algorithms and export."""
 
     def __init__(self):
-        self._documents: Dict[str, MindmapDocument] = {}
+        self._documents: dict[str, MindmapDocument] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -411,7 +412,7 @@ class MindmapGenerator:
         )()
         self._lock = threading.RLock()
         self._initialized = False
-        self._templates: Dict[str, Dict[str, Any]] = {}
+        self._templates: dict[str, dict[str, Any]] = {}
         self._init_default_templates()
         logger.info("MindmapGenerator created")
 
@@ -437,7 +438,7 @@ class MindmapGenerator:
             logger.info("MindmapGenerator initialized: %d templates", len(self._templates))
 
     def create_from_text(
-        self, text: str, title: Optional[str] = None, layout: LayoutType = LayoutType.RADIAL
+        self, text: str, title: str | None = None, layout: LayoutType = LayoutType.RADIAL
     ) -> MindmapDocument:
         lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
         if not lines:
@@ -464,7 +465,7 @@ class MindmapGenerator:
             self._documents[doc.id] = doc
         return doc
 
-    def create_from_template(self, template_name: str, customizations: Optional[Dict] = None) -> MindmapDocument:
+    def create_from_template(self, template_name: str, customizations: dict | None = None) -> MindmapDocument:
         tpl = self._templates.get(template_name)
         if not tpl:
             raise ValueError(f"Template not found: {template_name}")
@@ -494,9 +495,7 @@ class MindmapGenerator:
             content = self._export_mermaid(doc)
         elif fmt == ExportFormat.HTML:
             content = self._export_html(doc)
-        elif fmt == ExportFormat.SVG:
-            content = self._export_svg(doc)
-        elif fmt == ExportFormat.PNG:
+        elif fmt == ExportFormat.SVG or fmt == ExportFormat.PNG:
             content = self._export_svg(doc)
         elif fmt == ExportFormat.PLANTUML:
             content = self._export_plantuml(doc)
@@ -510,7 +509,7 @@ class MindmapGenerator:
             node_count=self._count_nodes(doc.root),
         )
 
-    def list_documents(self) -> List[Dict[str, Any]]:
+    def list_documents(self) -> list[dict[str, Any]]:
         with self._lock:
             return [
                 {
@@ -523,7 +522,7 @@ class MindmapGenerator:
                 for d in self._documents.values()
             ]
 
-    def get_document(self, doc_id: str) -> Optional[MindmapDocument]:
+    def get_document(self, doc_id: str) -> MindmapDocument | None:
         with self._lock:
             return self._documents.get(doc_id)
 
@@ -579,7 +578,7 @@ class MindmapGenerator:
                 self._layout_tree_right(child, result, depth + 1, x + 200, child_y)
                 child_y += 60
 
-    def _find_node_by_id(self, root: MindmapNode, node_id: str) -> Optional[MindmapNode]:
+    def _find_node_by_id(self, root: MindmapNode, node_id: str) -> MindmapNode | None:
         stack = [root]
         while stack:
             current = stack.pop(0)
@@ -602,7 +601,7 @@ class MindmapGenerator:
                     stack.append((child, depth + 1))
         return root
 
-    def _count_nodes(self, root: Optional[MindmapNode]) -> int:
+    def _count_nodes(self, root: MindmapNode | None) -> int:
         if not root:
             return 0
         count = 1
@@ -725,7 +724,7 @@ class MindmapGenerator:
         lines.append("@endmindmap")
         return "\n".join(lines)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             docs = self.list_documents()

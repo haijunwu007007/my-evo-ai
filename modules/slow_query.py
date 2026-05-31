@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 慢查询分析（A级）"""
 # Grade: B
 __module_meta__ = {"id":"slow-query","name":"Slow Query","version":"V0.1","group":"data","grade":"C",

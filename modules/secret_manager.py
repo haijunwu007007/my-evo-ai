@@ -114,7 +114,7 @@ class SecretValidator:
     （最小长度、复杂度、过期策略、禁止明文存储）。
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or {}
         self._min_length = self.config.get("min_secret_length", 16)
         self._require_uppercase = self.config.get("require_uppercase", True)
@@ -122,9 +122,9 @@ class SecretValidator:
         self._require_numbers = self.config.get("require_numbers", True)
         self._max_age_days = self.config.get("max_secret_age_days", 90)
         self._forbidden_patterns = ["password", "123456", "admin", "root"]
-        self._validation_history: List[Dict] = []
+        self._validation_history: list[dict] = []
 
-    def validate_secret(self, secret_value: str, secret_type: str = "generic") -> Dict[str, Any]:
+    def validate_secret(self, secret_value: str, secret_type: str = "generic") -> dict[str, Any]:
         """校验密钥安全性。企业场景：创建密钥时强制校验复杂度，
         不合格则拒绝创建并返回具体原因。
         """
@@ -145,7 +145,7 @@ class SecretValidator:
         self._validation_history.append({"ts": time.time(), **result})
         return result
 
-    def check_rotation_needed(self, created_at: float, secret_type: str) -> Dict[str, Any]:
+    def check_rotation_needed(self, created_at: float, secret_type: str) -> dict[str, Any]:
         """检查是否需要轮换。企业场景：安全合规要求每90天轮换一次密钥，
         定期扫描即将过期的密钥并发出提醒。
         """
@@ -183,15 +183,15 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     6. 密钥授权（按应用/服务授权访问）
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._secrets: Dict[str, Dict] = {}
-        self._access_log: List[Dict] = []
-        self._metrics: Dict[str, Any] = {
+        self._secrets: dict[str, dict] = {}
+        self._access_log: list[dict] = []
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
@@ -200,7 +200,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_accessed": 0,
             "total_rotated": 0,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("secret_manager")
         self._validator = SecretValidator(self.config.get("validation", {}))
@@ -543,7 +543,7 @@ class SecretManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_secret_access_summary(self, days: int = 30) -> Dict[str, Any]:
+    def get_secret_access_summary(self, days: int = 30) -> dict[str, Any]:
         """密钥访问摘要。企业场景：安全审计月报，统计每个密钥被哪些服务
         访问、访问频次、最后访问时间，发现僵尸密钥和异常访问。
         """

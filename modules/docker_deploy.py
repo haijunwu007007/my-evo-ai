@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("docker_deploy")
 
-class ContainerAnalyzer(object):
+class ContainerAnalyzer:
     """docker_deploy 运营分析引擎
 
     - 分析容器资源使用趋势
@@ -142,21 +142,21 @@ class ContainerInfo:
     name: str = ""
     image: str = ""
     status: ContainerStatus = ContainerStatus.STOPPED
-    ports: Dict[str, str] = field(default_factory=dict)
-    env: Dict[str, str] = field(default_factory=dict)
+    ports: dict[str, str] = field(default_factory=dict)
+    env: dict[str, str] = field(default_factory=dict)
     cpu_limit: float = 1.0
     memory_limit: int = 512
     created_at: float = 0.0
-    started_at: Optional[float] = None
+    started_at: float | None = None
     restart_count: int = 0
-    health_check_url: Optional[str] = None
-    health_status: Optional[str] = None
+    health_check_url: str | None = None
+    health_status: str | None = None
     last_health_check: float = 0.0
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     network: str = "bridge"
-    volumes: List[str] = field(default_factory=list)
+    volumes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
@@ -183,7 +183,7 @@ class ImageInfo:
     size_mb: int = 0
     created_at: float = 0.0
     layers: int = 1
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
     def full_name(self) -> str:
         return f"{self.name}:{self.tag}"
@@ -197,11 +197,11 @@ class DeploymentRecord:
     new_image: str = ""
     status: str = "pending"
     created_at: float = 0.0
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     containers_affected: int = 0
-    rollback_from: Optional[str] = None
+    rollback_from: str | None = None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "app": self.app_name,
@@ -217,15 +217,15 @@ class DeploymentRecord:
 class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Docker部署管理：容器生命周期、镜像管理、部署策略、健康监控、滚动更新"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._containers: Dict[str, ContainerInfo] = {}
-        self._images: Dict[str, ImageInfo] = {}
-        self._deployments: Dict[str, DeploymentRecord] = {}
+        self._containers: dict[str, ContainerInfo] = {}
+        self._images: dict[str, ImageInfo] = {}
+        self._deployments: dict[str, DeploymentRecord] = {}
         self._ops_count = 0
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("docker_deploy.initialize", "start")
         self.trace("docker_deploy.initialize", "end")
         try:
@@ -238,7 +238,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         running = sum(1 for c in self._containers.values() if c.status == ContainerStatus.RUNNING)
         healthy = sum(1 for c in self._containers.values() if c.health_status == "healthy")
         return {
@@ -256,7 +256,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         raw = f"{prefix}-{time.time()}-{id(self)}"
         return hashlib.md5(raw.encode()).hexdigest()[:12]
 
-    def create_container(self, params: Optional[Dict] = None) -> Dict:
+    def create_container(self, params: dict | None = None) -> dict:
         params = params or {}
         name = params.get("name", f"container-{self._gen_id()}")
         image = params.get("image", "nginx:latest")
@@ -289,7 +289,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("create_container", f"{name}({image})")
         return {"success": True, "container": container.to_dict()}
 
-    def start_container(self, params: Optional[Dict] = None) -> Dict:
+    def start_container(self, params: dict | None = None) -> dict:
         params = params or {}
         cid = params.get("id", "")
         if cid not in self._containers:
@@ -304,7 +304,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("start_container", c.name)
         return {"success": True, "container": c.to_dict()}
 
-    def stop_container(self, params: Optional[Dict] = None) -> Dict:
+    def stop_container(self, params: dict | None = None) -> dict:
         params = params or {}
         cid = params.get("id", "")
         if cid not in self._containers:
@@ -316,7 +316,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "container": c.to_dict()}
 
-    def restart_container(self, params: Optional[Dict] = None) -> Dict:
+    def restart_container(self, params: dict | None = None) -> dict:
         params = params or {}
         cid = params.get("id", "")
         stop = self.stop_container({"id": cid})
@@ -328,7 +328,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return start
 
-    def remove_container(self, params: Optional[Dict] = None) -> Dict:
+    def remove_container(self, params: dict | None = None) -> dict:
         params = params or {}
         cid = params.get("id", "")
         c = self._containers.pop(cid, None)
@@ -338,7 +338,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("remove_container", c.name)
         return {"success": True, "removed": cid, "name": c.name}
 
-    def list_containers(self, params: Optional[Dict] = None) -> Dict:
+    def list_containers(self, params: dict | None = None) -> dict:
         params = params or {}
         status_filter = params.get("status")
         result = []
@@ -349,7 +349,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "containers": result, "count": len(result)}
 
-    def pull_image(self, params: Optional[Dict] = None) -> Dict:
+    def pull_image(self, params: dict | None = None) -> dict:
         params = params or {}
         name = params.get("name", "nginx")
         tag = params.get("tag", "latest")
@@ -361,7 +361,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("pull_image", full)
         return {"success": True, "image": full, "size_mb": size}
 
-    def deploy(self, params: Optional[Dict] = None) -> Dict:
+    def deploy(self, params: dict | None = None) -> dict:
         params = params or {}
         app_name = params.get("app", "")
         new_image = params.get("image", "")
@@ -398,7 +398,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("deploy", f"{app_name} -> {new_image} ({strategy})")
         return {"success": True, "deployment": dep.to_dict()}
 
-    def rollback(self, params: Optional[Dict] = None) -> Dict:
+    def rollback(self, params: dict | None = None) -> dict:
         params = params or {}
         dep_id = params.get("deployment_id", "")
         dep = self._deployments.get(dep_id)
@@ -422,7 +422,7 @@ class DockerDeploy(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._images.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

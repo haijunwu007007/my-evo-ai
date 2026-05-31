@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - MongoDB NoSQL 存储（A级）
 # Grade: B
 
@@ -12,7 +11,7 @@ logger=logging.getLogger("evo.mongodb-nosql")
 class MongoDBNoSQL(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="mongodb-nosql";MODULE_NAME="MongoDB 文档存储";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
-        super().__init__(config);self._collections:Dict[str,List[Dict]]={}
+        super().__init__(config);self._collections:dict[str,list[dict]]={}
         self._mongo=None;self._db=None;self._marked_as_mock=False
         self._uri=(config or {}).get("mongo_uri","mongodb://localhost:27017")
         self._db_name=(config or {}).get("mongo_db","evo_ai")

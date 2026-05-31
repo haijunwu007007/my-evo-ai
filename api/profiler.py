@@ -27,7 +27,7 @@ except ImportError:
 # ── 全局状态 ──
 _profile_enabled = os.environ.get("EVO_PROFILE_ENABLED", "false").lower() in ("1", "true", "yes")
 _profile_records: deque = deque(maxlen=50)  # 最多保留 50 条记录
-_profiler_instance: Optional["pyinstrument.Profiler"] = None
+_profiler_instance: pyinstrument.Profiler | None = None
 _sampling_active = False
 
 

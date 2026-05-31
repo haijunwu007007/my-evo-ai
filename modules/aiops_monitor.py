@@ -99,15 +99,15 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("aiops_monitor")
 
-class AnomalyDetector(object):
+class AnomalyDetector:
     """统计异常检测引擎"""
 
     def __init__(self, window_size: int = 60, sensitivity: float = 2.5):
         self.window_size = window_size
         self.sensitivity = sensitivity
-        self._windows: Dict[str, deque] = {}
-        self._means: Dict[str, float] = {}
-        self._stds: Dict[str, float] = {}
+        self._windows: dict[str, deque] = {}
+        self._means: dict[str, float] = {}
+        self._stds: dict[str, float] = {}
 
     def push(self, metric: str, value: float) -> float:
         if metric not in self._windows:
@@ -127,11 +127,11 @@ class AnomalyDetector(object):
         z_score = abs(value - mean) / std
         return z_score
 
-    def is_anomaly(self, metric: str, value: float) -> Tuple[bool, float]:
+    def is_anomaly(self, metric: str, value: float) -> tuple[bool, float]:
         z = self.push(metric, value)
         return z > self.sensitivity, z
 
-    def get_stats(self, metric: str) -> Dict:
+    def get_stats(self, metric: str) -> dict:
         w = self._windows.get(metric)
         if not w:
             return {"count": 0, "mean": 0, "std": 0}
@@ -171,23 +171,23 @@ class EventCorrelator:
     def __init__(self, time_window: float = 300.0, max_correlation: int = 10):
         self.time_window = time_window
         self.max_correlation = max_correlation
-        self._events: List[Dict] = []
-        self._topology: Dict[str, set] = defaultdict(set)
-        self._correlations: List[Dict] = []
+        self._events: list[dict] = []
+        self._topology: dict[str, set] = defaultdict(set)
+        self._correlations: list[dict] = []
 
-    def add_topology(self, source: str, targets: List[str]):
+    def add_topology(self, source: str, targets: list[str]):
         for t in targets:
             self._topology[source].add(t)
             self._topology[t].add(source)
 
-    def push_event(self, event: Dict):
+    def push_event(self, event: dict):
         ts = event.get("timestamp", time.time())
         event["id"] = str(uuid.uuid4())[:8]
         self._events.append(event)
         cutoff = ts - self.time_window * 2
         self._events = [e for e in self._events if e.get("timestamp", 0) > cutoff]
 
-    def correlate(self, new_event: Dict) -> List[Dict]:
+    def correlate(self, new_event: dict) -> list[dict]:
         ts = new_event.get("timestamp", time.time())
         source = new_event.get("source", "")
         correlated = []
@@ -224,13 +224,13 @@ class FailurePredictor:
 
     def __init__(self, history_window: int = 120):
         self.history_window = history_window
-        self._histories: Dict[str, deque] = {}
-        self._thresholds: Dict[str, Dict] = {}
+        self._histories: dict[str, deque] = {}
+        self._thresholds: dict[str, dict] = {}
 
     def set_threshold(self, metric: str, warning: float, critical: float, forecast_minutes: int = 30):
         self._thresholds[metric] = {"warning": warning, "critical": critical, "forecast_minutes": forecast_minutes}
 
-    def push(self, metric: str, value: float) -> Optional[Dict]:
+    def push(self, metric: str, value: float) -> dict | None:
         if metric not in self._histories:
             self._histories[metric] = deque(maxlen=self.history_window)
         h = self._histories[metric]
@@ -275,15 +275,15 @@ class FailurePredictor:
             )
         return predictions[0] if predictions else None
 
-class RemediationEngine(object):
+class RemediationEngine:
     """自动修复引擎 - Runbook编排执行"""
 
     def __init__(self):
-        self._runbooks: Dict[str, Dict] = {}
-        self._execution_history: List[Dict] = []
+        self._runbooks: dict[str, dict] = {}
+        self._execution_history: list[dict] = []
         self._max_history = 500
 
-    def register_runbook(self, name: str, conditions: Dict, steps: List[Dict], rollback: List[Dict] = None):
+    def register_runbook(self, name: str, conditions: dict, steps: list[dict], rollback: list[dict] = None):
         self._runbooks[name] = {
             "conditions": conditions,
             "steps": steps,
@@ -292,7 +292,7 @@ class RemediationEngine(object):
             "fail_count": 0,
         }
 
-    def evaluate(self, alert: Dict) -> List[str]:
+    def evaluate(self, alert: dict) -> list[str]:
         matches = []
         for name, rb in self._runbooks.items():
             cond = rb["conditions"]
@@ -314,7 +314,7 @@ class RemediationEngine(object):
                 matches.append(name)
         return matches
 
-    def execute(self, runbook_name: str, context: Dict) -> Dict:
+    def execute(self, runbook_name: str, context: dict) -> dict:
         self.trace("execute", {"runbook": runbook_name})
         self.metrics_collector.counter("aiops.execute.calls", 1)
         self.audit("runbook_execute", {"runbook": runbook_name})
@@ -353,8 +353,8 @@ class CapacityForecaster:
 
     def __init__(self, history_size: int = 288):
         self.history_size = history_size
-        self._metrics: Dict[str, deque] = {}
-        self._projections: Dict[str, Dict] = {}
+        self._metrics: dict[str, deque] = {}
+        self._projections: dict[str, dict] = {}
 
     def record(self, metric: str, value: float, timestamp: float = None):
         ts = timestamp or time.time()
@@ -362,7 +362,7 @@ class CapacityForecaster:
             self._metrics[metric] = deque(maxlen=self.history_size)
         self._metrics[metric].append((ts, value))
 
-    def forecast(self, metric: str, periods_ahead: int = 24) -> Dict:
+    def forecast(self, metric: str, periods_ahead: int = 24) -> dict:
         data = self._metrics.get(metric)
         if not data or len(data) < 10:
             return {"metric": metric, "error": "insufficient_data"}
@@ -401,7 +401,7 @@ class CapacityForecaster:
         self._projections[metric] = result
         return result
 
-    def _extract_seasonality(self, points: List[Tuple], period: int = 12) -> Dict:
+    def _extract_seasonality(self, points: list[tuple], period: int = 12) -> dict:
         if len(points) < period * 2:
             return {}
         seasonal_sum = defaultdict(float)
@@ -416,17 +416,17 @@ class CapacityForecaster:
             seasonal[k] = seasonal_sum[k] / seasonal_count[k] - mean_val
         return seasonal
 
-    def get_all_projections(self) -> Dict:
+    def get_all_projections(self) -> dict:
         return dict(self._projections)
 
 class AiopsMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """AIOps智能运维监控 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "anomalies_detected": 0,
@@ -435,7 +435,7 @@ class AiopsMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -449,7 +449,7 @@ class AiopsMonitor(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.failure_predictor = FailurePredictor(history_window=self.config.get("prediction_window", 120))
         self.remediation_engine = RemediationEngine()
         self.capacity_forecaster = CapacityForecaster(history_size=self.config.get("forecast_window", 288))
-        self._alerts: List[Dict] = []
+        self._alerts: list[dict] = []
         self._max_alerts = 1000
         self._instance_id = str(uuid.uuid4())[:8]
 

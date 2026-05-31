@@ -174,7 +174,7 @@ class _CryptoEngine:
 # 预置配置模板
 # ═══════════════════════════════════════════════════════════
 
-BUILTIN_TEMPLATES: List[ConfigItem] = [
+BUILTIN_TEMPLATES: list[ConfigItem] = [
     # ─── LLM Providers ───
     ConfigItem(key="openai_api_key", group="llm", label="OpenAI API Key",
                description="OpenAI GPT系列接口密钥", env_var="OPENAI_API_KEY",
@@ -283,11 +283,11 @@ class ConfigCenter:
         self._master_key = self._load_or_create_master_key()
 
         # 内存配置缓存 {group.key: ConfigItem}
-        self._configs: Dict[str, ConfigItem] = {}
+        self._configs: dict[str, ConfigItem] = {}
         # 变更回调
-        self._change_callbacks: Dict[str, List[callable]] = {}
+        self._change_callbacks: dict[str, list[callable]] = {}
         # 审计日志缓存
-        self._audit_cache: List[ConfigAuditLog] = []
+        self._audit_cache: list[ConfigAuditLog] = []
 
         # 初始化: 加载已有 + 注入预置模板 + 扫描环境变量
         self._load_from_disk()
@@ -406,7 +406,7 @@ class ConfigCenter:
             return item.value or item.default_value or default
         return default
 
-    def get_all(self, group: Optional[str] = None, mask_secrets: bool = True) -> List[dict]:
+    def get_all(self, group: str | None = None, mask_secrets: bool = True) -> list[dict]:
         """获取配置列表 (支持分组过滤)"""
         result = []
         for ck, item in self._configs.items():
@@ -473,9 +473,9 @@ class ConfigCenter:
         ))
         return {"status": "ok", "key": ck, "action": "deleted"}
 
-    def get_groups(self) -> List[dict]:
+    def get_groups(self) -> list[dict]:
         """获取配置分组统计"""
-        groups: Dict[str, dict] = {}
+        groups: dict[str, dict] = {}
         for ck, item in self._configs.items():
             g = item.group
             if g not in groups:
@@ -536,7 +536,7 @@ class ConfigCenter:
 
     # ─── 审计日志 ───
 
-    def get_audit_logs(self, limit: int = 50, group: Optional[str] = None) -> List[dict]:
+    def get_audit_logs(self, limit: int = 50, group: str | None = None) -> list[dict]:
         """获取审计日志"""
         logs = self._audit_cache
         if group:
@@ -545,7 +545,7 @@ class ConfigCenter:
 
     # ─── 导出/导入 ───
 
-    def export_config(self, group: Optional[str] = None, include_secrets: bool = False) -> str:
+    def export_config(self, group: str | None = None, include_secrets: bool = False) -> str:
         """导出配置为JSON"""
         items = self.get_all(group=group, mask_secrets=not include_secrets)
         return json.dumps({
@@ -602,7 +602,7 @@ class ConfigCenter:
 # 全局单例
 # ═══════════════════════════════════════════════════════════
 
-_config_center: Optional[ConfigCenter] = None
+_config_center: ConfigCenter | None = None
 
 def get_config_center() -> ConfigCenter:
     global _config_center

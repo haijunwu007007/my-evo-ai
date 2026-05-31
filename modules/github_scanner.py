@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - GitHub 扫描器（A级）
 # Grade: B
 
@@ -23,7 +22,7 @@ class GithubScanner(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,Enterprise
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID)
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
-    def _fetch_trending(self,language:str="python",since:str="daily")->List[Dict]:
+    def _fetch_trending(self,language:str="python",since:str="daily")->list[dict]:
         cache_key=f"{language}_{since}"
         if cache_key in self._CACHE and time.time()-self._CACHE[cache_key]["time"]<self._CACHE_TTL:
             logger.info("trending_cache_hit:%s",cache_key)
@@ -48,7 +47,7 @@ class GithubScanner(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,Enterprise
             if len(repos)>=15:break
         self._CACHE[cache_key]={"data":repos,"time":time.time()}
         return repos
-    def _fetch_repo_info(self,owner:str,name:str)->Dict:
+    def _fetch_repo_info(self,owner:str,name:str)->dict:
         api_url=f"https://api.github.com/repos/{owner}/{name}"
         try:
             req=urllib.request.Request(api_url,headers={"User-Agent":"EvoScanner","Accept":"application/vnd.github.v3+json"})

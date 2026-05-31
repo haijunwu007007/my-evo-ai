@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class VoicerecorderAnalyzer(object):
+class VoicerecorderAnalyzer:
     """voicerecorder 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -274,13 +274,13 @@ class VoiceRecord:
     format: str = "wav"
     quality: RecordQuality = RecordQuality.UNDEFINED
     state: RecordState = RecordState.IDLE
-    labels: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    labels: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     checksum: str = ""
     created: float = field(default_factory=time.time)
     updated: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "record_id": self.record_id,
             "speaker_id": self.speaker_id,
@@ -315,8 +315,8 @@ class DatasetInfo:
     dataset_id: str = ""
     name: str = ""
     description: str = ""
-    records: List[str] = field(default_factory=list)
-    languages: List[str] = field(default_factory=list)
+    records: list[str] = field(default_factory=list)
+    languages: list[str] = field(default_factory=list)
     total_duration_sec: float = 0
     total_size: int = 0
     version: str = "1.0"
@@ -347,10 +347,10 @@ class VoicerecorderModule:
     """企业级语音记录器模块"""
 
     def __init__(self):
-        self._records: Dict[str, VoiceRecord] = {}
-        self._speakers: Dict[str, SpeakerProfile] = {}
-        self._datasets: Dict[str, DatasetInfo] = {}
-        self._active_sessions: Dict[str, str] = {}
+        self._records: dict[str, VoiceRecord] = {}
+        self._speakers: dict[str, SpeakerProfile] = {}
+        self._datasets: dict[str, DatasetInfo] = {}
+        self._active_sessions: dict[str, str] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -395,14 +395,14 @@ class VoicerecorderModule:
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active = len(self._active_sessions)
@@ -417,8 +417,8 @@ class VoicerecorderModule:
 
     # --- Record ---
     def create_record(
-        self, speaker_id: str = "", language: str = "zh", text: str = "", metadata: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        self, speaker_id: str = "", language: str = "zh", text: str = "", metadata: dict[str, Any] = None
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import random
@@ -453,8 +453,8 @@ class VoicerecorderModule:
         return {"success": True, "record_id": record_id, "length_sec": round(length, 2), "file_size": file_size}
 
     def update_record(
-        self, record_id: str, text: str = "", labels: List[str] = None, quality: str = ""
-    ) -> Dict[str, Any]:
+        self, record_id: str, text: str = "", labels: list[str] = None, quality: str = ""
+    ) -> dict[str, Any]:
         if record_id not in self._records:
             return {"success": False, "error": "not_found"}
         record = self._records[record_id]
@@ -472,7 +472,7 @@ class VoicerecorderModule:
         record.updated = time.time()
         return {"success": True, "record_id": record_id}
 
-    def delete_record(self, record_id: str) -> Dict[str, Any]:
+    def delete_record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self._records:
             return {"success": False, "error": "not_found"}
         record = self._records.pop(record_id)
@@ -482,14 +482,14 @@ class VoicerecorderModule:
             spk.total_duration_sec = max(0, spk.total_duration_sec - record.audio_length_sec)
         return {"success": True, "record_id": record_id}
 
-    def get_record(self, record_id: str) -> Dict[str, Any]:
+    def get_record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self._records:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._records[record_id].to_dict()}
 
     def search_records(
         self, speaker_id: str = "", language: str = "", quality: str = "", label: str = "", limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         results = []
         for r in self._records.values():
             if speaker_id and r.speaker_id != speaker_id:
@@ -514,7 +514,7 @@ class VoicerecorderModule:
         accent: str = "",
         gender: str = "",
         age_group: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if speaker_id in self._speakers:
             return {"success": False, "error": "already_exists"}
         spk = SpeakerProfile(
@@ -524,7 +524,7 @@ class VoicerecorderModule:
         self._stats["speakers"] += 1
         return {"success": True, "speaker_id": speaker_id}
 
-    def list_speakers(self) -> Dict[str, Any]:
+    def list_speakers(self) -> dict[str, Any]:
         items = [
             {
                 "speaker_id": s.speaker_id,
@@ -539,7 +539,7 @@ class VoicerecorderModule:
         return {"success": True, "speakers": items, "total": len(items)}
 
     # --- Dataset ---
-    def create_dataset(self, name: str, description: str = "", record_ids: List[str] = None) -> Dict[str, Any]:
+    def create_dataset(self, name: str, description: str = "", record_ids: list[str] = None) -> dict[str, Any]:
         dataset_id = f"ds_{uuid.uuid4().hex[:8]}"
         records = record_ids or []
         total_dur = sum(self._records[rid].audio_length_sec for rid in records if rid in self._records)
@@ -564,7 +564,7 @@ class VoicerecorderModule:
             "total_duration": round(total_dur, 2),
         }
 
-    def list_datasets(self) -> Dict[str, Any]:
+    def list_datasets(self) -> dict[str, Any]:
         items = [
             {
                 "dataset_id": d.dataset_id,
@@ -578,7 +578,7 @@ class VoicerecorderModule:
         ]
         return {"success": True, "datasets": items, "total": len(items)}
 
-    def export_dataset(self, dataset_id: str, format: str = "wav") -> Dict[str, Any]:
+    def export_dataset(self, dataset_id: str, format: str = "wav") -> dict[str, Any]:
         if dataset_id not in self._datasets:
             return {"success": False, "error": "not_found"}
         ds = self._datasets[dataset_id]
@@ -592,7 +592,7 @@ class VoicerecorderModule:
             "total_size": ds.total_size,
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

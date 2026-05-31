@@ -160,12 +160,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ClusterProxy:
@@ -175,7 +175,7 @@ class ClusterProxy:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -189,7 +189,7 @@ class ClusterProxy:
     # 依赖策略
     dependency_timeout: int = 30
     fail_on_missing_dependency: bool = True
-    priority_group: List[str] = field(default_factory=list)
+    priority_group: list[str] = field(default_factory=list)
 
 class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """生命周期策略管理器 - 生产级实现"""
@@ -205,11 +205,11 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         )
         self.module_name = "cluster_proxy"
         self.module_id = self.module_name
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, ClusterProxy] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, ClusterProxy] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
@@ -300,7 +300,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -394,7 +394,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -415,7 +415,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -432,7 +432,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -444,7 +444,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -458,7 +458,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         ]
 
     # 模块导出
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         _ = self.trace("execute")
         metrics_collector.counter("cluster_proxy_ops_total", labels={"action": action})
@@ -549,7 +549,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._audit.log("component_registered", {"component_id": component_id})
         return comp
 
-    def analyze_routing_efficiency(self) -> Dict[str, Any]:
+    def analyze_routing_efficiency(self) -> dict[str, Any]:
         """分析集群路由效率：请求分布、延迟统计、错误率、热点节点识别"""
         routes = self._routing_rules if hasattr(self, "_routing_rules") else []
         components = self._components if hasattr(self, "_components") else {}
@@ -595,7 +595,7 @@ class ClusterProxyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         }
         return report
 
-    def generate_topology_snapshot(self) -> Dict[str, Any]:
+    def generate_topology_snapshot(self) -> dict[str, Any]:
         """生成集群拓扑快照：节点关系、依赖图、分区感知"""
         components = self._components if hasattr(self, "_components") else {}
         backends = self._backends if hasattr(self, "_backends") else {}

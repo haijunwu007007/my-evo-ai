@@ -87,13 +87,14 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LoongclawAnalyzer(object):
+class LoongclawAnalyzer:
     """loongclaw 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -268,8 +269,8 @@ class PluginInfo:
     version: str = "1.0.0"
     description: str = ""
     state: PluginState = PluginState.REGISTERED
-    config: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     registered_at: float = 0.0
     started_at: float = 0.0
     last_heartbeat: float = 0.0
@@ -284,9 +285,9 @@ class PluginInfo:
 class TaskNode:
     task_id: str
     name: str
-    handler: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
-    config: Dict[str, Any] = field(default_factory=dict)
+    handler: str | None = None
+    dependencies: list[str] = field(default_factory=list)
+    config: dict[str, Any] = field(default_factory=dict)
     retries: int = 0
     max_retries: int = 3
     timeout: float = 300.0
@@ -301,7 +302,7 @@ class EventMessage:
     event_id: str = ""
     event_type: str = ""
     source: str = ""
-    payload: Dict[str, Any] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)
     timestamp: float = 0.0
     ttl: float = 3600.0
 
@@ -334,7 +335,7 @@ class LoongClaw:
 
     MODULE_ID = "loongclaw"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         config = config or {}
         self.metrics_collector = type(
             "_NMC",
@@ -367,23 +368,23 @@ class LoongClaw:
             },
         )()
         self._lock = threading.RLock()
-        self._plugins: Dict[str, PluginInfo] = {}
-        self._tasks: Dict[str, TaskNode] = {}
-        self._task_graph: Dict[str, Set[str]] = defaultdict(set)
-        self._reverse_graph: Dict[str, Set[str]] = defaultdict(set)
-        self._handlers: Dict[str, Callable] = {}
+        self._plugins: dict[str, PluginInfo] = {}
+        self._tasks: dict[str, TaskNode] = {}
+        self._task_graph: dict[str, set[str]] = defaultdict(set)
+        self._reverse_graph: dict[str, set[str]] = defaultdict(set)
+        self._handlers: dict[str, Callable] = {}
         self._event_bus: deque = deque(maxlen=config.get("event_buffer", 10000))
-        self._subscriptions: Dict[str, List[Callable]] = defaultdict(list)
-        self._execution_history: List[Dict[str, Any]] = []
+        self._subscriptions: dict[str, list[Callable]] = defaultdict(list)
+        self._execution_history: list[dict[str, Any]] = []
         self._max_history: int = config.get("max_history", 1000)
         self._heartbeat_interval: int = config.get("heartbeat_interval", 30)
-        self._resource_limits: Dict[str, Dict[str, Any]] = {}
+        self._resource_limits: dict[str, dict[str, Any]] = {}
         self._initialized = False
 
     def initialize(self) -> None:
         self._initialized = True
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         plugins_ok = sum(1 for p in self._plugins.values() if p.state in (PluginState.INITIALIZED, PluginState.RUNNING))
         return {
             "healthy": self._initialized,
@@ -412,8 +413,8 @@ class LoongClaw:
         name: str,
         version: str = "1.0.0",
         description: str = "",
-        config: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         with self._lock:
             plugin = PluginInfo(
                 plugin_id=plugin_id,
@@ -426,7 +427,7 @@ class LoongClaw:
             self._publish_event("plugin.registered", "system", {"plugin_id": plugin_id})
             return {"plugin_id": plugin_id, "state": plugin.state.value}
 
-    def init_plugin(self, plugin_id: str) -> Dict[str, Any]:
+    def init_plugin(self, plugin_id: str) -> dict[str, Any]:
         with self._lock:
             plugin = self._plugins.get(plugin_id)
             if not plugin:
@@ -436,7 +437,7 @@ class LoongClaw:
             self._publish_event("plugin.initialized", "system", {"plugin_id": plugin_id})
             return {"plugin_id": plugin_id, "state": plugin.state.value}
 
-    def start_plugin(self, plugin_id: str) -> Dict[str, Any]:
+    def start_plugin(self, plugin_id: str) -> dict[str, Any]:
         with self._lock:
             plugin = self._plugins.get(plugin_id)
             if not plugin:
@@ -447,7 +448,7 @@ class LoongClaw:
             self._publish_event("plugin.started", "system", {"plugin_id": plugin_id})
             return {"plugin_id": plugin_id, "state": plugin.state.value}
 
-    def stop_plugin(self, plugin_id: str) -> Dict[str, Any]:
+    def stop_plugin(self, plugin_id: str) -> dict[str, Any]:
         with self._lock:
             plugin = self._plugins.get(plugin_id)
             if not plugin:
@@ -456,7 +457,7 @@ class LoongClaw:
             self._publish_event("plugin.stopped", "system", {"plugin_id": plugin_id})
             return {"plugin_id": plugin_id, "state": plugin.state.value}
 
-    def remove_plugin(self, plugin_id: str) -> Dict[str, Any]:
+    def remove_plugin(self, plugin_id: str) -> dict[str, Any]:
         with self._lock:
             plugin = self._plugins.pop(plugin_id, None)
             if plugin:
@@ -464,7 +465,7 @@ class LoongClaw:
                 return {"plugin_id": plugin_id, "status": "removed"}
             return {"plugin_id": plugin_id, "status": "not_found"}
 
-    def heartbeat(self, plugin_id: str) -> Dict[str, Any]:
+    def heartbeat(self, plugin_id: str) -> dict[str, Any]:
         with self._lock:
             plugin = self._plugins.get(plugin_id)
             if plugin:
@@ -472,7 +473,7 @@ class LoongClaw:
                 return {"plugin_id": plugin_id, "status": "ok"}
             return {"error": "Plugin not found"}
 
-    def list_plugins(self, state: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_plugins(self, state: str | None = None) -> list[dict[str, Any]]:
         with self._lock:
             plugins = list(self._plugins.values())
             if state:
@@ -499,12 +500,12 @@ class LoongClaw:
         self,
         task_id: str,
         name: str,
-        dependencies: Optional[List[str]] = None,
-        handler: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        dependencies: list[str] | None = None,
+        handler: str | None = None,
+        config: dict[str, Any] | None = None,
         timeout: float = 300.0,
         max_retries: int = 3,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         with self._lock:
             task = TaskNode(
                 task_id=task_id,
@@ -522,7 +523,7 @@ class LoongClaw:
             self._publish_event("task.added", "orchestrator", {"task_id": task_id})
             return {"task_id": task_id, "status": task.status}
 
-    def execute_task(self, task_id: str) -> Dict[str, Any]:
+    def execute_task(self, task_id: str) -> dict[str, Any]:
         with self._lock:
             task = self._tasks.get(task_id)
             if not task:
@@ -561,7 +562,7 @@ class LoongClaw:
                 self._execution_history = self._execution_history[-self._max_history :]
             return {"task_id": task_id, "status": task.status, "result": task.result}
 
-    def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         with self._lock:
             task = self._tasks.get(task_id)
             if not task:
@@ -578,7 +579,7 @@ class LoongClaw:
 
     # --- Event bus ---
 
-    def _publish_event(self, event_type: str, source: str, payload: Optional[Dict[str, Any]] = None) -> EventMessage:
+    def _publish_event(self, event_type: str, source: str, payload: dict[str, Any] | None = None) -> EventMessage:
         msg = EventMessage(
             event_type=event_type,
             source=source,
@@ -600,7 +601,7 @@ class LoongClaw:
         if handler in handlers:
             handlers.remove(handler)
 
-    def get_events(self, event_type: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_events(self, event_type: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         events = list(self._event_bus)
         if event_type:
             events = [e for e in events if e.event_type == event_type]

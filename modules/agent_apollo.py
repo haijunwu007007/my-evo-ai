@@ -129,7 +129,7 @@ class KnowledgeDoc:
     title: str
     content: str
     doc_type: DocType = DocType.DOC
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     version: int = 1
@@ -141,7 +141,7 @@ class QARecord:
 
     question: str
     answer: str
-    doc_ids: List[str] = field(default_factory=list)
+    doc_ids: list[str] = field(default_factory=list)
     confidence: float = 0.0
     asked_at: float = field(default_factory=time.time)
 
@@ -153,16 +153,16 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._docs: Dict[str, KnowledgeDoc] = {}
-        self._qa_history: List[QARecord] = []
+        self._docs: dict[str, KnowledgeDoc] = {}
+        self._qa_history: list[QARecord] = []
         self._doc_counter: int = 0
-        self._index: Dict[str, List[str]] = {}  # word -> [doc_ids]
+        self._index: dict[str, list[str]] = {}  # word -> [doc_ids]
 
     def initialize(self) -> None:
         try:
@@ -198,7 +198,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_apollo_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -308,7 +308,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -323,7 +323,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._index.clear()
         self._qa_history.clear()
 
-    def _add_doc(self, title: str, content: str, doc_type: DocType, tags: List[str]) -> KnowledgeDoc:
+    def _add_doc(self, title: str, content: str, doc_type: DocType, tags: list[str]) -> KnowledgeDoc:
         self._doc_counter += 1
         doc_id = f"doc_{self._doc_counter}"
         doc = KnowledgeDoc(doc_id=doc_id, title=title, content=content, doc_type=doc_type, tags=tags)
@@ -334,7 +334,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.stats.success_count += 1
         return doc
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """分词"""
         text = text.lower()
         words = re.findall(r"[\w\u4e00-\u9fff]{2,}", text)
@@ -352,10 +352,10 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         for doc in self._docs.values():
             self._index_doc(doc)
 
-    def _search(self, query: str, limit: int = 10) -> List[Dict]:
+    def _search(self, query: str, limit: int = 10) -> list[dict]:
         """语义搜索"""
         query_terms = self._tokenize(query)
-        doc_scores: Dict[str, float] = {}
+        doc_scores: dict[str, float] = {}
         for term in query_terms:
             for doc_id in self._index.get(term, []):
                 doc_scores[doc_id] = doc_scores.get(doc_id, 0) + 1
@@ -375,7 +375,7 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 )
         return results
 
-    def _answer(self, question: str) -> Dict:
+    def _answer(self, question: str) -> dict:
         """智能问答"""
         results = self._search(question, 3)
         if not results:
@@ -407,26 +407,26 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
 module_class = AgentApolloManager
 
-class KnowledgeIndexEngine(object):
+class KnowledgeIndexEngine:
     """知识索引引擎 - 倒排索引、TF-IDF评分、语义相似度"""
 
     def __init__(self):
-        self._inverted_index: Dict[str, Dict[str, int]] = {}
-        self._doc_vectors: Dict[str, Dict[str, float]] = {}
-        self._idf_cache: Dict[str, float] = {}
+        self._inverted_index: dict[str, dict[str, int]] = {}
+        self._doc_vectors: dict[str, dict[str, float]] = {}
+        self._idf_cache: dict[str, float] = {}
         self._doc_count: int = 0
         self._avg_doc_len: float = 0.0
 
-    def add_document(self, doc_id: str, title: str, content: str, tags: List[str] = None) -> None:
+    def add_document(self, doc_id: str, title: str, content: str, tags: list[str] = None) -> None:
         """索引文档"""
         self._doc_count += 1
         text = (title + " " + content).lower()
         words = self._tokenize(text)
         self._avg_doc_len = (self._avg_doc_len * (self._doc_count - 1) + len(words)) / self._doc_count
-        tf: Dict[str, int] = {}
+        tf: dict[str, int] = {}
         for w in words:
             tf[w] = tf.get(w, 0) + 1
-        vector: Dict[str, float] = {}
+        vector: dict[str, float] = {}
         for w, count in tf.items():
             if w not in self._inverted_index:
                 self._inverted_index[w] = {}
@@ -455,10 +455,10 @@ class KnowledgeIndexEngine(object):
         self._doc_count = max(0, self._doc_count - 1)
         self._update_idf()
 
-    def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """搜索文档"""
         query_words = self._tokenize(query.lower())
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for w in query_words:
             postings = self._inverted_index.get(w, {})
             idf = self._idf_cache.get(w, 1.0)
@@ -469,20 +469,20 @@ class KnowledgeIndexEngine(object):
         ranked = sorted(scores.items(), key=lambda x: -x[1])
         return [{"doc_id": did, "score": round(s, 4)} for did, s in ranked[:top_k]]
 
-    def suggest(self, prefix: str, limit: int = 10) -> List[str]:
+    def suggest(self, prefix: str, limit: int = 10) -> list[str]:
         """自动补全建议"""
         prefix = prefix.lower()
         suggestions = [w for w in self._inverted_index if w.startswith(prefix)]
         return sorted(suggestions, key=lambda w: -len(self._inverted_index[w]))[:limit]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "documents": self._doc_count,
             "vocab_size": len(self._inverted_index),
             "avg_doc_len": round(self._avg_doc_len, 1),
         }
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         import re
 
         return re.findall(r"\w+", text)
@@ -491,12 +491,12 @@ class KnowledgeIndexEngine(object):
         for w, postings in self._inverted_index.items():
             self._idf_cache[w] = round(1.0 + 1.0 / (1.0 + len(postings)), 4)
 
-    def get_similar(self, doc_id: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def get_similar(self, doc_id: str, top_k: int = 5) -> list[dict[str, Any]]:
         """找出与给定文档最相似的文档"""
         if doc_id not in self._doc_vectors:
             return []
         target = self._doc_vectors[doc_id]
-        similarities: List[Tuple[str, float]] = []
+        similarities: list[tuple[str, float]] = []
         for other_id, other_vec in self._doc_vectors.items():
             if other_id == doc_id:
                 continue
@@ -506,11 +506,11 @@ class KnowledgeIndexEngine(object):
         similarities.sort(key=lambda x: -x[1])
         return [{"doc_id": did, "similarity": round(s, 4)} for did, s in similarities[:top_k]]
 
-    def batch_search(self, queries: List[str], top_k: int = 3) -> List[List[Dict]]:
+    def batch_search(self, queries: list[str], top_k: int = 3) -> list[list[dict]]:
         """批量搜索"""
         return [self.search(q, top_k) for q in queries]
 
-    def get_document_terms(self, doc_id: str) -> Dict[str, Any]:
+    def get_document_terms(self, doc_id: str) -> dict[str, Any]:
         """获取文档的词项统计"""
         if doc_id not in self._doc_vectors:
             return {"doc_id": doc_id, "terms": 0}
@@ -522,7 +522,7 @@ class KnowledgeIndexEngine(object):
             "top_terms": [{"term": t, "weight": round(w, 4)} for t, w in top_terms],
         }
 
-    def rebuild_index(self, documents: List[Dict]) -> int:
+    def rebuild_index(self, documents: list[dict]) -> int:
         """从文档列表重建整个索引"""
         self._inverted_index.clear()
         self._doc_vectors.clear()
@@ -532,13 +532,13 @@ class KnowledgeIndexEngine(object):
             self.add_document(doc["id"], doc.get("title", ""), doc.get("content", ""), doc.get("tags", []))
         return self._doc_count
 
-    def get_trending_terms(self, top_n: int = 20) -> List[Dict]:
+    def get_trending_terms(self, top_n: int = 20) -> list[dict]:
         """获取高频词汇"""
         term_freqs = [(w, sum(postings.values())) for w, postings in self._inverted_index.items()]
         term_freqs.sort(key=lambda x: -x[1])
         return [{"term": w, "frequency": f, "doc_count": len(self._inverted_index[w])} for w, f in term_freqs[:top_n]]
 
-    def export_index(self) -> Dict[str, Any]:
+    def export_index(self) -> dict[str, Any]:
         """导出索引数据"""
         return {
             "doc_count": self._doc_count,
@@ -548,7 +548,7 @@ class KnowledgeIndexEngine(object):
         }
 
     @staticmethod
-    def _cosine_sim(v1: Dict[str, float], v2: Dict[str, float]) -> float:
+    def _cosine_sim(v1: dict[str, float], v2: dict[str, float]) -> float:
         """余弦相似度"""
         common = set(v1.keys()) & set(v2.keys())
         if not common:
@@ -558,14 +558,14 @@ class KnowledgeIndexEngine(object):
         n2 = sum(v**2 for v in v2.values()) ** 0.5
         return dot / max(n1 * n2, 1e-8)
 
-class KnowledgeSyncManager(object):
+class KnowledgeSyncManager:
     """知识同步管理器 - 多源同步、增量更新、冲突解决"""
 
     def __init__(self):
-        self._sources: Dict[str, Dict] = {}
-        self._sync_history: List[Dict] = []
-        self._conflicts: List[Dict] = []
-        self._last_sync: Dict[str, float] = {}
+        self._sources: dict[str, dict] = {}
+        self._sync_history: list[dict] = []
+        self._conflicts: list[dict] = []
+        self._last_sync: dict[str, float] = {}
 
     def register_source(self, source_id: str, source_type: str, endpoint: str) -> None:
         """注册知识源"""
@@ -576,7 +576,7 @@ class KnowledgeSyncManager(object):
             "registered_at": time.time(),
         }
 
-    def sync_source(self, source_id: str, documents: List[Dict]) -> Dict[str, Any]:
+    def sync_source(self, source_id: str, documents: list[dict]) -> dict[str, Any]:
         """同步知识源"""
         if source_id not in self._sources:
             return {"error": "source not found", "source_id": source_id}
@@ -598,7 +598,7 @@ class KnowledgeSyncManager(object):
         self._sync_history.append(record)
         return record
 
-    def get_sync_status(self, source_id: str = None) -> Dict[str, Any]:
+    def get_sync_status(self, source_id: str = None) -> dict[str, Any]:
         """获取同步状态"""
         if source_id:
             records = [r for r in self._sync_history if r["source_id"] == source_id]
@@ -619,10 +619,10 @@ class KnowledgeSyncManager(object):
                 return True
         return False
 
-    def get_sync_history(self, limit: int = 50) -> List[Dict]:
+    def get_sync_history(self, limit: int = 50) -> list[dict]:
         return self._sync_history[-limit:]
 
-    def list_sources(self) -> List[Dict]:
+    def list_sources(self) -> list[dict]:
         """列出所有知识源"""
         return [{"source_id": sid, "type": s["type"], "status": s["status"]} for sid, s in self._sources.items()]
 
@@ -634,7 +634,7 @@ class KnowledgeSyncManager(object):
             return True
         return False
 
-    def get_source_metrics(self, source_id: str) -> Dict[str, Any]:
+    def get_source_metrics(self, source_id: str) -> dict[str, Any]:
         """获取知识源指标"""
         records = [r for r in self._sync_history if r["source_id"] == source_id]
         total_synced = sum(r["synced"] for r in records)
@@ -646,13 +646,13 @@ class KnowledgeSyncManager(object):
             "sync_runs": len(records),
         }
 
-    def analyze_knowledge_coverage(self) -> Dict[str, Any]:
+    def analyze_knowledge_coverage(self) -> dict[str, Any]:
         """分析知识库覆盖率：分类分布、知识缺口、冗余检测"""
         indices = self._indices if hasattr(self, "_indices") else {}
         if not indices:
             return {"total_indices": 0, "coverage": {}}
         total_docs = 0
-        category_counts: Dict[str, int] = {}
+        category_counts: dict[str, int] = {}
         for idx_name, idx_data in indices.items():
             count = idx_data.get("doc_count", 0) if isinstance(idx_data, dict) else 0
             total_docs += count

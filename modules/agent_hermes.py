@@ -94,7 +94,8 @@ import threading
 import heapq
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 
@@ -132,12 +133,12 @@ class Message:
     recipient: str = field(compare=False, default="")
     channel: str = field(compare=False, default="default")
     channel_type: ChannelType = field(compare=False, default=ChannelType.DIRECT)
-    payload: Dict[str, Any] = field(compare=False, default_factory=dict)
-    headers: Dict[str, str] = field(compare=False, default_factory=dict)
+    payload: dict[str, Any] = field(compare=False, default_factory=dict)
+    headers: dict[str, str] = field(compare=False, default_factory=dict)
     status: MessageStatus = field(compare=False, default=MessageStatus.PENDING)
     created_at: float = field(compare=False, default_factory=time.time)
-    delivered_at: Optional[float] = field(compare=False, default=None)
-    expire_at: Optional[float] = field(compare=False, default=None)
+    delivered_at: float | None = field(compare=False, default=None)
+    expire_at: float | None = field(compare=False, default=None)
     retry_count: int = field(compare=False, default=0)
     max_retries: int = field(compare=False, default=3)
     ttl_seconds: float = field(compare=False, default=86400 * 7)
@@ -154,7 +155,7 @@ class Message:
     def is_expired(self) -> bool:
         return time.time() > self.expire_at
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "msg_id": self.msg_id,
             "sender": self.sender,
@@ -179,14 +180,14 @@ class MessageStore:
     """消息持久化存储 — 内存存储 + 序列化支持"""
 
     def __init__(self, max_messages: int = 100000):
-        self._messages: Dict[str, Message] = {}
-        self._channel_index: Dict[str, Set[str]] = defaultdict(set)
-        self._recipient_index: Dict[str, Set[str]] = defaultdict(set)
-        self._sender_index: Dict[str, Set[str]] = defaultdict(set)
-        self._status_index: Dict[MessageStatus, Set[str]] = defaultdict(set)
+        self._messages: dict[str, Message] = {}
+        self._channel_index: dict[str, set[str]] = defaultdict(set)
+        self._recipient_index: dict[str, set[str]] = defaultdict(set)
+        self._sender_index: dict[str, set[str]] = defaultdict(set)
+        self._status_index: dict[MessageStatus, set[str]] = defaultdict(set)
         self._lock = threading.RLock()
         self._max_messages = max_messages
-        self._dead_letters: List[Message] = []
+        self._dead_letters: list[Message] = []
 
     def store(self, message: Message) -> bool:
         with self._lock:
@@ -199,7 +200,7 @@ class MessageStore:
             self._status_index[message.status].add(message.msg_id)
             return True
 
-    def get(self, msg_id: str) -> Optional[Message]:
+    def get(self, msg_id: str) -> Message | None:
         with self._lock:
             return self._messages.get(msg_id)
 
@@ -215,7 +216,7 @@ class MessageStore:
             self._status_index[status].add(msg_id)
             return True
 
-    def get_by_channel(self, channel: str, limit: int = 100) -> List[Message]:
+    def get_by_channel(self, channel: str, limit: int = 100) -> list[Message]:
         with self._lock:
             ids = list(self._channel_index.get(channel, set()))
             msgs = [self._messages[mid] for mid in ids if mid in self._messages]
@@ -223,8 +224,8 @@ class MessageStore:
             return msgs[:limit]
 
     def get_by_recipient(
-        self, recipient: str, status: Optional[MessageStatus] = None, limit: int = 100
-    ) -> List[Message]:
+        self, recipient: str, status: MessageStatus | None = None, limit: int = 100
+    ) -> list[Message]:
         with self._lock:
             ids = self._recipient_index.get(recipient, set())
             msgs = [self._messages[mid] for mid in ids if mid in self._messages]
@@ -238,7 +239,7 @@ class MessageStore:
             message.status = MessageStatus.DEAD_LETTER
             self._dead_letters.append(message)
 
-    def get_dead_letters(self, limit: int = 50) -> List[Message]:
+    def get_dead_letters(self, limit: int = 50) -> list[Message]:
         with self._lock:
             return self._dead_letters[-limit:]
 
@@ -256,7 +257,7 @@ class MessageStore:
             self._sender_index[msg.sender].discard(msg_id)
             self._status_index[msg.status].discard(msg_id)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         with self._lock:
             return {
                 "total": len(self._messages),
@@ -269,13 +270,13 @@ class MessageStore:
 # 路由引擎
 # ============================================================
 
-class RoutingEngine(object):
+class RoutingEngine:
     """消息路由引擎 — 支持Direct/Topic/Broadcast模式"""
 
     def __init__(self):
-        self._subscriptions: Dict[str, Dict[str, ChannelType]] = defaultdict(dict)
-        self._topic_patterns: Dict[str, List[str]] = defaultdict(list)  # topic -> [patterns]
-        self._handlers: Dict[str, Callable] = {}
+        self._subscriptions: dict[str, dict[str, ChannelType]] = defaultdict(dict)
+        self._topic_patterns: dict[str, list[str]] = defaultdict(list)  # topic -> [patterns]
+        self._handlers: dict[str, Callable] = {}
 
     def subscribe(self, recipient: str, channel: str, channel_type: ChannelType = ChannelType.DIRECT) -> bool:
         self._subscriptions[recipient][channel] = channel_type
@@ -290,7 +291,7 @@ class RoutingEngine(object):
     def register_handler(self, channel: str, handler: Callable):
         self._handlers[channel] = handler
 
-    def resolve_recipients(self, message: Message) -> List[str]:
+    def resolve_recipients(self, message: Message) -> list[str]:
         """解析消息目标接收者列表"""
         recipients = []
         if message.channel_type == ChannelType.DIRECT:
@@ -314,12 +315,12 @@ class RoutingEngine(object):
 class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Hermes智能体 — 消息路由与通信引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(module_name="agent_hermes", version="6.39.0", config=config)
         self._store = MessageStore()
         self._router = RoutingEngine()
-        self._pending_queue: List[Message] = []
+        self._pending_queue: list[Message] = []
         self._queue_lock = threading.Lock()
         self._stats = {
             "total_sent": 0,
@@ -341,11 +342,11 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         sender: str,
         recipient: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         channel: str = "default",
         channel_type: ChannelType = ChannelType.DIRECT,
         priority: MessagePriority = MessagePriority.NORMAL,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         ttl_seconds: float = 86400 * 7,
     ) -> Result:
         """发送消息"""
@@ -371,7 +372,7 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     async def broadcast(
         self,
         sender: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         channel: str = "broadcast",
         priority: MessagePriority = MessagePriority.NORMAL,
     ) -> Result:
@@ -400,7 +401,7 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # === 消息接收 ===
 
-    async def receive_messages(self, recipient: str, channel: Optional[str] = None, limit: int = 50) -> Result:
+    async def receive_messages(self, recipient: str, channel: str | None = None, limit: int = 50) -> Result:
         """接收消息（拉模式）"""
         if channel:
             msgs = self._store.get_by_channel(channel, limit)
@@ -470,10 +471,10 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     async def search_messages(
         self,
-        sender: Optional[str] = None,
-        recipient: Optional[str] = None,
-        channel: Optional[str] = None,
-        status: Optional[MessageStatus] = None,
+        sender: str | None = None,
+        recipient: str | None = None,
+        channel: str | None = None,
+        status: MessageStatus | None = None,
         limit: int = 100,
     ) -> Result:
         all_msgs = list(self._store._messages.values())
@@ -537,7 +538,7 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def batch_update_routes(self, routes: List[Dict]) -> Dict[str, Any]:
+    def batch_update_routes(self, routes: list[dict]) -> dict[str, Any]:
         """批量更新消息路由规则。企业场景：服务上线时一次性配置几十条路由。
 
         Args:
@@ -574,7 +575,7 @@ class AgentHermes(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results["details"].append({"error": str(e), "rule": str(rule)})
         return results
 
-    def get_route_statistics(self) -> Dict[str, Any]:
+    def get_route_statistics(self) -> dict[str, Any]:
         """获取路由表统计信息：总路由数、按优先级分布、按目标分布。
         用于运维监控面板展示当前路由健康度。
         """

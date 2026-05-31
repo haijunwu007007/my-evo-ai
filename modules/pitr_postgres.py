@@ -90,11 +90,11 @@ class WALArchive:
 
     def __init__(self, max_segments: int = 10000):
         self.max_segments = max_segments
-        self._segments: Dict[str, Dict] = {}
+        self._segments: dict[str, dict] = {}
         self._archive_location = "/var/lib/postgresql/wal_archive"
         self._archive_stats = {"total_archived": 0, "total_size_mb": 0, "failed": 0}
 
-    def archive_segment(self, segment_name: str, size_mb: float = 16) -> Dict:
+    def archive_segment(self, segment_name: str, size_mb: float = 16) -> dict:
         if segment_name in self._segments:
             return {"success": False, "error": "already_archived"}
         entry = {
@@ -112,7 +112,7 @@ class WALArchive:
             self._cleanup_old_segments(100)
         return {"success": True, "segment": segment_name}
 
-    def restore_segment(self, segment_name: str) -> Dict:
+    def restore_segment(self, segment_name: str) -> dict:
         seg = self._segments.get(segment_name)
         if not seg:
             return {"success": False, "error": "segment_not_found"}
@@ -122,7 +122,7 @@ class WALArchive:
         seg["restored_at"] = time.time()
         return {"success": True, "segment": segment_name, "size_mb": seg["size_mb"]}
 
-    def get_segment_range(self, start_ts: float, end_ts: float) -> List[str]:
+    def get_segment_range(self, start_ts: float, end_ts: float) -> list[str]:
         return [name for name, seg in self._segments.items() if start_ts <= seg["archived_at"] <= end_ts]
 
     def _cleanup_old_segments(self, count: int):
@@ -130,7 +130,7 @@ class WALArchive:
         for name, _ in oldest[:count]:
             self._segments.pop(name, None)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {**self._archive_stats, "current_segments": len(self._segments)}
 
     # --- Auto-generated action dispatch methods ---
@@ -158,16 +158,16 @@ class WALArchive:
             params = {}
         return self.restore_segment(**params)
 
-class BackupManager(object):
+class BackupManager:
     """备份管理器"""
 
     def __init__(self, retention_days: int = 7, compression: str = "gzip"):
         self.retention_days = retention_days
         self.compression = compression
-        self._backups: Dict[str, Dict] = {}
+        self._backups: dict[str, dict] = {}
         self._backup_types = ["full", "incremental", "diff"]
 
-    def create_backup(self, backup_type: str = "full", database: str = "default", tables: List[str] = None) -> Dict:
+    def create_backup(self, backup_type: str = "full", database: str = "default", tables: list[str] = None) -> dict:
         if backup_type not in self._backup_types:
             return {"success": False, "error": f"invalid_type:{backup_type}"}
         backup_id = f"bak_{backup_type}_{int(time.time())}_{str(uuid.uuid4())[:6]}"
@@ -195,17 +195,17 @@ class BackupManager(object):
     def delete_backup(self, backup_id: str) -> bool:
         return self._backups.pop(backup_id, None) is not None
 
-    def get_backup(self, backup_id: str) -> Optional[Dict]:
+    def get_backup(self, backup_id: str) -> dict | None:
         return self._backups.get(backup_id)
 
-    def list_backups(self, backup_type: str = None, limit: int = 50) -> List[Dict]:
+    def list_backups(self, backup_type: str = None, limit: int = 50) -> list[dict]:
         backups = list(self._backups.values())
         if backup_type:
             backups = [b for b in backups if b["type"] == backup_type]
         backups.sort(key=lambda x: x.get("started_at", 0), reverse=True)
         return backups[:limit]
 
-    def get_latest_backup(self, database: str = "default") -> Optional[Dict]:
+    def get_latest_backup(self, database: str = "default") -> dict | None:
         backups = [b for b in self._backups.values() if b["database"] == database and b["status"] == "completed"]
         if not backups:
             return None
@@ -217,15 +217,15 @@ class BackupManager(object):
         for bid in expired:
             del self._backups[bid]
 
-class RecoveryEngine(object):
+class RecoveryEngine:
     """恢复引擎"""
 
     def __init__(self, wal_archive: WALArchive, backup_mgr: BackupManager):
         self.wal = wal_archive
         self.backup_mgr = backup_mgr
-        self._recovery_history: List[Dict] = []
+        self._recovery_history: list[dict] = []
 
-    def point_in_time_recovery(self, database: str, target_time: float, backup_id: str = None) -> Dict:
+    def point_in_time_recovery(self, database: str, target_time: float, backup_id: str = None) -> dict:
         if not backup_id:
             backup = self.backup_mgr.get_latest_backup(database)
             if not backup:
@@ -251,7 +251,7 @@ class RecoveryEngine(object):
         self._recovery_history.append(recovery)
         return {"success": True, **recovery}
 
-    def dry_run(self, database: str, target_time: float) -> Dict:
+    def dry_run(self, database: str, target_time: float) -> dict:
         backup = self.backup_mgr.get_latest_backup(database)
         if not backup:
             return {"success": False, "error": "no_backup_available"}
@@ -270,13 +270,13 @@ class RecoveryEngine(object):
 class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """PITR时间点恢复 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "backups_created": 0,
@@ -285,7 +285,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -377,7 +377,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_backup_health_report(self) -> Dict[str, Any]:
+    def get_backup_health_report(self) -> dict[str, Any]:
         """备份健康报告。企业场景：DBA每日查看备份状态，
         确保全量备份和WAL归档都正常运行。
         """
@@ -400,7 +400,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "status": "healthy" if len(backups) > 0 else "no_backups",
         }
 
-    def get_wal_archive_stats(self, hours: int = 24) -> Dict[str, Any]:
+    def get_wal_archive_stats(self, hours: int = 24) -> dict[str, Any]:
         """WAL归档统计。企业场景：监控WAL归档频率和大小，
         确保PITR时间窗口覆盖需求。
         """
@@ -419,7 +419,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             else 0,
         }
 
-    def estimate_recovery_window(self, db_name: str) -> Dict[str, Any]:
+    def estimate_recovery_window(self, db_name: str) -> dict[str, Any]:
         """预估恢复窗口。企业场景：DBA确认PITR能覆盖多长时间的数据恢复，
         确保满足等保要求的7天/30天恢复窗口。
         """
@@ -443,7 +443,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "compliance_met_30d": window_hours >= 720,
         }
 
-    def get_replication_lag(self) -> Dict[str, Any]:
+    def get_replication_lag(self) -> dict[str, Any]:
         """复制延迟检查。企业场景：监控主从复制延迟，
         延迟过大时PITR可能丢失数据或恢复不一致。
         """
@@ -478,7 +478,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "replicas": replica_status,
         }
 
-    def create_pitr_backup(self, db_name: str, label: str = None) -> Dict[str, Any]:
+    def create_pitr_backup(self, db_name: str, label: str = None) -> dict[str, Any]:
         """创建PITR备份点。企业场景：重大操作前手动创建备份点，
         确保有精确恢复点可回退。
         """
@@ -506,7 +506,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-    def get_wal_gap_analysis(self) -> Dict[str, Any]:
+    def get_wal_gap_analysis(self) -> dict[str, Any]:
         """WAL归档缺口分析。企业场景：检查WAL归档是否有时间间隙，
         缺口期间的数据无法PITR恢复，属于严重风险。
         """
@@ -535,7 +535,7 @@ class PITRPostgres(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 )
         return {"success": True, "total_wal_files": len(sorted_wal), "gaps_found": len(gaps), "gaps": gaps}
 
-    def get_database_size_trend(self, db_name: str, days: int = 7) -> Dict[str, Any]:
+    def get_database_size_trend(self, db_name: str, days: int = 7) -> dict[str, Any]:
         """数据库大小趋势。企业场景：容量规划，查看数据库增长速率，
         预估何时需要扩容。
         """

@@ -123,7 +123,7 @@ class LogEntry:
     source: str
     message: str
     raw: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     log_file: str = ""
 
 @dataclass
@@ -148,20 +148,20 @@ class LogFilter:
 
     filter_id: str
     name: str
-    level: Optional[str] = None
-    source: Optional[str] = None
-    keyword: Optional[str] = None
-    regex: Optional[str] = None
-    time_start: Optional[str] = None
-    time_end: Optional[str] = None
+    level: str | None = None
+    source: str | None = None
+    keyword: str | None = None
+    regex: str | None = None
+    time_start: str | None = None
+    time_end: str | None = None
 
-class LogParserEngine(object):
+class LogParserEngine:
     """日志解析引擎 - 支持多格式日志解析、字段提取和结构化输出"""
 
     def __init__(self):
-        self._patterns: Dict[str, str] = {}
+        self._patterns: dict[str, str] = {}
         self._parsed_count: int = 0
-        self._field_extractors: Dict[str, callable] = {}
+        self._field_extractors: dict[str, callable] = {}
 
     def register_pattern(self, name: str, regex: str) -> None:
         """注册日志解析模式"""
@@ -171,7 +171,7 @@ class LogParserEngine(object):
         """注册字段提取器"""
         self._field_extractors[field_name] = extractor_fn
 
-    def parse_line(self, line: str, pattern_name: str = "default") -> Optional[Dict]:
+    def parse_line(self, line: str, pattern_name: str = "default") -> dict | None:
         """解析单行日志"""
         self._parsed_count += 1
         pattern = self._patterns.get(pattern_name, r"(\S+)\s+(\S+)\s+(\S+)\s+(.+)")
@@ -189,11 +189,11 @@ class LogParserEngine(object):
                 pass
         return result
 
-    def parse_batch(self, lines: List[str], pattern_name: str = "default") -> List[Dict]:
+    def parse_batch(self, lines: list[str], pattern_name: str = "default") -> list[dict]:
         """批量解析日志行"""
         return [r for r in (self.parse_line(l, pattern_name) for l in lines) if r]
 
-    def extract_timestamp(self, line: str) -> Optional[str]:
+    def extract_timestamp(self, line: str) -> str | None:
         """从日志行提取时间戳"""
         import re
 
@@ -215,14 +215,14 @@ class LogParserEngine(object):
         m = re.search(r"\b(DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|CRITICAL)\b", line, re.I)
         return m.group(1).upper() if m else "UNKNOWN"
 
-    def categorize(self, parsed_lines: List[Dict]) -> Dict[str, int]:
+    def categorize(self, parsed_lines: list[dict]) -> dict[str, int]:
         """按级别分类统计"""
         from collections import Counter
 
         levels = [self.extract_log_level(p.get("raw", "")) for p in parsed_lines]
         return dict(Counter(levels))
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "patterns": len(self._patterns),
             "extractors": len(self._field_extractors),
@@ -256,8 +256,8 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def __init__(self):
 
         super().__init__()
-        self._sources: Dict[str, LogSource] = {}
-        self._filters: Dict[str, LogFilter] = {}
+        self._sources: dict[str, LogSource] = {}
+        self._filters: dict[str, LogFilter] = {}
         self._log_store: deque = deque(maxlen=50000)  # 内存存储最近5万条
         self._stats = {
             "total_collected": 0,
@@ -266,7 +266,7 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "scan_count": 0,
             "last_scan_time": None,
         }
-        self._collect_thread: Optional[threading.Thread] = None
+        self._collect_thread: threading.Thread | None = None
         self._collecting = False
         self._collect_interval = 10
         self._lock = threading.Lock()
@@ -344,7 +344,7 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 if size <= src.last_position:
                     continue
 
-                with open(f, "r", encoding=src.encoding, errors="replace") as fh:
+                with open(f, encoding=src.encoding, errors="replace") as fh:
                     # 如果文件变小了（被轮转），从头读
                     if size < src.last_position:
                         fh.seek(0)
@@ -376,7 +376,7 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
         src.last_scan = time.time()
 
-    def _parse_line(self, line: str, source: str, filename: str = "") -> Optional[LogEntry]:
+    def _parse_line(self, line: str, source: str, filename: str = "") -> LogEntry | None:
         """解析单行日志"""
         for pattern in self.LOG_PATTERNS:
             match = pattern.match(line)
@@ -409,7 +409,7 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             log_file=filename,
         )
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         collecting = self._collect_thread and self._collect_thread.is_alive()
         with self._lock:
@@ -603,7 +603,7 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "error_rate": round(len(error_msgs) / max(len(entries), 1) * 100, 2),
         }
 
-    def detect_log_anomalies(self, window_seconds: int = 300) -> Dict[str, Any]:
+    def detect_log_anomalies(self, window_seconds: int = 300) -> dict[str, Any]:
         """检测日志异常：错误突增、新错误模式、沉默告警"""
         with self._lock:
             entries = list(self._log_store)

@@ -159,11 +159,11 @@ class VerifyResult:
     rules_checked: int = 0
     rules_passed: int = 0
     rules_failed: int = 0
-    details: List[Dict[str, Any]] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    repair_suggestions: List[str] = field(default_factory=list)
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    details: list[dict[str, Any]] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    repair_suggestions: list[str] = field(default_factory=list)
+    started_at: str | None = None
+    completed_at: str | None = None
     duration_seconds: float = 0.0
 
     def __post_init__(self):
@@ -181,15 +181,15 @@ class BackupMetadata:
     backup_type: str = "full"
     created_at: str = ""
     policy_id: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-class BackupIntegrityAnalyzer(object):
+class BackupIntegrityAnalyzer:
     """备份完整性分析引擎 — 趋势追踪、退化检测、恢复风险评估、合规报告生成"""
 
     def __init__(self):
-        self._verify_records: List[Dict[str, Any]] = []
+        self._verify_records: list[dict[str, Any]] = []
 
-    def record_verify_result(self, result: Dict[str, Any]) -> None:
+    def record_verify_result(self, result: dict[str, Any]) -> None:
         """记录验证结果用于趋势分析"""
         self._verify_records.append(
             {
@@ -206,7 +206,7 @@ class BackupIntegrityAnalyzer(object):
         if len(self._verify_records) > 1000:
             self._verify_records = self._verify_records[-1000:]
 
-    def analyze_backup_trend(self, backup_id: str, days: int = 30) -> Dict[str, Any]:
+    def analyze_backup_trend(self, backup_id: str, days: int = 30) -> dict[str, Any]:
         """分析指定备份的验证趋势：通过率变化、平均耗时、规则覆盖"""
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
         records = [r for r in self._verify_records if r["backup_id"] == backup_id and r["timestamp"] >= cutoff]
@@ -245,10 +245,10 @@ class BackupIntegrityAnalyzer(object):
             "trend_delta": round(delta * 100, 1),
         }
 
-    def detect_degradation(self) -> List[Dict[str, Any]]:
+    def detect_degradation(self) -> list[dict[str, Any]]:
         """检测所有备份中的退化信号：连续失败、通过率下降、耗时异常增长"""
         alerts = []
-        backup_records: Dict[str, List[Dict]] = defaultdict(list)
+        backup_records: dict[str, list[dict]] = defaultdict(list)
         for r in self._verify_records:
             backup_records[r["backup_id"]].append(r)
         for backup_id, records in backup_records.items():
@@ -308,7 +308,7 @@ class BackupIntegrityAnalyzer(object):
         alerts.sort(key=lambda x: {"critical": 0, "warning": 1, "info": 2}.get(x["severity"], 3))
         return alerts
 
-    def estimate_recovery_risk(self) -> Dict[str, Any]:
+    def estimate_recovery_risk(self) -> dict[str, Any]:
         """评估整体灾难恢复风险：基于最近验证结果、备份覆盖率、失败模式"""
         total = len(self._verify_records)
         if total == 0:
@@ -373,11 +373,11 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.module_category = "数据保护"
 
         # 备份元数据注册表
-        self._backup_registry: Dict[str, BackupMetadata] = {}
+        self._backup_registry: dict[str, BackupMetadata] = {}
         # 验证历史
-        self._verify_history: Dict[str, VerifyResult] = {}
+        self._verify_history: dict[str, VerifyResult] = {}
         # 验证规则
-        self._rules: Dict[str, VerifyRule] = {}
+        self._rules: dict[str, VerifyRule] = {}
         # 统计
         self._total_verifies = 0
         self._total_passed = 0
@@ -456,7 +456,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             f"[{self.module_name}] 初始化完成，注册 {len(self._backup_registry)} 个备份，{len(self._rules)} 条规则"
         )
 
-    def _register_backup(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _register_backup(self, params: dict[str, Any]) -> dict[str, Any]:
         """注册备份元数据"""
         backup_id = params.get("backup_id", "")
         if not backup_id:
@@ -475,7 +475,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._backup_registry[backup_id] = meta
         return {"success": True, "result": {"backup_id": backup_id}}
 
-    def _verify(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行备份验证"""
         backup_id = params.get("backup_id", "")
         verify_type = params.get("verify_type", "full")
@@ -585,7 +585,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         )
         return {"success": True, "result": self._format_result(result)}
 
-    def _format_result(self, r: VerifyResult) -> Dict[str, Any]:
+    def _format_result(self, r: VerifyResult) -> dict[str, Any]:
         """格式化验证结果"""
         return {
             "verify_id": r.verify_id,
@@ -602,7 +602,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "duration_seconds": round(r.duration_seconds, 3),
         }
 
-    def _batch_verify(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _batch_verify(self, params: dict[str, Any]) -> dict[str, Any]:
         """批量验证"""
         backup_ids = params.get("backup_ids", list(self._backup_registry.keys()))
         verify_type = params.get("verify_type", "full")
@@ -625,7 +625,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _list_backups(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _list_backups(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """列出已注册备份"""
         params = params or {}
         tag = params.get("tag", "")
@@ -653,7 +653,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
         return {"success": True, "result": result}
 
-    def _get_history(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_history(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """查询验证历史"""
         params = params or {}
         backup_id = params.get("backup_id", "")
@@ -675,7 +675,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _get_stats(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_stats(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """获取验证统计"""
         return {
             "success": True,
@@ -690,7 +690,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             },
         }
 
-    def _get_integrity_trend(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_integrity_trend(self, params: dict[str, Any]) -> dict[str, Any]:
         """分析备份完整性趋势"""
         params = params or {}
         backup_id = params.get("backup_id", "")
@@ -705,17 +705,17 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 summaries.append(trend)
         return {"success": True, "result": {"trends": summaries, "total_analyzed": len(summaries)}}
 
-    def _get_degradation_alerts(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_degradation_alerts(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """获取退化告警列表"""
         alerts = self._integrity_analyzer.detect_degradation()
         return {"success": True, "result": {"alerts": alerts, "total": len(alerts)}}
 
-    def _get_recovery_risk(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_recovery_risk(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """评估灾难恢复风险"""
         risk = self._integrity_analyzer.estimate_recovery_risk()
         return {"success": True, "result": risk}
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行备份验证操作"""
         _ = self.trace("execute")
         metrics_collector.counter("backup_verify_ops_total", labels={"action": operation})
@@ -747,7 +747,7 @@ class BackupVerifyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         """优雅关闭"""
         logger.info(f"[{self.module_name}] 已关闭，共执行 {self._total_verifies} 次验证")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         base = super().health_check() or {}
         result = dict(base)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 535模块合规测试"""
 import os, sys, pytest, ast
 from pathlib import Path
@@ -8,7 +7,7 @@ EXCLUDE_NO_CLASS = {"nl_workflow.py", "trending_pipeline.py"}
 EXCLUDE_CB = EXCLUDE_NO_CLASS | {"atom_code.py", "key_insights.py", "langfuse_monitor.py",
     "trigger_engine.py", "webhook_handler.py", "workflow_manager.py"}
 
-def get_py_files() -> List[Path]:
+def get_py_files() -> list[Path]:
     d = BASE / "modules"; return sorted([f for f in d.iterdir() if f.suffix == ".py" and not f.name.startswith("_")])
 
 @pytest.mark.compliance

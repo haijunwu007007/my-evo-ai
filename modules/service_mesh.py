@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class MeshAnalyzer(object):
+class MeshAnalyzer:
     """service_mesh 运营分析引擎
 
     - 分析网格流量分布
@@ -116,7 +116,7 @@ class MeshAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "MeshAnalyzer", "module": "service_mesh", "summary": summary}
 
-class ServiceMeshAnalyzer(object):
+class ServiceMeshAnalyzer:
     """service mesh 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class ServiceMeshAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class TrafficFlowAnalyzer(object):
+class TrafficFlowAnalyzer:
     """分析服务网格流量和延迟分布
 
     为service_mesh模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class TrafficFlowAnalyzer(object):
 class ServiceMesh(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """服务网格"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"service_mesh")
 

@@ -14,8 +14,9 @@ import time
 import json
 from core.logging_config import get_logger
 import traceback
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, Callable
+from datetime import datetime, timezone, UTC
+from typing import Dict, List, Optional, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from pathlib import Path
@@ -51,7 +52,7 @@ class DecisionEvent:
     event_type: str       # 事件类型
     data: dict            # 事件数据
     severity: str         # 严重级别: critical/warning/info
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 @dataclass
@@ -60,10 +61,10 @@ class DecisionRule:
     id: str
     name: str
     description: str
-    triggers: List[dict]       # 触发条件 [{"type": "event", "event_type": "module_failed"}, ...]
-    conditions: List[dict]     # 执行条件 [{"field": "severity", "op": "eq", "value": "critical"}, ...]
-    actions: List[dict]        # 执行动作 [{"type": "module", "module": "x", "method": "y"}, ...]
-    chain: List[dict]          # 决策链: 按序执行, 前一步输出传递给下一步
+    triggers: list[dict]       # 触发条件 [{"type": "event", "event_type": "module_failed"}, ...]
+    conditions: list[dict]     # 执行条件 [{"field": "severity", "op": "eq", "value": "critical"}, ...]
+    actions: list[dict]        # 执行动作 [{"type": "module", "module": "x", "method": "y"}, ...]
+    chain: list[dict]          # 决策链: 按序执行, 前一步输出传递给下一步
     priority: str = "normal"
     enabled: bool = True
     cooldown: int = 300        # 冷却时间(秒), 防止频繁触发
@@ -84,7 +85,7 @@ class DecisionExecution:
     priority: str
     status: str = DecisionStatus.PENDING.value
     trigger_event: dict = field(default_factory=dict)
-    chain_results: List[dict] = field(default_factory=list)
+    chain_results: list[dict] = field(default_factory=list)
     started_at: str = ""
     finished_at: str = ""
     duration_ms: int = 0
@@ -116,10 +117,10 @@ class ChainExecutor:
 
     async def execute_chain(
         self,
-        chain: List[dict],
+        chain: list[dict],
         context: dict = None,
         chain_timeout: int = 120,
-    ) -> Dict:
+    ) -> dict:
         """
         执行决策链
 
@@ -227,7 +228,7 @@ class ChainExecutor:
                 "error": result.get("error", ""),
                 "duration_ms": duration,
             }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {
                 "step": step_name,
                 "module": module_id,
@@ -363,9 +364,9 @@ class DecisionEngine:
         self._db_path = db_path or str(Path(__file__).parent.parent / "data" / "decision_engine.db")
         self._executor = module_executor
         self._chain_executor = ChainExecutor(module_executor)
-        self._rules: Dict[str, DecisionRule] = {}
-        self._running_executions: Dict[str, DecisionExecution] = {}
-        self._event_listeners: Dict[str, List[Callable]] = {}  # event_type -> [callbacks]
+        self._rules: dict[str, DecisionRule] = {}
+        self._running_executions: dict[str, DecisionExecution] = {}
+        self._event_listeners: dict[str, list[Callable]] = {}  # event_type -> [callbacks]
         self._stats = {"total": 0, "success": 0, "failed": 0, "escalated": 0}
 
         # 初始化DB
@@ -859,7 +860,7 @@ class DecisionEngine:
 
     # ── 事件处理 ──
 
-    def on_event(self, event: DecisionEvent) -> List[Dict]:
+    def on_event(self, event: DecisionEvent) -> list[dict]:
         """
         接收事件，匹配规则，返回触发的决策列表(同步)
         实际执行由调用方异步调用 execute_decisions
@@ -931,11 +932,7 @@ class DecisionEngine:
             else:
                 actual = event.data.get(field, "")
 
-            if op == "eq" and actual != value:
-                return False
-            elif op == "ne" and actual == value:
-                return False
-            elif op == "in" and actual not in (value if isinstance(value, list) else [value]):
+            if op == "eq" and actual != value or op == "ne" and actual == value or op == "in" and actual not in (value if isinstance(value, list) else [value]):
                 return False
             elif op == "gt":
                 try:
@@ -959,7 +956,7 @@ class DecisionEngine:
             rule_name=rule_info["rule_name"],
             priority=rule_info["priority"],
             trigger_event=trigger_event or {},
-            started_at=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
         )
         execution.status = DecisionStatus.RUNNING.value
         self._running_executions[exec_id] = execution
@@ -1021,7 +1018,7 @@ class DecisionEngine:
             await self._escalate(execution)
 
         finally:
-            execution.finished_at = datetime.now(timezone.utc).isoformat()
+            execution.finished_at = datetime.now(UTC).isoformat()
             self._persist_execution(execution)
             self._running_executions.pop(exec_id, None)
 
@@ -1070,11 +1067,11 @@ class DecisionEngine:
 
     # ── 公开查询接口 ──
 
-    def get_rules(self) -> List[dict]:
+    def get_rules(self) -> list[dict]:
         """获取所有规则"""
         return [self._rule_to_dict(r) for r in self._rules.values()]
 
-    def get_rule(self, rule_id: str) -> Optional[dict]:
+    def get_rule(self, rule_id: str) -> dict | None:
         rule = self._rules.get(rule_id)
         return self._rule_to_dict(rule) if rule else None
 
@@ -1112,7 +1109,7 @@ class DecisionEngine:
             return True
         return False
 
-    def update_rule(self, rule_id: str, updates: dict) -> Optional[dict]:
+    def update_rule(self, rule_id: str, updates: dict) -> dict | None:
         """更新规则字段"""
         rule = self._rules.get(rule_id)
         if not rule:
@@ -1124,7 +1121,7 @@ class DecisionEngine:
         self._persist_rule(rule)
         return self._rule_to_dict(rule)
 
-    def get_history(self, limit: int = 50, status: str = None, rule_id: str = None) -> List[dict]:
+    def get_history(self, limit: int = 50, status: str = None, rule_id: str = None) -> list[dict]:
         """查询执行历史"""
         query = "SELECT * FROM decision_history WHERE 1=1"
         params = []
@@ -1147,7 +1144,7 @@ class DecisionEngine:
                 rows.append(r)
         return rows
 
-    def get_execution_detail(self, execution_id: str) -> Optional[dict]:
+    def get_execution_detail(self, execution_id: str) -> dict | None:
         """获取单次执行详情"""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -1285,7 +1282,7 @@ class DecisionEngine:
         except Exception:
             return 0.5
 
-    def smart_evaluate(self, event: DecisionEvent, intelligent_coordinator: Any = None) -> List[Dict]:
+    def smart_evaluate(self, event: DecisionEvent, intelligent_coordinator: Any = None) -> list[dict]:
         """
         v1.1 智能评估 — 规则匹配 + 经验加权 + 智能协调器建议
         
@@ -1338,7 +1335,7 @@ class DecisionEngine:
 
         return matched
 
-    def get_experience_report(self) -> Dict:
+    def get_experience_report(self) -> dict:
         """
         获取经验报告 — 所有规则的经验评分和优化建议
         """

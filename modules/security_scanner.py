@@ -181,10 +181,10 @@ class SecurityFinding:
     file_path: str = ""
     line_number: int = 0
     code_snippet: str = ""
-    cve: Optional[str] = None
+    cve: str | None = None
     cvss_score: float = 0.0
     remediation: str = ""
-    references: List[str] = field(default_factory=list)
+    references: list[str] = field(default_factory=list)
     false_positive: bool = False
 
 @dataclass
@@ -195,15 +195,15 @@ class ScanReport:
     scan_type: ScanType
     target: str
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     status: str = "running"
-    findings: List[SecurityFinding] = field(default_factory=list)
+    findings: list[SecurityFinding] = field(default_factory=list)
     files_scanned: int = 0
     lines_scanned: int = 0
     duration_ms: float = 0.0
     score: float = 100.0
 
-class VulnerabilityEvaluator(object):
+class VulnerabilityEvaluator:
     """漏洞评估引擎 — CVSS风格评估、风险优先级排序、修复建议生成、误报检测"""
 
     """漏洞评分引擎 — CVSS风格评估、风险优先级排序、修复建议生成"""
@@ -221,7 +221,7 @@ class VulnerabilityEvaluator(object):
         description: str = "",
         has_exploit: bool = False,
         affected_assets: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """为单个发现计算综合风险分数"""
         base_score = self._IMPACT_WEIGHTS.get(severity.lower(), 5.0)
         av_mult = self._ATTACK_VECTOR_WEIGHTS.get(attack_vector.lower(), 0.8)
@@ -264,7 +264,7 @@ class VulnerabilityEvaluator(object):
             "remediation_hint": self._get_remediation_hint(severity.lower(), description),
         }
 
-    def score_report(self, findings: List[Dict]) -> Dict[str, Any]:
+    def score_report(self, findings: list[dict]) -> dict[str, Any]:
         """评估整份扫描报告，生成综合风险摘要"""
         if not findings:
             return {"overall_score": 100.0, "grade": "A", "summary": "未发现安全问题"}
@@ -301,7 +301,7 @@ class VulnerabilityEvaluator(object):
             "recommendation": self._report_recommendation(critical_count, high_count, overall_score),
         }
 
-    def prioritize_remediation(self, findings: List[Dict], team_capacity: int = 3) -> List[Dict]:
+    def prioritize_remediation(self, findings: list[dict], team_capacity: int = 3) -> list[dict]:
         """根据团队容量生成修复优先级排序列表"""
         scored = []
         for f in findings:
@@ -371,7 +371,7 @@ class VulnerabilityEvaluator(object):
             return "安全评分偏低，建议制定修复计划并在2周内完成所有高危和中危漏洞的修复。"
         return "安全状态良好，建议定期扫描并持续关注新发现的安全问题。"
 
-    def detect_false_positives(self, findings: List[Dict]) -> Dict[str, Any]:
+    def detect_false_positives(self, findings: list[dict]) -> dict[str, Any]:
         """检测可能的误报：基于模式置信度、上下文分析、历史标记"""
         if not findings:
             return {"total": 0, "likely_false_positives": 0, "details": []}
@@ -415,14 +415,14 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._scan_history: List[ScanReport] = []
+        self._scan_history: list[ScanReport] = []
         self._code_rules = self._init_code_rules()
         self._config_rules = self._init_config_rules()
         self._known_cve = self._init_cve_db()
         self._max_scan_size = 50 * 1024 * 1024
         self._vuln_scorer = VulnerabilityEvaluator()
 
-    def _init_code_rules(self) -> List[Dict]:
+    def _init_code_rules(self) -> list[dict]:
         """代码安全规则"""
         return [
             {
@@ -523,7 +523,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         ]
 
-    def _init_config_rules(self) -> List[Dict]:
+    def _init_config_rules(self) -> list[dict]:
         """配置安全规则"""
         return [
             {
@@ -568,7 +568,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         ]
 
-    def _init_cve_db(self) -> List[Dict]:
+    def _init_cve_db(self) -> list[dict]:
         """已知CVE数据库（模拟）"""
         return [
             {
@@ -622,7 +622,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
 
     @trace_operation("security_scan")
-    def scan(self, target: str, scan_type: ScanType = ScanType.FULL, depth: int = 3) -> Dict[str, Any]:
+    def scan(self, target: str, scan_type: ScanType = ScanType.FULL, depth: int = 3) -> dict[str, Any]:
         """执行安全扫描"""
         scan_id = f"scan_{uuid.uuid4().hex[:10]}"
         report = ScanReport(scan_id=scan_id, scan_type=scan_type, target=target)
@@ -703,7 +703,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if size > self._max_scan_size:
                 return
 
-            with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+            with open(filepath, encoding="utf-8", errors="replace") as f:
                 lines = f.readlines()
 
             report.files_scanned += 1
@@ -820,7 +820,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             fpath = os.path.join(target, fname)
             if os.path.exists(fpath):
                 try:
-                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                    with open(fpath, encoding="utf-8", errors="replace") as f:
                         content = f.read()
                     lines = content.split("\n")
                     report.files_scanned += 1
@@ -857,12 +857,12 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "yarn.lock",
         }
 
-        deps_found: Dict[str, str] = {}
+        deps_found: dict[str, str] = {}
         for fname in dep_files:
             fpath = os.path.join(target, fname)
             if os.path.exists(fpath):
                 try:
-                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                    with open(fpath, encoding="utf-8", errors="replace") as f:
                         content = f.read()
 
                     # 简单解析
@@ -912,7 +912,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     except (ValueError, IndexError):
                         pass
 
-    def _calculate_security_score(self, findings: List[SecurityFinding]) -> float:
+    def _calculate_security_score(self, findings: list[SecurityFinding]) -> float:
         """计算安全评分"""
         score = 100.0
         deductions = {
@@ -926,7 +926,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             score -= deductions.get(f.level, 0)
         return max(0, round(score, 1))
 
-    def _format_report(self, report: ScanReport) -> Dict[str, Any]:
+    def _format_report(self, report: ScanReport) -> dict[str, Any]:
         """格式化扫描报告"""
         by_level = defaultdict(int)
         by_category = defaultdict(int)
@@ -967,7 +967,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def get_scan_history(self, limit: int = 20) -> List[Dict]:
+    def get_scan_history(self, limit: int = 20) -> list[dict]:
         return [
             {
                 "scan_id": r.scan_id,
@@ -1022,7 +1022,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

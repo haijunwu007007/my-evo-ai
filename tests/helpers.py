@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """测试工具函数"""
 import os, sys, json, http.client
 from pathlib import Path

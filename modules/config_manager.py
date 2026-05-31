@@ -105,7 +105,8 @@ import traceback
 import re
 import fnmatch
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, TypeVar
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -162,7 +163,7 @@ class ConfigVersion:
     version_id: str
     timestamp: datetime = field(default_factory=datetime.now)
     change_type: ChangeType = ChangeType.SET
-    changes: Dict[str, Any] = field(default_factory=dict)
+    changes: dict[str, Any] = field(default_factory=dict)
     namespace: str = "default"
     checksum: str = ""
     author: str = "system"
@@ -184,14 +185,14 @@ class ConfigValidationRule:
     """配置校验规则"""
 
     key_pattern: str
-    field_type: Optional[type] = None
+    field_type: type | None = None
     required: bool = False
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    regex_pattern: Optional[str] = None
-    allowed_values: Optional[Set[Any]] = None
+    min_value: float | None = None
+    max_value: float | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    regex_pattern: str | None = None
+    allowed_values: set[Any] | None = None
     default_value: Any = None
     description: str = ""
 
@@ -213,7 +214,7 @@ class ConfigEncryptionError(Exception):
 class SimpleEncryptor:
     """简单加密器（生产环境应使用KMS）"""
 
-    def __init__(self, key: Optional[str] = None):
+    def __init__(self, key: str | None = None):
         self._key = (key or "evo_config_secret_key_2024").encode("utf-8")
         self._prefix = "ENC("
         self._suffix = ")"
@@ -244,7 +245,7 @@ class ConfigParser:
     """配置文件解析器"""
 
     @staticmethod
-    def parse(content: str, fmt: ConfigFormat) -> Dict[str, Any]:
+    def parse(content: str, fmt: ConfigFormat) -> dict[str, Any]:
         """解析配置内容"""
         if fmt == ConfigFormat.JSON:
             return json.loads(content)
@@ -262,7 +263,7 @@ class ConfigParser:
             raise ConfigValidationError(f"不支持的配置格式: {fmt.value}")
 
     @staticmethod
-    def serialize(data: Dict[str, Any], fmt: ConfigFormat) -> str:
+    def serialize(data: dict[str, Any], fmt: ConfigFormat) -> str:
         """序列化配置"""
         if fmt == ConfigFormat.JSON:
             return json.dumps(data, ensure_ascii=False, indent=2, default=str)
@@ -293,7 +294,7 @@ class ConfigParser:
         return mapping.get(ext, ConfigFormat.JSON)
 
     @staticmethod
-    def _parse_yaml(content: str) -> Dict[str, Any]:
+    def _parse_yaml(content: str) -> dict[str, Any]:
         """解析YAML（内置简单实现）"""
         try:
             import yaml
@@ -327,9 +328,9 @@ class ConfigParser:
             return result
 
     @staticmethod
-    def _parse_toml(content: str) -> Dict[str, Any]:
+    def _parse_toml(content: str) -> dict[str, Any]:
         """解析TOML（简单实现）"""
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         current_section = result
         for line in content.splitlines():
             stripped = line.strip()
@@ -349,9 +350,9 @@ class ConfigParser:
         return result
 
     @staticmethod
-    def _parse_ini(content: str) -> Dict[str, Any]:
+    def _parse_ini(content: str) -> dict[str, Any]:
         """解析INI格式"""
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         current_section = "default"
         for line in content.splitlines():
             stripped = line.strip()
@@ -367,7 +368,7 @@ class ConfigParser:
         return result
 
     @staticmethod
-    def _parse_env(content: str) -> Dict[str, Any]:
+    def _parse_env(content: str) -> dict[str, Any]:
         """解析ENV格式"""
         result = {}
         for line in content.splitlines():
@@ -382,7 +383,7 @@ class ConfigParser:
         return result
 
     @staticmethod
-    def _parse_properties(content: str) -> Dict[str, Any]:
+    def _parse_properties(content: str) -> dict[str, Any]:
         """解析Properties格式"""
         result = {}
         for line in content.splitlines():
@@ -420,7 +421,7 @@ class ConfigParser:
         return value
 
     @staticmethod
-    def _serialize_yaml(data: Dict, indent: int = 0) -> str:
+    def _serialize_yaml(data: dict, indent: int = 0) -> str:
         """简单YAML序列化"""
         lines = []
         prefix = "  " * indent
@@ -443,7 +444,7 @@ class ConfigParser:
         return "\n".join(lines)
 
     @staticmethod
-    def _serialize_ini(data: Dict) -> str:
+    def _serialize_ini(data: dict) -> str:
         """INI序列化"""
         lines = []
         for section, values in data.items():
@@ -455,7 +456,7 @@ class ConfigParser:
         return "\n".join(lines)
 
     @staticmethod
-    def _serialize_env(data: Dict) -> str:
+    def _serialize_env(data: dict) -> str:
         """ENV序列化"""
         lines = []
         for k, v in data.items():
@@ -466,24 +467,24 @@ class ConfigParser:
         return "\n".join(lines)
 
     @staticmethod
-    def _serialize_properties(data: Dict) -> str:
+    def _serialize_properties(data: dict) -> str:
         """Properties序列化"""
         lines = []
         for k, v in data.items():
             lines.append(f"{k}={v}")
         return "\n".join(lines)
 
-class ConfigValidator(object):
+class ConfigValidator:
     """配置校验器"""
 
     def __init__(self):
-        self._rules: List[ConfigValidationRule] = []
+        self._rules: list[ConfigValidationRule] = []
 
     def add_rule(self, rule: ConfigValidationRule) -> None:
         """添加校验规则"""
         self._rules.append(rule)
 
-    def validate(self, key: str, value: Any, namespace: str = "default") -> List[str]:
+    def validate(self, key: str, value: Any, namespace: str = "default") -> list[str]:
         """校验配置值"""
         errors = []
         for rule in self._rules:
@@ -519,7 +520,7 @@ class ConfigValidator(object):
 
         return errors
 
-    def validate_all(self, data: Dict[str, Any]) -> Dict[str, List[str]]:
+    def validate_all(self, data: dict[str, Any]) -> dict[str, list[str]]:
         """校验所有配置"""
         errors = {}
         for key, value in data.items():
@@ -528,13 +529,13 @@ class ConfigValidator(object):
                 errors[key] = errs
         return errors
 
-    def apply_defaults(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_defaults(self, data: dict[str, Any]) -> dict[str, Any]:
         """应用默认值"""
         result = dict(data)
         for rule in self._rules:
             if rule.default_value is not None:
                 found = False
-                for key in result.keys():
+                for key in result:
                     if fnmatch.fnmatch(key, rule.key_pattern):
                         found = True
                         break
@@ -547,10 +548,10 @@ class ConfigWatcher:
 
     def __init__(self, check_interval: float = 2.0):
         self.check_interval = check_interval
-        self._watched_files: Dict[str, float] = {}
-        self._callbacks: Dict[str, List[Callable]] = {}
+        self._watched_files: dict[str, float] = {}
+        self._callbacks: dict[str, list[Callable]] = {}
         self._running = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
 
     def watch(self, file_path: str, callback: Callable) -> None:
         """监听文件变更"""
@@ -609,15 +610,15 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__(module_id="config_manager", module_name="配置管理中心")
-        self._namespaces: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self._versions: Dict[str, List[ConfigVersion]] = defaultdict(list)
+        self._namespaces: dict[str, dict[str, Any]] = defaultdict(dict)
+        self._versions: dict[str, list[ConfigVersion]] = defaultdict(list)
         self._validator = ConfigValidator()
         self._encryptor = SimpleEncryptor()
         self._watcher = ConfigWatcher(check_interval=2.0)
-        self._change_listeners: List[Callable[[ConfigChange], None]] = []
+        self._change_listeners: list[Callable[[ConfigChange], None]] = []
         self._lock = threading.RLock()
-        self._sensitive_keys: Set[str] = {"password", "secret", "token", "api_key", "private_key"}
-        self._loaded_files: Dict[str, ConfigFormat] = {}
+        self._sensitive_keys: set[str] = {"password", "secret", "token", "api_key", "private_key"}
+        self._loaded_files: dict[str, ConfigFormat] = {}
         self._total_changes = 0
 
     # ─────────────────────── 基础读写 ───────────────────────
@@ -700,7 +701,7 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return True
             return False
 
-    def get_all(self, namespace: str = "default") -> Dict[str, Any]:
+    def get_all(self, namespace: str = "default") -> dict[str, Any]:
         """获取命名空间全部配置（解密敏感值）"""
         with self._lock:
             ns = copy.deepcopy(self._namespaces[namespace])
@@ -715,8 +716,8 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # ─────────────────────── 文件加载 ───────────────────────
 
     def load_file(
-        self, file_path: str, namespace: str = "default", fmt: Optional[ConfigFormat] = None, watch: bool = False
-    ) -> Dict[str, Any]:
+        self, file_path: str, namespace: str = "default", fmt: ConfigFormat | None = None, watch: bool = False
+    ) -> dict[str, Any]:
         """从文件加载配置"""
         metrics_collector.counter("config_load_total", labels={"namespace": namespace})
         path = Path(file_path)
@@ -763,7 +764,7 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._audit_log("load_env", f"加载{count}个环境变量 (prefix={prefix})")
         return count
 
-    def save_file(self, file_path: str, namespace: str = "default", fmt: Optional[ConfigFormat] = None) -> bool:
+    def save_file(self, file_path: str, namespace: str = "default", fmt: ConfigFormat | None = None) -> bool:
         """保存配置到文件"""
         data = self.get_all(namespace)
         path = Path(file_path)
@@ -776,14 +777,14 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ─────────────────────── 版本管理 ───────────────────────
 
-    def get_version(self, version_id: str, namespace: str = "default") -> Optional[ConfigVersion]:
+    def get_version(self, version_id: str, namespace: str = "default") -> ConfigVersion | None:
         """获取版本详情"""
         for v in self._versions[namespace]:
             if v.version_id == version_id:
                 return v
         return None
 
-    def list_versions(self, namespace: str = "default", limit: int = 50) -> List[Dict]:
+    def list_versions(self, namespace: str = "default", limit: int = 50) -> list[dict]:
         """列出版本历史"""
         versions = self._versions[namespace][-limit:]
         return [
@@ -818,7 +819,7 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._audit_log("rollback", f"{namespace} -> {version_id}")
         return True
 
-    def export_snapshot(self, namespace: str = "default") -> Dict:
+    def export_snapshot(self, namespace: str = "default") -> dict:
         """导出快照"""
         return {
             "namespace": namespace,
@@ -827,7 +828,7 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "versions": self.list_versions(namespace, limit=10),
         }
 
-    def import_snapshot(self, snapshot: Dict, namespace: Optional[str] = None) -> bool:
+    def import_snapshot(self, snapshot: dict, namespace: str | None = None) -> bool:
         """导入快照"""
         ns = namespace or snapshot.get("namespace", "default")
         config = snapshot.get("config", {})
@@ -842,12 +843,12 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """添加校验规则"""
         self._validator.add_rule(rule)
 
-    def validate_namespace(self, namespace: str = "default") -> Dict[str, List[str]]:
+    def validate_namespace(self, namespace: str = "default") -> dict[str, list[str]]:
         """校验命名空间全部配置"""
         data = self.get_all(namespace)
         return self._validator.validate_all(data)
 
-    def list_namespaces(self) -> List[str]:
+    def list_namespaces(self) -> list[str]:
         """列出所有命名空间"""
         return list(self._namespaces.keys())
 
@@ -863,14 +864,14 @@ class ConfigManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             except Exception:
                 pass
 
-    def _compute_checksum(self, data: Dict) -> str:
+    def _compute_checksum(self, data: dict) -> str:
         """计算配置校验和"""
         content = json.dumps(data, sort_keys=True, default=str)
         return hashlib.md5(content.encode()).hexdigest()
 
     # ─────────────────────── 搜索 ───────────────────────
 
-    def search(self, pattern: str, namespace: str = "default") -> Dict[str, Any]:
+    def search(self, pattern: str, namespace: str = "default") -> dict[str, Any]:
         """搜索配置项"""
         results = {}
         for key, value in self.get_all(namespace).items():

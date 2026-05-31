@@ -99,7 +99,8 @@ import traceback
 import inspect
 import weakref
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, get_type_hints
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, get_type_hints
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -133,11 +134,11 @@ class ServiceDescriptor:
     implementation: Any
     lifecycle: Lifecycle = Lifecycle.SINGLETON
     mode: RegistrationMode = RegistrationMode.TYPE
-    factory: Optional[Callable] = None
+    factory: Callable | None = None
     instance: Any = None
     is_initialized: bool = False
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    tags: Set[str] = field(default_factory=set)
+    parameters: dict[str, Any] = field(default_factory=dict)
+    tags: set[str] = field(default_factory=set)
     lazy: bool = False
 
 @dataclass
@@ -145,11 +146,11 @@ class Scope:
     """作用域"""
 
     scope_id: str
-    parent: Optional["Scope"] = None
-    _instances: Dict[str, Any] = field(default_factory=dict)
+    parent: Scope | None = None
+    _instances: dict[str, Any] = field(default_factory=dict)
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         return self._instances.get(key)
 
     def set(self, key: str, instance: Any) -> None:
@@ -183,13 +184,13 @@ class InjectionError(Exception):
 
 T = TypeVar("T")
 
-class DependencyResolver(object):
+class DependencyResolver:
     """依赖解析器"""
 
     def __init__(self, container):
         self._container = container
 
-    def resolve_dependencies(self, impl_class: type, resolving: Optional[Set[str]] = None) -> Dict[str, Any]:
+    def resolve_dependencies(self, impl_class: type, resolving: set[str] | None = None) -> dict[str, Any]:
         """解析类的构造函数依赖"""
         if resolving is None:
             resolving = set()
@@ -245,19 +246,19 @@ class ContainerBuilder:
     """容器构建器"""
 
     def __init__(self):
-        self._registrations: List[ServiceDescriptor] = []
-        self._modules: List["ContainerModule"] = []
+        self._registrations: list[ServiceDescriptor] = []
+        self._modules: list[ContainerModule] = []
 
     def register(
         self,
         service_type: str,
         implementation: Any = None,
         lifecycle: Lifecycle = Lifecycle.SINGLETON,
-        factory: Optional[Callable] = None,
+        factory: Callable | None = None,
         instance: Any = None,
-        tags: Optional[Set[str]] = None,
+        tags: set[str] | None = None,
         lazy: bool = False,
-    ) -> "ContainerBuilder":
+    ) -> ContainerBuilder:
         """注册服务"""
         if instance is not None:
             mode = RegistrationMode.INSTANCE
@@ -285,29 +286,29 @@ class ContainerBuilder:
         self._registrations.append(descriptor)
         return self
 
-    def register_singleton(self, service_type: str, implementation: Any = None) -> "ContainerBuilder":
+    def register_singleton(self, service_type: str, implementation: Any = None) -> ContainerBuilder:
         """注册单例"""
         return self.register(service_type, implementation, Lifecycle.SINGLETON)
 
-    def register_transient(self, service_type: str, implementation: Any = None) -> "ContainerBuilder":
+    def register_transient(self, service_type: str, implementation: Any = None) -> ContainerBuilder:
         """注册瞬态"""
         return self.register(service_type, implementation, Lifecycle.TRANSIENT)
 
-    def register_instance(self, service_type: str, instance: Any) -> "ContainerBuilder":
+    def register_instance(self, service_type: str, instance: Any) -> ContainerBuilder:
         """注册实例"""
         return self.register(service_type, instance=instance)
 
-    def register_module(self, module: "ContainerModule") -> "ContainerBuilder":
+    def register_module(self, module: ContainerModule) -> ContainerBuilder:
         """注册模块"""
         self._modules.append(module)
         return self
 
-    def add_module(self, configure_fn: Callable[["ContainerBuilder"], None]) -> "ContainerBuilder":
+    def add_module(self, configure_fn: Callable[[ContainerBuilder], None]) -> ContainerBuilder:
         """通过函数配置模块"""
         configure_fn(self)
         return self
 
-    def build(self) -> "IoCContainer":
+    def build(self) -> IoCContainer:
         """构建容器"""
         container = IoCContainer()
         for reg in self._registrations:
@@ -319,7 +320,7 @@ class ContainerBuilder:
 class ContainerModule:
     """容器模块基类"""
 
-    def configure(self, builder: Union[ContainerBuilder, "IoCContainer"]) -> None:
+    def configure(self, builder: ContainerBuilder | IoCContainer) -> None:
         """配置模块"""
         return {"success": True, "data": {"records": 50000, "size_mb": 128, "queries": 2400}}
 
@@ -331,16 +332,16 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     支持单例/瞬态/作用域三种生命周期，自动解析构造函数依赖。
     """
 
-    def __init__(self, parent: Optional["IoCContainer"] = None):
+    def __init__(self, parent: IoCContainer | None = None):
 
         super().__init__(module_id="dependency_injector", module_name="依赖注入容器")
         self._parent = parent
-        self._services: Dict[str, ServiceDescriptor] = OrderedDict()
-        self._singletons: Dict[str, Any] = {}
-        self._scopes: Dict[str, Scope] = {}
+        self._services: dict[str, ServiceDescriptor] = OrderedDict()
+        self._singletons: dict[str, Any] = {}
+        self._scopes: dict[str, Scope] = {}
         self._resolver = DependencyResolver(self)
         self._lock = threading.RLock()
-        self._active_scope: Optional[str] = None
+        self._active_scope: str | None = None
         self._resolve_count = 0
         self._creation_count = 0
         self._disposed = False
@@ -352,9 +353,9 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         service_type: str,
         implementation: Any = None,
         lifecycle: Lifecycle = Lifecycle.SINGLETON,
-        factory: Optional[Callable] = None,
+        factory: Callable | None = None,
         instance: Any = None,
-        tags: Optional[Set[str]] = None,
+        tags: set[str] | None = None,
         lazy: bool = False,
     ) -> None:
         """注册服务"""
@@ -419,7 +420,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ─────────────────────── 解析API ───────────────────────
 
-    def resolve(self, service_type: str, resolving: Optional[Set[str]] = None) -> Any:
+    def resolve(self, service_type: str, resolving: set[str] | None = None) -> Any:
         """解析服务"""
         with self._lock:
             self._resolve_count += 1
@@ -459,14 +460,14 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             # 瞬态模式
             return self._create_instance(descriptor, resolving)
 
-    def try_resolve(self, service_type: str) -> Optional[Any]:
+    def try_resolve(self, service_type: str) -> Any | None:
         """尝试解析"""
         try:
             return self.resolve(service_type)
         except (ServiceNotFoundError, InjectionError):
             return None
 
-    def resolve_all(self, service_type: str) -> List[Any]:
+    def resolve_all(self, service_type: str) -> list[Any]:
         """解析所有匹配的服务（含标签）"""
         results = []
         for name, desc in self._services.items():
@@ -477,7 +478,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     pass
         return results
 
-    def _create_instance(self, descriptor: ServiceDescriptor, resolving: Optional[Set[str]] = None) -> Any:
+    def _create_instance(self, descriptor: ServiceDescriptor, resolving: set[str] | None = None) -> Any:
         """创建实例"""
         if resolving is None:
             resolving = set()
@@ -511,7 +512,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ─────────────────────── 作用域 ───────────────────────
 
-    def create_scope(self, scope_id: Optional[str] = None) -> str:
+    def create_scope(self, scope_id: str | None = None) -> str:
         """创建作用域"""
         scope_id = scope_id or f"scope_{int(time.time() * 1000)}"
         scope = Scope(scope_id=scope_id)
@@ -539,7 +540,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return False
 
     @contextmanager
-    def scope_context(self, scope_id: Optional[str] = None):
+    def scope_context(self, scope_id: str | None = None):
         """作用域上下文管理器"""
         sid = self.create_scope(scope_id)
         self.enter_scope(sid)
@@ -554,11 +555,11 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """检查服务是否已注册"""
         return service_type in self._services
 
-    def get_descriptor(self, service_type: str) -> Optional[ServiceDescriptor]:
+    def get_descriptor(self, service_type: str) -> ServiceDescriptor | None:
         """获取服务描述符"""
         return self._services.get(service_type)
 
-    def list_services(self, tag: Optional[str] = None) -> List[Dict]:
+    def list_services(self, tag: str | None = None) -> list[dict]:
         """列出所有服务"""
         result = []
         for name, desc in self._services.items():
@@ -576,7 +577,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return result
 
-    def detect_circular_dependencies(self) -> List[List[str]]:
+    def detect_circular_dependencies(self) -> list[list[str]]:
         """检测循环依赖"""
         cycles = []
         for name in self._services:
@@ -588,7 +589,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     cycles.append(cycle)
         return cycles
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取容器统计"""
         return {
             "registered_services": len(self._services),
@@ -602,7 +603,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ─────────────────────── 装饰器 ───────────────────────
 
-    def inject(self, service_type: Optional[str] = None):
+    def inject(self, service_type: str | None = None):
         """属性注入装饰器"""
 
         def decorator(func):
@@ -617,7 +618,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return decorator
 
-    def singleton(self, service_type: Optional[str] = None):
+    def singleton(self, service_type: str | None = None):
         """单例注册装饰器"""
 
         def decorator(cls):
@@ -627,7 +628,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return decorator
 
-    def transient(self, service_type: Optional[str] = None):
+    def transient(self, service_type: str | None = None):
         """瞬态注册装饰器"""
 
         def decorator(cls):
@@ -674,7 +675,7 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._services.clear()
         self._logger.info("依赖注入容器已释放")
 
-    async def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一执行入口 - 容器操作的路由分发"""
         self.trace("execute", {"operation": operation})
         self.metrics_collector.counter("di.execute.calls", 1)
@@ -696,14 +697,14 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _safe_resolve(self, service_id: str) -> Dict:
+    def _safe_resolve(self, service_id: str) -> dict:
         try:
             instance = self.resolve(service_id)
             return {"service_id": service_id, "resolved": True, "type": type(instance).__name__}
         except Exception as e:
             return {"service_id": service_id, "resolved": False, "error": str(e)}
 
-    def _safe_register(self, p: Dict) -> Dict:
+    def _safe_register(self, p: dict) -> dict:
         service_id = p.get("service_id", "")
         factory = p.get("factory")
         if not service_id:
@@ -714,10 +715,10 @@ class IoCContainer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.register(service_id, factory or (lambda: None), lifecycle)
         return {"service_id": service_id, "registered": True}
 
-    def _list_registered_services(self) -> Dict:
+    def _list_registered_services(self) -> dict:
         return {"services": list(self._services.keys()), "count": len(self._services)}
 
-    def _diagnose_container(self) -> Dict:
+    def _diagnose_container(self) -> dict:
         return {
             "services": len(self._services),
             "singletons": len(self._singletons),

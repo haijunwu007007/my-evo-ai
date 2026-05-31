@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 断点1: 统一模块执行接口 - ModuleAdapter
@@ -101,7 +100,8 @@ __module_meta__ = {
 
 import asyncio
 from core.logging_config import get_logger
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -114,7 +114,7 @@ logger = get_logger("evo.module_adapter")
 # ============================================================================
 
 @dataclass
-class ModuleAdapterAnalyzer(object):
+class ModuleAdapterAnalyzer:
     """module_adapter 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -280,13 +280,13 @@ class StandardResult(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     success: bool
     result: Any = None
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
     module_id: str = ""
     event_published: bool = False
     validated: bool = False
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "success": self.success,
             "result": self.result,
@@ -311,9 +311,9 @@ class ModuleAdapterRegistry:
     def __init__(self):
         super().__init__()
         # 适配器函数: module_id -> async function(executor, task, context)
-        self._adapters: Dict[str, Callable] = {}
+        self._adapters: dict[str, Callable] = {}
         # 已注册的标准接口模块
-        self._standard_modules: Dict[str, Any] = {}
+        self._standard_modules: dict[str, Any] = {}
         self._build_default_adapters()
 
     def _build_default_adapters(self):
@@ -331,7 +331,7 @@ class ModuleAdapterRegistry:
         self._standard_modules[module_id] = module
         logger.debug(f"[AdapterRegistry] 注册标准模块: {module_id}")
 
-    def get_adapter(self, module_id: str) -> Optional[Callable]:
+    def get_adapter(self, module_id: str) -> Callable | None:
         """获取适配器"""
         return self._adapters.get(module_id)
 
@@ -343,7 +343,7 @@ class ModuleAdapterRegistry:
         """检查模块是否有 execute() 方法"""
         return hasattr(module, "execute") and callable(getattr(module, "execute"))
 
-    def get_all_module_ids(self) -> List[str]:
+    def get_all_module_ids(self) -> list[str]:
         """获取所有已注册模块ID"""
         return list(set(list(self._adapters.keys()) + list(self._standard_modules.keys())))
 
@@ -351,7 +351,7 @@ class ModuleAdapterRegistry:
 # 全局注册表单例
 # ============================================================================
 
-_adapter_registry: Optional[ModuleAdapterRegistry] = None
+_adapter_registry: ModuleAdapterRegistry | None = None
 
 def get_adapter_registry() -> ModuleAdapterRegistry:
     """获取全局适配器注册表"""
@@ -399,7 +399,7 @@ class UnifiedExecutor:
     # 系统级适配器实现
     # ========================================================================
 
-    async def _adapt_external_executor(self, task: str, context: Dict = None) -> StandardResult:
+    async def _adapt_external_executor(self, task: str, context: dict = None) -> StandardResult:
         """适配 ExternalExecutor"""
         import time
 
@@ -447,7 +447,7 @@ class UnifiedExecutor:
                 module_id="external_executor",
             )
 
-    async def _auto_route_external(self, task: str, executor, params: Dict) -> Any:
+    async def _auto_route_external(self, task: str, executor, params: dict) -> Any:
         """自动路由到外部执行器方法"""
         # 简单规则路由
         if "文件" in task or "file" in task.lower():
@@ -463,7 +463,7 @@ class UnifiedExecutor:
             return executor.cmd_execute(task)
         return executor.cmd_execute(task)
 
-    async def _adapt_ai_gateway(self, task: str, context: Dict = None) -> StandardResult:
+    async def _adapt_ai_gateway(self, task: str, context: dict = None) -> StandardResult:
         """适配 AI Gateway"""
         import time
 
@@ -494,7 +494,7 @@ class UnifiedExecutor:
                 module_id="ai-gateway",
             )
 
-    async def _adapt_autonomous_agent(self, task: str, context: Dict = None) -> StandardResult:
+    async def _adapt_autonomous_agent(self, task: str, context: dict = None) -> StandardResult:
         """适配 Autonomous Agent"""
         import time
 
@@ -530,7 +530,7 @@ class UnifiedExecutor:
                 module_id="autonomous-agent",
             )
 
-    async def _adapt_workflow_manager(self, task: str, context: Dict = None) -> StandardResult:
+    async def _adapt_workflow_manager(self, task: str, context: dict = None) -> StandardResult:
         """适配 Workflow Manager"""
         import time
 
@@ -560,7 +560,7 @@ class UnifiedExecutor:
                 module_id="workflow-manager",
             )
 
-    async def _adapt_memory_engine(self, task: str, context: Dict = None) -> StandardResult:
+    async def _adapt_memory_engine(self, task: str, context: dict = None) -> StandardResult:
         """适配 Memory Engine"""
         import time
 
@@ -600,7 +600,7 @@ class UnifiedExecutor:
     # 统一执行接口 - 断点1核心
     # ========================================================================
 
-    async def execute(self, module_id: str, task: str, context: Dict = None) -> Dict:
+    async def execute(self, module_id: str, task: str, context: dict = None) -> dict:
         """
         统一执行接口 - 断点1核心实现
         所有模块调用必须经过此接口
@@ -655,7 +655,7 @@ class UnifiedExecutor:
 
         return result.to_dict()
 
-    async def _execute_standard_module(self, module: Any, task: str, context: Dict) -> StandardResult:
+    async def _execute_standard_module(self, module: Any, task: str, context: dict) -> StandardResult:
         """执行已实现标准接口的模块"""
         if self.registry.has_execute_method(module):
             try:
@@ -681,7 +681,7 @@ class UnifiedExecutor:
                 return StandardResult(success=False, error=str(e))
         return StandardResult(success=False, error=f"模块 {module} 未实现execute()方法")
 
-    async def _execute_via_mm(self, module_id: str, task: str, context: Dict) -> StandardResult:
+    async def _execute_via_mm(self, module_id: str, task: str, context: dict) -> StandardResult:
         """通过ModuleManager执行"""
         mm = getattr(self.coordinator, "_mm", None)
         if mm and hasattr(mm, "execute_module"):
@@ -697,7 +697,7 @@ class UnifiedExecutor:
                 return StandardResult(success=False, error=str(e), module_id=module_id)
         return StandardResult(success=False, error=f"无可用执行路径: {module_id}", module_id=module_id)
 
-    async def _publish_start_event(self, module_id: str, task: str, context: Dict):
+    async def _publish_start_event(self, module_id: str, task: str, context: dict):
         """发布执行开始事件"""
         eb = getattr(self.coordinator, "_event_bus", None)
         if eb:
@@ -732,7 +732,7 @@ class UnifiedExecutor:
     # 批量执行
     # ========================================================================
 
-    async def execute_batch(self, tasks: List[Dict]) -> List[Dict]:
+    async def execute_batch(self, tasks: list[dict]) -> list[dict]:
         """
         批量执行多个任务
         tasks: [{"module_id": str, "task": str, "context": Dict}, ...]
@@ -743,7 +743,7 @@ class UnifiedExecutor:
             results.append(r)
         return results
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取执行统计"""
         return {
             "total_executions": self._execution_count,

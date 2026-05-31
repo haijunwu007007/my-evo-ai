@@ -89,7 +89,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ImageUnderstandAnalyzer(object):
+class ImageUnderstandAnalyzer:
     """image_understand 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -274,13 +274,13 @@ class ImageMetadata:
     color_space: str = "RGB"
     channels: int = 3
     bits_per_channel: int = 8
-    dpi: Tuple[int, int] = (72, 72)
+    dpi: tuple[int, int] = (72, 72)
     file_size: int = 0
     checksum: str = ""
     created: float = field(default_factory=time.time)
-    exif: Dict[str, Any] = field(default_factory=dict)
+    exif: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "width": self.width,
             "height": self.height,
@@ -305,7 +305,7 @@ class BoundingBox:
     confidence: float = 0.0
     class_id: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "x": self.x,
             "y": self.y,
@@ -331,9 +331,9 @@ class ClassificationResult:
     label: str = ""
     confidence: float = 0.0
     class_id: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"label": self.label, "confidence": round(self.confidence, 4), "class_id": self.class_id}
 
 @dataclass
@@ -341,12 +341,12 @@ class FaceDetection:
     """人脸检测结果"""
 
     face_id: str = ""
-    bbox: Dict[str, Any] = field(default_factory=dict)
+    bbox: dict[str, Any] = field(default_factory=dict)
     confidence: float = 0.0
-    landmarks: List[Dict[str, float]] = field(default_factory=list)
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    landmarks: list[dict[str, float]] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "face_id": self.face_id,
             "bbox": self.bbox,
@@ -362,13 +362,13 @@ class AnalysisResult:
     analysis_id: str = ""
     image_id: str = ""
     task: str = ""
-    results: List[Dict[str, Any]] = field(default_factory=list)
+    results: list[dict[str, Any]] = field(default_factory=list)
     metadata: ImageMetadata = field(default_factory=ImageMetadata)
     processing_time_ms: float = 0.0
     model_name: str = ""
     created: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "analysis_id": self.analysis_id,
             "image_id": self.image_id,
@@ -443,9 +443,9 @@ class ImageUnderstandModule:
     NSFW_LABELS = ["safe", "nsfw_partial", "nsfw_full"]
 
     def __init__(self):
-        self._images: Dict[str, Dict[str, Any]] = {}
-        self._analysis_cache: Dict[str, AnalysisResult] = {}
-        self._model_configs: Dict[str, Dict[str, Any]] = {}
+        self._images: dict[str, dict[str, Any]] = {}
+        self._analysis_cache: dict[str, AnalysisResult] = {}
+        self._model_configs: dict[str, dict[str, Any]] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -500,7 +500,7 @@ class ImageUnderstandModule:
         for name, model in self._default_models.items():
             self._model_configs[name] = {"name": model, "version": "1.0", "loaded": True}
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {
@@ -511,7 +511,7 @@ class ImageUnderstandModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         models_ok = sum(1 for m in self._model_configs.values() if m["loaded"])
@@ -526,8 +526,8 @@ class ImageUnderstandModule:
 
     # --- Image Management ---
     def upload_image(
-        self, image_id: str, data: bytes, format: str = "png", metadata: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        self, image_id: str, data: bytes, format: str = "png", metadata: dict[str, Any] = None
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import time as tmod
@@ -546,13 +546,13 @@ class ImageUnderstandModule:
             "checksum": checksum,
         }
 
-    def get_image_info(self, image_id: str) -> Dict[str, Any]:
+    def get_image_info(self, image_id: str) -> dict[str, Any]:
         if image_id not in self._images:
             return {"success": False, "error": "not_found", "image_id": image_id}
         img = self._images[image_id]
         return {"success": True, "image_id": image_id, **img["metadata"].to_dict()}
 
-    def delete_image(self, image_id: str) -> Dict[str, Any]:
+    def delete_image(self, image_id: str) -> dict[str, Any]:
         if image_id not in self._images:
             return {"success": False, "error": "not_found"}
         del self._images[image_id]
@@ -562,7 +562,7 @@ class ImageUnderstandModule:
         return {"success": True, "image_id": image_id, "cache_cleared": len(keys_to_del)}
 
     # --- Classification ---
-    def classify(self, image_id: str, top_k: int = 5, model: str = None) -> Dict[str, Any]:
+    def classify(self, image_id: str, top_k: int = 5, model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -598,7 +598,7 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- Object Detection ---
-    def detect_objects(self, image_id: str, confidence_threshold: float = 0.3, model: str = None) -> Dict[str, Any]:
+    def detect_objects(self, image_id: str, confidence_threshold: float = 0.3, model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -644,7 +644,7 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- OCR ---
-    def extract_text(self, image_id: str, language: str = "zh+en", model: str = None) -> Dict[str, Any]:
+    def extract_text(self, image_id: str, language: str = "zh+en", model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -692,7 +692,7 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- Face Detection ---
-    def detect_faces(self, image_id: str, model: str = None) -> Dict[str, Any]:
+    def detect_faces(self, image_id: str, model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -744,7 +744,7 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- NSFW Detection ---
-    def check_nsfw(self, image_id: str, model: str = None) -> Dict[str, Any]:
+    def check_nsfw(self, image_id: str, model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -779,7 +779,7 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- Image Description ---
-    def describe(self, image_id: str, language: str = "zh", model: str = None) -> Dict[str, Any]:
+    def describe(self, image_id: str, language: str = "zh", model: str = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if image_id not in self._images:
@@ -821,14 +821,14 @@ class ImageUnderstandModule:
         return {"success": True, **analysis.to_dict()}
 
     # --- Models ---
-    def list_models(self) -> Dict[str, Any]:
+    def list_models(self) -> dict[str, Any]:
         models = {
             task: {"name": cfg["name"], "version": cfg["version"], "loaded": cfg["loaded"]}
             for task, cfg in self._model_configs.items()
         }
         return {"success": True, "models": models, "total": len(models)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

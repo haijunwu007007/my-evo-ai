@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Fix compact module syntax errors"""
 import ast, re
 from pathlib import Path

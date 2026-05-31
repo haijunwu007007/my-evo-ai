@@ -157,16 +157,16 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._rules: Dict[str, ScaleRule] = {}
-        self._instances: Dict[str, List[Instance]] = {}  # service -> instances
-        self._events: List[ScaleEvent] = []
-        self._cooldowns: Dict[str, float] = {}  # rule_id -> last_scale_time
+        self._rules: dict[str, ScaleRule] = {}
+        self._instances: dict[str, list[Instance]] = {}  # service -> instances
+        self._events: list[ScaleEvent] = []
+        self._cooldowns: dict[str, float] = {}  # rule_id -> last_scale_time
         self._counter: int = 0
         self._instance_counter: int = 0
 
@@ -205,7 +205,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "auto_scale"})
         self.metrics_collector.counter("auto_scale.execute.calls", 1)
         self.audit("execute", {"module": "auto_scale"})
@@ -323,7 +323,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         total = sum(len(sv) for sv in self._instances.values())
         return {
             "status": "healthy",
@@ -337,7 +337,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         pass
 
-    def _evaluate(self, service: str, metric_name: str, value: float) -> Dict:
+    def _evaluate(self, service: str, metric_name: str, value: float) -> dict:
         current_count = len(self._instances.get(service, []))
         triggered = []
         for rid, rule in self._rules.items():
@@ -375,7 +375,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "actions": triggered,
         }
 
-    def _scale(self, service: str, direction: ScaleDirection, count: int, reason: str, rule_id: str) -> Dict:
+    def _scale(self, service: str, direction: ScaleDirection, count: int, reason: str, rule_id: str) -> dict:
         current = self._instances.get(service, [])
         current_count = len(current)
         if direction == ScaleDirection.UP:
@@ -419,7 +419,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "to": new_count,
         }
 
-    def predict_capacity(self, service: str, forecast_minutes: int = 60) -> Dict[str, Any]:
+    def predict_capacity(self, service: str, forecast_minutes: int = 60) -> dict[str, Any]:
         """容量预测。企业场景：基于历史流量模式预测未来N分钟的实例需求，提前扩容避免流量突增导致服务降级。
         使用简单线性回归+周期性因子，结合最近24小时数据。
         """
@@ -456,7 +456,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "data_points": len(recent),
         }
 
-    def get_scaling_cost_report(self, service: str, days: int = 7) -> Dict[str, Any]:
+    def get_scaling_cost_report(self, service: str, days: int = 7) -> dict[str, Any]:
         """获取弹性伸缩成本报告。企业场景：FinOps团队评估自动伸缩的资源成本效率。
         统计各服务的实例运行时间、扩缩容次数、资源利用率，辅助成本优化决策。
         """
@@ -499,7 +499,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         target_memory: float = 80.0,
         scale_up_cooldown: int = 300,
         scale_down_cooldown: int = 600,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """配置弹性伸缩策略。企业场景：为不同服务定制伸缩策略，
         核心服务设置更激进的扩容（低阈值快速扩）和保守的缩容（长冷却防抖动）。
         """
@@ -528,7 +528,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "target_memory": target_memory,
         }
 
-    def predict_capacity_needs(self, service: str, look_ahead_hours: int = 24) -> Dict[str, Any]:
+    def predict_capacity_needs(self, service: str, look_ahead_hours: int = 24) -> dict[str, Any]:
         """容量需求预测。企业场景：大促前根据历史流量趋势预估所需实例数，
         提前扩容避免流量高峰时响应超时。
         基于近7天同时段流量均值和增长率计算。
@@ -564,7 +564,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "predictions": predictions[:24],
         }
 
-    def get_scale_event_history(self, limit: int = 30) -> Dict[str, Any]:
+    def get_scale_event_history(self, limit: int = 30) -> dict[str, Any]:
         """扩缩容事件历史。企业场景：复盘扩缩容是否合理，是否有频繁抖动。"""
         events = getattr(self, "_scale_events", [])
         recent = events[-limit:]
@@ -580,7 +580,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "events": recent,
         }
 
-    def get_cost_estimate(self, service: str, instances: int, instance_type: str = "standard") -> Dict[str, Any]:
+    def get_cost_estimate(self, service: str, instances: int, instance_type: str = "standard") -> dict[str, Any]:
         """费用估算。企业场景：扩容前评估新增实例的月度费用，
         辅助成本控制决策。基于实例类型和数量计算。
         """
@@ -598,7 +598,7 @@ class AutoScaleManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "daily_cost_cny": daily_cost,
         }
 
-    def get_resource_utilization(self, service: str) -> Dict[str, Any]:
+    def get_resource_utilization(self, service: str) -> dict[str, Any]:
         """资源利用率报告。企业场景：判断当前实例是否资源过剩（可缩容）或不足（需扩容）。
         综合CPU、内存、网络IO指标给出缩扩容建议。
         """

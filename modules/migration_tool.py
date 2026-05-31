@@ -83,13 +83,14 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MigrationToolAnalyzer(object):
+class MigrationToolAnalyzer:
     """migration_tool 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -272,15 +273,15 @@ class ColumnDef:
     primary_key: bool = False
     unique: bool = False
     index: bool = False
-    foreign_key: Optional[str] = None
+    foreign_key: str | None = None
     comment: str = ""
 
 @dataclass
 class TableSchema:
     table_name: str
-    columns: List[ColumnDef] = field(default_factory=list)
-    indexes: List[Dict[str, Any]] = field(default_factory=list)
-    constraints: List[Dict[str, Any]] = field(default_factory=list)
+    columns: list[ColumnDef] = field(default_factory=list)
+    indexes: list[dict[str, Any]] = field(default_factory=list)
+    constraints: list[dict[str, Any]] = field(default_factory=list)
     engine: str = "InnoDB"
     charset: str = "utf8mb4"
     comment: str = ""
@@ -291,7 +292,7 @@ class MigrationStep:
     table: str = ""
     column: str = ""
     data_type: str = ""
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
     sql: str = ""
     checksum: str = ""
 
@@ -302,14 +303,14 @@ class MigrationRecord:
     description: str = ""
     migration_type: MigrationType = MigrationType.SCHEMA
     state: MigrationState = MigrationState.PENDING
-    steps: List[MigrationStep] = field(default_factory=list)
-    up_sql: List[str] = field(default_factory=list)
-    down_sql: List[str] = field(default_factory=list)
-    applied_at: Optional[float] = None
-    rollback_at: Optional[float] = None
+    steps: list[MigrationStep] = field(default_factory=list)
+    up_sql: list[str] = field(default_factory=list)
+    down_sql: list[str] = field(default_factory=list)
+    applied_at: float | None = None
+    rollback_at: float | None = None
     duration_ms: float = 0.0
     checksum: str = ""
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.checksum:
@@ -329,7 +330,7 @@ class MigrationResult:
 class SchemaDiff:
     table_name: str
     change_type: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class MigrationConfig:
@@ -365,7 +366,7 @@ class MigrationTool:
 
     """Enterprise database migration engine with version control and rollback."""
 
-    def __init__(self, config: Optional[MigrationConfig] = None):
+    def __init__(self, config: MigrationConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -398,12 +399,12 @@ class MigrationTool:
         )()
 
         self._config = config or MigrationConfig()
-        self._migrations: Dict[str, MigrationRecord] = {}
-        self._applied: Dict[str, MigrationRecord] = {}
-        self._pending: List[str] = []
-        self._schemas: Dict[str, TableSchema] = {}
+        self._migrations: dict[str, MigrationRecord] = {}
+        self._applied: dict[str, MigrationRecord] = {}
+        self._pending: list[str] = []
+        self._schemas: dict[str, TableSchema] = {}
         self._lock = threading.RLock()
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "before_up": [],
             "after_up": [],
             "before_down": [],
@@ -411,7 +412,7 @@ class MigrationTool:
             "before_rollback": [],
             "after_rollback": [],
         }
-        self._diff_log: List[SchemaDiff] = []
+        self._diff_log: list[SchemaDiff] = []
         self._initialized = False
         logger.info("MigrationTool created")
 
@@ -428,11 +429,11 @@ class MigrationTool:
         self,
         version: str,
         name: str,
-        up_sql: Optional[List[str]] = None,
-        down_sql: Optional[List[str]] = None,
+        up_sql: list[str] | None = None,
+        down_sql: list[str] | None = None,
         description: str = "",
         migration_type: MigrationType = MigrationType.SCHEMA,
-        dependencies: Optional[List[str]] = None,
+        dependencies: list[str] | None = None,
     ) -> MigrationRecord:
         record = MigrationRecord(
             version=version,
@@ -453,7 +454,7 @@ class MigrationTool:
             self._schemas[schema.table_name] = schema
             logger.info("Schema registered: %s (%d columns)", schema.table_name, len(schema.columns))
 
-    def migrate(self, target: Optional[str] = None, dry_run: Optional[bool] = None) -> List[MigrationResult]:
+    def migrate(self, target: str | None = None, dry_run: bool | None = None) -> list[MigrationResult]:
         if not self._initialized:
             raise RuntimeError("Not initialized")
         is_dry = dry_run if dry_run is not None else self._config.dry_run
@@ -473,7 +474,7 @@ class MigrationTool:
 
         return results
 
-    def rollback(self, steps: int = 1) -> List[MigrationResult]:
+    def rollback(self, steps: int = 1) -> list[MigrationResult]:
         if not self._initialized:
             raise RuntimeError("Not initialized")
         results = []
@@ -489,7 +490,7 @@ class MigrationTool:
 
         return results
 
-    def status(self) -> Dict[str, Any]:
+    def status(self) -> dict[str, Any]:
         with self._lock:
             return {
                 "total_migrations": len(self._migrations),
@@ -501,7 +502,7 @@ class MigrationTool:
                 "diff_count": len(self._diff_log),
             }
 
-    def generate_diff(self, schema: TableSchema) -> List[SchemaDiff]:
+    def generate_diff(self, schema: TableSchema) -> list[SchemaDiff]:
         diffs = []
         with self._lock:
             existing = self._schemas.get(schema.table_name)
@@ -646,7 +647,7 @@ class MigrationTool:
         applied = set(self._applied.keys())
         self._pending = sorted(v for v in self._migrations if v not in applied)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             st = self.status()

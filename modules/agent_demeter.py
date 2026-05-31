@@ -158,14 +158,14 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._pools: Dict[str, ResourcePool] = {}
-        self._allocations: Dict[str, Allocation] = {}
+        self._pools: dict[str, ResourcePool] = {}
+        self._allocations: dict[str, Allocation] = {}
         self._alloc_counter: int = 0
 
     def initialize(self) -> None:
@@ -191,7 +191,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """执行动作"""
         _ = self.trace("execute")
         metrics_collector.counter("agent_demeter_ops_total", labels={"action": action})
@@ -269,7 +269,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             duration_ms = (time.time() - start_time) * 1000
             self.stats.record_request(duration_ms, success, error_msg)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         high_util = sum(1 for p in self._pools.values() if p.utilization > 0.9)
         status = "healthy" if high_util == 0 else ("degraded" if high_util <= 2 else "unhealthy")
@@ -290,7 +290,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             p.reserved = 0
         # super().shutdown() removed for sync compatibility
 
-    def create_pool(self, pool_id: str, rtype: str, total: float, unit: str = "") -> Dict:
+    def create_pool(self, pool_id: str, rtype: str, total: float, unit: str = "") -> dict:
         """创建资源池"""
         try:
             rt = ResourceType(rtype)
@@ -303,7 +303,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return {"pool_id": pool_id, "type": rtype, "total": total, "unit": unit}
 
-    def allocate(self, pool_id: str, consumer: str, amount: float) -> Dict:
+    def allocate(self, pool_id: str, consumer: str, amount: float) -> dict:
         """分配资源"""
         pool = self._pools.get(pool_id)
         if not pool:
@@ -324,7 +324,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return {"allocation_id": alloc_id, "pool_id": pool_id, "amount": amount, "remaining": pool.available}
 
-    def release(self, alloc_id: str) -> Dict:
+    def release(self, alloc_id: str) -> dict:
         """释放资源"""
         alloc = self._allocations.get(alloc_id)
         if not alloc:
@@ -338,7 +338,7 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.stats.success_count += 1
         return {"allocation_id": alloc_id, "released": alloc.amount, "status": "released"}
 
-    def _pool_info(self, pool: Optional[ResourcePool]) -> Dict:
+    def _pool_info(self, pool: ResourcePool | None) -> dict:
         if not pool:
             return {"error": "not found"}
         return {
@@ -354,24 +354,24 @@ class AgentDemeterManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
 module_class = AgentDemeterManager
 
-class ResourceAllocationEngine(object):
+class ResourceAllocationEngine:
     """资源分配引擎 - 智能调度、负载均衡、容量规划"""
 
     def __init__(self):
-        self._pools: Dict[str, Dict] = {}
-        self._allocations: Dict[str, List[Dict]] = {}
-        self._utilization_history: Dict[str, List[float]] = {}
-        self._reservation_queue: List[Dict] = []
-        self._scaling_rules: Dict[str, Dict] = {}
+        self._pools: dict[str, dict] = {}
+        self._allocations: dict[str, list[dict]] = {}
+        self._utilization_history: dict[str, list[float]] = {}
+        self._reservation_queue: list[dict] = []
+        self._scaling_rules: dict[str, dict] = {}
 
-    def create_pool(self, pool_id: str, capacity: float, unit: str = "unit") -> Dict:
+    def create_pool(self, pool_id: str, capacity: float, unit: str = "unit") -> dict:
         """创建资源池"""
         self._pools[pool_id] = {"capacity": capacity, "allocated": 0.0, "unit": unit}
         self._allocations[pool_id] = []
         self._utilization_history[pool_id] = []
         return {"pool_id": pool_id, "capacity": capacity, "unit": unit}
 
-    def allocate(self, pool_id: str, consumer: str, amount: float, priority: str = "normal") -> Dict:
+    def allocate(self, pool_id: str, consumer: str, amount: float, priority: str = "normal") -> dict:
         """分配资源"""
         pool = self._pools.get(pool_id)
         if not pool:
@@ -406,7 +406,7 @@ class ResourceAllocationEngine(object):
                 return True
         return False
 
-    def get_utilization(self, pool_id: str) -> Dict[str, Any]:
+    def get_utilization(self, pool_id: str) -> dict[str, Any]:
         """获取利用率"""
         pool = self._pools.get(pool_id, {})
         cap = pool.get("capacity", 0)
@@ -420,7 +420,7 @@ class ResourceAllocationEngine(object):
             "available": round(cap - alloc, 4),
         }
 
-    def suggest_scaling(self, pool_id: str) -> Dict[str, Any]:
+    def suggest_scaling(self, pool_id: str) -> dict[str, Any]:
         """容量规划建议"""
         history = self._utilization_history.get(pool_id, [])
         if len(history) < 5:
@@ -449,14 +449,14 @@ class ResourceAllocationEngine(object):
         if len(history) > 1000:
             self._utilization_history[pool_id] = history[-500:]
 
-    def list_pools(self) -> List[Dict]:
+    def list_pools(self) -> list[dict]:
         return [{"pool_id": pid, **self.get_utilization(pid)} for pid in self._pools]
 
-    def get_active_allocations(self, pool_id: str) -> List[Dict]:
+    def get_active_allocations(self, pool_id: str) -> list[dict]:
         allocs = self._allocations.get(pool_id, [])
         return [a for a in allocs if a["status"] == "active"]
 
-    def force_balance(self, pool_id: str, target_util: float = 0.5) -> Dict:
+    def force_balance(self, pool_id: str, target_util: float = 0.5) -> dict:
         """强制均衡"""
         pool = self._pools.get(pool_id)
         if not pool:
@@ -473,7 +473,7 @@ class ResourceAllocationEngine(object):
             "utilization": round(target_util, 4),
         }
 
-    def reserve(self, pool_id: str, consumer: str, amount: float, duration: float = 0) -> Dict:
+    def reserve(self, pool_id: str, consumer: str, amount: float, duration: float = 0) -> dict:
         """预约资源"""
         pool = self._pools.get(pool_id, {})
         available = pool.get("capacity", 0) - pool.get("allocated", 0)
@@ -491,7 +491,7 @@ class ResourceAllocationEngine(object):
         pool["allocated"] = pool.get("allocated", 0) + amount
         return reservation
 
-    def get_reservation_status(self) -> List[Dict]:
+    def get_reservation_status(self) -> list[dict]:
         """获取预约状态"""
         return [r for r in self._reservation_queue if r["status"] == "reserved"]
 
@@ -505,7 +505,7 @@ class ResourceAllocationEngine(object):
                 return True
         return False
 
-    def get_capacity_report(self) -> Dict[str, Any]:
+    def get_capacity_report(self) -> dict[str, Any]:
         """容量报告"""
         total_cap = sum(p["capacity"] for p in self._pools.values())
         total_alloc = sum(p["allocated"] for p in self._pools.values())
@@ -534,7 +534,7 @@ class ResourceAllocationEngine(object):
         self._record_utilization(pool_id)
         return True
 
-    def get_consumer_usage(self, pool_id: str, consumer: str) -> Dict[str, Any]:
+    def get_consumer_usage(self, pool_id: str, consumer: str) -> dict[str, Any]:
         """获取消费者用量"""
         allocs = self._allocations.get(pool_id, [])
         consumer_allocs = [a for a in allocs if a["consumer"] == consumer]
@@ -547,7 +547,7 @@ class ResourceAllocationEngine(object):
             "total_amount": sum(a["amount"] for a in active),
         }
 
-    def redistribute(self, source_pool: str, target_pool: str, amount: float) -> Dict:
+    def redistribute(self, source_pool: str, target_pool: str, amount: float) -> dict:
         """跨池资源调配"""
         src = self._pools.get(source_pool, {})
         tgt = self._pools.get(target_pool, {})
@@ -569,7 +569,7 @@ class ResourceAllocationEngine(object):
         self._scaling_rules.pop(pool_id, None)
         return True
 
-    def get_pool_history(self, pool_id: str, points: int = 20) -> List[float]:
+    def get_pool_history(self, pool_id: str, points: int = 20) -> list[float]:
         """获取利用率历史"""
         history = self._utilization_history.get(pool_id, [])
         if len(history) <= points:
@@ -577,7 +577,7 @@ class ResourceAllocationEngine(object):
         step = len(history) / points
         return [round(history[int(i * step)], 4) for i in range(points)]
 
-    def export_state(self) -> Dict[str, Any]:
+    def export_state(self) -> dict[str, Any]:
         """导出引擎状态"""
         return {
             "pools": dict(self._pools),
@@ -586,7 +586,7 @@ class ResourceAllocationEngine(object):
             "scaling_rules": list(self._scaling_rules.keys()),
         }
 
-    def find_idle_pools(self, threshold: float = 0.2) -> List[Dict]:
+    def find_idle_pools(self, threshold: float = 0.2) -> list[dict]:
         """找出空闲资源池"""
         idle = []
         for pid in self._pools:
@@ -595,7 +595,7 @@ class ResourceAllocationEngine(object):
                 idle.append(util)
         return sorted(idle, key=lambda x: x["utilization"])
 
-    def find_hot_pools(self, threshold: float = 0.9) -> List[Dict]:
+    def find_hot_pools(self, threshold: float = 0.9) -> list[dict]:
         """找出热点资源池"""
         hot = []
         for pid in self._pools:
@@ -604,7 +604,7 @@ class ResourceAllocationEngine(object):
                 hot.append(util)
         return sorted(hot, key=lambda x: -x["utilization"])
 
-    def pre_warm_pool(self, pool_id: str, amount: float) -> Dict:
+    def pre_warm_pool(self, pool_id: str, amount: float) -> dict:
         """预热资源池"""
         pool = self._pools.get(pool_id, {})
         if not pool:
@@ -612,7 +612,7 @@ class ResourceAllocationEngine(object):
         pool["capacity"] += amount
         return {"pool_id": pool_id, "added_capacity": amount, "new_capacity": pool["capacity"]}
 
-    def analyze_allocation_efficiency(self) -> Dict[str, Any]:
+    def analyze_allocation_efficiency(self) -> dict[str, Any]:
         """分析资源分配效率：利用率、碎片率、浪费比例"""
         pools = self._pools if hasattr(self, "_pools") else {}
         if not pools:

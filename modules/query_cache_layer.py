@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 查询缓存层（A级）"""
 # Grade: C
 __module_meta__ = {"id":"query-cache-layer","name":"Query Cache","version":"V0.1","group":"storage","grade":"C","tags":["storage","cache","query"],"description":"查询缓存层 - get/set/invalidate/管理"}
@@ -10,7 +9,7 @@ from modules._persist import PersistMixin
 logger=logging.getLogger("evo.query-cache-layer")
 class QueryCacheLayer(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="query-cache-layer";MODULE_NAME="查询缓存";VERSION="V0.1";MODULE_LEVEL="A"
-    def __init__(self,config=None):super().__init__(config);self._cache:Dict[str,Dict]={};self._hits=0;self._misses=0;self._start=time.time()
+    def __init__(self,config=None):super().__init__(config);self._cache:dict[str,dict]={};self._hits=0;self._misses=0;self._start=time.time()
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"cached":len(self._cache)})
     async def execute(self,action,params=None):return await self._safe_execute(action,params,handler=self._dispatch)

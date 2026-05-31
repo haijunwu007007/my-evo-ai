@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class PipelineBatchAnalyzer(object):
+class PipelineBatchAnalyzer:
     """pipeline_batch 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -261,8 +261,8 @@ class TaskNode:
         self,
         task_id: str,
         handler: str,
-        params: Optional[Dict] = None,
-        dependencies: Optional[List[str]] = None,
+        params: dict | None = None,
+        dependencies: list[str] | None = None,
         retry_count: int = 3,
         timeout_seconds: int = 3600,
         priority: int = 5,
@@ -276,11 +276,11 @@ class TaskNode:
         self.priority = priority
         self.status = PipelineStatus.PENDING
         self.attempts = 0
-        self.result: Optional[Dict] = None
-        self.error: Optional[str] = None
-        self.started_at: Optional[float] = None
-        self.finished_at: Optional[float] = None
-        self.output_data: Dict = {}
+        self.result: dict | None = None
+        self.error: str | None = None
+        self.started_at: float | None = None
+        self.finished_at: float | None = None
+        self.output_data: dict = {}
 
     @property
     def duration(self) -> float:
@@ -311,7 +311,7 @@ class PipelineBatchModule:
 
     """批处理流水线引擎"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -344,10 +344,10 @@ class PipelineBatchModule:
         )()
 
         self.config = config or {}
-        self._pipelines: Dict[str, Dict] = {}
-        self._pipeline_tasks: Dict[str, Dict[str, TaskNode]] = {}
-        self._execution_history: List[Dict] = []
-        self._checkpoints: Dict[str, Dict] = {}
+        self._pipelines: dict[str, dict] = {}
+        self._pipeline_tasks: dict[str, dict[str, TaskNode]] = {}
+        self._execution_history: list[dict] = []
+        self._checkpoints: dict[str, dict] = {}
         self._resource_quota = self.config.get(
             "resource_quota", {"max_concurrent": 10, "max_memory_mb": 4096, "max_cpu_percent": 80}
         )
@@ -361,9 +361,9 @@ class PipelineBatchModule:
             "avg_duration": 0.0,
         }
         self._initialized = False
-        self._handlers: Dict[str, Any] = {}
+        self._handlers: dict[str, Any] = {}
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_handlers()
             self._load_checkpoints()
@@ -377,7 +377,7 @@ class PipelineBatchModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         active = sum(1 for p in self._pipelines.values() if p["status"] == PipelineStatus.RUNNING)
@@ -401,33 +401,33 @@ class PipelineBatchModule:
             "sql": self._handle_sql,
         }
 
-    def _handle_shell(self, params: Dict) -> Dict:
+    def _handle_shell(self, params: dict) -> dict:
         return {"output": f"Executed shell: {params.get('command', '')}", "exit_code": 0, "rows": 1}
 
-    def _handle_python(self, params: Dict) -> Dict:
+    def _handle_python(self, params: dict) -> dict:
         return {"output": f"Executed python script: {params.get('script_name', 'inline')}", "rows": 1}
 
-    def _handle_http(self, params: Dict) -> Dict:
+    def _handle_http(self, params: dict) -> dict:
         return {"output": f"HTTP {params.get('method', 'GET')} {params.get('url', '')}", "status": 200, "rows": 1}
 
-    def _handle_transform(self, params: Dict) -> Dict:
+    def _handle_transform(self, params: dict) -> dict:
         return {"output": f"Transformed {params.get('input_rows', 0)} rows", "rows": params.get("input_rows", 0)}
 
-    def _handle_filter(self, params: Dict) -> Dict:
+    def _handle_filter(self, params: dict) -> dict:
         return {"output": f"Filtered, kept {params.get('kept', 0)} rows", "rows": params.get("kept", 0)}
 
-    def _handle_aggregate(self, params: Dict) -> Dict:
+    def _handle_aggregate(self, params: dict) -> dict:
         return {"output": f"Aggregated into {params.get('groups', 0)} groups", "rows": params.get("groups", 0)}
 
-    def _handle_export(self, params: Dict) -> Dict:
+    def _handle_export(self, params: dict) -> dict:
         return {"output": f"Exported to {params.get('target', 'stdout')}", "rows": params.get("rows", 0)}
 
-    def _handle_sql(self, params: Dict) -> Dict:
+    def _handle_sql(self, params: dict) -> dict:
         return {"output": f"SQL executed: {params.get('query', '')[:50]}...", "rows": params.get("affected", 0)}
 
     def create_pipeline(
-        self, pipeline_id: str, name: str, description: str = "", schedule: str = "", tags: Optional[List[str]] = None
-    ) -> Dict:
+        self, pipeline_id: str, name: str, description: str = "", schedule: str = "", tags: list[str] | None = None
+    ) -> dict:
         with self._lock:
             pipeline = {
                 "pipeline_id": pipeline_id,
@@ -451,11 +451,11 @@ class PipelineBatchModule:
         pipeline_id: str,
         task_id: str,
         handler: str,
-        params: Optional[Dict] = None,
-        dependencies: Optional[List[str]] = None,
+        params: dict | None = None,
+        dependencies: list[str] | None = None,
         retry_count: int = 3,
         timeout: int = 3600,
-    ) -> Dict:
+    ) -> dict:
         with self._lock:
             if pipeline_id not in self._pipelines:
                 return {"success": False, "error": "Pipeline not found"}
@@ -463,7 +463,7 @@ class PipelineBatchModule:
             self._pipeline_tasks[pipeline_id][task_id] = node
             return {"success": True, "task_id": task_id}
 
-    def validate_pipeline(self, pipeline_id: str) -> Dict:
+    def validate_pipeline(self, pipeline_id: str) -> dict:
         with self._lock:
             if pipeline_id not in self._pipelines:
                 return {"valid": False, "error": "Pipeline not found"}
@@ -493,7 +493,7 @@ class PipelineBatchModule:
                 errors.append("Circular dependency detected")
             return {"valid": len(errors) == 0, "errors": errors, "task_count": len(tasks)}
 
-    def execute_pipeline(self, pipeline_id: str, params: Optional[Dict] = None) -> Dict:
+    def execute_pipeline(self, pipeline_id: str, params: dict | None = None) -> dict:
         with self._lock:
             if pipeline_id not in self._pipelines:
                 return {"success": False, "error": "Pipeline not found"}
@@ -596,17 +596,17 @@ class PipelineBatchModule:
     def _load_checkpoints(self):
         self._checkpoints = {}
 
-    def pause_pipeline(self, pipeline_id: str) -> Dict:
+    def pause_pipeline(self, pipeline_id: str) -> dict:
         with self._lock:
             if pipeline_id in self._pipelines:
                 self._pipelines[pipeline_id]["status"] = PipelineStatus.PAUSED
                 return {"success": True}
         return {"success": False, "error": "Pipeline not found"}
 
-    def resume_pipeline(self, pipeline_id: str) -> Dict:
+    def resume_pipeline(self, pipeline_id: str) -> dict:
         return self.execute_pipeline(pipeline_id)
 
-    def get_pipeline_status(self, pipeline_id: str) -> Dict:
+    def get_pipeline_status(self, pipeline_id: str) -> dict:
         if pipeline_id not in self._pipelines:
             return {"error": "Pipeline not found"}
         p = self._pipelines[pipeline_id]
@@ -622,20 +622,20 @@ class PipelineBatchModule:
             },
         }
 
-    def get_execution_history(self, pipeline_id: Optional[str] = None, limit: int = 20) -> Dict:
+    def get_execution_history(self, pipeline_id: str | None = None, limit: int = 20) -> dict:
         history = self._execution_history
         if pipeline_id:
             history = [h for h in history if h["pipeline_id"] == pipeline_id]
         return {"records": history[-limit:], "total": len(history)}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return self._stats.copy()
 
-    def register_handler(self, name: str, handler: callable) -> Dict:
+    def register_handler(self, name: str, handler: callable) -> dict:
         self._handlers[name] = handler
         return {"success": True, "handler": name}
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         actions = {
             "create": lambda: self.create_pipeline(

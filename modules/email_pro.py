@@ -96,7 +96,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class EmailProAnalyzer(object):
+class EmailProAnalyzer:
     """email_pro 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -304,12 +304,12 @@ class EmailTemplate:
     subject: str = ""
     body_html: str = ""
     body_text: str = ""
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     created: float = field(default_factory=time.time)
     updated: float = field(default_factory=time.time)
     category: str = "general"
 
-    def render(self, context: Dict[str, str]) -> Tuple[str, str]:
+    def render(self, context: dict[str, str]) -> tuple[str, str]:
         subject = Template(self.subject).safe_substitute(**context)
         html = Template(self.body_html).safe_substitute(**context)
         text = Template(self.body_text).safe_substitute(**context) if self.body_text else ""
@@ -321,16 +321,16 @@ class EmailMessage:
 
     message_id: str = ""
     from_addr: EmailAddress = field(default_factory=EmailAddress)
-    to_list: List[EmailAddress] = field(default_factory=list)
-    cc_list: List[EmailAddress] = field(default_factory=list)
-    bcc_list: List[EmailAddress] = field(default_factory=list)
+    to_list: list[EmailAddress] = field(default_factory=list)
+    cc_list: list[EmailAddress] = field(default_factory=list)
+    bcc_list: list[EmailAddress] = field(default_factory=list)
     reply_to: EmailAddress = field(default_factory=EmailAddress)
     subject: str = ""
     body_html: str = ""
     body_text: str = ""
-    attachments: List[EmailAttachment] = field(default_factory=list)
+    attachments: list[EmailAttachment] = field(default_factory=list)
     priority: MailPriority = MailPriority.NORMAL
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     status: EmailStatus = EmailStatus.DRAFT
     template_id: str = ""
     created: float = field(default_factory=time.time)
@@ -342,7 +342,7 @@ class EmailMessage:
     open_count: int = 0
     click_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "message_id": self.message_id,
             "from": self.from_addr.to_header(),
@@ -420,14 +420,14 @@ class EmailProModule:
     """企业级邮件服务模块"""
 
     def __init__(self):
-        self._smtp_config: Optional[SmtpConfig] = None
-        self._templates: Dict[str, EmailTemplate] = {}
+        self._smtp_config: SmtpConfig | None = None
+        self._templates: dict[str, EmailTemplate] = {}
         self._queue: deque = deque(maxlen=50000)
-        self._sent_history: List[Dict] = deque(maxlen=10000)
-        self._bounces: Dict[str, List[BounceRecord]] = defaultdict(list)
+        self._sent_history: list[dict] = deque(maxlen=10000)
+        self._bounces: dict[str, list[BounceRecord]] = defaultdict(list)
         self._suppressed: set = set()
-        self._tracking: Dict[str, Dict] = {}
-        self._connections: Dict[str, Dict] = {}
+        self._tracking: dict[str, dict] = {}
+        self._connections: dict[str, dict] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -505,7 +505,7 @@ class EmailProModule:
         for t in defaults:
             self._templates[t.template_id] = t
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._smtp_config = SmtpConfig(
                 host="smtp.example.com",
@@ -526,7 +526,7 @@ class EmailProModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         issues = []
@@ -544,7 +544,7 @@ class EmailProModule:
     # --- Template ---
     def create_template(
         self, template_id: str, name: str, subject: str, body_html: str, body_text: str = "", category: str = "general"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import re
@@ -562,7 +562,7 @@ class EmailProModule:
         self._templates[template_id] = tmpl
         return {"success": True, "template_id": template_id, "variables": variables}
 
-    def get_template(self, template_id: str) -> Dict[str, Any]:
+    def get_template(self, template_id: str) -> dict[str, Any]:
         if template_id not in self._templates:
             return {"success": False, "error": "template_not_found"}
         t = self._templates[template_id]
@@ -575,7 +575,7 @@ class EmailProModule:
             "category": t.category,
         }
 
-    def list_templates(self, category: str = None) -> Dict[str, Any]:
+    def list_templates(self, category: str = None) -> dict[str, Any]:
         items = []
         for tid, t in self._templates.items():
             if category and t.category != category:
@@ -586,20 +586,20 @@ class EmailProModule:
     # --- Compose & Send ---
     def compose(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         body_html: str = "",
         body_text: str = "",
         from_addr: str = None,
-        cc: List[str] = None,
-        bcc: List[str] = None,
+        cc: list[str] = None,
+        bcc: list[str] = None,
         reply_to: str = None,
         priority: int = 3,
-        headers: Dict[str, str] = None,
+        headers: dict[str, str] = None,
         template_id: str = "",
-        template_vars: Dict[str, str] = None,
-        attachments: List[Dict] = None,
-    ) -> Dict[str, Any]:
+        template_vars: dict[str, str] = None,
+        attachments: list[dict] = None,
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if template_id and template_id in self._templates:
@@ -646,7 +646,7 @@ class EmailProModule:
             "queue_position": len(self._queue),
         }
 
-    def send_queued(self, batch_size: int = 10, simulate: bool = True) -> Dict[str, Any]:
+    def send_queued(self, batch_size: int = 10, simulate: bool = True) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         results = []
@@ -690,13 +690,13 @@ class EmailProModule:
 
     def send_immediate(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         body_html: str = "",
         body_text: str = "",
         template_id: str = "",
-        template_vars: Dict[str, str] = None,
-    ) -> Dict[str, Any]:
+        template_vars: dict[str, str] = None,
+    ) -> dict[str, Any]:
         compose = self.compose(
             to=to,
             subject=subject,
@@ -713,7 +713,7 @@ class EmailProModule:
     # --- Bounce & Suppress ---
     def record_bounce(
         self, email: str, message_id: str = "", bounce_type: str = "hard", reason: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         record = BounceRecord(email=email, message_id=message_id, bounce_type=bounce_type, reason=reason)
         self._bounces[email].append(record)
         if bounce_type == "hard":
@@ -727,7 +727,7 @@ class EmailProModule:
             "suppressed": bounce_type == "hard",
         }
 
-    def get_bounces(self, email: str = None, limit: int = 50) -> Dict[str, Any]:
+    def get_bounces(self, email: str = None, limit: int = 50) -> dict[str, Any]:
         records = []
         for addr, recs in self._bounces.items():
             if email and addr != email:
@@ -737,37 +737,37 @@ class EmailProModule:
         records.sort(key=lambda x: x["timestamp"], reverse=True)
         return {"success": True, "bounces": records, "total": len(records)}
 
-    def list_suppressed(self) -> Dict[str, Any]:
+    def list_suppressed(self) -> dict[str, Any]:
         return {"success": True, "suppressed": list(self._suppressed), "total": len(self._suppressed)}
 
-    def remove_suppressed(self, email: str) -> Dict[str, Any]:
+    def remove_suppressed(self, email: str) -> dict[str, Any]:
         if email in self._suppressed:
             self._suppressed.discard(email)
             return {"success": True, "email": email}
         return {"success": False, "error": "not_suppressed"}
 
     # --- Tracking ---
-    def record_open(self, tracking_id: str) -> Dict[str, Any]:
+    def record_open(self, tracking_id: str) -> dict[str, Any]:
         if tracking_id not in self._tracking:
             self._tracking[tracking_id] = {"opens": 0, "clicks": 0}
         self._tracking[tracking_id]["opens"] += 1
         self._stats["opened"] += 1
         return {"success": True, "tracking_id": tracking_id, "total_opens": self._tracking[tracking_id]["opens"]}
 
-    def record_click(self, tracking_id: str, url: str = "") -> Dict[str, Any]:
+    def record_click(self, tracking_id: str, url: str = "") -> dict[str, Any]:
         if tracking_id not in self._tracking:
             self._tracking[tracking_id] = {"opens": 0, "clicks": 0}
         self._tracking[tracking_id]["clicks"] += 1
         self._stats["clicked"] += 1
         return {"success": True, "tracking_id": tracking_id, "url": url}
 
-    def get_tracking(self, tracking_id: str) -> Dict[str, Any]:
+    def get_tracking(self, tracking_id: str) -> dict[str, Any]:
         if tracking_id not in self._tracking:
             return {"success": True, "tracking_id": tracking_id, "opens": 0, "clicks": 0}
         return {"success": True, **self._tracking[tracking_id]}
 
     # --- Query ---
-    def get_message(self, message_id: str) -> Dict[str, Any]:
+    def get_message(self, message_id: str) -> dict[str, Any]:
         for msg in self._sent_history:
             if msg["message_id"] == message_id:
                 return {"success": True, **msg}
@@ -776,7 +776,7 @@ class EmailProModule:
                 return {"success": True, **msg.to_dict()}
         return {"success": False, "error": "not_found"}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

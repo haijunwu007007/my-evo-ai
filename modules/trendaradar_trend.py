@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class TrendAnalyzer(object):
+class TrendAnalyzer:
     """trendaradar_trend 运营分析引擎
 
     - 分析趋势数据覆盖率
@@ -116,7 +116,7 @@ class TrendAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "TrendAnalyzer", "module": "trendaradar_trend", "summary": summary}
 
-class TrendaradarTrendAnalyzer(object):
+class TrendaradarTrendAnalyzer:
     """trendaradar trend 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -215,7 +215,7 @@ class TrendaradarTrendAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class TrendaradarTrendAnalyzer(object):
+class TrendaradarTrendAnalyzer:
     """trendaradar_trend核心分析引擎
 
     为trendaradar_trend模块提供深度分析能力，包括数据聚合、
@@ -273,18 +273,18 @@ class TrendaradarTrendAnalyzer(object):
 class TrendRadarTrend(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """趋势雷达"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"trendaradar_trend")
 

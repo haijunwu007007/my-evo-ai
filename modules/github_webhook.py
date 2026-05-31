@@ -20,7 +20,7 @@ import logging
 import time
 import traceback
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -34,12 +34,12 @@ MODULE_LEVEL = "A"
 # ── 模块导出 ──
 
 # 事件存储 (进程内，生产环境可替换为 Redis/DB)
-_events: List[Dict[str, Any]] = []
+_events: list[dict[str, Any]] = []
 _events_lock = False
 _MAX_EVENTS = 5000
 
 # 通知配置
-_notify_config: Dict[str, Any] = {
+_notify_config: dict[str, Any] = {
     "enabled": True,
     "channels": [],          # [{"type":"wechat_work","webhook_url":"..."}, ...]
     "events": ["push", "workflow_run", "pull_request", "release"],
@@ -74,7 +74,7 @@ def verify_signature(payload: bytes, signature_header: str, secret: str) -> bool
 # 事件解析
 # ═══════════════════════════════════════════════════════
 
-def parse_event(event_type: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+def parse_event(event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
     """
     解析 GitHub Webhook 事件为统一格式
     返回: {type, action, repo, ref, sender, title, description, url, timestamp, raw}
@@ -82,7 +82,7 @@ def parse_event(event_type: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     repo = (payload.get("repository") or {}).get("full_name", "unknown")
     sender = (payload.get("sender") or {}).get("login", "unknown")
     sender_url = (payload.get("sender") or {}).get("html_url", "")
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     base = {
         "event_type": event_type,
@@ -185,7 +185,7 @@ def parse_event(event_type: str, payload: Dict[str, Any]) -> Dict[str, Any]:
 # 事件存储
 # ═══════════════════════════════════════════════════════
 
-def store_event(event: Dict[str, Any]) -> str:
+def store_event(event: dict[str, Any]) -> str:
     """存储事件，返回事件ID"""
     event_id = hashlib.md5(f"{event['timestamp']}{event['title']}{time.time_ns()}".encode()).hexdigest()[:12]
     event["id"] = event_id
@@ -196,11 +196,11 @@ def store_event(event: Dict[str, Any]) -> str:
 
 
 def list_events(
-    event_type: Optional[str] = None,
-    repo: Optional[str] = None,
+    event_type: str | None = None,
+    repo: str | None = None,
     limit: int = 50,
     offset: int = 0,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """查询事件历史"""
     filtered = _events
     if event_type:
@@ -210,12 +210,12 @@ def list_events(
     return filtered[offset:offset + limit]
 
 
-def get_event_stats() -> Dict[str, Any]:
+def get_event_stats() -> dict[str, Any]:
     """获取事件统计"""
     total = len(_events)
-    by_type: Dict[str, int] = defaultdict(int)
-    by_repo: Dict[str, int] = defaultdict(int)
-    by_priority: Dict[str, int] = defaultdict(int)
+    by_type: dict[str, int] = defaultdict(int)
+    by_repo: dict[str, int] = defaultdict(int)
+    by_priority: dict[str, int] = defaultdict(int)
     failures = 0
 
     for e in _events:
@@ -263,7 +263,7 @@ def _parse_ts(ts: str) -> float:
 # 通知
 # ═══════════════════════════════════════════════════════
 
-async def send_notification(event: Dict[str, Any]) -> List[Dict[str, Any]]:
+async def send_notification(event: dict[str, Any]) -> list[dict[str, Any]]:
     """
     根据事件发送通知到已配置的渠道
     返回发送结果列表
@@ -299,7 +299,7 @@ async def send_notification(event: Dict[str, Any]) -> List[Dict[str, Any]]:
     return results
 
 
-async def _send_wechat_work(webhook_url: str, title: str, description: str, url: str) -> Dict[str, Any]:
+async def _send_wechat_work(webhook_url: str, title: str, description: str, url: str) -> dict[str, Any]:
     """发送企业微信消息"""
     if not webhook_url:
         return {"channel": "wechat_work", "status": "skipped", "reason": "no webhook_url"}
@@ -311,7 +311,7 @@ async def _send_wechat_work(webhook_url: str, title: str, description: str, url:
         return {"channel": "wechat_work", "status": "ok" if resp.is_success else "error", "code": resp.status_code}
 
 
-async def _send_dingtalk(webhook_url: str, title: str, description: str, secret: str, url: str) -> Dict[str, Any]:
+async def _send_dingtalk(webhook_url: str, title: str, description: str, secret: str, url: str) -> dict[str, Any]:
     """发送钉钉消息"""
     if not webhook_url:
         return {"channel": "dingtalk", "status": "skipped", "reason": "no webhook_url"}
@@ -334,7 +334,7 @@ async def _send_dingtalk(webhook_url: str, title: str, description: str, secret:
         return {"channel": "dingtalk", "status": "ok" if resp.is_success else "error", "code": resp.status_code}
 
 
-async def _send_feishu(webhook_url: str, title: str, description: str, url: str) -> Dict[str, Any]:
+async def _send_feishu(webhook_url: str, title: str, description: str, url: str) -> dict[str, Any]:
     """发送飞书消息"""
     if not webhook_url:
         return {"channel": "feishu", "status": "skipped", "reason": "no webhook_url"}
@@ -350,12 +350,12 @@ async def _send_feishu(webhook_url: str, title: str, description: str, url: str)
 # 配置管理
 # ═══════════════════════════════════════════════════════
 
-def get_config() -> Dict[str, Any]:
+def get_config() -> dict[str, Any]:
     """获取当前通知配置"""
     return dict(_notify_config)
 
 
-def update_config(config: Dict[str, Any]) -> Dict[str, Any]:
+def update_config(config: dict[str, Any]) -> dict[str, Any]:
     """更新通知配置"""
     for key in ("enabled", "channels", "events", "min_priority"):
         if key in config:
@@ -370,10 +370,10 @@ def update_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 async def process_webhook(
     event_type: str,
-    payload: Dict[str, Any],
+    payload: dict[str, Any],
     signature: str = "",
     secret: str = "",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """处理 GitHub Webhook 请求——完整流程: 验证→解析→存储→通知"""
     # 1. 签名验证
     if secret:
@@ -447,7 +447,7 @@ async def execute(action: str, **kwargs) -> Any:
 
 
 # ── 模块自检 ──
-def health_check() -> Dict[str, Any]:
+def health_check() -> dict[str, Any]:
     """健康检查"""
     return {
         "module": MODULE_ID,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现）
@@ -162,7 +161,7 @@ class CronJob:
     name: str = ""
     cron: str = ""  # cron表达式 或 interval:秒数
     action: str = ""  # 要执行的动作
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     enabled: bool = True
     status: str = "idle"  # idle/running/success/failed
     last_run: str = ""
@@ -189,7 +188,7 @@ class ExecutionRecord:
     duration_ms: float = 0.0
     error: str = ""
 
-def parse_interval(interval_str: str) -> Optional[float]:
+def parse_interval(interval_str: str) -> float | None:
     """解析间隔表达式: '30s', '5m', '1h'"""
     m = re.match(r"(\d+)([smh])", interval_str.strip())
     if not m:
@@ -217,12 +216,12 @@ def should_run_cron(cron_expr: str) -> bool:
         return False
     return True
 
-class CronExecutionAnalyzer(object):
+class CronExecutionAnalyzer:
     """调度执行分析器 — 任务执行统计分析、失败模式识别、资源消耗追踪、SLA合规检测"""
 
     def __init__(self):
-        self._exec_records: List[Dict[str, Any]] = []
-        self._failure_patterns: Dict[str, int] = {}
+        self._exec_records: list[dict[str, Any]] = []
+        self._failure_patterns: dict[str, int] = {}
 
     def record_execution(
         self,
@@ -233,7 +232,7 @@ class CronExecutionAnalyzer(object):
         error_msg: str = "",
         retry_count: int = 0,
         memory_mb: float = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """记录一次任务执行"""
         record = {
             "job_id": job_id,
@@ -251,7 +250,7 @@ class CronExecutionAnalyzer(object):
             self._failure_patterns[pattern] = self._failure_patterns.get(pattern, 0) + 1
         return record
 
-    def get_job_summary(self, job_id: str, window_hours: int = 24) -> Dict[str, Any]:
+    def get_job_summary(self, job_id: str, window_hours: int = 24) -> dict[str, Any]:
         """获取指定任务的执行统计摘要"""
         cutoff = time.time() - window_hours * 3600
         records = [r for r in self._exec_records if r["job_id"] == job_id and r["timestamp"] >= cutoff]
@@ -281,13 +280,13 @@ class CronExecutionAnalyzer(object):
             "retry_rate": round(total_retries / max(total, 1), 2),
         }
 
-    def detect_failure_trends(self, window_hours: int = 24) -> Dict[str, Any]:
+    def detect_failure_trends(self, window_hours: int = 24) -> dict[str, Any]:
         """检测失败趋势：失败率变化、周期性失败、新增失败模式"""
         cutoff = time.time() - window_hours * 3600
         records = [r for r in self._exec_records if r["timestamp"] >= cutoff]
         if not records:
             return {"trends": [], "total_records": 0}
-        hour_buckets: Dict[int, List[Dict]] = {}
+        hour_buckets: dict[int, list[dict]] = {}
         for r in records:
             hour = int((r["timestamp"] - cutoff) / 3600)
             hour_buckets.setdefault(hour, []).append(r)
@@ -312,7 +311,7 @@ class CronExecutionAnalyzer(object):
             "total_unique_failures": len(self._failure_patterns),
         }
 
-    def check_sla_compliance(self, sla_config: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
+    def check_sla_compliance(self, sla_config: dict[str, dict[str, float]]) -> dict[str, Any]:
         """检查SLA合规性：可用性、延迟、成功率"""
         violations = []
         summaries = {}
@@ -349,13 +348,13 @@ class CronExecutionAnalyzer(object):
             "summaries": summaries,
         }
 
-    def get_resource_report(self, window_hours: int = 24) -> Dict[str, Any]:
+    def get_resource_report(self, window_hours: int = 24) -> dict[str, Any]:
         """获取资源消耗报告：内存、CPU时间、执行频次"""
         cutoff = time.time() - window_hours * 3600
         records = [r for r in self._exec_records if r["timestamp"] >= cutoff]
         if not records:
             return {"total_executions": 0, "resource_usage": {}}
-        by_job: Dict[str, List[Dict]] = {}
+        by_job: dict[str, list[dict]] = {}
         for r in records:
             by_job.setdefault(r["job_id"], []).append(r)
         job_resources = []
@@ -394,16 +393,16 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
         self._circuits = {}
         self._buckets = {}
         self._windows = {}
-        self._jobs: Dict[str, CronJob] = {}
+        self._jobs: dict[str, CronJob] = {}
         self._history: deque = deque(maxlen=2000)
-        self._bg_scheduler: Optional[asyncio.Task] = None
+        self._bg_scheduler: asyncio.Task | None = None
 
     def initialize(self) -> None:
         self.info("初始化定时调度器...")
@@ -415,7 +414,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.start_time = datetime.now()
         self.info(f"定时调度器就绪，{len(self._jobs)}个任务")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("cron_scheduler_ops_total", labels={"action": action})
         params = params or {}
@@ -438,7 +437,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._bg_scheduler.cancel()
         self.status = ModuleStatus.STOPPED
 
-    def list_jobs_by_status(self, status_filter: str = "active") -> List[Dict[str, Any]]:
+    def list_jobs_by_status(self, status_filter: str = "active") -> list[dict[str, Any]]:
         """按状态筛选任务列表，返回任务详情和下次执行时间"""
         jobs = self._jobs if hasattr(self, "_jobs") else []
         filtered = []
@@ -456,7 +455,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         filtered.sort(key=lambda x: x.get("next_run") or "")
         return filtered
 
-    def get_execution_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_execution_summary(self, hours: int = 24) -> dict[str, Any]:
         """获取执行统计摘要：成功/失败/跳过数量、平均执行时间"""
         history = self._history if hasattr(self, "_history") else []
         cutoff = time.time() - hours * 3600
@@ -478,7 +477,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "avg_duration_ms": round(avg_dur, 2),
         }
 
-    def pause_job(self, job_id: str) -> Dict[str, Any]:
+    def pause_job(self, job_id: str) -> dict[str, Any]:
         """暂停指定任务"""
         jobs = self._jobs if hasattr(self, "_jobs") else []
         for job in jobs:
@@ -488,7 +487,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 return {"job_id": job_id, "old_status": old_status, "new_status": "paused"}
         return {"error": "job not found", "job_id": job_id}
 
-    def resume_job(self, job_id: str) -> Dict[str, Any]:
+    def resume_job(self, job_id: str) -> dict[str, Any]:
         """恢复已暂停的任务"""
         jobs = self._jobs if hasattr(self, "_jobs") else []
         for job in jobs:
@@ -508,7 +507,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         for job in defaults:
             self._jobs[job.job_id] = job
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "add": self._do_add,
@@ -525,7 +524,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _do_add(self, params: Dict) -> Dict:
+    def _do_add(self, params: dict) -> dict:
         job = CronJob(
             name=params.get("name", ""),
             cron=params.get("cron", ""),
@@ -538,14 +537,14 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("add_job", job.job_id)
         return {"success": True, "job_id": job.job_id}
 
-    def _do_remove(self, params: Dict) -> Dict:
+    def _do_remove(self, params: dict) -> dict:
         jid = params.get("job_id", "")
         if jid in self._jobs:
             del self._jobs[jid]
             return {"deleted": True}
         return {"error": "任务不存在"}
 
-    def _do_run(self, params: Dict) -> Dict:
+    def _do_run(self, params: dict) -> dict:
         jid = params.get("job_id", "")
         job = self._jobs.get(jid)
         if not job:
@@ -553,21 +552,21 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         record = asyncio.get_event_loop().run_until_complete(self._execute_job(job))
         return {"job_id": jid, "status": record.status, "duration_ms": round(record.duration_ms, 0)}
 
-    def _do_enable(self, params: Dict) -> Dict:
+    def _do_enable(self, params: dict) -> dict:
         job = self._jobs.get(params.get("job_id", ""))
         if not job:
             return {"error": "任务不存在"}
         job.enabled = True
         return {"enabled": True}
 
-    def _do_disable(self, params: Dict) -> Dict:
+    def _do_disable(self, params: dict) -> dict:
         job = self._jobs.get(params.get("job_id", ""))
         if not job:
             return {"error": "任务不存在"}
         job.enabled = False
         return {"enabled": False}
 
-    def _do_list(self, params: Dict) -> Dict:
+    def _do_list(self, params: dict) -> dict:
         return {
             "total": len(self._jobs),
             "jobs": [
@@ -586,7 +585,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _do_get(self, params: Dict) -> Dict:
+    def _do_get(self, params: dict) -> dict:
         job = self._jobs.get(params.get("job_id", ""))
         if not job:
             return {"error": "任务不存在"}
@@ -604,7 +603,7 @@ class CronScheduler(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "running": job.running_lock,
         }
 
-    def _do_history(self, params: Dict) -> Dict:
+    def _do_history(self, params: dict) -> dict:
         limit = params.get("limit", 50)
         jid = params.get("job_id", "")
         records = list(self._history)

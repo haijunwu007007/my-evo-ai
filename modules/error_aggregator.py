@@ -84,7 +84,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("error_aggregator")
 
-class ErrorPatternAnalyzer(object):
+class ErrorPatternAnalyzer:
     """error_aggregator 运营分析引擎
 
     - 分析错误类型分布趋势
@@ -143,16 +143,16 @@ class ErrorEvent:
     severity: ErrorSeverity = ErrorSeverity.MEDIUM
     source: str = ""
     stack_trace: str = ""
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     status: ErrorStatus = ErrorStatus.OPEN
     first_seen: float = 0.0
     last_seen: float = 0.0
     count: int = 1
-    affected_services: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    assigned_to: Optional[str] = None
+    affected_services: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    assigned_to: str | None = None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "fingerprint": self.fingerprint[:12],
@@ -176,7 +176,7 @@ class ErrorTrend:
     trend: str = "stable"
     delta_pct: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "severity": self.severity,
             "count": self.count,
@@ -189,10 +189,10 @@ class RootCause:
     error_id: str = ""
     likely_cause: str = ""
     confidence: float = 0.0
-    suggestions: List[str] = field(default_factory=list)
-    related_errors: List[str] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
+    related_errors: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "error_id": self.error_id,
             "cause": self.likely_cause,
@@ -204,17 +204,17 @@ class RootCause:
 class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """错误聚合分析：错误收集、指纹去重、根因分析、趋势跟踪、告警"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._errors: Dict[str, ErrorEvent] = {}
-        self._history: List[ErrorEvent] = []
-        self._hourly_buckets: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-        self._rules: List[Dict] = []
+        self._errors: dict[str, ErrorEvent] = {}
+        self._history: list[ErrorEvent] = []
+        self._hourly_buckets: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        self._rules: list[dict] = []
         self._ops_count = 0
         self._dedup_window = 300
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("error_aggregator.initialize", "start")
         self.trace("error_aggregator.initialize", "end")
         try:
@@ -231,7 +231,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         open_errors = [e for e in self._errors.values() if e.status == ErrorStatus.OPEN]
         critical = [e for e in open_errors if e.severity == ErrorSeverity.CRITICAL]
         return {
@@ -252,7 +252,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _hour_key(self, ts: float) -> str:
         return time.strftime("%Y%m%d%H", time.localtime(ts))
 
-    def ingest(self, params: Optional[Dict] = None) -> Dict:
+    def ingest(self, params: dict | None = None) -> dict:
         params = params or {}
         message = params.get("message", "")
         error_type = params.get("type", "Exception")
@@ -309,7 +309,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 break
         return {"success": True, "error_id": eid, "count": evt.count, "status": evt.status.value}
 
-    def list_errors(self, params: Optional[Dict] = None) -> Dict:
+    def list_errors(self, params: dict | None = None) -> dict:
         params = params or {}
         severity = params.get("severity")
         status = params.get("status")
@@ -328,7 +328,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "errors": results[:limit], "total": len(results)}
 
-    def get_error(self, params: Optional[Dict] = None) -> Dict:
+    def get_error(self, params: dict | None = None) -> dict:
         params = params or {}
         eid = params.get("id", "")
         for e in self._errors.values():
@@ -336,7 +336,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": True, "error": e.to_dict()}
         return {"success": False, "error": "Error not found"}
 
-    def acknowledge(self, params: Optional[Dict] = None) -> Dict:
+    def acknowledge(self, params: dict | None = None) -> dict:
         params = params or {}
         eid = params.get("id", "")
         assignee = params.get("assign_to")
@@ -350,7 +350,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": True, "error_id": eid, "status": e.status.value, "assigned_to": e.assigned_to}
         return {"success": False, "error": "Error not found"}
 
-    def resolve(self, params: Optional[Dict] = None) -> Dict:
+    def resolve(self, params: dict | None = None) -> dict:
         params = params or {}
         eid = params.get("id", "")
         for e in self._errors.values():
@@ -361,7 +361,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": True, "error_id": eid, "status": "resolved"}
         return {"success": False, "error": "Error not found"}
 
-    def get_trends(self, params: Optional[Dict] = None) -> Dict:
+    def get_trends(self, params: dict | None = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
         now = time.time()
@@ -376,7 +376,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ops_count += 1
         return {"success": True, "hours": hours, "trends": trends}
 
-    def analyze_root_cause(self, params: Optional[Dict] = None) -> Dict:
+    def analyze_root_cause(self, params: dict | None = None) -> dict:
         params = params or {}
         eid = params.get("id", "")
         for e in self._errors.values():
@@ -414,7 +414,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": True, "analysis": rc.to_dict()}
         return {"success": False, "error": "Error not found"}
 
-    def add_rule(self, params: Optional[Dict] = None) -> Dict:
+    def add_rule(self, params: dict | None = None) -> dict:
         params = params or {}
         pattern = params.get("pattern", "")
         severity = params.get("severity", "medium")
@@ -430,7 +430,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._hourly_buckets.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

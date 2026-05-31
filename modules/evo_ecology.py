@@ -87,7 +87,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("evo_ecology")
 
-class ModuleEcologyAnalyzer(object):
+class ModuleEcologyAnalyzer:
     """evo_ecology 运营分析引擎
 
     - 分析模块依赖健康度
@@ -140,11 +140,11 @@ class Species:
     growth_rate: float = 0.1
     carrying_capacity: int = 1000
     energy: float = 100.0
-    traits: Dict[str, float] = field(default_factory=dict)
+    traits: dict[str, float] = field(default_factory=dict)
     generation: int = 0
     extinct: bool = False
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
@@ -165,9 +165,9 @@ class EcoRelation:
     target: str = ""
     relation_type: str = "predation"
     strength: float = 0.5
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "source": self.source,
             "target": self.target,
@@ -179,13 +179,13 @@ class EcoRelation:
 class TickResult:
     tick: int = 0
     timestamp: float = 0.0
-    population_changes: Dict[str, int] = field(default_factory=dict)
-    extinctions: List[str] = field(default_factory=list)
+    population_changes: dict[str, int] = field(default_factory=dict)
+    extinctions: list[str] = field(default_factory=list)
     total_population: int = 0
     biodiversity: float = 0.0
     resources_remaining: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "tick": self.tick,
             "timestamp": self.timestamp,
@@ -199,19 +199,19 @@ class TickResult:
 class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """进化生态：物种管理、资源竞争、食物链、生态模拟、多样性度量"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._species: Dict[str, Species] = {}
-        self._relations: List[EcoRelation] = []
+        self._species: dict[str, Species] = {}
+        self._relations: list[EcoRelation] = []
         self._resources: float = 10000.0
         self._max_resources: float = 10000.0
         self._resource_regen: float = 500.0
         self._tick_count: int = 0
-        self._history: List[Dict] = []
+        self._history: list[dict] = []
         self._max_history = 200
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("evo_ecology.initialize", "start")
         self.trace("evo_ecology.initialize", "end")
         try:
@@ -253,7 +253,7 @@ class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         alive = [s for s in self._species.values() if not s.extinct]
         total = sum(s.population for s in alive)
         bio = self._calc_biodiversity()
@@ -277,7 +277,7 @@ class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return 0.0
         return -sum((p / total) * math.log(p / total) for p in alive if p > 0)
 
-    def tick(self, params: Optional[Dict] = None) -> Dict:
+    def tick(self, params: dict | None = None) -> dict:
         params = params or {}
         steps = params.get("steps", 1)
         results = []
@@ -342,7 +342,7 @@ class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return sp.population * sp.growth_rate * (self._resources / self._max_resources)
         return sp.population * 0.005
 
-    def add_species(self, params: Optional[Dict] = None) -> Dict:
+    def add_species(self, params: dict | None = None) -> dict:
         params = params or {}
         name = params.get("name", "")
         role = params.get("role", "consumer")
@@ -368,16 +368,16 @@ class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("add_species", f"{name}({role}) pop={pop}")
         return {"success": True, "species": sp.to_dict()}
 
-    def list_species(self, params: Optional[Dict] = None) -> Dict:
+    def list_species(self, params: dict | None = None) -> dict:
         result = [s.to_dict() for s in self._species.values()]
         return {"success": True, "species": result, "count": len(result)}
 
-    def get_history(self, params: Optional[Dict] = None) -> Dict:
+    def get_history(self, params: dict | None = None) -> dict:
         params = params or {}
         limit = params.get("limit", 50)
         return {"success": True, "history": self._history[-limit:], "count": len(self._history)}
 
-    def add_relation(self, params: Optional[Dict] = None) -> Dict:
+    def add_relation(self, params: dict | None = None) -> dict:
         params = params or {}
         source = params.get("source", "")
         target = params.get("target", "")
@@ -395,7 +395,7 @@ class EvoEcology(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._history.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

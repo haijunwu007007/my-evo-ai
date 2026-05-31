@@ -88,7 +88,7 @@ class ChannelConfig:
     name: str
     channel_type: str
     enabled: bool = True
-    config: Dict = field(default_factory=dict)
+    config: dict = field(default_factory=dict)
 
 
 # ═══════════════════════════════════════════════════
@@ -99,12 +99,12 @@ class TemplateEngine:
     """简单模板引擎 — 支持 {{变量}} 替换"""
 
     def __init__(self):
-        self._templates: Dict[str, str] = {}
+        self._templates: dict[str, str] = {}
 
     def register(self, name: str, template: str):
         self._templates[name] = template
 
-    def render(self, template: str, variables: Dict[str, Any] = None) -> str:
+    def render(self, template: str, variables: dict[str, Any] = None) -> str:
         variables = variables or {}
         # 加载命名模板
         if template in self._templates:
@@ -116,7 +116,7 @@ class TemplateEngine:
             return str(value)
         return re.sub(r'\{\{(.+?)\}\}', replacer, template)
 
-    def list_templates(self) -> Dict[str, str]:
+    def list_templates(self) -> dict[str, str]:
         return dict(self._templates)
 
 
@@ -150,7 +150,7 @@ class EmailSender:
 
     def send(self, to: str, subject: str, body: str,
              html: str = "", cc: str = "", bcc: str = "",
-             attachments: List[str] = None) -> Dict:
+             attachments: list[str] = None) -> dict:
         """发送邮件"""
         if not self.smtp_host or not self.smtp_user:
             return {"success": False, "error": "SMTP未配置: 需设置 SMTP_HOST / SMTP_USER / SMTP_PASS 环境变量"}
@@ -211,7 +211,7 @@ class EmailSender:
     def is_configured(self) -> bool:
         return bool(self.smtp_host and self.smtp_user and self.smtp_pass)
 
-    def get_config_info(self) -> Dict:
+    def get_config_info(self) -> dict:
         return {
             "configured": self.is_configured(),
             "host": self.smtp_host,
@@ -231,7 +231,7 @@ class IMNotifier:
 
     @staticmethod
     def send_wechat_work(webhook_url: str, content: str, msg_type: str = "text",
-                          mentioned_list: List[str] = None) -> Dict:
+                          mentioned_list: list[str] = None) -> dict:
         """企业微信机器人通知"""
         try:
             payload = {
@@ -257,7 +257,7 @@ class IMNotifier:
 
     @staticmethod
     def send_dingtalk(webhook_url: str, content: str, secret: str = "",
-                       msg_type: str = "text", at_mobiles: List[str] = None) -> Dict:
+                       msg_type: str = "text", at_mobiles: list[str] = None) -> dict:
         """钉钉机器人通知"""
         try:
             url = webhook_url
@@ -296,7 +296,7 @@ class IMNotifier:
 
     @staticmethod
     def send_feishu(webhook_url: str, content: str, msg_type: str = "text",
-                     title: str = "通知") -> Dict:
+                     title: str = "通知") -> dict:
         """飞书机器人通知"""
         try:
             if msg_type == "interactive":
@@ -333,7 +333,7 @@ class IMNotifier:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def send_slack(webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_slack(webhook_url: str, content: str, title: str = "") -> dict:
         """Slack Incoming Webhook 通知"""
         try:
             blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": content}}]
@@ -351,7 +351,7 @@ class IMNotifier:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def send_telegram(token: str, chat_id: str, content: str, parse_mode: str = "HTML") -> Dict:
+    def send_telegram(token: str, chat_id: str, content: str, parse_mode: str = "HTML") -> dict:
         """Telegram Bot 通知"""
         try:
             url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -369,7 +369,7 @@ class IMNotifier:
 
     @staticmethod
     def send_discord(webhook_url: str, content: str, title: str = "",
-                     username: str = "AUTO-EVO-AI") -> Dict:
+                     username: str = "AUTO-EVO-AI") -> dict:
         """Discord Webhook 通知"""
         try:
             embed = {"description": content, "color": 0x6366f1}
@@ -387,7 +387,7 @@ class IMNotifier:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def send_google_chat(webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_google_chat(webhook_url: str, content: str, title: str = "") -> dict:
         """Google Chat Webhook 通知"""
         try:
             payload = {
@@ -408,7 +408,7 @@ class IMNotifier:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def send_teams(webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_teams(webhook_url: str, content: str, title: str = "") -> dict:
         """Microsoft Teams Incoming Webhook 通知"""
         try:
             payload = {
@@ -441,7 +441,7 @@ class PushService:
     """Server酱/PushPlus/Bark 推送"""
 
     @staticmethod
-    def send_serverchan(sendkey: str, title: str, desp: str = "") -> Dict:
+    def send_serverchan(sendkey: str, title: str, desp: str = "") -> dict:
         """Server酱推送"""
         try:
             url = f"https://sctapi.ftqq.com/{sendkey}.send"
@@ -458,7 +458,7 @@ class PushService:
 
     @staticmethod
     def send_pushplus(token: str, title: str, content: str,
-                       template: str = "txt", topic: str = "") -> Dict:
+                       template: str = "txt", topic: str = "") -> dict:
         """PushPlus推送"""
         try:
             url = "http://www.pushplus.plus/send"
@@ -483,7 +483,7 @@ class PushService:
 
     @staticmethod
     def send_bark(device_key: str, title: str, body: str,
-                   server: str = "https://api.day.app") -> Dict:
+                   server: str = "https://api.day.app") -> dict:
         """Bark推送 (iOS/macOS)"""
         try:
             url = f"{server}/{device_key}/{urllib.parse.quote(title)}/{urllib.parse.quote(body)}"
@@ -508,13 +508,13 @@ class WebhookSender:
     """HTTP Webhook发送器 — 支持签名/重试"""
 
     def __init__(self):
-        self._history: List[Dict] = []
+        self._history: list[dict] = []
         self._max_retries = 3
         self._timeout = 10
 
     def send(self, url: str, data: Any, method: str = "POST",
-             headers: Dict = None, secret: str = "",
-             retries: int = 0) -> Dict:
+             headers: dict = None, secret: str = "",
+             retries: int = 0) -> dict:
         """发送Webhook"""
         headers = headers or {"Content-Type": "application/json"}
         payload = json.dumps(data, ensure_ascii=False).encode("utf-8") if isinstance(data, (dict, list)) else str(data).encode()
@@ -547,7 +547,7 @@ class WebhookSender:
         self._history.append({"url": url[:100], "status": 0, "success": False, "error": last_error, "timestamp": time.time()})
         return {"success": False, "error": last_error}
 
-    def get_history(self, limit: int = 50) -> List[Dict]:
+    def get_history(self, limit: int = 50) -> list[dict]:
         return self._history[-limit:]
 
 
@@ -568,7 +568,7 @@ class NotificationService:
         self._push = PushService()
         self._webhook = WebhookSender()
         self._template = TemplateEngine()
-        self._records: List[NotificationRecord] = []
+        self._records: list[NotificationRecord] = []
         self._max_records = 2000
         self._lock = threading.Lock()
         self._register_default_templates()
@@ -594,7 +594,7 @@ class NotificationService:
     # ─── 邮件 ───
 
     def send_email(self, to: str, subject: str, body: str,
-                   html: str = "", cc: str = "", bcc: str = "") -> Dict:
+                   html: str = "", cc: str = "", bcc: str = "") -> dict:
         """发送邮件"""
         result = self._email.send(to=to, subject=subject, body=body,
                                    html=html, cc=cc, bcc=bcc)
@@ -602,18 +602,18 @@ class NotificationService:
                      result.get("error", ""))
         return result
 
-    def configure_email(self, **kwargs) -> Dict:
+    def configure_email(self, **kwargs) -> dict:
         """配置SMTP"""
         self._email.configure(**kwargs)
         return {"success": True, "config": self._email.get_config_info()}
 
-    def email_config(self) -> Dict:
+    def email_config(self) -> dict:
         return self._email.get_config_info()
 
     # ─── 企业微信 ───
 
     def send_wechat_work(self, webhook_url: str, content: str,
-                          msg_type: str = "text") -> Dict:
+                          msg_type: str = "text") -> dict:
         """企业微信机器人通知"""
         result = self._im.send_wechat_work(webhook_url, content, msg_type)
         self._record("wechat_work", webhook_url[:50], "", content[:100],
@@ -623,7 +623,7 @@ class NotificationService:
     # ─── 钉钉 ───
 
     def send_dingtalk(self, webhook_url: str, content: str,
-                       secret: str = "", msg_type: str = "text") -> Dict:
+                       secret: str = "", msg_type: str = "text") -> dict:
         """钉钉机器人通知"""
         result = self._im.send_dingtalk(webhook_url, content, secret, msg_type)
         self._record("dingtalk", webhook_url[:50], "", content[:100],
@@ -633,7 +633,7 @@ class NotificationService:
     # ─── 飞书 ───
 
     def send_feishu(self, webhook_url: str, content: str,
-                     msg_type: str = "text", title: str = "通知") -> Dict:
+                     msg_type: str = "text", title: str = "通知") -> dict:
         """飞书机器人通知"""
         result = self._im.send_feishu(webhook_url, content, msg_type, title)
         self._record("feishu", webhook_url[:50], title, content[:100],
@@ -642,7 +642,7 @@ class NotificationService:
 
     # ─── Slack ───
 
-    def send_slack(self, webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_slack(self, webhook_url: str, content: str, title: str = "") -> dict:
         """Slack 通知"""
         result = self._im.send_slack(webhook_url, content, title)
         self._record("slack", webhook_url[:50], title, content[:100],
@@ -652,7 +652,7 @@ class NotificationService:
     # ─── Telegram ───
 
     def send_telegram(self, token: str, chat_id: str, content: str,
-                       parse_mode: str = "HTML") -> Dict:
+                       parse_mode: str = "HTML") -> dict:
         """Telegram 通知"""
         result = self._im.send_telegram(token, chat_id, content, parse_mode)
         self._record("telegram", f"chat:{chat_id}", "", content[:100],
@@ -662,7 +662,7 @@ class NotificationService:
     # ─── Discord ───
 
     def send_discord(self, webhook_url: str, content: str, title: str = "",
-                      username: str = "AUTO-EVO-AI") -> Dict:
+                      username: str = "AUTO-EVO-AI") -> dict:
         """Discord 通知"""
         result = self._im.send_discord(webhook_url, content, title, username)
         self._record("discord", webhook_url[:50], title, content[:100],
@@ -671,7 +671,7 @@ class NotificationService:
 
     # ─── Google Chat ───
 
-    def send_google_chat(self, webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_google_chat(self, webhook_url: str, content: str, title: str = "") -> dict:
         """Google Chat 通知"""
         result = self._im.send_google_chat(webhook_url, content, title)
         self._record("google_chat", webhook_url[:50], title, content[:100],
@@ -680,7 +680,7 @@ class NotificationService:
 
     # ─── Microsoft Teams ───
 
-    def send_teams(self, webhook_url: str, content: str, title: str = "") -> Dict:
+    def send_teams(self, webhook_url: str, content: str, title: str = "") -> dict:
         """Teams 通知"""
         result = self._im.send_teams(webhook_url, content, title)
         self._record("teams", webhook_url[:50], title, content[:100],
@@ -689,7 +689,7 @@ class NotificationService:
 
     # ─── Push ───
 
-    def send_serverchan(self, sendkey: str, title: str, desp: str = "") -> Dict:
+    def send_serverchan(self, sendkey: str, title: str, desp: str = "") -> dict:
         """Server酱推送"""
         result = self._push.send_serverchan(sendkey, title, desp)
         self._record("serverchan", sendkey[:10], title, desp[:100],
@@ -697,14 +697,14 @@ class NotificationService:
         return result
 
     def send_pushplus(self, token: str, title: str, content: str,
-                       template: str = "txt") -> Dict:
+                       template: str = "txt") -> dict:
         """PushPlus推送"""
         result = self._push.send_pushplus(token, title, content, template)
         self._record("pushplus", token[:10], title, content[:100],
                      result.get("success", False), result.get("error", ""))
         return result
 
-    def send_bark(self, device_key: str, title: str, body: str) -> Dict:
+    def send_bark(self, device_key: str, title: str, body: str) -> dict:
         """Bark推送"""
         result = self._push.send_bark(device_key, title, body)
         self._record("bark", device_key[:10], title, body[:100],
@@ -714,7 +714,7 @@ class NotificationService:
     # ─── Webhook ───
 
     def send_webhook(self, url: str, data: Any, method: str = "POST",
-                     headers: Dict = None, secret: str = "", retries: int = 0) -> Dict:
+                     headers: dict = None, secret: str = "", retries: int = 0) -> dict:
         """发送Webhook"""
         result = self._webhook.send(url, data, method, headers, secret, retries)
         self._record("webhook", url[:80], "", json.dumps(data)[:100] if isinstance(data, dict) else str(data)[:100],
@@ -723,17 +723,17 @@ class NotificationService:
 
     # ─── 模板 ───
 
-    def render_template(self, template_name: str, variables: Dict = None) -> str:
+    def render_template(self, template_name: str, variables: dict = None) -> str:
         """渲染通知模板"""
         return self._template.render(template_name, variables)
 
-    def list_templates(self) -> Dict[str, str]:
+    def list_templates(self) -> dict[str, str]:
         return self._template.list_templates()
 
     # ─── 统一发送 (自动路由) ───
 
     def send(self, channel: str, to: str, subject: str = "", content: str = "",
-             **kwargs) -> Dict:
+             **kwargs) -> dict:
         """
         统一发送接口 — 根据channel自动路由
         channel: email | wechat_work | dingtalk | feishu | serverchan | pushplus | bark | webhook
@@ -761,7 +761,7 @@ class NotificationService:
 
     # ─── 历史记录 ───
 
-    def get_history(self, channel: str = "", limit: int = 50) -> List[Dict]:
+    def get_history(self, channel: str = "", limit: int = 50) -> list[dict]:
         """获取发送历史"""
         with self._lock:
             records = self._records
@@ -779,7 +779,7 @@ class NotificationService:
             for r in records
         ]
 
-    def list_channels(self) -> List[Dict]:
+    def list_channels(self) -> list[dict]:
         """列出所有通知渠道"""
         return [
             {"id": "email", "name": "邮件", "configured": self._email.is_configured()},
@@ -797,7 +797,7 @@ class NotificationService:
             {"id": "webhook", "name": "Webhook", "configured": True},
         ]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """发送统计"""
         with self._lock:
             records = self._records
@@ -822,7 +822,7 @@ class NotificationService:
 # 全局单例
 # ═══════════════════════════════════════════════════
 
-_notification_service: Optional[NotificationService] = None
+_notification_service: NotificationService | None = None
 
 
 def get_notification_service() -> NotificationService:

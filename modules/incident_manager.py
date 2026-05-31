@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -89,7 +88,8 @@ import asyncio
 import json
 from core.logging_config import get_logger
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -140,7 +140,7 @@ class AlertSource(str, Enum):
 class IncidentImpact:
     """事件影响"""
 
-    affected_services: List[str] = field(default_factory=list)
+    affected_services: list[str] = field(default_factory=list)
     affected_users_count: int = 0
     affected_region: str = ""
     revenue_impact: float = 0.0
@@ -156,7 +156,7 @@ class IncidentTimeline:
     event_type: str = ""  # detected/acknowledged/escalated/comment/action/resolved/closed
     description: str = ""
     actor: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AutoAction:
@@ -165,10 +165,10 @@ class AutoAction:
     action_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     action_type: str = ""  # restart/scale/rollback/notify/script
     target: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     status: str = "pending"  # pending/running/succeeded/failed
     result: str = ""
-    executed_at: Optional[str] = None
+    executed_at: str | None = None
     duration_ms: float = 0.0
 
 @dataclass
@@ -177,9 +177,9 @@ class OnCallSchedule:
 
     schedule_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     team_name: str = ""
-    rotations: List[Dict[str, str]] = field(default_factory=list)  # [{user, start, end}]
+    rotations: list[dict[str, str]] = field(default_factory=list)  # [{user, start, end}]
     current_oncall: str = ""
-    escalation_chain: List[str] = field(default_factory=list)
+    escalation_chain: list[str] = field(default_factory=list)
 
 @dataclass
 class Incident:
@@ -194,18 +194,18 @@ class Incident:
     impact: IncidentImpact = field(default_factory=IncidentImpact)
     assignee: str = ""
     team: str = ""
-    labels: List[str] = field(default_factory=list)
-    timeline: List[IncidentTimeline] = field(default_factory=list)
-    auto_actions: List[AutoAction] = field(default_factory=list)
-    related_incidents: List[str] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)
+    timeline: list[IncidentTimeline] = field(default_factory=list)
+    auto_actions: list[AutoAction] = field(default_factory=list)
+    related_incidents: list[str] = field(default_factory=list)
     root_cause: str = ""
     resolution: str = ""
-    war_room_url: Optional[str] = None
+    war_room_url: str | None = None
     detected_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    acknowledged_at: Optional[str] = None
-    mitigated_at: Optional[str] = None
-    resolved_at: Optional[str] = None
-    closed_at: Optional[str] = None
+    acknowledged_at: str | None = None
+    mitigated_at: str | None = None
+    resolved_at: str | None = None
+    closed_at: str | None = None
     mtta_seconds: float = 0.0
     mttr_seconds: float = 0.0
     closed_by: str = ""
@@ -216,11 +216,11 @@ class IncidentMetric:
     """事件指标"""
 
     total_incidents: int = 0
-    by_severity: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    by_severity: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     avg_mtta_seconds: float = 0.0
     avg_mttr_seconds: float = 0.0
     mtbf_seconds: float = 0.0
-    last_incident_at: Optional[str] = None
+    last_incident_at: str | None = None
     resolved_today: int = 0
     auto_resolved: int = 0
     escalation_rate: float = 0.0
@@ -241,7 +241,7 @@ class IncidentImpactScorer:
             "recovery_time": 6,
         }
 
-    def score_incident(self, incident: Dict[str, Any]) -> Dict[str, Any]:
+    def score_incident(self, incident: dict[str, Any]) -> dict[str, Any]:
         """计算事件影响分数"""
         severity = incident.get("severity", "low")
         base_scores = {"critical": 80, "high": 60, "medium": 40, "low": 20}
@@ -284,7 +284,7 @@ class IncidentImpactScorer:
             },
         }
 
-    def should_escalate(self, incident: Dict[str, Any], current_level: int = 1) -> Dict[str, Any]:
+    def should_escalate(self, incident: dict[str, Any], current_level: int = 1) -> dict[str, Any]:
         """判断是否需要升级事件"""
         score_result = self.score_incident(incident)
         score = score_result["impact_score"]
@@ -305,7 +305,7 @@ class IncidentImpactScorer:
             "reason": reason,
         }
 
-    def batch_score(self, incidents: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def batch_score(self, incidents: list[dict[str, Any]]) -> dict[str, Any]:
         """批量评分并排序"""
         scored = []
         for inc in incidents:
@@ -334,30 +334,30 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 复习(Postmortem)管理
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 事件存储
-        self._incidents: Dict[str, Incident] = {}
+        self._incidents: dict[str, Incident] = {}
         # 值班排班
-        self._schedules: Dict[str, OnCallSchedule] = {}
+        self._schedules: dict[str, OnCallSchedule] = {}
         # 团队路由规则: label/service -> team
-        self._routing_rules: Dict[str, str] = {}
+        self._routing_rules: dict[str, str] = {}
         # 升级规则
-        self._escalation_rules: Dict[str, Dict[str, Any]] = {
+        self._escalation_rules: dict[str, dict[str, Any]] = {
             "P1": {"initial_timeout": 300, "escalation_interval": 600, "max_escalations": 4},
             "P2": {"initial_timeout": 600, "escalation_interval": 900, "max_escalations": 3},
             "P3": {"initial_timeout": 1800, "escalation_interval": 1800, "max_escalations": 2},
         }
         # 自动动作注册
-        self._auto_action_handlers: Dict[str, Callable] = {}
+        self._auto_action_handlers: dict[str, Callable] = {}
         # 通知回调
-        self._notify_callback: Optional[Callable] = None
+        self._notify_callback: Callable | None = None
         # 指标
         self._incident_metrics = IncidentMetric()
         # 升级检查任务
-        self._escalation_task: Optional[asyncio.Task] = None
+        self._escalation_task: asyncio.Task | None = None
         # 统计
         self._im_stats = {
             "incidents_total": 0,
@@ -457,10 +457,10 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         severity: str = "P4",
         source: str = "monitoring",
         description: str = "",
-        affected_services: Optional[List[str]] = None,
-        labels: Optional[List[str]] = None,
+        affected_services: list[str] | None = None,
+        labels: list[str] | None = None,
         detected_by: str = "",
-        auto_actions: Optional[List[Dict]] = None,
+        auto_actions: list[dict] | None = None,
     ) -> Result:
         trace_id = f"incident-create-{int(time.time() * 1000)}"
         start = time.time()
@@ -585,7 +585,7 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return self._routing_rules[svc]
         return "default"
 
-    def _get_oncall(self, team: str) -> Optional[str]:
+    def _get_oncall(self, team: str) -> str | None:
         schedule = self._schedules.get(team)
         if schedule and schedule.current_oncall:
             return schedule.current_oncall
@@ -663,7 +663,7 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询
     # ----------------------------------------------------------------
 
-    def get_incident(self, incident_id: str) -> Optional[Dict]:
+    def get_incident(self, incident_id: str) -> dict | None:
         inc = self._incidents.get(incident_id)
         if not inc:
             return None
@@ -699,12 +699,12 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def search_incidents(
         self,
         *,
-        severity: Optional[str] = None,
-        status: Optional[str] = None,
-        team: Optional[str] = None,
-        assignee: Optional[str] = None,
+        severity: str | None = None,
+        status: str | None = None,
+        team: str | None = None,
+        assignee: str | None = None,
         limit: int = 20,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         results = []
         for inc in sorted(self._incidents.values(), key=lambda x: x.detected_at, reverse=True):
             if severity and inc.severity.value != severity:
@@ -731,7 +731,7 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return results[:limit]
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         resolved = [i for i in self._incidents.values() if i.status == IncidentStatus.RESOLVED]
         mttas = [i.mtta_seconds for i in resolved if i.mtta_seconds > 0]
         mttrs = [i.mttr_seconds for i in resolved if i.mttr_seconds > 0]
@@ -746,7 +746,7 @@ class IncidentManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "last_incident": self._incident_metrics.last_incident_at,
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._im_stats, "module_stats": self.stats.to_dict()}
 
 # ============================================================================

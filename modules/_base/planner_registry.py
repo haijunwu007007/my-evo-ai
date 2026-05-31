@@ -1013,9 +1013,9 @@ class ModuleRegistry:
         return "custom"
 
     def __init__(self):
-        self._modules: Dict[str, ModuleCapability] = dict(self.CORE_MODULES)
-        self._category_index: Dict[str, List[str]] = defaultdict(list)
-        self._tag_index: Dict[str, List[str]] = defaultdict(list)
+        self._modules: dict[str, ModuleCapability] = dict(self.CORE_MODULES)
+        self._category_index: dict[str, list[str]] = defaultdict(list)
+        self._tag_index: dict[str, list[str]] = defaultdict(list)
         self._build_index()
 
     def auto_discover(self, modules_dir: str = "modules") -> int:
@@ -1098,10 +1098,10 @@ class ModuleRegistry:
             if cap.name not in self._tag_index.get(tag.lower(), []):
                 self._tag_index[tag.lower()].append(cap.name)
 
-    def search(self, query: str, limit: int = 10) -> List[ModuleCapability]:
+    def search(self, query: str, limit: int = 10) -> list[ModuleCapability]:
         """按关键词搜索模块"""
         query = query.lower()
-        scores: Dict[str, float] = defaultdict(float)
+        scores: dict[str, float] = defaultdict(float)
 
         # 精确名称匹配
         for name in self._modules:
@@ -1130,15 +1130,15 @@ class ModuleRegistry:
         ranked = sorted(scores.items(), key=lambda x: -x[1])[:limit]
         return [self._modules[n] for n, _ in ranked]
 
-    def get_by_category(self, category: str) -> List[ModuleCapability]:
+    def get_by_category(self, category: str) -> list[ModuleCapability]:
         """按分类获取模块"""
         return [self._modules[n] for n in self._category_index.get(category, [])]
 
-    def get_categories(self) -> Dict[str, int]:
+    def get_categories(self) -> dict[str, int]:
         """获取所有分类及模块数量"""
         return {cat: len(names) for cat, names in self._category_index.items()}
 
-    def get_all(self) -> Dict[str, ModuleCapability]:
+    def get_all(self) -> dict[str, ModuleCapability]:
         """获取所有模块"""
         return dict(self._modules)
 

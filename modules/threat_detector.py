@@ -166,7 +166,7 @@ class ThreatEvent:
     source_ip: str = ""
     target: str = ""
     description: str = ""
-    raw_data: Dict[str, Any] = field(default_factory=dict)
+    raw_data: dict[str, Any] = field(default_factory=dict)
     confidence: float = 0.0
     timestamp: float = field(default_factory=time.time)
     resolved: bool = False
@@ -198,21 +198,21 @@ class IPReputation:
     blocked: bool = False
     block_reason: str = ""
 
-class ThreatAnalyzer(object):
+class ThreatAnalyzer:
     """威胁分析引擎 - 负责威胁规则匹配、风险评分和威胁情报聚合"""
 
     def __init__(self):
-        self._rule_database: Dict[str, Dict] = {}
+        self._rule_database: dict[str, dict] = {}
         self._analysis_count: int = 0
         self._threats_detected: int = 0
-        self._risk_score_distribution: Dict[str, int] = {}
-        self._ioc_cache: Dict[str, Dict] = {}
+        self._risk_score_distribution: dict[str, int] = {}
+        self._ioc_cache: dict[str, dict] = {}
 
-    def add_rule(self, rule_id: str, pattern: Dict, severity: str = "medium") -> None:
+    def add_rule(self, rule_id: str, pattern: dict, severity: str = "medium") -> None:
         """添加威胁检测规则"""
         self._rule_database[rule_id] = {"pattern": pattern, "severity": severity}
 
-    def analyze_event(self, event: Dict) -> Dict[str, Any]:
+    def analyze_event(self, event: dict) -> dict[str, Any]:
         """分析安全事件，返回威胁评估"""
         self._analysis_count += 1
         threats = []
@@ -227,15 +227,15 @@ class ThreatAnalyzer(object):
         self._risk_score_distribution[level] = self._risk_score_distribution.get(level, 0) + 1
         return {"threats": threats, "risk_score": risk_score, "risk_level": level}
 
-    def _match_rule(self, event: Dict, pattern: Dict) -> bool:
+    def _match_rule(self, event: dict, pattern: dict) -> bool:
         """规则匹配"""
         return False
 
-    def enrich_with_ioc(self, indicator: str, ioc_data: Dict) -> None:
+    def enrich_with_ioc(self, indicator: str, ioc_data: dict) -> None:
         """用威胁情报丰富IOC缓存"""
         self._ioc_cache[indicator] = ioc_data
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "total_rules": len(self._rule_database),
             "analysis_count": self._analysis_count,
@@ -252,14 +252,14 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         super().__init__()
         self._metrics = _MetricsAdapter()
         self._events: deque = deque(maxlen=50000)
-        self._rules: List[DetectionRule] = []
-        self._ip_reputation: Dict[str, IPReputation] = {}
-        self._request_tracker: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
-        self._failed_auth_tracker: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
-        self._active_alerts: List[ThreatEvent] = []
-        self._geo_blocklist: Set[str] = set()
-        self._suspicious_user_agents: Set[str] = set()
-        self._alert_callbacks: List = []
+        self._rules: list[DetectionRule] = []
+        self._ip_reputation: dict[str, IPReputation] = {}
+        self._request_tracker: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._failed_auth_tracker: dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
+        self._active_alerts: list[ThreatEvent] = []
+        self._geo_blocklist: set[str] = set()
+        self._suspicious_user_agents: set[str] = set()
+        self._alert_callbacks: list = []
         self._detection_stats = defaultdict(int)
 
     def initialize(self) -> None:
@@ -378,8 +378,8 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("analyze_request")
     def analyze_request(
-        self, source_ip: str, method: str, path: str, headers: Dict[str, str], body: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, source_ip: str, method: str, path: str, headers: dict[str, str], body: str | None = None
+    ) -> dict[str, Any]:
         """分析HTTP请求"""
         threats = []
         now = time.time()
@@ -461,7 +461,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return {"threat_detected": False, "threats": 0}
 
-    def _check_ip_reputation(self, ip: str) -> Optional[ThreatEvent]:
+    def _check_ip_reputation(self, ip: str) -> ThreatEvent | None:
         """检查IP信誉"""
         rep = self._ip_reputation.get(ip)
         if rep and rep.score > 80:
@@ -475,7 +475,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return None
 
-    def _check_rate(self, ip: str, now: float) -> Optional[ThreatEvent]:
+    def _check_rate(self, ip: str, now: float) -> ThreatEvent | None:
         """检查请求频率"""
         requests = list(self._request_tracker[ip])
         recent = [t for t in requests if now - t < 60]
@@ -502,7 +502,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return None
 
-    def _check_user_agent(self, ua: str) -> Optional[ThreatEvent]:
+    def _check_user_agent(self, ua: str) -> ThreatEvent | None:
         """检查User-Agent"""
         for suspicious in self._suspicious_user_agents:
             if suspicious.lower() in ua.lower():
@@ -516,7 +516,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 )
         return None
 
-    def _check_brute_force(self, ip: str, now: float) -> Optional[ThreatEvent]:
+    def _check_brute_force(self, ip: str, now: float) -> ThreatEvent | None:
         """检查暴力破解"""
         failures = list(self._failed_auth_tracker[ip])
         recent = [t for t in failures if now - t < 60]
@@ -533,7 +533,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return None
 
     @trace_operation("analyze_log_entry")
-    def analyze_log(self, log_entry: str) -> Dict[str, Any]:
+    def analyze_log(self, log_entry: str) -> dict[str, Any]:
         """分析日志条目"""
         threats = []
         for rule in self._rules:
@@ -547,7 +547,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return {"has_threats": len(threats) > 0, "threats": threats}
 
-    def block_ip(self, ip: str, reason: str = "manual") -> Dict[str, Any]:
+    def block_ip(self, ip: str, reason: str = "manual") -> dict[str, Any]:
         """封禁IP"""
         rep = self._ip_reputation.get(ip, IPReputation(ip=ip))
         rep.blocked = True
@@ -558,14 +558,14 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         audit_logger.log(action="ip_blocked", resource=ip, details=f"原因: {reason}")
         return {"ip": ip, "blocked": True, "reason": reason}
 
-    def unblock_ip(self, ip: str) -> Dict[str, Any]:
+    def unblock_ip(self, ip: str) -> dict[str, Any]:
         """解封IP"""
         if ip in self._ip_reputation:
             self._ip_reputation[ip].blocked = False
             self._ip_reputation[ip].block_reason = ""
         return {"ip": ip, "blocked": False}
 
-    def get_threat_summary(self) -> Dict[str, Any]:
+    def get_threat_summary(self) -> dict[str, Any]:
         """获取威胁摘要"""
         recent_events = [e for e in self._events if time.time() - e.timestamp < 3600]
         by_level = defaultdict(int)
@@ -586,7 +586,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "detection_stats": dict(self._detection_stats),
         }
 
-    def get_active_alerts(self, limit: int = 20) -> List[Dict]:
+    def get_active_alerts(self, limit: int = 20) -> list[dict]:
         return [
             {
                 "event_id": e.event_id,
@@ -600,7 +600,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for e in reversed(self._active_alerts[-limit:])
         ]
 
-    def get_blocked_ips(self) -> List[Dict]:
+    def get_blocked_ips(self) -> list[dict]:
         return [
             {"ip": rep.ip, "score": rep.score, "threat_count": rep.threat_count, "reason": rep.block_reason}
             for rep in self._ip_reputation.values()
@@ -652,7 +652,7 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {
@@ -671,14 +671,14 @@ class ThreatDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             action="module_shutdown", resource="threat_detector", details=f"关闭，{len(self._events)} 个事件记录"
         )
 
-    def get_threat_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_threat_summary(self, hours: int = 24) -> dict[str, Any]:
         """威胁摘要：按级别分类统计、TOP攻击源、趋势"""
         events = self._events if hasattr(self, "_events") else []
         now = time.time()
         cutoff = now - hours * 3600
         recent = [e for e in events if getattr(e, "timestamp", now) > cutoff]
         by_level = {}
-        sources: Dict[str, int] = {}
+        sources: dict[str, int] = {}
         for e in recent:
             level = getattr(e, "severity", getattr(e, "level", "info"))
             by_level[level] = by_level.get(level, 0) + 1

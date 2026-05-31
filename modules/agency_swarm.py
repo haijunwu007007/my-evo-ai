@@ -79,7 +79,8 @@ __module_meta__ = {
         "description": "Agency Swarm - 多Agent协作框架 基于OpenAI Agents SDK构建"
     }
 
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List, Dict, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -91,7 +92,7 @@ except ImportError:
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector, asyncio
 
-class AgencySwarmAnalyzer(object):
+class AgencySwarmAnalyzer:
     """agency_swarm 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -271,7 +272,7 @@ class Message:
     receiver: str
     content: str
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AgentCapability:
@@ -279,14 +280,14 @@ class AgentCapability:
 
     name: str
     description: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AgentState:
     """Agent状态"""
 
     status: str  # idle, working, waiting, completed
-    current_task: Optional[str] = None
+    current_task: str | None = None
     last_active: datetime = field(default_factory=datetime.now)
     completed_tasks: int = 0
 
@@ -312,10 +313,10 @@ class BaseAgent:
         self.name = name
         self.role = role
         self.instructions = instructions
-        self.capabilities: List[AgentCapability] = []
+        self.capabilities: list[AgentCapability] = []
         self.state = AgentState(status="idle")
-        self.message_queue: List[Message] = []
-        self._tools: Dict[str, Callable] = {}
+        self.message_queue: list[Message] = []
+        self._tools: dict[str, Callable] = {}
 
     def register_capability(self, capability: AgentCapability):
         """注册能力"""
@@ -363,7 +364,7 @@ class BaseAgent:
         """获取状态"""
         return self.state
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """获取Agent信息"""
         return {
             "name": self.name,
@@ -380,7 +381,7 @@ class Coordinator(BaseAgent):
         super().__init__(
             name=name, role=AgentRole.COORDINATOR, instructions="你是一个任务协调者，负责分解任务并分配给合适的Agent"
         )
-        self.agents: Dict[str, BaseAgent] = {}
+        self.agents: dict[str, BaseAgent] = {}
 
     def register_agent(self, agent: BaseAgent):
         """注册Agent"""
@@ -403,7 +404,7 @@ class Coordinator(BaseAgent):
         self.state.status = "idle"
         return "\n".join(results)
 
-    def _decompose_task(self, task: str) -> List[str]:
+    def _decompose_task(self, task: str) -> list[str]:
         """分解任务"""
         # 简单的任务分解逻辑
         return [f"子任务: {task}"]
@@ -459,9 +460,9 @@ class AgencySwarm:
     """
 
     def __init__(self):
-        self.agents: Dict[str, BaseAgent] = {}
-        self.coordinator: Optional[Coordinator] = None
-        self.message_history: List[Message] = []
+        self.agents: dict[str, BaseAgent] = {}
+        self.coordinator: Coordinator | None = None
+        self.message_history: list[Message] = []
 
     def register_agent(self, agent: BaseAgent):
         """注册Agent"""
@@ -472,18 +473,18 @@ class AgencySwarm:
         self.coordinator = coordinator
         self.agents[coordinator.name] = coordinator
 
-    def get_agent(self, name: str) -> Optional[BaseAgent]:
+    def get_agent(self, name: str) -> BaseAgent | None:
         """获取Agent"""
         return self.agents.get(name)
 
-    def get_agents_by_role(self, role: AgentRole) -> List[BaseAgent]:
+    def get_agents_by_role(self, role: AgentRole) -> list[BaseAgent]:
         """按角色获取Agent"""
         try:
             return [a for a in self.agents.values() if a.role == role]
         except ImportError:
             pass
 
-    async def run(self, task: str, max_turns: int = 10) -> Dict[str, Any]:
+    async def run(self, task: str, max_turns: int = 10) -> dict[str, Any]:
         """
         运行任务
 
@@ -517,7 +518,7 @@ class AgencySwarm:
                 "execution_time": (datetime.now() - start_time).total_seconds(),
             }
 
-    async def run_parallel(self, tasks: List[str]) -> List[Dict[str, Any]]:
+    async def run_parallel(self, tasks: list[str]) -> list[dict[str, Any]]:
         """
         并行运行多个任务
 
@@ -529,7 +530,7 @@ class AgencySwarm:
         """
         return await asyncio.gather(*[self.run(task) for task in tasks], return_exceptions=True)
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         return {
             "total_agents": len(self.agents),

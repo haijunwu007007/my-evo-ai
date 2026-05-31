@@ -34,7 +34,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger("evo.ai_gateway")
 
-class AiGatewayAnalyzer(object):
+class AiGatewayAnalyzer:
     """ai_gateway 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -212,7 +212,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         yaml_cfg = {}
         if os.path.exists(cfg_file):
             try:
-                with open(cfg_file, "r", encoding="utf-8") as f:
+                with open(cfg_file, encoding="utf-8") as f:
                     yaml_cfg = yaml.safe_load(f) or {}
             except Exception:
                 pass
@@ -294,7 +294,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "status": "active",
         }
 
-    def _call_openai(self, model_cfg: Dict, messages: List, temperature: float, stream: bool) -> Dict:
+    def _call_openai(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用 OpenAI 兼容 API"""
         payload = json.dumps(
             {
@@ -318,7 +318,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tokens = result.get("usage", {}).get("total_tokens", 0)
         return {"content": content, "tokens": tokens, "raw": result}
 
-    def _call_anthropic(self, model_cfg: Dict, messages: List, temperature: float, stream: bool) -> Dict:
+    def _call_anthropic(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用 Anthropic Claude API"""
         # 将 messages 转换为 Claude 格式
         system = ""
@@ -356,7 +356,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tokens = result.get("usage", {}).get("input_tokens", 0) + result.get("usage", {}).get("output_tokens", 0)
         return {"content": content, "tokens": tokens, "raw": result}
 
-    def _call_gemini(self, model_cfg: Dict, messages: List, temperature: float, stream: bool) -> Dict:
+    def _call_gemini(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用 Google Gemini API"""
         # 合并 messages 为单一文本
         content = "\n".join([f"{m['role']}: {m['content']}" for m in messages if m["role"] != "system"])
@@ -378,7 +378,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tokens = result.get("usageMetadata", {}).get("totalTokenCount", 0)
         return {"content": content, "tokens": tokens, "raw": result}
 
-    def _call_ollama(self, model_cfg: Dict, messages: List, temperature: float, stream: bool) -> Dict:
+    def _call_ollama(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用 Ollama 本地模型"""
         payload = json.dumps(
             {
@@ -396,7 +396,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tokens = result.get("eval_count", 0) + result.get("prompt_eval_count", 0)
         return {"content": content, "tokens": tokens, "raw": result}
 
-    def _call_zhipu(self, model_cfg: Dict, messages: List, temperature: float, stream: bool) -> Dict:
+    def _call_zhipu(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用智谱 AI (GLM) API"""
         payload = json.dumps(
             {
@@ -419,7 +419,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tokens = result.get("usage", {}).get("total_tokens", 0)
         return {"content": content, "tokens": tokens, "raw": result}
 
-    def chat(self, messages: List[Dict], model: str = None, temperature: float = 0.7, stream: bool = False) -> Dict:
+    def chat(self, messages: list[dict], model: str = None, temperature: float = 0.7, stream: bool = False) -> dict:
         """发送聊天请求"""
         model_name = model or self.default_model
         model_cfg = self.models.get(model_name)
@@ -465,7 +465,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             model_cfg["errors"] += 1
             return {"success": False, "error": str(e), "mode": "error"}
 
-    def evaluate_models(self, test_prompt: str, models: List[str] = None) -> Dict:
+    def evaluate_models(self, test_prompt: str, models: list[str] = None) -> dict:
         """评估多个模型"""
         results = []
         for name in models or list(self.models.keys()):
@@ -481,7 +481,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "results": results}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "models_count": len(self.models),
             "default": self.default_model,
@@ -496,7 +496,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # Embeddings
     # ──────────────────────────────────────────
 
-    def embeddings(self, texts: List[str], model: str = "text-embedding-3-small") -> Dict:
+    def embeddings(self, texts: list[str], model: str = "text-embedding-3-small") -> dict:
         """
         生成文本向量嵌入。
 
@@ -534,7 +534,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "embeddings": [],
         }
 
-    def _embeddings_openai(self, model_cfg: Dict, texts: List[str], model: str = "text-embedding-3-small") -> Dict:
+    def _embeddings_openai(self, model_cfg: dict, texts: list[str], model: str = "text-embedding-3-small") -> dict:
         """调用 OpenAI Embeddings API"""
         payload = json.dumps(
             {
@@ -564,7 +564,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e), "embeddings": []}
 
-    def _embeddings_zhipu(self, model_cfg: Dict, texts: List[str]) -> Dict:
+    def _embeddings_zhipu(self, model_cfg: dict, texts: list[str]) -> dict:
         """调用智谱 AI Embeddings API"""
         embeddings = []
         for text in texts:
@@ -596,7 +596,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "dimensions": dims,
         }
 
-    def _embeddings_ollama(self, model_cfg: Dict, texts: List[str]) -> Dict:
+    def _embeddings_ollama(self, model_cfg: dict, texts: list[str]) -> dict:
         """调用 Ollama Embeddings API"""
         embeddings = []
         for text in texts:
@@ -622,7 +622,7 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "dimensions": dims,
         }
 
-    def get_embedding_config(self) -> Dict:
+    def get_embedding_config(self) -> dict:
         """返回当前可用的 embedding 配置"""
         cfg = {"provider": None, "model": None, "dimensions": 0}
         if any("openai" in c["api_url"] for c in self.models.values()):

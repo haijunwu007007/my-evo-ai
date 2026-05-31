@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class InstantMessagingAnalyzer(object):
+class InstantMessagingAnalyzer:
     """instant_messaging 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -297,8 +297,8 @@ class Message:
     content: str
     status: MessageStatus = MessageStatus.SENT
     created_at: float = 0.0
-    edited_at: Optional[float] = None
-    reply_to: Optional[str] = None
+    edited_at: float | None = None
+    reply_to: str | None = None
     mentions: list[str] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
     read_by: set[str] = field(default_factory=set)
@@ -498,7 +498,7 @@ class InstantMessaging:
         sender_id: str,
         content: str,
         msg_type: MessageType = MessageType.TEXT,
-        reply_to: Optional[str] = None,
+        reply_to: str | None = None,
     ) -> Message:
         if not self._initialized:
             raise RuntimeError("InstantMessaging not initialized")

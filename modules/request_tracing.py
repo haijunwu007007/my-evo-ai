@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class LatencyAnalyzer(object):
+class LatencyAnalyzer:
     """request_tracing 运营分析引擎
 
     - 分析请求延迟分布
@@ -116,7 +116,7 @@ class LatencyAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "LatencyAnalyzer", "module": "request_tracing", "summary": summary}
 
-class RequestTracingAnalyzer(object):
+class RequestTracingAnalyzer:
     """request tracing 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class RequestTracingAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class RequestTracingAnalyzer(object):
+class RequestTracingAnalyzer:
     """request_tracing核心分析引擎
 
     为request_tracing模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class RequestTracingAnalyzer(object):
 class RequestTracing(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """请求追踪"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"request_tracing")
 

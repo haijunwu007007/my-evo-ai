@@ -151,8 +151,8 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
                 "description": "数据压缩/解压缩管理，支持多种算法、压缩比分析、批量处理、归档管理",
             }
         )
-        self._history: List[CompressionResult] = []
-        self._archives: Dict[str, Dict] = {}  # archive_id -> {entries, metadata}
+        self._history: list[CompressionResult] = []
+        self._archives: dict[str, dict] = {}  # archive_id -> {entries, metadata}
         self._initialized = False
         self._max_history = 2000
 
@@ -194,7 +194,7 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             return zlib.decompress(data, -zlib.MAX_WBITS)
         raise ValueError(f"不支持的算法: {algorithm}")
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         self.trace("execute", {"module": "compress_algorithm"})
         self.metrics_collector.counter("compress_algorithm.execute.calls", 1)
@@ -477,7 +477,7 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             logger.error(f"[CompressAlgorithm] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -497,7 +497,7 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_compression_stats(self) -> Dict[str, Any]:
+    def get_compression_stats(self) -> dict[str, Any]:
         """获取压缩统计报告。企业场景：运维看板展示各算法使用量和节省存储量。"""
         history = getattr(self, "_history", [])
         algo_stats = {}
@@ -542,7 +542,7 @@ class CompressAlgorithmManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             return "zlib_fast"
         return "zlib_default" if best[0] == "zlib_6" else best[0]
 
-def benchmark_algorithms(self, sample_data: str, iterations: int = 100) -> Dict[str, Any]:
+def benchmark_algorithms(self, sample_data: str, iterations: int = 100) -> dict[str, Any]:
     """压缩算法基准测试。企业场景：针对实际业务数据选择最优压缩算法，
     对比各算法的压缩比、速度、内存消耗。
     """
@@ -585,7 +585,7 @@ def benchmark_algorithms(self, sample_data: str, iterations: int = 100) -> Dict[
         "best_speed": best_speed[0],
     }
 
-def compress_file(self, file_path: str, algorithm: str = "zlib_default") -> Dict[str, Any]:
+def compress_file(self, file_path: str, algorithm: str = "zlib_default") -> dict[str, Any]:
     """压缩指定文件。企业场景：日志归档、数据备份时压缩文件减少存储占用。"""
     import zlib as _zlib
     import os as _os
@@ -611,7 +611,7 @@ def compress_file(self, file_path: str, algorithm: str = "zlib_default") -> Dict
         "algorithm": algorithm,
     }
 
-def get_algorithm_list(self) -> Dict[str, Any]:
+def get_algorithm_list(self) -> dict[str, Any]:
     """获取支持的压缩算法列表。企业场景：前端展示可选算法。"""
     algos = ["zlib_default", "zlib_fast", "zlib_max", "gzip", "bz2", "lz4", "snappy"]
     return {"success": True, "algorithms": algos, "total": len(algos)}

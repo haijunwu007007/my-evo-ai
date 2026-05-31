@@ -25,15 +25,15 @@ try:
 except ImportError:
     def check_role(*a): return True
 
-class PlanAnalyzer(object):
+class PlanAnalyzer:
     """计划分析引擎 - 负责计划评估、依赖分析和可行性检查"""
 
     def __init__(self):
-        self._plan_cache: Dict[str, Dict] = {}
+        self._plan_cache: dict[str, dict] = {}
         self._analysis_count: int = 0
-        self._dependency_graph: Dict[str, List[str]] = {}
+        self._dependency_graph: dict[str, list[str]] = {}
 
-    def analyze_plan(self, plan_id: str, plan: Dict) -> Dict:
+    def analyze_plan(self, plan_id: str, plan: dict) -> dict:
         """分析计划的可行性和依赖"""
         self._analysis_count += 1
         tasks = plan.get("tasks", [])
@@ -43,25 +43,25 @@ class PlanAnalyzer(object):
         self._plan_cache[plan_id] = result
         return result
 
-    def _extract_dependencies(self, tasks: List[Dict]) -> List[str]:
+    def _extract_dependencies(self, tasks: list[dict]) -> list[str]:
         """提取任务依赖关系"""
         deps = []
         for task in tasks:
             deps.extend(task.get("depends_on", []))
         return list(set(deps))
 
-    def get_critical_path(self, plan_id: str) -> List[str]:
+    def get_critical_path(self, plan_id: str) -> list[str]:
         """获取关键路径"""
         return self._dependency_graph.get(plan_id, [])
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "plans_analyzed": self._analysis_count,
             "cache_size": len(self._plan_cache),
             "graph_nodes": len(self._dependency_graph),
         }
 
-class CapabilityIndexer(object):
+class CapabilityIndexer:
     """能力索引器 - 对模块能力注册表建立倒排索引加速匹配。
 
     企业场景：500+模块中快速定位能处理特定任务的模块，
@@ -69,12 +69,12 @@ class CapabilityIndexer(object):
     """
 
     def __init__(self):
-        self._inverted_index: Dict[str, Set[str]] = defaultdict(set)
-        self._category_index: Dict[str, Set[str]] = defaultdict(set)
-        self._module_meta: Dict[str, Dict] = {}
-        self._success_stats: Dict[str, Dict] = defaultdict(lambda: {"total": 0, "success": 0})
+        self._inverted_index: dict[str, Set[str]] = defaultdict(set)
+        self._category_index: dict[str, Set[str]] = defaultdict(set)
+        self._module_meta: dict[str, dict] = {}
+        self._success_stats: dict[str, dict] = defaultdict(lambda: {"total": 0, "success": 0})
 
-    def index_module(self, module_id: str, name: str, description: str, category: str, actions: List[str] = None):
+    def index_module(self, module_id: str, name: str, description: str, category: str, actions: list[str] = None):
         """索引模块的名称、描述、分类和可用action"""
         self._module_meta[module_id] = {
             "name": name,
@@ -91,10 +91,10 @@ class CapabilityIndexer(object):
             if len(token) >= 2:
                 self._inverted_index[token].add(module_id)
 
-    def search(self, query: str, top_k: int = 10, category: str = None) -> List[Dict]:
+    def search(self, query: str, top_k: int = 10, category: str = None) -> list[dict]:
         """搜索匹配的模块，按TF-IDF简化分数排序"""
         tokens = set(query.lower().split())
-        scores: Dict[str, float] = defaultdict(float)
+        scores: dict[str, float] = defaultdict(float)
         for token in tokens:
             if token in self._inverted_index:
                 for mid in self._inverted_index[token]:
@@ -138,7 +138,7 @@ class CapabilityIndexer(object):
         if success:
             self._success_stats[module_id]["success"] += 1
 
-    def get_category_stats(self) -> Dict[str, int]:
+    def get_category_stats(self) -> dict[str, int]:
         """获取各分类的模块数量统计"""
         return {cat: len(mids) for cat, mids in self._category_index.items()}
 
@@ -192,14 +192,14 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.intent_parser = IntentParser()
 
         # 执行历史
-        self._plans: Dict[str, ExecutionPlan] = {}
+        self._plans: dict[str, ExecutionPlan] = {}
         self._plan_counter = 0
 
         # 模块执行器（通过HTTP调用API Server）
         self._api_base = "http://localhost:8765"
 
         # 对话上下文
-        self._context: List[Dict[str, str]] = []
+        self._context: list[dict[str, str]] = []
 
         # ── 生产级基础设施 ──
 
@@ -207,10 +207,10 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._plan_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_PLANS)
 
         # 取消事件（每个运行中的计划一个）
-        self._cancel_events: Dict[str, asyncio.Event] = {}
+        self._cancel_events: dict[str, asyncio.Event] = {}
 
         # 熔断器状态 {module_name: {"fails": int, "last_fail": float, "state": "closed|open"}}
-        self._circuit_breakers: Dict[str, Dict[str, Any]] = {}
+        self._circuit_breakers: dict[str, dict[str, Any]] = {}
 
         # 监控指标
         self._metrics = {
@@ -228,13 +228,13 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
         # 审计日志
-        self._audit_log: List[Dict[str, Any]] = []
+        self._audit_log: list[dict[str, Any]] = []
 
         # 链路追踪
         self._trace_counter = 0
 
         # 初始化事件循环引用（延迟创建）
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     def _get_loop(self) -> asyncio.AbstractEventLoop:
         """获取或创建事件循环"""
@@ -248,7 +248,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._trace_counter += 1
         return f"trace_{self._trace_counter:06d}_{int(time.time() * 1000)}"
 
-    def _record_audit(self, action: str, plan_id: str, details: Dict[str, Any]):
+    def _record_audit(self, action: str, plan_id: str, details: dict[str, Any]):
         """记录审计日志"""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -312,7 +312,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # EnterpriseModule 接口（同步，内部调异步引擎）
     # ═══════════════════════════════════════════════════════════════════
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化编排引擎"""
         _ = self.trace("initialize")
         self._plan_counter = 0
@@ -345,8 +345,8 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     async def async_execute(
-        self, message: str = "", task: str = "", params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, message: str = "", task: str = "", params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         异步执行入口 — 供FastAPI async路由直接await调用。
         用法: result = planner.async_execute(message="帮我分析数据")
@@ -383,7 +383,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "error": str(e)[:300],
             }
 
-    async def execute(self, message: str = "", task: str = "", params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, message: str = "", task: str = "", params: dict[str, Any] | None = None) -> dict[str, Any]:
         """
         同步执行入口 — 供非async上下文调用。
         在已有事件循环的上下文（如FastAPI async路由）中请用async_execute()。
@@ -441,7 +441,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "error": str(e)[:300],
             }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查 — 含监控指标和熔断器状态"""
         # 统计当前熔断中的模块
         open_circuits = [n for n, cb in self._circuit_breakers.items() if cb["state"] == "open"]
@@ -469,7 +469,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def shutdown(self) -> Dict[str, Any]:
+    def shutdown(self) -> dict[str, Any]:
         """优雅关闭 — 取消所有运行中计划"""
         # 取消所有运行中的计划
         for plan_id, event in self._cancel_events.items():
@@ -501,8 +501,8 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # ═══════════════════════════════════════════════════════════════════
 
     async def _execute_async(
-        self, message: str = "", task: str = "", params: Optional[Dict[str, Any]] = None, trace_id: str = ""
-    ) -> Dict[str, Any]:
+        self, message: str = "", task: str = "", params: dict[str, Any] | None = None, trace_id: str = ""
+    ) -> dict[str, Any]:
         """异步主执行入口"""
         async with self._plan_semaphore:
             # 对话模式
@@ -514,7 +514,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             else:
                 return {"status": "error", "message": "No message or task provided"}
 
-    async def _chat_mode_async(self, message: str, trace_id: str) -> Dict[str, Any]:
+    async def _chat_mode_async(self, message: str, trace_id: str) -> dict[str, Any]:
         """对话模式 — 异步编排执行"""
         # 1. 记录上下文
         self._context.append({"role": "user", "content": message})
@@ -577,7 +577,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    async def _task_mode_async(self, task: str, params: Dict[str, Any], trace_id: str) -> Dict[str, Any]:
+    async def _task_mode_async(self, task: str, params: dict[str, Any], trace_id: str) -> dict[str, Any]:
         """任务模式 — 异步执行指定任务"""
         try:
             task_type = TaskType(task)
@@ -635,7 +635,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     async def _create_plan(
-        self, task_type: TaskType, user_intent: str, steps_def: List[Dict], params: Dict[str, Any], trace_id: str
+        self, task_type: TaskType, user_intent: str, steps_def: list[dict], params: dict[str, Any], trace_id: str
     ) -> ExecutionPlan:
         """创建执行计划"""
         self._plan_counter += 1
@@ -676,7 +676,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 异步执行引擎 — 并行+超时+重试+取消
     # ═══════════════════════════════════════════════════════════════════
 
-    async def _run_plan(self, plan: ExecutionPlan, trace_id: str) -> List[Dict[str, Any]]:
+    async def _run_plan(self, plan: ExecutionPlan, trace_id: str) -> list[dict[str, Any]]:
         """
         执行计划 — 按依赖关系分组，无依赖步骤并行执行
         支持取消：通过cancel_event异步检查
@@ -747,7 +747,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         plan.completed_at = datetime.now().isoformat()
         return all_results
 
-    def _build_parallel_groups(self, steps: List[ExecutionStep]) -> List[List[ExecutionStep]]:
+    def _build_parallel_groups(self, steps: list[ExecutionStep]) -> list[list[ExecutionStep]]:
         """
         构建并行执行组
         步骤间无依赖关系的放在同一组并行执行
@@ -787,7 +787,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     async def _execute_step_with_retry(
         self, step: ExecutionStep, trace_id: str, cancel_event: asyncio.Event
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         执行单个步骤（含重试+超时+熔断+取消检查）
         """
@@ -844,7 +844,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     self._update_metrics("steps_retried")
                 return result
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._update_metrics("steps_timeout")
                 last_error = f"timeout after {timeout}s"
                 logger.warning(
@@ -882,7 +882,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "retries": self.RETRY_MAX - 1,
         }
 
-    async def _execute_step_async(self, step: ExecutionStep, trace_id: str) -> Dict[str, Any]:
+    async def _execute_step_async(self, step: ExecutionStep, trace_id: str) -> dict[str, Any]:
         """
         异步执行单个步骤 — 优先通过HTTP调用（兼容async模块），回退到直接调用
         """
@@ -944,7 +944,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         # 回退：直接调用模块实例（仅HTTP超时/网络问题时）
         return await self._execute_step_direct(step, trace_id, t0)
 
-    async def _execute_step_direct(self, step: ExecutionStep, trace_id: str, t0: float) -> Dict[str, Any]:
+    async def _execute_step_direct(self, step: ExecutionStep, trace_id: str, t0: float) -> dict[str, Any]:
         """直接调用模块实例（回退方式）"""
         step.status = "running"
 
@@ -1145,7 +1145,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return False
 
     @staticmethod
-    def _get_module_actions(mod) -> List[str]:
+    def _get_module_actions(mod) -> list[str]:
         """获取模块支持的action列表"""
         if not hasattr(mod, "execute"):
             return []
@@ -1180,7 +1180,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return []
 
     @staticmethod
-    def _find_best_action(target: str, available: List[str]) -> Optional[str]:
+    def _find_best_action(target: str, available: list[str]) -> str | None:
         """从可用actions中找到最接近目标的一个"""
         if not available or not target:
             return None
@@ -1219,7 +1219,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # HTTP回退 + 结果聚合 + 计划取消
     # ═══════════════════════════════════════════════════════════════════
 
-    async def _execute_step_http(self, step: ExecutionStep, t0: float) -> Dict[str, Any]:
+    async def _execute_step_http(self, step: ExecutionStep, t0: float) -> dict[str, Any]:
         """HTTP回退执行（异步）— 通过API Server调用，兼容async模块"""
         try:
 
@@ -1261,7 +1261,7 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "duration_ms": round((time.time() - t0) * 1000, 1),
             }
 
-    def _aggregate_results(self, results: List[Dict], plan: Optional[ExecutionPlan]) -> Dict[str, Any]:
+    def _aggregate_results(self, results: list[dict], plan: ExecutionPlan | None) -> dict[str, Any]:
         """聚合执行结果"""
         success = sum(1 for r in results if r.get("status") == "success")
         partial = sum(1 for r in results if r.get("status") == "partial")
@@ -1299,11 +1299,11 @@ class AgentPlanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return True
         return False
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """获取监控指标"""
         return dict(self._metrics)
 
-    def get_audit_log(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_audit_log(self, limit: int = 20) -> list[dict[str, Any]]:
         """获取审计日志"""
         return self._audit_log[-limit:]
 

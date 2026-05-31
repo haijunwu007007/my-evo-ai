@@ -135,9 +135,9 @@ class ContentItem:
     locale: str = "zh-CN"
     author: str = ""
     category: str = ""
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    seo: Dict[str, str] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    seo: dict[str, str] = field(default_factory=dict)
     version: int = 1
     parent_id: str = ""
     created_at: float = 0.0
@@ -179,11 +179,11 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 "description": "企业级内容管理服务，支持CRUD/版本/多语言/审批/发布",
             }
         )
-        self._contents: Dict[str, ContentItem] = {}
-        self._versions: Dict[str, List[ContentVersion]] = defaultdict(list)
-        self._reviews: Dict[str, List[ReviewRecord]] = defaultdict(list)
-        self._categories: Dict[str, Dict] = {}
-        self._tags: Dict[str, int] = defaultdict(int)
+        self._contents: dict[str, ContentItem] = {}
+        self._versions: dict[str, list[ContentVersion]] = defaultdict(list)
+        self._reviews: dict[str, list[ReviewRecord]] = defaultdict(list)
+        self._categories: dict[str, dict] = {}
+        self._tags: dict[str, int] = defaultdict(int)
         self._initialized = False
 
     def initialize(self) -> None:
@@ -254,7 +254,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         versions.append(version)
         return version
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "content_service"})
         self.metrics_collector.counter("content_service.execute.calls", 1)
         self.audit("execute", {"module": "content_service"})
@@ -430,9 +430,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 ra = params.get("action", "")
                 if ra == "approve":
                     item.status = "approved"
-                elif ra == "reject":
-                    item.status = "draft"
-                elif ra == "request_changes":
+                elif ra == "reject" or ra == "request_changes":
                     item.status = "draft"
                 else:
                     return {"success": False, "error": f"无效的审批动作: {ra}"}
@@ -517,7 +515,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             logger.error(f"[ContentService] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -537,7 +535,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_content_version_history(self, content_id: str) -> Dict[str, Any]:
+    def get_content_version_history(self, content_id: str) -> dict[str, Any]:
         """获取内容版本历史。企业场景：编辑器展示文档修改记录，支持版本对比和回滚。
         每次保存自动创建版本快照，保留最近50个版本。
         """
@@ -549,7 +547,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         versions = self._version_history.get(content_id, [])
         return {"success": True, "content_id": content_id, "total_versions": len(versions), "versions": versions[-20:]}
 
-    def tag_content(self, content_id: str, tags: List[str]) -> Dict[str, Any]:
+    def tag_content(self, content_id: str, tags: list[str]) -> dict[str, Any]:
         """为内容打标签。企业场景：编辑给文章打标签分类，
         支持按标签聚合和筛选。标签用于CMS分类体系和推荐系统。
         """
@@ -563,7 +561,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._content_tags[content_id] = new_tags
         return {"success": True, "content_id": content_id, "tags": new_tags, "added": list(set(tags) - set(current))}
 
-    def get_content_by_tag(self, tag: str, limit: int = 20) -> Dict[str, Any]:
+    def get_content_by_tag(self, tag: str, limit: int = 20) -> dict[str, Any]:
         """按标签查找内容。企业场景：CMS中按标签聚合展示相关文章列表。"""
         tag_map = getattr(self, "_content_tags", {})
         results = []
@@ -572,7 +570,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 results.append({"content_id": cid, "tags": tags})
         return {"success": True, "tag": tag, "total": len(results), "results": results[:limit]}
 
-def search_content(self, query: str, content_type: Optional[str] = None, limit: int = 20) -> Dict[str, Any]:
+def search_content(self, query: str, content_type: str | None = None, limit: int = 20) -> dict[str, Any]:
     """内容搜索。企业场景：知识库全文检索，支持按类型过滤（文章/文档/页面），
     返回匹配内容列表及高亮片段。
     """
@@ -610,13 +608,13 @@ def _highlight_match(self, text: str, query: str, context_chars: int = 50) -> st
     end = min(len(text), idx + len(query) + context_chars)
     return ("..." if start > 0 else "") + text[start:end] + ("..." if end < len(text) else "")
 
-def get_content_stats(self) -> Dict[str, Any]:
+def get_content_stats(self) -> dict[str, Any]:
     """内容统计概览。企业场景：运营面板展示内容库总量、类型分布、增长趋势。"""
     if not hasattr(self, "_content_store"):
         return {"success": True, "total": 0}
     store = self._content_store
     total = len(store)
-    by_type: Dict[str, int] = {}
+    by_type: dict[str, int] = {}
     for item in store.values():
         ct = getattr(item, "content_type", "unknown")
         by_type[ct] = by_type.get(ct, 0) + 1
@@ -627,7 +625,7 @@ def get_content_stats(self) -> Dict[str, Any]:
         "top_types": sorted(by_type.items(), key=lambda x: -x[1])[:5],
     }
 
-def batch_update_content(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+def batch_update_content(self, updates: list[dict[str, Any]]) -> dict[str, Any]:
     """批量更新内容。企业场景：批量修改文章状态（发布/下架/归档）。"""
     updated = 0
     for u in updates:

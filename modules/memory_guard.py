@@ -83,13 +83,14 @@ import tracemalloc
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MemoryGuardAnalyzer(object):
+class MemoryGuardAnalyzer:
     """memory_guard 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -278,16 +279,16 @@ class MemorySnapshot:
     gc_gen0: int
     gc_gen1: int
     gc_gen2: int
-    gc_collections: Tuple[int, int, int]
+    gc_collections: tuple[int, int, int]
     fragments: int
-    largest_allocation: Tuple[str, int] = ("", 0)
+    largest_allocation: tuple[str, int] = ("", 0)
 
 @dataclass
 class LeakReport:
     detected: bool
     leak_rate_mb_per_min: float
     confidence: float
-    growing_objects: List[Tuple[str, int, int]] = field(default_factory=list)
+    growing_objects: list[tuple[str, int, int]] = field(default_factory=list)
     recommendation: str = ""
 
 @dataclass
@@ -295,7 +296,7 @@ class AlertRecord:
     level: AlertLevel
     message: str
     timestamp: float
-    snapshot: Optional[MemorySnapshot] = None
+    snapshot: MemorySnapshot | None = None
     action_taken: str = ""
 
 @dataclass
@@ -309,8 +310,8 @@ class GuardConfig:
     leak_detection_window: int = 60
     leak_growth_threshold: float = 2.0
     enable_oom_protection: bool = True
-    oom_prevention_callback: Optional[str] = None
-    max_heap_mb: Optional[float] = None
+    oom_prevention_callback: str | None = None
+    max_heap_mb: float | None = None
 
 class MemoryGuard:
     def trace(self, name, *args, **kwargs):
@@ -335,7 +336,7 @@ class MemoryGuard:
 
     """Enterprise memory protection with leak detection and OOM prevention."""
 
-    def __init__(self, config: Optional[GuardConfig] = None):
+    def __init__(self, config: GuardConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -370,11 +371,11 @@ class MemoryGuard:
         self._config = config or GuardConfig()
         self._thresholds = MemoryThreshold()
         self._history: deque = deque(maxlen=self._config.history_size)
-        self._alerts: List[AlertRecord] = []
+        self._alerts: list[AlertRecord] = []
         self._lock = threading.RLock()
         self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self._callbacks: Dict[AlertLevel, List[Callable]] = {level: [] for level in AlertLevel}
+        self._thread: threading.Thread | None = None
+        self._callbacks: dict[AlertLevel, list[Callable]] = {level: [] for level in AlertLevel}
         self._gc_count = 0
         self._oom_prevented = 0
         self._last_gc_time = 0.0
@@ -525,7 +526,7 @@ class MemoryGuard:
                 recommendation=rec,
             )
 
-    def force_gc(self, generation: Optional[int] = None) -> Tuple[int, float]:
+    def force_gc(self, generation: int | None = None) -> tuple[int, float]:
         before = self.take_snapshot()
         if generation is not None and 0 <= generation <= 2:
             collected = gc.collect(generation)
@@ -538,17 +539,17 @@ class MemoryGuard:
         logger.info("Force GC: collected=%d, freed=%.2fMB", collected, freed)
         return collected, round(freed, 2)
 
-    def get_history(self, last_n: int = 60) -> List[MemorySnapshot]:
+    def get_history(self, last_n: int = 60) -> list[MemorySnapshot]:
         with self._lock:
             return list(self._history)[-last_n:]
 
-    def get_alerts(self, level: Optional[AlertLevel] = None) -> List[AlertRecord]:
+    def get_alerts(self, level: AlertLevel | None = None) -> list[AlertRecord]:
         with self._lock:
             if level:
                 return [a for a in self._alerts if a.level == level]
             return list(self._alerts)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             latest = self._history[-1] if self._history else None
             return {
@@ -619,7 +620,7 @@ class MemoryGuard:
         self._oom_prevented += 1
         logger.warning("OOM prevention triggered: forced full GC cycle")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             snap = self.take_snapshot()

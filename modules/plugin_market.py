@@ -89,10 +89,10 @@ class PluginRegistry:
     """插件注册中心"""
 
     def __init__(self):
-        self._plugins: Dict[str, Dict] = {}
-        self._by_category: Dict[str, List[str]] = defaultdict(list)
-        self._by_author: Dict[str, List[str]] = defaultdict(list)
-        self._name_index: Dict[str, str] = {}
+        self._plugins: dict[str, dict] = {}
+        self._by_category: dict[str, list[str]] = defaultdict(list)
+        self._by_author: dict[str, list[str]] = defaultdict(list)
+        self._name_index: dict[str, str] = {}
 
     def register(
         self,
@@ -102,10 +102,10 @@ class PluginRegistry:
         category: str,
         description: str,
         entry_point: str,
-        dependencies: List[str] = None,
-        tags: List[str] = None,
+        dependencies: list[str] = None,
+        tags: list[str] = None,
         icon: str = "",
-    ) -> Dict:
+    ) -> dict:
         plugin_id = str(uuid.uuid4())[:10]
         normalized = name.lower().replace("-", "_").replace(" ", "_")
         if normalized in self._name_index:
@@ -156,10 +156,10 @@ class PluginRegistry:
         query: str = "",
         category: str = "",
         author: str = "",
-        tags: List[str] = None,
+        tags: list[str] = None,
         sort_by: str = "relevance",
         limit: int = 20,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         results = list(self._plugins.values())
         if query:
             q = query.lower()
@@ -210,15 +210,15 @@ class PluginRegistry:
             for p in results[:limit]
         ]
 
-    def get_plugin(self, plugin_id: str) -> Optional[Dict]:
+    def get_plugin(self, plugin_id: str) -> dict | None:
         return self._plugins.get(plugin_id)
 
-    def get_by_name(self, name: str) -> Optional[Dict]:
+    def get_by_name(self, name: str) -> dict | None:
         normalized = name.lower().replace("-", "_").replace(" ", "_")
         pid = self._name_index.get(normalized)
         return self._plugins.get(pid) if pid else None
 
-    def rate(self, plugin_id: str, score: float, review: str = "") -> Dict:
+    def rate(self, plugin_id: str, score: float, review: str = "") -> dict:
         plugin = self._plugins.get(plugin_id)
         if not plugin:
             return {"success": False, "error": "plugin_not_found"}
@@ -237,10 +237,10 @@ class PluginRegistry:
         if plugin:
             plugin["download_count"] += 1
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         return list(set(p["category"] for p in self._plugins.values()))
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "total_plugins": len(self._plugins),
             "categories": len(self.get_categories()),
@@ -297,15 +297,15 @@ class PluginRegistry:
             params = {}
         return self.search(**params)
 
-class InstallManager(object):
+class InstallManager:
     """安装管理器"""
 
     def __init__(self, registry: PluginRegistry):
         self.registry = registry
-        self._installed: Dict[str, Dict] = {}
-        self._install_log: List[Dict] = []
+        self._installed: dict[str, dict] = {}
+        self._install_log: list[dict] = []
 
-    def install(self, plugin_id: str, version: str = None) -> Dict:
+    def install(self, plugin_id: str, version: str = None) -> dict:
         plugin = self.registry.get_plugin(plugin_id)
         if not plugin:
             return {"success": False, "error": "plugin_not_found"}
@@ -328,7 +328,7 @@ class InstallManager(object):
         self._install_log.append(record)
         return {"success": True, "plugin_id": plugin_id, "version": ver}
 
-    def uninstall(self, plugin_id: str) -> Dict:
+    def uninstall(self, plugin_id: str) -> dict:
         if plugin_id not in self._installed:
             return {"success": False, "error": "not_installed"}
         entry = self._installed.pop(plugin_id)
@@ -337,13 +337,13 @@ class InstallManager(object):
         )
         return {"success": True, "plugin_id": plugin_id}
 
-    def list_installed(self) -> List[Dict]:
+    def list_installed(self) -> list[dict]:
         return list(self._installed.values())
 
     def is_installed(self, plugin_id: str) -> bool:
         return plugin_id in self._installed
 
-    def check_updates(self) -> List[Dict]:
+    def check_updates(self) -> list[dict]:
         updates = []
         for pid, installed in self._installed.items():
             plugin = self.registry.get_plugin(pid)
@@ -361,13 +361,13 @@ class InstallManager(object):
 class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """插件市场 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "installs": 0,
@@ -376,7 +376,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -477,7 +477,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_marketplace_stats(self) -> Dict[str, Any]:
+    def get_marketplace_stats(self) -> dict[str, Any]:
         """市场统计。企业场景：平台运营查看插件市场概况，
         各分类插件数量、下载量排行、评分分布。
         """
@@ -498,7 +498,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "by_category": [{"category": c, "count": n} for c, n in sorted_cats],
         }
 
-    def get_update_availability_report(self) -> Dict[str, Any]:
+    def get_update_availability_report(self) -> dict[str, Any]:
         """更新可用报告。企业场景：运维每周检查已安装插件的更新，
         批量升级安全补丁。
         """
@@ -509,7 +509,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             by_severity[sev] = by_severity.get(sev, 0) + 1
         return {"success": True, "updates_available": len(updates), "by_severity": by_severity, "updates": updates}
 
-    def get_plugin_dependencies(self, plugin_id: str) -> Dict[str, Any]:
+    def get_plugin_dependencies(self, plugin_id: str) -> dict[str, Any]:
         """查看插件依赖树。企业场景：安装插件前评估依赖影响，
         检查是否存在版本冲突或循环依赖。
         """
@@ -553,7 +553,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "dependency_tree": dep_tree,
         }
 
-    def get_marketplace_stats(self) -> Dict[str, Any]:
+    def get_marketplace_stats(self) -> dict[str, Any]:
         """插件市场统计。企业场景：管理员查看市场概况，总插件数、
         已安装数、按分类分布、下载排行。
         """
@@ -585,7 +585,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_downloaded": top_downloads[:10],
         }
 
-    def check_plugin_compatibility(self, plugin_name: str, target_version: str) -> Dict[str, Any]:
+    def check_plugin_compatibility(self, plugin_name: str, target_version: str) -> dict[str, Any]:
         """插件兼容性检查。企业场景：升级系统版本前检查已安装插件
         是否兼容新版本，提前发现不兼容风险。
         """
@@ -610,7 +610,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "max_platform": max_ver,
         }
 
-    def get_plugin_changelog(self, plugin_name: str) -> Dict[str, Any]:
+    def get_plugin_changelog(self, plugin_name: str) -> dict[str, Any]:
         """查看插件更新日志。企业场景：升级前评估变更内容，
         确认是否包含breaking changes。
         """
@@ -635,7 +635,7 @@ class PluginMarket(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recent_changes": changelog[:5],
         }
 
-    def search_plugins(self, keyword: str, category: str = None) -> Dict[str, Any]:
+    def search_plugins(self, keyword: str, category: str = None) -> dict[str, Any]:
         """搜索插件。企业场景：开发者在市场中搜索特定功能的插件，
         按名称、描述、标签匹配，按下载量排序。
         """

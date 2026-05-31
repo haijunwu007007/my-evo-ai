@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - JSON 持久化存储（A级） — 线程安全原子写入"""
 # Grade: A
 
@@ -45,9 +44,9 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         super().__init__(config)
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self._store_path: str = self.config.get("path", "data/json_store.json")
         self._backup_path: str = self._store_path + ".bak"
         self._lock = threading.Lock()
@@ -60,7 +59,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     def initialize(self) -> None:
         try:
             if os.path.exists(self._store_path):
-                with open(self._store_path, "r", encoding="utf-8") as f:
+                with open(self._store_path, encoding="utf-8") as f:
                     self._data = json.load(f)
                 self.logger.info("Loaded %d keys from %s", len(self._data), self._store_path)
             else:
@@ -81,7 +80,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             },
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
     async def shutdown(self) -> None:
@@ -93,10 +92,10 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     # 公开 API
     # ------------------------------------------------------------------
 
-    def load(self, path: str) -> Optional[Dict[str, Any]]:
+    def load(self, path: str) -> dict[str, Any] | None:
         """加载指定路径的 JSON 文件。"""
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
             self.logger.warning("File not found: %s", path)
@@ -140,7 +139,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                     pass
             return False
 
-    def backup(self, path: str) -> Optional[str]:
+    def backup(self, path: str) -> str | None:
         """创建 .bak 备份文件，返回备份路径；失败返回 None。"""
         if not os.path.exists(path):
             self.logger.warning("Cannot backup non-existent file: %s", path)
@@ -154,7 +153,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.logger.error("Backup failed for %s: %s", path, exc)
             return None
 
-    def list_keys(self, directory: str) -> List[str]:
+    def list_keys(self, directory: str) -> list[str]:
         """扫描目录下所有 .json 文件名（不含扩展名）。"""
         if not os.path.isdir(directory):
             self.logger.warning("Directory not found: %s", directory)
@@ -179,7 +178,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as exc:
             self.logger.error("Flush failed: %s", exc)
 
-    def _dispatch(self, p: Dict) -> Dict:
+    def _dispatch(self, p: dict) -> dict:
         """旧版 dispatch — 保持向后兼容。"""
         action = p.get("action", "status")
         key = p.get("key", "")
@@ -226,7 +225,7 @@ class JsonStore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             if os.path.exists(self._backup_path):
                 with self._lock:
                     try:
-                        with open(self._backup_path, "r", encoding="utf-8") as f:
+                        with open(self._backup_path, encoding="utf-8") as f:
                             self._data = json.load(f)
                         self._flush()
                         return {"success": True, "restored": len(self._data)}

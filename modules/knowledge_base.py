@@ -163,16 +163,16 @@ class KnowledgeEntry:
     content: str
     entry_type: EntryType
     category: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     author: str = "system"
     version: int = 1
     status: str = "published"
-    related_entries: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    related_entries: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     word_count: int = 0
-    embedding: Optional[List[float]] = None  # 模拟向量嵌入
+    embedding: list[float] | None = None  # 模拟向量嵌入
 
     def __post_init__(self):
         if not self.word_count:
@@ -187,8 +187,8 @@ class SearchResult:
     entry_type: str
     score: float
     snippet: str = ""
-    highlights: List[str] = field(default_factory=list)
-    matched_tags: List[str] = field(default_factory=list)
+    highlights: list[str] = field(default_factory=list)
+    matched_tags: list[str] = field(default_factory=list)
 
 @dataclass
 class CategoryNode:
@@ -196,22 +196,22 @@ class CategoryNode:
 
     category_id: str
     name: str
-    parent_id: Optional[str] = None
-    children: List[str] = field(default_factory=list)
+    parent_id: str | None = None
+    children: list[str] = field(default_factory=list)
     description: str = ""
     entry_count: int = 0
 
-class KnowledgeIndexerAnalyzer(object):
+class KnowledgeIndexerAnalyzer:
     """知识索引器 — 构建倒排索引、计算TF-IDF、排序相关性"""
 
     def __init__(self):
-        self._documents: Dict[str, str] = {}
-        self._inverted_index: Dict[str, Set[str]] = {}
-        self._doc_lengths: Dict[str, int] = {}
+        self._documents: dict[str, str] = {}
+        self._inverted_index: dict[str, set[str]] = {}
+        self._doc_lengths: dict[str, int] = {}
         self._avg_doc_length = 0.0
         self._total_docs = 0
 
-    def add_document(self, doc_id: str, content: str) -> Dict[str, Any]:
+    def add_document(self, doc_id: str, content: str) -> dict[str, Any]:
         """添加文档到索引，自动分词并构建倒排索引"""
         self._documents[doc_id] = content
         tokens = self._tokenize(content)
@@ -228,12 +228,12 @@ class KnowledgeIndexerAnalyzer(object):
             "total_docs": self._total_docs,
         }
 
-    def search(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 10) -> list[dict[str, Any]]:
         """使用TF-IDF搜索相关文档"""
         if not self._documents:
             return []
         query_tokens = self._tokenize(query)
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for doc_id in self._documents:
             score = 0.0
             for token in query_tokens:
@@ -248,7 +248,7 @@ class KnowledgeIndexerAnalyzer(object):
             for doc_id, score in ranked
         ]
 
-    def compute_similarity(self, doc_id_a: str, doc_id_b: str) -> Dict[str, Any]:
+    def compute_similarity(self, doc_id_a: str, doc_id_b: str) -> dict[str, Any]:
         """计算两个文档之间的余弦相似度"""
         if doc_id_a not in self._documents or doc_id_b not in self._documents:
             return {"error": "document not found", "similarity": 0}
@@ -268,7 +268,7 @@ class KnowledgeIndexerAnalyzer(object):
             "unique_to_b": len(terms_b - terms_a),
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取索引统计信息"""
         return {
             "total_documents": self._total_docs,
@@ -277,7 +277,7 @@ class KnowledgeIndexerAnalyzer(object):
             "index_size_bytes": sum(len(d) for d in self._documents.values()),
         }
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         return [w.lower() for w in re.findall(r"\b[a-zA-Z0-9\u4e00-\u9fff]+\b", text) if len(w) > 1]
 
     def _term_frequency(self, doc_id: str, term: str) -> float:
@@ -301,12 +301,12 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._entries: Dict[str, KnowledgeEntry] = {}
-        self._categories: Dict[str, CategoryNode] = {}
-        self._inverted_index: Dict[str, Set[str]] = defaultdict(set)
-        self._tag_index: Dict[str, Set[str]] = defaultdict(set)
-        self._category_index: Dict[str, Set[str]] = defaultdict(set)
-        self._search_history: List[Dict] = []
+        self._entries: dict[str, KnowledgeEntry] = {}
+        self._categories: dict[str, CategoryNode] = {}
+        self._inverted_index: dict[str, set[str]] = defaultdict(set)
+        self._tag_index: dict[str, set[str]] = defaultdict(set)
+        self._category_index: dict[str, set[str]] = defaultdict(set)
+        self._search_history: list[dict] = []
         self._max_entries = 100000
         self._stop_words = {
             "the",
@@ -453,7 +453,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for cat_id, name, desc in root_categories:
             self._categories[cat_id] = CategoryNode(category_id=cat_id, name=name, description=desc)
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """分词"""
         # 英文分词
         tokens = re.findall(r"[a-zA-Z0-9\u4e00-\u9fff]+", text.lower())
@@ -477,7 +477,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         # 模拟向量嵌入
         entry.embedding = self._simple_embed(tokens)
 
-    def _simple_embed(self, tokens: List[str]) -> List[float]:
+    def _simple_embed(self, tokens: list[str]) -> list[float]:
         """简单的词频向量嵌入（模拟，实际应用中用 SentenceTransformers）"""
         dim = 64
         vec = [0.0] * dim
@@ -489,7 +489,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             vec = [v / norm for v in vec]
         return vec
 
-    def _cosine_similarity(self, v1: List[float], v2: List[float]) -> float:
+    def _cosine_similarity(self, v1: list[float], v2: list[float]) -> float:
         """余弦相似度"""
         if not v1 or not v2 or len(v1) != len(v2):
             return 0.0
@@ -505,10 +505,10 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         content: str,
         entry_type: EntryType = EntryType.ARTICLE,
         category: str = "",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         author: str = "system",
-        metadata: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict | None = None,
+    ) -> dict[str, Any]:
         """添加知识条目"""
         if len(self._entries) >= self._max_entries:
             raise RuntimeError(f"知识库已满 ({self._max_entries})")
@@ -546,17 +546,17 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         query: str,
         search_type: SearchType = SearchType.HYBRID,
-        category: Optional[str] = None,
-        entry_type: Optional[EntryType] = None,
-        tags: Optional[List[str]] = None,
+        category: str | None = None,
+        entry_type: EntryType | None = None,
+        tags: list[str] | None = None,
         limit: int = 20,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """搜索知识库"""
         start = time.time()
         query_tokens = self._tokenize(query)
         query_embedding = self._simple_embed(query_tokens)
 
-        candidate_ids: Set[str] = set()
+        candidate_ids: set[str] = set()
 
         # 全文搜索候选
         if search_type in (SearchType.FULLTEXT, SearchType.HYBRID):
@@ -667,7 +667,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def _generate_snippet(self, content: str, query_tokens: List[str], max_length: int = 200) -> str:
+    def _generate_snippet(self, content: str, query_tokens: list[str], max_length: int = 200) -> str:
         """生成搜索摘要"""
         lines = content.split("\n")
         for line in lines:
@@ -681,7 +681,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return content[:max_length] + "..."
 
     @trace_operation("kb_get_entry")
-    def get_entry(self, entry_id: str) -> Dict[str, Any]:
+    def get_entry(self, entry_id: str) -> dict[str, Any]:
         if entry_id not in self._entries:
             raise ValueError(f"条目 {entry_id} 不存在")
         e = self._entries[entry_id]
@@ -706,10 +706,10 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def update_entry(
         self,
         entry_id: str,
-        title: Optional[str] = None,
-        content: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        title: str | None = None,
+        content: str | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         if entry_id not in self._entries:
             raise ValueError(f"条目 {entry_id} 不存在")
         entry = self._entries[entry_id]
@@ -754,7 +754,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return True
 
     @trace_operation("kb_related")
-    def find_related(self, entry_id: str, limit: int = 5) -> List[Dict]:
+    def find_related(self, entry_id: str, limit: int = 5) -> list[dict]:
         """查找相关条目"""
         if entry_id not in self._entries:
             raise ValueError(f"条目 {entry_id} 不存在")
@@ -776,7 +776,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return scored[:limit]
 
     @trace_operation("kb_batch_import")
-    def batch_import(self, entries: List[Dict[str, str]]) -> Dict[str, Any]:
+    def batch_import(self, entries: list[dict[str, str]]) -> dict[str, Any]:
         """批量导入"""
         imported = 0
         failed = 0
@@ -794,7 +794,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 failed += 1
         return {"imported": imported, "failed": failed, "total": len(entries)}
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取知识库统计"""
         type_counts = defaultdict(int)
         cat_counts = defaultdict(int)
@@ -864,7 +864,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

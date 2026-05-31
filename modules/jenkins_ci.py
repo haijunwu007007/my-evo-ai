@@ -99,7 +99,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-class PipelineAnalyzer(object):
+class PipelineAnalyzer:
     """jenkins_ci 运营分析引擎
 
     - 分析构建成功率与耗时
@@ -157,7 +157,7 @@ class Stage:
     started_at: float = 0
     finished_at: float = 0
     duration: float = 0
-    log: List[str] = field(default_factory=list)
+    log: list[str] = field(default_factory=list)
 
 @dataclass
 class Build:
@@ -168,14 +168,14 @@ class Build:
     commit: str = ""
     commit_msg: str = ""
     triggered_by: str = ""
-    stages: List[Stage] = field(default_factory=list)
-    artifacts: List[str] = field(default_factory=list)
-    env: Dict[str, str] = field(default_factory=dict)
-    params: Dict[str, str] = field(default_factory=dict)
+    stages: list[Stage] = field(default_factory=list)
+    artifacts: list[str] = field(default_factory=list)
+    env: dict[str, str] = field(default_factory=dict)
+    params: dict[str, str] = field(default_factory=dict)
     started_at: float = 0
     finished_at: float = 0
     duration: float = 0
-    test_results: Dict[str, Any] = field(default_factory=dict)
+    test_results: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Job:
@@ -186,11 +186,11 @@ class Job:
     build_cmd: str = "make build"
     test_cmd: str = "make test"
     deploy_cmd: str = "make deploy"
-    stages_def: List[str] = field(default_factory=lambda: ["checkout", "build", "test", "deploy"])
-    env: Dict[str, str] = field(default_factory=dict)
-    params: List[Dict] = field(default_factory=list)
+    stages_def: list[str] = field(default_factory=lambda: ["checkout", "build", "test", "deploy"])
+    env: dict[str, str] = field(default_factory=dict)
+    params: list[dict] = field(default_factory=list)
     enabled: bool = True
-    builds: List[Build] = field(default_factory=list)
+    builds: list[Build] = field(default_factory=list)
     next_build: int = 1
 
 @dataclass
@@ -207,11 +207,11 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self, config=None):
 
         super().__init__(config)
-        self._jobs: Dict[str, Job] = {}
-        self._artifacts: Dict[str, Artifact] = {}
+        self._jobs: dict[str, Job] = {}
+        self._artifacts: dict[str, Artifact] = {}
         self._lock = threading.RLock()
-        self._queue: List[Build] = []
-        self._credentials: Dict[str, Dict] = {}
+        self._queue: list[Build] = []
+        self._credentials: dict[str, dict] = {}
         self._stats = {"total_builds": 0, "success": 0, "failed": 0, "aborted": 0}
 
     def _cfg(self, key, default):

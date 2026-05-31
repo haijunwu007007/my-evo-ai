@@ -78,7 +78,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class SuperagentAnalyzer(object):
+class SuperagentAnalyzer:
     """superagent 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -282,7 +282,7 @@ class SuperagentModule:
 
     """超级智能体 - 自主推理/多步规划/工具链/长期记忆/学习/自适应"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -325,13 +325,13 @@ class SuperagentModule:
             "avg_completion_ms": 0,
             "learning_events": 0,
         }
-        self._tasks: Dict[str, Dict] = {}
-        self._memories: Dict[str, List[Dict]] = defaultdict(list)
-        self._tools: Dict[str, Dict] = {}
-        self._plans: Dict[str, Dict] = {}
+        self._tasks: dict[str, dict] = {}
+        self._memories: dict[str, list[dict]] = defaultdict(list)
+        self._tools: dict[str, dict] = {}
+        self._plans: dict[str, dict] = {}
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 6))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_tools()
             self._initialized = True
@@ -345,7 +345,7 @@ class SuperagentModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         running = sum(1 for t in self._tasks.values() if t.get("status") == "running")
@@ -431,7 +431,7 @@ class SuperagentModule:
             "constraints": constraints,
             "steps": steps,
             "status": "planned",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         return {"success": True, "plan_id": plan_id, "steps": num_steps, "goal": goal}
 
@@ -449,7 +449,7 @@ class SuperagentModule:
             step["actual_duration_ms"] = int((__import__('time').time()*1000)%(3000-100+1))+100
             tool_calls += len(step.get("tools_needed", []))
         plan["status"] = "completed"
-        plan["completed_at"] = datetime.now(timezone.utc).isoformat()
+        plan["completed_at"] = datetime.now(UTC).isoformat()
         dur = int((time.time() - t0) * 1000)
         self._stats["total_tool_calls"] += tool_calls
         self._stats["total_tasks"] += 1
@@ -491,7 +491,7 @@ class SuperagentModule:
         memory = {
             "content": content,
             "importance": importance,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "access_count": 0,
         }
         self._memories[key].append(memory)

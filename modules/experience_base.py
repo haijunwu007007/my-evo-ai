@@ -87,7 +87,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class ExperienceBaseAnalyzer(object):
+class ExperienceBaseAnalyzer:
     """experience_base 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -270,16 +270,16 @@ class Experience:
     success_rate: float = 0.0  # 历史成功率
 
     # 标签和关键词
-    tags: List[str] = field(default_factory=list)
-    keywords: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
 
     # 时间
     created_at: str = field(default_factory=lambda: time.strftime("%Y-%m-%d %H:%M:%S"))
-    last_used: Optional[str] = None
+    last_used: str | None = None
     updated_at: str = field(default_factory=lambda: time.strftime("%Y-%m-%d %H:%M:%S"))
 
     # 元数据
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
     def update_score(self, new_success: bool):
         """更新评分"""
@@ -295,9 +295,9 @@ class DecisionContext:
     """决策上下文"""
 
     situation: str  # 情境描述
-    available_options: List[str]  # 可选方案
-    constraints: List[str] = field(default_factory=list)
-    similar_history: List[Experience] = field(default_factory=list)
+    available_options: list[str]  # 可选方案
+    constraints: list[str] = field(default_factory=list)
+    similar_history: list[Experience] = field(default_factory=list)
 
 @dataclass
 class Recommendation:
@@ -306,7 +306,7 @@ class Recommendation:
     experience: Experience
     confidence: float
     reasoning: str
-    alternative: List[str] = field(default_factory=list)
+    alternative: list[str] = field(default_factory=list)
 
 class ExperienceBase:
     """
@@ -324,8 +324,8 @@ class ExperienceBase:
         self.db_path = db_path or ".evo_data/experience.db"
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        self.experiences: Dict[str, Experience] = {}
-        self.patterns: Dict[str, List[str]] = defaultdict(list)  # pattern -> experience_ids
+        self.experiences: dict[str, Experience] = {}
+        self.patterns: dict[str, list[str]] = defaultdict(list)  # pattern -> experience_ids
 
         # 缺口4修复：记忆引擎桥接，经验同步到长期记忆
         self._memory = None
@@ -451,9 +451,9 @@ class ExperienceBase:
         action: str,
         result: str,
         success: bool,
-        tags: List[str] = None,
-        keywords: List[str] = None,
-        metadata: Dict = None,
+        tags: list[str] = None,
+        keywords: list[str] = None,
+        metadata: dict = None,
     ) -> Experience:
         """添加经验"""
         import uuid
@@ -506,7 +506,7 @@ class ExperienceBase:
         logger.info(f"[Experience] 添加经验: {action[:30]}... ({'✅' if success else '❌'})")
         return exp
 
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """提取关键词"""
         # 简单实现：提取高频词
         words = text.lower().split()
@@ -549,7 +549,7 @@ class ExperienceBase:
         # 返回前5个高频词
         return [w for w, _ in sorted(word_freq.items(), key=lambda x: -x[1])[:5]]
 
-    def get_recent(self, limit: int = 20) -> List[Experience]:
+    def get_recent(self, limit: int = 20) -> list[Experience]:
         """获取最近的经验记录"""
         sorted_exps = sorted(self.experiences.values(), key=lambda e: e.created_at, reverse=True)
         return sorted_exps[:limit]
@@ -578,7 +578,7 @@ class ExperienceBase:
         scored.sort(key=lambda x: -x[1])
         return [exp for exp, _ in scored[:limit]]
 
-    def recommend_action(self, situation: str, options: List[str]) -> Recommendation:
+    def recommend_action(self, situation: str, options: list[str]) -> Recommendation:
         """推荐行动"""
         similar = self.find_similar(situation)
 
@@ -631,7 +631,7 @@ class ExperienceBase:
         # 添加新经验
         return self.add_experience(context, action, result, success)
 
-    def detect_patterns(self) -> Dict[str, List[Dict]]:
+    def detect_patterns(self) -> dict[str, list[dict]]:
         """检测模式"""
         patterns = defaultdict(list)
 
@@ -674,7 +674,7 @@ class ExperienceBase:
 
         return patterns
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """获取统计信息"""
         success_rate = self.stats["success"] / self.stats["total"] if self.stats["total"] > 0 else 0
 

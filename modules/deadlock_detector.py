@@ -88,9 +88,9 @@ class WaitGraph:
     """等待图(Wait-for Graph)构建与分析"""
 
     def __init__(self):
-        self._edges: Dict[str, Set[str]] = defaultdict(set)
-        self._resources: Dict[str, str] = {}
-        self._transactions: Dict[str, Dict] = {}
+        self._edges: dict[str, set[str]] = defaultdict(set)
+        self._resources: dict[str, str] = {}
+        self._transactions: dict[str, dict] = {}
 
     def add_waiting(self, txn_id: str, resource: str):
         holder = self._resources.get(resource)
@@ -121,7 +121,7 @@ class WaitGraph:
                 self._resources.pop(r, None)
         self._edges.pop(txn_id, None)
 
-    def detect_cycle(self) -> List[List[str]]:
+    def detect_cycle(self) -> list[list[str]]:
         visited = set()
         path = []
         cycles = []
@@ -145,7 +145,7 @@ class WaitGraph:
                 visited.clear()
         return cycles
 
-    def get_graph_summary(self) -> Dict:
+    def get_graph_summary(self) -> dict:
         return {
             "transactions": len(self._transactions),
             "waiting_edges": sum(len(v) for v in self._edges.values()),
@@ -184,7 +184,7 @@ class WaitGraph:
             params = {}
         return self.release(**params)
 
-class DeadlockResolver(object):
+class DeadlockResolver:
     """死锁解除策略引擎"""
 
     STRATEGIES = ["abort_youngest", "abort_oldest", "abort_longest_wait", "abort_most_locks", "manual"]
@@ -192,7 +192,7 @@ class DeadlockResolver(object):
     def __init__(self, strategy: str = "abort_youngest"):
         self.strategy = strategy
 
-    def resolve(self, cycle: List[str], transactions: Dict[str, Dict]) -> Dict:
+    def resolve(self, cycle: list[str], transactions: dict[str, dict]) -> dict:
         if not cycle:
             return {"action": "none", "reason": "no_cycle"}
         victim = self._select_victim(cycle, transactions)
@@ -208,7 +208,7 @@ class DeadlockResolver(object):
             "remaining_txns": [t for t in cycle if t != victim],
         }
 
-    def _select_victim(self, cycle: List[str], transactions: Dict[str, Dict]) -> str:
+    def _select_victim(self, cycle: list[str], transactions: dict[str, dict]) -> str:
         if len(cycle) <= 1:
             return cycle[0] if cycle else ""
         candidates = [(t, transactions.get(t, {})) for t in cycle if t in transactions]
@@ -224,19 +224,19 @@ class DeadlockResolver(object):
             return max(candidates, key=lambda x: len(x[1].get("holding", set())))[0]
         return candidates[0][0]
 
-class TimeoutManager(object):
+class TimeoutManager:
     """锁超时管理"""
 
     def __init__(self, default_timeout: float = 30.0):
         self.default_timeout = default_timeout
-        self._timeouts: Dict[str, float] = {}
-        self._custom_timeouts: Dict[str, float] = {}
+        self._timeouts: dict[str, float] = {}
+        self._custom_timeouts: dict[str, float] = {}
 
     def set_timeout(self, resource: str, timeout: float = None):
         t = timeout if timeout is not None else self.default_timeout
         self._timeouts[resource] = time.time() + t
 
-    def check_timeouts(self) -> List[Dict]:
+    def check_timeouts(self) -> list[dict]:
         now = time.time()
         expired = []
         for resource, deadline in list(self._timeouts.items()):
@@ -248,7 +248,7 @@ class TimeoutManager(object):
     def remove(self, resource: str):
         self._timeouts.pop(resource, None)
 
-    def get_pending(self) -> Dict[str, float]:
+    def get_pending(self) -> dict[str, float]:
         now = time.time()
         return {r: round(d - now, 1) for r, d in self._timeouts.items() if d > now}
 
@@ -256,10 +256,10 @@ class ResourceTracker:
     """资源占用追踪"""
 
     def __init__(self):
-        self._locks: Dict[str, List[Dict]] = defaultdict(list)
+        self._locks: dict[str, list[dict]] = defaultdict(list)
         self._lock_history: deque = deque(maxlen=10000)
 
-    def acquire(self, resource: str, txn_id: str, lock_type: str = "exclusive", timeout: float = 30.0) -> Dict:
+    def acquire(self, resource: str, txn_id: str, lock_type: str = "exclusive", timeout: float = 30.0) -> dict:
         existing = self._locks[resource]
         conflicting = [l for l in existing if l["txn_id"] != txn_id and l["lock_type"] == "exclusive"]
         shared_conflict = [
@@ -272,14 +272,14 @@ class ResourceTracker:
         self._lock_history.append({"resource": resource, "action": "acquire", "txn_id": txn_id, "ts": time.time()})
         return {"acquired": True, "lock_type": lock_type}
 
-    def release(self, resource: str, txn_id: str) -> Dict:
+    def release(self, resource: str, txn_id: str) -> dict:
         before = len(self._locks.get(resource, []))
         self._locks[resource] = [l for l in self._locks.get(resource, []) if l["txn_id"] != txn_id]
         released = before - len(self._locks[resource])
         self._lock_history.append({"resource": resource, "action": "release", "txn_id": txn_id, "ts": time.time()})
         return {"released": released}
 
-    def get_lock_info(self, resource: str) -> Dict:
+    def get_lock_info(self, resource: str) -> dict:
         locks = self._locks.get(resource, [])
         return {
             "resource": resource,
@@ -289,19 +289,19 @@ class ResourceTracker:
             ],
         }
 
-    def get_all_locks(self) -> Dict[str, List]:
+    def get_all_locks(self) -> dict[str, list]:
         return {k: [l["txn_id"] for l in v] for k, v in self._locks.items() if v}
 
 class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """死锁检测 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "detections": 0,
@@ -310,7 +310,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -318,7 +318,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.resolver = DeadlockResolver(strategy=self.config.get("resolve_strategy", "abort_youngest"))
         self.timeout_mgr = TimeoutManager(default_timeout=self.config.get("lock_timeout", 30))
         self.resource_tracker = ResourceTracker()
-        self._detection_history: List[Dict] = []
+        self._detection_history: list[dict] = []
         self._check_interval = self.config.get("check_interval", 5.0)
         self._last_check = 0
 
@@ -428,7 +428,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def analyze_lock_contention(self, resource_id: str) -> Dict[str, Any]:
+    def analyze_lock_contention(self, resource_id: str) -> dict[str, Any]:
         """锁竞争分析。企业场景：性能优化团队分析热点资源的锁等待情况，
         识别锁竞争严重的资源并优化访问模式（如拆分热点key、乐观锁替代悲观锁）。
         """
@@ -444,13 +444,13 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_wait_time_ms": sum(w.get("wait_ms", 0) for w in waiters),
         }
 
-    def get_deadlock_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_deadlock_history(self, limit: int = 20) -> dict[str, Any]:
         """死锁历史记录。企业场景：复盘死锁事件，分析根因并制定预防措施。"""
         history = getattr(self, "_deadlock_history", [])
         recent = history[-limit:]
         return {"success": True, "total_events": len(history), "returned": len(recent), "events": recent}
 
-    def get_lock_usage_report(self, hours: int = 1) -> Dict[str, Any]:
+    def get_lock_usage_report(self, hours: int = 1) -> dict[str, Any]:
         """锁使用报告。企业场景：DBA审查数据库锁等待情况，
         识别长事务持有锁过久、热点行竞争等问题。
         """
@@ -480,7 +480,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_by_hold_time": lock_stats[:10],
         }
 
-    def force_release_lock(self, resource_id: str, reason: str = "manual") -> Dict[str, Any]:
+    def force_release_lock(self, resource_id: str, reason: str = "manual") -> dict[str, Any]:
         """强制释放锁。企业场景：紧急情况下DBA手动释放死锁或长事务持有的锁，
         恢复系统可用性。操作会记录审计日志。
         """
@@ -502,7 +502,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             del self._wait_graph[resource_id]
         return {"success": True, **released}
 
-    def get_lock_dependency_graph(self) -> Dict[str, Any]:
+    def get_lock_dependency_graph(self) -> dict[str, Any]:
         """生成锁依赖图。企业场景：架构师分析系统锁竞争关系，
         识别热点资源，优化锁粒度减少争用。
         """
@@ -527,7 +527,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "cycles": cycles[:5],
         }
 
-    def _detect_cycles(self, wait_graph: Dict) -> List[List[str]]:
+    def _detect_cycles(self, wait_graph: dict) -> list[list[str]]:
         """检测等待图中的环。环=死锁。"""
         visited = set()
         path = []
@@ -550,7 +550,7 @@ class DeadlockDetector(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             dfs(node)
         return cycles
 
-    def get_deadlock_risk_report(self) -> Dict[str, Any]:
+    def get_deadlock_risk_report(self) -> dict[str, Any]:
         """死锁风险评估报告。企业场景：DBA定期评估数据库锁使用情况，
         识别高风险SQL和事务模式。
         """

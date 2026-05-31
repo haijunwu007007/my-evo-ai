@@ -93,7 +93,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LlamaparseAnalyzer(object):
+class LlamaparseAnalyzer:
     """llamaparse 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -310,16 +310,16 @@ class ParsedDocument:
     filename: str
     format: ParseFormat
     content: str
-    chunks: List[Dict[str, Any]] = field(default_factory=list)
-    tables: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    chunks: list[dict[str, Any]] = field(default_factory=list)
+    tables: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     page_count: int = 0
     word_count: int = 0
     char_count: int = 0
     parse_time_ms: float = 0.0
     file_hash: str = ""
     quality_score: float = 0.0
-    sections: List[Dict[str, str]] = field(default_factory=list)
+    sections: list[dict[str, str]] = field(default_factory=list)
 
 @dataclass
 class TextChunk:
@@ -333,7 +333,7 @@ class TextChunk:
     page: int = 0
     section: str = ""
     token_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ExtractedTable:
@@ -341,13 +341,13 @@ class ExtractedTable:
 
     table_id: str
     page: int
-    headers: List[str]
-    rows: List[List[str]]
+    headers: list[str]
+    rows: list[list[str]]
     caption: str = ""
     confidence: float = 0.0
     format: TableFormat = TableFormat.JSON
 
-class LlamaParseEngine(object):
+class LlamaParseEngine:
     def trace(self, name, *args, **kwargs):
         class _NS:
             def __enter__(self):
@@ -414,9 +414,9 @@ class LlamaParseEngine(object):
         )()
 
         self._lock = threading.RLock()
-        self._configs: Dict[str, ParseConfig] = {}
-        self._cache: Dict[str, ParsedDocument] = {}
-        self._parse_history: List[Dict[str, Any]] = []
+        self._configs: dict[str, ParseConfig] = {}
+        self._cache: dict[str, ParsedDocument] = {}
+        self._parse_history: list[dict[str, Any]] = []
         self._stats = {
             "total_parsed": 0,
             "total_chunks": 0,
@@ -460,7 +460,7 @@ class LlamaParseEngine(object):
             deduplicate_chunks=True,
         )
 
-    def parse_text(self, content: str, filename: str = "input.txt", config_name: str = "default") -> Dict[str, Any]:
+    def parse_text(self, content: str, filename: str = "input.txt", config_name: str = "default") -> dict[str, Any]:
         with self._lock:
             config = self._configs.get(config_name, self._configs["default"])
             file_hash = hashlib.md5(content.encode()).hexdigest()
@@ -558,7 +558,7 @@ class LlamaParseEngine(object):
         text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
         return text.strip()
 
-    def _extract_sections(self, text: str) -> List[Dict[str, str]]:
+    def _extract_sections(self, text: str) -> list[dict[str, str]]:
         sections = []
         lines = text.split("\n")
         current_section = "header"
@@ -580,7 +580,7 @@ class LlamaParseEngine(object):
             sections.append({"title": "main", "content": text})
         return sections
 
-    def _chunk_text(self, text: str, config: ParseConfig, sections: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    def _chunk_text(self, text: str, config: ParseConfig, sections: list[dict[str, str]]) -> list[dict[str, Any]]:
         chunks = []
         seen = set() if config.deduplicate_chunks else None
         if config.chunk_strategy == ChunkStrategy.FIXED_SIZE:
@@ -603,7 +603,7 @@ class LlamaParseEngine(object):
             chunk["token_count"] = len(chunk["content"].split())
         return chunks
 
-    def _chunk_fixed(self, text: str, size: int, overlap: int, seen: Optional[Set]) -> List[Dict[str, Any]]:
+    def _chunk_fixed(self, text: str, size: int, overlap: int, seen: Set | None) -> list[dict[str, Any]]:
         chunks = []
         start = 0
         while start < len(text):
@@ -616,7 +616,7 @@ class LlamaParseEngine(object):
             start += size - overlap if overlap else size
         return chunks
 
-    def _chunk_paragraph(self, text: str, max_size: int, seen: Optional[Set]) -> List[Dict[str, Any]]:
+    def _chunk_paragraph(self, text: str, max_size: int, seen: Set | None) -> list[dict[str, Any]]:
         chunks = []
         paragraphs = re.split(r"\n\s*\n", text)
         current = ""
@@ -642,8 +642,8 @@ class LlamaParseEngine(object):
         return chunks
 
     def _chunk_semantic(
-        self, sections: List[Dict[str, str]], max_size: int, seen: Optional[Set]
-    ) -> List[Dict[str, Any]]:
+        self, sections: list[dict[str, str]], max_size: int, seen: Set | None
+    ) -> list[dict[str, Any]]:
         chunks = []
         for section in sections:
             content = section["content"].strip()
@@ -661,7 +661,7 @@ class LlamaParseEngine(object):
                     chunks.append(sc)
         return chunks
 
-    def _chunk_sentence(self, text: str, max_size: int, seen: Optional[Set]) -> List[Dict[str, Any]]:
+    def _chunk_sentence(self, text: str, max_size: int, seen: Set | None) -> list[dict[str, Any]]:
         sentences = re.split(r"(?<=[.!?。！？])\s+", text)
         chunks = []
         current = ""
@@ -681,7 +681,7 @@ class LlamaParseEngine(object):
             chunks.append({"content": current.strip(), "start_char": char_pos, "end_char": char_pos + len(current)})
         return chunks
 
-    def _extract_tables_sim(self, text: str) -> List[Dict[str, Any]]:
+    def _extract_tables_sim(self, text: str) -> list[dict[str, Any]]:
         tables = []
         lines = text.split("\n")
         i = 0
@@ -720,7 +720,7 @@ class LlamaParseEngine(object):
                 )
         return tables
 
-    def _extract_metadata(self, text: str, filename: str) -> Dict[str, Any]:
+    def _extract_metadata(self, text: str, filename: str) -> dict[str, Any]:
         meta = {"filename": filename, "format": self._detect_format(filename).value}
         lines = text.split("\n")
         for line in lines[:20]:
@@ -752,7 +752,7 @@ class LlamaParseEngine(object):
             return "zh"
         return "en"
 
-    def _compute_quality(self, text: str, chunks: List[Dict], tables: List[Dict]) -> float:
+    def _compute_quality(self, text: str, chunks: list[dict], tables: list[dict]) -> float:
         score = 0.5
         if len(text) > 100:
             score += 0.1
@@ -765,7 +765,7 @@ class LlamaParseEngine(object):
             score += min(0.15, len(tables) * 0.05)
         return min(1.0, score)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self._stats,
             "format_counts": dict(self._stats["format_counts"]),
@@ -774,7 +774,7 @@ class LlamaParseEngine(object):
             "supported_formats": sorted(self._supported_formats),
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "healthy": True,
             "status": "healthy",

@@ -94,7 +94,7 @@ import difflib
 
 logger = get_logger(__name__)
 
-class TemplateRegistryAnalyzer(object):
+class TemplateRegistryAnalyzer:
     """template_registry 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -304,8 +304,8 @@ class TemplateVersion:
     created_at: float
     created_by: str
     checksum: str
-    variables: List[str] = field(default_factory=list)
-    dependencies: List[TemplateDependency] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
+    dependencies: list[TemplateDependency] = field(default_factory=list)
 
 @dataclass
 class Template:
@@ -316,18 +316,18 @@ class Template:
     description: str = ""
     type: TemplateType = TemplateType.CUSTOM
     status: TemplateStatus = TemplateStatus.DRAFT
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     author: str = ""
     organization: str = ""
-    versions: Dict[str, TemplateVersion] = field(default_factory=dict)
+    versions: dict[str, TemplateVersion] = field(default_factory=dict)
     current_version: str = "1.0.0"
-    variables_schema: Dict[str, Any] = field(default_factory=dict)
-    examples: List[Dict[str, Any]] = field(default_factory=list)
-    permissions: Dict[str, List[str]] = field(default_factory=dict)
+    variables_schema: dict[str, Any] = field(default_factory=dict)
+    examples: list[dict[str, Any]] = field(default_factory=list)
+    permissions: dict[str, list[str]] = field(default_factory=dict)
     usage_count: int = 0
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class RenderResult:
@@ -336,9 +336,9 @@ class RenderResult:
     success: bool
     content: str = ""
     error: str = ""
-    variables_used: List[str] = field(default_factory=list)
+    variables_used: list[str] = field(default_factory=list)
     render_time: float = 0.0
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 class TemplateRegistry:
     """
@@ -346,18 +346,18 @@ class TemplateRegistry:
     支持版本控制、依赖管理、变量渲染、权限控制
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.version = "V0.1"
         self.logger = get_logger(__name__)
         self.config = config or self._default_config()
 
         # 模板存储
-        self._templates: Dict[str, Template] = {}
-        self._name_index: Dict[str, str] = {}  # name -> id
-        self._tag_index: Dict[str, Set[str]] = {}  # tag -> set(id)
+        self._templates: dict[str, Template] = {}
+        self._name_index: dict[str, str] = {}  # name -> id
+        self._tag_index: dict[str, set[str]] = {}  # tag -> set(id)
 
         # 渲染缓存
-        self._render_cache: Dict[str, Tuple[str, float]] = {}
+        self._render_cache: dict[str, tuple[str, float]] = {}
         self._cache_ttl = self.config.get("cache_ttl", 300)
 
         # 使用统计
@@ -379,7 +379,7 @@ class TemplateRegistry:
 
         self.logger.info("TemplateRegistry V0.1 初始化完成")
 
-    def _default_config(self) -> Dict:
+    def _default_config(self) -> dict:
         """默认配置"""
         return {
             "max_versions_per_template": 50,
@@ -416,7 +416,7 @@ class TemplateRegistry:
         self._stats["total_templates"] = len(self._templates)
         self.logger.info(f"加载 {self._stats['total_templates']} 个内置模板")
 
-    def _create_builtin_prompt_templates(self) -> List[Template]:
+    def _create_builtin_prompt_templates(self) -> list[Template]:
         """创建内置提示词模板"""
         templates = []
 
@@ -500,7 +500,7 @@ class TemplateRegistry:
 
         return templates
 
-    def _create_builtin_code_templates(self) -> List[Template]:
+    def _create_builtin_code_templates(self) -> list[Template]:
         """创建内置代码模板"""
         templates = []
 
@@ -565,7 +565,7 @@ class {{ class_name }}:
 
         return templates
 
-    def _create_builtin_email_templates(self) -> List[Template]:
+    def _create_builtin_email_templates(self) -> list[Template]:
         """创建内置邮件模板"""
         templates = []
 
@@ -613,7 +613,7 @@ class {{ class_name }}:
 
         return templates
 
-    def _create_builtin_report_templates(self) -> List[Template]:
+    def _create_builtin_report_templates(self) -> list[Template]:
         """创建内置报告模板"""
         templates = []
 
@@ -690,7 +690,7 @@ class {{ class_name }}:
 
         return templates
 
-    def register(self, template: Template) -> Tuple[bool, str]:
+    def register(self, template: Template) -> tuple[bool, str]:
         """注册模板"""
         with self._lock:
             # 检查名称冲突
@@ -715,7 +715,7 @@ class {{ class_name }}:
         self.logger.info(f"模板注册成功: {template.name} ({template.id})")
         return True, template.id
 
-    def _validate_template(self, template: Template) -> Tuple[bool, str]:
+    def _validate_template(self, template: Template) -> tuple[bool, str]:
         """验证模板"""
         if not template.name:
             return False, "模板名称不能为空"
@@ -725,7 +725,7 @@ class {{ class_name }}:
             return False, "模板必须至少有一个版本"
         return True, ""
 
-    def get(self, template_id_or_name: str) -> Optional[Template]:
+    def get(self, template_id_or_name: str) -> Template | None:
         """获取模板"""
         # 先按ID查找
         if template_id_or_name in self._templates:
@@ -739,7 +739,7 @@ class {{ class_name }}:
 
         return None
 
-    def update(self, template_id: str, updates: Dict) -> Tuple[bool, str]:
+    def update(self, template_id: str, updates: dict) -> tuple[bool, str]:
         """更新模板"""
         with self._lock:
             tpl = self._templates.get(template_id)
@@ -762,7 +762,7 @@ class {{ class_name }}:
         content: str,
         changelog: str,
         created_by: str,
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """添加新版本"""
         with self._lock:
             tpl = self._templates.get(template_id)
@@ -800,7 +800,7 @@ class {{ class_name }}:
         self.logger.info(f"模板新版本: {template_id} v{new_ver}")
         return True, new_ver
 
-    def _extract_variables(self, content: str) -> List[str]:
+    def _extract_variables(self, content: str) -> list[str]:
         """提取模板变量"""
         # 匹配 {{ variable }} 和 {% if variable %}
         pattern = r"\{\{\s*(\w+)\s*\}\}|\{\%\s*(?:if|for)\s+(\w+)"
@@ -813,8 +813,8 @@ class {{ class_name }}:
     def render(
         self,
         template_id_or_name: str,
-        variables: Dict[str, Any],
-        version: Optional[str] = None,
+        variables: dict[str, Any],
+        version: str | None = None,
         fmt: RenderFormat = RenderFormat.TEXT,
     ) -> RenderResult:
         """渲染模板"""
@@ -873,7 +873,7 @@ class {{ class_name }}:
         except Exception as e:
             return RenderResult(success=False, error=str(e), render_time=time.time() - start_time)
 
-    def _do_render(self, content: str, variables: Dict, fmt: RenderFormat) -> str:
+    def _do_render(self, content: str, variables: dict, fmt: RenderFormat) -> str:
         """执行渲染"""
         # 简单的变量替换（生产环境应使用Jinja2等）
         result = content
@@ -909,7 +909,7 @@ class {{ class_name }}:
             return True
         return False
 
-    def delete(self, template_id: str) -> Tuple[bool, str]:
+    def delete(self, template_id: str) -> tuple[bool, str]:
         """删除模板（标记为已归档）"""
         with self._lock:
             tpl = self._templates.get(template_id)
@@ -924,12 +924,12 @@ class {{ class_name }}:
 
     def search(
         self,
-        query: Optional[str] = None,
-        type_filter: Optional[TemplateType] = None,
-        status_filter: Optional[TemplateStatus] = None,
-        tags: Optional[List[str]] = None,
-        author: Optional[str] = None,
-    ) -> List[Template]:
+        query: str | None = None,
+        type_filter: TemplateType | None = None,
+        status_filter: TemplateStatus | None = None,
+        tags: list[str] | None = None,
+        author: str | None = None,
+    ) -> list[Template]:
         """搜索模板"""
         results = []
 
@@ -950,7 +950,7 @@ class {{ class_name }}:
 
         return results
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取统计信息"""
         with self._lock:
             by_type = {}
@@ -969,7 +969,7 @@ class {{ class_name }}:
                 "cache_size": len(self._render_cache),
             }
 
-    def diff_versions(self, template_id: str, v1: str, v2: str) -> List[str]:
+    def diff_versions(self, template_id: str, v1: str, v2: str) -> list[str]:
         """比较两个版本差异"""
         tpl = self.get(template_id)
         if not tpl:
@@ -991,7 +991,7 @@ class {{ class_name }}:
         )
         return diff
 
-    def export_template(self, template_id: str) -> Optional[Dict]:
+    def export_template(self, template_id: str) -> dict | None:
         """导出模板（用于备份/迁移）"""
         tpl = self.get(template_id)
         if not tpl:
@@ -1020,7 +1020,7 @@ class {{ class_name }}:
             "metadata": tpl.metadata,
         }
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         """健康检查"""
         stats = self.get_stats()
         cache_ok = stats["cache_size"] < 10000
@@ -1033,7 +1033,7 @@ class {{ class_name }}:
             "timestamp": time.time(),
         }
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         """执行操作"""
         params = params or {}
 
@@ -1059,12 +1059,12 @@ class {{ class_name }}:
         else:
             return {"error": f"未知操作: {action}"}
 
-def health_check() -> Dict:
+def health_check() -> dict:
     """模块健康检查接口"""
     registry = TemplateRegistry()
     return registry.health_check()
 
-def execute(action: str, params: Optional[Dict] = None) -> Dict:
+def execute(action: str, params: dict | None = None) -> dict:
     """模块执行接口"""
     registry = TemplateRegistry()
     return registry.execute(action, params)

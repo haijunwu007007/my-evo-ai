@@ -113,7 +113,7 @@ class TemplateVariable:
     default: Any = ""
     description: str = ""
     required: bool = False
-    choices: List[str] = field(default_factory=list)
+    choices: list[str] = field(default_factory=list)
     pattern: str = ""  # 正则验证
 
 @dataclass
@@ -126,8 +126,8 @@ class CodeTemplate:
     category: str = "general"
     language: str = "python"
     content: str = ""
-    variables: List[TemplateVariable] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    variables: list[TemplateVariable] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = 0.0
     updated_at: float = 0.0
     usage_count: int = 0
@@ -141,8 +141,8 @@ class GeneratedProject:
     template_id: str = ""
     name: str = ""
     path: str = ""
-    files: List[str] = field(default_factory=list)
-    variables_used: Dict[str, Any] = field(default_factory=dict)
+    files: list[str] = field(default_factory=list)
+    variables_used: dict[str, Any] = field(default_factory=dict)
     created_at: float = 0.0
 
 @dataclass
@@ -154,7 +154,7 @@ class CodeSnippet:
     description: str = ""
     language: str = "python"
     code: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = 0.0
     usage_count: int = 0
 
@@ -174,9 +174,9 @@ class CodeTemplateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 "description": "代码模板管理器，支持脚手架生成、代码片段库、模板变量渲染",
             }
         )
-        self._templates: Dict[str, CodeTemplate] = {}
-        self._snippets: Dict[str, CodeSnippet] = {}
-        self._projects: Dict[str, GeneratedProject] = {}
+        self._templates: dict[str, CodeTemplate] = {}
+        self._snippets: dict[str, CodeSnippet] = {}
+        self._projects: dict[str, GeneratedProject] = {}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -484,7 +484,7 @@ class TokenBucket:
             )
             self._snippets[snippet.snippet_id] = snippet
 
-    def _render_template(self, content: str, variables: Dict[str, Any]) -> str:
+    def _render_template(self, content: str, variables: dict[str, Any]) -> str:
         """渲染模板变量，支持 {{var}} 语法"""
         result = content
         # 内置变量
@@ -739,7 +739,7 @@ class TokenBucket:
             logger.error(f"[CodeTemplate] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()

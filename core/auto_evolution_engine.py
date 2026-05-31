@@ -103,7 +103,7 @@ class ModuleRegistry:
     """模块上游版本注册表"""
 
     def __init__(self):
-        self._modules: Dict[str, ModuleUpstream] = {}
+        self._modules: dict[str, ModuleUpstream] = {}
         self._lock = threading.Lock()
         self._load()
 
@@ -139,16 +139,16 @@ class ModuleRegistry:
             )
             self._save()
 
-    def get(self, module_name: str) -> Optional[ModuleUpstream]:
+    def get(self, module_name: str) -> ModuleUpstream | None:
         return self._modules.get(module_name)
 
-    def get_all(self) -> Dict[str, ModuleUpstream]:
+    def get_all(self) -> dict[str, ModuleUpstream]:
         return dict(self._modules)
 
-    def get_upgradable(self) -> List[ModuleUpstream]:
+    def get_upgradable(self) -> list[ModuleUpstream]:
         return [m for m in self._modules.values() if m.update_available]
 
-    def get_external(self) -> List[ModuleUpstream]:
+    def get_external(self) -> list[ModuleUpstream]:
         return [m for m in self._modules.values() if m.type != "internal"]
 
 
@@ -156,7 +156,7 @@ class GitHubReleaseChecker:
     """GitHub Release/Tag 版本检测器"""
 
     @staticmethod
-    def check_release(repo: str) -> Tuple[Optional[str], Optional[str]]:
+    def check_release(repo: str) -> tuple[str | None, str | None]:
         """检查GitHub仓库最新release tag和url"""
         try:
             # GitHub API: 获取最新release
@@ -180,7 +180,7 @@ class GitHubReleaseChecker:
             return (None, None)
 
     @staticmethod
-    def check_tags(repo: str) -> Tuple[Optional[str], Optional[str]]:
+    def check_tags(repo: str) -> tuple[str | None, str | None]:
         """回退：检查最新tag"""
         try:
             api_url = f"https://api.github.com/repos/{repo}/tags?per_page=1"
@@ -199,7 +199,7 @@ class GitHubReleaseChecker:
             return (None, None)
 
     @staticmethod
-    def parse_semver(tag: str) -> Tuple[int, ...]:
+    def parse_semver(tag: str) -> tuple[int, ...]:
         """从tag中解析语义版本号"""
         tag = tag.lstrip("vV")
         parts = tag.replace("-", ".").split(".")[:3]
@@ -218,7 +218,7 @@ class TrendingScanner:
     """每日Trending扫描+自动发现可集成项目"""
 
     @staticmethod
-    def scan_trending(language: str = "python") -> List[Dict]:
+    def scan_trending(language: str = "python") -> list[dict]:
         """扫描GitHub Trending Python页面"""
         results = []
         try:
@@ -251,7 +251,7 @@ class TrendingScanner:
             return results
 
     @staticmethod
-    def evaluate_for_integration(repo_info: Dict) -> Tuple[bool, float, str]:
+    def evaluate_for_integration(repo_info: dict) -> tuple[bool, float, str]:
         """评估一个项目是否值得集成进系统"""
         score = 0.0
         reasons = []
@@ -285,7 +285,7 @@ class AutoEvolutionEngine:
 
     def __init__(self):
         self._registry = ModuleRegistry()
-        self._events: List[EvolutionEvent] = []
+        self._events: list[EvolutionEvent] = []
         self._lock = threading.Lock()
         self._load_events()
 
@@ -308,7 +308,7 @@ class AutoEvolutionEngine:
 
     # ═══ 每日演化循环 ═══
 
-    async def run_daily_evolution(self) -> Dict:
+    async def run_daily_evolution(self) -> dict:
         """每日自演化循环——三步走"""
         t0 = time.time()
         results = {
@@ -347,7 +347,7 @@ class AutoEvolutionEngine:
         results["timestamp"] = datetime.now().isoformat()
         return results
 
-    async def _check_all_versions(self) -> Dict:
+    async def _check_all_versions(self) -> dict:
         """检查所有外部模块的上游版本"""
         checked = 0
         upgrades = 0
@@ -383,7 +383,7 @@ class AutoEvolutionEngine:
         self._registry._save()
         return {"checked": checked, "upgrades": upgrades}
 
-    async def _apply_upgrades(self) -> Dict:
+    async def _apply_upgrades(self) -> dict:
         """自动升级可用模块"""
         applied = 0
         for mod in self._registry.get_upgradable():
@@ -401,7 +401,7 @@ class AutoEvolutionEngine:
             applied += 1
         return {"applied": applied}
 
-    async def _discover_new_projects(self) -> Dict:
+    async def _discover_new_projects(self) -> dict:
         """从GitHub Trending发现新项目并集成"""
         discovered = 0
         integrated = 0
@@ -430,7 +430,7 @@ class AutoEvolutionEngine:
 
     # ═══ 查询接口 ═══
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "modules_tracked": len(self._registry.get_all()),
             "external_modules": len(self._registry.get_external()),
@@ -439,13 +439,13 @@ class AutoEvolutionEngine:
             "recent_events": [asdict(e) for e in self._events[-20:]],
         }
 
-    def get_registry(self) -> Dict:
+    def get_registry(self) -> dict:
         return {k: asdict(v) for k, v in self._registry.get_all().items()}
 
-    def get_events(self, limit: int = 50) -> List[Dict]:
+    def get_events(self, limit: int = 50) -> list[dict]:
         return [asdict(e) for e in self._events[-limit:]]
 
-    def get_module_version(self, module_name: str) -> Optional[Dict]:
+    def get_module_version(self, module_name: str) -> dict | None:
         mod = self._registry.get(module_name)
         if mod:
             return asdict(mod)
@@ -462,7 +462,7 @@ class AutoEvolutionEngine:
 
 # ═══ 全局单例 ═══
 
-_engine: Optional[AutoEvolutionEngine] = None
+_engine: AutoEvolutionEngine | None = None
 
 
 def get_evolution_engine() -> AutoEvolutionEngine:

@@ -104,9 +104,9 @@ logger = logging.getLogger(__name__)
 class Document:
     doc_id: str = ""
     content: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    chunks: List[str] = field(default_factory=list)
-    embeddings: List[List[float]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    chunks: list[str] = field(default_factory=list)
+    embeddings: list[list[float]] = field(default_factory=list)
     source: str = ""
     doc_type: str = "text"
     created_at: float = field(default_factory=time.time)
@@ -117,7 +117,7 @@ class RetrievalResult:
     chunk: str = ""
     doc_id: str = ""
     score: float = 0.0
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
 @dataclass
 class PipelineStep:
@@ -126,7 +126,7 @@ class PipelineStep:
     status: str = "pending"
     detail: str = ""
 
-class RAGAnalyzer(object):
+class RAGAnalyzer:
     """rag_pipeline 运营分析引擎
 
     - 分析检索召回率
@@ -153,9 +153,9 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def __init__(self, config=None):
 
         super().__init__(config)
-        self._docs: Dict[str, Document] = {}
-        self._chunks: List[Tuple[List[float], str, str, Dict]] = []
-        self._vector_index: Dict[str, List[float]] = {}
+        self._docs: dict[str, Document] = {}
+        self._chunks: list[tuple[list[float], str, str, dict]] = []
+        self._vector_index: dict[str, list[float]] = {}
         self._lock = threading.RLock()
         self._max_chunks = self._cfg("max_chunks", 50000)
         self._chunk_size = self._cfg("chunk_size", 512)
@@ -172,17 +172,17 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def _gen_id(self, prefix="doc"):
         return f"{prefix}_{hashlib.md5(f'{time.time()}{id(self)}'.encode()).hexdigest()[:10]}"
 
-    def _mock_embed(self, text: str) -> List[float]:
+    def _mock_embed(self, text: str) -> list[float]:
         h = hashlib.md5(text.encode()).hexdigest()
         return [int(h[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)]
 
-    def _cosine_sim(self, a: List[float], b: List[float]) -> float:
+    def _cosine_sim(self, a: list[float], b: list[float]) -> float:
         dot = sum(x * y for x, y in zip(a, b))
         na = math.sqrt(sum(x * x for x in a)) or 1e-8
         nb = math.sqrt(sum(x * x for x in b)) or 1e-8
         return dot / (na * nb)
 
-    def _chunk_text(self, text: str) -> List[str]:
+    def _chunk_text(self, text: str) -> list[str]:
         words = text.split()
         chunks = []
         i = 0

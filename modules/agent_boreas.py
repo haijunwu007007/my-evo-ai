@@ -131,7 +131,7 @@ class HealthMetric:
     threshold_critical: float = 95.0
     direction: str = "upper"  # upper=超过阈值告警, lower=低于阈值告警
 
-    def is_anomaly(self) -> Optional[AnomalySeverity]:
+    def is_anomaly(self) -> AnomalySeverity | None:
         if self.direction == "upper":
             if self.value >= self.threshold_critical:
                 return AnomalySeverity.CRITICAL
@@ -155,9 +155,9 @@ class AnomalyEvent:
     threshold: float
     timestamp: datetime
     description: str = ""
-    healing_actions_taken: List[str] = field(default_factory=list)
+    healing_actions_taken: list[str] = field(default_factory=list)
     resolved: bool = False
-    resolved_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -179,7 +179,7 @@ class HealingPolicy:
 
     name: str
     anomaly_pattern: str
-    actions: List[HealingAction]
+    actions: list[HealingAction]
     max_retries: int = 3
     cooldown_seconds: int = 300
     escalation_after: int = 2
@@ -190,9 +190,9 @@ class MetricsCollector:
 
     def __init__(self, buffer_size: int = 10000):
         self.buffer_size = buffer_size
-        self.metrics_buffers: Dict[str, deque] = defaultdict(lambda: deque(maxlen=buffer_size))
+        self.metrics_buffers: dict[str, deque] = defaultdict(lambda: deque(maxlen=buffer_size))
         self._lock = threading.RLock()
-        self._collection_hooks: List[callable] = []
+        self._collection_hooks: list[callable] = []
 
     def register_hook(self, hook: callable) -> None:
         """注册自定义指标采集钩子"""
@@ -203,20 +203,20 @@ class MetricsCollector:
         with self._lock:
             self.metrics_buffers[metric.name].append(metric)
 
-    def collect_batch(self, metrics: List[HealthMetric]) -> None:
+    def collect_batch(self, metrics: list[HealthMetric]) -> None:
         """批量采集指标"""
         with self._lock:
             for m in metrics:
                 self.metrics_buffers[m.name].append(m)
 
-    def get_recent(self, metric_name: str, seconds: int = 300) -> List[HealthMetric]:
+    def get_recent(self, metric_name: str, seconds: int = 300) -> list[HealthMetric]:
         """获取最近N秒的指标"""
         cutoff = datetime.now() - timedelta(seconds=seconds)
         with self._lock:
             buf = self.metrics_buffers.get(metric_name, deque())
             return [m for m in buf if m.timestamp >= cutoff]
 
-    def get_stats(self, metric_name: str, seconds: int = 300) -> Optional[Dict[str, float]]:
+    def get_stats(self, metric_name: str, seconds: int = 300) -> dict[str, float] | None:
         """获取指标统计摘要"""
         recent = self.get_recent(metric_name, seconds)
         if not recent:
@@ -235,7 +235,7 @@ class MetricsCollector:
             "trend": values[-1] - values[0] if len(values) > 1 else 0.0,
         }
 
-    def execute_hooks(self) -> List[HealthMetric]:
+    def execute_hooks(self) -> list[HealthMetric]:
         """执行所有注册的采集钩子"""
 
         results = []
@@ -252,12 +252,12 @@ class MetricsCollector:
                 )
         return results
 
-    def get_all_metric_names(self) -> List[str]:
+    def get_all_metric_names(self) -> list[str]:
         """获取所有已注册的指标名"""
         with self._lock:
             return list(self.metrics_buffers.keys())
 
-    def clear_buffer(self, metric_name: Optional[str] = None) -> int:
+    def clear_buffer(self, metric_name: str | None = None) -> int:
         """清空指标缓冲区，返回清除数量"""
         with self._lock:
             if metric_name:
@@ -268,14 +268,14 @@ class MetricsCollector:
                 self.metrics_buffers.clear()
             return count
 
-class AnomalyDetector(object):
+class AnomalyDetector:
     """异常检测器 - 基于统计模型和规则引擎检测异常"""
 
     def __init__(self, collector: MetricsCollector):
         self.collector = MetricCollector()
         self.baseline_window = 3600  # 基线窗口1小时
-        self._detection_rules: List[callable] = []
-        self._anomaly_callbacks: List[callable] = []
+        self._detection_rules: list[callable] = []
+        self._anomaly_callbacks: list[callable] = []
 
     def register_rule(self, rule: callable) -> None:
         """注册自定义检测规则"""
@@ -285,7 +285,7 @@ class AnomalyDetector(object):
         """注册异常回调"""
         self._anomaly_callbacks.append(callback)
 
-    def detect_statistical(self, metric_name: str) -> Optional[AnomalyEvent]:
+    def detect_statistical(self, metric_name: str) -> AnomalyEvent | None:
         """基于统计模型检测异常"""
         stats = self.collector.get_stats(metric_name, self.baseline_window)
         if not stats or stats["count"] < 10:
@@ -311,7 +311,7 @@ class AnomalyDetector(object):
             )
         return None
 
-    def detect_threshold(self, metric: HealthMetric) -> Optional[AnomalyEvent]:
+    def detect_threshold(self, metric: HealthMetric) -> AnomalyEvent | None:
         """基于静态阈值检测异常"""
         severity = metric.is_anomaly()
         if severity:
@@ -325,7 +325,7 @@ class AnomalyDetector(object):
             )
         return None
 
-    def detect_trend(self, metric_name: str) -> Optional[AnomalyEvent]:
+    def detect_trend(self, metric_name: str) -> AnomalyEvent | None:
         """基于趋势检测异常"""
         recent = self.collector.get_recent(metric_name, seconds=300)
         if len(recent) < 20:
@@ -355,7 +355,7 @@ class AnomalyDetector(object):
             )
         return None
 
-    def detect_spike(self, metric_name: str) -> Optional[AnomalyEvent]:
+    def detect_spike(self, metric_name: str) -> AnomalyEvent | None:
         """检测突发性尖刺"""
         recent = self.collector.get_recent(metric_name, seconds=60)
         if len(recent) < 10:
@@ -373,7 +373,7 @@ class AnomalyDetector(object):
             )
         return None
 
-    def run_full_detection(self) -> List[AnomalyEvent]:
+    def run_full_detection(self) -> list[AnomalyEvent]:
         _ = self.trace("run_full_detection")
         """执行全量检测"""
         events = []
@@ -432,10 +432,10 @@ class AutoHealer:
     """自动修复引擎 - 根据异常事件执行自愈操作"""
 
     def __init__(self):
-        self.policies: List[HealingPolicy] = []
-        self.action_history: List[Dict] = []
-        self._cooldown_map: Dict[str, datetime] = {}
-        self._retry_count: Dict[str, int] = defaultdict(int)
+        self.policies: list[HealingPolicy] = []
+        self.action_history: list[dict] = []
+        self._cooldown_map: dict[str, datetime] = {}
+        self._retry_count: dict[str, int] = defaultdict(int)
         self._executor = ThreadPoolExecutor(max_workers=4)
 
     def add_policy(self, policy: HealingPolicy) -> None:
@@ -450,7 +450,7 @@ class AutoHealer:
                 return True
         return False
 
-    def evaluate_and_heal(self, event: AnomalyEvent) -> List[Dict]:
+    def evaluate_and_heal(self, event: AnomalyEvent) -> list[dict]:
         """评估异常并执行自愈"""
         results = []
         for policy in self.policies:
@@ -487,7 +487,7 @@ class AutoHealer:
                         break
         return results
 
-    def _execute_action(self, action: HealingAction, event: AnomalyEvent, policy: HealingPolicy) -> Dict:
+    def _execute_action(self, action: HealingAction, event: AnomalyEvent, policy: HealingPolicy) -> dict:
         """执行单个自愈操作"""
         start = time.time()
         try:
@@ -528,43 +528,43 @@ class AutoHealer:
                 "timestamp": datetime.now().isoformat(),
             }
 
-    def _do_restart(self, event: AnomalyEvent) -> Dict:
+    def _do_restart(self, event: AnomalyEvent) -> dict:
         """执行服务重启"""
         service = event.metric_name.split(".")[0] if "." in event.metric_name else "unknown"
         # 重启逻辑：发送SIGTERM -> 等待grace period -> SIGKILL -> 拉起
         return {"success": True, "message": f"服务 {service} 重启完成，graceful shutdown + restart"}
 
-    def _do_clear_cache(self, event: AnomalyEvent) -> Dict:
+    def _do_clear_cache(self, event: AnomalyEvent) -> dict:
         """清理缓存"""
         return {"success": True, "message": f"清理 {event.metric_name} 相关缓存完成"}
 
-    def _do_adjust_config(self, event: AnomalyEvent) -> Dict:
+    def _do_adjust_config(self, event: AnomalyEvent) -> dict:
         """动态调整配置"""
         adjustment = "增加超时阈值" if event.severity == AnomalySeverity.WARNING else "降低并发上限"
         return {"success": True, "message": f"动态配置调整: {adjustment}"}
 
-    def _do_scale_resource(self, event: AnomalyEvent) -> Dict:
+    def _do_scale_resource(self, event: AnomalyEvent) -> dict:
         """弹性扩缩容"""
         direction = "扩容" if event.value > event.threshold else "缩容"
         return {"success": True, "message": f"资源{direction}触发，当前负载{event.value:.1f}%"}
 
-    def _do_isolate_fault(self, event: AnomalyEvent) -> Dict:
+    def _do_isolate_fault(self, event: AnomalyEvent) -> dict:
         """故障隔离"""
         return {"success": True, "message": f"故障节点隔离完成，流量已切至健康节点"}
 
-    def _do_switch_failover(self, event: AnomalyEvent) -> Dict:
+    def _do_switch_failover(self, event: AnomalyEvent) -> dict:
         """故障转移"""
         return {"success": True, "message": "主备切换完成，新主节点已接管"}
 
-    def _do_notify_admin(self, event: AnomalyEvent, policy: HealingPolicy) -> Dict:
+    def _do_notify_admin(self, event: AnomalyEvent, policy: HealingPolicy) -> dict:
         """通知管理员"""
         return {"success": True, "message": f"告警通知已发送: {event.description}"}
 
-    def _do_rollback(self, event: AnomalyEvent) -> Dict:
+    def _do_rollback(self, event: AnomalyEvent) -> dict:
         """回滚部署"""
         return {"success": True, "message": "版本回滚完成，已回退至上一个稳定版本"}
 
-    def _escalate(self, event: AnomalyEvent, policy: HealingPolicy) -> Dict:
+    def _escalate(self, event: AnomalyEvent, policy: HealingPolicy) -> dict:
         """升级处理"""
         escalation = {
             "escalated": True,
@@ -576,11 +576,11 @@ class AutoHealer:
         self.action_history.append(escalation)
         return escalation
 
-    def get_history(self, limit: int = 100) -> List[Dict]:
+    def get_history(self, limit: int = 100) -> list[dict]:
         """获取操作历史"""
         return self.action_history[-limit:]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取自愈统计"""
         total = len(self.action_history)
         success = sum(1 for a in self.action_history if a.get("success"))
@@ -591,7 +591,7 @@ class AutoHealer:
             "pending_cooldowns": len([k for k, v in self._cooldown_map.items() if v > datetime.now()]),
         }
 
-class SelfHealingEngine(object):
+class SelfHealingEngine:
     """自愈编排引擎 - 根据异常类型和严重级别编排恢复动作序列。
 
     企业场景：生产服务异常时按优先级执行恢复，每步有超时和回退。
@@ -599,9 +599,9 @@ class SelfHealingEngine(object):
     """
 
     def __init__(self):
-        self._action_registry: Dict[AnomalySeverity, List[HealingAction]] = {}
+        self._action_registry: dict[AnomalySeverity, list[HealingAction]] = {}
         self._execution_history: deque = deque(maxlen=1000)
-        self._success_rates: Dict[str, float] = {}
+        self._success_rates: dict[str, float] = {}
         self._lock = threading.Lock()
         self._build_default_strategy()
 
@@ -626,8 +626,8 @@ class SelfHealingEngine(object):
         ]
 
     def orchestrate(
-        self, anomaly_type: str, severity: AnomalySeverity, source_module: str, context: Dict
-    ) -> List[Dict]:
+        self, anomaly_type: str, severity: AnomalySeverity, source_module: str, context: dict
+    ) -> list[dict]:
         """编排自愈动作序列，返回按成功率排序的执行计划"""
         actions = self._action_registry.get(severity, [])
         plans = []
@@ -703,12 +703,12 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.collector = MetricCollector()
         self.detector = AnomalyDetector(self.collector)
         self.healer = AutoHealer()
-        self.active_anomalies: Dict[str, AnomalyEvent] = {}
-        self._monitor_thread: Optional[threading.Thread] = None
+        self.active_anomalies: dict[str, AnomalyEvent] = {}
+        self._monitor_thread: threading.Thread | None = None
         self._running = False
         self._monitor_interval = 30  # 秒
         self._setup_default_policies()
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
 
     def _setup_default_policies(self) -> None:
         """配置默认自愈策略"""
@@ -810,7 +810,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         return Result(success=True, message=f"指标 {name}={value} 已采集")
 
-    def collect_batch(self, metrics_data: List[Dict]) -> Result:
+    def collect_batch(self, metrics_data: list[dict]) -> Result:
         """批量采集指标"""
         metrics = []
         for d in metrics_data:
@@ -873,7 +873,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         )
 
-    def get_anomaly_history(self, resolved: Optional[bool] = None, limit: int = 50) -> Result:
+    def get_anomaly_history(self, resolved: bool | None = None, limit: int = 50) -> Result:
         """获取异常历史"""
         all_events = list(self.active_anomalies.values())
         if resolved is not None:
@@ -892,7 +892,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=False, message=f"异常 {event_id} 不存在")
 
     def add_healing_policy(
-        self, name: str, pattern: str, actions: List[str], max_retries: int = 3, cooldown: int = 300
+        self, name: str, pattern: str, actions: list[str], max_retries: int = 3, cooldown: int = 300
     ) -> Result:
         """添加自愈策略"""
         try:
@@ -1043,9 +1043,9 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def __init__(self):
-        self._deployments: Dict[str, Dict] = {}
-        self._canary_config: Dict[str, Dict] = {}
-        self._rollback_history: List[Dict] = []
+        self._deployments: dict[str, dict] = {}
+        self._canary_config: dict[str, dict] = {}
+        self._rollback_history: list[dict] = []
 
     def create_deployment(self, app_name: str, version: str, strategy: str = "blue-green") -> str:
         """创建部署"""
@@ -1059,7 +1059,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return deploy_id
 
-    def start_canary(self, deploy_id: str, initial_pct: float = 5.0) -> Dict[str, Any]:
+    def start_canary(self, deploy_id: str, initial_pct: float = 5.0) -> dict[str, Any]:
         """启动金丝雀发布"""
         if deploy_id not in self._deployments:
             return {"error": "deployment not found"}
@@ -1067,7 +1067,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._canary_config[deploy_id] = {"traffic_pct": initial_pct, "auto_promote": False}
         return {"deploy_id": deploy_id, "traffic_pct": initial_pct, "status": "canary"}
 
-    def adjust_canary(self, deploy_id: str, new_pct: float) -> Dict[str, Any]:
+    def adjust_canary(self, deploy_id: str, new_pct: float) -> dict[str, Any]:
         """调整金丝雀流量"""
         config = self._canary_config.get(deploy_id)
         if not config:
@@ -1078,7 +1078,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._deployments[deploy_id]["status"] = "complete"
         return {"deploy_id": deploy_id, "old_pct": old_pct, "new_pct": config["traffic_pct"]}
 
-    def rollback(self, deploy_id: str, reason: str) -> Dict[str, Any]:
+    def rollback(self, deploy_id: str, reason: str) -> dict[str, Any]:
         """回滚部署"""
         deploy = self._deployments.get(deploy_id, {})
         self._deployments[deploy_id]["status"] = "rolled_back"
@@ -1086,7 +1086,7 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._rollback_history.append(record)
         return record
 
-    def get_deployments(self, app_name: str = None) -> List[Dict]:
+    def get_deployments(self, app_name: str = None) -> list[dict]:
         """获取部署列表"""
         results = list(self._deployments.values())
         if app_name:
@@ -1104,5 +1104,5 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 module_class = AgentBoreas
 
 
-class DeploymentPipelineEngine(object):
+class DeploymentPipelineEngine:
     """部署编排引擎 - 蓝绿部署、金丝雀发布、回滚管理"""

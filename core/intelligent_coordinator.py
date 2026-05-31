@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI 智能协调层 v1.0
 ===========================
@@ -25,7 +24,7 @@ import hashlib
 import sqlite3
 import uuid
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -61,11 +60,11 @@ class ParsedIntent:
     """解析后的意图"""
     intent_type: str           # IntentType
     primary_action: str        # 主动作: analyze/scan/generate/monitor/configure/query/...
-    entities: Dict[str, Any]   # 提取的实体: {"stock": "贵州茅台", "metric": "CPU"}
-    modules_hint: List[str]    # 候选模块列表
+    entities: dict[str, Any]   # 提取的实体: {"stock": "贵州茅台", "metric": "CPU"}
+    modules_hint: list[str]    # 候选模块列表
     complexity: str            # TaskComplexity
-    sub_tasks: List[str]       # 子任务拆解(多步时)
-    params: Dict[str, Any]     # 提取的参数
+    sub_tasks: list[str]       # 子任务拆解(多步时)
+    params: dict[str, Any]     # 提取的参数
     confidence: float = 0.0    # 置信度 0-1
     reasoning: str = ""        # 推理过程
 
@@ -75,10 +74,10 @@ class ConversationTurn:
     """对话轮次"""
     id: str
     user_input: str
-    parsed_intent: Dict        # ParsedIntent.asdict()
-    response: Dict             # 系统响应
-    modules_used: List[str]    # 使用的模块
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    parsed_intent: dict        # ParsedIntent.asdict()
+    response: dict             # 系统响应
+    modules_used: list[str]    # 使用的模块
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 @dataclass
@@ -88,11 +87,11 @@ class WorkflowStep:
     description: str
     module_id: str = ""
     action: str = "status"
-    params: Dict[str, Any] = field(default_factory=dict)
-    input_mapping: Dict[str, str] = field(default_factory=dict)   # param: "steps.{id}.output.{field}"
+    params: dict[str, Any] = field(default_factory=dict)
+    input_mapping: dict[str, str] = field(default_factory=dict)   # param: "steps.{id}.output.{field}"
     condition: str = ""         # 条件表达式
-    parallel_with: List[str] = field(default_factory=list)
-    depends_on: List[str] = field(default_factory=list)
+    parallel_with: list[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     timeout: int = 30
     retry: int = 0
 
@@ -102,12 +101,12 @@ class WorkflowPlan:
     """工作流执行计划"""
     id: str
     original_task: str
-    intent: Dict               # ParsedIntent
-    steps: List[Dict]           # WorkflowStep.asdict()
-    dag_order: List[str]        # DAG拓扑排序后的步骤ID
-    data_flow: Dict[str, str]  # 步骤间数据流映射
+    intent: dict               # ParsedIntent
+    steps: list[dict]           # WorkflowStep.asdict()
+    dag_order: list[str]        # DAG拓扑排序后的步骤ID
+    data_flow: dict[str, str]  # 步骤间数据流映射
     estimated_duration_ms: int = 0
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 # ============================================================================
@@ -176,7 +175,7 @@ class IntentParser:
         "同时", "并行", "parallel",
     ]
 
-    def parse(self, text: str, context: Dict = None) -> ParsedIntent:
+    def parse(self, text: str, context: dict = None) -> ParsedIntent:
         """
         解析自然语言意图
         
@@ -228,7 +227,7 @@ class IntentParser:
             reasoning=reasoning,
         )
 
-    def _extract_entities(self, text: str, text_lower: str) -> Dict[str, Any]:
+    def _extract_entities(self, text: str, text_lower: str) -> dict[str, Any]:
         """提取实体"""
         entities = {}
         for entity_type, patterns in self.ENTITY_PATTERNS.items():
@@ -264,7 +263,7 @@ class IntentParser:
                 best_action = action
         return best_action
 
-    def _classify_intent(self, text_lower: str, action: str, entities: Dict) -> Tuple[str, str]:
+    def _classify_intent(self, text_lower: str, action: str, entities: dict) -> tuple[str, str]:
         """分类意图"""
         # 多步任务
         for indicator in self.MULTI_STEP_INDICATORS:
@@ -306,7 +305,7 @@ class IntentParser:
             return TaskComplexity.MEDIUM.value
         return TaskComplexity.LOW.value
 
-    def _extract_params(self, text: str, entities: Dict) -> Dict:
+    def _extract_params(self, text: str, entities: dict) -> dict:
         """提取参数"""
         params = {}
         if "number" in entities:
@@ -321,7 +320,7 @@ class IntentParser:
         params["input"] = text
         return params
 
-    def _split_sub_tasks(self, text: str) -> List[str]:
+    def _split_sub_tasks(self, text: str) -> list[str]:
         """拆分子任务"""
         # 按顺序指示词拆分
         splitters = ["然后", "接着", "之后", "最后", "并且", ";", "，然后", ", then",
@@ -335,7 +334,7 @@ class IntentParser:
         # 过滤空串和极短串
         return [p.strip() for p in parts if len(p.strip()) >= 2]
 
-    def _suggest_modules(self, text_lower: str, action: str, entities: Dict) -> List[str]:
+    def _suggest_modules(self, text_lower: str, action: str, entities: dict) -> list[str]:
         """建议候选模块"""
         hints = []
         # 基于实体推荐
@@ -378,7 +377,7 @@ class IntentParser:
         return list(dict.fromkeys(hints))[:10]  # 去重+限制
 
     def _calculate_confidence(self, intent_type: str, action: str, 
-                               modules_hint: List[str], entities: Dict) -> float:
+                               modules_hint: list[str], entities: dict) -> float:
         """计算置信度"""
         score = 0.3  # 基础分
         if action != "query":  # 有明确动作
@@ -409,7 +408,7 @@ class ConversationManager:
         self._init_db()
         
         # 内存缓存: session_id -> turns
-        self._sessions: Dict[str, List[ConversationTurn]] = {}
+        self._sessions: dict[str, list[ConversationTurn]] = {}
         self._max_turns_per_session = 50
 
     def _init_db(self):
@@ -451,7 +450,7 @@ class ConversationManager:
         return session_id
 
     def add_turn(self, session_id: str, user_input: str, 
-                 intent: ParsedIntent, response: Dict, modules_used: List[str] = None) -> ConversationTurn:
+                 intent: ParsedIntent, response: dict, modules_used: list[str] = None) -> ConversationTurn:
         """添加对话轮次"""
         turn = ConversationTurn(
             id=str(uuid.uuid4())[:12],
@@ -487,7 +486,7 @@ class ConversationManager:
         
         return turn
 
-    def get_context(self, session_id: str, last_n: int = 5) -> Dict:
+    def get_context(self, session_id: str, last_n: int = 5) -> dict:
         """获取对话上下文(最近N轮)"""
         turns = self._sessions.get(session_id, [])
         if not turns:
@@ -529,7 +528,7 @@ class ConversationManager:
             "last_action": recent[-1].parsed_intent.get("primary_action", "") if recent else "",
         }
 
-    def get_recent_modules(self, session_id: str, top_n: int = 5) -> List[str]:
+    def get_recent_modules(self, session_id: str, top_n: int = 5) -> list[str]:
         """获取最近使用的模块"""
         ctx = self.get_context(session_id)
         return ctx["last_modules"][-top_n:]
@@ -567,7 +566,7 @@ class DataFlowMapper:
         "score": ["score", "rating", "confidence"],
     }
 
-    def build_data_flow(self, steps: List[Dict], capability_graph: Any = None) -> Dict[str, str]:
+    def build_data_flow(self, steps: list[dict], capability_graph: Any = None) -> dict[str, str]:
         """
         为工作流步骤构建数据流映射
         
@@ -607,7 +606,7 @@ class DataFlowMapper:
         
         return mappings
 
-    def _guess_output_key(self, src_step: Dict, target_param: str) -> str:
+    def _guess_output_key(self, src_step: dict, target_param: str) -> str:
         """猜测源步骤的输出键名"""
         src_action = src_step.get("action", "")
         module = src_step.get("module_id", "")
@@ -653,7 +652,7 @@ class WorkflowPlanner:
     def __init__(self, capability_graph: Any = None):
         self.graph = capability_graph
         self.data_flow_mapper = DataFlowMapper()
-        self._plan_cache: Dict[str, WorkflowPlan] = {}
+        self._plan_cache: dict[str, WorkflowPlan] = {}
 
     def plan(self, task: str, intent: ParsedIntent) -> WorkflowPlan:
         """
@@ -674,7 +673,7 @@ class WorkflowPlanner:
             cached = self._plan_cache[cache_key]
             try:
                 created = datetime.fromisoformat(cached.created_at)
-                if datetime.now(timezone.utc) - created > timedelta(minutes=5):
+                if datetime.now(UTC) - created > timedelta(minutes=5):
                     del self._plan_cache[cache_key]
                 else:
                     # github相关任务不使用缓存（需要实时数据）
@@ -723,7 +722,7 @@ class WorkflowPlanner:
         self._plan_cache[cache_key] = plan
         return plan
 
-    def _plan_multi_step(self, sub_tasks: List[str], intent: ParsedIntent) -> List[WorkflowStep]:
+    def _plan_multi_step(self, sub_tasks: list[str], intent: ParsedIntent) -> list[WorkflowStep]:
         """规划多步任务"""
         steps = []
         for i, sub_task in enumerate(sub_tasks):
@@ -750,7 +749,7 @@ class WorkflowPlanner:
             steps.append(step)
         return steps
 
-    def _plan_single_module(self, intent: ParsedIntent) -> List[WorkflowStep]:
+    def _plan_single_module(self, intent: ParsedIntent) -> list[WorkflowStep]:
         """规划单模块任务"""
         module_id = intent.modules_hint[0]
         action = intent.primary_action
@@ -769,7 +768,7 @@ class WorkflowPlanner:
             )
         ]
 
-    def _plan_smart_chain(self, task: str, intent: ParsedIntent) -> List[WorkflowStep]:
+    def _plan_smart_chain(self, task: str, intent: ParsedIntent) -> list[WorkflowStep]:
         """智能链规划 — 基于动作和模块建议生成最优链"""
         steps = []
         modules = intent.modules_hint[:5]  # 最多5步
@@ -830,7 +829,7 @@ class IntelligentCoordinator:
         }
         
         # 经验库: 意图→模块 映射的成功率
-        self._intent_module_experience: Dict[str, Dict[str, Dict]] = defaultdict(
+        self._intent_module_experience: dict[str, dict[str, dict]] = defaultdict(
             lambda: defaultdict(lambda: {"success": 0, "fail": 0, "total_ms": 0})
         )
         
@@ -839,7 +838,7 @@ class IntelligentCoordinator:
     # ── 核心入口 ──
 
     async def process(self, task: str, session_id: str = None, 
-                      module_executor: Any = None) -> Dict:
+                      module_executor: Any = None) -> dict:
         """
         智能处理任务 — 完整闭环
         
@@ -904,7 +903,7 @@ class IntelligentCoordinator:
             "matched_by": "intelligent_coordinator",
         }
 
-    async def _execute_workflow(self, plan: WorkflowPlan, module_executor: Any) -> Dict:
+    async def _execute_workflow(self, plan: WorkflowPlan, module_executor: Any) -> dict:
         """
         执行工作流计划
         
@@ -967,7 +966,7 @@ class IntelligentCoordinator:
                     if step_dict.get("retry", 0) > 0:
                         logger.warning(f"[Workflow] 步骤 {step_id} 失败: {result.get('error', '')}")
                     
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 step_results.append({
                     "step_id": step_id, "module_id": module_id, "action": action,
                     "success": False, "error": "timeout", "output": None,
@@ -987,8 +986,8 @@ class IntelligentCoordinator:
             "summary": f"{success_count}成功/{fail_count}失败 共{len(step_results)}步",
         }
 
-    def _resolve_mapping(self, mapping: Dict[str, str], 
-                          shared_output: Dict, step_results: List[Dict]) -> Dict:
+    def _resolve_mapping(self, mapping: dict[str, str], 
+                          shared_output: dict, step_results: list[dict]) -> dict:
         """解析数据流映射"""
         resolved = {}
         for param_name, expr in mapping.items():
@@ -1018,7 +1017,7 @@ class IntelligentCoordinator:
                     resolved[param_name] = shared_output[key]
         return resolved
 
-    def _enhance_with_experience(self, intent: ParsedIntent, context: Dict) -> ParsedIntent:
+    def _enhance_with_experience(self, intent: ParsedIntent, context: dict) -> ParsedIntent:
         """结合历史经验优化模块推荐"""
         intent_key = f"{intent.primary_action}:{intent.intent_type}"
         exp = self._intent_module_experience.get(intent_key, {})
@@ -1040,7 +1039,7 @@ class IntelligentCoordinator:
         
         return intent
 
-    def _update_experience(self, intent: ParsedIntent, result: Dict, start_time: float):
+    def _update_experience(self, intent: ParsedIntent, result: dict, start_time: float):
         """更新执行经验"""
         duration = int((time.monotonic() - start_time) * 1000)
         intent_key = f"{intent.primary_action}:{intent.intent_type}"
@@ -1060,7 +1059,7 @@ class IntelligentCoordinator:
 
     # ── 查询接口 ──
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取智能协调器统计"""
         return {
             "total_intents": self._stats["total_intents"],
@@ -1071,7 +1070,7 @@ class IntelligentCoordinator:
             "experience_entries": sum(len(v) for v in self._intent_module_experience.values()),
         }
 
-    def get_experience(self, intent_key: str = None) -> Dict:
+    def get_experience(self, intent_key: str = None) -> dict:
         """获取执行经验"""
         if intent_key:
             return {intent_key: dict(self._intent_module_experience.get(intent_key, {}))}
@@ -1080,7 +1079,7 @@ class IntelligentCoordinator:
             for k, v in self._intent_module_experience.items()
         }
 
-    def parse_only(self, text: str, session_id: str = None) -> Dict:
+    def parse_only(self, text: str, session_id: str = None) -> dict:
         """仅解析意图(不执行)"""
         session_id = self.conversation_mgr.get_or_create_session(session_id)
         context = self.conversation_mgr.get_context(session_id)
@@ -1096,11 +1095,11 @@ class IntelligentCoordinator:
             "session_id": session_id,
         }
 
-    def get_session_context(self, session_id: str) -> Dict:
+    def get_session_context(self, session_id: str) -> dict:
         """获取会话上下文"""
         return self.conversation_mgr.get_context(session_id)
 
-    def get_conversation_history(self, session_id: str, limit: int = 20) -> List[Dict]:
+    def get_conversation_history(self, session_id: str, limit: int = 20) -> list[dict]:
         """获取对话历史"""
         ctx = self.conversation_mgr.get_context(session_id, last_n=limit)
         return ctx.get("recent_turns", [])

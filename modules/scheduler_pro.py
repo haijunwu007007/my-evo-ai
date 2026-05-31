@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 高级调度器（A级）
 # Grade: B
 
@@ -8,7 +7,8 @@ __module_meta__ = {"id":"scheduler-pro","name":"Scheduler Pro","version":"V0.1",
     "tags":["system","scheduler","pro"],"description":"Advanced scheduler with cron, retry, pause/resume"}
 import time, uuid, logging, heapq, threading
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
 from modules._persist import PersistMixin
 
@@ -17,8 +17,8 @@ class SchedulerPro(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseM
     MODULE_ID="scheduler-pro";MODULE_NAME="高级调度器";VERSION="v1.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
         super().__init__(config)
-        self._tasks: List[Dict] = []
-        self._running=False;self._paused=False;self._thread:Optional[threading.Thread]=None
+        self._tasks: list[dict] = []
+        self._running=False;self._paused=False;self._thread:threading.Thread | None=None
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:
         return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"tasks":len(self._tasks),"running":self._running})

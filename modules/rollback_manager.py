@@ -102,17 +102,17 @@ class RollbackPlanner:
     """
 
     def __init__(self, max_checkpoints: int = 100):
-        self._checkpoints: Dict[str, Dict] = {}  # checkpoint_id -> data
-        self._target_checkpoints: Dict[str, str] = {}  # target_id -> checkpoint_id
-        self._rollback_history: List[Dict] = []
+        self._checkpoints: dict[str, dict] = {}  # checkpoint_id -> data
+        self._target_checkpoints: dict[str, str] = {}  # target_id -> checkpoint_id
+        self._rollback_history: list[dict] = []
         self._max_checkpoints = max_checkpoints
         self._total_checkpoints = 0
         self._total_rollbacks = 0
         self._total_auto_rollbacks = 0
 
     def create_checkpoint(
-        self, target_id: str, snapshot: Dict, description: str = "", labels: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        self, target_id: str, snapshot: dict, description: str = "", labels: list[str] | None = None
+    ) -> dict[str, Any]:
         """创建检查点。企业场景：部署前保存当前版本快照，
         包括配置、代码版本、数据库Schema、环境变量等。
         回滚时恢复到该快照状态。
@@ -150,8 +150,8 @@ class RollbackPlanner:
         }
 
     def rollback_to(
-        self, target_id: str, checkpoint_id: Optional[str] = None, reason: str = "", dry_run: bool = False
-    ) -> Dict[str, Any]:
+        self, target_id: str, checkpoint_id: str | None = None, reason: str = "", dry_run: bool = False
+    ) -> dict[str, Any]:
         """执行回滚。企业场景：生产环境出问题后紧急回滚到上一个稳定版本。
         支持dry_run预览回滚影响，不实际执行。
         如果未指定checkpoint_id，则回滚到该target的最新检查点。
@@ -204,7 +204,7 @@ class RollbackPlanner:
             "description": cp.get("description", ""),
         }
 
-    def _compute_diff(self, target_id: str, checkpoint: Dict) -> Dict[str, Any]:
+    def _compute_diff(self, target_id: str, checkpoint: dict) -> dict[str, Any]:
         """计算回滚差异。企业场景：dry_run时展示回滚会影响哪些配置项。"""
         snapshot = checkpoint.get("snapshot", {})
         current = {}
@@ -225,7 +225,7 @@ class RollbackPlanner:
             "checkpoint_labels": checkpoint.get("labels", []),
         }
 
-    def auto_rollback_check(self, target_id: str, health_checks: Dict[str, bool]) -> Dict[str, Any]:
+    def auto_rollback_check(self, target_id: str, health_checks: dict[str, bool]) -> dict[str, Any]:
         """自动回滚决策。企业场景：部署后健康检查失败时自动判断是否需要回滚。
         基于规则引擎：连续N次检查失败则触发自动回滚。
         """
@@ -250,7 +250,7 @@ class RollbackPlanner:
                 result["available_checkpoint"] = cp_id
         return result
 
-    def diff_checkpoints(self, cp_id_1: str, cp_id_2: str) -> Dict[str, Any]:
+    def diff_checkpoints(self, cp_id_1: str, cp_id_2: str) -> dict[str, Any]:
         """对比两个检查点。企业场景：发布前对比新旧版本的配置差异，
         确认变更内容。
         """
@@ -287,7 +287,7 @@ class RollbackPlanner:
             "changes": changes[:50],
         }
 
-    def list_checkpoints(self, target_id: Optional[str] = None, limit: int = 20) -> List[Dict]:
+    def list_checkpoints(self, target_id: str | None = None, limit: int = 20) -> list[dict]:
         """列出检查点。企业场景：选择回滚目标版本。"""
         cps = list(self._checkpoints.values())
         if target_id:
@@ -306,7 +306,7 @@ class RollbackPlanner:
             for c in cps[:limit]
         ]
 
-    def get_rollback_history(self, target_id: Optional[str] = None, limit: int = 20) -> List[Dict]:
+    def get_rollback_history(self, target_id: str | None = None, limit: int = 20) -> list[dict]:
         """获取回滚历史。企业场景：复盘故障时查看回滚记录。"""
         history = self._rollback_history
         if target_id:
@@ -327,7 +327,7 @@ class RollbackPlanner:
             for h in history[:limit]
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取回滚统计。企业场景：度量回滚频率辅助发布质量评估。"""
         return {
             "total_checkpoints": len(self._checkpoints),
@@ -349,20 +349,20 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     6. 回滚频率统计
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("rollback_manager")
         self._planner = RollbackPlanner(max_checkpoints=self.config.get("max_checkpoints", 100))
@@ -476,7 +476,7 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_rollback_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_rollback_history(self, limit: int = 20) -> dict[str, Any]:
         """回滚历史记录。企业场景：审计复盘过去30天的回滚操作，
         分析回滚原因分布（发布失败/数据损坏/配置错误）。
         """
@@ -494,7 +494,7 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recent": recent,
         }
 
-    def pre_rollback_check(self, target_version: str) -> Dict[str, Any]:
+    def pre_rollback_check(self, target_version: str) -> dict[str, Any]:
         """回滚前检查。企业场景：正式回滚前验证目标版本是否可用、
         数据库schema是否兼容、依赖服务是否支持旧版本。
         """
@@ -523,7 +523,7 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         all_pass = all(c["status"] == "pass" for c in checks)
         return {"success": True, "can_rollback": all_pass, "target_version": target_version, "checks": checks}
 
-    def get_rollback_diff(self, version_from: str, version_to: str) -> Dict[str, Any]:
+    def get_rollback_diff(self, version_from: str, version_to: str) -> dict[str, Any]:
         """版本变更差异对比。企业场景：回滚前预览两个版本间的配置、
         数据库迁移、API接口等变更项，评估回滚影响范围。
         """
@@ -562,7 +562,7 @@ class RollbackManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "changes": changes,
         }
 
-    def schedule_rollback(self, version: str, scheduled_time: float) -> Dict[str, Any]:
+    def schedule_rollback(self, version: str, scheduled_time: float) -> dict[str, Any]:
         """定时回滚。企业场景：凌晨低峰期自动回滚，避免影响在线业务。
         设置后由调度系统在指定时间执行。
         """

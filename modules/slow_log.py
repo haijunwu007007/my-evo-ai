@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class SlowQueryAnalyzer(object):
+class SlowQueryAnalyzer:
     """slow_log 运营分析引擎
 
     - 分析慢查询趋势
@@ -116,7 +116,7 @@ class SlowQueryAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "SlowQueryAnalyzer", "module": "slow_log", "summary": summary}
 
-class SlowLogAnalyzer(object):
+class SlowLogAnalyzer:
     """slow log 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -274,18 +274,18 @@ class SlowLogPatternExtractor:
 class SlowLog(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """慢日志分析"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"slow_log")
 

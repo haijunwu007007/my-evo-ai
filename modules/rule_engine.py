@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - RuleEngine 规则引擎
@@ -86,7 +85,8 @@ import asyncio
 import re
 from core.logging_config import get_logger
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Set
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field as dc_field
 from enum import Enum
 from collections import defaultdict
@@ -152,9 +152,9 @@ class Condition:
     value: Any = None
     value2: Any = None  # 用于BETWEEN
     logical: LogicalOperator = LogicalOperator.AND
-    conditions: List["Condition"] = dc_field(default_factory=list)  # 嵌套条件
+    conditions: list[Condition] = dc_field(default_factory=list)  # 嵌套条件
 
-    def evaluate(self, facts: Dict[str, Any]) -> bool:
+    def evaluate(self, facts: dict[str, Any]) -> bool:
         """评估条件"""
         if self.conditions:
             # 嵌套逻辑
@@ -206,7 +206,7 @@ class Condition:
             return self._field_exists(facts, self.field)
         return False
 
-    def _get_field_value(self, facts: Dict) -> Any:
+    def _get_field_value(self, facts: dict) -> Any:
         """支持点号路径获取值"""
         parts = self.field.split(".")
         current = facts
@@ -219,7 +219,7 @@ class Condition:
             return None
         return current
 
-    def _field_exists(self, facts: Dict, field_path: str) -> bool:
+    def _field_exists(self, facts: dict, field_path: str) -> bool:
         parts = field_path.split(".")
         current = facts
         for part in parts:
@@ -238,7 +238,7 @@ class Condition:
         except (TypeError, ValueError):
             return False
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         if self.conditions:
             return {"logical": self.logical.value, "conditions": [c.to_dict() for c in self.conditions]}
         return {"field": self.field, "operator": self.operator.value, "value": self.value}
@@ -248,7 +248,7 @@ class Action:
     """动作"""
 
     action_type: str = ""  # set_value, notify, call_api, log, etc.
-    params: Dict[str, Any] = dc_field(default_factory=dict)
+    params: dict[str, Any] = dc_field(default_factory=dict)
     priority: int = 0
 
 @dataclass
@@ -259,16 +259,16 @@ class Rule:
     name: str = ""
     description: str = ""
     group: str = "default"
-    condition: Optional[Condition] = None
-    actions: List[Action] = dc_field(default_factory=list)
+    condition: Condition | None = None
+    actions: list[Action] = dc_field(default_factory=list)
     priority: int = 100  # 越高越优先
     status: RuleStatus = RuleStatus.ENABLED
-    effective_from: Optional[str] = None
-    effective_until: Optional[str] = None
-    tags: List[str] = dc_field(default_factory=list)
+    effective_from: str | None = None
+    effective_until: str | None = None
+    tags: list[str] = dc_field(default_factory=list)
     version: int = 1
     fire_count: int = 0
-    last_fired: Optional[str] = None
+    last_fired: str | None = None
     created_at: str = dc_field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = dc_field(default_factory=lambda: datetime.now().isoformat())
 
@@ -281,10 +281,10 @@ class RuleExecution:
     rule_name: str = ""
     group: str = ""
     matched: bool = False
-    facts_snapshot: Dict[str, Any] = dc_field(default_factory=dict)
-    actions_taken: List[str] = dc_field(default_factory=list)
+    facts_snapshot: dict[str, Any] = dc_field(default_factory=dict)
+    actions_taken: list[str] = dc_field(default_factory=list)
     execution_time_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     timestamp: str = dc_field(default_factory=lambda: datetime.now().isoformat())
 
 # ============================================================================
@@ -308,21 +308,21 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 热更新
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 规则存储
-        self._rules: Dict[str, Rule] = {}
-        self._rules_by_group: Dict[str, List[str]] = defaultdict(list)
+        self._rules: dict[str, Rule] = {}
+        self._rules_by_group: dict[str, list[str]] = defaultdict(list)
         # 动作处理器
-        self._action_handlers: Dict[str, Callable] = {}
+        self._action_handlers: dict[str, Callable] = {}
         # 事实库
-        self._facts: Dict[str, Dict[str, Any]] = {}
+        self._facts: dict[str, dict[str, Any]] = {}
         # 冲突解决策略
         self._conflict_strategy = ConflictStrategy(self.config.get("conflict_strategy", "first_match"))
         # 执行历史
-        self._execution_history: List[RuleExecution] = []
+        self._execution_history: list[RuleExecution] = []
         self._execution_history_max = 10000
         # 统计
         self._re_stats = {
@@ -434,7 +434,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 规则管理
     # ----------------------------------------------------------------
 
-    def add_rule(self, rule_cfg: Dict) -> Result:
+    def add_rule(self, rule_cfg: dict) -> Result:
         """添加规则"""
         condition = self._build_condition(rule_cfg.get("condition", {}))
         actions = [
@@ -478,7 +478,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._update_stats()
         return Result(success=True)
 
-    def _build_condition(self, cond_cfg: Dict) -> Condition:
+    def _build_condition(self, cond_cfg: dict) -> Condition:
         """从配置构建条件"""
         if "logical" in cond_cfg:
             return Condition(
@@ -499,7 +499,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def register_action_handler(self, action_type: str, handler: Callable):
         self._action_handlers[action_type] = handler
 
-    def _execute_action(self, action: Action, facts: Dict, context: Dict) -> str:
+    def _execute_action(self, action: Action, facts: dict, context: dict) -> str:
         handler = self._action_handlers.get(action.action_type)
         if handler:
             try:
@@ -518,12 +518,12 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def evaluate(
         self,
-        facts: Dict[str, Any],
+        facts: dict[str, Any],
         *,
-        groups: Optional[List[str]] = None,
-        rule_ids: Optional[List[str]] = None,
-        context: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        groups: list[str] | None = None,
+        rule_ids: list[str] | None = None,
+        context: dict | None = None,
+    ) -> dict[str, Any]:
         """
         评估规则
 
@@ -608,7 +608,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.record_request((time.time() - start) * 1000, False, str(e))
             return {"matched": 0, "resolved": 0, "error": str(e)}
 
-    def _get_candidates(self, groups: Optional[List[str]], rule_ids: Optional[List[str]]) -> List[Rule]:
+    def _get_candidates(self, groups: list[str] | None, rule_ids: list[str] | None) -> list[Rule]:
         if rule_ids:
             return [self._rules[rid] for rid in rule_ids if rid in self._rules]
         if groups:
@@ -618,7 +618,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return [self._rules[rid] for rid in candidate_ids if rid in self._rules]
         return [r for r in self._rules.values()]
 
-    def _resolve_conflicts(self, matches: List[Dict]) -> List[Dict]:
+    def _resolve_conflicts(self, matches: list[dict]) -> list[dict]:
         """冲突解决"""
         if not matches:
             return []
@@ -637,11 +637,11 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 事实管理
     # ----------------------------------------------------------------
 
-    def set_facts(self, key: str, facts: Dict[str, Any]) -> Result:
+    def set_facts(self, key: str, facts: dict[str, Any]) -> Result:
         self._facts[key] = facts
         return Result(success=True)
 
-    def get_facts(self, key: str) -> Dict:
+    def get_facts(self, key: str) -> dict:
         return self._facts.get(key, {})
 
     def update_fact(self, key: str, field_path: str, value: Any) -> Result:
@@ -673,7 +673,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self._re_stats,
             "handlers": len(self._action_handlers),
@@ -681,7 +681,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def list_rules(self, group: Optional[str] = None) -> List[Dict]:
+    def list_rules(self, group: str | None = None) -> list[dict]:
         result = []
         for r in self._rules.values():
             if group and r.group != group:
@@ -700,7 +700,7 @@ class RuleEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return sorted(result, key=lambda x: x["priority"], reverse=True)
 
-    def get_execution_history(self, rule_id: Optional[str] = None, limit: int = 50) -> List[Dict]:
+    def get_execution_history(self, rule_id: str | None = None, limit: int = 50) -> list[dict]:
         result = self._execution_history
         if rule_id:
             result = [e for e in result if e.rule_id == rule_id]

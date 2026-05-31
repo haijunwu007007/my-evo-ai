@@ -167,7 +167,7 @@ class ReviewRule:
     severity: Severity
     description: str
     pattern: str = ""
-    check_fn: Optional[str] = None
+    check_fn: str | None = None
     auto_fix: bool = False
 
 @dataclass
@@ -193,9 +193,9 @@ class ReviewResult:
     file_path: str
     language: str
     total_lines: int = 0
-    issues: List[ReviewIssue] = field(default_factory=list)
+    issues: list[ReviewIssue] = field(default_factory=list)
     score: float = 100.0
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
     duration_ms: float = 0.0
     reviewed_at: float = field(default_factory=time.time)
 
@@ -215,13 +215,13 @@ class CodeMetrics:
     max_function_length: int = 0
     duplication_ratio: float = 0.0
 
-class ReviewPatternAnalyzer(object):
+class ReviewPatternAnalyzer:
     """代码审查模式分析器 — 识别重复代码、复杂度热点、风格偏差"""
 
     def __init__(self):
-        self._complexity_cache: Dict[str, int] = {}
+        self._complexity_cache: dict[str, int] = {}
 
-    def analyze_complexity(self, code: str) -> Dict[str, Any]:
+    def analyze_complexity(self, code: str) -> dict[str, Any]:
         """分析代码复杂度：圈复杂度、嵌套深度、函数长度"""
         lines = code.split("\n")
         functions = self._extract_functions(lines)
@@ -250,7 +250,7 @@ class ReviewPatternAnalyzer(object):
             "functions": results,
         }
 
-    def detect_code_smells(self, code: str) -> List[Dict[str, Any]]:
+    def detect_code_smells(self, code: str) -> list[dict[str, Any]]:
         """检测代码异味：过长函数、过深嵌套、魔法数字、重复代码"""
         smells = []
         lines = code.split("\n")
@@ -332,8 +332,8 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         self.module_name = "code_review"
         self.module_id = self.module_name
-        self._rules: List[ReviewRule] = []
-        self._results: List[ReviewResult] = []
+        self._rules: list[ReviewRule] = []
+        self._results: list[ReviewResult] = []
         self._max_file_size = 500000
         self._supported_languages = {"python": ".py", "javascript": ".js", "typescript": ".ts"}
 
@@ -527,12 +527,12 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ),
         ]
 
-    def review_code(self, file_path: str, content: Optional[str] = None, language: str = "") -> Dict[str, Any]:
+    def review_code(self, file_path: str, content: str | None = None, language: str = "") -> dict[str, Any]:
         """审查代码文件"""
         start = time.time()
 
         if content is None:
-            with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+            with open(file_path, encoding="utf-8", errors="replace") as f:
                 content = f.read()
 
         ext = os.path.splitext(file_path)[1].lower()
@@ -605,7 +605,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return lang_map.get(ext, "unknown")
 
-    def _compute_metrics(self, content: str, language: str) -> Dict[str, Any]:
+    def _compute_metrics(self, content: str, language: str) -> dict[str, Any]:
         """计算代码度量"""
         lines = content.split("\n")
         total = len(lines)
@@ -619,11 +619,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             stripped = line.strip()
             if not stripped:
                 blank_lines += 1
-            elif stripped.startswith("#") or stripped.startswith("//"):
-                comment_lines += 1
-            elif stripped.startswith('"""') or stripped.startswith("'''"):
-                comment_lines += 1
-            elif in_multiline_string:
+            elif stripped.startswith("#") or stripped.startswith("//") or stripped.startswith('"""') or stripped.startswith("'''") or in_multiline_string:
                 comment_lines += 1
             else:
                 code_lines += 1
@@ -675,7 +671,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     complexity += len(node.values) - 1
         return complexity
 
-    def _check_pattern_rule(self, rule: ReviewRule, lines: List[str], file_path: str) -> List[ReviewIssue]:
+    def _check_pattern_rule(self, rule: ReviewRule, lines: list[str], file_path: str) -> list[ReviewIssue]:
         """基于正则的规则检查"""
         issues = []
         try:
@@ -701,7 +697,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 )
         return issues
 
-    def _check_python_structure(self, content: str, file_path: str) -> List[ReviewIssue]:
+    def _check_python_structure(self, content: str, file_path: str) -> list[ReviewIssue]:
         """Python结构化检查"""
         issues = []
         try:
@@ -864,7 +860,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return suggestions.get(rule_id, "")
 
-    def _calculate_score(self, issues: List[ReviewIssue], total_lines: int) -> float:
+    def _calculate_score(self, issues: list[ReviewIssue], total_lines: int) -> float:
         """计算审查评分"""
         if not issues:
             return 100.0
@@ -879,7 +875,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         score = max(0, 100 - total_deduction)
         return score
 
-    def batch_review(self, file_paths: List[str]) -> Dict[str, Any]:
+    def batch_review(self, file_paths: list[str]) -> dict[str, Any]:
         """批量审查"""
         results = []
         for path in file_paths:
@@ -903,7 +899,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "results": results,
         }
 
-    def get_review_history(self, limit: int = 50) -> List[Dict]:
+    def get_review_history(self, limit: int = 50) -> list[dict]:
         return [
             {
                 "review_id": r.review_id,
@@ -916,7 +912,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for r in reversed(self._results[-limit:])
         ]
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -942,7 +938,7 @@ class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
         logger.info(f"关闭代码审查引擎，共审查 {len(self._results)} 个文件")
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         _ = self.trace("execute")
         metrics_collector.counter("code_review_ops_total", labels={"action": action})

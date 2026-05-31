@@ -15,11 +15,7 @@ for f in sorted(api_dir.glob("routes_*.py")):
             if next_line.startswith("    "):
                 stripped = next_line[4:]
                 # 处理 async def
-                if stripped.startswith("async def"):
-                    lines[i + 1] = stripped
-                    changed = True
-                # 处理 """...""" (docstring)
-                elif stripped.startswith('"""'):
+                if stripped.startswith("async def") or stripped.startswith('"""'):
                     lines[i + 1] = stripped
                     changed = True
     if changed:

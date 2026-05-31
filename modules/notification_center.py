@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class NotificationCenterAnalyzer(object):
+class NotificationCenterAnalyzer:
     """notification_center 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -293,7 +294,7 @@ class NotificationTemplate:
     subject: str = ""
     body: str = ""
     engine: TemplateEngine = TemplateEngine.FORMAT
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     locale: str = "en"
     version: int = 1
     created_at: float = field(default_factory=time.time)
@@ -302,7 +303,7 @@ class NotificationTemplate:
 @dataclass
 class UserPreference:
     user_id: str
-    channel_preferences: Dict[str, bool] = field(
+    channel_preferences: dict[str, bool] = field(
         default_factory=lambda: {"email": True, "sms": False, "push": True, "in_app": True, "slack": False}
     )
     quiet_hours_start: int = 22
@@ -310,8 +311,8 @@ class UserPreference:
     timezone: str = "UTC"
     digest_mode: bool = False
     digest_interval: str = "daily"
-    categories_enabled: List[str] = field(default_factory=lambda: ["system", "security", "updates"])
-    categories_disabled: List[str] = field(default_factory=list)
+    categories_enabled: list[str] = field(default_factory=lambda: ["system", "security", "updates"])
+    categories_disabled: list[str] = field(default_factory=list)
     max_per_day: int = 50
     language: str = "en"
 
@@ -324,9 +325,9 @@ class Notification:
     category: str = "system"
     subject: str = ""
     body: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     template_id: str = ""
-    template_vars: Dict[str, str] = field(default_factory=dict)
+    template_vars: dict[str, str] = field(default_factory=dict)
     sender_id: str = "system"
     status: DeliveryStatus = DeliveryStatus.PENDING
     created_at: float = field(default_factory=time.time)
@@ -338,7 +339,7 @@ class Notification:
     max_retries: int = 3
     delivery_channel_id: str = ""
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DeliveryLog:
@@ -357,7 +358,7 @@ class DeliveryLog:
 @dataclass
 class NotificationBatch:
     batch_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
-    notifications: List[Notification] = field(default_factory=list)
+    notifications: list[Notification] = field(default_factory=list)
     scheduled_at: float = 0.0
     created_at: float = field(default_factory=time.time)
     total_count: int = 0
@@ -376,13 +377,13 @@ class ChannelConfig:
     batch_size: int = 100
     retry_delay_ms: float = 1000.0
     timeout_ms: int = 10000
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class DigestConfig:
     digest_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     user_id: str = ""
-    channels: List[ChannelType] = field(default_factory=list)
+    channels: list[ChannelType] = field(default_factory=list)
     interval: str = "daily"
     subject_template: str = "Your {count} updates"
     max_items: int = 20
@@ -412,17 +413,17 @@ class NotificationCenter:
     """Enterprise multi-channel notification system with templates and delivery tracking."""
 
     def __init__(self):
-        self._templates: Dict[str, Dict[str, NotificationTemplate]] = defaultdict(dict)
-        self._preferences: Dict[str, UserPreference] = {}
-        self._notifications: Dict[str, Notification] = {}
-        self._delivery_logs: List[DeliveryLog] = []
-        self._batches: Dict[str, NotificationBatch] = {}
-        self._channel_configs: Dict[ChannelType, ChannelConfig] = {}
-        self._digest_configs: Dict[str, DigestConfig] = {}
+        self._templates: dict[str, dict[str, NotificationTemplate]] = defaultdict(dict)
+        self._preferences: dict[str, UserPreference] = {}
+        self._notifications: dict[str, Notification] = {}
+        self._delivery_logs: list[DeliveryLog] = []
+        self._batches: dict[str, NotificationBatch] = {}
+        self._channel_configs: dict[ChannelType, ChannelConfig] = {}
+        self._digest_configs: dict[str, DigestConfig] = {}
         self._queue: deque = deque(maxlen=50000)
-        self._rate_counters: Dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
-        self._suppressed: Set[str] = set()
-        self._hooks: Dict[str, List[Callable]] = {
+        self._rate_counters: dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
+        self._suppressed: set[str] = set()
+        self._hooks: dict[str, list[Callable]] = {
             "before_send": [],
             "after_send": [],
             "on_read": [],
@@ -520,8 +521,8 @@ class NotificationCenter:
         priority: NotificationPriority = NotificationPriority.NORMAL,
         category: str = "system",
         template_id: str = "",
-        template_vars: Optional[Dict[str, str]] = None,
-        data: Optional[Dict] = None,
+        template_vars: dict[str, str] | None = None,
+        data: dict | None = None,
         expires_in: int = 0,
     ) -> Notification:
         rendered_subject = subject
@@ -557,13 +558,13 @@ class NotificationCenter:
 
     def send_batch(
         self,
-        recipient_ids: List[str],
+        recipient_ids: list[str],
         subject: str,
         body: str,
         channel: ChannelType = ChannelType.IN_APP,
         category: str = "system",
         template_id: str = "",
-        template_vars: Optional[Dict[str, str]] = None,
+        template_vars: dict[str, str] | None = None,
     ) -> NotificationBatch:
         batch = NotificationBatch()
         for rid in recipient_ids:
@@ -581,10 +582,10 @@ class NotificationCenter:
         recipient_id: str,
         subject: str,
         body: str,
-        channels: Optional[List[ChannelType]] = None,
+        channels: list[ChannelType] | None = None,
         priority: NotificationPriority = NotificationPriority.NORMAL,
         category: str = "system",
-    ) -> List[Notification]:
+    ) -> list[Notification]:
         prefs = self._preferences.get(recipient_id)
         target_channels = channels or []
         if prefs and not target_channels:
@@ -624,7 +625,7 @@ class NotificationCenter:
 
     def get_user_notifications(
         self, recipient_id: str, unread_only: bool = False, limit: int = 50, offset: int = 0
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         with self._lock:
             notifs = [n for n in self._notifications.values() if n.recipient_id == recipient_id]
             if unread_only:
@@ -649,7 +650,7 @@ class NotificationCenter:
         with self._lock:
             self._preferences[user_id] = preference
 
-    def get_preference(self, user_id: str) -> Optional[UserPreference]:
+    def get_preference(self, user_id: str) -> UserPreference | None:
         return self._preferences.get(user_id)
 
     def suppress(self, recipient_id: str, reason: str = "") -> None:
@@ -668,7 +669,7 @@ class NotificationCenter:
         with self._lock:
             self._channel_configs[channel] = config
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             total = len(self._notifications)
             by_status = defaultdict(int)
@@ -690,10 +691,10 @@ class NotificationCenter:
                 "delivery_logs": len(self._delivery_logs),
             }
 
-    def _resolve_template(self, channel: ChannelType, template_id: str) -> Optional[NotificationTemplate]:
+    def _resolve_template(self, channel: ChannelType, template_id: str) -> NotificationTemplate | None:
         return self._templates.get(channel.value, {}).get(template_id)
 
-    def _render(self, template: str, variables: Dict[str, str]) -> str:
+    def _render(self, template: str, variables: dict[str, str]) -> str:
         try:
             return template.format(**variables)
         except (KeyError, IndexError):
@@ -703,7 +704,7 @@ class NotificationCenter:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

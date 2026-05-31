@@ -135,7 +135,7 @@ class Alert:
     name: str
     message: str
     severity: Severity
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     fingerprint: str = ""
     started_at: float = field(default_factory=time.time)
 
@@ -156,13 +156,13 @@ class Incident:
     assignee: str = ""
     team: str = ""
     source: AlertSource = AlertSource.SYSTEM
-    alerts: List[Alert] = field(default_factory=list)
-    actions: List[IncidentAction] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    affected_services: List[str] = field(default_factory=list)
+    alerts: list[Alert] = field(default_factory=list)
+    actions: list[IncidentAction] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    affected_services: list[str] = field(default_factory=list)
     root_cause: str = ""
     resolution: str = ""
-    timeline: List[Dict] = field(default_factory=list)
+    timeline: list[dict] = field(default_factory=list)
     sla_minutes: float = 60.0
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
@@ -172,28 +172,28 @@ class Incident:
 @dataclass
 class EscalationPolicy:
     name: str
-    levels: List[Dict[str, Any]] = field(default_factory=list)
-    notify_channels: List[str] = field(default_factory=list)
+    levels: list[dict[str, Any]] = field(default_factory=list)
+    notify_channels: list[str] = field(default_factory=list)
     repeat_interval: float = 300.0
 
 @dataclass
 class Runbook:
     name: str
     description: str = ""
-    steps: List[str] = field(default_factory=list)
+    steps: list[str] = field(default_factory=list)
     severity_match: Severity = Severity.MEDIUM
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-class ResponsePlaybookEngine(object):
+class ResponsePlaybookEngine:
     """响应剧本引擎 - 管理自动化响应剧本的匹配、执行和效果评估"""
 
     def __init__(self):
-        self._playbooks: Dict[str, Dict] = {}
-        self._execution_log: List[Dict] = []
+        self._playbooks: dict[str, dict] = {}
+        self._execution_log: list[dict] = []
         self._max_log = 1000
 
     def register_playbook(
-        self, playbook_id: str, match_rules: Dict, actions: List[Dict], severity_threshold: str = "P3"
+        self, playbook_id: str, match_rules: dict, actions: list[dict], severity_threshold: str = "P3"
     ) -> None:
         """注册响应剧本"""
         self._playbooks[playbook_id] = {
@@ -204,7 +204,7 @@ class ResponsePlaybookEngine(object):
         }
         metrics_collector.gauge("response_playbooks_count", len(self._playbooks))
 
-    def match_playbook(self, incident: Dict) -> List[Dict]:
+    def match_playbook(self, incident: dict) -> list[dict]:
         """匹配适用的剧本"""
         matched = []
         for pid, pb in self._playbooks.items():
@@ -221,7 +221,7 @@ class ResponsePlaybookEngine(object):
         metrics_collector.counter("response_playbook_matches", len(matched))
         return matched
 
-    def execute_playbook(self, playbook_id: str, incident_id: str) -> Dict:
+    def execute_playbook(self, playbook_id: str, incident_id: str) -> dict:
         """执行剧本"""
         pb = self._playbooks.get(playbook_id)
         if not pb:
@@ -252,13 +252,13 @@ class IncidentResponseModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     def __init__(self, config=None):
 
         super().__init__(config)
-        self._incidents: Dict[str, Incident] = {}
-        self._policies: Dict[str, EscalationPolicy] = {}
-        self._runbooks: Dict[str, Runbook] = {}
+        self._incidents: dict[str, Incident] = {}
+        self._policies: dict[str, EscalationPolicy] = {}
+        self._runbooks: dict[str, Runbook] = {}
         self._lock = threading.RLock()
         self._counter = 0
         self._stats = {"total": 0, "resolved": 0, "mttr_avg": 0, "by_severity": {}}
-        self._notification_log: List[Dict] = []
+        self._notification_log: list[dict] = []
 
     def _cfg(self, key, default):
         if self._config and isinstance(self._config, dict):
@@ -274,7 +274,7 @@ class IncidentResponseModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         inc.timeline.append(entry)
         inc.updated_at = time.time()
 
-    def _match_runbooks(self, inc: Incident) -> List[Runbook]:
+    def _match_runbooks(self, inc: Incident) -> list[Runbook]:
         matched = []
         for rb in self._runbooks.values():
             if rb.severity_match.value <= inc.severity.value:

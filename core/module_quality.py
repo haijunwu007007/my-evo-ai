@@ -11,7 +11,7 @@ EXECUTE_LIKE = {'execute', 'run', 'process', 'handle', 'analyze', 'search', 'que
                 'evolve', 'learn', 'optimize', 'sync', 'backup', 'restore', 'deploy'}
 
 
-def analyze_module(filepath: Path) -> Dict:
+def analyze_module(filepath: Path) -> dict:
     """分析单个模块文件的质量"""
     result = {
         "name": filepath.stem, "path": str(filepath.relative_to(MODULES_DIR.parent)),
@@ -60,7 +60,7 @@ def analyze_module(filepath: Path) -> Dict:
     return result
 
 
-def scan_all() -> Dict:
+def scan_all() -> dict:
     """扫描所有模块并返回分级统计"""
     if not MODULES_DIR.exists():
         return {"error": f"模块目录不存在: {MODULES_DIR}"}

@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MemgptAnalyzer(object):
+class MemgptAnalyzer:
     """memgpt 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -268,8 +268,8 @@ class MemoryBlock:
     accessed_at: float = field(default_factory=time.time)
     access_count: int = 0
     importance: float = 0.5
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     token_estimate: int = 0
     checksum: str = ""
 
@@ -296,7 +296,7 @@ class InsertResult:
     block_id: str
     tier: MemoryTier
     accepted: bool
-    evicted: List[str] = field(default_factory=list)
+    evicted: list[str] = field(default_factory=list)
     message: str = ""
 
 @dataclass
@@ -305,7 +305,7 @@ class SearchHit:
     content: str
     tier: MemoryTier
     score: float
-    highlights: List[str] = field(default_factory=list)
+    highlights: list[str] = field(default_factory=list)
 
 @dataclass
 class MemoryStats:
@@ -346,7 +346,7 @@ class MemGPT:
 
     """Enterprise-grade hierarchical memory management with context optimization."""
 
-    def __init__(self, config: Optional[MemoryConfig] = None):
+    def __init__(self, config: MemoryConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -381,8 +381,8 @@ class MemGPT:
         self._config = config or MemoryConfig()
         self._core: OrderedDict[str, MemoryBlock] = OrderedDict()
         self._recall: OrderedDict[str, MemoryBlock] = OrderedDict()
-        self._archival: Dict[str, MemoryBlock] = {}
-        self._tag_index: Dict[str, set] = {}
+        self._archival: dict[str, MemoryBlock] = {}
+        self._tag_index: dict[str, set] = {}
         self._lock = threading.RLock()
         self._stats = MemoryStats()
         self._initialized = False
@@ -410,10 +410,10 @@ class MemGPT:
     def insert(
         self,
         content: str,
-        tier: Optional[MemoryTier] = None,
+        tier: MemoryTier | None = None,
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict] = None,
+        tags: list[str] | None = None,
+        metadata: dict | None = None,
         force_tier: bool = False,
     ) -> InsertResult:
         if not self._initialized:
@@ -459,15 +459,15 @@ class MemGPT:
         return InsertResult(block.block_id, block.tier, True, evicted)
 
     def search(
-        self, query: str, max_results: int = 10, tiers: Optional[List[MemoryTier]] = None, min_score: float = 0.0
-    ) -> List[SearchHit]:
+        self, query: str, max_results: int = 10, tiers: list[MemoryTier] | None = None, min_score: float = 0.0
+    ) -> list[SearchHit]:
         if not self._initialized:
             raise RuntimeError("MemGPT not initialized")
 
         search_tiers = tiers or list(MemoryTier)
         query_lower = query.lower()
         query_terms = set(query_lower.split())
-        results: List[SearchHit] = []
+        results: list[SearchHit] = []
 
         sources = {MemoryTier.CORE: self._core, MemoryTier.RECALL: self._recall, MemoryTier.ARCHIVAL: self._archival}
 
@@ -500,7 +500,7 @@ class MemGPT:
         self._stats.searches += 1
         return results[:max_results]
 
-    def get_context(self, max_tokens: Optional[int] = None) -> Tuple[str, int]:
+    def get_context(self, max_tokens: int | None = None) -> tuple[str, int]:
         if not self._initialized:
             raise RuntimeError("MemGPT not initialized")
         limit = max_tokens or self._config.max_context_tokens
@@ -515,7 +515,7 @@ class MemGPT:
                 total += b.token_estimate
         return "\n".join(blocks), total
 
-    def recall(self, query: str, max_tokens: int = 4000) -> Tuple[str, int]:
+    def recall(self, query: str, max_tokens: int = 4000) -> tuple[str, int]:
         hits = self.search(query, max_results=20)
         blocks = []
         total = 0
@@ -567,7 +567,7 @@ class MemGPT:
                         del self._tag_index[tag]
             return True
 
-    def compress(self, strategy: CompressionStrategy = CompressionStrategy.SUMMARY) -> Dict[str, Any]:
+    def compress(self, strategy: CompressionStrategy = CompressionStrategy.SUMMARY) -> dict[str, Any]:
         if not self._initialized:
             raise RuntimeError("MemGPT not initialized")
         results = {"compressed": 0, "tokens_before": 0, "tokens_after": 0}
@@ -607,7 +607,7 @@ class MemGPT:
     def _is_core_full(self) -> bool:
         return len(self._core) >= self._config.core_capacity
 
-    def _evict_core(self) -> List[str]:
+    def _evict_core(self) -> list[str]:
         evicted = []
         if self._config.eviction_policy == "lru":
             self._core.move_to_end(True)
@@ -627,7 +627,7 @@ class MemGPT:
             self._stats.evictions += 1
         return evicted
 
-    def _evict_recall(self) -> List[str]:
+    def _evict_recall(self) -> list[str]:
         evicted = []
         if self._recall:
             bid, block = self._recall.popitem(last=True)
@@ -637,7 +637,7 @@ class MemGPT:
             self._stats.evictions += 1
         return evicted
 
-    def _find_block(self, block_id: str) -> Optional[MemoryBlock]:
+    def _find_block(self, block_id: str) -> MemoryBlock | None:
         return self._core.get(block_id) or self._recall.get(block_id) or self._archival.get(block_id)
 
     def _remove_from_tier(self, block: MemoryBlock):
@@ -645,18 +645,18 @@ class MemGPT:
         self._recall.pop(block.block_id, None)
         self._archival.pop(block.block_id, None)
 
-    def _find_duplicate(self, content: str) -> Optional[MemoryBlock]:
+    def _find_duplicate(self, content: str) -> MemoryBlock | None:
         checksum = hashlib.md5(content.encode()).hexdigest()[:12]
         return self._find_by_checksum(checksum)
 
-    def _find_by_checksum(self, checksum: str) -> Optional[MemoryBlock]:
+    def _find_by_checksum(self, checksum: str) -> MemoryBlock | None:
         for store in [self._core, self._recall, self._archival]:
             for b in store.values():
                 if b.checksum == checksum:
                     return b
         return None
 
-    def _extract_highlights(self, content: str, terms: set) -> List[str]:
+    def _extract_highlights(self, content: str, terms: set) -> list[str]:
         highlights = []
         words = content.split()
         for i, w in enumerate(words):
@@ -680,7 +680,7 @@ class MemGPT:
             self._stats.total_blocks = self._stats.core_count + self._stats.recall_count + self._stats.archival_count
             self._stats.hit_rate = self._search_hits / max(self._search_total, 1)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             self._update_stats()

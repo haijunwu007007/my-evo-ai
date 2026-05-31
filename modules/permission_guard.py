@@ -206,7 +206,7 @@ DEFAULT_ALLOWED_DIRS = {
 # 配置文件路径
 DEFAULT_CONFIG_PATH = "~/.workbuddy/permissions.json"
 
-class PermissionGuardAnalyzer(object):
+class PermissionGuardAnalyzer:
     """permission_guard 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -391,12 +391,12 @@ class PendingApproval:
     id: str
     action_type: ActionType
     description: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     requested_at: datetime
     requested_by: str = "system"
     status: str = "pending"  # pending, approved, denied, expired
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "action_type": self.action_type.value,
@@ -414,7 +414,7 @@ class ScopePermission:
     path: str
     allowed: bool
     recursive: bool = True
-    patterns: List[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
 
 @dataclass
 class SecurityReport:
@@ -424,7 +424,7 @@ class SecurityReport:
     blocked_count: int = 0
     approved_count: int = 0
     pending_count: int = 0
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 class PermissionGuardError(Exception):
     """权限系统异常"""
@@ -489,9 +489,9 @@ class PermissionGuard:
 
     def __init__(
         self,
-        config_path: Optional[str] = None,
+        config_path: str | None = None,
         default_mode: PermissionMode = PermissionMode.ASK_ME,
-        allowed_dirs: Optional[Set[str]] = None,
+        allowed_dirs: set[str] | None = None,
     ):
         """
         初始化权限加固系统
@@ -505,13 +505,13 @@ class PermissionGuard:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.mode = default_mode
-        self.allowed_dirs: Set[str] = allowed_dirs or DEFAULT_ALLOWED_DIRS.copy()
-        self.blocked_commands: Set[str] = set()
-        self.approved_commands: Set[str] = set()  # 永久批准的命令
-        self.scope_permissions: List[ScopePermission] = []
+        self.allowed_dirs: set[str] = allowed_dirs or DEFAULT_ALLOWED_DIRS.copy()
+        self.blocked_commands: set[str] = set()
+        self.approved_commands: set[str] = set()  # 永久批准的命令
+        self.scope_permissions: list[ScopePermission] = []
 
         # 待审批队列
-        self.pending_approvals: Dict[str, PendingApproval] = {}
+        self.pending_approvals: dict[str, PendingApproval] = {}
         self._lock = threading.Lock()
 
         # 统计
@@ -601,7 +601,7 @@ class PermissionGuard:
         self.approved_commands.discard(command.lower())
         self._save_config()
 
-    def is_command_safe(self, command: str, return_reason: bool = False) -> Tuple[bool, str]:
+    def is_command_safe(self, command: str, return_reason: bool = False) -> tuple[bool, str]:
         """
         检查命令是否安全
 
@@ -718,7 +718,7 @@ class PermissionGuard:
         return False
 
     def request_approval(
-        self, action_type: ActionType, description: str, details: Optional[Dict[str, Any]] = None
+        self, action_type: ActionType, description: str, details: dict[str, Any] | None = None
     ) -> str:
         """
         请求操作批准
@@ -794,7 +794,7 @@ class PermissionGuard:
 
             return True
 
-    def get_pending_approvals(self) -> List[PendingApproval]:
+    def get_pending_approvals(self) -> list[PendingApproval]:
         """获取待审批列表"""
         with self._lock:
             return [a for a in self.pending_approvals.values() if a.status == "pending"]
@@ -813,7 +813,7 @@ class PermissionGuard:
 
             return len(expired)
 
-    def execute_with_guard(self, command: str, callback: Optional[Callable] = None) -> Any:
+    def execute_with_guard(self, command: str, callback: Callable | None = None) -> Any:
         """
         带权限检查的执行
 
@@ -946,12 +946,12 @@ class SafeShellExecutor:
     包装subprocess，提供权限检查
     """
 
-    def __init__(self, guard: Optional[PermissionGuard] = None):
+    def __init__(self, guard: PermissionGuard | None = None):
         self.guard = guard or PermissionGuard()
 
     def run(
-        self, command: str, cwd: Optional[str] = None, capture_output: bool = True, timeout: Optional[int] = None
-    ) -> Dict[str, Any]:
+        self, command: str, cwd: str | None = None, capture_output: bool = True, timeout: int | None = None
+    ) -> dict[str, Any]:
         """
         执行命令
 
@@ -998,7 +998,7 @@ class SafeShellExecutor:
 # 快捷函数
 # ============================================================================
 
-_guard_instance: Optional[PermissionGuard] = None
+_guard_instance: PermissionGuard | None = None
 
 def get_guard() -> PermissionGuard:
     """获取单例权限守卫"""
@@ -1011,7 +1011,7 @@ def is_safe(command: str) -> bool:
     """快捷函数：检查命令是否安全"""
     return get_guard().is_command_safe(command)
 
-def request_execution(command: str) -> Dict[str, Any]:
+def request_execution(command: str) -> dict[str, Any]:
     """快捷函数：请求命令执行"""
     return get_guard().execute_with_guard(command)
 

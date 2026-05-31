@@ -97,9 +97,9 @@ class RecoveryPlan:
     service_id: str
     priority: int = 0  # 0=最高
     strategy: str = "full"  # full, incremental, checkpoint, warm_standby
-    target_state: Dict[str, Any] = field(default_factory=dict)
-    pre_checks: List[str] = field(default_factory=list)
-    post_checks: List[str] = field(default_factory=list)
+    target_state: dict[str, Any] = field(default_factory=dict)
+    pre_checks: list[str] = field(default_factory=list)
+    post_checks: list[str] = field(default_factory=list)
     timeout_seconds: int = 300
     max_retries: int = 3
     rollback_on_failure: bool = True
@@ -112,8 +112,8 @@ class Checkpoint:
 
     checkpoint_id: str
     service_id: str
-    state_data: Dict[str, Any]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    state_data: dict[str, Any]
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     size_bytes: int = 0
     checksum: str = ""
@@ -128,11 +128,11 @@ class RecoveryTask:
     step: int = 0
     total_steps: int = 0
     progress: float = 0.0
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
-    error: Optional[str] = None
+    started_at: float | None = None
+    completed_at: float | None = None
+    error: str | None = None
     retries_used: int = 0
-    log: List[str] = field(default_factory=list)
+    log: list[str] = field(default_factory=list)
 
 class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """
@@ -164,16 +164,16 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._running = False
 
         # 恢复计划存储
-        self._plans: Dict[str, RecoveryPlan] = {}
+        self._plans: dict[str, RecoveryPlan] = {}
         # 检查点存储 (LRU, 最多100个)
         self._checkpoints: OrderedDict[str, Checkpoint] = OrderedDict()
         self._max_checkpoints = 100
         # 恢复任务
-        self._tasks: Dict[str, RecoveryTask] = {}
+        self._tasks: dict[str, RecoveryTask] = {}
         # 服务状态跟踪
-        self._service_states: Dict[str, Dict[str, Any]] = {}
+        self._service_states: dict[str, dict[str, Any]] = {}
         # 恢复历史
-        self._history: List[Dict[str, Any]] = []
+        self._history: list[dict[str, Any]] = []
         self._max_history = 500
         # 并发控制
         self._max_concurrent = 5
@@ -242,7 +242,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
             self._plans[plan_id] = plan
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行恢复操作"""
         self.trace("execute", {"operation": operation})
         self.metrics_collector.counter("recovery.execute.calls", 1)
@@ -276,7 +276,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             logger.error(f"恢复操作失败 [{operation}]: {e}")
             return {"success": False, "error": str(e)}
 
-    def _create_plan(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_plan(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建恢复计划"""
         plan_id = p.get("plan_id", f"plan_{hashlib.md5(p['name'].encode()).hexdigest()[:8]}")
         plan = RecoveryPlan(
@@ -295,7 +295,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._plans[plan_id] = plan
         return {"plan_id": plan_id, "name": plan.name, "strategy": plan.strategy}
 
-    def _execute_plan(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_plan(self, p: dict[str, Any]) -> dict[str, Any]:
         """执行恢复计划"""
         if self._circuit_open:
             return {"error": "熔断器已打开，暂停恢复操作", "state": "circuit_open"}
@@ -409,14 +409,14 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             with self._lock:
                 self._active_recoveries -= 1
 
-    def _get_latest_checkpoint(self, service_id: str) -> Optional[Checkpoint]:
+    def _get_latest_checkpoint(self, service_id: str) -> Checkpoint | None:
         """获取最新检查点"""
         for cp_id, cp in reversed(self._checkpoints.items()):
             if cp.service_id == service_id:
                 return cp
         return None
 
-    def _create_checkpoint(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_checkpoint(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建检查点"""
         service_id = p["service_id"]
         state_data = p.get("state_data", {"snapshot": True})
@@ -449,7 +449,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "total_checkpoints": len(self._checkpoints),
         }
 
-    def _restore_checkpoint(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _restore_checkpoint(self, p: dict[str, Any]) -> dict[str, Any]:
         """从检查点恢复"""
         cp_id = p["checkpoint_id"]
         cp = self._checkpoints.get(cp_id)
@@ -473,7 +473,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "state_keys": list(cp.state_data.keys()),
         }
 
-    def _register_service(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _register_service(self, p: dict[str, Any]) -> dict[str, Any]:
         """注册服务用于自动恢复监控"""
         service_id = p["service_id"]
         auto_recover = p.get("auto_recover", False)
@@ -492,7 +492,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
         return {"service_id": service_id, "auto_recover": auto_recover, "check_interval": check_interval}
 
-    def _service_health(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _service_health(self, p: dict[str, Any]) -> dict[str, Any]:
         """检查服务健康状态"""
         service_id = p["service_id"]
         state = self._service_states.get(service_id)
@@ -513,7 +513,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "recovery_count": state["recovery_count"],
         }
 
-    def _auto_recover(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _auto_recover(self, p: dict[str, Any]) -> dict[str, Any]:
         """自动恢复 - 扫描并恢复所有需要的服务"""
         if not self._auto_recovery_enabled:
             return {"enabled": False, "message": "自动恢复未启用"}
@@ -538,7 +538,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "total_services": len(self._service_states),
         }
 
-    def _cancel_recovery(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _cancel_recovery(self, p: dict[str, Any]) -> dict[str, Any]:
         """取消恢复任务"""
         task_id = p["task_id"]
         task = self._tasks.get(task_id)
@@ -553,7 +553,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         task.log.append("任务已被用户取消")
         return {"cancelled": True, "task_id": task_id, "phase": task.phase}
 
-    def _list_plans(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_plans(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         """列出所有恢复计划"""
         return [
             {
@@ -567,7 +567,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             for pl in self._plans.values()
         ]
 
-    def _list_checkpoints(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_checkpoints(self, p: dict[str, Any]) -> dict[str, Any]:
         """列出检查点"""
         service_id = p.get("service_id")
         cps = []
@@ -584,14 +584,14 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 )
         return {"checkpoints": cps, "total": len(cps)}
 
-    def _list_tasks(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_tasks(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         """列出恢复任务"""
         return [
             {"task_id": t.task_id, "plan_id": t.plan_id, "phase": t.phase, "progress": t.progress, "error": t.error}
             for t in self._tasks.values()
         ]
 
-    def _get_history(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_history(self, p: dict[str, Any]) -> dict[str, Any]:
         """获取恢复历史"""
         limit = p.get("limit", 50)
         service_id = p.get("service_id")
@@ -604,7 +604,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "success_rate": f"{self._successful_recoveries / max(self._total_recoveries, 1) * 100:.1f}%",
         }
 
-    def _purge_old_checkpoints(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _purge_old_checkpoints(self, p: dict[str, Any]) -> dict[str, Any]:
         """清理旧检查点"""
         max_age = p.get("max_age_hours", 24)
         cutoff = time.time() - max_age * 3600
@@ -615,7 +615,7 @@ class AutoRecoveryManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             removed += 1
         return {"removed": removed, "remaining": len(self._checkpoints)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         active_tasks = sum(1 for t in self._tasks.values() if t.phase in ("pre_check", "restore", "post_check"))
         avg_recovery_ms = self._recovery_time_ms_total / max(self._successful_recoveries, 1)

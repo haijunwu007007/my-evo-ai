@@ -9,9 +9,9 @@ logger = get_logger(__name__)
 
 class ModuleRegistry:
     def __init__(self):
-        self._modules: Dict[str, dict] = {}
-        self._deps: Dict[str, List[str]] = {}
-        self._reverse_deps: Dict[str, List[str]] = {}
+        self._modules: dict[str, dict] = {}
+        self._deps: dict[str, list[str]] = {}
+        self._reverse_deps: dict[str, list[str]] = {}
 
     def scan(self, modules_dir: str) -> dict:
         """扫描模块目录，解析每个模块的输入输出"""
@@ -109,7 +109,7 @@ class ModuleRegistry:
                     self._reverse_deps[dep] = []
                 self._reverse_deps[dep].append(name)
 
-    def resolve_chain(self, start: str, target_output: str = "") -> List[str]:
+    def resolve_chain(self, start: str, target_output: str = "") -> list[str]:
         """解析从 start 模块开始的可执行链"""
         if start not in self._modules:
             return []
@@ -129,7 +129,7 @@ class ModuleRegistry:
         dfs(start)
         return chain
 
-    def match_modules(self, output_key: str) -> List[str]:
+    def match_modules(self, output_key: str) -> list[str]:
         """根据输出键找到能消费它的模块"""
         return [
             name for name, info in self._modules.items()

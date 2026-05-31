@@ -16,7 +16,8 @@ AUTO-EVO-AI V0.1 — MySQL CDC (Change Data Capture) 引擎
 from __future__ import annotations
 import json, time, logging, threading, hashlib, re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field, asdict
 
 logger = logging.getLogger("evo.modules.mysql_cdc")
@@ -28,11 +29,11 @@ class ChangeEvent:
     """数据库变更事件"""
     table: str
     action: str               # insert / update / delete
-    before: Optional[dict] = None
-    after: Optional[dict] = None
+    before: dict | None = None
+    after: dict | None = None
     timestamp: float = 0.0
-    binlog_pos: Optional[str] = None
-    row_id: Optional[str] = None
+    binlog_pos: str | None = None
+    row_id: str | None = None
 
     def __post_init__(self):
         if not self.timestamp:
@@ -72,7 +73,7 @@ class OutputTarget:
     def send(self, event: ChangeEvent) -> bool:
         raise NotImplementedError
 
-    def send_batch(self, events: List[ChangeEvent]) -> int:
+    def send_batch(self, events: list[ChangeEvent]) -> int:
         success = 0
         for e in events:
             if self.send(e):
@@ -150,7 +151,7 @@ class WebhookOutput(OutputTarget):
 class MemoryQueueOutput(OutputTarget):
     """本机内存队列（兜底）"""
     def __init__(self):
-        self.queue: List[ChangeEvent] = []
+        self.queue: list[ChangeEvent] = []
         self._lock = threading.Lock()
 
     def send(self, event: ChangeEvent) -> bool:
@@ -160,7 +161,7 @@ class MemoryQueueOutput(OutputTarget):
                 self.queue = self.queue[-5000:]
         return True
 
-    def get_events(self, limit: int = 100) -> List[ChangeEvent]:
+    def get_events(self, limit: int = 100) -> list[ChangeEvent]:
         with self._lock:
             ret = self.queue[-limit:]
             return ret
@@ -206,15 +207,15 @@ class MySQLCdcEngine:
 
         self._conn = None
         self._running = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._lock = threading.Lock()
 
         # 统计
         self.stats = CdcStats()
         # 断点
-        self._checkpoints: Dict[str, CdcCheckpoint] = {}
+        self._checkpoints: dict[str, CdcCheckpoint] = {}
         # 输出目标
-        self._output: Optional[OutputTarget] = None
+        self._output: OutputTarget | None = None
         # 内存队列（兜底）
         self._memory_queue = MemoryQueueOutput()
 
@@ -279,7 +280,7 @@ class MySQLCdcEngine:
 
     # ── 表清单 ──
 
-    def _get_tables(self) -> List[str]:
+    def _get_tables(self) -> list[str]:
         """获取监控的表清单"""
         try:
             self._ensure_conn()
@@ -303,7 +304,7 @@ class MySQLCdcEngine:
 
     # ── 轮询模式 ──
 
-    def _poll_table(self, table: str) -> List[ChangeEvent]:
+    def _poll_table(self, table: str) -> list[ChangeEvent]:
         """轮询单表变更"""
         events = []
         try:
@@ -350,7 +351,7 @@ class MySQLCdcEngine:
 
     # ── Binlog 模式 ──
 
-    def _read_binlog(self) -> List[ChangeEvent]:
+    def _read_binlog(self) -> list[ChangeEvent]:
         """通过 SHOW BINLOG EVENTS 读取变更"""
         events = []
         try:
@@ -474,7 +475,7 @@ class MySQLCdcEngine:
 
 # ──────────────── 全局实例 ────────────────
 
-_engine: Optional[MySQLCdcEngine] = None
+_engine: MySQLCdcEngine | None = None
 
 
 # ──────────────── 模块入口（EnterpriseModule 兼容） ────────────────

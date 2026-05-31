@@ -87,7 +87,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MultipartUploadAnalyzer(object):
+class MultipartUploadAnalyzer:
     """multipart_upload 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -274,7 +274,7 @@ class ChunkInfo:
     retry_count: int = 0
     data: bytes = b""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
             "size": self.size,
@@ -299,9 +299,9 @@ class UploadSession:
     checksum: str = ""
     created: float = field(default_factory=time.time)
     updated: float = field(default_factory=time.time)
-    completed_chunks: List[int] = field(default_factory=list)
-    chunks: Dict[int, ChunkInfo] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    completed_chunks: list[int] = field(default_factory=list)
+    chunks: dict[int, ChunkInfo] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def progress(self) -> float:
@@ -309,7 +309,7 @@ class UploadSession:
             return 0.0
         return round(len(self.completed_chunks) / self.total_chunks * 100, 2)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "upload_id": self.upload_id,
             "file_name": self.file_name,
@@ -338,7 +338,7 @@ class UploadConfig:
     checksum_algorithm: str = "md5"
     storage_path: str = "/uploads"
     temp_path: str = "/tmp/uploads"
-    allowed_types: List[str] = field(default_factory=lambda: ["*"])
+    allowed_types: list[str] = field(default_factory=lambda: ["*"])
     max_sessions: int = 1000
 
 class MultipartUploadModule:
@@ -365,8 +365,8 @@ class MultipartUploadModule:
     """企业级分片上传模块"""
 
     def __init__(self):
-        self._sessions: Dict[str, UploadSession] = {}
-        self._file_index: Dict[str, str] = {}  # checksum -> upload_id
+        self._sessions: dict[str, UploadSession] = {}
+        self._file_index: dict[str, str] = {}  # checksum -> upload_id
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -410,7 +410,7 @@ class MultipartUploadModule:
         }
         self._initialized = False
 
-    def initialize(self, config: Dict[str, Any] = None) -> Dict[str, Any]:
+    def initialize(self, config: dict[str, Any] = None) -> dict[str, Any]:
         try:
             if config:
                 for k, v in config.items():
@@ -426,7 +426,7 @@ class MultipartUploadModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active = sum(1 for s in self._sessions.values() if s.status == UploadStatus.UPLOADING)
@@ -446,8 +446,8 @@ class MultipartUploadModule:
         mime_type: str = "",
         chunk_size: int = 0,
         checksum: str = "",
-        metadata: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if file_size > self._config.max_file_size:
@@ -496,14 +496,14 @@ class MultipartUploadModule:
             "file_size": file_size,
         }
 
-    def get_session(self, upload_id: str) -> Dict[str, Any]:
+    def get_session(self, upload_id: str) -> dict[str, Any]:
         if upload_id not in self._sessions:
             return {"success": False, "error": "not_found", "upload_id": upload_id}
         session = self._sessions[upload_id]
         chunk_list = [c.to_dict() for c in session.chunks.values()]
         return {"success": True, **session.to_dict(), "chunks": chunk_list}
 
-    def list_sessions(self, status: str = None, limit: int = 50) -> Dict[str, Any]:
+    def list_sessions(self, status: str = None, limit: int = 50) -> dict[str, Any]:
         sessions = []
         for s in self._sessions.values():
             if status and s.status.value != status:
@@ -512,7 +512,7 @@ class MultipartUploadModule:
         sessions = sessions[:limit]
         return {"success": True, "sessions": sessions, "total": len(sessions)}
 
-    def cancel(self, upload_id: str) -> Dict[str, Any]:
+    def cancel(self, upload_id: str) -> dict[str, Any]:
         if upload_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         session = self._sessions[upload_id]
@@ -522,7 +522,7 @@ class MultipartUploadModule:
         return {"success": True, "upload_id": upload_id, "status": "cancelled"}
 
     # --- Chunk Upload ---
-    def upload_chunk(self, upload_id: str, chunk_index: int, data: bytes, checksum: str = "") -> Dict[str, Any]:
+    def upload_chunk(self, upload_id: str, chunk_index: int, data: bytes, checksum: str = "") -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if upload_id not in self._sessions:
@@ -561,7 +561,7 @@ class MultipartUploadModule:
             "progress": session.progress,
         }
 
-    def upload_chunk_base64(self, upload_id: str, chunk_index: int, data_hex: str) -> Dict[str, Any]:
+    def upload_chunk_base64(self, upload_id: str, chunk_index: int, data_hex: str) -> dict[str, Any]:
         try:
             data = bytes.fromhex(data_hex)
         except ValueError:
@@ -569,7 +569,7 @@ class MultipartUploadModule:
         return self.upload_chunk(upload_id, chunk_index, data)
 
     # --- Resume ---
-    def resume(self, upload_id: str) -> Dict[str, Any]:
+    def resume(self, upload_id: str) -> dict[str, Any]:
         if upload_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         session = self._sessions[upload_id]
@@ -590,7 +590,7 @@ class MultipartUploadModule:
         }
 
     # --- Merge ---
-    def complete(self, upload_id: str) -> Dict[str, Any]:
+    def complete(self, upload_id: str) -> dict[str, Any]:
         if upload_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         session = self._sessions[upload_id]
@@ -637,7 +637,7 @@ class MultipartUploadModule:
         }
 
     # --- Query ---
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(1 for s in self._sessions.values() if s.status in (UploadStatus.UPLOADING, UploadStatus.INITIATED))
         completed = sum(1 for s in self._sessions.values() if s.status == UploadStatus.MERGED)
         return {

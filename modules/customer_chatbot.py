@@ -86,7 +86,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class CustomerChatbotAnalyzer(object):
+class CustomerChatbotAnalyzer:
     """customer_chatbot 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -269,11 +269,11 @@ class Intent:
 
     name: str = ""
     confidence: float = 0.0
-    entities: Dict[str, str] = field(default_factory=dict)
-    slots_required: List[str] = field(default_factory=list)
-    slots_filled: Dict[str, str] = field(default_factory=dict)
+    entities: dict[str, str] = field(default_factory=dict)
+    slots_required: list[str] = field(default_factory=list)
+    slots_filled: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "confidence": round(self.confidence, 4),
@@ -290,11 +290,11 @@ class KnowledgeEntry:
     question: str = ""
     answer: str = ""
     category: str = ""
-    keywords: List[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
     similarity: float = 0.0
     enabled: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entry_id": self.entry_id,
             "question": self.question,
@@ -312,17 +312,17 @@ class ChatSession:
     channel: str = "web"
     state: SessionState = SessionState.ACTIVE
     current_intent: str = ""
-    messages: List[Dict[str, Any]] = field(default_factory=list)
-    slots: Dict[str, str] = field(default_factory=dict)
-    pending_slots: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    messages: list[dict[str, Any]] = field(default_factory=list)
+    slots: dict[str, str] = field(default_factory=dict)
+    pending_slots: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created: float = field(default_factory=time.time)
     updated: float = field(default_factory=time.time)
     message_count: int = 0
     resolved: bool = False
     satisfaction: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "session_id": self.session_id,
             "user_id": self.user_id,
@@ -372,11 +372,11 @@ class CustomerChatbotModule:
     """企业级智能客服模块"""
 
     def __init__(self):
-        self._sessions: Dict[str, ChatSession] = {}
-        self._user_sessions: Dict[str, List[str]] = defaultdict(list)
-        self._knowledge: Dict[str, KnowledgeEntry] = {}
-        self._tickets: Dict[str, TicketInfo] = {}
-        self._intents: Dict[str, Dict[str, Any]] = {}
+        self._sessions: dict[str, ChatSession] = {}
+        self._user_sessions: dict[str, list[str]] = defaultdict(list)
+        self._knowledge: dict[str, KnowledgeEntry] = {}
+        self._tickets: dict[str, TicketInfo] = {}
+        self._intents: dict[str, dict[str, Any]] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -491,14 +491,14 @@ class CustomerChatbotModule:
             "examples": ["投诉", "质量有问题", "不满意"],
         }
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "knowledge_entries": len(self._knowledge), "intents": len(self._intents)}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active = sum(1 for s in self._sessions.values() if s.state == SessionState.ACTIVE)
@@ -512,7 +512,7 @@ class CustomerChatbotModule:
         }
 
     # --- Session ---
-    def create_session(self, user_id: str, channel: str = "web", metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+    def create_session(self, user_id: str, channel: str = "web", metadata: dict[str, Any] = None) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         session_id = f"cs_{uuid.uuid4().hex[:12]}"
@@ -522,12 +522,12 @@ class CustomerChatbotModule:
         self._stats["sessions_created"] += 1
         return {"success": True, "session_id": session_id, "user_id": user_id}
 
-    def get_session(self, session_id: str) -> Dict[str, Any]:
+    def get_session(self, session_id: str) -> dict[str, Any]:
         if session_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._sessions[session_id].to_dict()}
 
-    def close_session(self, session_id: str, satisfaction: int = 0) -> Dict[str, Any]:
+    def close_session(self, session_id: str, satisfaction: int = 0) -> dict[str, Any]:
         if session_id not in self._sessions:
             return {"success": False, "error": "not_found"}
         session = self._sessions[session_id]
@@ -542,7 +542,7 @@ class CustomerChatbotModule:
         return {"success": True, "session_id": session_id}
 
     # --- Chat ---
-    def chat(self, session_id: str, message: str) -> Dict[str, Any]:
+    def chat(self, session_id: str, message: str) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         if session_id not in self._sessions:
@@ -657,7 +657,7 @@ class CustomerChatbotModule:
             entities["order_id"] = order_match.group(1)
         return Intent(name=best_intent, confidence=min(best_score, 0.99), entities=entities)
 
-    def _search_knowledge(self, query: str) -> Optional[Dict]:
+    def _search_knowledge(self, query: str) -> dict | None:
         import random
 
         query_lower = query.lower()
@@ -687,8 +687,8 @@ class CustomerChatbotModule:
 
     # --- Knowledge ---
     def add_knowledge(
-        self, question: str, answer: str, category: str = "", keywords: List[str] = None
-    ) -> Dict[str, Any]:
+        self, question: str, answer: str, category: str = "", keywords: list[str] = None
+    ) -> dict[str, Any]:
         entry_id = f"kb_{uuid.uuid4().hex[:8]}"
         entry = KnowledgeEntry(
             entry_id=entry_id, question=question, answer=answer, category=category, keywords=keywords or []
@@ -696,7 +696,7 @@ class CustomerChatbotModule:
         self._knowledge[entry_id] = entry
         return {"success": True, "entry_id": entry_id}
 
-    def search_knowledge(self, query: str, limit: int = 5) -> Dict[str, Any]:
+    def search_knowledge(self, query: str, limit: int = 5) -> dict[str, Any]:
         results = []
         query_lower = query.lower()
         for entry in self._knowledge.values():
@@ -711,7 +711,7 @@ class CustomerChatbotModule:
     # --- Ticket ---
     def create_ticket(
         self, session_id: str, subject: str, category: str = "", priority: str = "normal"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if session_id not in self._sessions:
             return {"success": False, "error": "session_not_found"}
         session = self._sessions[session_id]
@@ -731,7 +731,7 @@ class CustomerChatbotModule:
         self._stats["tickets_created"] += 1
         return {"success": True, "ticket_id": ticket_id, "subject": subject}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(1 for s in self._sessions.values() if s.state == SessionState.ACTIVE)
         return {
             "success": True,

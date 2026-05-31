@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - Elasticsearch 搜索（A级）
 # Grade: B
 
@@ -14,7 +13,7 @@ logger=logging.getLogger("evo.es-search")
 class ElasticsearchSearch(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="elasticsearch-search";MODULE_NAME="ES搜索";VERSION="V0.1";MODULE_LEVEL="A"
     def __init__(self,config=None):
-        super().__init__(config);self._indices:Dict[str,list]={};self._start=time.time()
+        super().__init__(config);self._indices:dict[str,list]={};self._start=time.time()
         self._requests=None;self._marked_as_mock=False
         self._host=(config or {}).get("es_host","http://localhost:9200")
         try:

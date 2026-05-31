@@ -95,7 +95,8 @@ import subprocess
 import threading
 import inspect
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
@@ -145,13 +146,13 @@ class ContainerConfig:
 
     image: str = ""
     container_name: str = ""
-    command: Optional[str] = None
-    entrypoint: Optional[str] = None
-    env: Dict[str, str] = field(default_factory=dict)
-    ports: Dict[str, str] = field(default_factory=dict)  # host:container
-    volumes: List[str] = field(default_factory=list)  # host:container[:ro]
-    networks: List[str] = field(default_factory=list)
-    labels: Dict[str, str] = field(default_factory=dict)
+    command: str | None = None
+    entrypoint: str | None = None
+    env: dict[str, str] = field(default_factory=dict)
+    ports: dict[str, str] = field(default_factory=dict)  # host:container
+    volumes: list[str] = field(default_factory=list)  # host:container[:ro]
+    networks: list[str] = field(default_factory=list)
+    labels: dict[str, str] = field(default_factory=dict)
     restart_policy: RestartPolicy = RestartPolicy.UNLESS_STOPPED
     cpu_limit: float = 0.0  # CPU核数
     memory_limit: str = ""  # 如 "512m", "2g"
@@ -161,9 +162,9 @@ class ContainerConfig:
     working_dir: str = ""
     user: str = ""
     hostname: str = ""
-    extra_hosts: Dict[str, str] = field(default_factory=dict)
-    health_check: Optional[Dict[str, Any]] = None
-    depends_on: List[str] = field(default_factory=list)
+    extra_hosts: dict[str, str] = field(default_factory=dict)
+    health_check: dict[str, Any] | None = None
+    depends_on: list[str] = field(default_factory=list)
     auto_remove: bool = False
     detach: bool = True
     tty: bool = False
@@ -179,10 +180,10 @@ class ContainerInfo:
     image: str = ""
     status: ContainerStatus = ContainerStatus.CREATED
     created_at: str = ""
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
-    ip_address: Optional[str] = None
-    ports: List[str] = field(default_factory=list)
+    started_at: str | None = None
+    finished_at: str | None = None
+    ip_address: str | None = None
+    ports: list[str] = field(default_factory=list)
     health: str = "unknown"
     cpu_percent: float = 0.0
     memory_usage_mb: float = 0.0
@@ -190,18 +191,18 @@ class ContainerInfo:
     network_rx_bytes: int = 0
     network_tx_bytes: int = 0
     restart_count: int = 0
-    exit_code: Optional[int] = None
-    labels: Dict[str, str] = field(default_factory=dict)
+    exit_code: int | None = None
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class ImageInfo:
     """镜像信息"""
 
     image_id: str = ""
-    repo_tags: List[str] = field(default_factory=list)
+    repo_tags: list[str] = field(default_factory=list)
     size_mb: float = 0.0
     created_at: str = ""
-    dockerfile: Optional[str] = None
+    dockerfile: str | None = None
     layers: int = 0
 
 @dataclass
@@ -212,15 +213,15 @@ class BuildContext:
     dockerfile_path: str = "Dockerfile"
     context_path: str = "."
     tag: str = ""
-    build_args: Dict[str, str] = field(default_factory=dict)
-    labels: Dict[str, str] = field(default_factory=dict)
+    build_args: dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     no_cache: bool = False
     target: str = ""
     status: ImageBuildStatus = ImageBuildStatus.PENDING
     progress: float = 0.0
     output: str = ""
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
+    started_at: str | None = None
+    finished_at: str | None = None
 
 # ============================================================================
 # DockerManager 主类
@@ -244,7 +245,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
       - 镜像仓库集成
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
@@ -256,22 +257,22 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
             except Exception:
                 self._docker_client = None
         # 容器注册表
-        self._containers: Dict[str, ContainerInfo] = {}
+        self._containers: dict[str, ContainerInfo] = {}
         # 镜像注册表
-        self._images: Dict[str, ImageInfo] = {}
+        self._images: dict[str, ImageInfo] = {}
         # 网络注册表
-        self._networks: Dict[str, Dict[str, Any]] = {}
+        self._networks: dict[str, dict[str, Any]] = {}
         # 卷注册表
-        self._volumes: Dict[str, Dict[str, Any]] = {}
+        self._volumes: dict[str, dict[str, Any]] = {}
         # Compose项目
-        self._compose_projects: Dict[str, Dict[str, Any]] = {}
+        self._compose_projects: dict[str, dict[str, Any]] = {}
         # 构建队列
         self._build_queue: deque = deque(maxlen=50)
-        self._build_history: List[BuildContext] = []
+        self._build_history: list[BuildContext] = []
         # 监控线程
-        self._monitor_thread: Optional[threading.Thread] = None
+        self._monitor_thread: threading.Thread | None = None
         # 健康检查线程
-        self._health_check_thread: Optional[threading.Thread] = None
+        self._health_check_thread: threading.Thread | None = None
         self._running = False
         # 统计
         self._docker_stats = {
@@ -371,7 +372,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         running = sum(1 for c in self._containers.values() if c.status == ContainerStatus.RUNNING)
         return {
             "status": "healthy",
@@ -566,7 +567,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
             return Result(success=False, error=str(e))
 
     def scale_containers(
-        self, base_name: str, image: str, count: int, config: Optional[ContainerConfig] = None
+        self, base_name: str, image: str, count: int, config: ContainerConfig | None = None
     ) -> Result:
         """扩缩容（按数量）"""
         if count < 0 or count > 100:
@@ -593,7 +594,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
             success=True, data={"target": count, "changes": len(results), "details": [r.to_dict() for r in results]}
         )
 
-    def list_containers(self, status_filter: Optional[str] = None, label_filter: Optional[str] = None) -> List[Dict]:
+    def list_containers(self, status_filter: str | None = None, label_filter: str | None = None) -> list[dict]:
         """列出容器"""
         result = []
         for name, info in self._containers.items():
@@ -705,7 +706,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
         except Exception as e:
             return Result(success=False, error=str(e))
 
-    def list_images(self) -> List[Dict]:
+    def list_images(self) -> list[dict]:
         return [
             {"id": img.image_id, "tags": img.repo_tags, "size_mb": img.size_mb, "created": img.created_at}
             for img in self._images.values()
@@ -715,7 +716,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
     # 网络管理
     # ----------------------------------------------------------------
 
-    def create_network(self, name: str, config: Optional[Dict] = None) -> Result:
+    def create_network(self, name: str, config: dict | None = None) -> Result:
         config = config or {}
         cmd_parts = ["docker", "network", "create"]
         if config.get("driver"):
@@ -741,7 +742,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
     # 数据卷管理
     # ----------------------------------------------------------------
 
-    def create_volume(self, name: str, config: Optional[Dict] = None) -> Result:
+    def create_volume(self, name: str, config: dict | None = None) -> Result:
         config = config or {}
         cmd_parts = ["docker", "volume", "create"]
         if config.get("driver"):
@@ -837,7 +838,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
     # ----------------------------------------------------------------
 
     def compose_up(
-        self, project_dir: str, service: Optional[str] = None, scale: Optional[Dict[str, int]] = None
+        self, project_dir: str, service: str | None = None, scale: dict[str, int] | None = None
     ) -> Result:
         """Compose启动"""
         try:
@@ -864,7 +865,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         running = sum(1 for c in self._containers.values() if c.status == ContainerStatus.RUNNING)
         total_cpu = sum(c.cpu_percent for c in self._containers.values() if c.status == ContainerStatus.RUNNING)
         total_mem = sum(c.memory_usage_mb for c in self._containers.values() if c.status == ContainerStatus.RUNNING)
@@ -880,7 +881,7 @@ class DockerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin, Res
             "module_stats": self.stats.to_dict(),
         }
 
-    def get_build_history(self, limit: int = 20) -> List[Dict]:
+    def get_build_history(self, limit: int = 20) -> list[dict]:
         return [
             {
                 "build_id": b.build_id,

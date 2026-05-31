@@ -85,7 +85,7 @@ import json
 import threading
 import shutil
 import signal
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -95,7 +95,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class OpeninterpreterAnalyzer(object):
+class OpeninterpreterAnalyzer:
     """openinterpreter 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -278,9 +278,9 @@ class ExecutionResult:
     memory_mb: float = 0.0
     cpu_time_ms: float = 0.0
     timed_out: bool = False
-    sandbox_path: Optional[str] = None
-    artifacts: List[str] = field(default_factory=list)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    sandbox_path: str | None = None
+    artifacts: list[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 @dataclass
 class SandboxConfig:
@@ -292,8 +292,8 @@ class SandboxConfig:
     max_output_bytes: int = 1024 * 1024  # 1MB
     max_file_size_mb: int = 100
     network_access: bool = False
-    allowed_dirs: List[str] = field(default_factory=list)
-    env_vars: Dict[str, str] = field(default_factory=dict)
+    allowed_dirs: list[str] = field(default_factory=list)
+    env_vars: dict[str, str] = field(default_factory=dict)
     tmp_dir: str = "/tmp/interpreter"
 
 @dataclass
@@ -307,7 +307,7 @@ class LanguageConfig:
     install_cmd: str = ""
     version_flag: str = "--version"
 
-class SecurityValidator(object):
+class SecurityValidator:
     """代码安全验证器"""
 
     BLOCKED_PATTERNS = {
@@ -345,7 +345,7 @@ class SecurityValidator(object):
     }
 
     @classmethod
-    def validate(cls, code: str, language: str) -> tuple[bool, List[str]]:
+    def validate(cls, code: str, language: str) -> tuple[bool, list[str]]:
         """验证代码安全性，返回(是否安全, 问题列表)"""
         issues = []
         lang_key = language.lower()
@@ -379,22 +379,22 @@ class ExecutionHistory:
     def __init__(self, max_size: int = 1000):
         self._history: deque = deque(maxlen=max_size)
         self._lock = threading.Lock()
-        self._index: Dict[str, ExecutionResult] = {}
+        self._index: dict[str, ExecutionResult] = {}
 
     def add(self, result: ExecutionResult) -> None:
         with self._lock:
             self._history.appendleft(result)
             self._index[result.exec_id] = result
 
-    def get(self, exec_id: str) -> Optional[ExecutionResult]:
+    def get(self, exec_id: str) -> ExecutionResult | None:
         return self._index.get(exec_id)
 
-    def list_executions(self, limit: int = 20, offset: int = 0) -> List[ExecutionResult]:
+    def list_executions(self, limit: int = 20, offset: int = 0) -> list[ExecutionResult]:
         with self._lock:
             items = list(self._history)
         return items[offset : offset + limit]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             total = len(self._history)
             if total == 0:
@@ -432,8 +432,8 @@ class OutputCapture:
 
     def __init__(self, max_bytes: int = 1024 * 1024):
         self._max = max_bytes
-        self.stdout_chunks: List[str] = []
-        self.stderr_chunks: List[str] = []
+        self.stdout_chunks: list[str] = []
+        self.stderr_chunks: list[str] = []
         self._total_stdout = 0
         self._total_stderr = 0
         self._lock = threading.Lock()
@@ -527,10 +527,10 @@ class OpenInterpreter:
         self.version = "6.38.0"
         self._status = "initialized"
         self._sandbox_config = SandboxConfig()
-        self._languages: Dict[str, LanguageConfig] = {}
+        self._languages: dict[str, LanguageConfig] = {}
         self._history = ExecutionHistory()
-        self._active_executions: Dict[str, threading.Thread] = {}
-        self._exec_locks: Dict[str, threading.Event] = {}
+        self._active_executions: dict[str, threading.Thread] = {}
+        self._exec_locks: dict[str, threading.Event] = {}
         self._supported_langs = {
             LanguageType.PYTHON: LanguageConfig(
                 language=LanguageType.PYTHON,
@@ -570,9 +570,9 @@ class OpenInterpreter:
         self,
         code: str,
         language: str = "python",
-        timeout: Optional[int] = None,
-        env_vars: Optional[Dict[str, str]] = None,
-        files: Optional[Dict[str, str]] = None,
+        timeout: int | None = None,
+        env_vars: dict[str, str] | None = None,
+        files: dict[str, str] | None = None,
     ) -> ExecutionResult:
         """执行代码"""
         exec_id = uuid.uuid4().hex[:12]
@@ -691,14 +691,12 @@ class OpenInterpreter:
 
         return result
 
-    def _build_command(self, config: LanguageConfig, main_file: str, sandbox: str) -> List[str]:
+    def _build_command(self, config: LanguageConfig, main_file: str, sandbox: str) -> list[str]:
         """构建执行命令"""
         lang = config.language
         if lang == LanguageType.PYTHON:
             return [config.executable, "-u", main_file]
-        elif lang == LanguageType.NODEJS:
-            return [config.executable, main_file]
-        elif lang == LanguageType.BASH:
+        elif lang == LanguageType.NODEJS or lang == LanguageType.BASH:
             return [config.executable, main_file]
         elif lang == LanguageType.RUST:
             output_bin = os.path.join(sandbox, "output")
@@ -726,7 +724,7 @@ class OpenInterpreter:
         self,
         code: str,
         language: str = "python",
-        timeout: Optional[int] = None,
+        timeout: int | None = None,
     ) -> str:
         """异步执行代码，返回exec_id"""
         exec_id = uuid.uuid4().hex[:12]
@@ -745,14 +743,14 @@ class OpenInterpreter:
                 self._active_executions.pop(exec_id, None)
                 self._exec_locks.pop(exec_id, None)
 
-        self._active_results: Dict[str, ExecutionResult] = getattr(self, "_active_results", {})
+        self._active_results: dict[str, ExecutionResult] = getattr(self, "_active_results", {})
         thread = threading.Thread(target=_run, daemon=True)
         self._active_executions[exec_id] = thread
         self._exec_locks[exec_id] = event
         thread.start()
         return exec_id
 
-    def get_result(self, exec_id: str) -> Optional[ExecutionResult]:
+    def get_result(self, exec_id: str) -> ExecutionResult | None:
         """获取执行结果"""
         return self._history.get(exec_id)
 
@@ -761,7 +759,7 @@ class OpenInterpreter:
         # 简化实现
         return exec_id in self._history
 
-    def list_languages(self) -> Dict[str, Dict[str, str]]:
+    def list_languages(self) -> dict[str, dict[str, str]]:
         """列出支持的语言"""
         result = {}
         for name, cfg in self._languages.items():
@@ -777,7 +775,7 @@ class OpenInterpreter:
         self._sandbox_config = config
         logger.info(f"Sandbox config updated: mem={config.max_memory_mb}MB, cpu={config.max_cpu_seconds}s")
 
-    def get_history(self, limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
         """获取执行历史"""
         results = self._history.list_executions(limit, offset)
         return [
@@ -794,7 +792,7 @@ class OpenInterpreter:
             for r in results
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         base = super().health_check()
         base.update(self._history.get_stats())
@@ -808,7 +806,7 @@ class OpenInterpreter:
         }
         return base
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return self.get_stats()
 
     def shutdown(self) -> None:

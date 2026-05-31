@@ -125,7 +125,7 @@ class SecurityPolicy:
     description: str = ""
     risk_level: RiskLevel = RiskLevel.MEDIUM
     enabled: bool = True
-    rules: List[str] = field(default_factory=list)
+    rules: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -148,16 +148,16 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
-        self._policies: Dict[str, SecurityPolicy] = {}
-        self._checks: Dict[str, ComplianceCheck] = {}
+        self._policies: dict[str, SecurityPolicy] = {}
+        self._checks: dict[str, ComplianceCheck] = {}
         self._audit = None
         self._metrics = metrics_collector
-        self._last_scan_time: Optional[float] = None
-        self._alerts: List[Dict[str, Any]] = []
+        self._last_scan_time: float | None = None
+        self._alerts: list[dict[str, Any]] = []
 
     def initialize(self) -> None:
         """初始化安全治理管理器"""
@@ -240,7 +240,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         for check in default_checks:
             self._checks[check.check_id] = check
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """执行安全治理动作"""
         _ = self.trace("execute")
         metrics_collector.counter("aegis_governance_ops_total", labels={"action": action})
@@ -294,7 +294,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             duration_ms = (time.time() - start_time) * 1000
             self.stats.record_request(duration_ms, success, error_msg)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         # 计算合规率（仅统计已评估的检查项）
         evaluated = [c for c in self._checks.values() if c.status != ComplianceStatus.UNKNOWN]
@@ -328,7 +328,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._checks.clear()
         self._alerts.clear()
 
-    def list_policies(self) -> List[Dict[str, Any]]:
+    def list_policies(self) -> list[dict[str, Any]]:
         """列出所有安全策略"""
         return [
             {
@@ -342,7 +342,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             for p in self._policies.values()
         ]
 
-    def list_checks(self) -> List[Dict[str, Any]]:
+    def list_checks(self) -> list[dict[str, Any]]:
         """列出所有合规检查项"""
         return [
             {
@@ -356,7 +356,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             for c in self._checks.values()
         ]
 
-    def run_compliance_check(self, check_id: str) -> Dict[str, Any]:
+    def run_compliance_check(self, check_id: str) -> dict[str, Any]:
         """运行合规检查"""
         if check_id not in self._checks:
             return {"error": f"Check not found: {check_id}"}
@@ -388,7 +388,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "last_check": check.last_check,
         }
 
-    def scan_security(self) -> Dict[str, Any]:
+    def scan_security(self) -> dict[str, Any]:
         """安全扫描"""
         self._last_scan_time = time.time()
 
@@ -414,7 +414,7 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self.stats.success_count += 1
         return {"scan_time": self._last_scan_time, "findings": findings, "findings_count": len(findings)}
 
-    def get_risk_assessment(self) -> Dict[str, Any]:
+    def get_risk_assessment(self) -> dict[str, Any]:
         """风险评估"""
         # 模拟风险评估
         high_risks = sum(1 for p in self._policies.values() if p.risk_level == RiskLevel.HIGH)
@@ -438,17 +438,17 @@ class AegisGovernanceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "policies_count": len(self._policies),
         }
 
-class GovernancePolicyEngine(object):
+class GovernancePolicyEngine:
     """治理策略引擎 - 策略生命周期管理、风险评估模型、合规规则引擎"""
 
     def __init__(self):
-        self._rule_registry: Dict[str, Dict] = {}
-        self._risk_model: Dict[str, float] = {}
-        self._violation_history: List[Dict] = []
-        self._remediation_actions: Dict[str, List[Dict]] = {}
-        self._compliance_frameworks: Dict[str, Dict] = {}
+        self._rule_registry: dict[str, dict] = {}
+        self._risk_model: dict[str, float] = {}
+        self._violation_history: list[dict] = []
+        self._remediation_actions: dict[str, list[dict]] = {}
+        self._compliance_frameworks: dict[str, dict] = {}
 
-    def register_framework(self, name: str, version: str, controls: List[str]) -> None:
+    def register_framework(self, name: str, version: str, controls: list[str]) -> None:
         """注册合规框架(如SOC2、ISO27001、GDPR)"""
         self._compliance_frameworks[name] = {
             "version": version,
@@ -469,7 +469,7 @@ class GovernancePolicyEngine(object):
             "created_at": time.time(),
         }
 
-    def evaluate_risk(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate_risk(self, context: dict[str, Any]) -> dict[str, Any]:
         """基于规则评估风险"""
         total_score = 0.0
         triggered = []
@@ -520,7 +520,7 @@ class GovernancePolicyEngine(object):
         )
         return action_id
 
-    def get_compliance_summary(self) -> Dict[str, Any]:
+    def get_compliance_summary(self) -> dict[str, Any]:
         """合规摘要"""
         open_violations = sum(1 for v in self._violation_history if v["status"] == "open")
         closed_violations = len(self._violation_history) - open_violations
@@ -537,16 +537,16 @@ class GovernancePolicyEngine(object):
             "remediation_progress": f"{completed_remediations}/{total_remediations}",
         }
 
-    def get_violation_history(self, limit: int = 50) -> List[Dict]:
+    def get_violation_history(self, limit: int = 50) -> list[dict]:
         """获取违规历史"""
         return self._violation_history[-limit:]
 
-    def get_framework_controls(self, framework_name: str) -> List[str]:
+    def get_framework_controls(self, framework_name: str) -> list[str]:
         """获取框架控制点"""
         fw = self._compliance_frameworks.get(framework_name, {})
         return fw.get("controls", [])
 
-    def batch_evaluate(self, contexts: List[Dict]) -> List[Dict]:
+    def batch_evaluate(self, contexts: list[dict]) -> list[dict]:
         """批量风险评估"""
         results = []
         for ctx in contexts:
@@ -554,11 +554,11 @@ class GovernancePolicyEngine(object):
             results.append(result)
         return results
 
-    def generate_risk_report(self) -> Dict[str, Any]:
+    def generate_risk_report(self) -> dict[str, Any]:
         """生成风险评估报告"""
         summary = self.get_compliance_summary()
         recent = self.get_violation_history(10)
-        risk_by_category: Dict[str, int] = {}
+        risk_by_category: dict[str, int] = {}
         for rule_id, rule in self._rule_registry.items():
             cat = rule["category"]
             risk_by_category[cat] = risk_by_category.get(cat, 0) + 1
@@ -578,12 +578,12 @@ class GovernancePolicyEngine(object):
             "updated_at": time.time(),
         }
 
-    def calculate_trend(self, days: int = 30) -> Dict[str, Any]:
+    def calculate_trend(self, days: int = 30) -> dict[str, Any]:
         """计算违规趋势"""
         now = time.time()
         cutoff = now - days * 86400
         recent = [v for v in self._violation_history if v["timestamp"] > cutoff]
-        by_severity: Dict[str, int] = {}
+        by_severity: dict[str, int] = {}
         for v in recent:
             sev = v["severity"]
             by_severity[sev] = by_severity.get(sev, 0) + 1
@@ -604,7 +604,7 @@ class GovernancePolicyEngine(object):
                 return True
         return False
 
-    def search_violations(self, severity: str = None, policy_id: str = None) -> List[Dict]:
+    def search_violations(self, severity: str = None, policy_id: str = None) -> list[dict]:
         """搜索违规记录"""
         results = []
         for v in self._violation_history:
@@ -615,13 +615,13 @@ class GovernancePolicyEngine(object):
             results.append(v)
         return results
 
-    def assess_governance_maturity(self) -> Dict[str, Any]:
+    def assess_governance_maturity(self) -> dict[str, Any]:
         """评估治理成熟度：策略覆盖率、执行合规率、审计完整性"""
         policies = self._policies if hasattr(self, "_policies") else {}
         audit_logs = self._audit_log if hasattr(self, "_audit_log") else []
         total_policies = len(policies)
         enforced = sum(1 for p in policies.values() if isinstance(p, dict) and p.get("enforced", False))
-        categories: Dict[str, int] = {}
+        categories: dict[str, int] = {}
         for p in policies.values():
             if isinstance(p, dict):
                 cat = p.get("category", "uncategorized")
@@ -640,13 +640,13 @@ class GovernancePolicyEngine(object):
             "grade": "A" if maturity_score >= 80 else "B" if maturity_score >= 60 else "C",
         }
 
-    def get_policy_violation_summary(self) -> Dict[str, Any]:
+    def get_policy_violation_summary(self) -> dict[str, Any]:
         """获取策略违规汇总：按严重级别和策略分类统计违规事件"""
         violations = self._violations if hasattr(self, "_violations") else []
         if not violations:
             return {"total_violations": 0}
-        severity_dist: Dict[str, int] = {}
-        policy_dist: Dict[str, int] = {}
+        severity_dist: dict[str, int] = {}
+        policy_dist: dict[str, int] = {}
         for v in violations:
             if isinstance(v, dict):
                 sev = v.get("severity", "info")

@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("distributed_counter")
 
-class ConsistencyAnalyzer(object):
+class ConsistencyAnalyzer:
     """distributed_counter 运营分析引擎
 
     - 分析同步延迟与不一致
@@ -131,16 +131,16 @@ class CounterType(Enum):
 class CounterValue:
     value: int = 0
     updated_at: float = 0.0
-    ttl: Optional[float] = None
+    ttl: float | None = None
     counter_type: CounterType = CounterType.STANDARD
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_expired(self) -> bool:
         if self.ttl is None:
             return False
         return time.time() - self.updated_at > self.ttl
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "value": self.value,
             "updated_at": self.updated_at,
@@ -157,7 +157,7 @@ class RateLimitEntry:
     refill_rate: float = 10.0
     last_refill: float = 0.0
 
-    def consume(self, count: int = 1) -> Tuple[bool, float]:
+    def consume(self, count: int = 1) -> tuple[bool, float]:
         now = time.time()
         elapsed = now - self.last_refill
         self.tokens = min(self.max_tokens, self.tokens + elapsed * self.refill_rate)
@@ -178,15 +178,15 @@ class VirtualNode:
             hash_val = int(hashlib.md5(key.encode()).hexdigest(), 16)
             self.replicas.append((hash_val, node_id))
 
-    def get_sorted_replicas(self) -> List[Tuple[int, str]]:
+    def get_sorted_replicas(self) -> list[tuple[int, str]]:
         return sorted(self.replicas, key=lambda x: x[0])
 
 class ConsistentHashRing:
     """Consistent hash ring for distributed counter sharding."""
 
     def __init__(self):
-        self.ring: List[Tuple[int, str]] = []
-        self.nodes: Dict[str, VirtualNode] = {}
+        self.ring: list[tuple[int, str]] = []
+        self.nodes: dict[str, VirtualNode] = {}
 
     def add_node(self, node_id: str) -> None:
         vnode = VirtualNode(node_id)
@@ -200,7 +200,7 @@ class ConsistentHashRing:
             remove_keys = set(vnode.get_sorted_replicas())
             self.ring = [r for r in self.ring if r not in remove_keys]
 
-    def get_node(self, key: str) -> Optional[str]:
+    def get_node(self, key: str) -> str | None:
         if not self.ring:
             return None
         hash_val = int(hashlib.md5(key.encode()).hexdigest(), 16)
@@ -209,7 +209,7 @@ class ConsistentHashRing:
                 return node_id
         return self.ring[0][1]
 
-    def get_nodes_for_key(self, key: str, count: int = 3) -> List[str]:
+    def get_nodes_for_key(self, key: str, count: int = 3) -> list[str]:
         if not self.ring:
             return []
         hash_val = int(hashlib.md5(key.encode()).hexdigest(), 16)
@@ -233,19 +233,19 @@ class ConsistentHashRing:
 class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """分布式计数器：原子操作、TTL、限流、滑动窗口、一致性哈希分片"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._counters: Dict[str, CounterValue] = {}
-        self._rate_limits: Dict[str, RateLimitEntry] = {}
-        self._sliding_windows: Dict[str, List[float]] = {}
-        self._locks: Dict[str, threading.Lock] = defaultdict(threading.Lock)
+        self._counters: dict[str, CounterValue] = {}
+        self._rate_limits: dict[str, RateLimitEntry] = {}
+        self._sliding_windows: dict[str, list[float]] = {}
+        self._locks: dict[str, threading.Lock] = defaultdict(threading.Lock)
         self._global_lock = threading.Lock()
         self._hash_ring = ConsistentHashRing()
         self._ops_count = 0
         self._cache_hits = 0
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("distributed_counter.initialize", "start")
         self.trace("distributed_counter.initialize", "end")
         try:
@@ -258,7 +258,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         active = sum(1 for c in self._counters.values() if not c.is_expired())
         return {
             "healthy": self.status == ModuleStatus.RUNNING,
@@ -280,7 +280,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             cv.updated_at = time.time()
         return cv
 
-    def incr(self, params: Optional[Dict] = None) -> Dict:
+    def incr(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         amount = params.get("amount", 1)
@@ -294,7 +294,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._ops_count += 1
             return {"action": "incr", "key": key, "value": cv.value, "amount": amount}
 
-    def decr(self, params: Optional[Dict] = None) -> Dict:
+    def decr(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         amount = params.get("amount", 1)
@@ -305,7 +305,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._ops_count += 1
             return {"action": "decr", "key": key, "value": cv.value, "amount": amount}
 
-    def get(self, params: Optional[Dict] = None) -> Dict:
+    def get(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         with self._locks[key]:
@@ -313,7 +313,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._ops_count += 1
             return {"action": "get", "key": key, "value": cv.value, "counter": cv.to_dict()}
 
-    def set_value(self, params: Optional[Dict] = None) -> Dict:
+    def set_value(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         value = params.get("value", 0)
@@ -327,7 +327,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self._ops_count += 1
             return {"action": "set", "key": key, "value": cv.value}
 
-    def delete(self, params: Optional[Dict] = None) -> Dict:
+    def delete(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         with self._global_lock:
@@ -335,7 +335,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._ops_count += 1
         return {"action": "delete", "key": key, "existed": removed is not None}
 
-    def check_rate(self, params: Optional[Dict] = None) -> Dict:
+    def check_rate(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         max_tokens = params.get("max_tokens", 100)
@@ -358,7 +358,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 "cost": cost,
             }
 
-    def record_event(self, params: Optional[Dict] = None) -> Dict:
+    def record_event(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         window_sec = params.get("window_sec", 60)
@@ -374,7 +374,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._ops_count += 1
         return {"action": "record_event", "key": key, "count_in_window": count, "window_sec": window_sec}
 
-    def get_count_in_window(self, params: Optional[Dict] = None) -> Dict:
+    def get_count_in_window(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         window_sec = params.get("window_sec", 60)
@@ -386,7 +386,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._ops_count += 1
         return {"action": "get_count_in_window", "key": key, "count": count, "window_sec": window_sec}
 
-    def get_shard(self, params: Optional[Dict] = None) -> Dict:
+    def get_shard(self, params: dict | None = None) -> dict:
         params = params or {}
         key = params.get("key", "default")
         node = self._hash_ring.get_node(key)
@@ -394,7 +394,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._ops_count += 1
         return {"action": "get_shard", "key": key, "primary": node, "replicas": replicas}
 
-    def list_counters(self, params: Optional[Dict] = None) -> Dict:
+    def list_counters(self, params: dict | None = None) -> dict:
         params = params or {}
         pattern = params.get("pattern", "*")
         prefix = pattern.replace("*", "")
@@ -405,7 +405,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._ops_count += 1
         return {"action": "list_counters", "pattern": pattern, "count": len(result), "counters": result}
 
-    def reset_all(self, params: Optional[Dict] = None) -> Dict:
+    def reset_all(self, params: dict | None = None) -> dict:
         with self._global_lock:
             count = len(self._counters)
             self._counters.clear()
@@ -420,7 +420,7 @@ class DistributedCounter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._sliding_windows.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

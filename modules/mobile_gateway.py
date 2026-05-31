@@ -86,13 +86,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MobileGatewayAnalyzer(object):
+class MobileGatewayAnalyzer:
     """mobile_gateway 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -295,7 +296,7 @@ class DeviceInfo:
     last_active: float = field(default_factory=time.time)
     first_seen: float = field(default_factory=time.time)
     is_active: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class APIRoute:
@@ -314,16 +315,16 @@ class PushMessage:
     message_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
     title: str = ""
     body: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     target_type: str = "user"
-    target_ids: List[str] = field(default_factory=list)
+    target_ids: list[str] = field(default_factory=list)
     priority: str = "normal"
     sound: str = "default"
     badge: int = 0
     content_available: bool = False
     mutable_content: bool = False
-    scheduled_at: Optional[float] = None
-    expires_at: Optional[float] = None
+    scheduled_at: float | None = None
+    expires_at: float | None = None
     status: str = "pending"
     sent_at: float = 0.0
     delivered_count: int = 0
@@ -352,7 +353,7 @@ class GatewayMetrics:
     push_failed: int = 0
     rate_limited: int = 0
     auth_failures: int = 0
-    errors_by_code: Dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    errors_by_code: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     latency_samples: deque = field(default_factory=lambda: deque(maxlen=1000))
 
 @dataclass
@@ -360,7 +361,7 @@ class OfflineSync:
     sync_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     user_id: str = ""
     device_id: str = ""
-    operations: List[Dict[str, Any]] = field(default_factory=list)
+    operations: list[dict[str, Any]] = field(default_factory=list)
     sync_token: str = ""
     created_at: float = field(default_factory=time.time)
     synced_at: float = 0.0
@@ -390,13 +391,13 @@ class MobileGateway:
     """Enterprise mobile API gateway with device management and push notifications."""
 
     def __init__(self):
-        self._devices: Dict[str, DeviceInfo] = {}
-        self._user_devices: Dict[str, List[str]] = defaultdict(list)
-        self._routes: Dict[str, APIRoute] = {}
+        self._devices: dict[str, DeviceInfo] = {}
+        self._user_devices: dict[str, list[str]] = defaultdict(list)
+        self._routes: dict[str, APIRoute] = {}
         self._push_queue: deque = deque(maxlen=50000)
-        self._rate_limits: Dict[str, RateLimitRule] = {}
-        self._offline_syncs: Dict[str, OfflineSync] = {}
-        self._request_counts: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._rate_limits: dict[str, RateLimitRule] = {}
+        self._offline_syncs: dict[str, OfflineSync] = {}
+        self._request_counts: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -428,7 +429,7 @@ class MobileGateway:
             },
         )()
         self._metrics = GatewayMetrics()
-        self._hooks: Dict[str, List[Callable]] = {
+        self._hooks: dict[str, list[Callable]] = {
             "on_request": [],
             "on_push": [],
             "on_device_register": [],
@@ -489,8 +490,8 @@ class MobileGateway:
         title: str,
         body: str,
         target_type: str = "user",
-        target_ids: Optional[List[str]] = None,
-        data: Optional[Dict] = None,
+        target_ids: list[str] | None = None,
+        data: dict | None = None,
         priority: str = "normal",
     ) -> PushMessage:
         msg = PushMessage(
@@ -511,7 +512,7 @@ class MobileGateway:
                 pass
         return msg
 
-    def send_broadcast(self, title: str, body: str, data: Optional[Dict] = None) -> PushMessage:
+    def send_broadcast(self, title: str, body: str, data: dict | None = None) -> PushMessage:
         with self._lock:
             all_users = list(self._user_devices.keys())
         return self.send_push(title=title, body=body, target_type="broadcast", target_ids=all_users[:100], data=data)
@@ -522,9 +523,9 @@ class MobileGateway:
         path: str,
         user_id: str = "",
         device_id: str = "",
-        headers: Optional[Dict] = None,
-        body: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        headers: dict | None = None,
+        body: dict | None = None,
+    ) -> dict[str, Any]:
         start = time.time()
         self._metrics.total_requests += 1
 
@@ -580,7 +581,7 @@ class MobileGateway:
         window.append(now)
         return True
 
-    def get_offline_sync(self, user_id: str, since: float = 0.0) -> List[Dict[str, Any]]:
+    def get_offline_sync(self, user_id: str, since: float = 0.0) -> list[dict[str, Any]]:
         syncs = []
         with self._lock:
             for s in self._offline_syncs.values():
@@ -595,13 +596,13 @@ class MobileGateway:
                     )
         return sorted(syncs, key=lambda x: x["created_at"], reverse=True)
 
-    def create_offline_sync(self, user_id: str, device_id: str, operations: List[Dict]) -> OfflineSync:
+    def create_offline_sync(self, user_id: str, device_id: str, operations: list[dict]) -> OfflineSync:
         sync = OfflineSync(user_id=user_id, device_id=device_id, operations=operations)
         with self._lock:
             self._offline_syncs[sync.sync_id] = sync
         return sync
 
-    def get_device_info(self, device_id: str) -> Optional[Dict[str, Any]]:
+    def get_device_info(self, device_id: str) -> dict[str, Any] | None:
         with self._lock:
             dev = self._devices.get(device_id)
             if not dev:
@@ -619,12 +620,12 @@ class MobileGateway:
                 "timezone": dev.timezone,
             }
 
-    def get_user_devices(self, user_id: str) -> List[Dict[str, Any]]:
+    def get_user_devices(self, user_id: str) -> list[dict[str, Any]]:
         with self._lock:
             device_ids = self._user_devices.get(user_id, [])
             return [self.get_device_info(did) for did in device_ids]
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         with self._lock:
             return {
                 "total_requests": self._metrics.total_requests,
@@ -637,7 +638,7 @@ class MobileGateway:
                 "auth_failures": self._metrics.auth_failures,
             }
 
-    def list_routes(self) -> List[Dict[str, Any]]:
+    def list_routes(self) -> list[dict[str, Any]]:
         return [
             {
                 "method": r.method,
@@ -650,7 +651,7 @@ class MobileGateway:
             for r in self._routes.values()
         ]
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             return {

@@ -108,7 +108,8 @@ import uuid
 import ssl
 import socket
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -120,7 +121,7 @@ from urllib.parse import urlparse, urljoin, urlencode, quote
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-class HttpClientAnalyzer(object):
+class HttpClientAnalyzer:
     """http client 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -299,11 +300,11 @@ class RequestConfig:
 
     method: HttpMethod = HttpMethod.GET
     url: str = ""
-    headers: Dict[str, str] = field(default_factory=dict)
-    params: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
+    params: dict[str, str] = field(default_factory=dict)
     body: Any = None
-    json_body: Optional[Dict] = None
-    form_data: Optional[Dict[str, str]] = None
+    json_body: dict | None = None
+    form_data: dict[str, str] | None = None
     timeout_connect: float = 10.0
     timeout_read: float = 30.0
     retry_count: int = 3
@@ -311,21 +312,21 @@ class RequestConfig:
     follow_redirects: bool = True
     max_redirects: int = 5
     verify_ssl: bool = True
-    proxy_url: Optional[str] = None
-    auth_token: Optional[str] = None
-    api_key: Optional[str] = None
-    trace_id: Optional[str] = None
+    proxy_url: str | None = None
+    auth_token: str | None = None
+    api_key: str | None = None
+    trace_id: str | None = None
 
 @dataclass
 class Response:
     """HTTP响应"""
 
     status_code: int = 0
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     body: str = ""
     json_data: Any = None
     bytes_data: bytes = b""
-    cookies: Dict[str, str] = field(default_factory=dict)
+    cookies: dict[str, str] = field(default_factory=dict)
     elapsed_ms: float = 0
     url: str = ""
     request_id: str = ""
@@ -398,7 +399,7 @@ class SlidingWindowCounter:
     def __init__(self, max_requests: int = 100, window_seconds: float = 1.0):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._timestamps: List[float] = []
+        self._timestamps: list[float] = []
         self._lock = threading.Lock()
 
     def acquire(self) -> bool:
@@ -426,7 +427,7 @@ class CircuitBreaker:
         self._state = self.State.CLOSED
         self._failure_count = 0
         self._success_count = 0
-        self._last_failure: Optional[float] = None
+        self._last_failure: float | None = None
         self._half_open_count = 0
         self._lock = threading.Lock()
 
@@ -457,9 +458,7 @@ class CircuitBreaker:
             self._failure_count += 1
             self._last_failure = time.time()
             self._success_count = 0
-            if self._state == self.State.HALF_OPEN:
-                self._state = self.State.OPEN
-            elif self._failure_count >= self.failure_threshold:
+            if self._state == self.State.HALF_OPEN or self._failure_count >= self.failure_threshold:
                 self._state = self.State.OPEN
 
     @property
@@ -478,10 +477,10 @@ class ResponseCache:
     def __init__(self, max_size: int = 1000, default_ttl: float = 300):
         self.max_size = max_size
         self.default_ttl = default_ttl
-        self._cache: OrderedDict[str, Tuple[Response, float]] = OrderedDict()
+        self._cache: OrderedDict[str, tuple[Response, float]] = OrderedDict()
         self._lock = threading.Lock()
 
-    def get(self, cache_key: str) -> Optional[Response]:
+    def get(self, cache_key: str) -> Response | None:
         with self._lock:
             if cache_key in self._cache:
                 response, expires = self._cache[cache_key]
@@ -493,7 +492,7 @@ class ResponseCache:
                     self._cache.pop(cache_key)
             return None
 
-    def put(self, cache_key: str, response: Response, ttl: Optional[float] = None) -> None:
+    def put(self, cache_key: str, response: Response, ttl: float | None = None) -> None:
         with self._lock:
             expires = time.time() + (ttl or self.default_ttl)
             self._cache[cache_key] = (response, expires)
@@ -501,7 +500,7 @@ class ResponseCache:
             while len(self._cache) > self.max_size:
                 self._cache.popitem(last=False)
 
-    def invalidate(self, pattern: Optional[str] = None) -> int:
+    def invalidate(self, pattern: str | None = None) -> int:
         with self._lock:
             if pattern:
                 keys = [k for k in self._cache if pattern in k]
@@ -521,9 +520,9 @@ class RequestInterceptor:
     """请求拦截器"""
 
     def __init__(self):
-        self._before_handlers: List[Callable] = []
-        self._after_handlers: List[Callable] = []
-        self._error_handlers: List[Callable] = []
+        self._before_handlers: list[Callable] = []
+        self._after_handlers: list[Callable] = []
+        self._error_handlers: list[Callable] = []
 
     def add_before(self, handler: Callable[[RequestConfig], RequestConfig]) -> None:
         self._before_handlers.append(handler)
@@ -544,7 +543,7 @@ class RequestInterceptor:
             response = handler(response)
         return response
 
-    def run_error(self, error: Exception, config: RequestConfig) -> Optional[Response]:
+    def run_error(self, error: Exception, config: RequestConfig) -> Response | None:
         for handler in self._error_handlers:
             response = handler(error, config)
             if response:
@@ -562,7 +561,7 @@ class RequestPipeline:
         self._cache_hits: int = 0
         self._cache_misses: int = 0
         self._interceptor_errors: int = 0
-        self._pipeline_stages: List[str] = [
+        self._pipeline_stages: list[str] = [
             "resolve",
             "intercept_req",
             "cache_check",
@@ -574,7 +573,7 @@ class RequestPipeline:
             "metrics",
         ]
 
-    def before_request(self, method: str, url: str, headers: dict) -> Dict[str, Any]:
+    def before_request(self, method: str, url: str, headers: dict) -> dict[str, Any]:
         """请求前置处理：验证拦截器、缓存检查"""
         self._total_requests += 1
         return {
@@ -598,7 +597,7 @@ class RequestPipeline:
         """记录拦截器错误"""
         self._interceptor_errors += 1
 
-    def get_pipeline_stats(self) -> Dict[str, Any]:
+    def get_pipeline_stats(self) -> dict[str, Any]:
         """获取管线统计"""
         return {
             "pipeline_id": self._pipeline_id,
@@ -612,7 +611,7 @@ class RequestPipeline:
             "stages": self._pipeline_stages,
         }
 
-class HttpClientAnalyzer(object):
+class HttpClientAnalyzer:
     """http_client核心分析引擎
 
     为http_client模块提供深度分析能力，包括数据聚合、
@@ -679,17 +678,17 @@ class HttpClient(EnterpriseModule):
 
         super().__init__(module_id="http_client", module_name="HTTP客户端引擎")
         self._rate_limiter = TokenBucket(rate=100, capacity=200)
-        self._circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self._circuit_breakers: dict[str, CircuitBreaker] = {}
         self._cache = ResponseCache(max_size=1000, default_ttl=300)
         self._interceptor = RequestInterceptor()
-        self._default_headers: Dict[str, str] = {
+        self._default_headers: dict[str, str] = {
             "User-Agent": "AUTO-EVO-AI/6.39 HTTPClient",
             "Accept": "application/json",
             "Content-Type": "application/json",
         }
-        self._cookies: Dict[str, str] = {}
+        self._cookies: dict[str, str] = {}
         self._executor = ThreadPoolExecutor(max_workers=20)
-        self._audit_log: List[Dict[str, Any]] = []
+        self._audit_log: list[dict[str, Any]] = []
         self._audit_max: int = 5000
         self._pipeline = RequestPipeline()
         self._stats = {
@@ -707,10 +706,10 @@ class HttpClient(EnterpriseModule):
     def get(
         self,
         url: str,
-        params: Optional[Dict] = None,
-        headers: Optional[Dict] = None,
+        params: dict | None = None,
+        headers: dict | None = None,
         timeout: float = 30,
-        cache_ttl: Optional[float] = None,
+        cache_ttl: float | None = None,
         **kwargs,
     ) -> Response:
         """GET请求"""
@@ -727,9 +726,9 @@ class HttpClient(EnterpriseModule):
     def post(
         self,
         url: str,
-        json_body: Optional[Dict] = None,
-        body: Optional[str] = None,
-        headers: Optional[Dict] = None,
+        json_body: dict | None = None,
+        body: str | None = None,
+        headers: dict | None = None,
         timeout: float = 30,
         **kwargs,
     ) -> Response:
@@ -746,7 +745,7 @@ class HttpClient(EnterpriseModule):
         return self._execute(config)
 
     def put(
-        self, url: str, json_body: Optional[Dict] = None, headers: Optional[Dict] = None, timeout: float = 30
+        self, url: str, json_body: dict | None = None, headers: dict | None = None, timeout: float = 30
     ) -> Response:
         """PUT请求"""
         config = RequestConfig(
@@ -759,7 +758,7 @@ class HttpClient(EnterpriseModule):
         )
         return self._execute(config)
 
-    def delete(self, url: str, headers: Optional[Dict] = None, timeout: float = 30) -> Response:
+    def delete(self, url: str, headers: dict | None = None, timeout: float = 30) -> Response:
         """DELETE请求"""
         config = RequestConfig(
             method=HttpMethod.DELETE,
@@ -770,13 +769,13 @@ class HttpClient(EnterpriseModule):
         )
         return self._execute(config)
 
-    def request(self, config: RequestConfig, cache_ttl: Optional[float] = None) -> Response:
+    def request(self, config: RequestConfig, cache_ttl: float | None = None) -> Response:
         """自定义请求"""
         if not config.trace_id:
             config.trace_id = str(uuid.uuid4())[:8]
         return self._execute(config, cache_ttl=cache_ttl)
 
-    def batch_request(self, configs: List[RequestConfig]) -> List[Response]:
+    def batch_request(self, configs: list[RequestConfig]) -> list[Response]:
         """批量请求"""
         futures = []
         for config in configs:
@@ -785,7 +784,7 @@ class HttpClient(EnterpriseModule):
 
     # ─────────────────────── 核心执行 ───────────────────────
 
-    def _execute(self, config: RequestConfig, cache_ttl: Optional[float] = None) -> Response:
+    def _execute(self, config: RequestConfig, cache_ttl: float | None = None) -> Response:
         """执行请求"""
         self._stats["total_requests"] += 1
         start = time.time()
@@ -919,12 +918,12 @@ class HttpClient(EnterpriseModule):
         self,
         method: str,
         url: str,
-        headers: Dict[str, str],
-        body: Optional[bytes],
+        headers: dict[str, str],
+        body: bytes | None,
         timeout_connect: float,
         timeout_read: float,
         verify_ssl: bool = True,
-        proxy: Optional[str] = None,
+        proxy: str | None = None,
     ) -> Response:
         """实际发送HTTP请求"""
         parsed = urlparse(url)
@@ -968,7 +967,7 @@ class HttpClient(EnterpriseModule):
             )
         except urllib.error.URLError as e:
             raise ConnectionError(f"连接失败: {e.reason}")
-        except socket.timeout:
+        except TimeoutError:
             raise TimeoutError(f"请求超时: {total_timeout}s")
 
     # ─────────────────────── 工具方法 ───────────────────────
@@ -1019,7 +1018,7 @@ class HttpClient(EnterpriseModule):
         if error:
             self._interceptor.add_error(error)
 
-    def clear_cache(self, pattern: Optional[str] = None) -> int:
+    def clear_cache(self, pattern: str | None = None) -> int:
         """清空缓存"""
         return self._cache.invalidate(pattern)
 
@@ -1027,7 +1026,7 @@ class HttpClient(EnterpriseModule):
         """设置限流"""
         self._rate_limiter = TokenBucket(rate=rate, capacity=capacity)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计"""
         s = self._stats
         total = s["total_requests"]
@@ -1046,7 +1045,7 @@ class HttpClient(EnterpriseModule):
 
     # ─────────────────────── EnterpriseModule接口 ───────────────────────
 
-    def _audit_record(self, action: str, detail: Dict[str, Any]) -> None:
+    def _audit_record(self, action: str, detail: dict[str, Any]) -> None:
         """记录审计日志"""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -1057,7 +1056,7 @@ class HttpClient(EnterpriseModule):
         if len(self._audit_log) > self._audit_max:
             self._audit_log = self._audit_log[-self._audit_max :]
 
-    def get_audit_log(self, limit: int = 100) -> List[Dict]:
+    def get_audit_log(self, limit: int = 100) -> list[dict]:
         """获取审计日志"""
         return self._audit_log[-limit:]
 

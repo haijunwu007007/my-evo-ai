@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据库管理器（A级）— SQLite 连接池 + 迁移管理 + CRUD"""
 # Grade: A
 
@@ -53,12 +52,12 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         super().__init__(config)
-        self._connections: Dict[str, sqlite3.Connection] = {}
-        self._locks: Dict[str, threading.Lock] = {}
+        self._connections: dict[str, sqlite3.Connection] = {}
+        self._locks: dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
-        self._migration_log: List[str] = []
+        self._migration_log: list[str] = []
         self.logger = get_logger(__name__)
 
     def initialize(self) -> None:
@@ -70,7 +69,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     def health_check(self) -> HealthReport:
         healthy = True
-        conn_ok: Dict[str, bool] = {}
+        conn_ok: dict[str, bool] = {}
         for name in list(self._connections.keys()):
             try:
                 conn = self._connections.get(name)
@@ -96,7 +95,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             },
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
     async def shutdown(self) -> None:
@@ -114,7 +113,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     # 公开 API
     # ------------------------------------------------------------------
 
-    def get_connection(self, name: str = "default", db_path: str = ":memory:") -> Optional[sqlite3.Connection]:
+    def get_connection(self, name: str = "default", db_path: str = ":memory:") -> sqlite3.Connection | None:
         """获取或创建命名连接。"""
         if not _HAS_SQLITE:
             self.logger.error("sqlite3 not available, cannot create connection")
@@ -166,7 +165,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 self.logger.error("Execute error: %s — %s", sql[:80], exc)
                 return {"success": False, "error": str(exc)}
 
-    def fetch_one(self, sql: str, params: Optional[Tuple] = None, name: str = "default") -> Dict:
+    def fetch_one(self, sql: str, params: tuple | None = None, name: str = "default") -> dict:
         """查询单行。"""
         if not _HAS_SQLITE:
             return {"success": False, "error": "sqlite3_not_available"}
@@ -185,7 +184,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             except Exception as exc:
                 return {"success": False, "error": str(exc)}
 
-    def fetch_all(self, sql: str, params: Optional[Tuple] = None, name: str = "default") -> Dict:
+    def fetch_all(self, sql: str, params: tuple | None = None, name: str = "default") -> dict:
         """查询多行。"""
         if not _HAS_SQLITE:
             return {"success": False, "error": "sqlite3_not_available"}
@@ -207,7 +206,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             except Exception as exc:
                 return {"success": False, "error": str(exc)}
 
-    def run_migrations(self, migrations_dir: str) -> Dict:
+    def run_migrations(self, migrations_dir: str) -> dict:
         """按文件名顺序执行 .sql 迁移文件。
 
         每条迁移只执行一次，通过 _migrations 表追踪已执行的迁移。
@@ -236,9 +235,9 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         if not sql_files:
             return {"success": True, "applied": [], "message": "no_migration_files_found"}
 
-        applied: List[str] = []
-        skipped: List[str] = []
-        errors: List[str] = []
+        applied: list[str] = []
+        skipped: list[str] = []
+        errors: list[str] = []
 
         for path in sql_files:
             name = os.path.basename(path)
@@ -249,7 +248,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 continue
 
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     sql_text = f.read()
                 conn.executescript(sql_text)
                 conn.execute(
@@ -278,7 +277,7 @@ class DatabaseManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     # Dispatch（保持向后兼容）
     # ------------------------------------------------------------------
 
-    def _dispatch(self, p: Dict) -> Dict:
+    def _dispatch(self, p: dict) -> dict:
         action = p.get("action", "status")
 
         if action == "status":

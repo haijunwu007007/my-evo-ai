@@ -162,7 +162,7 @@ class TextClassification:
 
     label: str
     confidence: float
-    probabilities: Dict[str, float] = field(default_factory=dict)
+    probabilities: dict[str, float] = field(default_factory=dict)
 
 @dataclass
 class NLPResult:
@@ -173,15 +173,15 @@ class NLPResult:
     input_text: str = ""
     result: Any = None
     duration_ms: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-class TextSimilarityEngine(object):
+class TextSimilarityEngine:
     """文本相似度引擎 — Jaccard相似度、余弦相似度、编辑距离、语义邻近度"""
 
     def __init__(self):
-        self._corpus_vectors: Dict[str, List[float]] = {}
+        self._corpus_vectors: dict[str, list[float]] = {}
 
-    def jaccard_similarity(self, text_a: str, text_b: str) -> Dict[str, Any]:
+    def jaccard_similarity(self, text_a: str, text_b: str) -> dict[str, Any]:
         """计算Jaccard相似度（基于词集合重叠）"""
         tokens_a = set(text_a.lower().split())
         tokens_b = set(text_b.lower().split())
@@ -196,7 +196,7 @@ class TextSimilarityEngine(object):
             "unique_to_b": len(tokens_b - tokens_a),
         }
 
-    def cosine_similarity(self, vec_a: List[float], vec_b: List[float]) -> Dict[str, Any]:
+    def cosine_similarity(self, vec_a: list[float], vec_b: list[float]) -> dict[str, Any]:
         """计算余弦相似度（基于TF向量）"""
         if len(vec_a) != len(vec_b):
             return {"error": "vector dimensions must match", "similarity": 0}
@@ -207,7 +207,7 @@ class TextSimilarityEngine(object):
             return {"similarity": 0.0, "norm_a": norm_a, "norm_b": norm_b}
         return {"similarity": round(dot / (norm_a * norm_b), 6), "dot_product": round(dot, 4)}
 
-    def levenshtein_distance(self, text_a: str, text_b: str) -> Dict[str, Any]:
+    def levenshtein_distance(self, text_a: str, text_b: str) -> dict[str, Any]:
         """计算Levenshtein编辑距离"""
         m, n = len(text_a), len(text_b)
         dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -223,7 +223,7 @@ class TextSimilarityEngine(object):
         normalized = 1 - dp[m][n] / max_len if max_len > 0 else 1.0
         return {"distance": dp[m][n], "normalized_similarity": round(normalized, 4), "length_a": m, "length_b": n}
 
-    def ngram_overlap(self, text_a: str, text_b: str, n: int = 2) -> Dict[str, Any]:
+    def ngram_overlap(self, text_a: str, text_b: str, n: int = 2) -> dict[str, Any]:
         """计算N-gram重叠度"""
 
         def get_ngrams(text, n):
@@ -238,7 +238,7 @@ class TextSimilarityEngine(object):
         union = ngrams_a | ngrams_b
         return {"overlap": round(len(intersection) / len(union), 4), "shared_ngrams": len(intersection), "n": n}
 
-    def batch_compare(self, query: str, candidates: List[str], method: str = "jaccard") -> List[Dict[str, Any]]:
+    def batch_compare(self, query: str, candidates: list[str], method: str = "jaccard") -> list[dict[str, Any]]:
         """批量比较查询文本与候选文本的相似度"""
         results = []
         for i, candidate in enumerate(candidates):
@@ -261,13 +261,13 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._stop_words: Set[str] = self._init_stopwords()
-        self._models: Dict[str, Dict] = {}
-        self._vocab: Dict[str, int] = defaultdict(int)
-        self._idf_cache: Dict[str, float] = {}
-        self._processing_log: List[Dict] = []
+        self._stop_words: set[str] = self._init_stopwords()
+        self._models: dict[str, dict] = {}
+        self._vocab: dict[str, int] = defaultdict(int)
+        self._idf_cache: dict[str, float] = {}
+        self._processing_log: list[dict] = []
 
-    def _init_stopwords(self) -> Set[str]:
+    def _init_stopwords(self) -> set[str]:
         return {
             "的",
             "了",
@@ -377,7 +377,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _tokenize(self, text: str, language: str = "auto") -> List[str]:
+    def _tokenize(self, text: str, language: str = "auto") -> list[str]:
         """分词"""
         if language == "auto":
             zh_chars = sum(1 for c in text if "\u4e00" <= c <= "\u9fff")
@@ -402,13 +402,13 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 w.lower() for w in re.findall(r"[a-zA-Z0-9]+", text) if w.lower() not in self._stop_words and len(w) > 1
             ]
 
-    def _compute_tf(self, tokens: List[str]) -> Dict[str, float]:
+    def _compute_tf(self, tokens: list[str]) -> dict[str, float]:
         """计算TF"""
         counts = Counter(tokens)
         total = len(tokens)
         return {t: c / max(total, 1) for t, c in counts.items()}
 
-    def _compute_tfidf(self, tokens: List[str]) -> Dict[str, float]:
+    def _compute_tfidf(self, tokens: list[str]) -> dict[str, float]:
         """计算TF-IDF"""
         tf = self._compute_tf(tokens)
         unique_terms = set(tokens)
@@ -422,7 +422,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             tfidf[term] = tf[term] * idf
         return tfidf
 
-    def _cosine_similarity(self, v1: Dict[str, float], v2: Dict[str, float]) -> float:
+    def _cosine_similarity(self, v1: dict[str, float], v2: dict[str, float]) -> float:
         """余弦相似度"""
         common = set(v1.keys()) & set(v2.keys())
         if not common:
@@ -433,7 +433,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return dot / max(n1 * n2, 1e-10)
 
     @trace_operation("nlp_tokenize")
-    def tokenize(self, text: str, language: str = "auto") -> Dict[str, Any]:
+    def tokenize(self, text: str, language: str = "auto") -> dict[str, Any]:
         """分词"""
         start = time.time()
         tokens = self._tokenize(text, language)
@@ -445,7 +445,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_extract_keywords")
-    def extract_keywords(self, text: str, top_k: int = 10, method: str = "tfidf") -> Dict[str, Any]:
+    def extract_keywords(self, text: str, top_k: int = 10, method: str = "tfidf") -> dict[str, Any]:
         """提取关键词"""
         start = time.time()
         tokens = self._tokenize(text)
@@ -467,7 +467,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_ner")
-    def extract_entities(self, text: str, model: str = "zh_ner") -> Dict[str, Any]:
+    def extract_entities(self, text: str, model: str = "zh_ner") -> dict[str, Any]:
         """实体识别"""
         start = time.time()
         model_data = self._models.get(model)
@@ -516,7 +516,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_classify")
-    def classify_text(self, text: str, model: str = "zh_classifier") -> Dict[str, Any]:
+    def classify_text(self, text: str, model: str = "zh_classifier") -> dict[str, Any]:
         """文本分类"""
         start = time.time()
         model_data = self._models.get(model)
@@ -548,7 +548,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_similarity")
-    def compute_similarity(self, text1: str, text2: str) -> Dict[str, Any]:
+    def compute_similarity(self, text1: str, text2: str) -> dict[str, Any]:
         """计算文本相似度"""
         start = time.time()
         tokens1 = self._tokenize(text1)
@@ -570,7 +570,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_summarize")
-    def summarize(self, text: str, max_sentences: int = 3) -> Dict[str, Any]:
+    def summarize(self, text: str, max_sentences: int = 3) -> dict[str, Any]:
         """文本摘要（抽取式）"""
         start = time.time()
         sentences = re.split(r"[。！？\n]", text)
@@ -607,7 +607,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("nlp_batch_process")
-    def batch_process(self, texts: List[str], task: str = "keywords") -> List[Dict]:
+    def batch_process(self, texts: list[str], task: str = "keywords") -> list[dict]:
         """批量处理"""
         results = []
         handlers = {
@@ -676,7 +676,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {
@@ -690,7 +690,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         audit_logger.log(action="module_shutdown", resource="nlp_engine", details=f"关闭，词汇量: {len(self._vocab)}")
 
-    def batch_tokenize(self, texts: List[str]) -> List[Dict[str, Any]]:
+    def batch_tokenize(self, texts: list[str]) -> list[dict[str, Any]]:
         """批量分词：统计token数量、字符比、平均token长度"""
         results = []
         for text in texts:

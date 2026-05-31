@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class SemanticAnalyzer(object):
+class SemanticAnalyzer:
     """weaviate_semantic 运营分析引擎
 
     - 分析语义搜索准确率
@@ -116,7 +116,7 @@ class SemanticAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "SemanticAnalyzer", "module": "weaviate_semantic", "summary": summary}
 
-class WeaviateSemanticAnalyzer(object):
+class WeaviateSemanticAnalyzer:
     """weaviate semantic 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class WeaviateSemanticAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class WeaviateSemanticAnalyzer(object):
+class WeaviateSemanticAnalyzer:
     """weaviate_semantic核心分析引擎
 
     为weaviate_semantic模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class WeaviateSemanticAnalyzer(object):
 class WeaviateSemantic(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Weaviate语义搜索"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"weaviate_semantic")
 

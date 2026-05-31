@@ -79,26 +79,27 @@ import math
 import time
 import uuid
 from collections import defaultdict, deque
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger("decision_engine")
 
-class RuleEngine(object):
+class RuleEngine:
     """规则引擎 - 条件匹配与优先级执行"""
 
     def __init__(self):
-        self._rules: Dict[str, Dict] = {}
-        self._rule_groups: Dict[str, List[str]] = defaultdict(list)
+        self._rules: dict[str, dict] = {}
+        self._rule_groups: dict[str, list[str]] = defaultdict(list)
 
     def add_rule(
         self,
         rule_id: str,
         name: str,
-        conditions: List[Dict],
-        actions: List[Dict],
+        conditions: list[dict],
+        actions: list[dict],
         priority: int = 100,
         group: str = "default",
         enabled: bool = True,
@@ -115,7 +116,7 @@ class RuleEngine(object):
         }
         self._rule_groups[group].append(rule_id)
 
-    def evaluate_conditions(self, conditions: List[Dict], context: Dict) -> bool:
+    def evaluate_conditions(self, conditions: list[dict], context: dict) -> bool:
         for cond in conditions:
             field = cond.get("field", "")
             operator = cond.get("operator", "eq")
@@ -129,7 +130,7 @@ class RuleEngine(object):
                 return False
         return True
 
-    async def execute(self, context: Dict, group: str = None) -> Dict:
+    async def execute(self, context: dict, group: str = None) -> dict:
         _ = self.trace("execute")
         metrics_collector.counter("decision_engine_eval_total", labels={"group": group or "default"})
         self.audit(
@@ -158,7 +159,7 @@ class RuleEngine(object):
             "match_count": len(matched),
         }
 
-    def _execute_action(self, action: Dict, context: Dict) -> Dict:
+    def _execute_action(self, action: dict, context: dict) -> dict:
         action_type = action.get("type", "set_value")
         if action_type == "set_value":
             target = action.get("target", "")
@@ -173,7 +174,7 @@ class RuleEngine(object):
         return {"type": action_type, "params": action}
 
     @staticmethod
-    def _get_nested_value(obj: Dict, path: str) -> Any:
+    def _get_nested_value(obj: dict, path: str) -> Any:
         parts = path.split(".")
         current = obj
         for p in parts:
@@ -228,16 +229,16 @@ class RuleEngine(object):
                 return False
         return False
 
-def rule_id_for(rule: Dict) -> str:
+def rule_id_for(rule: dict) -> str:
     return str(id(rule))[:8]
 
 class ScoringModel:
     """评分模型引擎"""
 
     def __init__(self):
-        self._models: Dict[str, Dict] = {}
+        self._models: dict[str, dict] = {}
 
-    def create_model(self, name: str, features: List[Dict], weights: Dict[str, float], thresholds: Dict = None):
+    def create_model(self, name: str, features: list[dict], weights: dict[str, float], thresholds: dict = None):
         total_weight = sum(abs(w) for w in weights.values())
         normalized = {k: v / total_weight for k, v in weights.items()}
         self._models[name] = {
@@ -247,7 +248,7 @@ class ScoringModel:
             "score_count": 0,
         }
 
-    def score(self, model_name: str, context: Dict) -> Dict:
+    def score(self, model_name: str, context: dict) -> dict:
         model = self._models.get(model_name)
         if not model:
             return {"error": "model_not_found"}
@@ -287,18 +288,18 @@ class ScoringModel:
         model["score_count"] += 1
         return {"score": round(total_score, 1), "grade": grade, "feature_scores": feature_scores}
 
-    def batch_score(self, model_name: str, contexts: List[Dict]) -> List[Dict]:
+    def batch_score(self, model_name: str, contexts: list[dict]) -> list[dict]:
         """批量评分"""
         return [self.score(model_name, ctx) for ctx in contexts]
 
-    def get_feature_importance(self, model_name: str) -> Dict[str, float]:
+    def get_feature_importance(self, model_name: str) -> dict[str, float]:
         """获取特征重要性排名"""
         model = self._models.get(model_name)
         if not model:
             return {}
         return dict(sorted(model["weights"].items(), key=lambda x: -abs(x[1])))
 
-    def calibrate_thresholds(self, model_name: str, scores: List[float]) -> Dict:
+    def calibrate_thresholds(self, model_name: str, scores: list[float]) -> dict:
         """基于历史分数校准阈值"""
         if not scores:
             return {"error": "no_scores"}
@@ -310,15 +311,15 @@ class ScoringModel:
             model["thresholds"] = {"high": p75, "medium": p50, "low": 0}
         return {"high": p75, "medium": p50, "calibrated_from": len(scores)}
 
-class ABTestEngine(object):
+class ABTestEngine:
     """A/B测试引擎"""
 
     def __init__(self):
-        self._experiments: Dict[str, Dict] = {}
-        self._assignments: Dict[str, str] = {}
+        self._experiments: dict[str, dict] = {}
+        self._assignments: dict[str, str] = {}
 
     def create_experiment(
-        self, name: str, variants: List[Dict], traffic_pct: float = 100.0, allocation: Dict[str, float] = None
+        self, name: str, variants: list[dict], traffic_pct: float = 100.0, allocation: dict[str, float] = None
     ):
         if not allocation:
             n = len(variants)
@@ -332,7 +333,7 @@ class ABTestEngine(object):
             "active": True,
         }
 
-    def assign(self, experiment: str, user_id: str) -> Dict:
+    def assign(self, experiment: str, user_id: str) -> dict:
         exp = self._experiments.get(experiment)
         if not exp or not exp["active"]:
             return {"variant": "control", "reason": "no_experiment"}
@@ -354,7 +355,7 @@ class ABTestEngine(object):
         exp["metrics"][variant]["impressions"] += 1
         return {"experiment": experiment, "variant": variant, "config": exp["variants"].get(variant, {})}
 
-    def track_conversion(self, experiment: str, variant: str) -> Dict:
+    def track_conversion(self, experiment: str, variant: str) -> dict:
         exp = self._experiments.get(experiment)
         if exp and variant in exp["metrics"]:
             exp["metrics"][variant]["conversions"] += 1
@@ -363,7 +364,7 @@ class ABTestEngine(object):
             return {"variant": variant, "conversions": metrics["conversions"], "cvr": round(cvr, 2)}
         return {"error": "not_found"}
 
-    def get_experiment_results(self, experiment: str) -> Dict:
+    def get_experiment_results(self, experiment: str) -> dict:
         exp = self._experiments.get(experiment, {})
         results = {}
         for variant, metrics in exp.get("metrics", {}).items():
@@ -375,7 +376,7 @@ class ABTestEngine(object):
             }
         return {"experiment": experiment, "active": exp.get("active", False), "results": results}
 
-    def get_statistical_significance(self, experiment: str, min_samples: int = 100) -> Dict:
+    def get_statistical_significance(self, experiment: str, min_samples: int = 100) -> dict:
         """统计显著性检验（简化版z-test）"""
         import math
 
@@ -396,7 +397,7 @@ class ABTestEngine(object):
                 }
         return {"experiment": experiment, "variants": results}
 
-    def stop_experiment(self, experiment: str, winner: str = None) -> Dict:
+    def stop_experiment(self, experiment: str, winner: str = None) -> dict:
         """停止实验"""
         exp = self._experiments.get(experiment)
         if exp:
@@ -405,7 +406,7 @@ class ABTestEngine(object):
             return {"experiment": experiment, "stopped": True, "winner": winner}
         return {"error": "not_found"}
 
-    def get_experiment_impact_summary(self) -> Dict[str, Any]:
+    def get_experiment_impact_summary(self) -> dict[str, Any]:
         """汇总所有实验的业务影响：总曝光、提升幅度、最佳实验"""
         experiments = self._experiments if hasattr(self, "_experiments") else {}
         total_impressions = 0
@@ -441,9 +442,9 @@ class DecisionAuditLog:
     def __init__(self, max_entries: int = 10000):
         self.max_entries = max_entries
         self._log: deque = deque(maxlen=max_entries)
-        self._stats: Dict[str, int] = defaultdict(int)
+        self._stats: dict[str, int] = defaultdict(int)
 
-    def record(self, decision_type: str, context: Dict, result: Dict, source: str = "rule_engine"):
+    def record(self, decision_type: str, context: dict, result: dict, source: str = "rule_engine"):
         entry = {
             "id": str(uuid.uuid4())[:8],
             "type": decision_type,
@@ -455,16 +456,16 @@ class DecisionAuditLog:
         self._log.append(entry)
         self._stats[decision_type] += 1
 
-    def query(self, decision_type: str = None, limit: int = 100) -> List[Dict]:
+    def query(self, decision_type: str = None, limit: int = 100) -> list[dict]:
         entries = list(self._log)
         if decision_type:
             entries = [e for e in entries if e["type"] == decision_type]
         return entries[-limit:]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"total_decisions": len(self._log), "by_type": dict(self._stats)}
 
-    def get_anomaly_report(self) -> Dict:
+    def get_anomaly_report(self) -> dict:
         """异常决策分析 - 识别频率异常的决策类型"""
         avg = sum(self._stats.values()) / max(len(self._stats), 1)
         anomalies = {k: v for k, v in self._stats.items() if v > avg * 3}
@@ -475,7 +476,7 @@ class DecisionAuditLog:
             "recommendation": "检查高频异常决策类型" if anomalies else "正常",
         }
 
-    def export_summary(self, hours: int = 24) -> Dict:
+    def export_summary(self, hours: int = 24) -> dict:
         """导出审计摘要（按小时统计）"""
         cutoff = time.time() - hours * 3600
         recent = [e for e in self._log if e["timestamp"] > cutoff]
@@ -489,18 +490,18 @@ class DecisionAuditLog:
             "hourly_distribution": dict(sorted(hourly.items())),
         }
 
-    def search_by_source(self, source: str, limit: int = 50) -> List[Dict]:
+    def search_by_source(self, source: str, limit: int = 50) -> list[dict]:
         """按来源搜索审计记录"""
         return [e for e in self._log if e.get("source") == source][-limit:]
 
 class DecisionEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """决策引擎 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "decisions_made": 0,
@@ -509,7 +510,7 @@ class DecisionEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 

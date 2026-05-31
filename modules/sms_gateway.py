@@ -24,10 +24,10 @@ CONFIG = {
 
 _stats = {"sent": 0, "failed": 0, "history": []}
 
-def health_check() -> Dict:
+def health_check() -> dict:
     return {"module": "sms_gateway", "status": "healthy", "provider": CONFIG["provider"]}
 
-def execute(action: str = "send", params: Dict = None) -> Dict:
+def execute(action: str = "send", params: dict = None) -> dict:
     p = params or {}
     if action == "health": return health_check()
     elif action == "config":

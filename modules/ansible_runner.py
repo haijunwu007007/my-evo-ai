@@ -122,10 +122,10 @@ class InventoryHost:
     host_id: str
     hostname: str
     ip: str
-    groups: List[str] = field(default_factory=list)
-    variables: Dict[str, str] = field(default_factory=dict)
+    groups: list[str] = field(default_factory=list)
+    variables: dict[str, str] = field(default_factory=dict)
     status: HostStatus = HostStatus.OK
-    last_run: Optional[float] = None
+    last_run: float | None = None
 
 @dataclass
 class Playbook:
@@ -135,11 +135,11 @@ class Playbook:
     name: str
     description: str = ""
     playbook_path: str = ""
-    variables: Dict[str, Any] = field(default_factory=dict)
-    target_groups: List[str] = field(default_factory=list)
+    variables: dict[str, Any] = field(default_factory=dict)
+    target_groups: list[str] = field(default_factory=list)
     status: PlaybookStatus = PlaybookStatus.PENDING
     created_at: float = field(default_factory=time.time)
-    last_run: Optional[float] = None
+    last_run: float | None = None
     run_count: int = 0
     success_count: int = 0
 
@@ -149,11 +149,11 @@ class ExecutionRecord:
 
     execution_id: str
     playbook_id: str
-    hosts: List[str] = field(default_factory=list)
+    hosts: list[str] = field(default_factory=list)
     status: PlaybookStatus = PlaybookStatus.RUNNING
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
-    results: Dict[str, str] = field(default_factory=dict)
+    completed_at: float | None = None
+    results: dict[str, str] = field(default_factory=dict)
     output: str = ""
 
 class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -164,15 +164,15 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._hosts: Dict[str, InventoryHost] = {}
-        self._playbooks: Dict[str, Playbook] = {}
-        self._executions: List[ExecutionRecord] = []
+        self._hosts: dict[str, InventoryHost] = {}
+        self._playbooks: dict[str, Playbook] = {}
+        self._executions: list[ExecutionRecord] = []
         self._host_counter: int = 0
         self._pb_counter: int = 0
         self._exec_counter: int = 0
@@ -212,7 +212,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "ansible_runner"})
         self.metrics_collector.counter("ansible_runner.execute.calls", 1)
         self.audit("execute", {"module": "ansible_runner"})
@@ -332,7 +332,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         failed_hosts = sum(1 for h in self._hosts.values() if h.status == HostStatus.FAILED)
         return {
             "status": "healthy" if failed_hosts == 0 else "degraded",
@@ -346,7 +346,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def shutdown(self) -> None:
         pass
 
-    def _run_playbook(self, playbook_id: str, extra_vars: Dict) -> Dict:
+    def _run_playbook(self, playbook_id: str, extra_vars: dict) -> dict:
         pb = self._playbooks.get(playbook_id)
         if not pb:
             return {"error": "Playbook not found"}
@@ -414,10 +414,10 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self,
         playbook_name: str,
         cron_expr: str,
-        target_hosts: List[str],
-        extra_vars: Optional[Dict] = None,
+        target_hosts: list[str],
+        extra_vars: dict | None = None,
         enabled: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """编排定时Ansible任务。企业场景：每日凌晨自动执行安全补丁扫描、日志清理、证书续期等运维任务。
         cron_expr支持标准5字段格式: 分 时 日 月 周，如 "0 2 * * *" 表示每天凌晨2点。
         """
@@ -458,8 +458,8 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         return {"success": True, "job_id": job_id, "playbook": playbook_name, "cron": cron_expr}
 
     def manage_inventory(
-        self, group: str, action: str, hosts: Optional[List[str]] = None, vars: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, group: str, action: str, hosts: list[str] | None = None, vars: dict | None = None
+    ) -> dict[str, Any]:
         """管理Ansible主机清单。企业场景：动态管理不同环境（dev/staging/prod）的主机组，
         支持增删主机、设置主机变量（如ansible_user、ansible_port），按组批量操作。
         """
@@ -509,7 +509,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             }
         return {"success": False, "error": f"不支持的操作: {action}"}
 
-    def get_execution_history(self, playbook_name: Optional[str] = None, last_n: int = 20) -> Dict[str, Any]:
+    def get_execution_history(self, playbook_name: str | None = None, last_n: int = 20) -> dict[str, Any]:
         """获取执行历史与成功率分析。企业场景：运维周报统计各Playbook执行频率、成功率、平均耗时。
         支持按Playbook名称过滤，返回最近N条执行记录及汇总指标。
         """
@@ -534,7 +534,7 @@ class AnsibleRunnerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "recent_records": recent,
         }
 
-def get_inventory_summary(self) -> Dict[str, Any]:
+def get_inventory_summary(self) -> dict[str, Any]:
     """主机清单概览。企业场景：运维快速了解当前管理的主机组数量和各环境主机分布。"""
     if not hasattr(self, "_inventory"):
         return {"success": True, "groups": 0, "total_hosts": 0}
@@ -546,7 +546,7 @@ def get_inventory_summary(self) -> Dict[str, Any]:
         total_hosts += host_count
     return {"success": True, "groups": len(groups), "total_hosts": total_hosts, "detail": groups}
 
-def validate_playbook_syntax(self, playbook_path: str) -> Dict[str, Any]:
+def validate_playbook_syntax(self, playbook_path: str) -> dict[str, Any]:
     """校验Playbook语法。企业场景：提交前CI检查Playbook语法合法性，
     避免执行时因语法错误导致批量失败。
     """
@@ -555,7 +555,7 @@ def validate_playbook_syntax(self, playbook_path: str) -> Dict[str, Any]:
     if not _os.path.exists(playbook_path):
         return {"success": False, "error": f"文件不存在: {playbook_path}", "valid": False}
     try:
-        with open(playbook_path, "r", encoding="utf-8") as fh:
+        with open(playbook_path, encoding="utf-8") as fh:
             content = fh.read()
     except Exception as e:
         return {"success": False, "error": str(e), "valid": False}
@@ -581,7 +581,7 @@ def validate_playbook_syntax(self, playbook_path: str) -> Dict[str, Any]:
         "playbook_path": playbook_path,
     }
 
-def get_host_info(self, host: str) -> Dict[str, Any]:
+def get_host_info(self, host: str) -> dict[str, Any]:
     """获取主机详细信息。企业场景：运维查看单台主机的连接状态、系统信息、标签。"""
     if not hasattr(self, "_inventory"):
         return {"success": False, "error": "主机清单未初始化"}
@@ -590,7 +590,7 @@ def get_host_info(self, host: str) -> Dict[str, Any]:
             return {"success": True, "host": host, "group": group_name, "vars": group_data["hosts"][host]}
     return {"success": False, "error": f"主机{host}未找到"}
 
-def get_module_stats(self) -> Dict[str, Any]:
+def get_module_stats(self) -> dict[str, Any]:
     """获取Ansible模块使用统计。企业场景：运维了解常用模块分布。"""
     modules_used = getattr(self, "_modules_used", {"shell": 45, "copy": 30, "yum": 20, "service": 15, "file": 25})
     return {"success": True, "top_modules": sorted(modules_used.items(), key=lambda x: -x[1])[:10]}

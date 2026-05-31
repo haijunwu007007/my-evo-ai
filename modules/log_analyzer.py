@@ -160,14 +160,14 @@ class LogFormat(Enum):
 class LogEntry:
     """日志条目"""
 
-    timestamp: Optional[float]
+    timestamp: float | None
     level: LogLevel
     message: str
     source: str = ""
     line_number: int = 0
     raw: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class Anomaly:
@@ -178,9 +178,9 @@ class Anomaly:
     severity: str
     description: str
     affected_entries: int = 0
-    first_seen: Optional[float] = None
-    last_seen: Optional[float] = None
-    sample_entries: List[str] = field(default_factory=list)
+    first_seen: float | None = None
+    last_seen: float | None = None
+    sample_entries: list[str] = field(default_factory=list)
     confidence: float = 0.0
 
 @dataclass
@@ -201,11 +201,11 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._entries: List[LogEntry] = []
-        self._anomalies: List[Anomaly] = []
-        self._patterns: List[LogPattern] = []
-        self._sources: Dict[str, Dict] = {}
-        self._stats_cache: Dict[str, Any] = {}
+        self._entries: list[LogEntry] = []
+        self._anomalies: list[Anomaly] = []
+        self._patterns: list[LogPattern] = []
+        self._sources: dict[str, dict] = {}
+        self._stats_cache: dict[str, Any] = {}
         self._max_entries = 1000000
         self._retention_hours = 24
         self._log_level_weights = {
@@ -312,7 +312,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     @trace_operation("ingest_logs")
     def ingest_logs(
         self, content: str, source: str = "inline", format: LogFormat = LogFormat.STANDARD
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """采集日志"""
         try:
             start = time.time()
@@ -347,7 +347,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats["errors"] += 1
             raise
 
-    def _parse_logs(self, content: str, format: LogFormat, source: str) -> List[LogEntry]:
+    def _parse_logs(self, content: str, format: LogFormat, source: str) -> list[LogEntry]:
         """解析日志"""
         entries = []
         lines = content.split("\n")
@@ -359,7 +359,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 entries.append(entry)
         return entries
 
-    def _parse_line(self, line: str, format: LogFormat, source: str, line_num: int) -> Optional[LogEntry]:
+    def _parse_line(self, line: str, format: LogFormat, source: str, line_num: int) -> LogEntry | None:
         """解析单行日志"""
         try:
             if format == LogFormat.JSON:
@@ -406,7 +406,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             timestamp=timestamp, level=level, message=message, source=source, line_number=line_num, raw=line
         )
 
-    def _parse_json_line(self, line: str, source: str, line_num: int) -> Optional[LogEntry]:
+    def _parse_json_line(self, line: str, source: str, line_num: int) -> LogEntry | None:
         """解析JSON格式日志"""
         try:
             data = json.loads(line)
@@ -491,7 +491,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return self._parse_standard_line(line, source, line_num)
 
-    def _match_patterns(self, entry: LogEntry) -> List[str]:
+    def _match_patterns(self, entry: LogEntry) -> list[str]:
         """匹配异常模式"""
         tags = []
         for pattern in self._patterns:
@@ -501,8 +501,8 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("analyze_logs")
     def analyze_logs(
-        self, source: Optional[str] = None, time_range: Optional[Dict] = None, min_level: LogLevel = LogLevel.WARNING
-    ) -> Dict[str, Any]:
+        self, source: str | None = None, time_range: dict | None = None, min_level: LogLevel = LogLevel.WARNING
+    ) -> dict[str, Any]:
         """分析日志"""
         entries = self._entries
         if source:
@@ -556,7 +556,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "hourly_volume": dict(list(hourly_counts.items())[-24:]),
         }
 
-    def _detect_anomalies(self, entries: List[LogEntry]) -> List[Anomaly]:
+    def _detect_anomalies(self, entries: list[LogEntry]) -> list[Anomaly]:
         """异常检测"""
         anomalies = []
 
@@ -617,7 +617,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return anomalies
 
     @trace_operation("get_anomalies")
-    def get_anomalies(self, severity: Optional[str] = None, limit: int = 50) -> List[Dict]:
+    def get_anomalies(self, severity: str | None = None, limit: int = 50) -> list[dict]:
         """获取异常列表"""
         anomalies = self._anomalies
         if severity:
@@ -637,8 +637,8 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("search_logs")
     def search_logs(
-        self, query: str, level: Optional[LogLevel] = None, source: Optional[str] = None, limit: int = 100
-    ) -> List[Dict]:
+        self, query: str, level: LogLevel | None = None, source: str | None = None, limit: int = 100
+    ) -> list[dict]:
         """搜索日志"""
         results = self._entries
         if source:
@@ -660,7 +660,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for e in results[-limit:]
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取日志统计"""
         if not self._entries:
             return {"total_entries": 0}
@@ -682,7 +682,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def add_pattern(
         self, name: str, regex: str, category: str, severity: LogLevel = LogLevel.WARNING, description: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """添加自定义检测模式"""
         pattern = LogPattern(
             pattern_id=f"pat_{uuid.uuid4().hex[:8]}",
@@ -695,7 +695,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._patterns.append(pattern)
         return {"pattern_id": pattern.pattern_id, "name": name}
 
-    def clear_logs(self, source: Optional[str] = None) -> Dict[str, int]:
+    def clear_logs(self, source: str | None = None) -> dict[str, int]:
         """清理日志"""
         before = len(self._entries)
         if source:
@@ -753,7 +753,7 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

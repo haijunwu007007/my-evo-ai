@@ -128,7 +128,7 @@ class MockRule:
     match_strategy: MatchStrategy = MatchStrategy.EXACT
     status_code: int = 200
     response_body: str = ""
-    response_headers: Dict[str, str] = field(default_factory=dict)
+    response_headers: dict[str, str] = field(default_factory=dict)
     delay_ms: float = 0.0
     enabled: bool = True
     hit_count: int = 0
@@ -146,7 +146,7 @@ class MockLog:
     matched: bool
     status_code: int
     delay_ms: float
-    request_headers: Dict[str, str] = field(default_factory=dict)
+    request_headers: dict[str, str] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
 class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -157,14 +157,14 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._rules: Dict[str, MockRule] = {}
-        self._logs: List[MockLog] = []
+        self._rules: dict[str, MockRule] = {}
+        self._logs: list[MockLog] = []
         self._counter: int = 0
         self._log_counter: int = 0
 
@@ -235,7 +235,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "api_mock"})
         self.metrics_collector.counter("api_mock.execute.calls", 1)
         self.audit("execute", {"module": "api_mock"})
@@ -357,7 +357,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -369,7 +369,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def shutdown(self) -> None:
         pass
 
-    def _mock_request(self, method: str, path: str, headers: Dict) -> Dict:
+    def _mock_request(self, method: str, path: str, headers: dict) -> dict:
         """模拟请求匹配"""
         matched_rule = None
         for rule in sorted(self._rules.values(), key=lambda r: -r.priority):
@@ -377,13 +377,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 continue
             if rule.method != "*" and rule.method != method:
                 continue
-            if rule.match_strategy == MatchStrategy.EXACT and rule.path_pattern == path:
-                matched_rule = rule
-                break
-            elif rule.match_strategy == MatchStrategy.PREFIX and path.startswith(rule.path_pattern):
-                matched_rule = rule
-                break
-            elif rule.match_strategy == MatchStrategy.REGEX and re.match(rule.path_pattern, path):
+            if rule.match_strategy == MatchStrategy.EXACT and rule.path_pattern == path or rule.match_strategy == MatchStrategy.PREFIX and path.startswith(rule.path_pattern) or rule.match_strategy == MatchStrategy.REGEX and re.match(rule.path_pattern, path):
                 matched_rule = rule
                 break
 
@@ -431,14 +425,14 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "headers": {"Content-Type": "application/json"},
         }
 
-    def import_from_file(self, file_path: str, format: str = "json") -> Dict[str, Any]:
+    def import_from_file(self, file_path: str, format: str = "json") -> dict[str, Any]:
         """从文件导入Mock规则集。企业场景：团队间共享Mock配置，前端联调时导入后端提供的API契约文件。
         支持JSON格式，每条规则包含 name, method, path_pattern, status_code, response_body, response_headers。
         """
         import json as _json
 
         try:
-            with open(file_path, "r", encoding="utf-8") as fh:
+            with open(file_path, encoding="utf-8") as fh:
                 data = _json.load(fh)
         except FileNotFoundError:
             return {"success": False, "error": f"文件不存在: {file_path}"}
@@ -476,7 +470,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 errors.append(f"规则{i}: {e}")
         return {"success": True, "imported": imported, "total": len(data), "errors": errors}
 
-    def export_scenario(self, name: str, rule_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    def export_scenario(self, name: str, rule_ids: list[str] | None = None) -> dict[str, Any]:
         """导出Mock场景为可分享的JSON文件。企业场景：测试团队打包完整的API模拟场景，
         供CI/CD流水线或新成员快速复用，无需重复配置。
         """
@@ -509,7 +503,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": False, "error": str(e)}
         return {"success": True, "scenario": name, "rules_count": len(rules), "export_path": export_path}
 
-    def get_mock_analytics(self) -> Dict[str, Any]:
+    def get_mock_analytics(self) -> dict[str, Any]:
         """获取Mock服务运营统计。企业场景：评估Mock规则的覆盖率（被命中的规则vs总规则），
         发现从未被匹配的僵尸规则，统计请求延迟分布，优化Mock性能。
         """
@@ -517,7 +511,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         matched = sum(1 for l in self._logs if l.matched)
         unmatched = total_requests - matched
         # 按规则统计命中次数
-        rule_hits: Dict[str, int] = {}
+        rule_hits: dict[str, int] = {}
         for log in self._logs:
             if log.matched and log.rule_id:
                 rule_hits[log.rule_id] = rule_hits.get(log.rule_id, 0) + 1
@@ -541,7 +535,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_rules": sorted(rule_hits.items(), key=lambda x: -x[1])[:5],
         }
 
-    def record_and_replay(self, session_id: str, base_url: str, paths: List[str]) -> Dict[str, Any]:
+    def record_and_replay(self, session_id: str, base_url: str, paths: list[str]) -> dict[str, Any]:
         """录制真实API响应并创建Mock规则。企业场景：联调阶段录制后端真实响应，
         前端离线开发时自动回放，无需依赖后端环境。
         """
@@ -585,7 +579,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "base_url": base_url,
         }
 
-    def get_session_list(self) -> Dict[str, Any]:
+    def get_session_list(self) -> dict[str, Any]:
         """获取所有录制会话列表。企业场景：团队查看可用的Mock录制会话，选择合适的回放。"""
         sessions = getattr(self, "_recording_sessions", {})
         return {
@@ -602,7 +596,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def export_mock_collection(self, format: str = "json") -> Dict[str, Any]:
+    def export_mock_collection(self, format: str = "json") -> dict[str, Any]:
         """导出Mock数据集合。企业场景：团队共享Mock数据，前后端并行开发时
         后端提供Mock集合给前端，或QA团队导出录制数据进行回归测试。
         """
@@ -627,7 +621,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "format": "json", "collection": collection}
         return {"success": False, "error": f"不支持的格式: {format}"}
 
-    def get_mock_coverage(self) -> Dict[str, Any]:
+    def get_mock_coverage(self) -> dict[str, Any]:
         """Mock覆盖率统计。企业场景：QA评估哪些API已被Mock覆盖，
         哪些还未覆盖，辅助制定测试计划。
         """
@@ -648,7 +642,7 @@ class ApiMockManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "endpoints": sorted(endpoints),
         }
 
-    def validate_mock_response(self, mock_id: str) -> Dict[str, Any]:
+    def validate_mock_response(self, mock_id: str) -> dict[str, Any]:
         """验证Mock响应格式。企业场景：Mock数据变更后校验响应格式是否符合OpenAPI规范，
         避免Mock数据与真实API响应不一致导致前端联调问题。
         """

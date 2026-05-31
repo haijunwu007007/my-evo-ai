@@ -6,7 +6,8 @@ AUTO-EVO-AI V0.1 统一模块注册中心
 
 import asyncio
 import json
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -22,8 +23,8 @@ class UnifiedModuleRegistry:
     
     def __init__(self, mm: ModuleManager):
         self.mm = mm
-        self.module_status: Dict[str, Dict] = {}  # 模块运行状态
-        self.module_dependencies: Dict[str, List[str]] = {}  # 模块依赖关系
+        self.module_status: dict[str, dict] = {}  # 模块运行状态
+        self.module_dependencies: dict[str, list[str]] = {}  # 模块依赖关系
         self.coordination_queue = asyncio.Queue()  # 协调队列
         self._initialized = False
         
@@ -223,7 +224,7 @@ class UnifiedModuleRegistry:
         print(f"    - 已注册实现: {registered} 个")
         print(f"    - 待实现: {total - registered} 个")
         
-    async def execute_coordinated(self, module_ids: List[str], params: Dict) -> Dict:
+    async def execute_coordinated(self, module_ids: list[str], params: dict) -> dict:
         """
         协调执行多个模块
         
@@ -250,11 +251,11 @@ class UnifiedModuleRegistry:
                 
         return results
         
-    def get_module_status(self, module_id: str) -> Dict:
+    def get_module_status(self, module_id: str) -> dict:
         """获取模块状态"""
         return self.module_status.get(module_id, {"status": "unknown"})
         
-    def get_all_status(self) -> Dict:
+    def get_all_status(self) -> dict:
         """获取所有模块状态"""
         return {
             "total": len(self.mm.module_metadata),
@@ -280,12 +281,12 @@ class UnifiedModuleRegistry:
 class ProcessWatchdogModule(ModuleBase):
     """进程守护模块 - 自动检测卡死/超时中断"""
     
-    def __init__(self, module_id: str = "process-watchdog", config: Dict = None):
+    def __init__(self, module_id: str = "process-watchdog", config: dict = None):
         super().__init__(module_id, config)
         self.timeout = config.get("timeout", 300) if config else 300
         self.max_retries = config.get("max_retries", 3) if config else 3
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "watch")
         pid = params.get("pid")
         
@@ -295,7 +296,7 @@ class ProcessWatchdogModule(ModuleBase):
             return await self._kill_process(pid)
         return {"success": True, "message": f"ProcessWatchdog action={action}"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": "进程守护神",
@@ -304,7 +305,7 @@ class ProcessWatchdogModule(ModuleBase):
             "max_retries": self.max_retries
         }
         
-    async def _watch_process(self, pid: int) -> Dict:
+    async def _watch_process(self, pid: int) -> dict:
         try:
             import psutil
             proc = psutil.Process(pid)
@@ -314,7 +315,7 @@ class ProcessWatchdogModule(ModuleBase):
         except (ImportError, Exception):
             return {"success": False, "pid": pid, "status": "not_found"}
             
-    async def _kill_process(self, pid: int) -> Dict:
+    async def _kill_process(self, pid: int) -> dict:
         try:
             import psutil
             proc = psutil.Process(pid)
@@ -327,32 +328,32 @@ class ProcessWatchdogModule(ModuleBase):
 class AutoRestartModule(ModuleBase):
     """自动重启模块"""
     
-    def __init__(self, module_id: str = "auto-restart", config: Dict = None):
+    def __init__(self, module_id: str = "auto-restart", config: dict = None):
         super().__init__(module_id, config)
         self.restart_count = {}
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         service = params.get("service", "")
         return {"success": True, "service": service, "message": "AutoRestart module active"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "自动重启", "desc": "进程异常自动重启"}
 
 
 class HealthPingModule(ModuleBase):
     """健康检查模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "status": "healthy", "timestamp": datetime.now().isoformat()}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "健康检查", "desc": "服务健康检查"}
 
 
 class SystemMonitorModule(ModuleBase):
     """系统监控模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         try:
             import psutil
             return {
@@ -364,18 +365,18 @@ class SystemMonitorModule(ModuleBase):
         except Exception as e:
             return {"success": False, "error": str(e)}
             
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "系统监控", "desc": "CPU/内存/磁盘监控"}
 
 
 class MemoryGuardModule(ModuleBase):
     """内存守卫模块"""
     
-    def __init__(self, module_id: str = "memory-guard", config: Dict = None):
+    def __init__(self, module_id: str = "memory-guard", config: dict = None):
         super().__init__(module_id, config)
         self.threshold = config.get("threshold", 80) if config else 80
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         try:
             import psutil
             mem = psutil.virtual_memory()
@@ -388,35 +389,35 @@ class MemoryGuardModule(ModuleBase):
         except Exception as e:
             return {"success": False, "error": str(e)}
             
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "内存泄漏守卫", "desc": "内存监控与告警"}
 
 
 class APILimiterModule(ModuleBase):
     """API限流模块"""
     
-    def __init__(self, module_id: str = "api-rate-limiter", config: Dict = None):
+    def __init__(self, module_id: str = "api-rate-limiter", config: dict = None):
         super().__init__(module_id, config)
         self.requests = {}
         self.limit = config.get("limit", 100) if config else 100
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         key = params.get("key", "default")
         self.requests[key] = self.requests.get(key, 0) + 1
         return {"success": True, "requests": self.requests[key], "limit": self.limit}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "API限流保护器", "desc": "限流退避保护"}
 
 
 class LogManagerModule(ModuleBase):
     """日志管理模块"""
     
-    def __init__(self, module_id: str = "log-manager", config: Dict = None):
+    def __init__(self, module_id: str = "log-manager", config: dict = None):
         super().__init__(module_id, config)
         self.logs = []
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "add")
         message = params.get("message", "")
         
@@ -424,18 +425,18 @@ class LogManagerModule(ModuleBase):
             self.logs.append({"time": datetime.now().isoformat(), "msg": message})
         return {"success": True, "count": len(self.logs)}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "智能日志管理", "desc": "日志收集与分析"}
 
 
 class BackupEngineModule(ModuleBase):
     """备份引擎模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "backup")
         return {"success": True, "action": action, "message": "Backup completed"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "智能备份引擎", "desc": "一键备份恢复"}
 
 
@@ -449,7 +450,7 @@ class AgentOrchestratorModule(AsyncModule):
     支持 AI 增强意图理解（当 AIGateway 可用时）
     """
 
-    def __init__(self, module_id: str = "agent-orchestrator", config: Dict = None):
+    def __init__(self, module_id: str = "agent-orchestrator", config: dict = None):
         super().__init__(module_id, config)
         self.mm = None  # 将在初始化时设置
         self.task_history = []
@@ -472,7 +473,7 @@ class AgentOrchestratorModule(AsyncModule):
                 self._orchestrator = None
         return self._orchestrator
 
-    async def _run_async(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_async(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         执行主编排任务
 
@@ -516,7 +517,7 @@ class AgentOrchestratorModule(AsyncModule):
             "ai_enhanced": self.ai_gateway is not None and bool(self.ai_gateway.models)
         }
 
-    async def _understand_intent(self, user_input: str) -> Dict[str, Any]:
+    async def _understand_intent(self, user_input: str) -> dict[str, Any]:
         """理解用户意图 (AI增强或规则引擎)"""
         orchestrator = self._get_orchestrator()
 
@@ -559,7 +560,7 @@ class AgentOrchestratorModule(AsyncModule):
             "raw_input": user_input
         }
 
-    async def _decompose_task(self, user_input: str, intent: Dict) -> List[Dict]:
+    async def _decompose_task(self, user_input: str, intent: dict) -> list[dict]:
         """拆解任务"""
         tasks = []
         intents = intent.get("intents", [])
@@ -585,7 +586,7 @@ class AgentOrchestratorModule(AsyncModule):
             
         return tasks if tasks else [{"name": "默认", "module": "system-monitor", "params": {}}]
         
-    async def _aggregate_results(self, results: List[Dict]) -> str:
+    async def _aggregate_results(self, results: list[dict]) -> str:
         """聚合结果"""
         success_count = sum(1 for r in results if r.get("result", {}).get("success"))
         total_count = len(results)
@@ -599,7 +600,7 @@ class AgentOrchestratorModule(AsyncModule):
                 
         return f"执行完成: {success_count}/{total_count}\n" + "\n".join(summaries)
         
-    async def _learn_from_execution(self, user_input: str, results: List[Dict]):
+    async def _learn_from_execution(self, user_input: str, results: list[dict]):
         """学习执行经验"""
         self.task_history.append({
             "input": user_input,
@@ -607,7 +608,7 @@ class AgentOrchestratorModule(AsyncModule):
             "timestamp": datetime.now().isoformat()
         })
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": "主编排器",
@@ -622,27 +623,27 @@ class AgentOrchestratorModule(AsyncModule):
 class UniCommGatewayModule(ModuleBase):
     """全渠道通信网关"""
     
-    def __init__(self, module_id: str = "uni-comm-gateway", config: Dict = None):
+    def __init__(self, module_id: str = "uni-comm-gateway", config: dict = None):
         super().__init__(module_id, config)
         self.channels = ["feishu", "dingtalk", "telegram", "slack", "email", "wechat"]
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         channel = params.get("channel", "feishu")
         message = params.get("message", "")
         return {"success": True, "sent": True, "channel": channel, "message": message}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "全渠道通信网关", "desc": "统一消息收发", "channels": self.channels}
 
 
 class LongTermMemoryModule(ModuleBase):
     """长期记忆引擎"""
     
-    def __init__(self, module_id: str = "longterm-memory", config: Dict = None):
+    def __init__(self, module_id: str = "longterm-memory", config: dict = None):
         super().__init__(module_id, config)
         self.memory_store = {}
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "store")
         key = params.get("key", "")
         value = params.get("value", "")
@@ -654,17 +655,17 @@ class LongTermMemoryModule(ModuleBase):
             
         return {"success": True, "memory_count": len(self.memory_store)}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "长期记忆引擎", "desc": "AI记忆管理"}
 
 
 class Mem0MemoryModule(ModuleBase):
     """Mem0记忆模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Mem0 memory module"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "Mem0记忆", "desc": "个性化AI记忆层"}
 
 
@@ -673,56 +674,56 @@ class Mem0MemoryModule(ModuleBase):
 class LLMOpenAIModule(ModuleBase):
     """OpenAI GPT模块"""
     
-    def __init__(self, module_id: str = "llm-openai", config: Dict = None):
+    def __init__(self, module_id: str = "llm-openai", config: dict = None):
         super().__init__(module_id, config)
         self.model = config.get("model", "gpt-4") if config else "gpt-4"
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         prompt = params.get("prompt", "")
         return {"success": True, "response": f"[GPT-4] {prompt}", "model": self.model}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "OpenAI GPT", "desc": "GPT-4语言模型", "model": self.model}
 
 
 class LLMClaudeModule(ModuleBase):
     """Claude AI模块"""
     
-    def __init__(self, module_id: str = "llm-claude", config: Dict = None):
+    def __init__(self, module_id: str = "llm-claude", config: dict = None):
         super().__init__(module_id, config)
         self.model = config.get("model", "claude-3") if config else "claude-3"
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         prompt = params.get("prompt", "")
         return {"success": True, "response": f"[Claude] {prompt}", "model": self.model}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "Claude AI", "desc": "Claude3语言模型"}
 
 
 class AIGatewayModule(ModuleBase):
     """AI网关模块"""
     
-    def __init__(self, module_id: str = "ai-gateway", config: Dict = None):
+    def __init__(self, module_id: str = "ai-gateway", config: dict = None):
         super().__init__(module_id, config)
         self.models = ["openai", "claude", "gemini"]
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         prompt = params.get("prompt", "")
         model = params.get("model", "openai")
         return {"success": True, "response": f"[AI:{model}] {prompt}"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "多模型AI网关", "desc": "统一LLM调用", "models": self.models}
 
 
 class LiteLLMGatewayModule(ModuleBase):
     """LiteLLM网关"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "LiteLLM gateway"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "LiteLLM网关", "desc": "100+模型统一调用"}
 
 
@@ -731,36 +732,36 @@ class LiteLLMGatewayModule(ModuleBase):
 class ComposioToolsModule(ModuleBase):
     """Composio工具模块"""
     
-    def __init__(self, module_id: str = "composio-tools", config: Dict = None):
+    def __init__(self, module_id: str = "composio-tools", config: dict = None):
         super().__init__(module_id, config)
         self.tools = ["github", "slack", "gmail", "notion"]
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         tool = params.get("tool", "")
         action = params.get("action", "")
         return {"success": True, "tool": tool, "action": action}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "Composio工具", "desc": "100+工具集成", "tools": self.tools}
 
 
 class MCPServersModule(ModuleBase):
     """MCP服务器模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "MCP servers module"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "MCP协议服务器", "desc": "Model Context Protocol"}
 
 
 class MCPIntegrationModule(ModuleBase):
     """MCP协议集成"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "MCP integration"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "MCP协议集成", "desc": "AI的USB-C扩展坞"}
 
 
@@ -769,51 +770,51 @@ class MCPIntegrationModule(ModuleBase):
 class AgentMASModule(ModuleBase):
     """MAS多Agent模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Multi-Agent System"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "MAS多Agent", "desc": "多Agent系统编排"}
 
 
 class CrewAIModule(ModuleBase):
     """CrewAI模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "CrewAI execution"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "CrewAI团队", "desc": "多Agent团队协作"}
 
 
 class AgencySwarmModule(ModuleBase):
     """Agency Swarm模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Agency Swarm"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "Agency Swarm", "desc": "多Agent协作框架"}
 
 
 class OpenHandsAgentModule(ModuleBase):
     """OpenHands Agent"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         task = params.get("task", "")
         return {"success": True, "task": task, "status": "executed"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "OpenHands", "desc": "AI软件工程师"}
 
 
 class AutoGenStudioModule(ModuleBase):
     """AutoGen Studio"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "AutoGen Studio"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "AutoGen Studio", "desc": "微软AutoGen开发工具"}
 
 
@@ -822,48 +823,48 @@ class AutoGenStudioModule(ModuleBase):
 class DatabaseClientModule(ModuleBase):
     """数据库客户端"""
     
-    def __init__(self, module_id: str = "database-client", config: Dict = None):
+    def __init__(self, module_id: str = "database-client", config: dict = None):
         super().__init__(module_id, config)
         self.connections = {}
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "query")
         sql = params.get("sql", "")
         return {"success": True, "action": action, "sql": sql}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "数据库连接", "desc": "MySQL/PostgreSQL/MongoDB"}
 
 
 class RedisCacheModule(ModuleBase):
     """Redis缓存模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "get")
         key = params.get("key", "")
         return {"success": True, "action": action, "key": key}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "Redis缓存", "desc": "高速内存缓存"}
 
 
 class CacheEngineModule(ModuleBase):
     """缓存引擎"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Cache engine"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "智能缓存引擎", "desc": "Redis多级缓存"}
 
 
 class PostgresDBModule(ModuleBase):
     """PostgreSQL模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "PostgreSQL module"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "PostgreSQL", "desc": "关系型数据库"}
 
 
@@ -872,59 +873,59 @@ class PostgresDBModule(ModuleBase):
 class MindmapGeneratorModule(ModuleBase):
     """思维导图生成"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         topic = params.get("topic", "主题")
         mindmap = f"mindmap\n  root(({topic}))\n    概念1\n    概念2\n    概念3"
         return {"success": True, "mindmap": mindmap, "topic": topic}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "思维导图生成", "desc": "AI自动生成思维导图"}
 
 
 class WeeklyReportModule(ModuleBase):
     """周报生成"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "report": "本周工作总结\n1. 完成模块开发\n2. 修复若干Bug\n3. 系统稳定性提升",
             "period": "weekly"
         }
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "AI周报生成器", "desc": "自动生成工作周报"}
 
 
 class MonthlyReportModule(ModuleBase):
     """月报生成"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "report": "月度总结报告", "period": "monthly"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "AI月报生成器", "desc": "自动生成月度总结"}
 
 
 class DataVisualizerModule(ModuleBase):
     """数据可视化"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         data = params.get("data", [])
         chart_type = params.get("type", "line")
         return {"success": True, "chart_type": chart_type, "data_points": len(data)}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "数据可视化引擎", "desc": "Plotly图表生成"}
 
 
 class SpeechToTextModule(ModuleBase):
     """语音转文字"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         audio = params.get("audio", "")
         return {"success": True, "text": "[Transcribed text]", "language": "zh"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "语音转文字", "desc": "Whisper语音识别"}
 
 
@@ -933,45 +934,45 @@ class SpeechToTextModule(ModuleBase):
 class WorkflowManagerModule(ModuleBase):
     """工作流管理"""
     
-    def __init__(self, module_id: str = "workflow-manager", config: Dict = None):
+    def __init__(self, module_id: str = "workflow-manager", config: dict = None):
         super().__init__(module_id, config)
         self.workflows = {}
         
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "list")
         return {"success": True, "workflows": list(self.workflows.keys())}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "工作流管理引擎", "desc": "Prefect工作流编排"}
 
 
 class FlowEngineModule(ModuleBase):
     """流程引擎"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Flow engine"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "可视化流程编排", "desc": "拖拽式流程编排"}
 
 
 class TriggerEngineModule(ModuleBase):
     """触发引擎"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Trigger engine"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "全局热键触发", "desc": "基于keyboard的触发"}
 
 
 class N8NModule(ModuleBase):
     """n8n模块"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "n8n workflow automation"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "n8n自动化", "desc": "开源工作流自动化"}
 
 
@@ -980,51 +981,51 @@ class N8NModule(ModuleBase):
 class FileWatcherModule(ModuleBase):
     """文件监控"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         path = params.get("path", "")
         return {"success": True, "watching": path}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "文件监控引擎", "desc": "watchdog文件监听"}
 
 
 class AutoRecoveryModule(ModuleBase):
     """服务自动恢复"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Auto recovery"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "服务自动恢复", "desc": "多进程守护"}
 
 
 class NetworkHealerModule(ModuleBase):
     """网络自愈"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Network healer"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "网络中断自愈", "desc": "断线自动重连"}
 
 
 class PerfMonitorModule(ModuleBase):
     """性能监控"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "metrics": {"cpu": 50, "memory": 60}}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "性能监控中心", "desc": "psutil+Prometheus"}
 
 
 class SecurityScannerModule(ModuleBase):
     """安全扫描"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "vulnerabilities": []}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "安全扫描引擎", "desc": "bandit+pip-audit"}
 
 
@@ -1033,41 +1034,41 @@ class SecurityScannerModule(ModuleBase):
 class DataPipelineModule(ModuleBase):
     """数据管道"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Data pipeline"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "ETL数据管道", "desc": "Pandas数据处理"}
 
 
 class ExportEngineModule(ModuleBase):
     """导出引擎"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         format = params.get("format", "csv")
         return {"success": True, "format": format}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "多格式数据导出", "desc": "CSV/JSON/HTML"}
 
 
 class PDFReportModule(ModuleBase):
     """PDF报告"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "PDF report generated"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "PDF报告生成", "desc": "fpdf2原生PDF"}
 
 
 class EventBusModule(ModuleBase):
     """事件总线"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Event bus"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "事件总线", "desc": "blinker事件驱动"}
 
 
@@ -1076,54 +1077,54 @@ class EventBusModule(ModuleBase):
 class FinanceDataModule(ModuleBase):
     """金融数据"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         market = params.get("market", "stock")
         return {"success": True, "market": market, "data": []}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "金融数据中心", "desc": "AKShare金融数据"}
 
 
 class BrowserAutoModule(ModuleBase):
     """浏览器自动化"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "navigate")
         url = params.get("url", "")
         return {"success": True, "action": action, "url": url}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "浏览器自动化", "desc": "Playwright浏览器自动化"}
 
 
 class EcommerceAgentModule(ModuleBase):
     """电商Agent"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "E-commerce agent"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "电商垂直Agent", "desc": "电商全链路自动化"}
 
 
 class VoiceNotifyModule(ModuleBase):
     """语音通知"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         text = params.get("text", "")
         return {"success": True, "text": text, "played": True}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "语音播报引擎", "desc": "pyttsx3文字转语音"}
 
 
 class SchedulerProModule(ModuleBase):
     """企业调度器"""
     
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "message": "Scheduler Pro"}
         
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "企业级调度器", "desc": "APScheduler企业调度"}
 
 

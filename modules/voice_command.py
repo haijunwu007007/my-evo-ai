@@ -87,7 +87,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class VoiceCommandAnalyzer(object):
+class VoiceCommandAnalyzer:
     """voice_command 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -281,17 +281,17 @@ class VoiceCommand:
     transcript: str = ""
     category: CommandCategory = CommandCategory.UNKNOWN
     intent: str = ""
-    entities: Dict[str, Any] = field(default_factory=dict)
+    entities: dict[str, Any] = field(default_factory=dict)
     confidence: float = 0.0
     status: CommandStatus = CommandStatus.RECOGNIZED
-    result: Dict[str, Any] = field(default_factory=dict)
+    result: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     created: float = field(default_factory=time.time)
     completed: float = 0
     duration_ms: float = 0
     provider: VoiceProvider = VoiceProvider.WHISPER
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "cmd_id": self.cmd_id,
             "transcript": self.transcript,
@@ -308,8 +308,8 @@ class SceneRule:
 
     scene_id: str = ""
     name: str = ""
-    triggers: List[str] = field(default_factory=list)
-    actions: List[Dict[str, Any]] = field(default_factory=list)
+    triggers: list[str] = field(default_factory=list)
+    actions: list[dict[str, Any]] = field(default_factory=list)
     enabled: bool = True
     trigger_count: int = 0
 
@@ -321,9 +321,9 @@ class DeviceInfo:
     name: str = ""
     device_type: str = ""
     room: str = ""
-    state: Dict[str, Any] = field(default_factory=dict)
+    state: dict[str, Any] = field(default_factory=dict)
     online: bool = True
-    capabilities: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
 
 @dataclass
 class TimerEntry:
@@ -361,11 +361,11 @@ class VoiceCommandModule:
     """企业级语音命令模块"""
 
     def __init__(self):
-        self._commands: Dict[str, VoiceCommand] = {}
+        self._commands: dict[str, VoiceCommand] = {}
         self._command_history: deque = deque(maxlen=10000)
-        self._devices: Dict[str, DeviceInfo] = {}
-        self._scenes: Dict[str, SceneRule] = {}
-        self._timers: Dict[str, TimerEntry] = {}
+        self._devices: dict[str, DeviceInfo] = {}
+        self._scenes: dict[str, SceneRule] = {}
+        self._timers: dict[str, TimerEntry] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -467,14 +467,14 @@ class VoiceCommandModule:
         for d in devices:
             self._devices[d.device_id] = d
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "devices": len(self._devices), "scenes": len(self._scenes), "provider": "whisper"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         online_devices = sum(1 for d in self._devices.values() if d.online)
@@ -491,7 +491,7 @@ class VoiceCommandModule:
     # --- Command ---
     def process_command(
         self, transcript: str = "", audio_data: bytes = b"", provider: str = "whisper"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import random
@@ -537,7 +537,7 @@ class VoiceCommandModule:
     def _simulate_stt(self, audio_data: bytes) -> str:
         return "打开客厅灯"
 
-    def _parse_command(self, text: str) -> Tuple[CommandCategory, str, Dict[str, Any], float]:
+    def _parse_command(self, text: str) -> tuple[CommandCategory, str, dict[str, Any], float]:
         import random
 
         text = text.strip().lower()
@@ -579,7 +579,7 @@ class VoiceCommandModule:
                 return dev.device_id
         return ""
 
-    def _execute_command(self, cmd: VoiceCommand) -> Dict[str, Any]:
+    def _execute_command(self, cmd: VoiceCommand) -> dict[str, Any]:
         if cmd.category == CommandCategory.SCENE:
             scene_id = cmd.entities.get("scene_id", "")
             return self._activate_scene(scene_id)
@@ -629,7 +629,7 @@ class VoiceCommandModule:
         return {"status": "failed", "error": "unrecognized_command"}
 
     # --- Scene ---
-    def _activate_scene(self, scene_id: str) -> Dict[str, Any]:
+    def _activate_scene(self, scene_id: str) -> dict[str, Any]:
         if scene_id not in self._scenes:
             return {"status": "failed", "error": "scene_not_found"}
         scene = self._scenes[scene_id]
@@ -650,7 +650,7 @@ class VoiceCommandModule:
         self._stats["scenes_triggered"] += 1
         return {"status": "completed", "scene": scene.name, "actions": results}
 
-    def list_scenes(self) -> Dict[str, Any]:
+    def list_scenes(self) -> dict[str, Any]:
         items = [
             {
                 "scene_id": s.scene_id,
@@ -664,7 +664,7 @@ class VoiceCommandModule:
         return {"success": True, "scenes": items, "total": len(items)}
 
     # --- Device ---
-    def list_devices(self, room: str = "") -> Dict[str, Any]:
+    def list_devices(self, room: str = "") -> dict[str, Any]:
         items = [
             {
                 "device_id": d.device_id,
@@ -681,7 +681,7 @@ class VoiceCommandModule:
         return {"success": True, "devices": items, "total": len(items)}
 
     # --- Timer ---
-    def get_timers(self, active_only: bool = True) -> Dict[str, Any]:
+    def get_timers(self, active_only: bool = True) -> dict[str, Any]:
         items = [
             {
                 "timer_id": t.timer_id,
@@ -694,13 +694,13 @@ class VoiceCommandModule:
         ]
         return {"success": True, "timers": items, "total": len(items)}
 
-    def cancel_timer(self, timer_id: str) -> Dict[str, Any]:
+    def cancel_timer(self, timer_id: str) -> dict[str, Any]:
         if timer_id in self._timers:
             self._timers[timer_id].active = False
             return {"success": True, "timer_id": timer_id}
         return {"success": False, "error": "not_found"}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

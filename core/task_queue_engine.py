@@ -24,7 +24,8 @@ import secrets
 import threading
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field, asdict
 from enum import Enum
@@ -109,7 +110,7 @@ class TaskItem:
         return asdict(self)
 
     @classmethod
-    def from_row(cls, row: sqlite3.Row) -> "TaskItem":
+    def from_row(cls, row: sqlite3.Row) -> TaskItem:
         d = dict(row)
         d["target_params"] = json.loads(d.get("target_params") or "{}")
         d["result"] = json.loads(d.get("result") or "{}")
@@ -197,7 +198,7 @@ class TaskQueueStore:
             conn.close()
         return task
 
-    def get_task(self, task_id: str) -> Optional[TaskItem]:
+    def get_task(self, task_id: str) -> TaskItem | None:
         conn = self._get_conn()
         try:
             row = conn.execute("SELECT * FROM task_queue WHERE id=?", (task_id,)).fetchone()
@@ -205,9 +206,9 @@ class TaskQueueStore:
         finally:
             conn.close()
 
-    def list_tasks(self, status: Optional[str] = None, queue: Optional[str] = None,
-                   priority: Optional[str] = None, parent_id: Optional[str] = None,
-                   limit: int = 50, offset: int = 0) -> List[TaskItem]:
+    def list_tasks(self, status: str | None = None, queue: str | None = None,
+                   priority: str | None = None, parent_id: str | None = None,
+                   limit: int = 50, offset: int = 0) -> list[TaskItem]:
         conn = self._get_conn()
         try:
             conds, params = [], []
@@ -229,7 +230,7 @@ class TaskQueueStore:
         finally:
             conn.close()
 
-    def next_pending(self, exclude_ids: Optional[set] = None) -> Optional[TaskItem]:
+    def next_pending(self, exclude_ids: set | None = None) -> TaskItem | None:
         """获取下一个待执行任务 (按优先级+创建时间)"""
         conn = self._get_conn()
         try:
@@ -259,7 +260,7 @@ class TaskQueueStore:
         finally:
             conn.close()
 
-    def count_by_status(self) -> Dict[str, int]:
+    def count_by_status(self) -> dict[str, int]:
         conn = self._get_conn()
         try:
             counts = {}
@@ -367,11 +368,11 @@ class TaskQueueEngine:
         self._max_workers = max_workers
         self._poll_interval = poll_interval
         self._running = False
-        self._running_tasks: Dict[str, asyncio.Task] = {}
+        self._running_tasks: dict[str, asyncio.Task] = {}
         self._lock = asyncio.Lock()
-        self._worker_task: Optional[asyncio.Task] = None
+        self._worker_task: asyncio.Task | None = None
         self._total_processed = 0
-        self._on_task_complete: Optional[Callable] = None  # 任务完成回调
+        self._on_task_complete: Callable | None = None  # 任务完成回调
         logger.info("[TaskQueue] 初始化 | max_workers=%d", max_workers)
 
     @property
@@ -437,7 +438,7 @@ class TaskQueueEngine:
         logger.info("[TaskQueue] 入队: %s (%s/%s) priority=%s", task.id[:12], task.name, task.target_type, task.priority)
         return task
 
-    def enqueue_many(self, tasks: List[dict]) -> List[TaskItem]:
+    def enqueue_many(self, tasks: list[dict]) -> list[TaskItem]:
         """批量提交"""
         return [self.enqueue(**t) for t in tasks]
 
@@ -479,7 +480,7 @@ class TaskQueueEngine:
             self._store.update_status(task.id, "success", result=result)
             logger.info("[TaskQueue] 成功: %s (%s)", task.id[:12], task.name)
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._store.update_status(task.id, "timeout",
                                       error=f"超时 ({task.timeout_seconds}s)")
             logger.warning("[TaskQueue] 超时: %s (%s)", task.id[:12], task.name)
@@ -611,11 +612,11 @@ class TaskQueueEngine:
 
     # ─── 查询 ───
 
-    def get_task(self, task_id: str) -> Optional[dict]:
+    def get_task(self, task_id: str) -> dict | None:
         task = self._store.get_task(task_id)
         return task.to_dict() if task else None
 
-    def list_tasks(self, **kwargs) -> List[dict]:
+    def list_tasks(self, **kwargs) -> list[dict]:
         tasks = self._store.list_tasks(**kwargs)
         return [t.to_dict() for t in tasks]
 
@@ -633,7 +634,7 @@ class TaskQueueEngine:
 
 # ─── 全局单例 ───
 
-_engine: Optional[TaskQueueEngine] = None
+_engine: TaskQueueEngine | None = None
 
 def get_task_queue_engine() -> TaskQueueEngine:
     global _engine

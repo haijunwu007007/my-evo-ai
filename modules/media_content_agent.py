@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 media_content_agent.py - 新媒体内容 Agent
@@ -121,7 +120,7 @@ logger = get_logger("evo.vertical.media_content")
 # 枚举与数据结构
 # ============================================================
 
-class MediaContentAgentAnalyzer(object):
+class MediaContentAgentAnalyzer:
     """media_content_agent 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -323,12 +322,12 @@ class ContentItem:
     content_type: ContentType = ContentType.ARTICLE
     platform: Platform = Platform.WECHAT_MP
     status: ContentStatus = ContentStatus.DRAFT
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     cover_url: str = ""
-    media_urls: List[str] = field(default_factory=list)
+    media_urls: list[str] = field(default_factory=list)
     publish_time: str = ""
     schedule_time: str = ""
-    metrics: Dict[str, int] = field(default_factory=dict)
+    metrics: dict[str, int] = field(default_factory=dict)
     create_time: str = ""
 
 @dataclass
@@ -349,9 +348,9 @@ class PublishingResult:
 class ContentGenerator:
     """AI内容生成引擎"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._style_profiles: Dict[str, Dict] = {
+        self._style_profiles: dict[str, dict] = {
             "professional": {"tone": "专业严谨", "length": "long"},
             "casual": {"tone": "轻松活泼", "length": "medium"},
             "humorous": {"tone": "幽默风趣", "length": "medium"},
@@ -361,8 +360,8 @@ class ContentGenerator:
         }
 
     def generate_article(
-        self, topic: str, style: str = "professional", keywords: List[str] = None, length: str = "medium"
-    ) -> Dict[str, Any]:
+        self, topic: str, style: str = "professional", keywords: list[str] = None, length: str = "medium"
+    ) -> dict[str, Any]:
         """生成图文内容"""
         logger.info(f"生成图文: 主题={topic}, 风格={style}")
         profile = self._style_profiles.get(style, self._style_profiles["professional"])
@@ -380,7 +379,7 @@ class ContentGenerator:
             "generated_at": datetime.now().isoformat(),
         }
 
-    def generate_video_script(self, topic: str, duration_seconds: int = 60, style: str = "casual") -> Dict[str, Any]:
+    def generate_video_script(self, topic: str, duration_seconds: int = 60, style: str = "casual") -> dict[str, Any]:
         """生成视频脚本"""
         logger.info(f"生成视频脚本: {topic}, 时长={duration_seconds}s")
 
@@ -404,7 +403,7 @@ class ContentGenerator:
 
     def generate_titles(
         self, topic: str, count: int = 5, platform: Platform = Platform.WECHAT_MP
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成爆款标题"""
         templates = {
             Platform.WECHAT_MP: [
@@ -436,14 +435,14 @@ class ContentGenerator:
 
         return [{"rank": i + 1, "title": t, "platform": platform.value} for i, t in enumerate(titles)]
 
-    def generate_hashtags(self, content: str, platform: Platform = Platform.DOUYIN, count: int = 10) -> List[str]:
+    def generate_hashtags(self, content: str, platform: Platform = Platform.DOUYIN, count: int = 10) -> list[str]:
         """生成推荐标签"""
         base_tags = ["#干货分享", "#每日推送", "#AI推荐"]
         topic_words = re.findall(r"[\u4e00-\u9fa5]{2,6}", content)
         content_tags = [f"#{w}" for w in topic_words[: count - len(base_tags)]]
         return (content_tags + base_tags)[:count]
 
-    def optimize_content(self, content: str, platform: Platform = Platform.WECHAT_MP) -> Dict[str, Any]:
+    def optimize_content(self, content: str, platform: Platform = Platform.WECHAT_MP) -> dict[str, Any]:
         """内容优化建议"""
         suggestions = []
         if len(content) < 500:
@@ -459,14 +458,14 @@ class ContentGenerator:
             "readability_score": 78,
         }
 
-class PublishManager(object):
+class PublishManager:
     """多平台发布管理"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._content_store: Dict[str, ContentItem] = {}
-        self._publish_queue: List[ContentItem] = []
-        self._platform_connections: Dict[Platform, bool] = {}
+        self._content_store: dict[str, ContentItem] = {}
+        self._publish_queue: list[ContentItem] = []
+        self._platform_connections: dict[Platform, bool] = {}
 
     def prepare_content(
         self,
@@ -474,9 +473,9 @@ class PublishManager(object):
         body: str,
         platform: Platform = Platform.WECHAT_MP,
         content_type: ContentType = ContentType.ARTICLE,
-        tags: List[str] = None,
+        tags: list[str] = None,
         cover_url: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """准备待发布内容"""
         content = ContentItem(
             content_id=self._gen_content_id(),
@@ -492,7 +491,7 @@ class PublishManager(object):
         self._content_store[content.content_id] = content
         return {"success": True, "content_id": content.content_id, "status": "draft"}
 
-    def schedule_publish(self, content_id: str, schedule_time: str) -> Dict[str, Any]:
+    def schedule_publish(self, content_id: str, schedule_time: str) -> dict[str, Any]:
         """定时发布"""
         content = self._content_store.get(content_id)
         if not content:
@@ -517,7 +516,7 @@ class PublishManager(object):
             success=True, content_id=content_id, platform=content.platform.value, publish_time=content.publish_time
         )
 
-    def batch_publish(self, content_ids: List[str], interval_seconds: int = 60) -> List[PublishingResult]:
+    def batch_publish(self, content_ids: list[str], interval_seconds: int = 60) -> list[PublishingResult]:
         """批量发布"""
         results = []
         for i, cid in enumerate(content_ids):
@@ -527,7 +526,7 @@ class PublishManager(object):
             results.append(result)
         return results
 
-    def get_content_calendar(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
+    def get_content_calendar(self, start_date: str, end_date: str) -> list[dict[str, Any]]:
         """获取内容日历"""
         items = [
             c
@@ -551,10 +550,10 @@ class PublishManager(object):
 class ContentAnalytics:
     """内容数据分析"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
 
-    def get_content_metrics(self, content_id: str, platform: Platform = Platform.WECHAT_MP) -> Dict[str, Any]:
+    def get_content_metrics(self, content_id: str, platform: Platform = Platform.WECHAT_MP) -> dict[str, Any]:
         """获取单篇内容数据"""
         return {
             "content_id": content_id,
@@ -571,7 +570,7 @@ class ContentAnalytics:
             "fetch_time": datetime.now().isoformat(),
         }
 
-    def get_account_overview(self, platform: Platform = Platform.WECHAT_MP) -> Dict[str, Any]:
+    def get_account_overview(self, platform: Platform = Platform.WECHAT_MP) -> dict[str, Any]:
         """获取账号概览"""
         return {
             "platform": platform.value,
@@ -585,7 +584,7 @@ class ContentAnalytics:
             "fetch_time": datetime.now().isoformat(),
         }
 
-    def trending_topics(self, platform: Platform = Platform.DOUYIN) -> List[Dict[str, Any]]:
+    def trending_topics(self, platform: Platform = Platform.DOUYIN) -> list[dict[str, Any]]:
         """热门话题推荐"""
         return [
             {"rank": 1, "topic": "AI技术", "heat": 99999, "growth": "+25%"},
@@ -593,7 +592,7 @@ class ContentAnalytics:
             {"rank": 3, "topic": "职场成长", "heat": 77777, "growth": "+12%"},
         ]
 
-    def competitor_analysis(self, competitor_id: str, platform: Platform = Platform.WECHAT_MP) -> Dict[str, Any]:
+    def competitor_analysis(self, competitor_id: str, platform: Platform = Platform.WECHAT_MP) -> dict[str, Any]:
         """竞品账号分析"""
         return {
             "competitor_id": competitor_id,
@@ -605,14 +604,14 @@ class ContentAnalytics:
             "content_strategy": "分析中...",
         }
 
-class EngagementManager(object):
+class EngagementManager:
     """互动管理引擎"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._reply_rules: List[Dict[str, Any]] = []
+        self._reply_rules: list[dict[str, Any]] = []
 
-    def auto_reply_comment(self, comment: str, context: str = "", tone: str = "friendly") -> Dict[str, Any]:
+    def auto_reply_comment(self, comment: str, context: str = "", tone: str = "friendly") -> dict[str, Any]:
         """自动回复评论"""
         logger.info(f"自动回复评论: {comment[:30]}...")
         return {
@@ -623,18 +622,18 @@ class EngagementManager(object):
             "replied_at": datetime.now().isoformat(),
         }
 
-    def set_reply_rule(self, keyword: str, reply_template: str, priority: int = 0) -> Dict[str, Any]:
+    def set_reply_rule(self, keyword: str, reply_template: str, priority: int = 0) -> dict[str, Any]:
         """设置自动回复规则"""
         rule = {"keyword": keyword, "template": reply_template, "priority": priority}
         self._reply_rules.append(rule)
         self._reply_rules.sort(key=lambda r: r["priority"], reverse=True)
         return {"success": True, "rules_count": len(self._reply_rules)}
 
-    def get_unread_messages(self, platform: Platform = Platform.WECHAT_MP) -> List[Dict[str, Any]]:
+    def get_unread_messages(self, platform: Platform = Platform.WECHAT_MP) -> list[dict[str, Any]]:
         """获取未读消息"""
         return []
 
-    def batch_reply(self, comments: List[Dict[str, str]], max_replies: int = 50) -> Dict[str, Any]:
+    def batch_reply(self, comments: list[dict[str, str]], max_replies: int = 50) -> dict[str, Any]:
         """批量回复"""
         replied = 0
         for c in comments[:max_replies]:
@@ -674,7 +673,7 @@ class MediaContentAgent:
     实现新媒体运营全流程自动化。
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -717,7 +716,7 @@ class MediaContentAgent:
         self._running = False
         self.logger.info("MediaContentAgent 初始化完成")
 
-    def get_dashboard(self) -> Dict[str, Any]:
+    def get_dashboard(self) -> dict[str, Any]:
         """获取运营看板"""
         return {
             "agent": "MediaContentAgent",
@@ -741,8 +740,8 @@ class MediaContentAgent:
         }
 
     def one_click_publish(
-        self, topic: str, platforms: List[Platform] = None, style: str = "professional"
-    ) -> List[Dict[str, Any]]:
+        self, topic: str, platforms: list[Platform] = None, style: str = "professional"
+    ) -> list[dict[str, Any]]:
         """一键生成并发布到多平台"""
         platforms = platforms or [Platform.WECHAT_MP]
         results = []
@@ -770,7 +769,7 @@ class MediaContentAgent:
         self._running = False
         self.logger.info("MediaContentAgent 已停止")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy" if self._running else "stopped",
             "components": {k: "ok" for k in ["generator", "publisher", "analytics", "engagement"]},

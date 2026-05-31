@@ -44,12 +44,12 @@ class PluginManifest:
     homepage: str = ""                  # 主页
     repository: str = ""                # 仓库地址
     module_class: str = ""              # EnterpriseModule子类路径
-    permissions: List[str] = field(default_factory=list)    # 声明的权限
-    dependencies: Dict[str, str] = field(default_factory=dict)  # 依赖: 最低版本
-    tags: List[str] = field(default_factory=list)            # 分类标签
+    permissions: list[str] = field(default_factory=list)    # 声明的权限
+    dependencies: dict[str, str] = field(default_factory=dict)  # 依赖: 最低版本
+    tags: list[str] = field(default_factory=list)            # 分类标签
     min_evo_version: str = "0.1.0"      # 最低兼容版本
     icon: str = ""                       # 图标URL/base64
-    config_schema: Dict = field(default_factory=dict)        # 配置项schema
+    config_schema: dict = field(default_factory=dict)        # 配置项schema
 
 
 @dataclass
@@ -62,7 +62,7 @@ class PluginState:
     enabled_at: str = ""
     error: str = ""
     module_instance: Any = None
-    config: Dict = field(default_factory=dict)
+    config: dict = field(default_factory=dict)
 
 
 class PluginManager:
@@ -102,8 +102,8 @@ class PluginManager:
             Path(d).mkdir(parents=True, exist_ok=True)
 
         self._registry_path = os.path.join(self._base_dir, "registry.json")
-        self._plugins: Dict[str, PluginState] = {}
-        self._manifests: Dict[str, PluginManifest] = {}
+        self._plugins: dict[str, PluginState] = {}
+        self._manifests: dict[str, PluginManifest] = {}
         self._rw_lock = threading.RLock()
 
         # 加载已注册插件
@@ -188,7 +188,7 @@ class PluginManager:
         """加载本地注册表"""
         try:
             if os.path.exists(self._registry_path):
-                with open(self._registry_path, "r", encoding="utf-8") as f:
+                with open(self._registry_path, encoding="utf-8") as f:
                     data = json.load(f)
                 for name, info in data.get("plugins", {}).items():
                     self._plugins[name] = PluginState(
@@ -241,7 +241,7 @@ class PluginManager:
             manifest_path = os.path.join(plugin_dir, "plugin.json")
             if os.path.exists(manifest_path):
                 try:
-                    with open(manifest_path, "r", encoding="utf-8") as f:
+                    with open(manifest_path, encoding="utf-8") as f:
                         manifest_data = json.load(f)
                     manifest = PluginManifest(**{k: v for k, v in manifest_data.items() if k in PluginManifest.__dataclass_fields__})
                     self._manifests[name] = manifest
@@ -252,7 +252,7 @@ class PluginManager:
     # 仓库浏览
     # ═══════════════════════════════════════════════════════
 
-    def browse_repository(self, tag: str = "", search: str = "") -> List[Dict]:
+    def browse_repository(self, tag: str = "", search: str = "") -> list[dict]:
         """浏览可用插件仓库"""
         results = self.BUILTIN_REPOSITORY.copy()
 
@@ -274,7 +274,7 @@ class PluginManager:
     # 插件安装
     # ═══════════════════════════════════════════════════════
 
-    def install_plugin(self, name: str, source: str = "builtin") -> Dict[str, Any]:
+    def install_plugin(self, name: str, source: str = "builtin") -> dict[str, Any]:
         """
         安装插件
 
@@ -346,7 +346,7 @@ class PluginManager:
                 "version": self._manifests[name].version,
             }
 
-    def _install_from_git(self, name: str, url: str) -> Dict:
+    def _install_from_git(self, name: str, url: str) -> dict:
         """从Git仓库安装插件"""
         temp_dir = os.path.join(self._temp_dir, f"{name}_{int(time.time())}")
 
@@ -361,7 +361,7 @@ class PluginManager:
             if not os.path.exists(manifest_path):
                 return {"success": False, "message": "No plugin.json found in repository"}
 
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 manifest_data = json.load(f)
 
             manifest = PluginManifest(**{k: v for k, v in manifest_data.items() if k in PluginManifest.__dataclass_fields__})
@@ -392,7 +392,7 @@ class PluginManager:
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir, ignore_errors=True)
 
-    def _install_from_local(self, name: str, local_path: str) -> Dict:
+    def _install_from_local(self, name: str, local_path: str) -> dict:
         """从本地路径安装插件"""
         source_dir = os.path.abspath(local_path)
 
@@ -404,7 +404,7 @@ class PluginManager:
             return {"success": False, "message": "No plugin.json found in source directory"}
 
         try:
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 manifest_data = json.load(f)
             manifest = PluginManifest(**{k: v for k, v in manifest_data.items() if k in PluginManifest.__dataclass_fields__})
             manifest.name = name
@@ -491,7 +491,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
     # 插件管理
     # ═══════════════════════════════════════════════════════
 
-    def enable_plugin(self, name: str) -> Dict[str, Any]:
+    def enable_plugin(self, name: str) -> dict[str, Any]:
         """启用插件"""
         with self._rw_lock:
             if name not in self._plugins:
@@ -537,7 +537,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
                 self._save_registry()
                 return {"success": False, "message": f"Enable failed: {state.error}"}
 
-    def disable_plugin(self, name: str) -> Dict[str, Any]:
+    def disable_plugin(self, name: str) -> dict[str, Any]:
         """禁用插件"""
         with self._rw_lock:
             if name not in self._plugins:
@@ -566,7 +566,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
             self._save_registry()
             return {"success": True, "message": f"Plugin '{name}' disabled"}
 
-    def uninstall_plugin(self, name: str, remove_data: bool = False) -> Dict[str, Any]:
+    def uninstall_plugin(self, name: str, remove_data: bool = False) -> dict[str, Any]:
         """卸载插件"""
         with self._rw_lock:
             if name not in self._plugins:
@@ -587,7 +587,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
             self._save_registry()
             return {"success": True, "message": f"Plugin '{name}' uninstalled", "removed_data": remove_data}
 
-    def update_plugin(self, name: str) -> Dict[str, Any]:
+    def update_plugin(self, name: str) -> dict[str, Any]:
         """更新插件"""
         if name not in self._plugins:
             return {"success": False, "message": f"Plugin '{name}' not installed"}
@@ -611,7 +611,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
     # 插件执行
     # ═══════════════════════════════════════════════════════
 
-    async def execute_plugin(self, name: str, action: str, params: Dict = None) -> Dict:
+    async def execute_plugin(self, name: str, action: str, params: dict = None) -> dict:
         """执行插件操作"""
         if name not in self._plugins:
             return {"success": False, "error": f"Plugin '{name}' not installed"}
@@ -632,7 +632,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
     # 查询
     # ═══════════════════════════════════════════════════════
 
-    def get_plugin(self, name: str) -> Optional[Dict]:
+    def get_plugin(self, name: str) -> dict | None:
         """获取插件详情"""
         if name not in self._plugins:
             return None
@@ -662,7 +662,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
 
         return result
 
-    def list_plugins(self, status: str = "") -> List[Dict]:
+    def list_plugins(self, status: str = "") -> list[dict]:
         """列出所有插件"""
         plugins = []
         for name, state in self._plugins.items():
@@ -673,7 +673,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
                 plugins.append(info)
         return plugins
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """插件统计"""
         total = len(self._plugins)
         enabled = sum(1 for s in self._plugins.values() if s.status == "enabled")
@@ -690,7 +690,7 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
             "plugins": self.list_plugins(),
         }
 
-    def check_compatibility(self, name: str) -> Dict[str, Any]:
+    def check_compatibility(self, name: str) -> dict[str, Any]:
         """检查插件兼容性"""
         manifest = self._manifests.get(name)
         if not manifest:
@@ -731,13 +731,13 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
         except (ValueError, IndexError):
             return False
 
-    def export_plugin_config(self, name: str) -> Optional[Dict]:
+    def export_plugin_config(self, name: str) -> dict | None:
         """导出插件配置"""
         if name not in self._plugins:
             return None
         return self._plugins[name].config
 
-    def import_plugin_config(self, name: str, config: Dict) -> Dict:
+    def import_plugin_config(self, name: str, config: dict) -> dict:
         """导入插件配置"""
         if name not in self._plugins:
             return {"success": False, "message": "Plugin not installed"}

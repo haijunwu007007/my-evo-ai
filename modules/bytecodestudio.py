@@ -160,12 +160,12 @@ class AnalysisSession:
     total_instructions: int = 0
     call_count: int = 0
     jump_count: int = 0
-    security_findings: List[SecurityFinding] = field(default_factory=list)
-    optimizations: List[OptimizationSuggestion] = field(default_factory=list)
-    category_counts: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
-    top_operations: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    security_findings: list[SecurityFinding] = field(default_factory=list)
+    optimizations: list[OptimizationSuggestion] = field(default_factory=list)
+    category_counts: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    top_operations: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
-class BytecodeSecurityAnalyzer(object):
+class BytecodeSecurityAnalyzer:
     """字节码安全分析器 - 检测潜在安全风险模式"""
 
     # 高风险操作码和模式
@@ -178,7 +178,7 @@ class BytecodeSecurityAnalyzer(object):
         self._scan_count: int = 0
         self._findings_total: int = 0
 
-    def scan_bytecode(self, code_obj: types.CodeType) -> List[Dict]:
+    def scan_bytecode(self, code_obj: types.CodeType) -> list[dict]:
         """扫描字节码中的安全风险"""
         self._scan_count += 1
         findings = []
@@ -193,7 +193,7 @@ class BytecodeSecurityAnalyzer(object):
                 self._findings_total += 1
         return findings
 
-    def _assess_instruction(self, instr: dis.Instruction) -> Optional[Dict]:
+    def _assess_instruction(self, instr: dis.Instruction) -> dict | None:
         """评估单条指令的风险"""
         if instr.opname in self.DANGEROUS_OPS:
             if instr.argval and isinstance(instr.argval, str) and instr.argval in self.RISKY_BUILTINS:
@@ -215,7 +215,7 @@ class BytecodeSecurityAnalyzer(object):
                 }
         return None
 
-    def scan_module(self, module_name: str) -> Dict:
+    def scan_module(self, module_name: str) -> dict:
         """扫描整个模块的所有函数"""
         try:
             mod = importlib.import_module(module_name)
@@ -251,7 +251,7 @@ class BytecodeSecurityAnalyzer(object):
             "findings": sorted(total_findings, key=lambda x: x.get("risk", ""), reverse=True),
         }
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"total_scans": self._scan_count, "total_findings": self._findings_total}
 
 class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -266,7 +266,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self.module_name = "bytecodestudio"
         self.module_id = self.module_name
         self.module_version = "7.0.0"
-        self._sessions: Dict[str, AnalysisSession] = {}
+        self._sessions: dict[str, AnalysisSession] = {}
         self._audit = AuditLogger()
         self._analysis_count = 0
         self._total_functions_analyzed = 0
@@ -275,7 +275,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     def initialize(self):
         logger.info("bytecodestudio initialized")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("bytecodestudio_ops_total", labels={"action": operation})
         self.audit("execute", f"action={action}")
@@ -319,7 +319,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 ],
             }
 
-    def _analyze_code(self, p: Dict) -> Dict:
+    def _analyze_code(self, p: dict) -> dict:
         code_src = p.get("code", "")
         name = p.get("session_name", "inline")
         if not code_src:
@@ -350,7 +350,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _analyze_module(self, p: Dict) -> Dict:
+    def _analyze_module(self, p: dict) -> dict:
         mod_name = p.get("module", "")
         if not mod_name:
             return {"success": False, "error": "missing module"}
@@ -497,7 +497,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             )
         session.optimizations = opts
 
-    def _disassemble(self, p: Dict) -> Dict:
+    def _disassemble(self, p: dict) -> dict:
         code_src = p.get("code", "")
         if not code_src:
             return {"success": False, "error": "missing code"}
@@ -524,7 +524,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "result": {"name": getattr(co, "co_name", "<module>"), "instructions": instrs, "count": len(instrs)},
         }
 
-    def _security_audit(self, p: Dict) -> Dict:
+    def _security_audit(self, p: dict) -> dict:
         sid = p.get("session_id")
         if not sid or sid not in self._sessions:
             return {"success": False, "error": "session not found"}
@@ -550,7 +550,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _optimize_suggestions(self, p: Dict) -> Dict:
+    def _optimize_suggestions(self, p: dict) -> dict:
         sid = p.get("session_id")
         if not sid or sid not in self._sessions:
             return {"success": False, "error": "session not found"}
@@ -574,7 +574,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _get_session(self, p: Dict) -> Dict:
+    def _get_session(self, p: dict) -> dict:
         sid = p.get("session_id")
         if not sid or sid not in self._sessions:
             return {"success": False, "error": "session not found"}
@@ -594,7 +594,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _list_sessions(self, p: Dict) -> Dict:
+    def _list_sessions(self, p: dict) -> dict:
         limit = p.get("limit", 20)
         sessions = list(self._sessions.values())[-limit:]
         return {
@@ -612,7 +612,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "total": len(self._sessions),
         }
 
-    def _complexity_estimate(self, p: Dict) -> Dict:
+    def _complexity_estimate(self, p: dict) -> dict:
         code_src = p.get("code", "")
         if not code_src:
             return {"success": False, "error": "missing code"}
@@ -624,7 +624,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._collect_complexity(co, results)
         return {"success": True, "result": results}
 
-    def _collect_complexity(self, co, results: List):
+    def _collect_complexity(self, co, results: list):
         try:
             consts = co.co_consts or []
         except AttributeError:
@@ -650,7 +650,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                     pass
                 self._collect_complexity(c, results)
 
-    def _instruction_stats(self, p: Dict) -> Dict:
+    def _instruction_stats(self, p: dict) -> dict:
         sid = p.get("session_id")
         if not sid or sid not in self._sessions:
             return {"success": False, "error": "session not found"}
@@ -665,7 +665,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _compare_functions(self, p: Dict) -> Dict:
+    def _compare_functions(self, p: dict) -> dict:
         code_a = p.get("code_a", "")
         code_b = p.get("code_b", "")
         if not code_a or not code_b:
@@ -692,7 +692,7 @@ class BytecodeStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._initialized = False
         self._audit.log("shutdown", "bytecodestudio shutdown")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(

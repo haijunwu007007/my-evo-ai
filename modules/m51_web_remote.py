@@ -168,7 +168,7 @@ class BrowserConfig:
     user_agent: str = ""
     disable_images: bool = False
     disable_js: bool = False
-    extra_args: List[str] = field(default_factory=list)
+    extra_args: list[str] = field(default_factory=list)
     timeout_ms: int = 30000
     locale: str = "zh-CN"
     timezone: str = "Asia/Shanghai"
@@ -187,10 +187,10 @@ class ElementInfo:
     id: str = ""
     visible: bool = False
     enabled: bool = False
-    rect: Dict[str, int] = field(default_factory=dict)
-    attributes: Dict[str, str] = field(default_factory=dict)
+    rect: dict[str, int] = field(default_factory=dict)
+    attributes: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tag": self.tag,
             "text": self.text[:200],
@@ -227,14 +227,14 @@ class NetworkRequest:
     method: str = "GET"
     status: int = 0
     resource_type: str = ""
-    request_headers: Dict[str, str] = field(default_factory=dict)
-    response_headers: Dict[str, str] = field(default_factory=dict)
+    request_headers: dict[str, str] = field(default_factory=dict)
+    response_headers: dict[str, str] = field(default_factory=dict)
     post_data: str = ""
     response_body: str = ""
     timing_ms: float = 0.0
     timestamp: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "request_id": self.request_id,
             "url": self.url,
@@ -256,7 +256,7 @@ class RecordedAction:
     selector_type: str = "css"
     value: str = ""
     target_url: str = ""
-    position: Dict[str, int] = field(default_factory=dict)
+    position: dict[str, int] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.action_id:
@@ -270,7 +270,7 @@ class RemoteTask:
 
     task_id: str = ""
     name: str = ""
-    actions: List[Dict[str, Any]] = field(default_factory=list)
+    actions: list[dict[str, Any]] = field(default_factory=list)
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
     error: str = ""
@@ -278,7 +278,7 @@ class RemoteTask:
     started_at: str = ""
     finished_at: str = ""
     screenshot_path: str = ""
-    network_logs: List[Dict] = field(default_factory=list)
+    network_logs: list[dict] = field(default_factory=list)
     retries: int = 0
     max_retries: int = 3
     timeout_seconds: int = 120
@@ -289,7 +289,7 @@ class RemoteTask:
         if not self.created_at:
             self.created_at = datetime.now().isoformat()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "name": self.name,
@@ -341,7 +341,7 @@ class UserAgentRotator:
 class SelectorParser:
     """智能选择器解析 — 自动检测选择器类型"""
 
-    def parse(self, selector: str) -> Tuple[SelectorType, str]:
+    def parse(self, selector: str) -> tuple[SelectorType, str]:
         """解析选择器，返回(类型, 值)"""
         s = selector.strip()
         if s.startswith("//") or s.startswith("(//"):
@@ -379,16 +379,16 @@ class ActionRecorder:
     """操作录制引擎"""
 
     def __init__(self):
-        self._actions: List[RecordedAction] = []
+        self._actions: list[RecordedAction] = []
         self._recording = False
-        self._start_time: Optional[datetime] = None
+        self._start_time: datetime | None = None
 
     def start(self):
         self._actions.clear()
         self._recording = True
         self._start_time = datetime.now()
 
-    def stop(self) -> List[RecordedAction]:
+    def stop(self) -> list[RecordedAction]:
         self._recording = False
         result = list(self._actions)
         return result
@@ -445,13 +445,13 @@ class TaskExecutor:
         self._config = config
         self._ua_rotator = ua_rotator
         self._selector_parser = SelectorParser()
-        self._network_logs: List[NetworkRequest] = []
-        self._cookies: List[Dict] = []
+        self._network_logs: list[NetworkRequest] = []
+        self._cookies: list[dict] = []
         self._current_url = ""
         self._page_title = ""
-        self._dom_snapshot: Dict = {}
+        self._dom_snapshot: dict = {}
 
-    def execute_action(self, action: Dict) -> Dict:
+    def execute_action(self, action: dict) -> dict:
         """执行单个操作（模拟实现）"""
         action_type = action.get("type", "")
 
@@ -489,7 +489,7 @@ class TaskExecutor:
         except Exception as e:
             return {"status": "error", "error": f"{type(e).__name__}: {str(e)}"}
 
-    def _do_navigate(self, url: str) -> Dict:
+    def _do_navigate(self, url: str) -> dict:
         """导航到URL"""
         if not url:
             return {"status": "error", "error": "URL不能为空"}
@@ -512,12 +512,12 @@ class TaskExecutor:
         )
         return {"status": "ok", "url": url, "title": self._page_title}
 
-    def _do_click(self, selector: str) -> Dict:
+    def _do_click(self, selector: str) -> dict:
         """点击元素"""
         sel_type, sel_value = self._selector_parser.parse(selector)
         return {"status": "ok", "action": "click", "selector_type": sel_type.value, "selector": sel_value}
 
-    def _do_type(self, selector: str, value: str) -> Dict:
+    def _do_type(self, selector: str, value: str) -> dict:
         """输入文本"""
         sel_type, sel_value = self._selector_parser.parse(selector)
         return {
@@ -528,7 +528,7 @@ class TaskExecutor:
             "selector": sel_value,
         }
 
-    def _do_select(self, selector: str, value: str) -> Dict:
+    def _do_select(self, selector: str, value: str) -> dict:
         """选择下拉选项"""
         sel_type, sel_value = self._selector_parser.parse(selector)
         return {
@@ -539,12 +539,12 @@ class TaskExecutor:
             "selector": sel_value,
         }
 
-    def _do_scroll(self, value: str) -> Dict:
+    def _do_scroll(self, value: str) -> dict:
         """滚动页面"""
         pixels = int(value) if value else 500
         return {"status": "ok", "action": "scroll", "pixels": pixels}
 
-    def _do_screenshot(self, action: Dict) -> Dict:
+    def _do_screenshot(self, action: dict) -> dict:
         """截图（模拟）"""
         full_page = action.get("full_page", False)
         return {
@@ -556,7 +556,7 @@ class TaskExecutor:
             "timestamp": datetime.now().isoformat(),
         }
 
-    def _do_get_content(self, selector: str) -> Dict:
+    def _do_get_content(self, selector: str) -> dict:
         """获取元素内容"""
         sel_type, sel_value = self._selector_parser.parse(selector)
         return {
@@ -567,11 +567,11 @@ class TaskExecutor:
             "content": f"[simulated content for {sel_value}]",
         }
 
-    def _do_evaluate(self, script: str) -> Dict:
+    def _do_evaluate(self, script: str) -> dict:
         """执行JavaScript"""
         return {"status": "ok", "action": "evaluate", "result": "null"}
 
-    def _do_set_cookie(self, action: Dict) -> Dict:
+    def _do_set_cookie(self, action: dict) -> dict:
         """设置Cookie"""
         cookie = {
             "name": action.get("name", ""),
@@ -582,7 +582,7 @@ class TaskExecutor:
         self._cookies.append(cookie)
         return {"status": "ok", "action": "set_cookie", "cookie_name": cookie["name"]}
 
-    def _do_hover(self, selector: str) -> Dict:
+    def _do_hover(self, selector: str) -> dict:
         """悬停元素"""
         sel_type, sel_value = self._selector_parser.parse(selector)
         return {"status": "ok", "action": "hover", "selector_type": sel_type.value, "selector": sel_value}
@@ -592,7 +592,7 @@ class TaskExecutor:
         return self._current_url
 
     @property
-    def network_logs(self) -> List[Dict]:
+    def network_logs(self) -> list[dict]:
         return [r.to_dict() for r in self._network_logs]
 
     def clear_network_logs(self):
@@ -602,10 +602,10 @@ class TaskExecutor:
 # 主模块: WebRemote
 # ============================================================================
 
-class PageElementDetector(object):
+class PageElementDetector:
     """页面元素检测器 — 自动识别可交互元素、提取表单结构、检测弹窗"""
 
-    def detect_interactive_elements(self, page_snapshot: Dict) -> Dict[str, Any]:
+    def detect_interactive_elements(self, page_snapshot: dict) -> dict[str, Any]:
         """从页面快照中检测所有可交互元素：按钮、链接、输入框、下拉菜单"""
         elements = page_snapshot.get("elements", [])
         interactive = []
@@ -651,7 +651,7 @@ class PageElementDetector(object):
                 )
         return {"total_elements": len(elements), "interactive_count": len(interactive), "elements": interactive}
 
-    def extract_form_structure(self, page_snapshot: Dict) -> Dict[str, Any]:
+    def extract_form_structure(self, page_snapshot: dict) -> dict[str, Any]:
         """提取页面表单结构：字段列表、验证规则、提交路径"""
         forms = page_snapshot.get("forms", [])
         if not forms:
@@ -682,7 +682,7 @@ class PageElementDetector(object):
             )
         return {"forms_found": len(extracted), "forms": extracted}
 
-    def detect_popups(self, page_snapshot: Dict) -> Dict[str, Any]:
+    def detect_popups(self, page_snapshot: dict) -> dict[str, Any]:
         """检测页面弹窗/模态框/通知"""
         elements = page_snapshot.get("elements", [])
         popups = []
@@ -711,8 +711,8 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ua_rotator = UserAgentRotator()
         self._selector_parser = SelectorParser()
         self._recorder = ActionRecorder()
-        self._executor: Optional[TaskExecutor] = None
-        self._tasks: Dict[str, RemoteTask] = {}
+        self._executor: TaskExecutor | None = None
+        self._tasks: dict[str, RemoteTask] = {}
         self._task_queue: deque = deque()
         self._task_lock = threading.Lock()
         self._thread_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="webrem")
@@ -797,7 +797,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 核心执行 ──
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Result:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("web_remote_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -834,7 +834,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 动作处理器 ──
 
-    async def _handle_navigate(self, params: Dict) -> Dict:
+    async def _handle_navigate(self, params: dict) -> dict:
         url = params.get("url", "")
         if not url:
             return {"error": "URL必填"}
@@ -843,7 +843,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._recorder.record("navigate", url=url, target_url=url)
         return result
 
-    async def _handle_click(self, params: Dict) -> Dict:
+    async def _handle_click(self, params: dict) -> dict:
         selector = params.get("selector", "")
         if not selector:
             return {"error": "selector必填"}
@@ -852,7 +852,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._recorder.record("click", selector=selector)
         return result
 
-    async def _handle_type(self, params: Dict) -> Dict:
+    async def _handle_type(self, params: dict) -> dict:
         selector = params.get("selector", "")
         value = params.get("value", "")
         if not selector:
@@ -862,7 +862,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._recorder.record("type", selector=selector, value=value)
         return result
 
-    async def _handle_select(self, params: Dict) -> Dict:
+    async def _handle_select(self, params: dict) -> dict:
         selector = params.get("selector", "")
         value = params.get("value", "")
         if not selector:
@@ -872,60 +872,60 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._recorder.record("select", selector=selector, value=value)
         return result
 
-    async def _handle_scroll(self, params: Dict) -> Dict:
+    async def _handle_scroll(self, params: dict) -> dict:
         pixels = params.get("pixels", 500)
         self._request_count += 1
         result = self._executor.execute_action({"type": "scroll", "value": str(pixels)})
         self._recorder.record("scroll", value=str(pixels), position={"x": 0, "y": pixels})
         return result
 
-    async def _handle_screenshot(self, params: Dict) -> Dict:
+    async def _handle_screenshot(self, params: dict) -> dict:
         full_page = params.get("full_page", False)
         selector = params.get("selector", "")
         self._request_count += 1
         result = self._executor.execute_action({"type": "screenshot", "full_page": full_page, "selector": selector})
         return result
 
-    async def _handle_get_content(self, params: Dict) -> Dict:
+    async def _handle_get_content(self, params: dict) -> dict:
         selector = params.get("selector", "")
         if not selector:
             return {"error": "selector必填"}
         self._request_count += 1
         return self._executor.execute_action({"type": "get_content", "selector": selector})
 
-    async def _handle_get_title(self, params: Dict) -> Dict:
+    async def _handle_get_title(self, params: dict) -> dict:
         return {"title": self._executor.current_url, "url": self._executor.current_url}
 
-    async def _handle_get_url(self, params: Dict) -> Dict:
+    async def _handle_get_url(self, params: dict) -> dict:
         return {"url": self._executor.current_url}
 
-    async def _handle_evaluate(self, params: Dict) -> Dict:
+    async def _handle_evaluate(self, params: dict) -> dict:
         script = params.get("script", "")
         if not script:
             return {"error": "script必填"}
         self._request_count += 1
         return self._executor.execute_action({"type": "evaluate", "value": script})
 
-    async def _handle_hover(self, params: Dict) -> Dict:
+    async def _handle_hover(self, params: dict) -> dict:
         selector = params.get("selector", "")
         if not selector:
             return {"error": "selector必填"}
         self._request_count += 1
         return self._executor.execute_action({"type": "hover", "selector": selector})
 
-    async def _handle_wait(self, params: Dict) -> Dict:
+    async def _handle_wait(self, params: dict) -> dict:
         ms = params.get("ms", 1000)
         self._request_count += 1
         return self._executor.execute_action({"type": "wait", "value": str(ms)})
 
-    async def _handle_set_cookie(self, params: Dict) -> Dict:
+    async def _handle_set_cookie(self, params: dict) -> dict:
         self._request_count += 1
         return self._executor.execute_action({"type": "set_cookie", **params})
 
-    async def _handle_get_cookies(self, params: Dict) -> Dict:
+    async def _handle_get_cookies(self, params: dict) -> dict:
         return {"cookies": self._executor._cookies}
 
-    async def _handle_find_elements(self, params: Dict) -> Dict:
+    async def _handle_find_elements(self, params: dict) -> dict:
         selector = params.get("selector", "")
         sel_type, sel_value = self._selector_parser.parse(selector)
         # 模拟查找
@@ -936,7 +936,7 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "elements": [{"tag": "div", "text": "[simulated]", "visible": True}],
         }
 
-    async def _handle_submit_task(self, params: Dict) -> Dict:
+    async def _handle_submit_task(self, params: dict) -> dict:
         """提交自动化任务"""
         task = RemoteTask(
             name=params.get("name", "unnamed"),
@@ -952,14 +952,14 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._thread_pool.submit(self._run_task, task)
         return {"task_id": task.task_id, "status": "submitted"}
 
-    async def _handle_get_task(self, params: Dict) -> Dict:
+    async def _handle_get_task(self, params: dict) -> dict:
         task_id = params.get("task_id", "")
         task = self._tasks.get(task_id)
         if not task:
             return {"error": f"任务不存在: {task_id}"}
         return task.to_dict()
 
-    async def _handle_list_tasks(self, params: Dict) -> Dict:
+    async def _handle_list_tasks(self, params: dict) -> dict:
         status_filter = params.get("status", "")
         limit = params.get("limit", 50)
         tasks = list(self._tasks.values())
@@ -968,11 +968,11 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         tasks = tasks[-limit:]
         return {"total": len(tasks), "tasks": [t.to_dict() for t in tasks]}
 
-    async def _handle_record_start(self, params: Dict) -> Dict:
+    async def _handle_record_start(self, params: dict) -> dict:
         self._recorder.start()
         return {"recording": True}
 
-    async def _handle_record_stop(self, params: Dict) -> Dict:
+    async def _handle_record_stop(self, params: dict) -> dict:
         actions = self._recorder.stop()
         return {
             "recording": False,
@@ -982,15 +982,15 @@ class WebRemote(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    async def _handle_record_export(self, params: Dict) -> Dict:
+    async def _handle_record_export(self, params: dict) -> dict:
         script = self._recorder.export_script()
         return {"script": script}
 
-    async def _handle_get_network_logs(self, params: Dict) -> Dict:
+    async def _handle_get_network_logs(self, params: dict) -> dict:
         logs = self._executor.network_logs if self._executor else []
         return {"total": len(logs), "logs": logs}
 
-    async def _handle_stats(self, params: Dict) -> Dict:
+    async def _handle_stats(self, params: dict) -> dict:
         stats = self.stats.to_dict()
         stats.update(
             {

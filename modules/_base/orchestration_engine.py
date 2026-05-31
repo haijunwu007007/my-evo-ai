@@ -26,7 +26,8 @@ import logging
 import importlib
 import importlib.util
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Callable
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
@@ -71,15 +72,15 @@ class ExecutionMode(Enum):
 @dataclass
 class PipelineStep:
     module_id: str
-    params: Dict[str, Any] = field(default_factory=dict)
-    depends_on: List[str] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    depends_on: list[str] = field(default_factory=list)
     retry_count: int = 0
     max_retries: int = 3
     timeout_seconds: float = 120.0
-    fallback_module: Optional[str] = None
+    fallback_module: str | None = None
     status: str = "pending"
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    result: dict[str, Any] | None = None
+    error: str | None = None
     duration_ms: float = 0.0
 
     def to_dict(self) -> dict:
@@ -90,15 +91,15 @@ class PipelineStep:
 class Pipeline:
     id: str
     name: str
-    steps: List[PipelineStep]
+    steps: list[PipelineStep]
     mode: ExecutionMode = ExecutionMode.RESILIENT
     status: PipelineStatus = PipelineStatus.PENDING
     created_at: str = ""
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
     total_duration_ms: float = 0.0
-    context: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    context: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
 
     def __post_init__(self):
         if not self.created_at:
@@ -123,7 +124,7 @@ class Pipeline:
 class PipelineResult:
     pipeline: Pipeline
     success: bool
-    step_results: List[Dict[str, Any]] = field(default_factory=list)
+    step_results: list[dict[str, Any]] = field(default_factory=list)
     summary: str = ""
 
 
@@ -143,24 +144,24 @@ class OrchestrationEngine:
 
     def __init__(
         self,
-        registry: Optional[ModuleRegistry] = None,
-        discovery_engine: Optional[ModuleDiscoveryEngine] = None,
+        registry: ModuleRegistry | None = None,
+        discovery_engine: ModuleDiscoveryEngine | None = None,
         max_parallel: int = 10,
     ):
         self._registry = registry or ModuleRegistry()
         self._discovery = discovery_engine
         self._max_parallel = max_parallel
-        self._pipeline_history: List[Pipeline] = []
+        self._pipeline_history: list[Pipeline] = []
         self._session_id = str(uuid.uuid4())[:8]
         # AI 配置
         self._ai_model = os.environ.get("AI_DEFAULT_MODEL", "gpt-4o")
         self._ai_gateway = OrchestrationEngine._init_ai_gateway()
         # 事件桥接
-        self._event_bridge: Optional['PipelineEventBridge'] = None
+        self._event_bridge: PipelineEventBridge | None = None
         self._event_pipeline_active: bool = False
 
     @staticmethod
-    def _init_event_bridge() -> Optional['PipelineEventBridge']:
+    def _init_event_bridge() -> PipelineEventBridge | None:
         """延迟初始化事件桥接"""
         try:
             from modules._base.event_driven_orchestrator import PipelineEventBridge
@@ -183,7 +184,7 @@ class OrchestrationEngine:
         return True
 
     @staticmethod
-    def _init_ai_gateway() -> Optional[AIGateway]:
+    def _init_ai_gateway() -> AIGateway | None:
         try:
             gw = AIGateway()
             if gw.models:
@@ -197,8 +198,8 @@ class OrchestrationEngine:
 
     async def execute_pipeline(
         self,
-        module_ids: List[str],
-        params: Optional[Dict[str, Any]] = None,
+        module_ids: list[str],
+        params: dict[str, Any] | None = None,
         mode: ExecutionMode = ExecutionMode.RESILIENT,
         name: str = "",
     ) -> PipelineResult:
@@ -223,7 +224,7 @@ class OrchestrationEngine:
             )
 
         # 2. 构建 Pipeline
-        step_map: Dict[str, PipelineStep] = {}
+        step_map: dict[str, PipelineStep] = {}
         for mid in module_ids:
             step = PipelineStep(module_id=mid, params=params or {})
             meta = self._registry.get(mid)
@@ -325,9 +326,9 @@ class OrchestrationEngine:
     async def execute_module(
         self,
         module_id: str,
-        params: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        params: dict[str, Any],
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """执行单个模块（供外部或链式调用）
 
         流程:
@@ -337,7 +338,7 @@ class OrchestrationEngine:
           4. 返回标准化结果
         """
         start = time.time()
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "module_id": module_id,
             "success": False,
             "error": None,
@@ -389,7 +390,7 @@ class OrchestrationEngine:
             result["data"] = output
             result["success"] = True
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             result["error"] = f"模块 '{module_id}' 执行超时"
         except Exception as e:
             result["error"] = f"{type(e).__name__}: {str(e)}"
@@ -403,8 +404,8 @@ class OrchestrationEngine:
     async def _execute_layer(
         self,
         pipeline: Pipeline,
-        step_map: Dict[str, PipelineStep],
-        layer: List[str],
+        step_map: dict[str, PipelineStep],
+        layer: list[str],
     ):
         """执行单层（同层模块并行执行）"""
         semaphore = asyncio.Semaphore(min(len(layer), self._max_parallel))
@@ -442,7 +443,7 @@ class OrchestrationEngine:
                             wait = min(2**retries, 30)
                             logger.warning(f"重试 {step.module_id} ({retries}/{step.max_retries}): 等 {wait}s")
                             await asyncio.sleep(wait)
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         step.error = f"超时 ({step.timeout_seconds}s)"
                         step.retry_count = retries + 1
                         retries += 1
@@ -462,7 +463,7 @@ class OrchestrationEngine:
         tasks = [_run_step(step_map[mid]) for mid in layer if mid in step_map]
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _load_module(self, module_id: str) -> Optional[Any]:
+    async def _load_module(self, module_id: str) -> Any | None:
         """动态加载模块对象（双通道：importlib优先 + 直接spec后备）"""
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -531,7 +532,7 @@ class OrchestrationEngine:
             logger.error(f"加载模块 {module_id} 彻底失败: {e}")
             return None
 
-    async def _ai_match_modules_by_goal(self, goal: str) -> List[str]:
+    async def _ai_match_modules_by_goal(self, goal: str) -> list[str]:
         """AI驱动：用 AIGateway 解析目标 → 匹配模块"""
         if not self._ai_gateway:
             return []
@@ -579,10 +580,10 @@ class OrchestrationEngine:
             logger.debug(f"AI匹配异常: {e}")
         return []
 
-    def _keyword_match_modules_by_goal(self, goal: str) -> List[str]:
+    def _keyword_match_modules_by_goal(self, goal: str) -> list[str]:
         """关键词匹配（AI降级备选）"""
         goal_lower = goal.lower()
-        keyword_map: Dict[str, List[str]] = {
+        keyword_map: dict[str, list[str]] = {
             "github": ["github-scanner", "data-analysis", "feishu-notify"],
             "git": ["github-scanner", "git-ops"],
             "扫描": ["github-scanner"],
@@ -631,7 +632,7 @@ class OrchestrationEngine:
 
     # ── 查询 ──
 
-    def get_history(self, limit: int = 20) -> List[dict]:
+    def get_history(self, limit: int = 20) -> list[dict]:
         return [p.to_dict() for p in self._pipeline_history[-limit:]]
 
     def get_stats(self) -> dict:

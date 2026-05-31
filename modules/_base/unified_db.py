@@ -89,7 +89,7 @@ class UnifiedDBManager:
     替代单个模块各自管理连接的混乱现状。
     """
 
-    _instance: Optional[UnifiedDBManager] = None
+    _instance: UnifiedDBManager | None = None
     _lock = threading.Lock()
 
     def __new__(cls):
@@ -106,12 +106,12 @@ class UnifiedDBManager:
         self._initialized = True
 
         # 连接池 {db_name: [sqlite3.Connection]}
-        self._pools: Dict[str, List[sqlite3.Connection]] = {}
-        self._configs: Dict[str, DBConfig] = {}
-        self._locks: Dict[str, threading.Lock] = {}
+        self._pools: dict[str, list[sqlite3.Connection]] = {}
+        self._configs: dict[str, DBConfig] = {}
+        self._locks: dict[str, threading.Lock] = {}
 
         # 自发现: 扫描 data/ 目录
-        self._auto_discovered: Set[str] = set()
+        self._auto_discovered: set[str] = set()
 
         # 统计
         self._stats = {
@@ -186,13 +186,13 @@ class UnifiedDBManager:
             self._stats["errors"] += 1
             raise
 
-    def query(self, name: str, sql: str, params: tuple = ()) -> List[Dict]:
+    def query(self, name: str, sql: str, params: tuple = ()) -> list[dict]:
         """查询并返回 dict 列表"""
         cursor = self.execute(name, sql, params)
         columns = [desc[0] for desc in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    def query_one(self, name: str, sql: str, params: tuple = ()) -> Optional[Dict]:
+    def query_one(self, name: str, sql: str, params: tuple = ()) -> dict | None:
         """查询单条"""
         rows = self.query(name, sql, params)
         return rows[0] if rows else None
@@ -236,7 +236,7 @@ class UnifiedDBManager:
                     return False
         return True
 
-    def _find_migrations(self, name: str) -> Dict[int, str]:
+    def _find_migrations(self, name: str) -> dict[int, str]:
         """查找迁移文件"""
         migrations = {}
         mig_dir = DATA_DIR / "_migrations" / name
@@ -252,9 +252,9 @@ class UnifiedDBManager:
 
     # ── 自发现 ──
 
-    def auto_discover(self, force: bool = False) -> Dict[str, DBConfig]:
+    def auto_discover(self, force: bool = False) -> dict[str, DBConfig]:
         """扫描 data/ 目录自动发现所有 .db 文件"""
-        discovered: Dict[str, DBConfig] = {}
+        discovered: dict[str, DBConfig] = {}
         for db_file in DATA_DIR.glob("*.db"):
             name = db_file.stem
             if name not in self._configs or force:
@@ -264,7 +264,7 @@ class UnifiedDBManager:
         logger.info(f"自发现数据库: {len(discovered)} 个")
         return discovered
 
-    def auto_migrate_all(self) -> Dict[str, bool]:
+    def auto_migrate_all(self) -> dict[str, bool]:
         """对所有已注册数据库执行迁移"""
         results = {}
         for name in list(self._configs.keys()):
@@ -277,7 +277,7 @@ class UnifiedDBManager:
 
     # ── 健康报告 ──
 
-    def health_report(self, names: Optional[List[str]] = None) -> dict:
+    def health_report(self, names: list[str] | None = None) -> dict:
         """生成数据库健康报告"""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -353,7 +353,7 @@ def unified_execute(db_name: str, sql: str, params: tuple = ()) -> sqlite3.Curso
     return UnifiedDBManager().execute(db_name, sql, params)
 
 
-def unified_query(db_name: str, sql: str, params: tuple = ()) -> List[Dict]:
+def unified_query(db_name: str, sql: str, params: tuple = ()) -> list[dict]:
     """便捷方法：统一查询"""
     return UnifiedDBManager().query(db_name, sql, params)
 

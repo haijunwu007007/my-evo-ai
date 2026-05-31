@@ -74,7 +74,7 @@ class BrowserTask:
     """自动化任务"""
     id: str
     name: str
-    steps: List[Dict] = field(default_factory=list)
+    steps: list[dict] = field(default_factory=list)
     current_step: int = 0
     status: str = "pending"
     result: Any = None
@@ -94,11 +94,11 @@ class ExtractedData:
     url: str = ""
     title: str = ""
     text: str = ""
-    links: List[Dict] = field(default_factory=list)
-    images: List[Dict] = field(default_factory=list)
-    tables: List[List[List[str]]] = field(default_factory=list)
-    forms: List[Dict] = field(default_factory=list)
-    metadata: Dict = field(default_factory=dict)
+    links: list[dict] = field(default_factory=list)
+    images: list[dict] = field(default_factory=list)
+    tables: list[list[list[str]]] = field(default_factory=list)
+    forms: list[dict] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -108,7 +108,7 @@ class ScreenshotResult:
     base64: str = ""
     width: int = 0
     height: int = 0
-    element_rect: Dict = field(default_factory=dict)
+    element_rect: dict = field(default_factory=dict)
 
 
 # ═══════════════════════════════════════════════════
@@ -127,10 +127,10 @@ class PlaywrightEngine:
         self.browser_type = browser_type
         self.status = EngineStatus.CLOSED
         self._downloads_dir = tempfile.mkdtemp(prefix="evo_browser_dl_")
-        self._network_log: List[Dict] = []
+        self._network_log: list[dict] = []
         self._screenshot_dir = tempfile.mkdtemp(prefix="evo_browser_ss_")
 
-    async def launch(self) -> Dict:
+    async def launch(self) -> dict:
         """启动浏览器"""
         try:
             from playwright.async_api import async_playwright
@@ -195,7 +195,7 @@ class PlaywrightEngine:
         self._playwright = None
         self.status = EngineStatus.CLOSED
 
-    async def goto(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000) -> Dict:
+    async def goto(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000) -> dict:
         """导航到URL"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -251,7 +251,7 @@ class PlaywrightEngine:
             logger.error(f"[Browser] 截图失败: {e}")
             return ScreenshotResult()
 
-    async def click(self, selector: str, timeout: int = 5000) -> Dict:
+    async def click(self, selector: str, timeout: int = 5000) -> dict:
         """点击元素"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -261,7 +261,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": f"点击 {selector} 失败: {e}"}
 
-    async def fill(self, selector: str, value: str, timeout: int = 5000) -> Dict:
+    async def fill(self, selector: str, value: str, timeout: int = 5000) -> dict:
         """填写输入框"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -271,7 +271,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": f"填写 {selector} 失败: {e}"}
 
-    async def type_text(self, selector: str, text: str, delay: int = 50) -> Dict:
+    async def type_text(self, selector: str, text: str, delay: int = 50) -> dict:
         """模拟键盘输入（逐字符）"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -281,7 +281,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def select_option(self, selector: str, value: str = None, label: str = None) -> Dict:
+    async def select_option(self, selector: str, value: str = None, label: str = None) -> dict:
         """选择下拉选项"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -296,7 +296,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def hover(self, selector: str) -> Dict:
+    async def hover(self, selector: str) -> dict:
         """悬停"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -306,7 +306,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def press_key(self, key: str = "Enter") -> Dict:
+    async def press_key(self, key: str = "Enter") -> dict:
         """按键"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -316,7 +316,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def wait_for_selector(self, selector: str, timeout: int = 10000) -> Dict:
+    async def wait_for_selector(self, selector: str, timeout: int = 10000) -> dict:
         """等待元素出现"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -336,7 +336,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def get_content(self) -> Dict:
+    async def get_content(self) -> dict:
         """获取页面内容"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -355,7 +355,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def extract_tables(self) -> List[List[List[str]]]:
+    async def extract_tables(self) -> list[list[list[str]]]:
         """提取页面所有表格"""
         if not self._page:
             return []
@@ -378,7 +378,7 @@ class PlaywrightEngine:
         except Exception:
             return []
 
-    async def extract_links(self) -> List[Dict]:
+    async def extract_links(self) -> list[dict]:
         """提取页面所有链接"""
         if not self._page:
             return []
@@ -392,7 +392,7 @@ class PlaywrightEngine:
         except Exception:
             return []
 
-    async def extract_images(self) -> List[Dict]:
+    async def extract_images(self) -> list[dict]:
         """提取页面所有图片"""
         if not self._page:
             return []
@@ -408,7 +408,7 @@ class PlaywrightEngine:
         except Exception:
             return []
 
-    async def extract_forms(self) -> List[Dict]:
+    async def extract_forms(self) -> list[dict]:
         """提取页面表单结构"""
         if not self._page:
             return []
@@ -438,7 +438,7 @@ class PlaywrightEngine:
         except Exception:
             return []
 
-    async def auto_fill_form(self, form_index: int = 0, data: Dict[str, str] = None) -> Dict:
+    async def auto_fill_form(self, form_index: int = 0, data: dict[str, str] = None) -> dict:
         """自动填写表单"""
         if not self._page or not data:
             return {"success": False, "error": "参数无效"}
@@ -481,7 +481,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def get_cookies(self) -> List[Dict]:
+    async def get_cookies(self) -> list[dict]:
         """获取当前Cookie"""
         if not self._context:
             return []
@@ -490,7 +490,7 @@ class PlaywrightEngine:
         except Exception:
             return []
 
-    async def set_cookies(self, cookies: List[Dict]) -> Dict:
+    async def set_cookies(self, cookies: list[dict]) -> dict:
         """设置Cookie"""
         if not self._context:
             return {"success": False, "error": "浏览器未启动"}
@@ -500,11 +500,11 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def network_log(self) -> List[Dict]:
+    async def network_log(self) -> list[dict]:
         """获取网络请求日志"""
         return self._network_log[-100:]
 
-    async def scroll_to(self, position: str = "bottom", selector: str = "") -> Dict:
+    async def scroll_to(self, position: str = "bottom", selector: str = "") -> dict:
         """滚动页面"""
         if not self._page:
             return {"success": False, "error": "浏览器未启动"}
@@ -523,7 +523,7 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def get_page_info(self) -> Dict:
+    async def get_page_info(self) -> dict:
         """获取当前页面状态"""
         if not self._page:
             return {"status": "closed"}
@@ -554,7 +554,7 @@ class SeleniumEngine:
         self.status = EngineStatus.CLOSED
         self._screenshot_dir = tempfile.mkdtemp(prefix="evo_browser_ss_")
 
-    def launch(self) -> Dict:
+    def launch(self) -> dict:
         try:
             from selenium import webdriver
             from selenium.webdriver.chrome.options import Options
@@ -586,7 +586,7 @@ class SeleniumEngine:
         self._driver = None
         self.status = EngineStatus.CLOSED
 
-    def goto(self, url: str, timeout: int = 30) -> Dict:
+    def goto(self, url: str, timeout: int = 30) -> dict:
         if not self._driver:
             return {"success": False, "error": "浏览器未启动"}
         try:
@@ -616,7 +616,7 @@ class SeleniumEngine:
         except Exception as e:
             return ScreenshotResult()
 
-    def click(self, selector: str) -> Dict:
+    def click(self, selector: str) -> dict:
         if not self._driver:
             return {"success": False, "error": "浏览器未启动"}
         try:
@@ -629,7 +629,7 @@ class SeleniumEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def fill(self, selector: str, value: str) -> Dict:
+    def fill(self, selector: str, value: str) -> dict:
         if not self._driver:
             return {"success": False, "error": "浏览器未启动"}
         try:
@@ -641,7 +641,7 @@ class SeleniumEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_content(self) -> Dict:
+    def get_content(self) -> dict:
         if not self._driver:
             return {"success": False, "error": "浏览器未启动"}
         try:
@@ -679,9 +679,9 @@ class BrowserEngine:
         self._engine = None
         self._engine_type = engine_type
         self._headless = headless
-        self._tasks: Dict[str, BrowserTask] = {}
+        self._tasks: dict[str, BrowserTask] = {}
 
-    async def launch(self, engine_type: str = "", headless: bool = None) -> Dict:
+    async def launch(self, engine_type: str = "", headless: bool = None) -> dict:
         """启动浏览器引擎"""
         engine_type = engine_type or self._engine_type
         headless = headless if headless is not None else self._headless
@@ -816,7 +816,7 @@ class BrowserEngine:
         task.finished_at = time.time()
         return task
 
-    async def get_status(self) -> Dict:
+    async def get_status(self) -> dict:
         """获取引擎状态"""
         if not self._engine:
             return {"status": "closed", "engine": "none"}
@@ -832,7 +832,7 @@ class BrowserEngine:
 # 全局单例
 # ═══════════════════════════════════════════════════
 
-_browser_engine: Optional[BrowserEngine] = None
+_browser_engine: BrowserEngine | None = None
 
 
 async def get_browser_engine() -> BrowserEngine:
@@ -843,7 +843,7 @@ async def get_browser_engine() -> BrowserEngine:
     return _browser_engine
 
 
-async def launch_browser(headless: bool = True) -> Dict:
+async def launch_browser(headless: bool = True) -> dict:
     """快速启动浏览器"""
     engine = await get_browser_engine()
     return await engine.launch(headless=headless)

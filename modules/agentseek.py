@@ -119,8 +119,8 @@ class AgentProfile:
     name: str
     description: str
     category: AgentCategory
-    capabilities: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     version: str = "1.0.0"
     author: str = ""
     quality_score: float = 0.0
@@ -133,17 +133,17 @@ class MatchResult:
 
     agent: AgentProfile
     score: float
-    matched_capabilities: List[str]
-    missing_capabilities: List[str]
+    matched_capabilities: list[str]
+    missing_capabilities: list[str]
 
-class AgentMatchingEngine(object):
+class AgentMatchingEngine:
     """Agent匹配引擎 — 多维度相似度计算和排序"""
 
     def __init__(self):
-        self._search_history: List[Dict] = []
+        self._search_history: list[dict] = []
 
     def compute_similarity(
-        self, query_tags: Set[str], agent_tags: Set[str], query_desc: str = "", agent_desc: str = ""
+        self, query_tags: set[str], agent_tags: set[str], query_desc: str = "", agent_desc: str = ""
     ) -> float:
         """计算查询与Agent的多维度相似度（Jaccard + 文本匹配）"""
         if not query_tags and not query_desc:
@@ -161,7 +161,7 @@ class AgentMatchingEngine(object):
             text_score = len(common) / max(len(q_words), 1)
         return round(tag_score * 0.7 + text_score * 0.3, 4)
 
-    def rank_agents(self, query: Dict, candidates: List[Dict]) -> List[Dict]:
+    def rank_agents(self, query: dict, candidates: list[dict]) -> list[dict]:
         """对候选Agent按相似度排序"""
         query_tags = set(query.get("tags", []))
         query_desc = query.get("description", "")
@@ -181,7 +181,7 @@ class AgentMatchingEngine(object):
         )
         return scored[: query.get("limit", 20)]
 
-    def get_search_stats(self) -> Dict:
+    def get_search_stats(self) -> dict:
         return {
             "total_searches": len(self._search_history),
             "avg_results": round(
@@ -189,13 +189,13 @@ class AgentMatchingEngine(object):
             ),
         }
 
-    def build_tf_idf_index(self, agents: List[Dict]) -> Dict[str, Dict[str, float]]:
+    def build_tf_idf_index(self, agents: list[dict]) -> dict[str, dict[str, float]]:
         """构建Agent描述的TF-IDF索引用于语义搜索"""
         from collections import Counter
 
         doc_count = len(agents)
-        word_doc_freq: Dict[str, int] = Counter()
-        doc_tokens: Dict[str, List[str]] = {}
+        word_doc_freq: dict[str, int] = Counter()
+        doc_tokens: dict[str, list[str]] = {}
         for agent in agents:
             desc = agent.get("description", "").lower()
             tags = agent.get("tags", [])
@@ -203,7 +203,7 @@ class AgentMatchingEngine(object):
             doc_tokens[agent.get("agent_id", "")] = tokens
             for word in set(tokens):
                 word_doc_freq[word] += 1
-        index: Dict[str, Dict[str, float]] = {}
+        index: dict[str, dict[str, float]] = {}
         for agent_id, tokens in doc_tokens.items():
             tf = Counter(tokens)
             total = len(tokens)
@@ -214,11 +214,11 @@ class AgentMatchingEngine(object):
             index[agent_id] = scores
         return index
 
-    def semantic_search(self, query: str, tf_idf_index: Dict[str, Dict[str, float]], top_k: int = 10) -> List[Dict]:
+    def semantic_search(self, query: str, tf_idf_index: dict[str, dict[str, float]], top_k: int = 10) -> list[dict]:
         """基于TF-IDF的语义搜索"""
         q_words = query.lower().split()
         q_counter = Counter(q_words)
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for agent_id, word_scores in tf_idf_index.items():
             score = 0.0
             for word, q_count in q_counter.items():
@@ -229,11 +229,11 @@ class AgentMatchingEngine(object):
         ranked = sorted(scores.items(), key=lambda x: -x[1])[:top_k]
         return [{"agent_id": aid, "relevance_score": score} for aid, score in ranked]
 
-    def analyze_ecosystem(self, agents: List[Dict]) -> Dict:
+    def analyze_ecosystem(self, agents: list[dict]) -> dict:
         """分析Agent生态系统 — 能力分布、成熟度、覆盖度"""
-        all_capabilities: Dict[str, int] = {}
+        all_capabilities: dict[str, int] = {}
         quality_scores = []
-        categories: Dict[str, int] = {}
+        categories: dict[str, int] = {}
         for agent in agents:
             for cap in agent.get("tags", agent.get("capabilities", [])):
                 all_capabilities[cap] = all_capabilities.get(cap, 0) + 1
@@ -252,7 +252,7 @@ class AgentMatchingEngine(object):
             "redundancy_coverage": round(coverage, 4),
         }
 
-    def find_compatible_agents(self, agent_id: str, agents: List[Dict], shared_tags_threshold: int = 2) -> List[Dict]:
+    def find_compatible_agents(self, agent_id: str, agents: list[dict], shared_tags_threshold: int = 2) -> list[dict]:
         """发现兼容/可协作的Agent — 基于共享能力和互补性"""
         target = None
         for a in agents:
@@ -283,11 +283,11 @@ class AgentMatchingEngine(object):
         compatible.sort(key=lambda x: -x["compatibility_score"])
         return compatible[:10]
 
-    def build_capability_graph(self, agents: List[Dict]) -> Dict:
+    def build_capability_graph(self, agents: list[dict]) -> dict:
         """构建能力关联图 — 发现能力之间的共现关系"""
         from collections import defaultdict
 
-        co_occurrence: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        co_occurrence: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
         for agent in agents:
             caps = agent.get("tags", agent.get("capabilities", []))
             for i, c1 in enumerate(caps):
@@ -314,13 +314,13 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._agents: Dict[str, AgentProfile] = {}
+        self._agents: dict[str, AgentProfile] = {}
         self._counter: int = 0
         self._matching_engine = AgentMatchingEngine()
 
@@ -394,7 +394,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agentseek_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -523,7 +523,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module_id": self.module_id,
@@ -534,12 +534,12 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     def shutdown(self) -> None:
         pass  # super().shutdown() removed for sync compatibility
 
-    def analyze_agent_ecosystem(self) -> Dict[str, Any]:
+    def analyze_agent_ecosystem(self) -> dict[str, Any]:
         """分析Agent生态系统：能力分布、协作密度、覆盖缺口"""
         registry = self._registry if hasattr(self, "_registry") else {}
         if not registry:
             return {"total_agents": 0, "ecosystem": {}}
-        cap_map: Dict[str, int] = {}
+        cap_map: dict[str, int] = {}
         for agent_id, agent_data in registry.items():
             caps = agent_data.get("capabilities", []) if isinstance(agent_data, dict) else []
             for cap in caps:
@@ -555,7 +555,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "avg_capabilities_per_agent": round(sum(cap_map.values()) / max(total_agents, 1), 1),
         }
 
-    def _search(self, query: str, capabilities: List[str], category: str, limit: int) -> List[Dict]:
+    def _search(self, query: str, capabilities: list[str], category: str, limit: int) -> list[dict]:
         results = []
         q = query.lower()
         for agent in self._agents.values():
@@ -590,7 +590,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.success_count += 1
         return results[:limit]
 
-    def _recommend(self, required_caps: List[str], category: str) -> List[Dict]:
+    def _recommend(self, required_caps: list[str], category: str) -> list[dict]:
         matches = []
         for agent in self._agents.values():
             if category and agent.category.value != category:
@@ -613,7 +613,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.success_count += 1
         return matches
 
-    def _advanced_search(self, query: Dict) -> List[Dict]:
+    def _advanced_search(self, query: dict) -> list[dict]:
         """使用匹配引擎的高级搜索"""
         candidates = [
             {
@@ -627,7 +627,7 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         ]
         return self._matching_engine.rank_agents(query, candidates)
 
-    def _search_stats(self) -> Dict:
+    def _search_stats(self) -> dict:
         """搜索统计"""
         return {
             "total_agents": len(self._agents),
@@ -635,8 +635,8 @@ class AgentseekManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "engine_stats": self._matching_engine.get_search_stats(),
         }
 
-    def _count_by_category(self) -> Dict[str, int]:
-        counts: Dict[str, int] = {}
+    def _count_by_category(self) -> dict[str, int]:
+        counts: dict[str, int] = {}
         for a in self._agents.values():
             cat = a.category.value if hasattr(a.category, "value") else str(a.category)
             counts[cat] = counts.get(cat, 0) + 1

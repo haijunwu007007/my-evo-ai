@@ -109,7 +109,7 @@ import hashlib
 
 # 记忆类型枚举
 
-class SecondBrainAnalyzer(object):
+class SecondBrainAnalyzer:
     """second_brain 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -325,17 +325,17 @@ class InvalidMemoryTypeError(SecondBrainError):
 class Memory:
     """记忆条目"""
 
-    id: Optional[int] = None
+    id: int | None = None
     type: str = ""  # 记忆类型
     content: str = ""  # 记忆内容
     confidence: float = 0.5  # 置信度 0-1
     importance: int = 5  # 重要性 1-10
     persistence: int = 3  # 持久性 1-5
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
     evidence_count: int = 1  # 证据计数
     source: str = "manual"  # 来源
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.created_at is None:
@@ -343,7 +343,7 @@ class Memory:
         if self.updated_at is None:
             self.updated_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "id": self.id,
@@ -360,7 +360,7 @@ class Memory:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "Memory":
+    def from_dict(cls, data: dict) -> Memory:
         """从字典创建"""
         if "created_at" in data and isinstance(data["created_at"], str):
             data["created_at"] = datetime.fromisoformat(data["created_at"])
@@ -385,17 +385,17 @@ class MemoryStats:
     """记忆统计"""
 
     total: int = 0
-    by_type: Dict[str, int] = field(default_factory=dict)
+    by_type: dict[str, int] = field(default_factory=dict)
     avg_confidence: float = 0.0
     high_confidence_count: int = 0
-    last_extraction: Optional[datetime] = None
-    last_consolidation: Optional[datetime] = None
+    last_extraction: datetime | None = None
+    last_consolidation: datetime | None = None
 
 @dataclass
 class ExtractionResult:
     """提取结果"""
 
-    facts: List[Memory]
+    facts: list[Memory]
     processed_text: str
     tokens_used: int
 
@@ -436,7 +436,7 @@ class SecondBrain:
     ```
     """
 
-    def __init__(self, db_path: Optional[str] = None, jsonl_dir: Optional[str] = None, auto_enabled: bool = True):
+    def __init__(self, db_path: str | None = None, jsonl_dir: str | None = None, auto_enabled: bool = True):
         """
         初始化第二大脑
 
@@ -454,8 +454,8 @@ class SecondBrain:
 
         # 自动功能
         self.auto_enabled = auto_enabled
-        self.last_extraction: Optional[datetime] = None
-        self.last_consolidation: Optional[datetime] = None
+        self.last_extraction: datetime | None = None
+        self.last_consolidation: datetime | None = None
 
         # 线程锁
         self._lock = threading.Lock()
@@ -626,7 +626,7 @@ class SecondBrain:
 
         return min(0.95, base)
 
-    def save_memories(self, memories: List[Memory]) -> List[int]:
+    def save_memories(self, memories: list[Memory]) -> list[int]:
         """
         保存记忆到数据库
 
@@ -691,7 +691,7 @@ class SecondBrain:
         self.last_extraction = datetime.now()
         return ids
 
-    def _find_similar(self, cursor, memory: Memory) -> Optional[sqlite3.Row]:
+    def _find_similar(self, cursor, memory: Memory) -> sqlite3.Row | None:
         """查找相似的记忆"""
         # 使用简单的关键词匹配
         words = set(re.findall(r"\w+", memory.content.lower()))
@@ -739,10 +739,10 @@ class SecondBrain:
     def recall(
         self,
         query: str,
-        memory_types: Optional[List[str]] = None,
+        memory_types: list[str] | None = None,
         limit: int = MAX_RECALL_MEMORIES,
         char_budget: int = RECALL_CHAR_BUDGET,
-    ) -> List[Memory]:
+    ) -> list[Memory]:
         """
         召回相关记忆
 
@@ -820,7 +820,7 @@ class SecondBrain:
 
         return memories
 
-    def get_memories_by_type(self, memory_type: str, limit: int = 100) -> List[Memory]:
+    def get_memories_by_type(self, memory_type: str, limit: int = 100) -> list[Memory]:
         """获取指定类型的所有记忆"""
         if memory_type not in MEMORY_TYPES:
             raise InvalidMemoryTypeError(f"无效的记忆类型: {memory_type}")
@@ -868,7 +868,7 @@ class SecondBrain:
         memory_type: str,
         confidence: float = 0.7,
         importance: int = 5,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
     ) -> int:
         """
         手动添加记忆
@@ -902,9 +902,9 @@ class SecondBrain:
     def update_memory(
         self,
         memory_id: int,
-        content: Optional[str] = None,
-        confidence: Optional[float] = None,
-        importance: Optional[int] = None,
+        content: str | None = None,
+        confidence: float | None = None,
+        importance: int | None = None,
     ) -> bool:
         """更新记忆"""
         with self._lock:
@@ -997,7 +997,7 @@ class SecondBrain:
 
         return winner
 
-    def consolidate(self) -> Dict[str, int]:
+    def consolidate(self) -> dict[str, int]:
         """
         整合记忆
 
@@ -1098,7 +1098,7 @@ class SecondBrain:
 
         return stats
 
-    def prune(self) -> Dict[str, int]:
+    def prune(self) -> dict[str, int]:
         """
         修剪记忆
 
@@ -1183,11 +1183,11 @@ class SecondBrain:
 
         return stats
 
-    def search(self, query: str, memory_type: Optional[str] = None, min_confidence: float = 0.0) -> List[Memory]:
+    def search(self, query: str, memory_type: str | None = None, min_confidence: float = 0.0) -> list[Memory]:
         """搜索记忆"""
         return self.recall(query, [memory_type] if memory_type else None, char_budget=5000)
 
-    def clear(self, memory_type: Optional[str] = None, confirm: bool = False):
+    def clear(self, memory_type: str | None = None, confirm: bool = False):
         """
         清除记忆
 
@@ -1293,7 +1293,7 @@ class SecondBrain:
         # 实际应用中应使用调度器
         pass
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         stats = self.get_stats()
         return {
@@ -1304,7 +1304,7 @@ class SecondBrain:
             "last_consolidation": stats.last_consolidation.isoformat() if stats.last_consolidation else None,
         }
 
-    def to_context_string(self, memories: List[Memory]) -> str:
+    def to_context_string(self, memories: list[Memory]) -> str:
         """
         将记忆转换为上下文字符串
 
@@ -1360,7 +1360,7 @@ def remember(content: str, memory_type: str = "preference", **kwargs) -> int:
     brain = create_default_brain()
     return brain.add_memory(content, memory_type, **kwargs)
 
-def recall(query: str, memory_types: Optional[List[str]] = None) -> str:
+def recall(query: str, memory_types: list[str] | None = None) -> str:
     """
     快速召回记忆
 

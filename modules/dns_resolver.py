@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 | DNS解析器引擎
@@ -99,7 +98,8 @@ import threading
 import random
 import traceback
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -144,7 +144,7 @@ class DNSRecord:
     priority: int = 0
     weight: int = 0
     port: int = 0
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     fetched_at: float = field(default_factory=time.time)
     expires_at: float = 0
 
@@ -161,7 +161,7 @@ class DNSCacheEntry:
     """DNS缓存条目"""
 
     key: str
-    records: List[DNSRecord]
+    records: list[DNSRecord]
     created_at: float = field(default_factory=time.time)
     hit_count: int = 0
     last_accessed: float = field(default_factory=time.time)
@@ -199,7 +199,7 @@ class DNSQueryResult:
 
     domain: str
     record_type: RecordType
-    records: List[DNSRecord] = field(default_factory=list)
+    records: list[DNSRecord] = field(default_factory=list)
     server_used: str = ""
     from_cache: bool = False
     duration_ms: float = 0
@@ -223,7 +223,7 @@ class LRUCache:
         self._cache: OrderedDict[str, DNSCacheEntry] = OrderedDict()
         self._lock = threading.Lock()
 
-    def get(self, key: str) -> Optional[DNSCacheEntry]:
+    def get(self, key: str) -> DNSCacheEntry | None:
         with self._lock:
             entry = self._cache.get(key)
             if entry:
@@ -267,7 +267,7 @@ class LRUCache:
         with self._lock:
             return len(self._cache)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             total_hits = sum(e.hit_count for e in self._cache.values())
             entries = list(self._cache.values())
@@ -306,7 +306,7 @@ class DNSPacketBuilder:
         return header + question
 
     @staticmethod
-    def parse_response(data: bytes, domain: str) -> Tuple[int, List[DNSRecord]]:
+    def parse_response(data: bytes, domain: str) -> tuple[int, list[DNSRecord]]:
         """解析DNS响应报文（简化实现）"""
         if len(data) < 12:
             return 1, []
@@ -399,7 +399,7 @@ class DNSPacketBuilder:
         return ".".join(labels)
 
     @staticmethod
-    def _parse_name_pointer(data: bytes, offset: int) -> Tuple[str, int]:
+    def _parse_name_pointer(data: bytes, offset: int) -> tuple[str, int]:
         labels = []
         while True:
             if offset >= len(data):
@@ -422,7 +422,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__(module_id="dns_resolver", module_name="DNS解析器引擎")
-        self._servers: List[DNSServer] = []
+        self._servers: list[DNSServer] = []
         self._cache = LRUCache(max_size=50000)
         self._lb_strategy = LoadBalanceStrategy.LEAST_LATENCY
         self._rr_index = 0
@@ -430,7 +430,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._executor = ThreadPoolExecutor(max_workers=10)
         self._health_check_interval = 30
         self._running = False
-        self._health_thread: Optional[threading.Thread] = None
+        self._health_thread: threading.Thread | None = None
         self._stats = {
             "total_queries": 0,
             "cache_hits": 0,
@@ -522,32 +522,32 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 duration_ms=(time.time() - start) * 1000,
             )
 
-    def resolve_a(self, domain: str) -> List[str]:
+    def resolve_a(self, domain: str) -> list[str]:
         """解析A记录"""
         result = self.resolve(domain, RecordType.A)
         return [r.value for r in result.records if r.value]
 
-    def resolve_aaaa(self, domain: str) -> List[str]:
+    def resolve_aaaa(self, domain: str) -> list[str]:
         """解析AAAA记录"""
         result = self.resolve(domain, RecordType.AAAA)
         return [r.value for r in result.records if r.value]
 
-    def resolve_cname(self, domain: str) -> List[str]:
+    def resolve_cname(self, domain: str) -> list[str]:
         """解析CNAME记录"""
         result = self.resolve(domain, RecordType.CNAME)
         return [r.value for r in result.records if r.value]
 
-    def resolve_mx(self, domain: str) -> List[Tuple[str, int]]:
+    def resolve_mx(self, domain: str) -> list[tuple[str, int]]:
         """解析MX记录"""
         result = self.resolve(domain, RecordType.MX)
         return [(r.value, r.priority) for r in result.records if r.value]
 
-    def resolve_txt(self, domain: str) -> List[str]:
+    def resolve_txt(self, domain: str) -> list[str]:
         """解析TXT记录"""
         result = self.resolve(domain, RecordType.TXT)
         return [r.value for r in result.records if r.value]
 
-    def resolve_all(self, domain: str) -> Dict[str, List[str]]:
+    def resolve_all(self, domain: str) -> dict[str, list[str]]:
         """解析所有记录类型"""
         result = {}
         for rtype in [RecordType.A, RecordType.AAAA, RecordType.CNAME, RecordType.MX, RecordType.TXT]:
@@ -556,7 +556,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 result[rtype.name] = [r.value for r in records.records if r.value]
         return result
 
-    def batch_resolve(self, domains: List[str], record_type: RecordType = RecordType.A) -> Dict[str, DNSQueryResult]:
+    def batch_resolve(self, domains: list[str], record_type: RecordType = RecordType.A) -> dict[str, DNSQueryResult]:
         """批量解析"""
         results = {}
         futures = {}
@@ -570,7 +570,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results[domain] = DNSQueryResult(domain=domain, record_type=record_type, error=str(e))
         return results
 
-    def reverse_lookup(self, ip_address: str) -> List[str]:
+    def reverse_lookup(self, ip_address: str) -> list[str]:
         """反向DNS查询"""
         try:
             addr = socket.inet_pton(socket.AF_INET, ip_address)
@@ -611,7 +611,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return True
         return False
 
-    def list_servers(self) -> List[Dict]:
+    def list_servers(self) -> list[dict]:
         """列出所有DNS服务器"""
         return [
             {
@@ -629,7 +629,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for s in self._servers
         ]
 
-    def _select_server(self) -> Optional[DNSServer]:
+    def _select_server(self) -> DNSServer | None:
         """选择DNS服务器"""
         available = [s for s in self._servers if s.enabled and s.health != DNSServerHealth.UNHEALTHY]
         if not available:
@@ -652,7 +652,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         else:  # RANDOM
             return (available)[0]
 
-    def _do_resolve(self, server: DNSServer, domain: str, record_type: RecordType) -> List[DNSRecord]:
+    def _do_resolve(self, server: DNSServer, domain: str, record_type: RecordType) -> list[DNSRecord]:
         """执行DNS查询"""
         start = time.time()
         tid = int((__import__('time').time()*1000)%(65535-1+1))+1
@@ -672,7 +672,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 latency = (time.time() - start) * 1000
                 server.avg_latency_ms = server.avg_latency_ms * 0.9 + latency * 0.1
                 return records
-            except socket.timeout:
+            except TimeoutError:
                 server.total_errors += 1
                 return []
             except Exception as e:
@@ -715,7 +715,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """清空缓存"""
         return self._cache.clear()
 
-    def get_cache_stats(self) -> Dict:
+    def get_cache_stats(self) -> dict:
         return self._cache.get_stats()
 
     # ─────────────────────── EnterpriseModule接口 ───────────────────────
@@ -726,7 +726,7 @@ class DnsResolver(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._health_thread.start()
         self._logger.info("DNS解析器初始化完成")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — DNS解析路由"""
         _ = self.trace("execute")
         metrics_collector.counter("dns_resolver_ops_total", labels={"action": action})

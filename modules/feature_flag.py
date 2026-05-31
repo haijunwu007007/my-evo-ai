@@ -90,7 +90,8 @@ import json
 import hashlib
 from core.logging_config import get_logger
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -111,7 +112,7 @@ logger = get_logger("evo.feature_flag")
 # 数据模型
 # ============================================================================
 
-class FeatureFlagAnalyzer(object):
+class FeatureFlagAnalyzer:
     """feature flag 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -306,7 +307,7 @@ class ServingRule:
     percentage: float = 50.0
     percentage_key: str = "user_id"  # 粘性分配依据
     # User list
-    user_list: List[str] = field(default_factory=list)
+    user_list: list[str] = field(default_factory=list)
     # Attribute
     attribute_name: str = ""
     attribute_operator: str = "eq"  # eq/ne/gt/lt/in/contains
@@ -315,7 +316,7 @@ class ServingRule:
     min_version: str = ""
     max_version: str = ""
     # Variant
-    variations: Dict[str, float] = field(default_factory=dict)  # {"A": 50, "B": 50}
+    variations: dict[str, float] = field(default_factory=dict)  # {"A": 50, "B": 50}
     # 变体默认值
     default_variation: str = "A"
 
@@ -330,8 +331,8 @@ class FeatureFlag:
     status: FlagStatus = FlagStatus.DISABLED
     variation_type: VariationType = VariationType.BOOL
     default_value: Any = False
-    rules: List[ServingRule] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    rules: list[ServingRule] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_by: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -339,7 +340,7 @@ class FeatureFlag:
     evaluation_count: int = 0
     true_count: int = 0
     false_count: int = 0
-    variation_counts: Dict[str, int] = field(default_factory=dict)
+    variation_counts: dict[str, int] = field(default_factory=dict)
 
 @dataclass
 class EvaluationContext:
@@ -353,7 +354,7 @@ class EvaluationContext:
     device_type: str = ""
     app_version: str = ""
     platform: str = ""
-    custom_attributes: Dict[str, Any] = field(default_factory=dict)
+    custom_attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EvaluationResult:
@@ -383,7 +384,7 @@ class FlagSnapshot:
 # FeatureFlag 主类
 # ============================================================================
 
-class FeatureFlagEvaluator(object):
+class FeatureFlagEvaluator:
     """评估特性开关效果和灰度发布策略
 
     为feature_flag模块提供深度分析能力，包括数据聚合、
@@ -454,15 +455,15 @@ class FeatureFlag(EnterpriseModule):
       - 标签管理
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # Flag存储
-        self._flags: Dict[str, FeatureFlag] = {}  # flag_key -> FeatureFlag
-        self._flags_by_id: Dict[str, FeatureFlag] = {}
+        self._flags: dict[str, FeatureFlag] = {}  # flag_key -> FeatureFlag
+        self._flags_by_id: dict[str, FeatureFlag] = {}
         # 变更历史
-        self._snapshots: List[FlagSnapshot] = []
+        self._snapshots: list[FlagSnapshot] = []
         # 统计
         self._ff_stats = {
             "flags_total": 0,
@@ -543,7 +544,7 @@ class FeatureFlag(EnterpriseModule):
     # Flag管理
     # ----------------------------------------------------------------
 
-    def create_flag(self, cfg: Dict) -> Result:
+    def create_flag(self, cfg: dict) -> Result:
         key = cfg.get("flag_key", cfg.get("key", ""))
         if not key:
             return Result(success=False, error="flag_key不能为空")
@@ -571,10 +572,10 @@ class FeatureFlag(EnterpriseModule):
         self,
         flag_key: str,
         *,
-        status: Optional[str] = None,
+        status: str | None = None,
         default_value: Any = None,
-        description: Optional[str] = None,
-        rules: Optional[List[Dict]] = None,
+        description: str | None = None,
+        rules: list[dict] | None = None,
         changed_by: str = "",
     ) -> Result:
         flag = self._flags.get(flag_key)
@@ -613,7 +614,7 @@ class FeatureFlag(EnterpriseModule):
         self._update_stats()
         return Result(success=True)
 
-    def _build_rule(self, cfg: Dict) -> ServingRule:
+    def _build_rule(self, cfg: dict) -> ServingRule:
         return ServingRule(
             rule_type=ServingRuleType(cfg.get("type", "boolean")),
             priority=cfg.get("priority", 100),
@@ -633,7 +634,7 @@ class FeatureFlag(EnterpriseModule):
     # ----------------------------------------------------------------
 
     def is_enabled(
-        self, flag_key: str, *, context: Optional[EvaluationContext] = None, user_id: str = "", **kwargs
+        self, flag_key: str, *, context: EvaluationContext | None = None, user_id: str = "", **kwargs
     ) -> bool:
         """判断是否开启"""
         ctx = context or EvaluationContext(user_id=user_id)
@@ -643,7 +644,7 @@ class FeatureFlag(EnterpriseModule):
         result = self.evaluate(flag_key, ctx)
         return bool(result.value)
 
-    def evaluate(self, flag_key: str, context: Optional[EvaluationContext] = None) -> EvaluationResult:
+    def evaluate(self, flag_key: str, context: EvaluationContext | None = None) -> EvaluationResult:
         """评估Flag值"""
         self._ff_stats["evaluations_total"] += 1
         empty_result = EvaluationResult(flag_key=flag_key, reason="ERROR", value=None)
@@ -781,10 +782,10 @@ class FeatureFlag(EnterpriseModule):
         self._ff_stats["flags_enabled"] = sum(1 for f in self._flags.values() if f.status == FlagStatus.ENABLED)
         self._ff_stats["rules_total"] = sum(len(f.rules) for f in self._flags.values())
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._ff_stats, "module_stats": self.stats.to_dict()}
 
-    def list_flags(self, tag: Optional[str] = None, status: Optional[str] = None) -> List[Dict]:
+    def list_flags(self, tag: str | None = None, status: str | None = None) -> list[dict]:
         result = []
         for flag in self._flags.values():
             if tag and tag not in flag.tags:
@@ -806,7 +807,7 @@ class FeatureFlag(EnterpriseModule):
             )
         return result
 
-    def get_flag_detail(self, flag_key: str) -> Optional[Dict]:
+    def get_flag_detail(self, flag_key: str) -> dict | None:
         flag = self._flags.get(flag_key)
         if not flag:
             return None
@@ -840,7 +841,7 @@ class FeatureFlag(EnterpriseModule):
             "updated_at": flag.updated_at,
         }
 
-    def get_change_history(self, flag_key: str, limit: int = 20) -> List[Dict]:
+    def get_change_history(self, flag_key: str, limit: int = 20) -> list[dict]:
         return [
             {
                 "snapshot_id": s.snapshot_id,

@@ -90,7 +90,8 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -121,20 +122,20 @@ class ApiResource:
 
     resource_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     path_pattern: str = ""
-    methods: List[str] = field(default_factory=lambda: ["GET"])
-    required_scopes: List[str] = field(default_factory=list)
-    required_permissions: List[str] = field(default_factory=list)
-    required_roles: List[str] = field(default_factory=list)
+    methods: list[str] = field(default_factory=lambda: ["GET"])
+    required_scopes: list[str] = field(default_factory=list)
+    required_permissions: list[str] = field(default_factory=list)
+    required_roles: list[str] = field(default_factory=list)
     rate_limit_rpm: int = 0  # 0=不限
     rate_limit_rph: int = 0
     auth_required: bool = True
     auth_scheme: AuthScheme = AuthScheme.BEARER
     cors_enabled: bool = True
-    ip_whitelist: List[str] = field(default_factory=list)
-    ip_blacklist: List[str] = field(default_factory=list)
+    ip_whitelist: list[str] = field(default_factory=list)
+    ip_blacklist: list[str] = field(default_factory=list)
     description: str = ""
     enabled: bool = True
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     request_count: int = 0
     error_count: int = 0
     avg_latency_ms: float = 0.0
@@ -147,13 +148,13 @@ class ApiKey:
     key_value: str = field(default_factory=lambda: f"evo_{uuid.uuid4().hex}")
     name: str = ""
     user_id: str = ""
-    scopes: List[str] = field(default_factory=list)
+    scopes: list[str] = field(default_factory=list)
     rate_limit_rpm: int = 0
-    allowed_ips: List[str] = field(default_factory=list)
+    allowed_ips: list[str] = field(default_factory=list)
     enabled: bool = True
-    expires_at: Optional[str] = None
+    expires_at: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    last_used: Optional[str] = None
+    last_used: str | None = None
     request_count: int = 0
 
 @dataclass
@@ -161,8 +162,8 @@ class RolePermission:
     """角色权限映射"""
 
     role_name: str
-    permissions: List[str] = field(default_factory=list)
-    scopes: List[str] = field(default_factory=list)
+    permissions: list[str] = field(default_factory=list)
+    scopes: list[str] = field(default_factory=list)
     description: str = ""
 
 @dataclass
@@ -172,18 +173,18 @@ class ResourceRequest:
     request_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
     method: str = "GET"
     path: str = ""
-    headers: Dict[str, str] = field(default_factory=dict)
-    query_params: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
+    query_params: dict[str, str] = field(default_factory=dict)
     body: Any = None
     client_ip: str = ""
     user_agent: str = ""
-    auth_scheme: Optional[AuthScheme] = None
-    token: Optional[str] = None
-    token_scopes: List[str] = field(default_factory=list)
-    user_id: Optional[str] = None
-    roles: List[str] = field(default_factory=list)
-    permissions: List[str] = field(default_factory=list)
-    api_key_id: Optional[str] = None
+    auth_scheme: AuthScheme | None = None
+    token: str | None = None
+    token_scopes: list[str] = field(default_factory=list)
+    user_id: str | None = None
+    roles: list[str] = field(default_factory=list)
+    permissions: list[str] = field(default_factory=list)
+    api_key_id: str | None = None
     trace_id: str = field(default_factory=lambda: str(uuid.uuid4())[:16])
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -194,10 +195,10 @@ class ResourceResponse:
     request_id: str = ""
     status_code: int = 200
     body: Any = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     latency_ms: float = 0.0
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
+    error_code: str | None = None
+    error_message: str | None = None
     trace_id: str = ""
     rate_limited: bool = False
 
@@ -205,13 +206,13 @@ class ResourceResponse:
 # ResourceServer 主类
 # ============================================================================
 
-class ResourceAccessAnalyzer(object):
+class ResourceAccessAnalyzer:
     """资源访问分析引擎：访问模式分析、异常检测、权限热力图"""
 
     def __init__(self):
-        self._access_log: List[Dict] = []
-        self._resource_frequency: Dict[str, int] = {}
-        self._user_access_patterns: Dict[str, List[str]] = {}
+        self._access_log: list[dict] = []
+        self._resource_frequency: dict[str, int] = {}
+        self._user_access_patterns: dict[str, list[str]] = {}
 
     def record_access(self, user_id: str, resource: str, method: str = "GET", granted: bool = True) -> None:
         """记录资源访问事件"""
@@ -222,7 +223,7 @@ class ResourceAccessAnalyzer(object):
         self._resource_frequency[resource] = self._resource_frequency.get(resource, 0) + 1
         self._user_access_patterns.setdefault(user_id, []).append(resource)
 
-    def get_hot_resources(self, top_n: int = 10) -> List[Dict]:
+    def get_hot_resources(self, top_n: int = 10) -> list[dict]:
         """获取访问量最高的资源"""
         sorted_res = sorted(self._resource_frequency.items(), key=lambda x: -x[1])
         return [{"resource": r, "hits": c} for r, c in sorted_res[:top_n]]
@@ -255,33 +256,33 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 标准化错误响应
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # API资源表
-        self._resources: Dict[str, ApiResource] = {}
+        self._resources: dict[str, ApiResource] = {}
         # 排序资源（长路径优先）
-        self._sorted_resources: List[ApiResource] = []
+        self._sorted_resources: list[ApiResource] = []
         # API Key注册表
-        self._api_keys: Dict[str, ApiKey] = {}  # key_value -> ApiKey
-        self._api_keys_by_id: Dict[str, ApiKey] = {}  # key_id -> ApiKey
+        self._api_keys: dict[str, ApiKey] = {}  # key_value -> ApiKey
+        self._api_keys_by_id: dict[str, ApiKey] = {}  # key_id -> ApiKey
         # 角色权限映射
-        self._role_permissions: Dict[str, RolePermission] = {}
+        self._role_permissions: dict[str, RolePermission] = {}
         # Token验证器
-        self._token_validator: Optional[Callable] = None  # (token) -> (valid, user_id, scopes)
+        self._token_validator: Callable | None = None  # (token) -> (valid, user_id, scopes)
         # Introspection端点
-        self._introspection_url: Optional[str] = self.config.get("introspection_url")
+        self._introspection_url: str | None = self.config.get("introspection_url")
         self._introspection_client_id: str = self.config.get("introspection_client_id", "")
         self._introspection_client_secret: str = self.config.get("introspection_client_secret", "")
         # Token缓存（避免重复Introspection）
-        self._token_cache: Dict[str, Tuple[float, Dict]] = {}
+        self._token_cache: dict[str, tuple[float, dict]] = {}
         self._token_cache_ttl = self.config.get("token_cache_ttl", 300.0)
         # 审计日志
-        self._access_log: List[Dict] = []
+        self._access_log: list[dict] = []
         self._access_log_max = 100000
         # 限流计数器
-        self._rate_counters: Dict[str, List[float]] = defaultdict(list)
+        self._rate_counters: dict[str, list[float]] = defaultdict(list)
         # 统计
         self._rs_stats = {
             "total_requests": 0,
@@ -419,7 +420,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 资源注册
     # ----------------------------------------------------------------
 
-    def register_resource(self, resource_cfg: Dict[str, Any]) -> Result:
+    def register_resource(self, resource_cfg: dict[str, Any]) -> Result:
         """注册API资源"""
         metrics_collector.counter("resource_ops_total")
 
@@ -451,7 +452,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # ----------------------------------------------------------------
 
     def create_api_key(
-        self, name: str, user_id: str = "", scopes: Optional[List[str]] = None, rate_limit_rpm: int = 0
+        self, name: str, user_id: str = "", scopes: list[str] | None = None, rate_limit_rpm: int = 0
     ) -> Result:
         key = ApiKey(name=name, user_id=user_id, scopes=scopes or [], rate_limit_rpm=rate_limit_rpm)
         self._api_keys[key.key_value] = key
@@ -466,7 +467,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         key.enabled = False
         return Result(success=True)
 
-    def list_api_keys(self, user_id: Optional[str] = None) -> List[Dict]:
+    def list_api_keys(self, user_id: str | None = None) -> list[dict]:
         result = []
         for key in self._api_keys.values():
             if user_id and key.user_id != user_id:
@@ -495,10 +496,10 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._role_permissions[role.role_name] = role
         return Result(success=True)
 
-    def get_role_permissions(self, role_name: str) -> Optional[RolePermission]:
+    def get_role_permissions(self, role_name: str) -> RolePermission | None:
         return self._role_permissions.get(role_name)
 
-    def resolve_permissions(self, roles: List[str]) -> List[str]:
+    def resolve_permissions(self, roles: list[str]) -> list[str]:
         """解析角色对应的权限列表"""
         perms = set()
         for role_name in roles:
@@ -507,7 +508,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 perms.update(role.permissions)
         return list(perms)
 
-    def resolve_scopes(self, roles: List[str]) -> List[str]:
+    def resolve_scopes(self, roles: list[str]) -> list[str]:
         """解析角色对应的Scope列表"""
         scopes = set()
         for role_name in roles:
@@ -524,7 +525,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """设置Token验证器 (token) -> (valid, user_id, scopes)"""
         self._token_validator = validator
 
-    def validate_token(self, token: str) -> Tuple[bool, Optional[str], List[str]]:
+    def validate_token(self, token: str) -> tuple[bool, str | None, list[str]]:
         """验证Token"""
         # 检查缓存
         cached = self._token_cache.get(token)
@@ -627,7 +628,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 内部方法
     # ----------------------------------------------------------------
 
-    def _match_resource(self, method: str, path: str) -> Optional[ApiResource]:
+    def _match_resource(self, method: str, path: str) -> ApiResource | None:
         for res in self._sorted_resources:
             if not res.enabled:
                 continue
@@ -733,7 +734,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return True
 
     def _error_response(
-        self, request: ResourceRequest, status: int, error_code: str, message: str, extra_headers: Optional[Dict] = None
+        self, request: ResourceRequest, status: int, error_code: str, message: str, extra_headers: dict | None = None
     ) -> ResourceResponse:
         return ResourceResponse(
             request_id=request.request_id,
@@ -781,7 +782,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if len(self._access_log) > self._access_log_max:
             self._access_log = self._access_log[-self._access_log_max // 2 :]
 
-    def get_access_log(self, user_id: Optional[str] = None, limit: int = 100) -> List[Dict]:
+    def get_access_log(self, user_id: str | None = None, limit: int = 100) -> list[dict]:
         result = self._access_log
         if user_id:
             result = [e for e in result if e.get("user_id") == user_id]
@@ -791,7 +792,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             **self._rs_stats,
             "resources_count": len(self._resources),
@@ -801,7 +802,7 @@ class ResourceServer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def list_resources(self) -> List[Dict]:
+    def list_resources(self) -> list[dict]:
         return [
             {
                 "id": r.resource_id,

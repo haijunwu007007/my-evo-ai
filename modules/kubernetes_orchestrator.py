@@ -93,7 +93,8 @@ import asyncio
 import json
 from core.logging_config import get_logger
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -163,16 +164,16 @@ class ContainerSpec:
     name: str = ""
     image: str = ""
     tag: str = "latest"
-    ports: List[Dict[str, int]] = field(default_factory=list)
-    env: Dict[str, str] = field(default_factory=dict)
-    env_from: List[str] = field(default_factory=list)
-    resources_requests: Dict[str, str] = field(default_factory=dict)
-    resources_limits: Dict[str, str] = field(default_factory=dict)
-    volume_mounts: List[Dict[str, str]] = field(default_factory=list)
-    liveness_probe: Optional[Dict] = None
-    readiness_probe: Optional[Dict] = None
-    command: Optional[List[str]] = None
-    args: Optional[List[str]] = None
+    ports: list[dict[str, int]] = field(default_factory=list)
+    env: dict[str, str] = field(default_factory=dict)
+    env_from: list[str] = field(default_factory=list)
+    resources_requests: dict[str, str] = field(default_factory=dict)
+    resources_limits: dict[str, str] = field(default_factory=dict)
+    volume_mounts: list[dict[str, str]] = field(default_factory=list)
+    liveness_probe: dict | None = None
+    readiness_probe: dict | None = None
+    command: list[str] | None = None
+    args: list[str] | None = None
     working_dir: str = ""
     image_pull_policy: str = "IfNotPresent"
 
@@ -183,18 +184,18 @@ class DeploymentSpec:
     name: str = ""
     namespace: str = "default"
     replicas: int = 3
-    containers: List[ContainerSpec] = field(default_factory=list)
+    containers: list[ContainerSpec] = field(default_factory=list)
     strategy: DeploymentStrategy = DeploymentStrategy.ROLLING_UPDATE
     max_surge: str = "25%"
     max_unavailable: str = "25%"
     min_ready_seconds: int = 0
     revision_history_limit: int = 10
-    labels: Dict[str, str] = field(default_factory=dict)
-    annotations: Dict[str, str] = field(default_factory=dict)
-    node_selector: Dict[str, str] = field(default_factory=dict)
-    tolerations: List[Dict] = field(default_factory=list)
-    affinity: Optional[Dict] = None
-    volumes: List[Dict] = field(default_factory=list)
+    labels: dict[str, str] = field(default_factory=dict)
+    annotations: dict[str, str] = field(default_factory=dict)
+    node_selector: dict[str, str] = field(default_factory=dict)
+    tolerations: list[dict] = field(default_factory=list)
+    affinity: dict | None = None
+    volumes: list[dict] = field(default_factory=list)
     service_account_name: str = ""
 
 @dataclass
@@ -204,9 +205,9 @@ class ServiceSpec:
     name: str = ""
     namespace: str = "default"
     service_type: ServiceType = ServiceType.CLUSTER_IP
-    selector: Dict[str, str] = field(default_factory=dict)
-    ports: List[Dict[str, Any]] = field(default_factory=list)
-    labels: Dict[str, str] = field(default_factory=dict)
+    selector: dict[str, str] = field(default_factory=dict)
+    ports: list[dict[str, Any]] = field(default_factory=list)
+    labels: dict[str, str] = field(default_factory=dict)
     external_name: str = ""
 
 @dataclass
@@ -216,10 +217,10 @@ class IngressSpec:
     name: str = ""
     namespace: str = "default"
     host: str = ""
-    paths: List[Dict[str, str]] = field(default_factory=list)
+    paths: list[dict[str, str]] = field(default_factory=list)
     tls_enabled: bool = False
     tls_secret: str = ""
-    annotations: Dict[str, str] = field(default_factory=dict)
+    annotations: dict[str, str] = field(default_factory=dict)
     ingress_class: str = "nginx"
 
 @dataclass
@@ -231,13 +232,13 @@ class PodInfo:
     phase: PodPhase = PodPhase.PENDING
     node_name: str = ""
     ip: str = ""
-    container_statuses: List[Dict] = field(default_factory=list)
-    conditions: List[Dict[str, str]] = field(default_factory=list)
+    container_statuses: list[dict] = field(default_factory=list)
+    conditions: list[dict[str, str]] = field(default_factory=list)
     created_at: str = ""
     restart_count: int = 0
     cpu_usage: float = 0.0
     memory_usage_mb: float = 0.0
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class HPAConfig:
@@ -249,7 +250,7 @@ class HPAConfig:
     min_replicas: int = 2
     max_replicas: int = 10
     cpu_target_percent: int = 70
-    memory_target_percent: Optional[int] = None
+    memory_target_percent: int | None = None
     scale_up_cooldown: int = 60
     scale_down_cooldown: int = 300
 
@@ -259,8 +260,8 @@ class NamespaceInfo:
 
     name: str = ""
     status: str = "Active"
-    labels: Dict[str, str] = field(default_factory=dict)
-    resource_quota: Optional[ResourceQuota] = None
+    labels: dict[str, str] = field(default_factory=dict)
+    resource_quota: ResourceQuota | None = None
     deployment_count: int = 0
     pod_count: int = 0
     service_count: int = 0
@@ -269,14 +270,14 @@ class NamespaceInfo:
 # KubernetesOrchestrator 主类
 # ============================================================================
 
-class DeploymentHealthEngine(object):
+class DeploymentHealthEngine:
     """K8s部署健康检查引擎 - 检查Pod状态、资源使用、就绪探针"""
 
     def __init__(self):
-        self._check_history: Dict[str, List[Dict]] = {}
+        self._check_history: dict[str, list[dict]] = {}
         self._thresholds = {"cpu_warn": 80, "mem_warn": 85, "restart_warn": 3, "not_ready_warn": 1}
 
-    def check_deployment(self, deployment: Dict) -> Dict[str, Any]:
+    def check_deployment(self, deployment: dict) -> dict[str, Any]:
         """检查单个部署健康状态"""
         name = deployment.get("name", "unknown")
         pods = deployment.get("pods", [])
@@ -315,7 +316,7 @@ class DeploymentHealthEngine(object):
     def set_threshold(self, metric: str, value: int) -> None:
         self._thresholds[metric] = value
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         return {"deployments_checked": len(self._check_history), "thresholds": self._thresholds}
 
 class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -333,22 +334,22 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
       - Pod调度策略
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 资源注册表
-        self._deployments: Dict[str, Dict[str, Any]] = defaultdict(dict)  # ns -> name -> spec
-        self._services: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self._ingresses: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self._pods: Dict[str, Dict[str, PodInfo]] = defaultdict(dict)
-        self._configmaps: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self._secrets: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self._namespaces: Dict[str, NamespaceInfo] = {}
-        self._hpas: Dict[str, HPAConfig] = {}
+        self._deployments: dict[str, dict[str, Any]] = defaultdict(dict)  # ns -> name -> spec
+        self._services: dict[str, dict[str, Any]] = defaultdict(dict)
+        self._ingresses: dict[str, dict[str, Any]] = defaultdict(dict)
+        self._pods: dict[str, dict[str, PodInfo]] = defaultdict(dict)
+        self._configmaps: dict[str, dict[str, Any]] = defaultdict(dict)
+        self._secrets: dict[str, dict[str, Any]] = defaultdict(dict)
+        self._namespaces: dict[str, NamespaceInfo] = {}
+        self._hpas: dict[str, HPAConfig] = {}
         # 监控
-        self._monitor_task: Optional[asyncio.Task] = None
-        self._hpa_eval_task: Optional[asyncio.Task] = None
+        self._monitor_task: asyncio.Task | None = None
+        self._hpa_eval_task: asyncio.Task | None = None
         # 统计
         self._k8s_stats = {
             "deployments_created": 0,
@@ -491,7 +492,7 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     # ----------------------------------------------------------------
 
     def create_namespace(
-        self, name: str, labels: Optional[Dict] = None, quota: Optional[ResourceQuota] = None
+        self, name: str, labels: dict | None = None, quota: ResourceQuota | None = None
     ) -> Result:
         if name in self._namespaces:
             return Result(success=False, error=f"命名空间已存在: {name}")
@@ -665,13 +666,13 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     # ConfigMap/Secret
     # ----------------------------------------------------------------
 
-    def create_configmap(self, name: str, namespace: str = "default", data: Optional[Dict[str, str]] = None) -> Result:
+    def create_configmap(self, name: str, namespace: str = "default", data: dict[str, str] | None = None) -> Result:
         self._configmaps[namespace][name] = {"data": data or {}, "created_at": datetime.now().isoformat()}
         self._k8s_stats["configmaps_count"] += 1
         return Result(success=True)
 
     def create_secret(
-        self, name: str, namespace: str = "default", data: Optional[Dict[str, str]] = None, secret_type: str = "Opaque"
+        self, name: str, namespace: str = "default", data: dict[str, str] | None = None, secret_type: str = "Opaque"
     ) -> Result:
         self._secrets[namespace][name] = {
             "data": data or {},
@@ -741,7 +742,7 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total_pods = sum(len(p) for p in self._pods.values())
         return {
             **self._k8s_stats,
@@ -755,7 +756,7 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "module_stats": self.stats.to_dict(),
         }
 
-    def list_deployments(self, namespace: Optional[str] = None) -> List[Dict]:
+    def list_deployments(self, namespace: str | None = None) -> list[dict]:
         result = []
         ns_list = [namespace] if namespace else list(self._deployments.keys())
         for ns in ns_list:
@@ -776,7 +777,7 @@ class KubernetesOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 )
         return result
 
-    def list_pods(self, namespace: Optional[str] = None, label_selector: Optional[str] = None) -> List[Dict]:
+    def list_pods(self, namespace: str | None = None, label_selector: str | None = None) -> list[dict]:
         result = []
         ns_list = [namespace] if namespace else list(self._pods.keys())
         for ns in ns_list:

@@ -79,7 +79,8 @@ import math
 import time
 import uuid
 from collections import defaultdict, deque
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -132,7 +133,7 @@ class RetryPolicy:
     def should_retry(self, attempt: int) -> bool:
         return attempt < self.max_retries
 
-class DLQAnalyzer(object):
+class DLQAnalyzer:
     """dead_letter 运营分析引擎
 
     - 分析死信消息累积趋势
@@ -161,11 +162,11 @@ class DeadLetterStore:
     def __init__(self, max_size: int = 50000):
         super().__init__()
         self.max_size = max_size
-        self._messages: Dict[str, Dict] = {}
-        self._queue_map: Dict[str, List[str]] = defaultdict(list)
-        self._error_types: Dict[str, int] = defaultdict(int)
+        self._messages: dict[str, dict] = {}
+        self._queue_map: dict[str, list[str]] = defaultdict(list)
+        self._error_types: dict[str, int] = defaultdict(int)
 
-    def add(self, message: Dict, original_queue: str, error: str, attempt: int = 0) -> Dict:
+    def add(self, message: dict, original_queue: str, error: str, attempt: int = 0) -> dict:
         msg_id = str(uuid.uuid4())[:12]
         entry = {
             "id": msg_id,
@@ -191,18 +192,18 @@ class DeadLetterStore:
                 del self._messages[mid]
         return {"id": msg_id, "status": "stored"}
 
-    def get(self, msg_id: str) -> Optional[Dict]:
+    def get(self, msg_id: str) -> dict | None:
         return self._messages.get(msg_id)
 
-    def list_by_queue(self, queue: str, limit: int = 50) -> List[Dict]:
+    def list_by_queue(self, queue: str, limit: int = 50) -> list[dict]:
         ids = self._queue_map.get(queue, [])
         return [self._messages[mid] for mid in ids[-limit:] if mid in self._messages]
 
-    def list_all(self, limit: int = 100, offset: int = 0) -> List[Dict]:
+    def list_all(self, limit: int = 100, offset: int = 0) -> list[dict]:
         msgs = sorted(self._messages.values(), key=lambda x: x["first_dead_at"], reverse=True)
         return msgs[offset : offset + limit]
 
-    def replay(self, msg_id: str) -> Optional[Dict]:
+    def replay(self, msg_id: str) -> dict | None:
         msg = self._messages.get(msg_id)
         if not msg:
             return None
@@ -228,7 +229,7 @@ class DeadLetterStore:
             return True
         return False
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         status_counts = defaultdict(int)
         for msg in self._messages.values():
             status_counts[msg["status"]] += 1
@@ -244,15 +245,15 @@ class ProcessingTracker:
 
     def __init__(self, max_tracked: int = 100000):
         self.max_tracked = max_tracked
-        self._tracking: Dict[str, List[Dict]] = defaultdict(list)
-        self._in_flight: Dict[str, Dict] = {}
+        self._tracking: dict[str, list[dict]] = defaultdict(list)
+        self._in_flight: dict[str, dict] = {}
 
-    def start_processing(self, msg_id: str, queue: str) -> Dict:
+    def start_processing(self, msg_id: str, queue: str) -> dict:
         self._in_flight[msg_id] = {"queue": queue, "started_at": time.time(), "attempt": 0}
         self._add_event(msg_id, "processing_started", {"queue": queue})
         return {"msg_id": msg_id, "status": "processing"}
 
-    def record_attempt(self, msg_id: str, error: str = None) -> Dict:
+    def record_attempt(self, msg_id: str, error: str = None) -> dict:
         info = self._in_flight.get(msg_id)
         if not info:
             return {"error": "not_tracked"}
@@ -264,13 +265,13 @@ class ProcessingTracker:
         self._add_event(msg_id, "completed" if success else "failed", {"error": error})
         self._in_flight.pop(msg_id, None)
 
-    def get_history(self, msg_id: str) -> List[Dict]:
+    def get_history(self, msg_id: str) -> list[dict]:
         return list(self._tracking.get(msg_id, []))
 
-    def get_in_flight(self) -> List[Dict]:
+    def get_in_flight(self) -> list[dict]:
         return [{"msg_id": k, **v} for k, v in self._in_flight.items()]
 
-    def _add_event(self, msg_id: str, event_type: str, details: Dict = None):
+    def _add_event(self, msg_id: str, event_type: str, details: dict = None):
         entry = {"event": event_type, "ts": time.time(), "details": details or {}}
         self._tracking[msg_id].append(entry)
         if len(self._tracking[msg_id]) > 50:
@@ -283,11 +284,11 @@ class ProcessingTracker:
 class DeadLetter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """死信队列 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "messages_received": 0,
@@ -297,7 +298,7 @@ class DeadLetter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 

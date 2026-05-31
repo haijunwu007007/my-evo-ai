@@ -167,9 +167,9 @@ class DocumentTemplate:
     category: str
     format: DocFormat
     content_template: str
-    variables: List[str] = field(default_factory=list)
-    sections: List[Dict[str, Any]] = field(default_factory=list)
-    styles: Dict[str, str] = field(default_factory=dict)
+    variables: list[str] = field(default_factory=list)
+    sections: list[dict[str, Any]] = field(default_factory=list)
+    styles: dict[str, str] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     usage_count: int = 0
 
@@ -179,14 +179,14 @@ class Document:
 
     doc_id: str
     title: str
-    template_id: Optional[str]
+    template_id: str | None
     format: DocFormat
     content: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     status: DocStatus = DocStatus.DRAFT
     version: int = 1
-    versions: List[Dict[str, Any]] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    versions: list[dict[str, Any]] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     author: str = "system"
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
@@ -200,12 +200,12 @@ class GenerationResult:
     success: bool
     doc_id: str
     format: DocFormat
-    output_path: Optional[str] = None
+    output_path: str | None = None
     content_length: int = 0
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
-class DocumentFormatter(object):
+class DocumentFormatter:
     """文档格式分析器 — 检测文档格式、转换格式、验证结构完整性"""
 
     SUPPORTED_FORMATS = {
@@ -221,7 +221,7 @@ class DocumentFormatter(object):
     }
 
     def __init__(self):
-        self._format_signatures: Dict[str, Dict[str, Any]] = {
+        self._format_signatures: dict[str, dict[str, Any]] = {
             "pdf": {"magic": b"%PDF", "extension": ".pdf", "binary": True},
             "docx": {"magic": b"PK\x03\x04", "extension": ".docx", "binary": True},
             "xlsx": {"magic": b"PK\x03\x04", "extension": ".xlsx", "binary": True},
@@ -233,7 +233,7 @@ class DocumentFormatter(object):
             "txt": {"extension": ".txt", "binary": False},
         }
 
-    def detect_format(self, content: bytes, filename: str = "") -> Dict[str, Any]:
+    def detect_format(self, content: bytes, filename: str = "") -> dict[str, Any]:
         """根据文件头魔数和扩展名检测文档格式"""
         filename_lower = filename.lower()
         detected = []
@@ -257,7 +257,7 @@ class DocumentFormatter(object):
             "file_size": len(content),
         }
 
-    def convert_plan(self, source_format: str, target_format: str) -> Dict[str, Any]:
+    def convert_plan(self, source_format: str, target_format: str) -> dict[str, Any]:
         """生成格式转换计划，评估转换复杂度和兼容性"""
         conversions = {
             ("csv", "json"): {"complexity": "low", "steps": ["parse_csv", "map_headers", "emit_json"]},
@@ -284,7 +284,7 @@ class DocumentFormatter(object):
             "suggestion": "Consider converting via an intermediate format (e.g., JSON)",
         }
 
-    def validate_structure(self, content: str, format_type: str = "json") -> Dict[str, Any]:
+    def validate_structure(self, content: str, format_type: str = "json") -> dict[str, Any]:
         """验证文档结构完整性和格式正确性"""
         errors = []
         warnings = []
@@ -321,8 +321,8 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._documents: Dict[str, Document] = {}
-        self._templates: Dict[str, DocumentTemplate] = {}
+        self._documents: dict[str, Document] = {}
+        self._templates: dict[str, DocumentTemplate] = {}
         self._output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "generated_docs")
         self._max_documents = 10000
 
@@ -402,10 +402,10 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         title: str,
         content: str,
         format: DocFormat = DocFormat.MARKDOWN,
-        template_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
-        tags: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        template_id: str | None = None,
+        metadata: dict | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         """创建文档"""
         try:
             if len(self._documents) >= self._max_documents:
@@ -444,11 +444,11 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def generate_from_template(
         self,
         template_id: str,
-        variables: Dict[str, str],
-        title: Optional[str] = None,
-        format: Optional[DocFormat] = None,
-        tags: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        variables: dict[str, str],
+        title: str | None = None,
+        format: DocFormat | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         """从模板生成文档"""
         if template_id not in self._templates:
             raise ValueError(f"模板 {template_id} 不存在")
@@ -479,8 +479,8 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("export_document")
     def export_document(
-        self, doc_id: str, target_format: DocFormat, output_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, doc_id: str, target_format: DocFormat, output_path: str | None = None
+    ) -> dict[str, Any]:
         """导出文档为指定格式"""
         try:
             if doc_id not in self._documents:
@@ -672,8 +672,8 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("update_document")
     def update_document(
-        self, doc_id: str, content: Optional[str] = None, title: Optional[str] = None, metadata: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, doc_id: str, content: str | None = None, title: str | None = None, metadata: dict | None = None
+    ) -> dict[str, Any]:
         """更新文档（自动版本控制）"""
         if doc_id not in self._documents:
             raise ValueError(f"文档 {doc_id} 不存在")
@@ -705,8 +705,8 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("batch_generate")
     def batch_generate(
-        self, template_id: str, batch_variables: List[Dict[str, str]], format: Optional[DocFormat] = None
-    ) -> List[Dict]:
+        self, template_id: str, batch_variables: list[dict[str, str]], format: DocFormat | None = None
+    ) -> list[dict]:
         """批量生成文档"""
         results = []
         for i, variables in enumerate(batch_variables):
@@ -719,7 +719,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results.append({"index": i, "success": False, "error": str(e)})
         return results
 
-    def list_documents(self, tag: Optional[str] = None, status: Optional[str] = None, limit: int = 100) -> List[Dict]:
+    def list_documents(self, tag: str | None = None, status: str | None = None, limit: int = 100) -> list[dict]:
         """列出文档"""
         docs = list(self._documents.values())
         if tag:
@@ -741,7 +741,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for d in docs[:limit]
         ]
 
-    def get_document(self, doc_id: str) -> Dict[str, Any]:
+    def get_document(self, doc_id: str) -> dict[str, Any]:
         """获取文档详情"""
         if doc_id not in self._documents:
             raise ValueError(f"文档 {doc_id} 不存在")
@@ -815,7 +815,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

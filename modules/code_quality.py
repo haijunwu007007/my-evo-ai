@@ -90,7 +90,7 @@ try:
 except ImportError:
     # REMOVED: metrics_collector = None
     class EnterpriseModule:
-        def __init__(self, config: Dict = None):
+        def __init__(self, config: dict = None):
             self._config = config or {}
             self._initialized = False
 
@@ -171,7 +171,7 @@ class FileAnalysis:
     comment_lines: int = 0
     blank_lines: int = 0
     cyclomatic_complexity: int = 0
-    issues: List[Issue] = field(default_factory=list)
+    issues: list[Issue] = field(default_factory=list)
     quality_score: float = 100.0
     analyzed_at: float = field(default_factory=time.time)
 
@@ -185,13 +185,13 @@ class QualityRule:
     severity: Severity = Severity.WARNING
     category: str = "style"
     enabled: bool = True
-    patterns: List[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
 
-class QualityMetricsAnalyzer(object):
+class QualityMetricsAnalyzer:
     """代码质量指标分析器 - 计算复杂度、重复率、维护性指数"""
 
     def __init__(self):
-        self._complexity_scores: Dict[str, float] = {}
+        self._complexity_scores: dict[str, float] = {}
         self._duplication_rate: float = 0.0
         self._maintainability_index: float = 100.0
 
@@ -207,7 +207,7 @@ class QualityMetricsAnalyzer(object):
                     complexity += 1
         return complexity
 
-    def estimate_duplication(self, lines: List[str], window: int = 6) -> float:
+    def estimate_duplication(self, lines: list[str], window: int = 6) -> float:
         """估算代码重复率"""
         # REMOVED: from collections import Counterchunks = [tuple(lines[i:i+window]) for i in range(len(lines) - window)]
         if not chunks:
@@ -216,7 +216,7 @@ class QualityMetricsAnalyzer(object):
         duplicates = sum(c - 1 for c in counts.values() if c > 1)
         return round(duplicates / len(chunks) * 100, 2)
 
-    def get_quality_score(self) -> Dict:
+    def get_quality_score(self) -> dict:
         return {
             "avg_complexity": sum(self._complexity_scores.values()) / max(len(self._complexity_scores), 1),
             "duplication_rate": self._duplication_rate,
@@ -237,12 +237,12 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         )
         self.module_name = "code_quality"
         self.module_id = self.module_name
-        self._rules: Dict[str, QualityRule] = {}
-        self._analyses: Dict[str, FileAnalysis] = {}
+        self._rules: dict[str, QualityRule] = {}
+        self._analyses: dict[str, FileAnalysis] = {}
         self._audit = AuditLogger()
         self._scan_count = 0
         self._issues_total = 0
-        self._startup_time: Optional[float] = None
+        self._startup_time: float | None = None
 
     def initialize(self) -> None:
         self._load_default_rules()
@@ -405,7 +405,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             quality_score=round(score, 1),
         )
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         _ = self.trace("execute")
         # REMOVED: metrics_collector.counter("code_quality_ops_total", labels={"action": action})self.audit("execute", f"action={action}")
@@ -435,7 +435,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.error(f"[CodeQuality] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def _analyze_file(self, p: Dict) -> Dict:
+    def _analyze_file(self, p: dict) -> dict:
         """分析文件"""
         file_path = p.get("file_path", "")
         if not os.path.exists(file_path):
@@ -463,7 +463,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _analyze_code(self, p: Dict) -> Dict:
+    def _analyze_code(self, p: dict) -> dict:
         """分析代码片段"""
         code = p.get("code", "")
         language = p.get("language", "python")
@@ -482,7 +482,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _get_file_analysis(self, p: Dict) -> Dict:
+    def _get_file_analysis(self, p: dict) -> dict:
         """获取文件分析结果"""
         fp = p.get("file_path", "")
         a = self._analyses.get(fp)
@@ -511,7 +511,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _list_issues(self, p: Dict) -> Dict:
+    def _list_issues(self, p: dict) -> dict:
         """列出问题"""
         severity = p.get("severity")
         limit = p.get("limit", 50)
@@ -540,7 +540,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _get_issue_detail(self, p: Dict) -> Dict:
+    def _get_issue_detail(self, p: dict) -> dict:
         """获取问题详情"""
         iid = p.get("issue_id", "")
         for a in self._analyses.values():
@@ -562,7 +562,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                     }
         return {"success": False, "error": f"问题{iid}不存在"}
 
-    def _list_rules(self, p: Dict) -> Dict:
+    def _list_rules(self, p: dict) -> dict:
         """列出规则"""
         category = p.get("category")
         rules = list(self._rules.values())
@@ -583,7 +583,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             ],
         }
 
-    def _toggle_rule(self, p: Dict) -> Dict:
+    def _toggle_rule(self, p: dict) -> dict:
         """启用/禁用规则"""
         rid = p.get("rule_id", "")
         enabled = p.get("enabled")
@@ -594,7 +594,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             r.enabled = enabled
         return {"success": True, "result": {"rule_id": rid, "enabled": r.enabled}}
 
-    def _get_quality_report(self, p: Dict) -> Dict:
+    def _get_quality_report(self, p: dict) -> dict:
         """获取质量报告"""
         total_files = len(self._analyses)
         if total_files == 0:
@@ -635,7 +635,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _get_stats(self) -> Dict:
+    def _get_stats(self) -> dict:
         """获取统计"""
         return {
             "success": True,
@@ -651,7 +651,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._initialized = False
         self._audit.log("shutdown", {})
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -664,7 +664,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         )
         return result
 
-    def batch_analyze(self, file_paths: List[str]) -> Dict[str, Any]:
+    def batch_analyze(self, file_paths: list[str]) -> dict[str, Any]:
         """批量分析多个文件"""
         results = {}
         total_issues = 0
@@ -680,11 +680,11 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "files": results,
         }
 
-    def get_trend(self, days: int = 7) -> List[Dict]:
+    def get_trend(self, days: int = 7) -> list[dict]:
         """获取质量趋势（按天统计）"""
         return [{"date": f"day-{i}", "score": 0, "issues": 0} for i in range(days)]
 
-    def generate_quality_trend_report(self, days: int = 7) -> Dict[str, Any]:
+    def generate_quality_trend_report(self, days: int = 7) -> dict[str, Any]:
         """生成代码质量趋势报告：各指标周环比变化、质量评分走势"""
         history = self._history if hasattr(self, "_history") else []
         if not history:
@@ -716,12 +716,12 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "trend": trend,
         }
 
-    def get_top_violations(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_top_violations(self, limit: int = 10) -> list[dict[str, Any]]:
         """获取Top违规项：按出现频次排序的代码异味和规则违反"""
         issues = self._issues if hasattr(self, "_issues") else []
         if not issues:
             return []
-        rule_counts: Dict[str, int] = {}
+        rule_counts: dict[str, int] = {}
         for issue in issues:
             if isinstance(issue, dict):
                 rule = issue.get("rule", "unknown")

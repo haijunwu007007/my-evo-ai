@@ -25,7 +25,7 @@ print()
 print('=== Full stub list ===')
 result = []
 for s in stubs:
-    with open(s, 'r', encoding='utf-8', errors='ignore') as f:
+    with open(s, encoding='utf-8', errors='ignore') as f:
         content = f.read()
     has_module_class = 'module_class' in content
     has_execute = 'def execute' in content

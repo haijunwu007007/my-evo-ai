@@ -130,7 +130,7 @@ class BigKeyRecord:
     element_count: int
     risk_level: RiskLevel
     detected_at: str
-    suggestions: List[str] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
 
 @dataclass
 class ThresholdConfig:
@@ -153,7 +153,7 @@ class BigKeyRiskAssessor:
             "string": {"warn": 10240, "critical": 102400},
         }
 
-    def assess_risk(self, key: str, data_type: str, size: int, access_freq: int = 0) -> Dict[str, Any]:
+    def assess_risk(self, key: str, data_type: str, size: int, access_freq: int = 0) -> dict[str, Any]:
         """评估单个大键的风险等级"""
         thresholds = self._risk_thresholds.get(data_type, {"warn": 10000, "critical": 100000})
         if size >= thresholds["critical"]:
@@ -184,7 +184,7 @@ class BigKeyRiskAssessor:
             "recommended_action": self._get_recommendation(data_type, size, level),
         }
 
-    def predict_growth(self, history: List[Dict[str, Any]], days: int = 30) -> Dict[str, Any]:
+    def predict_growth(self, history: list[dict[str, Any]], days: int = 30) -> dict[str, Any]:
         """根据历史数据预测大键增长趋势"""
         if len(history) < 2:
             return {"trend": "insufficient_data"}
@@ -207,7 +207,7 @@ class BigKeyRiskAssessor:
             "days_to_critical": self._days_to_threshold(current, avg_growth, "critical") if avg_growth > 0 else None,
         }
 
-    def batch_assess(self, keys: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def batch_assess(self, keys: list[dict[str, Any]]) -> dict[str, Any]:
         """批量评估多个大键"""
         results = []
         critical_count = 0
@@ -232,7 +232,7 @@ class BigKeyRiskAssessor:
             "health_score": round((1 - critical_count / max(len(keys), 1)) * 100, 1),
         }
 
-    def generate_report(self, assessments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def generate_report(self, assessments: list[dict[str, Any]]) -> dict[str, Any]:
         """生成大键风险报告"""
         by_type = {}
         for a in assessments:
@@ -280,14 +280,14 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
     MODULE_NAME = "大Key检测"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._keys: Dict[str, KeyInfo] = {}
-        self._big_keys: List[BigKeyRecord] = []
+        self._keys: dict[str, KeyInfo] = {}
+        self._big_keys: list[BigKeyRecord] = []
         self._scan_count = 0
         self._counter = 0
-        self._thresholds: Dict[KeyType, ThresholdConfig] = {}
+        self._thresholds: dict[KeyType, ThresholdConfig] = {}
         self._load_default_thresholds()
 
     def _next_id(self) -> str:
@@ -391,7 +391,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return risk, suggestions
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("big_key_detection_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -412,7 +412,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         return handler(params)
         return {"status": "healthy", "module": "big_key_detection"}
 
-    def _exec_register_key(self, p: Dict) -> Dict:
+    def _exec_register_key(self, p: dict) -> dict:
         """注册/更新Key信息"""
         key = p["key"]
         kt = KeyType(p.get("type", "string"))
@@ -428,7 +428,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         )
         return {"success": True, "result": {"key": key, "registered": True}}
 
-    def _exec_scan(self, p: Dict) -> Dict:
+    def _exec_scan(self, p: dict) -> dict:
         """执行大Key扫描"""
         pattern = p.get("pattern", "*")
         min_size = p.get("min_size_bytes", 0)
@@ -467,7 +467,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _exec_get_big_keys(self, p: Dict) -> Dict:
+    def _exec_get_big_keys(self, p: dict) -> dict:
         """获取大Key列表"""
         risk_filter = p.get("risk_level", "")
         limit = p.get("limit", 20)
@@ -492,7 +492,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _exec_analyze_key(self, p: Dict) -> Dict:
+    def _exec_analyze_key(self, p: dict) -> dict:
         """分析单个Key"""
         key = p["key"]
         if key not in self._keys:
@@ -515,7 +515,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _exec_remove_key(self, p: Dict) -> Dict:
+    def _exec_remove_key(self, p: dict) -> dict:
         """移除Key（异步删除建议）"""
         key = p.get("key", "")
         if key and key in self._keys:
@@ -524,7 +524,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             return {"success": True, "result": {"key": key, "freed_bytes": size}}
         return {"success": False, "error": "Key不存在"}
 
-    def _exec_set_threshold(self, p: Dict) -> Dict:
+    def _exec_set_threshold(self, p: dict) -> dict:
         """设置阈值"""
         kt = KeyType(p.get("key_type", "string"))
         self._thresholds[kt] = ThresholdConfig(
@@ -535,7 +535,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         )
         return {"success": True, "result": {"key_type": kt.value, "threshold_set": True}}
 
-    def _exec_get_thresholds(self, p: Dict) -> Dict:
+    def _exec_get_thresholds(self, p: dict) -> dict:
         return {
             "success": True,
             "result": {
@@ -548,7 +548,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         total_size = sum(k.size_bytes for k in self._keys.values())
         return {
             "success": True,
@@ -561,7 +561,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _exec_top_keys(self, p: Dict) -> Dict:
+    def _exec_top_keys(self, p: dict) -> dict:
         """获取最大的N个Key"""
         n = min(p.get("limit", 10), 50)
         sorted_keys = sorted(self._keys.values(), key=lambda k: k.size_bytes, reverse=True)[:n]
@@ -584,7 +584,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return fnmatch.fnmatch(key, pattern)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -603,7 +603,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         logger.info("大Key检测关闭")
         return True
 
-    def _audit_detection(self, event: str, detail: Dict) -> None:
+    def _audit_detection(self, event: str, detail: dict) -> None:
         """记录审计日志 - 检测到big key或执行清理操作时调用"""
         if hasattr(self, "_audit") and self._audit:
             self._audit.log(event, detail)
@@ -639,12 +639,12 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         )
 
-    def get_memory_footprint(self) -> Dict[str, Any]:
+    def get_memory_footprint(self) -> dict[str, Any]:
         """获取所有监控键的内存占用汇总"""
         import sys
 
         total = 0
-        by_type: Dict[str, int] = {}
+        by_type: dict[str, int] = {}
         for key_info in self._keys.values():
             sz = key_info.get("size_bytes", 0)
             total += sz
@@ -652,7 +652,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             by_type[kt] = by_type.get(kt, 0) + sz
         return {"total_bytes": total, "total_mb": round(total / 1024 / 1024, 2), "by_type": by_type}
 
-    def export_report(self, include_details: bool = False) -> Dict:
+    def export_report(self, include_details: bool = False) -> dict:
         """导出大键检测报告"""
         big_sorted = sorted(self._big_keys.values(), key=lambda x: x.get("size_bytes", 0), reverse=True)
         report = {
@@ -670,11 +670,11 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         }
         return report
 
-    def track_key_growth(self, key_name: str, current_size: int) -> Dict:
+    def track_key_growth(self, key_name: str, current_size: int) -> dict:
         """追踪键增长趋势"""
         history_key = f"growth:{key_name}"
         if not hasattr(self, "_growth_history"):
-            self._growth_history: Dict[str, List] = {}
+            self._growth_history: dict[str, list] = {}
         history = self._growth_history.setdefault(history_key, [])
         history.append({"size": current_size, "ts": datetime.now().isoformat()})
         if len(history) > 100:
@@ -689,7 +689,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             }
         return {"key": key_name, "current_size": current_size, "growth_rate": 0.0, "history_len": len(history)}
 
-    def recommend_action(self, key_name: str, key_type: str, size_bytes: int, element_count: int) -> Dict:
+    def recommend_action(self, key_name: str, key_type: str, size_bytes: int, element_count: int) -> dict:
         """根据键特征给出优化建议"""
         recommendations = []
         if key_type == "string" and size_bytes > 10 * 1024 * 1024:
@@ -714,7 +714,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "size_mb": round(size_bytes / 1024 / 1024, 2),
         }
 
-    def batch_analyze(self, keys: List[Dict]) -> List[Dict]:
+    def batch_analyze(self, keys: list[dict]) -> list[dict]:
         """批量分析多个键的风险和建议"""
         results = []
         for k in keys:

@@ -77,7 +77,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class GooseCoderAnalyzer(object):
+class GooseCoderAnalyzer:
     """goose_coder 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -287,7 +287,7 @@ class GooseCoderModule:
 
     """AI编程助手 - 代码生成/重构/调试/审查/测试生成/文档/优化/多语言"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -329,12 +329,12 @@ class GooseCoderModule:
             "tests_generated": 0,
             "total_errors": 0,
         }
-        self._sessions: Dict[str, Dict] = {}
-        self._code_snippets: Dict[str, Dict] = {}
-        self._templates: Dict[str, Dict] = {}
+        self._sessions: dict[str, dict] = {}
+        self._code_snippets: dict[str, dict] = {}
+        self._templates: dict[str, dict] = {}
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 6))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_templates()
             self._initialized = True
@@ -348,7 +348,7 @@ class GooseCoderModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         return {
@@ -385,7 +385,7 @@ class GooseCoderModule:
             "language": lang,
             "context": context,
             "history": [],
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         return {"success": True, "session_id": sid, "language": lang}
 
@@ -412,7 +412,7 @@ class GooseCoderModule:
                 "language": language,
                 "lines": actual_lines,
                 "task_type": TaskType.GENERATE.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
             self._stats["total_tasks"] += 1
             self._stats["lines_generated"] += actual_lines

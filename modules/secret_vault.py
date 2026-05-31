@@ -164,19 +164,19 @@ class SecretEntry:
     path: str
     secret_type: SecretType
     encrypted_value: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
     version: int = 1
-    versions: List[Dict[str, Any]] = field(default_factory=list)
+    versions: list[dict[str, Any]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    expires_at: Optional[float] = None
-    last_accessed: Optional[float] = None
+    expires_at: float | None = None
+    last_accessed: float | None = None
     access_count: int = 0
     rotation_days: int = 90
     auto_rotate: bool = False
     owner: str = "system"
-    access_policies: List[Dict[str, Any]] = field(default_factory=list)
+    access_policies: list[dict[str, Any]] = field(default_factory=list)
 
 @dataclass
 class AccessPolicy:
@@ -185,17 +185,17 @@ class AccessPolicy:
     policy_id: str
     name: str
     path_pattern: str
-    allowed_roles: List[str] = field(default_factory=list)
-    allowed_operations: List[str] = field(default_factory=list)
-    conditions: Dict[str, Any] = field(default_factory=dict)
+    allowed_roles: list[str] = field(default_factory=list)
+    allowed_operations: list[str] = field(default_factory=list)
+    conditions: dict[str, Any] = field(default_factory=dict)
 
-class SecretRotationEngine(object):
+class SecretRotationEngine:
     """密钥轮转引擎 - 负责密钥定期轮转、版本管理和过期清理"""
 
     def __init__(self):
-        self._rotation_history: Dict[str, List[Dict]] = {}
+        self._rotation_history: dict[str, list[dict]] = {}
         self._rotation_count: int = 0
-        self._policies: Dict[str, Dict] = {}
+        self._policies: dict[str, dict] = {}
 
     def set_rotation_policy(self, secret_name: str, max_age_days: int = 90, auto_rotate: bool = False) -> None:
         """设置密钥轮转策略"""
@@ -205,7 +205,7 @@ class SecretRotationEngine(object):
             "created_at": time.time(),
         }
 
-    def rotate(self, secret_name: str, new_value: str, store: Dict) -> Dict:
+    def rotate(self, secret_name: str, new_value: str, store: dict) -> dict:
         """执行密钥轮转"""
         self._rotation_count += 1
         old_value = store.get(secret_name, {}).get("value", "")
@@ -226,7 +226,7 @@ class SecretRotationEngine(object):
             history[:] = history[-10:]
         return {"secret": secret_name, "new_version": store[secret_name]["version"], "rotated": True}
 
-    def needs_rotation(self, secret_name: str, store: Dict) -> bool:
+    def needs_rotation(self, secret_name: str, store: dict) -> bool:
         """检查密钥是否需要轮转"""
         policy = self._policies.get(secret_name)
         if not policy:
@@ -236,11 +236,11 @@ class SecretRotationEngine(object):
         age_seconds = time.time() - rotated_at
         return age_seconds > policy["max_age_days"] * 86400
 
-    def get_rotation_history(self, secret_name: str) -> List[Dict]:
+    def get_rotation_history(self, secret_name: str) -> list[dict]:
         """获取轮转历史"""
         return self._rotation_history.get(secret_name, [])
 
-    def list_expired(self, store: Dict) -> List[str]:
+    def list_expired(self, store: dict) -> list[str]:
         """列出所有需要轮转的密钥"""
         return [name for name in self._policies if self.needs_rotation(name, store)]
 
@@ -249,7 +249,7 @@ class SecretRotationEngine(object):
 
         return hashlib.sha256(value.encode()).hexdigest()[:16] if value else "empty"
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "policies": len(self._policies),
             "total_rotations": self._rotation_count,
@@ -263,11 +263,11 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._secrets: Dict[str, SecretEntry] = {}
-        self._path_index: Dict[str, str] = {}  # path -> secret_id
-        self._policies: Dict[str, AccessPolicy] = {}
-        self._access_log: List[Dict] = []
-        self._encryption_key: Optional[bytes] = None
+        self._secrets: dict[str, SecretEntry] = {}
+        self._path_index: dict[str, str] = {}  # path -> secret_id
+        self._policies: dict[str, AccessPolicy] = {}
+        self._access_log: list[dict] = []
+        self._encryption_key: bytes | None = None
         self._max_secrets = 10000
 
     def initialize(self) -> None:
@@ -312,12 +312,12 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         path: str,
         value: str,
         secret_type: SecretType = SecretType.CUSTOM,
-        metadata: Optional[Dict] = None,
-        tags: Optional[List[str]] = None,
+        metadata: dict | None = None,
+        tags: list[str] | None = None,
         rotation_days: int = 90,
         auto_rotate: bool = False,
         owner: str = "system",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """存储密钥"""
         if len(self._secrets) >= self._max_secrets:
             raise RuntimeError(f"密钥数量已达上限 {self._max_secrets}")
@@ -357,7 +357,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("vault_retrieve")
-    def retrieve_secret(self, path: str, version: Optional[int] = None) -> Dict[str, Any]:
+    def retrieve_secret(self, path: str, version: int | None = None) -> dict[str, Any]:
         """检索密钥"""
         secret_id = self._path_index.get(path)
         if not secret_id or secret_id not in self._secrets:
@@ -391,7 +391,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("vault_update")
-    def update_secret(self, path: str, new_value: str, metadata: Optional[Dict] = None) -> Dict[str, Any]:
+    def update_secret(self, path: str, new_value: str, metadata: dict | None = None) -> dict[str, Any]:
         """更新密钥"""
         secret_id = self._path_index.get(path)
         if not secret_id or secret_id not in self._secrets:
@@ -435,7 +435,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return True
 
     @trace_operation("vault_rotate")
-    def rotate_secret(self, path: str, new_value: Optional[str] = None) -> Dict[str, Any]:
+    def rotate_secret(self, path: str, new_value: str | None = None) -> dict[str, Any]:
         """轮换密钥"""
         if new_value is None:
             new_value = base64.urlsafe_b64encode(os.urandom(32)).decode()
@@ -451,8 +451,8 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("vault_list")
     def list_secrets(
-        self, path_prefix: str = "secret/", tag: Optional[str] = None, secret_type: Optional[SecretType] = None
-    ) -> List[Dict]:
+        self, path_prefix: str = "secret/", tag: str | None = None, secret_type: SecretType | None = None
+    ) -> list[dict]:
         """列出密钥"""
         results = []
         for secret in self._secrets.values():
@@ -485,7 +485,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return results
 
     @trace_operation("vault_check_rotation")
-    def check_rotation_needs(self) -> Dict[str, Any]:
+    def check_rotation_needs(self) -> dict[str, Any]:
         """检查需要轮换的密钥"""
         needs_rotation = []
         expired = []
@@ -511,7 +511,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "total_needs_attention": len(needs_rotation) + len(expired),
         }
 
-    def get_access_log(self, limit: int = 100) -> List[Dict]:
+    def get_access_log(self, limit: int = 100) -> list[dict]:
         return [
             {
                 "action": e["action"],
@@ -568,7 +568,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {
@@ -592,7 +592,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if hasattr(self, "_audit") and self._audit:
             self._audit.log("secret_access", {"secret": secret_name, "accessor": accessor, "action": action})
 
-    def batch_set(self, secrets: Dict[str, str]) -> Dict:
+    def batch_set(self, secrets: dict[str, str]) -> dict:
         """批量设置密钥"""
         success = 0
         for name, value in secrets.items():
@@ -600,18 +600,18 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             success += 1
         return {"set": success, "total": len(secrets)}
 
-    def get_secret_metadata(self, secret_name: str) -> Optional[Dict]:
+    def get_secret_metadata(self, secret_name: str) -> dict | None:
         """获取密钥元数据（不含值）"""
         data = self._secrets.get(secret_name)
         if not data:
             return None
         return {k: v for k, v in data.items() if k != "value"}
 
-    def list_secrets_metadata(self) -> List[Dict]:
+    def list_secrets_metadata(self) -> list[dict]:
         """列出所有密钥的元数据"""
         return [{"name": k, **({kk: vv for kk, vv in v.items() if kk != "value"})} for k, v in self._secrets.items()]
 
-    def validate_secret(self, secret_name: str, rules: Dict) -> Dict:
+    def validate_secret(self, secret_name: str, rules: dict) -> dict:
         """验证密钥是否符合安全策略"""
         data = self._secrets.get(secret_name)
         if not data:
@@ -629,7 +629,7 @@ class SecretVault(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             errors.append("missing_special")
         return {"valid": len(errors) == 0, "errors": errors, "length": len(value)}
 
-    def audit_secret_access(self, secret_name: str, accessor: str, action: str = "read") -> Dict[str, Any]:
+    def audit_secret_access(self, secret_name: str, accessor: str, action: str = "read") -> dict[str, Any]:
         """审计密钥访问记录，检测异常访问模式"""
         key = f"audit:{secret_name}"
         records = self._audit_log.get(key, []) if hasattr(self, "_audit_log") else []

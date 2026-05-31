@@ -102,7 +102,8 @@ import threading
 import traceback
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -119,7 +120,7 @@ from modules._base.enterprise_module import (
 )
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-class ThroughputAnalyzer(object):
+class ThroughputAnalyzer:
     """kafka_producer analysis engine
 
                         - 分析吞吐延迟
@@ -171,10 +172,10 @@ class ProducerRecord:
     """生产者消息记录"""
 
     topic: str
-    key: Optional[str] = None
+    key: str | None = None
     value: Any = None
-    partition: Optional[int] = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    partition: int | None = None
+    headers: dict[str, str] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     compression: CompressionType = CompressionType.NONE
     serializer: SerializerType = SerializerType.JSON
@@ -196,7 +197,7 @@ class SendResult:
     """发送结果"""
 
     success: bool
-    metadata: Optional[RecordMetadata] = None
+    metadata: RecordMetadata | None = None
     error: str = ""
     duration_ms: float = 0
     retry_count: int = 0
@@ -345,7 +346,7 @@ class ProducerBuffer:
         self._buffer: deque = deque(maxlen=max_size)
         self._current_memory = 0
         self._lock = threading.Lock()
-        self._full_events: List[threading.Event] = []
+        self._full_events: list[threading.Event] = []
 
     def put(self, record: ProducerRecord) -> bool:
         with self._lock:
@@ -358,7 +359,7 @@ class ProducerBuffer:
             self._current_memory += serialized
             return True
 
-    def drain(self, max_count: Optional[int] = None) -> List[ProducerRecord]:
+    def drain(self, max_count: int | None = None) -> list[ProducerRecord]:
         with self._lock:
             count = max_count or min(self.batch_size, len(self._buffer))
             records = []
@@ -391,16 +392,16 @@ class KafkaProducer(EnterpriseModule):
 
         super().__init__(module_id="kafka_producer", module_name="Kafka生产者引擎")
         self._bootstrap_servers = bootstrap_servers
-        self._topics: Dict[str, TopicConfig] = {}
+        self._topics: dict[str, TopicConfig] = {}
         self._partitioner = Partitioner(PartitionStrategy.KEY_HASH)
         self._serializer = MessageSerializer()
         self._compressor = MessageCompressor()
         self._buffer = ProducerBuffer()
         self._executor = ThreadPoolExecutor(max_workers=5)
-        self._offset_counter: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
+        self._offset_counter: dict[str, dict[int, int]] = defaultdict(lambda: defaultdict(int))
         self._lock = threading.RLock()
         self._running = False
-        self._flush_thread: Optional[threading.Thread] = None
+        self._flush_thread: threading.Thread | None = None
         self._stats = {
             "total_sent": 0,
             "total_bytes": 0,
@@ -428,7 +429,7 @@ class KafkaProducer(EnterpriseModule):
             return True
         return False
 
-    def list_topics(self) -> List[Dict]:
+    def list_topics(self) -> list[dict]:
         return [
             {
                 "name": t.name,
@@ -443,7 +444,7 @@ class KafkaProducer(EnterpriseModule):
 
     # ─────────────────────── 统一执行入口 ───────────────────────
 
-    async def execute(self, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, params: dict | None = None) -> dict:
         """统一执行入口 - Kafka生产者引擎"""
         params = params or {}
         action = params.get("action", "status")
@@ -533,10 +534,10 @@ class KafkaProducer(EnterpriseModule):
         self,
         topic: str,
         value: Any,
-        key: Optional[str] = None,
-        headers: Optional[Dict] = None,
-        partition: Optional[int] = None,
-        compression: Optional[CompressionType] = None,
+        key: str | None = None,
+        headers: dict | None = None,
+        partition: int | None = None,
+        compression: CompressionType | None = None,
     ) -> SendResult:
         """同步发送消息"""
         start = time.time()
@@ -592,7 +593,7 @@ class KafkaProducer(EnterpriseModule):
             return SendResult(success=False, error=str(e), duration_ms=(time.time() - start) * 1000)
 
     def send_async(
-        self, topic: str, value: Any, key: Optional[str] = None, callback: Optional[Callable[[SendResult], None]] = None
+        self, topic: str, value: Any, key: str | None = None, callback: Callable[[SendResult], None] | None = None
     ) -> None:
         """异步发送消息"""
 
@@ -603,7 +604,7 @@ class KafkaProducer(EnterpriseModule):
 
         self._executor.submit(do_send)
 
-    def send_batch(self, records: List[ProducerRecord]) -> List[SendResult]:
+    def send_batch(self, records: list[ProducerRecord]) -> list[SendResult]:
         """批量发送"""
         results = []
         for record in records:
@@ -618,13 +619,13 @@ class KafkaProducer(EnterpriseModule):
             results.append(result)
         return results
 
-    def produce(self, topic: str, value: Any, key: Optional[str] = None, **kwargs) -> SendResult:
+    def produce(self, topic: str, value: Any, key: str | None = None, **kwargs) -> SendResult:
         """生产消息（别名）"""
         return self.send(topic, value, key, **kwargs)
 
     # ─────────────────────── 缓冲与刷新 ───────────────────────
 
-    def enqueue(self, topic: str, value: Any, key: Optional[str] = None, **kwargs) -> bool:
+    def enqueue(self, topic: str, value: Any, key: str | None = None, **kwargs) -> bool:
         """入队（异步发送）"""
         record = ProducerRecord(topic=topic, key=key, value=value, **kwargs)
         return self._buffer.put(record)
@@ -663,7 +664,7 @@ class KafkaProducer(EnterpriseModule):
 
     # ─────────────────────── 统计 ───────────────────────
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         s = self._stats
         total = s["total_sent"]
         return {

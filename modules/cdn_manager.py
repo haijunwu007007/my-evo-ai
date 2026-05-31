@@ -131,9 +131,9 @@ class CDNNode:
     active_connections: int = 0
     max_connections: int = 50000
     latency_ms: float = 0.0
-    last_health_check: Optional[datetime] = None
-    certificates_expire: Optional[datetime] = None
-    features: List[str] = field(default_factory=lambda: ["http2", "brotli", "ipv6"])
+    last_health_check: datetime | None = None
+    certificates_expire: datetime | None = None
+    features: list[str] = field(default_factory=lambda: ["http2", "brotli", "ipv6"])
 
 @dataclass
 class OriginServer:
@@ -146,7 +146,7 @@ class OriginServer:
     health_check_interval: int = 30
     status: str = "active"
     backup: bool = False
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class CacheRule:
@@ -159,7 +159,7 @@ class CacheRule:
     stale_while_revalidate: int = 300
     stale_if_error: int = 86400
     bypass_cache: bool = False
-    vary_headers: List[str] = field(default_factory=list)
+    vary_headers: list[str] = field(default_factory=list)
     priority: int = 0
 
 @dataclass
@@ -170,19 +170,19 @@ class WAFRule:
     action: str = "block"
     enabled: bool = True
     priority: int = 100
-    conditions: Dict[str, Any] = field(default_factory=dict)
+    conditions: dict[str, Any] = field(default_factory=dict)
     matched_count: int = 0
-    last_matched: Optional[datetime] = None
+    last_matched: datetime | None = None
 
 @dataclass
 class PurgeTask:
     task_id: str
-    paths: List[str]
-    tags: List[str]
+    paths: list[str]
+    tags: list[str]
     status: str = "pending"
     created_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
-    nodes_completed: List[str] = field(default_factory=list)
+    completed_at: datetime | None = None
+    nodes_completed: list[str] = field(default_factory=list)
     progress: float = 0.0
 
 class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -200,15 +200,15 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.module_id = self.module_name
         self.module_version = "2.0.0"
         self._initialized = False
-        self._nodes: Dict[str, CDNNode] = {}
-        self._origins: Dict[str, OriginServer] = {}
-        self._cache_rules: List[CacheRule] = []
-        self._waf_rules: Dict[str, WAFRule] = {}
-        self._purge_tasks: Dict[str, PurgeTask] = {}
-        self._ssl_certs: Dict[str, Dict] = {}
-        self._rate_limits: Dict[str, Dict] = {}
-        self._access_logs: List[Dict] = []
-        self._realtime_metrics: Dict[str, Any] = {
+        self._nodes: dict[str, CDNNode] = {}
+        self._origins: dict[str, OriginServer] = {}
+        self._cache_rules: list[CacheRule] = []
+        self._waf_rules: dict[str, WAFRule] = {}
+        self._purge_tasks: dict[str, PurgeTask] = {}
+        self._ssl_certs: dict[str, dict] = {}
+        self._rate_limits: dict[str, dict] = {}
+        self._access_logs: list[dict] = []
+        self._realtime_metrics: dict[str, Any] = {
             "requests_per_second": 0,
             "bandwidth_mbps": 0,
             "cache_hit_rate": 0,
@@ -221,9 +221,9 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._cache_misses = 0
         self._errors_4xx = 0
         self._errors_5xx = 0
-        self._geo_blocklist: List[str] = []
-        self._ip_blocklist: List[str] = []
-        self._ip_allowlist: List[str] = []
+        self._geo_blocklist: list[str] = []
+        self._ip_blocklist: list[str] = []
+        self._ip_allowlist: list[str] = []
 
     def initialize(self) -> None:
         if self._initialized:
@@ -342,7 +342,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             f"[{self.module_name}] 初始化完成，节点:{len(self._nodes)} 源站:{len(self._origins)} 缓存规则:{len(self._cache_rules)}"
         )
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("cdn_ops_total")
 
@@ -383,7 +383,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.error(f"[{self.module_name}] 操作 {operation} 异常: {e}")
             return {"success": False, "error": str(e)}
 
-    def _list_nodes(self, region: str = None, status: str = None) -> Dict:
+    def _list_nodes(self, region: str = None, status: str = None) -> dict:
         nodes = list(self._nodes.values())
         if region:
             nodes = [n for n in nodes if n.region == region]
@@ -413,7 +413,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _add_node(
         self, node_id: str, name: str, region: str, city: str, ip_address: str, bandwidth_gbps: float = 10.0
-    ) -> Dict:
+    ) -> dict:
         if node_id in self._nodes:
             return {"success": False, "error": f"节点 {node_id} 已存在"}
         node = CDNNode(node_id, name, region, city, ip_address, bandwidth_gbps=bandwidth_gbps)
@@ -421,7 +421,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._nodes[node_id] = node
         return {"success": True, "result": {"node_id": node_id, "name": name, "status": "added"}}
 
-    def _remove_node(self, node_id: str) -> Dict:
+    def _remove_node(self, node_id: str) -> dict:
         if node_id not in self._nodes:
             return {"success": False, "error": f"节点 {node_id} 不存在"}
         node = self._nodes.pop(node_id)
@@ -429,7 +429,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         logger.info(f"[CDN] 节点 {node_id} 已移除")
         return {"success": True, "result": {"node_id": node_id, "action": "removed"}}
 
-    def _node_health_check(self, node_id: str) -> Dict:
+    def _node_health_check(self, node_id: str) -> dict:
         if node_id not in self._nodes:
             return {"success": False, "error": f"节点 {node_id} 不存在"}
         node = self._nodes[node_id]
@@ -462,7 +462,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _route_request(self, client_region: str = "north-china", path: str = "/", host: str = "cdn.bgos.com") -> Dict:
+    def _route_request(self, client_region: str = "north-china", path: str = "/", host: str = "cdn.bgos.com") -> dict:
         # 按地域选择最优节点
         candidates = [n for n in self._nodes.values() if n.status in (NodeStatus.HEALTHY, NodeStatus.DEGRADED)]
         if not candidates:
@@ -526,13 +526,13 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         cache_ttl: int = 3600,
         bypass_cache: bool = False,
         priority: int = 50,
-    ) -> Dict:
+    ) -> dict:
         rule = CacheRule(rule_id, name, path_pattern, cache_ttl=cache_ttl, bypass_cache=bypass_cache, priority=priority)
         self._cache_rules.append(rule)
         self._cache_rules.sort(key=lambda r: r.priority)
         return {"success": True, "result": {"rule_id": rule_id, "name": name, "ttl": cache_ttl}}
 
-    def _list_cache_rules(self) -> Dict:
+    def _list_cache_rules(self) -> dict:
         result = [
             {
                 "rule_id": r.rule_id,
@@ -546,7 +546,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
         return {"success": True, "result": {"rules": result, "total": len(result)}}
 
-    def _evaluate_cache(self, path: str) -> Dict:
+    def _evaluate_cache(self, path: str) -> dict:
         for rule in sorted(self._cache_rules, key=lambda r: r.priority):
             import re
 
@@ -565,7 +565,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 }
         return {"success": True, "result": {"cacheable": True, "ttl": 3600, "rule": "default"}}
 
-    def _purge_cache(self, paths: List[str] = None, tags: List[str] = None, scope: str = "all") -> Dict:
+    def _purge_cache(self, paths: list[str] = None, tags: list[str] = None, scope: str = "all") -> dict:
         task_id = f"purge_{int(time.time())}"
         paths = paths or ["/"]
         tags = tags or []
@@ -595,7 +595,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _purge_status(self, task_id: str) -> Dict:
+    def _purge_status(self, task_id: str) -> dict:
         if task_id not in self._purge_tasks:
             return {"success": False, "error": f"清除任务 {task_id} 不存在"}
         task = self._purge_tasks[task_id]
@@ -611,7 +611,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _list_origins(self) -> Dict:
+    def _list_origins(self) -> dict:
         result = []
         for o in self._origins.values():
             result.append(
@@ -635,13 +635,13 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         origin_type: str = "https",
         weight: int = 100,
         backup: bool = False,
-    ) -> Dict:
+    ) -> dict:
         otype = OriginType(origin_type)
         origin = OriginServer(origin_id, name, endpoint, otype, weight=weight, backup=backup)
         self._origins[origin_id] = origin
         return {"success": True, "result": {"origin_id": origin_id, "endpoint": endpoint}}
 
-    def _failover_origin(self, from_origin: str) -> Dict:
+    def _failover_origin(self, from_origin: str) -> dict:
         if from_origin not in self._origins:
             return {"success": False, "error": f"源站 {from_origin} 不存在"}
         self._origins[from_origin].status = "unhealthy"
@@ -662,7 +662,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _waf_evaluate(
         self, ip: str, path: str = "/", method: str = "GET", query: str = "", user_agent: str = ""
-    ) -> Dict:
+    ) -> dict:
         actions = []
         for rule in sorted(self._waf_rules.values(), key=lambda r: r.priority):
             if not rule.enabled:
@@ -698,12 +698,12 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _add_waf_rule(
         self, rule_id: str, name: str, rule_type: str = "custom", action: str = "block", priority: int = 100
-    ) -> Dict:
+    ) -> dict:
         rule = WAFRule(rule_id, name, rule_type, action=action, priority=priority)
         self._waf_rules[rule_id] = rule
         return {"success": True, "result": {"rule_id": rule_id, "name": name, "action": action}}
 
-    def _list_waf_rules(self) -> Dict:
+    def _list_waf_rules(self) -> dict:
         result = [
             {
                 "rule_id": r.rule_id,
@@ -718,19 +718,19 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         ]
         return {"success": True, "result": {"rules": result, "total": len(result)}}
 
-    def _block_ip(self, ip: str, reason: str = "") -> Dict:
+    def _block_ip(self, ip: str, reason: str = "") -> dict:
         if ip not in self._ip_blocklist:
             self._ip_blocklist.append(ip)
         return {"success": True, "result": {"ip": ip, "action": "blocked", "reason": reason}}
 
-    def _allow_ip(self, ip: str) -> Dict:
+    def _allow_ip(self, ip: str) -> dict:
         if ip in self._ip_blocklist:
             self._ip_blocklist.remove(ip)
         if ip not in self._ip_allowlist:
             self._ip_allowlist.append(ip)
         return {"success": True, "result": {"ip": ip, "action": "whitelisted"}}
 
-    def _get_metrics(self) -> Dict:
+    def _get_metrics(self) -> dict:
         total_bw_gb = self._total_bandwidth_bytes / (1024**3)
         hit_rate = self._cache_hits / max(self._total_requests, 1)
         error_rate = (self._errors_4xx + self._errors_5xx) / max(self._total_requests, 1)
@@ -755,7 +755,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _get_realtime(self) -> Dict:
+    def _get_realtime(self) -> dict:
         avg_hit = self._cache_hits / max(self._total_requests, 1)
         avg_bw = (self._total_bandwidth_bytes / max(self._total_requests, 1)) / 1024
         return {
@@ -770,7 +770,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def _get_ssl_status(self) -> Dict:
+    def _get_ssl_status(self) -> dict:
         result = []
         for nid, node in self._nodes.items():
             cert_info = {
@@ -784,7 +784,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             result.append(cert_info)
         return {"success": True, "result": result, "total": len(result)}
 
-    def _set_rate_limit(self, scope: str, requests_per_second: int, burst: int = None) -> Dict:
+    def _set_rate_limit(self, scope: str, requests_per_second: int, burst: int = None) -> dict:
         self._rate_limits[scope] = {
             "requests_per_second": requests_per_second,
             "burst": burst or requests_per_second * 2,
@@ -801,7 +801,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
         logger.info(f"[{self.module_name}] 已关闭，所有节点进入draining状态")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() if hasattr(super(), "health_check") else None
         result = dict(base) if base else {}
         healthy = sum(1 for n in self._nodes.values() if n.status == NodeStatus.HEALTHY)
@@ -825,7 +825,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return result
 
-    def _record_audit(self, action: str, details: Dict = None) -> None:
+    def _record_audit(self, action: str, details: dict = None) -> None:
         """记录CDN操作审计"""
         if not hasattr(self, "_audit_entries"):
             self._audit_entries = []
@@ -835,7 +835,7 @@ class CDNManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if len(self._audit_entries) > 5000:
             self._audit_entries = self._audit_entries[-5000:]
 
-    def get_audit_entries(self, action: str = None, limit: int = 100) -> List[Dict]:
+    def get_audit_entries(self, action: str = None, limit: int = 100) -> list[dict]:
         """查询审计日志"""
         entries = getattr(self, "_audit_entries", [])
         if action:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -131,14 +130,14 @@ class RouteConfig:
     route_id: str = field(default_factory=lambda: f"rt_{uuid.uuid4().hex[:8]}")
     path_pattern: str = "/"
     match_type: RouteMatch = RouteMatch.PREFIX
-    methods: List[str] = field(default_factory=lambda: ["GET", "POST"])
+    methods: list[str] = field(default_factory=lambda: ["GET", "POST"])
     upstream: str = ""
     auth_type: AuthType = AuthType.NONE
     rate_limit: int = 1000  # req/min
     timeout_ms: int = 30000
     retry_count: int = 0
     strip_prefix: bool = False
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     enabled: bool = True
     priority: int = 0
 
@@ -148,7 +147,7 @@ class UpstreamConfig:
 
     upstream_id: str = field(default_factory=lambda: f"up_{uuid.uuid4().hex[:8]}")
     name: str = ""
-    targets: List[str] = field(default_factory=list)
+    targets: list[str] = field(default_factory=list)
     load_balance: str = "round_robin"  # round_robin | random | least_conn
     health_check_path: str = "/health"
     health_check_interval: int = 10
@@ -162,9 +161,9 @@ class GatewayRequest:
     request_id: str = field(default_factory=lambda: f"req_{uuid.uuid4().hex[:10]}")
     method: str = "GET"
     path: str = "/"
-    headers: Dict[str, str] = field(default_factory=dict)
-    query: Dict[str, str] = field(default_factory=dict)
-    body: Optional[str] = None
+    headers: dict[str, str] = field(default_factory=dict)
+    query: dict[str, str] = field(default_factory=dict)
+    body: str | None = None
     client_ip: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     trace_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
@@ -175,8 +174,8 @@ class GatewayResponse:
 
     request_id: str = ""
     status_code: int = 200
-    body: Optional[str] = None
-    headers: Dict[str, str] = field(default_factory=dict)
+    body: str | None = None
+    headers: dict[str, str] = field(default_factory=dict)
     duration_ms: float = 0.0
     upstream: str = ""
     route_id: str = ""
@@ -195,7 +194,7 @@ class RateLimitRule:
 class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """API网关管理器"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config or {})
         self.module_name = "API网关管理器"
@@ -204,13 +203,13 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self.version = "V0.1"
         self._initialized = False
 
-        self._routes: Dict[str, RouteConfig] = {}
-        self._upstreams: Dict[str, UpstreamConfig] = {}
-        self._rate_limits: Dict[str, RateLimitRule] = {}
-        self._rate_counters: Dict[str, List[float]] = defaultdict(list)
-        self._request_log: List[Dict[str, Any]] = []
-        self._lb_index: Dict[str, int] = defaultdict(int)
-        self._api_keys: Dict[str, Dict[str, Any]] = {
+        self._routes: dict[str, RouteConfig] = {}
+        self._upstreams: dict[str, UpstreamConfig] = {}
+        self._rate_limits: dict[str, RateLimitRule] = {}
+        self._rate_counters: dict[str, list[float]] = defaultdict(list)
+        self._request_log: list[dict[str, Any]] = []
+        self._lb_index: dict[str, int] = defaultdict(int)
+        self._api_keys: dict[str, dict[str, Any]] = {
             "bgos_internal": {"name": "BGOS内部调用", "roles": ["admin"], "rate_limit": 10000},
             "partner_api": {"name": "合作伙伴API", "roles": ["read"], "rate_limit": 1000},
         }
@@ -290,7 +289,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._initialized = False
         logger.info("[ClawGateway] 网关已关闭")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy" if self._initialized else "stopped",
             "healthy": True,
@@ -300,7 +299,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "version": "V0.1",
         }
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("claw_gateway_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -355,7 +354,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _add_route(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_route(self, params: dict[str, Any]) -> dict[str, Any]:
         rt = RouteConfig(
             path_pattern=params.get("path", "/"),
             match_type=RouteMatch(params.get("match_type", "prefix")),
@@ -370,13 +369,13 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._routes[rt.route_id] = rt
         return {"success": True, "result": {"route_id": rt.route_id, "path": rt.path_pattern}}
 
-    def _remove_route(self, route_id: str) -> Dict[str, Any]:
+    def _remove_route(self, route_id: str) -> dict[str, Any]:
         if route_id in self._routes:
             del self._routes[route_id]
             return {"success": True, "result": {"removed": True}}
         return {"success": False, "error": "路由不存在"}
 
-    def _add_upstream(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_upstream(self, params: dict[str, Any]) -> dict[str, Any]:
         up = UpstreamConfig(
             name=params.get("name", ""),
             targets=params.get("targets", []),
@@ -385,7 +384,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._upstreams[up.upstream_id] = up
         return {"success": True, "result": {"upstream_id": up.upstream_id, "name": up.name}}
 
-    def _route_request(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _route_request(self, params: dict[str, Any]) -> dict[str, Any]:
         """模拟路由请求"""
         req = GatewayRequest(
             method=params.get("method", "GET"),
@@ -459,17 +458,13 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _find_route(self, method: str, path: str) -> Optional[RouteConfig]:
+    def _find_route(self, method: str, path: str) -> RouteConfig | None:
         """路由匹配"""
         candidates = []
         for rt in self._routes.values():
             if not rt.enabled or method not in rt.methods:
                 continue
-            if rt.match_type == RouteMatch.EXACT and rt.path_pattern == path:
-                candidates.append(rt)
-            elif rt.match_type == RouteMatch.PREFIX and path.startswith(rt.path_pattern):
-                candidates.append(rt)
-            elif rt.match_type == RouteMatch.REGEX and re.match(rt.path_pattern, path):
+            if rt.match_type == RouteMatch.EXACT and rt.path_pattern == path or rt.match_type == RouteMatch.PREFIX and path.startswith(rt.path_pattern) or rt.match_type == RouteMatch.REGEX and re.match(rt.path_pattern, path):
                 candidates.append(rt)
         if not candidates:
             return None
@@ -491,7 +486,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 return up.targets[0]
         return "unknown"
 
-    def _match_route(self, method: str, path: str) -> Dict[str, Any]:
+    def _match_route(self, method: str, path: str) -> dict[str, Any]:
         rt = self._find_route(method, path)
         if not rt:
             return {"success": False, "error": "no_match", "status_code": 404}
@@ -505,7 +500,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             },
         }
 
-    def _authenticate(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _authenticate(self, params: dict[str, Any]) -> dict[str, Any]:
         auth_type = params.get("auth_type", "api_key")
         credential = params.get("credential", "")
 
@@ -521,7 +516,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             return {"success": True, "result": {"authenticated": True, "auth_type": "none"}}
         return {"success": False, "error": "unsupported_auth_type"}
 
-    def _check_rate_limit(self, key: str, route_id: str = "") -> Dict[str, Any]:
+    def _check_rate_limit(self, key: str, route_id: str = "") -> dict[str, Any]:
         limit_key = f"{key}:{route_id}"
         now = time.time()
         window = 60.0
@@ -544,7 +539,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             }
         return {"allowed": True, "count": count, "limit": limit}
 
-    def _add_rate_limit(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_rate_limit(self, params: dict[str, Any]) -> dict[str, Any]:
         rule = RateLimitRule(
             name=params.get("name", ""),
             limit=params.get("limit", 1000),
@@ -554,7 +549,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._rate_limits[rule.rule_id] = rule
         return {"success": True, "result": {"rule_id": rule.rule_id, "name": rule.name}}
 
-    def _audit_event(self, event: str, detail: Dict) -> None:
+    def _audit_event(self, event: str, detail: dict) -> None:
         """记录网关审计日志"""
         if hasattr(self, "_audit") and self._audit:
             self._audit.log(event, detail)
@@ -565,7 +560,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def audit_auth_result(self, client_id: str, success: bool, reason: str = "") -> None:
         self._audit_event("auth_result", {"client_id": client_id, "success": success, "reason": reason})
 
-    def get_gateway_stats(self) -> Dict:
+    def get_gateway_stats(self) -> dict:
         """获取网关运行统计"""
         return {
             "total_routes": len(self._routes),
@@ -574,7 +569,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "upstream_targets": {name: len(up.targets) for name, up in self._upstreams.items()},
         }
 
-    def list_active_connections(self) -> List[Dict]:
+    def list_active_connections(self) -> list[dict]:
         """列出活跃连接"""
         connections = []
         for name, up in self._upstreams.items():
@@ -582,7 +577,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 connections.append({"upstream": name, "target": target.target, "healthy": target.healthy})
         return connections
 
-    def health_check_upstreams(self) -> Dict:
+    def health_check_upstreams(self) -> dict:
         """检查所有上游健康状态"""
         results = {}
         for name, up in self._upstreams.items():
@@ -598,7 +593,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
     def log_request(self, method: str, path: str, status_code: int, duration_ms: float, client_ip: str = "") -> None:
         """记录请求日志"""
         if not hasattr(self, "_request_log"):
-            self._request_log: List[Dict] = []
+            self._request_log: list[dict] = []
         self._request_log.append(
             {
                 "method": method,
@@ -612,7 +607,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         if len(self._request_log) > 1000:
             self._request_log[:] = self._request_log[-500:]
 
-    def get_rate_limit_stats(self) -> Dict:
+    def get_rate_limit_stats(self) -> dict:
         """获取限流规则统计"""
         stats = {}
         for rule_id, rule in self._rate_limits.items():
@@ -624,7 +619,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             }
         return stats
 
-    def get_top_paths(self, n: int = 10) -> List[Dict]:
+    def get_top_paths(self, n: int = 10) -> list[dict]:
         """获取请求量最高的路径"""
         if not hasattr(self, "_request_log") or not self._request_log:
             return []
@@ -633,7 +628,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         path_counts = Counter((r["method"], r["path"]) for r in self._request_log)
         return [{"method": p[0], "path": p[1], "count": c} for p, c in path_counts.most_common(n)]
 
-    def batch_remove_routes(self, route_ids: List[str]) -> Dict:
+    def batch_remove_routes(self, route_ids: list[str]) -> dict:
         """批量删除路由"""
         removed = 0
         not_found = 0
@@ -647,7 +642,7 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             self.audit_route_change("batch_remove", str(route_ids))
         return {"removed": removed, "not_found": not_found}
 
-    def export_config(self) -> Dict:
+    def export_config(self) -> dict:
         """导出网关配置"""
         routes = [
             {"route_id": r.route_id, "path": r.path_pattern, "method": r.method, "upstream": r.upstream_name}
@@ -659,14 +654,14 @@ class ClawGatewayManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         ]
         return {"routes": routes, "upstreams": upstreams, "rate_limits": self.get_rate_limit_stats()}
 
-    def analyze_request_patterns(self) -> Dict[str, Any]:
+    def analyze_request_patterns(self) -> dict[str, Any]:
         """分析网关请求模式：频率分布、异常IP检测、路径热力图"""
         logs = self._access_logs if hasattr(self, "_access_logs") else []
         if not logs:
             return {"total_requests": 0}
-        ip_counts: Dict[str, int] = {}
-        path_counts: Dict[str, int] = {}
-        status_counts: Dict[str, int] = {}
+        ip_counts: dict[str, int] = {}
+        path_counts: dict[str, int] = {}
+        status_counts: dict[str, int] = {}
         for log in logs:
             ip = log.get("ip", "unknown")
             path = log.get("path", "/")

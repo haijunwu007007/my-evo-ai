@@ -81,7 +81,8 @@ import uuid
 import logging
 import json
 import re
-from typing import Any, Dict, List, Optional, Callable, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from enum import Enum
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -167,9 +168,9 @@ class AutomationTemplate:
     name: str
     description: str
     category: str
-    steps: List[Dict[str, Any]]
-    config_schema: Dict[str, Any] = field(default_factory=dict)
-    required_modules: List[str] = field(default_factory=list)
+    steps: list[dict[str, Any]]
+    config_schema: dict[str, Any] = field(default_factory=dict)
+    required_modules: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     usage_count: int = 0
 
@@ -180,9 +181,9 @@ class TriggerDefinition:
     trigger_id: str
     name: str
     trigger_type: TriggerType
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     enabled: bool = True
-    last_fired: Optional[float] = None
+    last_fired: float | None = None
     fire_count: int = 0
 
 @dataclass
@@ -195,11 +196,11 @@ class AutomationExecution:
     status: ExecutionStatus = ExecutionStatus.PENDING
     steps_total: int = 0
     steps_completed: int = 0
-    input_data: Dict[str, Any] = field(default_factory=dict)
-    output_data: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    input_data: dict[str, Any] = field(default_factory=dict)
+    output_data: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+    started_at: float | None = None
+    completed_at: float | None = None
     duration_ms: float = 0.0
     retries: int = 0
 
@@ -211,25 +212,25 @@ class Automation:
     name: str
     description: str
     trigger: TriggerDefinition
-    steps: List[Dict[str, Any]]
+    steps: list[dict[str, Any]]
     timeout_seconds: int = 300
-    retry_policy: Dict[str, Any] = field(default_factory=lambda: {"max_retries": 3, "backoff_base": 2.0})
+    retry_policy: dict[str, Any] = field(default_factory=lambda: {"max_retries": 3, "backoff_base": 2.0})
     enabled: bool = True
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
-    last_executed: Optional[float] = None
+    last_executed: float | None = None
     execution_count: int = 0
     success_count: int = 0
-    stats: Dict[str, Any] = field(default_factory=lambda: {"total_duration_ms": 0.0, "avg_duration_ms": 0.0})
+    stats: dict[str, Any] = field(default_factory=lambda: {"total_duration_ms": 0.0, "avg_duration_ms": 0.0})
 
-class TriggerAnalyzer(object):
+class TriggerAnalyzer:
     """触发器分析引擎 — 解析复杂触发条件、评估触发概率、推荐触发策略"""
 
     def __init__(self):
-        self._condition_cache: Dict[str, bool] = {}
-        self._trigger_history: List[Dict] = []
+        self._condition_cache: dict[str, bool] = {}
+        self._trigger_history: list[dict] = []
 
-    def parse_cron(self, cron_expr: str) -> Dict[str, Any]:
+    def parse_cron(self, cron_expr: str) -> dict[str, Any]:
         """解析cron表达式为结构化描述"""
         parts = cron_expr.strip().split()
         if len(parts) != 5:
@@ -241,7 +242,7 @@ class TriggerAnalyzer(object):
         parsed["valid"] = True
         return parsed
 
-    def _expand_field(self, field: str, name: str) -> List[int]:
+    def _expand_field(self, field: str, name: str) -> list[int]:
         """展开cron字段为具体值列表"""
         values = set()
         for part in field.split(","):
@@ -263,7 +264,7 @@ class TriggerAnalyzer(object):
     def _max_val(name: str) -> int:
         return {"minute": 60, "hour": 24, "day": 32, "month": 13, "weekday": 7}.get(name, 60)
 
-    def evaluate_condition(self, condition: Dict, context: Dict) -> bool:
+    def evaluate_condition(self, condition: dict, context: dict) -> bool:
         """评估复合触发条件是否满足"""
         op = condition.get("operator", "and")
         checks = condition.get("conditions", [])
@@ -290,7 +291,7 @@ class TriggerAnalyzer(object):
             return True
         return all(results) if op == "and" else any(results)
 
-    def recommend_schedule(self, execution_history: List[Dict]) -> Dict[str, Any]:
+    def recommend_schedule(self, execution_history: list[dict]) -> dict[str, Any]:
         """基于历史执行模式推荐最优调度策略"""
         if not execution_history:
             return {"recommendation": "hourly", "confidence": 0.0, "reason": "no history"}
@@ -316,13 +317,13 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._automations: Dict[str, Automation] = {}
-        self._templates: Dict[str, AutomationTemplate] = {}
-        self._executions: Dict[str, AutomationExecution] = {}
-        self._event_handlers: Dict[str, List[str]] = defaultdict(list)
-        self._scheduled_tasks: Dict[str, asyncio.Task] = {}
-        self._condition_monitors: Dict[str, asyncio.Task] = {}
-        self._hooks: Dict[str, List[Callable]] = defaultdict(list)
+        self._automations: dict[str, Automation] = {}
+        self._templates: dict[str, AutomationTemplate] = {}
+        self._executions: dict[str, AutomationExecution] = {}
+        self._event_handlers: dict[str, list[str]] = defaultdict(list)
+        self._scheduled_tasks: dict[str, asyncio.Task] = {}
+        self._condition_monitors: dict[str, asyncio.Task] = {}
+        self._hooks: dict[str, list[Callable]] = defaultdict(list)
         self._max_automations = 500
         self._max_concurrent = 20
         self._semaphore = asyncio.Semaphore(self._max_concurrent)
@@ -415,11 +416,11 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         name: str,
         description: str,
         trigger_type: TriggerType,
-        trigger_config: Dict[str, Any],
-        steps: List[Dict[str, Any]],
+        trigger_config: dict[str, Any],
+        steps: list[dict[str, Any]],
         timeout: int = 300,
-        tags: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         """创建自动化规则"""
         try:
             if len(self._automations) >= self._max_automations:
@@ -467,9 +468,9 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         template_id: str,
         name: str,
         trigger_type: TriggerType,
-        trigger_config: Dict[str, Any],
-        params: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        trigger_config: dict[str, Any],
+        params: dict | None = None,
+    ) -> dict[str, Any]:
         """从模板创建自动化"""
         if template_id not in self._templates:
             raise ValueError(f"模板 {template_id} 不存在")
@@ -497,7 +498,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
 
     @trace_operation("execute_automation")
-    def execute_automation(self, automation_id: str, input_data: Optional[Dict] = None) -> Dict[str, Any]:
+    def execute_automation(self, automation_id: str, input_data: dict | None = None) -> dict[str, Any]:
         """执行自动化"""
         try:
             if automation_id not in self._automations:
@@ -524,7 +525,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.stats["errors"] += 1
             raise
 
-    def _run_execution(self, auto: Automation, execution: AutomationExecution) -> Dict[str, Any]:
+    def _run_execution(self, auto: Automation, execution: AutomationExecution) -> dict[str, Any]:
         """运行执行流程"""
         start = time.time()
         execution.status = ExecutionStatus.RUNNING
@@ -550,7 +551,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             execution.output_data = step_outputs
             auto.success_count += 1
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             execution.status = ExecutionStatus.TIMEOUT
             execution.error = f"执行超时 ({auto.timeout_seconds}s)"
         except Exception as e:
@@ -587,8 +588,8 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     def _execute_step(
-        self, action: str, params: Dict, prev_outputs: Dict, execution: AutomationExecution
-    ) -> Dict[str, Any]:
+        self, action: str, params: dict, prev_outputs: dict, execution: AutomationExecution
+    ) -> dict[str, Any]:
         """执行单个步骤"""
         step_start = time.time()
         try:
@@ -620,21 +621,21 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "action": action, "error": str(e)}
 
-    def _step_collect_metrics(self, params, prev) -> Dict:
+    def _step_collect_metrics(self, params, prev) -> dict:
         return {
             "metrics_collected": 42,
             "time_range": params.get("period", "daily"),
             "data_points": {"cpu": 0.65, "memory": 0.72, "disk": 0.45},
         }
 
-    def _step_analyze_trends(self, params, prev) -> Dict:
+    def _step_analyze_trends(self, params, prev) -> dict:
         return {
             "trends": [{"metric": "cpu", "direction": "stable", "change": 0.02}],
             "anomalies": [],
             "insights": ["系统运行平稳"],
         }
 
-    def _step_generate_report(self, params, prev) -> Dict:
+    def _step_generate_report(self, params, prev) -> dict:
         fmt = params.get("format", "pdf")
         return {
             "report_id": f"rpt_{uuid.uuid4().hex[:8]}",
@@ -643,7 +644,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "generated_at": datetime.now().isoformat(),
         }
 
-    def _step_send_notification(self, params, prev) -> Dict:
+    def _step_send_notification(self, params, prev) -> dict:
         return {
             "delivered": True,
             "channel": params.get("channel", "email"),
@@ -651,7 +652,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "sent_at": datetime.now().isoformat(),
         }
 
-    def _step_check_services(self, params, prev) -> Dict:
+    def _step_check_services(self, params, prev) -> dict:
         return {
             "services_checked": 12,
             "healthy": 11,
@@ -659,22 +660,22 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "details": [{"name": "api-gateway", "status": "healthy", "latency_ms": 45}],
         }
 
-    def _step_extract_data(self, params, prev) -> Dict:
+    def _step_extract_data(self, params, prev) -> dict:
         return {"rows_extracted": 1500, "sources": params.get("sources", ["database"]), "duration_ms": 320}
 
-    def _step_transform(self, params, prev) -> Dict:
+    def _step_transform(self, params, prev) -> dict:
         return {"rows_transformed": 1480, "rows_filtered": 20, "rules_applied": len(params.get("rules", [])) or 5}
 
-    def _step_validate(self, params, prev) -> Dict:
+    def _step_validate(self, params, prev) -> dict:
         return {"valid": True, "errors": [], "warnings": 1, "schema_match": 0.99}
 
-    def _step_load(self, params, prev) -> Dict:
+    def _step_load(self, params, prev) -> dict:
         return {"rows_loaded": 1480, "target": params.get("target", "data_warehouse"), "duplicates_skipped": 5}
 
-    def _step_snapshot_config(self, params, prev) -> Dict:
+    def _step_snapshot_config(self, params, prev) -> dict:
         return {"snapshot_id": f"snap_{uuid.uuid4().hex[:8]}", "files": 23, "size_bytes": 524288}
 
-    def _step_backup_database(self, params, prev) -> Dict:
+    def _step_backup_database(self, params, prev) -> dict:
         return {
             "backup_id": f"bk_{uuid.uuid4().hex[:8]}",
             "tables": 45,
@@ -682,13 +683,13 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "size_bytes": 15728640,
         }
 
-    def _step_scan_dependencies(self, params, prev) -> Dict:
+    def _step_scan_dependencies(self, params, prev) -> dict:
         return {"packages_scanned": 120, "vulnerabilities": 0, "outdated": 5, "compliant": True}
 
-    def _step_generic(self, params, prev) -> Dict:
+    def _step_generic(self, params, prev) -> dict:
         return {"executed": True, "params": list(params.keys()), "context_keys": list(prev.keys())}
 
-    def fire_event(self, event_name: str, event_data: Optional[Dict] = None) -> List[Dict]:
+    def fire_event(self, event_name: str, event_data: dict | None = None) -> list[dict]:
         """触发事件"""
         results = []
         automation_ids = self._event_handlers.get(event_name, [])
@@ -725,7 +726,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.stats["automations_deleted"] += 1
         return True
 
-    def list_automations(self, tag: Optional[str] = None, enabled_only: bool = False) -> List[Dict]:
+    def list_automations(self, tag: str | None = None, enabled_only: bool = False) -> list[dict]:
         """列出自动化规则"""
         result = []
         for auto in self._automations.values():
@@ -747,7 +748,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return result
 
-    def list_templates(self) -> List[Dict]:
+    def list_templates(self) -> list[dict]:
         """列出自动化模板"""
         return [
             {
@@ -760,7 +761,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for t in self._templates.values()
         ]
 
-    def get_execution_history(self, limit: int = 50, status: Optional[str] = None) -> List[Dict]:
+    def get_execution_history(self, limit: int = 50, status: str | None = None) -> list[dict]:
         """获取执行历史"""
         executions = list(self._executions.values())
         if status:
@@ -826,7 +827,7 @@ class AutomationHub(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         active = sum(1 for a in self._automations.values() if a.enabled)
         base.update(

@@ -83,7 +83,7 @@ import uuid
 import hashlib
 import json
 from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from dataclasses import dataclass, field
 
@@ -137,9 +137,9 @@ class AgentDefinition:
     model: str = "gpt-4"
     temperature: float = 0.7
     max_tokens: int = 4096
-    tools: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    tools: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 @dataclass
 class ChatMessage:
@@ -150,8 +150,8 @@ class ChatMessage:
     sender_id: str = ""
     role: str = "assistant"
     content: str = ""
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    metadata: dict[str, Any] = field(default_factory=dict)
     token_count: int = 0
 
 @dataclass
@@ -161,14 +161,14 @@ class Conversation:
     conv_id: str = field(default_factory=lambda: f"conv_{uuid.uuid4().hex[:10]}")
     title: str = ""
     status: ConversationStatus = ConversationStatus.ACTIVE
-    agents: List[str] = field(default_factory=list)
-    messages: List[ChatMessage] = field(default_factory=list)
+    agents: list[str] = field(default_factory=list)
+    messages: list[ChatMessage] = field(default_factory=list)
     max_rounds: int = 50
     current_round: int = 0
     termination: TerminationCondition = TerminationCondition.MAX_ROUNDS
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AgentGroup:
@@ -177,11 +177,11 @@ class AgentGroup:
     group_id: str = field(default_factory=lambda: f"grp_{uuid.uuid4().hex[:8]}")
     name: str = ""
     description: str = ""
-    agent_ids: List[str] = field(default_factory=list)
+    agent_ids: list[str] = field(default_factory=list)
     routing_strategy: str = "sequential"  # sequential, round_robin, router
     max_rounds: int = 20
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    metadata: dict[str, Any] = field(default_factory=dict)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 @dataclass
 class SkillDefinition:
@@ -191,9 +191,9 @@ class SkillDefinition:
     name: str = ""
     description: str = ""
     handler: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    required_permissions: List[str] = field(default_factory=list)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    parameters: dict[str, Any] = field(default_factory=dict)
+    required_permissions: list[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """AutoGen Studio 多智能体编排管理器"""
@@ -208,15 +208,15 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self.module_description = "AutoGen风格的多智能体对话编排与角色管理"
 
         # 智能体注册表
-        self._agents: Dict[str, AgentDefinition] = {}
+        self._agents: dict[str, AgentDefinition] = {}
         # 对话会话存储
-        self._conversations: Dict[str, Conversation] = {}
+        self._conversations: dict[str, Conversation] = {}
         # 智能体组
-        self._groups: Dict[str, AgentGroup] = {}
+        self._groups: dict[str, AgentGroup] = {}
         # 工具/技能
-        self._skills: Dict[str, SkillDefinition] = {}
+        self._skills: dict[str, SkillDefinition] = {}
         # 对话历史索引（用于搜索）
-        self._message_index: List[Dict[str, str]] = []
+        self._message_index: list[dict[str, str]] = []
 
         self._initialized = False
 
@@ -320,7 +320,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._initialized = True
         logger.info(f"AutoGen Studio 初始化完成: {len(self._agents)} 智能体, {len(self._skills)} 技能")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行模块操作"""
         _ = self.trace("execute")
         params = params or {}
@@ -356,7 +356,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     # ── 智能体管理 ──
 
-    def _op_register_agent(self, p: Dict) -> Dict:
+    def _op_register_agent(self, p: dict) -> dict:
         agent_id = p.get("agent_id", f"agent_{uuid.uuid4().hex[:8]}")
         if agent_id in self._agents:
             return {"success": False, "error": f"智能体 {agent_id} 已存在"}
@@ -375,7 +375,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         logger.info(f"注册智能体: {agent_id} ({agent.name})")
         return {"success": True, "result": {"agent_id": agent_id, "name": agent.name, "role": agent.role.value}}
 
-    def _op_update_agent(self, p: Dict) -> Dict:
+    def _op_update_agent(self, p: dict) -> dict:
         aid = p.get("agent_id")
         if not aid or aid not in self._agents:
             return {"success": False, "error": "智能体不存在"}
@@ -388,7 +388,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         logger.info(f"更新智能体: {aid}")
         return {"success": True, "result": {"agent_id": aid, "name": a.name}}
 
-    def _op_list_agents(self, p: Dict) -> Dict:
+    def _op_list_agents(self, p: dict) -> dict:
         role_filter = p.get("role")
         result = []
         for a in self._agents.values():
@@ -406,7 +406,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             )
         return {"success": True, "result": result}
 
-    def _op_get_agent(self, p: Dict) -> Dict:
+    def _op_get_agent(self, p: dict) -> dict:
         aid = p.get("agent_id")
         if not aid or aid not in self._agents:
             return {"success": False, "error": "智能体不存在"}
@@ -426,7 +426,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _op_delete_agent(self, p: Dict) -> Dict:
+    def _op_delete_agent(self, p: dict) -> dict:
         aid = p.get("agent_id")
         if not aid or aid not in self._agents:
             return {"success": False, "error": "智能体不存在"}
@@ -436,7 +436,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     # ── 对话管理 ──
 
-    def _op_create_conversation(self, p: Dict) -> Dict:
+    def _op_create_conversation(self, p: dict) -> dict:
         conv = Conversation(
             title=p.get("title", "新对话"),
             agents=p.get("agents", ["assistant_default"]),
@@ -456,7 +456,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         logger.info(f"创建对话: {conv.conv_id} ({conv.title})")
         return {"success": True, "result": {"conv_id": conv.conv_id, "title": conv.title, "agents": conv.agents}}
 
-    def _op_send_message(self, p: Dict) -> Dict:
+    def _op_send_message(self, p: dict) -> dict:
         conv_id = p.get("conversation_id")
         if not conv_id or conv_id not in self._conversations:
             return {"success": False, "error": "对话不存在"}
@@ -479,7 +479,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         msg.token_count = len(content) // 2  # 近似token数
         conv.messages.append(msg)
         conv.current_round += 1
-        conv.updated_at = datetime.now(timezone.utc).isoformat()
+        conv.updated_at = datetime.now(UTC).isoformat()
 
         # 索引消息
         self._message_index.append({"conv_id": conv_id, "msg_id": msg.msg_id, "content": content[:200]})
@@ -510,7 +510,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _op_get_conversation(self, p: Dict) -> Dict:
+    def _op_get_conversation(self, p: dict) -> dict:
         cid = p.get("conversation_id")
         if not cid or cid not in self._conversations:
             return {"success": False, "error": "对话不存在"}
@@ -539,7 +539,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _op_list_conversations(self, p: Dict) -> Dict:
+    def _op_list_conversations(self, p: dict) -> dict:
         status = p.get("status")
         limit = min(p.get("limit", 50), 200)
         result = []
@@ -560,18 +560,18 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 break
         return {"success": True, "result": result}
 
-    def _op_end_conversation(self, p: Dict) -> Dict:
+    def _op_end_conversation(self, p: dict) -> dict:
         cid = p.get("conversation_id")
         if not cid or cid not in self._conversations:
             return {"success": False, "error": "对话不存在"}
         c = self._conversations[cid]
         c.status = ConversationStatus(p.get("final_status", "completed"))
-        c.updated_at = datetime.now(timezone.utc).isoformat()
+        c.updated_at = datetime.now(UTC).isoformat()
         return {"success": True, "result": {"conv_id": cid, "status": c.status.value}}
 
     # ── 智能体组管理 ──
 
-    def _op_create_group(self, p: Dict) -> Dict:
+    def _op_create_group(self, p: dict) -> dict:
         gid = p.get("group_id", f"grp_{uuid.uuid4().hex[:8]}")
         group = AgentGroup(
             group_id=gid,
@@ -589,7 +589,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         logger.info(f"创建智能体组: {gid} ({group.name}), 策略: {group.routing_strategy}")
         return {"success": True, "result": {"group_id": gid, "name": group.name, "agents": group.agent_ids}}
 
-    def _op_run_group_chat(self, p: Dict) -> Dict:
+    def _op_run_group_chat(self, p: dict) -> dict:
         """模拟运行多智能体群聊"""
         self.audit("execute", f"action={action}")
 
@@ -638,7 +638,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             round_count = rnd + 1
 
         conv.current_round = round_count
-        conv.updated_at = datetime.now(timezone.utc).isoformat()
+        conv.updated_at = datetime.now(UTC).isoformat()
 
         metrics_collector.record("autogen_studio_group_chats")
         metrics_collector.histogram("autogen_studio_group_chat_rounds").observe(round_count)
@@ -653,7 +653,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _op_list_groups(self, p: Dict) -> Dict:
+    def _op_list_groups(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -670,7 +670,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     # ── 技能管理 ──
 
-    def _op_register_skill(self, p: Dict) -> Dict:
+    def _op_register_skill(self, p: dict) -> dict:
         sid = p.get("skill_id", f"skill_{uuid.uuid4().hex[:8]}")
         if sid in self._skills:
             return {"success": False, "error": f"技能 {sid} 已存在"}
@@ -686,7 +686,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         metrics_collector.gauge("autogen_studio_skills_total", len(self._skills))
         return {"success": True, "result": {"skill_id": sid, "name": skill.name}}
 
-    def _op_list_skills(self, p: Dict) -> Dict:
+    def _op_list_skills(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -703,7 +703,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
 
     # ── 搜索与统计 ──
 
-    def _op_search_conversations(self, p: Dict) -> Dict:
+    def _op_search_conversations(self, p: dict) -> dict:
         query = p.get("query", "").lower()
         limit = min(p.get("limit", 20), 100)
         if not query:
@@ -711,7 +711,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         matches = [m for m in self._message_index if query in m["content"].lower()]
         return {"success": True, "result": matches[:limit], "total": len(matches)}
 
-    def _op_get_stats(self, p: Dict) -> Dict:
+    def _op_get_stats(self, p: dict) -> dict:
         active = sum(1 for c in self._conversations.values() if c.status == ConversationStatus.ACTIVE)
         total_msgs = sum(len(c.messages) for c in self._conversations.values())
         total_tokens = sum(m.token_count for c in self._conversations.values() for m in c.messages)
@@ -729,7 +729,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.setdefault("status", "healthy")

@@ -152,29 +152,29 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._routes: Dict[str, RouteRule] = {}
-        self._backends: Dict[str, List[BackendInstance]] = {}
-        self._rr_index: Dict[str, int] = {}
+        self._routes: dict[str, RouteRule] = {}
+        self._backends: dict[str, list[BackendInstance]] = {}
+        self._rr_index: dict[str, int] = {}
         # 熔断器状态（每个upstream独立）
-        self._circuit_states: Dict[str, Dict] = {}
+        self._circuit_states: dict[str, dict] = {}
         self._circuit_threshold: int = 5
         self._circuit_timeout: float = 30.0
         # 健康检查
-        self._health_history: Dict[str, List[Dict]] = {}
+        self._health_history: dict[str, list[dict]] = {}
         self._health_check_interval: float = 10.0
         self._last_health_check: float = 0.0
         # 限流计数器
-        self._rl_counters: Dict[str, Dict] = {}
+        self._rl_counters: dict[str, dict] = {}
         # 连接池管理
         self._max_connections_per_backend: int = 100
         # 请求日志
-        self._request_log: List[Dict] = []
+        self._request_log: list[dict] = []
         self._max_request_log: int = 10000
 
     def initialize(self) -> None:
@@ -211,7 +211,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.audit("execute", f"action={action}")
         _ = self.trace("execute")  # 链路追踪span注册
 
@@ -388,7 +388,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         total_backends = sum(len(v) for v in self._backends.values())
         unhealthy = sum(1 for v in self._backends.values() for i in v if not i.healthy)
         open_cb = sum(1 for s in self._circuit_states.values() if s.get("state") == "open")
@@ -418,7 +418,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._request_log.clear()
         if self._audit:
 
-            def get_backend_health_summary(self) -> Dict[str, Any]:
+            def get_backend_health_summary(self) -> dict[str, Any]:
                 """获取后端健康概览：各后端可用率、平均延迟、熔断状态"""
 
         backends = self._backends if hasattr(self, "_backends") else {}
@@ -445,7 +445,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self.audit("poseidon_shutdown", summary)
         logger.info("Poseidon智能体已关闭")
 
-    def _route(self, path: str) -> Dict:
+    def _route(self, path: str) -> dict:
         """路由请求到后端（含熔断/限流/连接池检查）"""
         matched_rule = None
         for prefix, rule in self._routes.items():
@@ -545,7 +545,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             sum(i.connections for i in self._backends.get(upstream, [])),
         )
 
-    def batch_route(self, paths: List[str]) -> List[Dict]:
+    def batch_route(self, paths: list[str]) -> list[dict]:
         """批量路由多个路径"""
         results = []
         for path in paths:
@@ -554,7 +554,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         metrics_collector.histogram("poseidon_batch_route", len(paths))
         return {"total": len(paths), "routed": routed, "failed": len(paths) - routed, "results": results}
 
-    def get_top_routes(self, n: int = 10) -> List[Dict]:
+    def get_top_routes(self, n: int = 10) -> list[dict]:
         """获取请求量最高的路由"""
         sorted_routes = sorted(self._routes.values(), key=lambda r: r.request_count, reverse=True)
         return [
@@ -568,7 +568,7 @@ class AgentPoseidonManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             for r in sorted_routes[:n]
         ]
 
-    def _select(self, upstream: str, instances: List[BackendInstance], strategy: LBStrategy) -> BackendInstance:
+    def _select(self, upstream: str, instances: list[BackendInstance], strategy: LBStrategy) -> BackendInstance:
         if strategy == LBStrategy.ROUND_ROBIN:
             idx = self._rr_index.get(upstream, 0) % len(instances)
             self._rr_index[upstream] = idx + 1

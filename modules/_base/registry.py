@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - 模块注册器
 =============================
@@ -45,10 +44,10 @@ class ModuleInfo:
 
     def __init__(
         self,
-        module_class: Type[EnterpriseModule],
+        module_class: type[EnterpriseModule],
         category: str = "general",
-        tags: Optional[List[str]] = None,
-        dependencies: Optional[List[str]] = None,
+        tags: list[str] | None = None,
+        dependencies: list[str] | None = None,
         priority: int = 0,
     ):
         self.module_class = module_class
@@ -60,10 +59,10 @@ class ModuleInfo:
         self.tags = tags or []
         self.dependencies = dependencies or []
         self.priority = priority
-        self.instance: Optional[EnterpriseModule] = None
+        self.instance: EnterpriseModule | None = None
         self.status = ModuleStatus.UNINITIALIZED
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "module_id": self.module_id,
             "module_name": self.module_name,
@@ -86,17 +85,17 @@ class ModuleRegistry:
     """
 
     def __init__(self):
-        self._modules: Dict[str, ModuleInfo] = {}  # module_id -> ModuleInfo
-        self._category_index: Dict[str, List[str]] = {}  # category -> [module_ids]
-        self._tag_index: Dict[str, List[str]] = {}  # tag -> [module_ids]
+        self._modules: dict[str, ModuleInfo] = {}  # module_id -> ModuleInfo
+        self._category_index: dict[str, list[str]] = {}  # category -> [module_ids]
+        self._tag_index: dict[str, list[str]] = {}  # tag -> [module_ids]
         self._lock = asyncio.Lock() if asyncio.get_event_loop() else None
 
     def register(
         self,
-        module_class: Type[EnterpriseModule],
+        module_class: type[EnterpriseModule],
         category: str = "general",
-        tags: Optional[List[str]] = None,
-        dependencies: Optional[List[str]] = None,
+        tags: list[str] | None = None,
+        dependencies: list[str] | None = None,
         priority: int = 0,
     ):
         """
@@ -153,35 +152,35 @@ class ModuleRegistry:
                     ids.remove(module_id)
             logger.info(f"[注销] {module_id}")
 
-    def get_class(self, module_id: str) -> Optional[Type[EnterpriseModule]]:
+    def get_class(self, module_id: str) -> type[EnterpriseModule] | None:
         """获取模块类"""
         info = self._modules.get(module_id)
         return info.module_class if info else None
 
-    def get_info(self, module_id: str) -> Optional[ModuleInfo]:
+    def get_info(self, module_id: str) -> ModuleInfo | None:
         """获取模块注册信息"""
         return self._modules.get(module_id)
 
-    def get_instance(self, module_id: str) -> Optional[EnterpriseModule]:
+    def get_instance(self, module_id: str) -> EnterpriseModule | None:
         """获取已初始化的模块实例"""
         info = self._modules.get(module_id)
         return info.instance if info else None
 
-    def list_modules(self, category: str = "") -> List[Dict[str, Any]]:
+    def list_modules(self, category: str = "") -> list[dict[str, Any]]:
         """列出所有模块信息"""
         if category:
             ids = self._category_index.get(category, [])
             return [self._modules[mid].to_dict() for mid in ids if mid in self._modules]
         return [info.to_dict() for info in self._modules.values()]
 
-    def list_by_category(self) -> Dict[str, List[Dict[str, Any]]]:
+    def list_by_category(self) -> dict[str, list[dict[str, Any]]]:
         """按分类列出模块"""
         result = {}
         for cat, ids in self._category_index.items():
             result[cat] = [self._modules[mid].to_dict() for mid in ids if mid in self._modules]
         return result
 
-    def find_by_tag(self, tag: str) -> List[Dict[str, Any]]:
+    def find_by_tag(self, tag: str) -> list[dict[str, Any]]:
         """按标签查找模块"""
         ids = self._tag_index.get(tag, [])
         return [self._modules[mid].to_dict() for mid in ids if mid in self._modules]
@@ -190,14 +189,14 @@ class ModuleRegistry:
         """已注册模块总数"""
         return len(self._modules)
 
-    def count_by_level(self) -> Dict[str, int]:
+    def count_by_level(self) -> dict[str, int]:
         """按级别统计"""
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for info in self._modules.values():
             counts[info.level] = counts.get(info.level, 0) + 1
         return counts
 
-    async def create_instance(self, module_id: str, config: Optional[Dict] = None) -> Optional[EnterpriseModule]:
+    async def create_instance(self, module_id: str, config: dict | None = None) -> EnterpriseModule | None:
         """创建模块实例（不初始化）"""
         info = self._modules.get(module_id)
         if not info:
@@ -216,7 +215,7 @@ class ModuleRegistry:
         info.instance = instance
         return instance
 
-    async def initialize_all(self, config: Optional[Dict[str, Any]] = None):
+    async def initialize_all(self, config: dict[str, Any] | None = None):
         """
         初始化所有已注册模块
         按优先级从高到低，自动处理依赖顺序
@@ -243,7 +242,7 @@ class ModuleRegistry:
         logger.info(f"批量初始化完成: {len(initialized)}✅ {len(failed)}❌")
         return {"initialized": initialized, "failed": failed}
 
-    async def health_check_all(self) -> Dict[str, Any]:
+    async def health_check_all(self) -> dict[str, Any]:
         """检查所有模块健康状态"""
         results = {}
         healthy_count = 0
@@ -289,7 +288,7 @@ class ModuleRegistry:
         logger.info(f"批量关闭完成: {len(shutdown_ok)}✅ {len(failed)}❌")
         return {"shutdown": shutdown_ok, "failed": failed}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取注册中心统计"""
         return {
             "total_modules": len(self._modules),
@@ -300,7 +299,7 @@ class ModuleRegistry:
 
 
 # 全局单例
-_registry: Optional[ModuleRegistry] = None
+_registry: ModuleRegistry | None = None
 
 
 def get_registry() -> ModuleRegistry:

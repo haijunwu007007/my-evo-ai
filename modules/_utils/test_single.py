@@ -14,10 +14,10 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
 class TestSingle(EnterpriseModule):
     """单模块测试工具"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__("test_single", config=config or {})
         self._test_results: list = []
-        self._last_test_time: Optional[float] = None
+        self._last_test_time: float | None = None
 
     def initialize(self) -> None:
         """初始化测试工具"""
@@ -29,7 +29,7 @@ class TestSingle(EnterpriseModule):
             self._logger.error(f"测试工具初始化失败: {e}")
             raise
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "status": "healthy",
@@ -38,7 +38,7 @@ class TestSingle(EnterpriseModule):
             "last_test_time": self._last_test_time,
         }
 
-    def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """执行测试操作"""
         params = params or {}
         try:
@@ -58,7 +58,7 @@ class TestSingle(EnterpriseModule):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _test_module(self, module_name: str) -> Dict[str, Any]:
+    def _test_module(self, module_name: str) -> dict[str, Any]:
         """测试单个模块"""
         result = {
             "module": module_name,

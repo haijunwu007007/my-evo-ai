@@ -13,7 +13,7 @@ class TaskPlanner:
     """
 
     # 意图 → 模块映射策略
-    INTENT_MODULE_MAP: Dict[IntentCategory, List[str]] = {
+    INTENT_MODULE_MAP: dict[IntentCategory, list[str]] = {
         IntentCategory.DATA_ANALYSIS: ["data_analysis", "database_client", "business_analyst"],
         IntentCategory.DOCUMENT_GEN: ["document_automation", "content_generator"],
         IntentCategory.COMMUNICATION: ["enterprise_notifier", "email_automation", "instant_messaging"],
@@ -40,8 +40,8 @@ class TaskPlanner:
         self.registry = registry
 
     def plan(
-        self, user_input: str, primary_intent: IntentCategory, secondary_intents: List[IntentCategory]
-    ) -> List[SubTask]:
+        self, user_input: str, primary_intent: IntentCategory, secondary_intents: list[IntentCategory]
+    ) -> list[SubTask]:
         """
         将用户输入拆解为子任务列表
 
@@ -49,7 +49,7 @@ class TaskPlanner:
         "把今天的销售数据整理成报告，发给张总"
         → [数据分析, 文档生成, 邮件发送]
         """
-        sub_tasks: List[SubTask] = []
+        sub_tasks: list[SubTask] = []
         task_counter = 0
 
         # 1. 主意图任务
@@ -120,13 +120,13 @@ class TaskPlanner:
         }
         return desc_map.get(intent, f"执行：{user_input}")
 
-    def _resolve_dependencies(self, tasks: List[SubTask]):
+    def _resolve_dependencies(self, tasks: list[SubTask]):
         """解析任务依赖关系"""
         # 按优先级排序
         tasks.sort(key=lambda t: (t.priority.value, t.intent.value))
 
         # 同类意图内串行，不同类意图可并行
-        intent_groups: Dict[IntentCategory, List[SubTask]] = defaultdict(list)
+        intent_groups: dict[IntentCategory, list[SubTask]] = defaultdict(list)
         for t in tasks:
             intent_groups[t.intent].append(t)
 
@@ -134,7 +134,7 @@ class TaskPlanner:
             for i in range(1, len(group)):
                 group[i].depends_on.append(group[i - 1].task_id)
 
-    def _create_generic_plan(self, user_input: str) -> List[SubTask]:
+    def _create_generic_plan(self, user_input: str) -> list[SubTask]:
         """创建通用执行计划"""
         return [
             SubTask(
@@ -162,11 +162,11 @@ class ModuleExecutor:
     def __init__(self):
         self._initialized = False
         self._status = "pending"
-        self._loaded_modules: Dict[str, Any] = {}
-        self._load_errors: Dict[str, str] = {}
+        self._loaded_modules: dict[str, Any] = {}
+        self._load_errors: dict[str, str] = {}
         self._lock = threading.Lock()
 
-    def _publish_event(self, event_type: str, data: Dict):
+    def _publish_event(self, event_type: str, data: dict):
         """断点2：发布模块执行事件"""
         try:
             from modules.event_bus import get_event_bus
@@ -196,7 +196,7 @@ class ModuleExecutor:
                 self._loaded_modules[module_name] = mod
             return (True, mod, "")
 
-    async def execute(self, sub_task: SubTask, registry: ModuleRegistry, timeout: Optional[float] = None) -> SubTask:
+    async def execute(self, sub_task: SubTask, registry: ModuleRegistry, timeout: float | None = None) -> SubTask:
         """
         执行子任务
 
@@ -429,10 +429,10 @@ class ExecutionDAGBuilder:
     def __init__(self):
         self._initialized = False
         self._status = "pending"
-        self._nodes: Dict[str, Dict] = {}  # task_id -> {deps, action, parallel}
-        self._edges: Dict[str, Set[str]] = defaultdict(set)
+        self._nodes: dict[str, dict] = {}  # task_id -> {deps, action, parallel}
+        self._edges: dict[str, Set[str]] = defaultdict(set)
 
-    def add_task(self, task_id: str, action: str, depends_on: List[str] = None, parallel: bool = False):
+    def add_task(self, task_id: str, action: str, depends_on: list[str] = None, parallel: bool = False):
         """添加任务节点"""
         self._nodes[task_id] = {
             "action": action,
@@ -443,7 +443,7 @@ class ExecutionDAGBuilder:
         for dep in depends_on or []:
             self._edges[dep].add(task_id)
 
-    def build(self) -> Dict:
+    def build(self) -> dict:
         """构建可执行的DAG，返回执行层级"""
         in_degree = {tid: len(info["depends_on"]) for tid, info in self._nodes.items()}
         reverse = defaultdict(set)
@@ -487,7 +487,7 @@ class ExecutionDAGBuilder:
             "critical_path_length": len(layers),
         }
 
-    def estimate_execution_time(self, task_durations: Dict[str, float]) -> Dict:
+    def estimate_execution_time(self, task_durations: dict[str, float]) -> dict:
         """估算DAG总执行时间（考虑并行）"""
         dag = self.build()
         if not dag["success"]:

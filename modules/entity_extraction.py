@@ -85,7 +85,7 @@ from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, Circ
 
 logger = get_logger("entity_extraction")
 
-class AccuracyAnalyzer(object):
+class AccuracyAnalyzer:
     """entity_extraction 运营分析引擎
 
     - 分析各类型提取准确率
@@ -146,9 +146,9 @@ class Entity:
     confidence: float = 1.0
     normalized: str = ""
     source: str = "pattern"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "text": self.text,
             "type": self.entity_type.value,
@@ -168,7 +168,7 @@ class Relation:
     confidence: float = 1.0
     source: str = ""
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "subject": self.subject,
             "predicate": self.predicate,
@@ -180,12 +180,12 @@ class Relation:
 @dataclass
 class ExtractionResult:
     text: str = ""
-    entities: List[Entity] = field(default_factory=list)
-    relations: List[Relation] = field(default_factory=list)
+    entities: list[Entity] = field(default_factory=list)
+    relations: list[Relation] = field(default_factory=list)
     processed_at: float = 0.0
     elapsed_ms: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "text": self.text[:200],
             "entities": [e.to_dict() for e in self.entities],
@@ -196,7 +196,7 @@ class ExtractionResult:
         }
 
 # Built-in regex patterns for common entity types
-BUILTIN_PATTERNS: Dict[EntityType, List[str]] = {
+BUILTIN_PATTERNS: dict[EntityType, list[str]] = {
     EntityType.EMAIL: [r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"],
     EntityType.URL: [r'https?://[^\s<>"{}|\\^`\[\]]+', r'www\.[^\s<>"{}|\\^`\[\]]+\.[a-zA-Z]{2,}'],
     EntityType.PHONE: [
@@ -226,15 +226,15 @@ RELATION_PATTERNS = [
 class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """实体抽取引擎：正则匹配、字典匹配、实体链接、关系抽取、自定义规则"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config)
-        self._patterns: Dict[EntityType, List[re.Pattern]] = {}
-        self._relation_patterns: List[Tuple[re.Pattern, str]] = []
-        self._dictionaries: Dict[EntityType, List[str]] = defaultdict(list)
+        self._patterns: dict[EntityType, list[re.Pattern]] = {}
+        self._relation_patterns: list[tuple[re.Pattern, str]] = []
+        self._dictionaries: dict[EntityType, list[str]] = defaultdict(list)
         self._stats = {"total_texts": 0, "total_entities": 0, "total_relations": 0}
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         self.trace("entity_extraction.initialize", "start")
         self.trace("entity_extraction.initialize", "end")
         try:
@@ -252,7 +252,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.status = ModuleStatus.ERROR
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         return {
             "healthy": self.status == ModuleStatus.RUNNING,
             "status": self.status.value,
@@ -263,7 +263,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "stats": self._stats,
         }
 
-    def extract(self, params: Optional[Dict] = None) -> Dict:
+    def extract(self, params: dict | None = None) -> dict:
         params = params or {}
         text = params.get("text", "")
         types = params.get("types")
@@ -286,7 +286,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         )
         return {"success": True, "result": result.to_dict()}
 
-    def _extract_patterns(self, text: str, types: Optional[List[str]] = None) -> List[Entity]:
+    def _extract_patterns(self, text: str, types: list[str] | None = None) -> list[Entity]:
         entities = []
         type_filter = set(types) if types else None
         for etype, patterns in self._patterns.items():
@@ -307,7 +307,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     )
         return entities
 
-    def _extract_dictionary(self, text: str, types: Optional[List[str]] = None) -> List[Entity]:
+    def _extract_dictionary(self, text: str, types: list[str] | None = None) -> list[Entity]:
         entities = []
         type_filter = set(types) if types else None
         for etype, terms in self._dictionaries.items():
@@ -335,7 +335,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     idx = pos + len(term)
         return entities
 
-    def _extract_relations(self, text: str) -> List[Relation]:
+    def _extract_relations(self, text: str) -> list[Relation]:
         relations = []
         for pat, rel_type in self._relation_patterns:
             for m in pat.finditer(text):
@@ -346,7 +346,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 )
         return relations
 
-    def _deduplicate_entities(self, entities: List[Entity]) -> List[Entity]:
+    def _deduplicate_entities(self, entities: list[Entity]) -> list[Entity]:
         entities.sort(key=lambda e: (e.start, -e.confidence, -len(e.text)))
         result = []
         for e in entities:
@@ -359,7 +359,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 result.append(e)
         return result
 
-    def add_pattern(self, params: Optional[Dict] = None) -> Dict:
+    def add_pattern(self, params: dict | None = None) -> dict:
         params = params or {}
         entity_type = params.get("type", "CUSTOM")
         pattern = params.get("pattern", "")
@@ -375,7 +375,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("add_pattern", f"{et.value}: {pattern}")
         return {"success": True, "type": et.value, "pattern": pattern}
 
-    def add_dictionary(self, params: Optional[Dict] = None) -> Dict:
+    def add_dictionary(self, params: dict | None = None) -> dict:
         params = params or {}
         entity_type = params.get("type", "CUSTOM")
         terms = params.get("terms", [])
@@ -392,7 +392,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 added += 1
         return {"success": True, "type": et.value, "added": added, "total": len(self._dictionaries[et])}
 
-    def get_stats(self, params: Optional[Dict] = None) -> Dict:
+    def get_stats(self, params: dict | None = None) -> dict:
         return {"success": True, "stats": self._stats}
 
     def shutdown(self) -> None:
@@ -401,7 +401,7 @@ class EntityExtraction(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._relation_patterns.clear()
         self.status = ModuleStatus.STOPPED
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         params = params or {}
         handler = getattr(self, action, None)
         if handler and callable(handler):

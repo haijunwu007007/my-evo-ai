@@ -7,7 +7,8 @@ import asyncio, time, json, logging, uuid, threading, sqlite3
 from core.logging_config import get_logger
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 logger = get_logger("evo.message-bus")
@@ -43,11 +44,11 @@ class MessageBus:
         if getattr(self, '_initialized', False):
             return
         self._initialized = True
-        self._sync_handlers: Dict[str, List[Callable]] = defaultdict(list)
-        self._async_handlers: Dict[str, List[Callable]] = defaultdict(list)
-        self._history: List[Event] = []
+        self._sync_handlers: dict[str, list[Callable]] = defaultdict(list)
+        self._async_handlers: dict[str, list[Callable]] = defaultdict(list)
+        self._history: list[Event] = []
         self._max_history = 1000
-        self._wildcard_cache: Dict[str, Set[str]] = {}
+        self._wildcard_cache: dict[str, set[str]] = {}
         logger.info("[MessageBus] 初始化完成")
 
     # ── 注册 ──
@@ -102,7 +103,7 @@ class MessageBus:
         return event_id
 
     def dequeue(self, consumer: str = "default", batch: int = 1,
-                topics: List[str] = None) -> List[Dict]:
+                topics: list[str] = None) -> list[dict]:
         """消费队列中待处理的事件（跨进程安全）。"""
         self._ensure_queue_table()
         db_path = str(DATA_DIR / "events.db")
@@ -135,7 +136,7 @@ class MessageBus:
             conn.execute("UPDATE queue SET status='completed' WHERE id=?", (event_id,))
             conn.commit()
 
-    def queue_stats(self) -> Dict:
+    def queue_stats(self) -> dict:
         """队列统计。"""
         self._ensure_queue_table()
         db_path = str(DATA_DIR / "events.db")
@@ -192,7 +193,7 @@ class MessageBus:
 
     # ── 查询 ──
 
-    def get_history(self, topic: Optional[str] = None, limit: int = 50) -> List[Dict]:
+    def get_history(self, topic: str | None = None, limit: int = 50) -> list[dict]:
         events = self._history
         if topic:
             matched = self._match_topics(topic)
@@ -203,7 +204,7 @@ class MessageBus:
             for e in events[-limit:]
         ]
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         s = {
             "sync_subscriptions": sum(len(v) for v in self._sync_handlers.values()),
             "async_subscriptions": sum(len(v) for v in self._async_handlers.values()),
@@ -218,7 +219,7 @@ class MessageBus:
 
     # ── 内部 ──
 
-    def _match_topics(self, topic: str) -> Set[str]:
+    def _match_topics(self, topic: str) -> set[str]:
         """支持 'module.*'、'system.#' 通配符匹配。同时包含历史事件主题。"""
         if topic in self._wildcard_cache:
             return self._wildcard_cache[topic]

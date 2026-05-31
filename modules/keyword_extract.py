@@ -91,7 +91,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 logging.basicConfig(level=logging.INFO)
 logger = get_logger("keyword_extract")
 
-class KeywordExtractAnalyzer(object):
+class KeywordExtractAnalyzer:
     """keyword_extract 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -270,12 +270,12 @@ class Keyword:
     score: float
     frequency: int
     token_type: TokenType = TokenType.WORD
-    positions: List[int] = field(default_factory=list)
-    related: List[str] = field(default_factory=list)
+    positions: list[int] = field(default_factory=list)
+    related: list[str] = field(default_factory=list)
 
 @dataclass
 class ExtractionResult:
-    keywords: List[Keyword]
+    keywords: list[Keyword]
     total_tokens: int
     algorithm: ExtractAlgorithm
     processing_time_ms: float
@@ -286,7 +286,7 @@ class CustomDictEntry:
     word: str
     weight: float = 1.0
     category: str = "default"
-    synonyms: List[str] = field(default_factory=list)
+    synonyms: list[str] = field(default_factory=list)
 
 class TextPreprocessor:
     """文本预处理"""
@@ -489,11 +489,11 @@ class TextPreprocessor:
         self.min_word_length = min_word_length
         self.max_word_length = max_word_length
 
-    def tokenize(self, text: str) -> List[str]:
+    def tokenize(self, text: str) -> list[str]:
         tokens = re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z][a-zA-Z0-9_-]*", text.lower())
         return [t for t in tokens if self.min_word_length <= len(t) <= self.max_word_length]
 
-    def tokenize_with_positions(self, text: str) -> List[Tuple[str, int]]:
+    def tokenize_with_positions(self, text: str) -> list[tuple[str, int]]:
         tokens = re.finditer(r"[\u4e00-\u9fff]+|[a-zA-Z][a-zA-Z0-9_-]*", text.lower())
         result = []
         for i, m in enumerate(tokens):
@@ -504,10 +504,10 @@ class TextPreprocessor:
     def is_stop_word(self, word: str) -> bool:
         return word in self.STOP_WORDS_EN or word in self.STOP_WORDS_CN
 
-    def remove_stop_words(self, tokens: List[str]) -> List[str]:
+    def remove_stop_words(self, tokens: list[str]) -> list[str]:
         return [t for t in tokens if not self.is_stop_word(t)]
 
-    def extract_ngrams(self, tokens: List[str], n: int) -> List[str]:
+    def extract_ngrams(self, tokens: list[str], n: int) -> list[str]:
         return [" ".join(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
 
 class TFIDFExtractor:
@@ -515,10 +515,10 @@ class TFIDFExtractor:
 
     def __init__(self, top_k: int = 20):
         self.top_k = top_k
-        self._idf: Dict[str, float] = {}
+        self._idf: dict[str, float] = {}
         self._doc_count = 0
 
-    def train(self, documents: List[List[str]]) -> None:
+    def train(self, documents: list[list[str]]) -> None:
         self._doc_count += len(documents)
         for doc in documents:
             seen = set(doc)
@@ -527,12 +527,12 @@ class TFIDFExtractor:
         for word in self._idf:
             self._idf[word] = math.log((self._doc_count + 1) / (self._idf[word] + 1)) + 1
 
-    def extract(self, tokens: List[str], positions: Optional[List[Tuple[str, int]]] = None) -> List[Keyword]:
+    def extract(self, tokens: list[str], positions: list[tuple[str, int]] | None = None) -> list[Keyword]:
         if not tokens:
             return []
         counter = Counter(tokens)
         total = len(tokens)
-        pos_map: Dict[str, List[int]] = defaultdict(list)
+        pos_map: dict[str, list[int]] = defaultdict(list)
         if positions:
             for word, pos in positions:
                 pos_map[word].append(pos)
@@ -562,21 +562,21 @@ class TextRankExtractor:
         self.damping = damping
         self.iterations = iterations
 
-    def extract(self, tokens: List[str], positions: Optional[List[Tuple[str, int]]] = None) -> List[Keyword]:
+    def extract(self, tokens: list[str], positions: list[tuple[str, int]] | None = None) -> list[Keyword]:
         if not tokens:
             return []
         vocab = list(set(tokens))
         if len(vocab) < 2:
             return [Keyword(word=vocab[0], score=1.0, frequency=tokens.count(vocab[0]))] if vocab else []
 
-        graph: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        graph: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
         for i in range(len(tokens)):
             for j in range(i + 1, min(i + self.window_size, len(tokens))):
                 if tokens[i] != tokens[j]:
                     graph[tokens[i]][tokens[j]] += 1.0
                     graph[tokens[j]][tokens[i]] += 1.0
 
-        scores: Dict[str, float] = {v: 1.0 for v in vocab}
+        scores: dict[str, float] = {v: 1.0 for v in vocab}
         for _ in range(self.iterations):
             new_scores = {}
             for word in vocab:
@@ -589,7 +589,7 @@ class TextRankExtractor:
             scores = new_scores
 
         counter = Counter(tokens)
-        pos_map: Dict[str, List[int]] = defaultdict(list)
+        pos_map: dict[str, list[int]] = defaultdict(list)
         if positions:
             for word, pos in positions:
                 pos_map[word].append(pos)
@@ -614,7 +614,7 @@ class RAKEExtractor:
         self.top_k = top_k
         self.min_phrase_freq = min_phrase_freq
 
-    def extract(self, tokens: List[str], positions: Optional[List[Tuple[str, int]]] = None) -> List[Keyword]:
+    def extract(self, tokens: list[str], positions: list[tuple[str, int]] | None = None) -> list[Keyword]:
         if not tokens:
             return []
         phrases = []
@@ -624,19 +624,19 @@ class RAKEExtractor:
 
         phrase_freq = Counter(phrases)
         word_freq = Counter(tokens)
-        word_deg: Dict[str, float] = defaultdict(float)
+        word_deg: dict[str, float] = defaultdict(float)
         for phrase, freq in phrase_freq.items():
             words = phrase.split()
             deg = len(words) - 1
             for w in words:
                 word_deg[w] += freq * deg
 
-        word_scores: Dict[str, float] = {}
+        word_scores: dict[str, float] = {}
         for word in word_freq:
             deg = word_deg.get(word, 0)
             word_scores[word] = (deg + word_freq[word]) / word_freq[word] if word_freq[word] > 0 else 0
 
-        pos_map: Dict[str, List[int]] = defaultdict(list)
+        pos_map: dict[str, list[int]] = defaultdict(list)
         if positions:
             for word, pos in positions:
                 pos_map[word].append(pos)
@@ -661,24 +661,24 @@ class YAKEExtractor:
         self.top_k = top_k
         self.window_size = window_size
 
-    def extract(self, tokens: List[str], positions: Optional[List[Tuple[str, int]]] = None) -> List[Keyword]:
+    def extract(self, tokens: list[str], positions: list[tuple[str, int]] | None = None) -> list[Keyword]:
         if not tokens:
             return []
         n = len(tokens)
         counter = Counter(tokens)
         tf_norm = {w: math.log(c / n * (max(counter.values()) / n) + 1) for w, c in counter.items()}
 
-        case_info: Dict[str, int] = defaultdict(int)
+        case_info: dict[str, int] = defaultdict(int)
         for t in tokens:
             case_info[t] += 1 if t[0].isupper() else 0
         case_norm = {w: c / max(c + 1, counter[w]) for w, c in case_info.items()}
 
-        pos_map_full: Dict[str, List[int]] = defaultdict(list)
+        pos_map_full: dict[str, list[int]] = defaultdict(list)
         if positions:
             for word, pos in positions:
                 pos_map_full[word].append(pos)
 
-        spread: Dict[str, float] = {}
+        spread: dict[str, float] = {}
         for word in counter:
             ps = pos_map_full.get(word, [])
             if len(ps) >= 2:
@@ -687,13 +687,13 @@ class YAKEExtractor:
             else:
                 spread[word] = 0.0
 
-        cooccur: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        cooccur: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
         for i in range(len(tokens) - 1):
             if tokens[i] != tokens[i + 1]:
                 cooccur[tokens[i]][tokens[i + 1]] += 1
                 cooccur[tokens[i + 1]][tokens[i]] += 1
 
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for word in counter:
             left_ctx = sum(cooccur[word].values())
             tf = tf_norm.get(word, 0)
@@ -713,7 +713,7 @@ class YAKEExtractor:
             )
         return results
 
-def statistics_stdev(data: List[float]) -> float:
+def statistics_stdev(data: list[float]) -> float:
     if len(data) < 2:
         return 0.0
     mean = sum(data) / len(data)
@@ -730,8 +730,8 @@ class KeywordExtract:
         self._textrank = TextRankExtractor()
         self._rake = RAKEExtractor()
         self._yake = YAKEExtractor()
-        self._custom_dict: Dict[str, CustomDictEntry] = {}
-        self._doc_cache: Dict[str, List[str]] = {}
+        self._custom_dict: dict[str, CustomDictEntry] = {}
+        self._doc_cache: dict[str, list[str]] = {}
         self._stats = {
             "total_extractions": 0,
             "total_documents": 0,
@@ -743,7 +743,7 @@ class KeywordExtract:
         self._initialized = True
         logger.info("KeywordExtract initialized")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "status": "not_initialized"}
         return {
@@ -761,7 +761,7 @@ class KeywordExtract:
         text: str,
         algorithm: ExtractAlgorithm = ExtractAlgorithm.TFIDF,
         top_k: int = 20,
-        doc_id: Optional[str] = None,
+        doc_id: str | None = None,
     ) -> ExtractionResult:
         self._stats["total_extractions"] += 1
         self._stats["by_algorithm"][algorithm.value] += 1
@@ -814,7 +814,7 @@ class KeywordExtract:
             document_id=doc_id,
         )
 
-    def extract_multi(self, text: str, top_k: int = 10) -> Dict[str, List[Keyword]]:
+    def extract_multi(self, text: str, top_k: int = 10) -> dict[str, list[Keyword]]:
         results = {}
         for algo in ExtractAlgorithm:
             result = self.extract(text, algorithm=algo, top_k=top_k)
@@ -823,9 +823,9 @@ class KeywordExtract:
         results["merged"] = merged[:top_k]
         return results
 
-    def _merge_keywords(self, algo_results: Dict[str, List[Keyword]]) -> List[Keyword]:
-        word_scores: Dict[str, List[float]] = defaultdict(list)
-        word_freqs: Dict[str, int] = {}
+    def _merge_keywords(self, algo_results: dict[str, list[Keyword]]) -> list[Keyword]:
+        word_scores: dict[str, list[float]] = defaultdict(list)
+        word_freqs: dict[str, int] = {}
         for algo, kws in algo_results.items():
             for kw in kws:
                 word_scores[kw.word].append(kw.score)
@@ -850,7 +850,7 @@ class KeywordExtract:
     def remove_custom_word(self, word: str) -> bool:
         return self._custom_dict.pop(word, None) is not None
 
-    def _apply_custom_dict(self, keywords: List[Keyword]) -> List[Keyword]:
+    def _apply_custom_dict(self, keywords: list[Keyword]) -> list[Keyword]:
         boosted = []
         custom_words = set(self._custom_dict.keys())
         for kw in keywords:
@@ -872,17 +872,17 @@ class KeywordExtract:
         boosted.sort(key=lambda x: x.score, reverse=True)
         return boosted
 
-    def train_tfidf(self, documents: List[str]) -> None:
+    def train_tfidf(self, documents: list[str]) -> None:
         tokenized = []
         for doc in documents:
             tokens = self._preprocessor.remove_stop_words(self._preprocessor.tokenize(doc))
             tokenized.append(tokens)
         self._tfidf.train(tokenized)
 
-    def get_keywords_by_doc(self, doc_id: str) -> Optional[List[str]]:
+    def get_keywords_by_doc(self, doc_id: str) -> list[str] | None:
         return self._doc_cache.get(doc_id)
 
-    def get_similar_keywords(self, keyword: str, top_k: int = 10) -> List[str]:
+    def get_similar_keywords(self, keyword: str, top_k: int = 10) -> list[str]:
         similar = []
         word_lower = keyword.lower()
         for entry in self._custom_dict.values():
@@ -898,12 +898,12 @@ class KeywordExtract:
         return list(set(similar))[:top_k]
 
     @staticmethod
-    def _jaccard_similarity(a: Set[str], b: Set[str]) -> float:
+    def _jaccard_similarity(a: set[str], b: set[str]) -> float:
         intersection = a & b
         union = a | b
         return len(intersection) / len(union) if union else 0.0
 
-def statistics_mean(data: List[float]) -> float:
+def statistics_mean(data: list[float]) -> float:
     return sum(data) / len(data) if data else 0.0
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

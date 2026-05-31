@@ -102,7 +102,7 @@ def process_file(filepath: str) -> dict:
     """处理单个文件，返回修改统计"""
     result = {"file": filepath, "inputs_fixed": 0, "outputs_fixed": 0}
 
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # 用 AST 解析

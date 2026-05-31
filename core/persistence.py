@@ -41,6 +41,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from datetime import datetime, timedelta
 from contextlib import contextmanager
+import builtins
 
 logger = get_logger(__name__)
 
@@ -105,8 +106,8 @@ class Persistence:
         self._try_connect_redis()
 
         # 已注册表跟踪
-        self._registered_tables: Dict[str, bool] = {}
-        self._table_columns: Dict[str, List[str]] = {}
+        self._registered_tables: dict[str, bool] = {}
+        self._table_columns: dict[str, list[str]] = {}
 
         # 数据库版本（用于迁移）
         self._db_version = 1
@@ -253,7 +254,7 @@ class Persistence:
     # 表管理
     # ═══════════════════════════════════════════════════════
 
-    def _ensure_table(self, table_name: str, data: Optional[Dict] = None):
+    def _ensure_table(self, table_name: str, data: dict | None = None):
         """确保表存在（自动建表 + 自动迁移）"""
         if table_name in self._registered_tables:
             return
@@ -393,10 +394,10 @@ class Persistence:
     # CRUD Operations
     # ═══════════════════════════════════════════════════════
 
-    def insert(self, table: str, data: Dict[str, Any],
-               key: str = "", tags: Optional[List[str]] = None,
-               metadata: Optional[Dict] = None,
-               ttl_seconds: Optional[int] = None) -> int:
+    def insert(self, table: str, data: dict[str, Any],
+               key: str = "", tags: builtins.list[str] | None = None,
+               metadata: dict | None = None,
+               ttl_seconds: int | None = None) -> int:
         """插入记录"""
         self._ensure_table(table, data)
         safe_name = self._safe_table_name(table)
@@ -447,7 +448,7 @@ class Persistence:
             cur.close()
             return record_id
 
-    def get(self, table: str, record_id: int) -> Optional[Dict]:
+    def get(self, table: str, record_id: int) -> dict | None:
         """获取单条记录"""
         # Redis缓存优先
         if self._redis_available:
@@ -495,7 +496,7 @@ class Persistence:
 
         return result
 
-    def get_by_key(self, table: str, key: str) -> Optional[Dict]:
+    def get_by_key(self, table: str, key: str) -> dict | None:
         """按唯一键获取最新记录"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -519,14 +520,14 @@ class Persistence:
         return self._row_to_dict(row) if row else None
 
     def list(self, table: str, limit: int = 50, offset: int = 0,
-             tag: Optional[str] = None, order_by: str = "created_at",
-             ascending: bool = False, include_deleted: bool = False) -> Tuple[List[Dict], int]:
+             tag: str | None = None, order_by: str = "created_at",
+             ascending: bool = False, include_deleted: bool = False) -> tuple[builtins.list[dict], int]:
         """列出记录 → (records, total_count)"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
 
         conditions = [] if include_deleted else ["deleted_at IS NULL"]
-        params: List[Any] = []
+        params: list[Any] = []
 
         if tag:
             if self._backend == "postgresql":
@@ -565,7 +566,7 @@ class Persistence:
         records = [self._row_to_dict(r) for r in rows]
         return records, total
 
-    def search(self, table: str, query: str, limit: int = 20) -> List[Dict]:
+    def search(self, table: str, query: str, limit: int = 20) -> builtins.list[dict]:
         """全文搜索"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -602,15 +603,15 @@ class Persistence:
 
             return [self._row_to_dict(r) for r in rows]
 
-    def update(self, table: str, record_id: int, data: Optional[Dict] = None,
-               tags: Optional[List[str]] = None, metadata: Optional[Dict] = None) -> bool:
+    def update(self, table: str, record_id: int, data: dict | None = None,
+               tags: builtins.list[str] | None = None, metadata: dict | None = None) -> bool:
         """更新记录"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
         now = datetime.now().isoformat()
 
         sets = ["updated_at = ?", "version = version + 1"]
-        params: List[Any] = [now]
+        params: list[Any] = [now]
 
         if data is not None:
             sets.append("data = ?")
@@ -718,7 +719,7 @@ class Persistence:
     # 批量操作
     # ═══════════════════════════════════════════════════════
 
-    def bulk_insert(self, table: str, records: List[Dict[str, Any]]) -> List[int]:
+    def bulk_insert(self, table: str, records: builtins.list[dict[str, Any]]) -> builtins.list[int]:
         """批量插入"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -753,12 +754,12 @@ class Persistence:
 
         return ids
 
-    def export_table(self, table: str) -> List[Dict]:
+    def export_table(self, table: str) -> builtins.list[dict]:
         """导出表全部数据"""
         records, _ = self.list(table, limit=100000, include_deleted=False)
         return records
 
-    def import_table(self, table: str, records: List[Dict], skip_duplicates: bool = True) -> int:
+    def import_table(self, table: str, records: builtins.list[dict], skip_duplicates: bool = True) -> int:
         """导入数据"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -810,7 +811,7 @@ class Persistence:
     # 执行原生SQL（高级用法，上市公司级）
     # ═══════════════════════════════════════════════════════
 
-    def execute_raw(self, sql: str, params: Optional[tuple] = None) -> Any:
+    def execute_raw(self, sql: str, params: tuple | None = None) -> Any:
         """执行原生SQL（只读建议，写入请用transaction）"""
         if self._backend == "postgresql" and self._pg_pool:
             with self._get_conn() as conn:
@@ -828,7 +829,7 @@ class Persistence:
     # 数据库迁移工具
     # ═══════════════════════════════════════════════════════
 
-    def migrate_from_sqlite(self, pg_url: str) -> Dict[str, Any]:
+    def migrate_from_sqlite(self, pg_url: str) -> dict[str, Any]:
         """将SQLite数据迁移到PostgreSQL"""
         if self._backend != "sqlite":
             return {"success": False, "error": "Current backend is not SQLite"}
@@ -895,7 +896,7 @@ class Persistence:
     # 统计与管理
     # ═══════════════════════════════════════════════════════
 
-    def table_stats(self, table: str) -> Dict[str, Any]:
+    def table_stats(self, table: str) -> dict[str, Any]:
         """表统计信息"""
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -980,11 +981,11 @@ class Persistence:
                 "saved_mb": round((old_size - new_size) / 1024 / 1024, 2),
             }
 
-    def list_tables(self) -> List[str]:
+    def list_tables(self) -> builtins.list[str]:
         """列出所有已注册的表"""
         return list(self._registered_tables.keys())
 
-    def _row_to_dict(self, row) -> Optional[Dict]:
+    def _row_to_dict(self, row) -> dict | None:
         """Row → Dict（兼容SQLite Row和PG tuple）"""
         if not row:
             return None
@@ -1006,7 +1007,7 @@ class Persistence:
 
         return result
 
-    def status(self) -> Dict[str, Any]:
+    def status(self) -> dict[str, Any]:
         """持久化层状态"""
         info = {
             "status": "healthy",

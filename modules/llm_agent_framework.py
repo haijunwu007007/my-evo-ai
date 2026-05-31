@@ -76,7 +76,7 @@ import hashlib
 from core.logging_config import get_logger
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -84,7 +84,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class LlmAgentFrameworkAnalyzer(object):
+class LlmAgentFrameworkAnalyzer:
     """llm_agent_framework 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -281,7 +281,7 @@ class LlmAgentFrameworkModule:
 
     """LLM智能体框架 - ReAct/PlanExecute/工具调用/记忆管理/多轮/推理链"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -322,13 +322,13 @@ class LlmAgentFrameworkModule:
             "total_errors": 0,
             "total_tokens": 0,
         }
-        self._agents: Dict[str, Dict] = {}
-        self._tools: Dict[str, Dict] = {}
-        self._sessions: Dict[str, Dict] = {}
-        self._memories: Dict[str, List[Dict]] = {}
+        self._agents: dict[str, dict] = {}
+        self._tools: dict[str, dict] = {}
+        self._sessions: dict[str, dict] = {}
+        self._memories: dict[str, list[dict]] = {}
         self._executor = ThreadPoolExecutor(max_workers=self.config.get("max_workers", 8))
 
-    def initialize(self) -> Dict:
+    def initialize(self) -> dict:
         try:
             self._register_default_tools()
             self._initialized = True
@@ -337,7 +337,7 @@ class LlmAgentFrameworkModule:
             logger.error(f"Init failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         if not self._initialized:
             return {"healthy": False, "error": "Not initialized"}
         active = sum(1 for s in self._sessions.values() if s.get("state") == AgentState.THINKING)
@@ -396,7 +396,7 @@ class LlmAgentFrameworkModule:
             "max_steps": max_steps,
             "temperature": temperature,
             "memory_enabled": memory_enabled,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         self._memories[agent_id] = []
         return {"success": True, "agent_id": agent_id, "name": name}
@@ -414,7 +414,7 @@ class LlmAgentFrameworkModule:
             "state": AgentState.IDLE,
             "messages": [],
             "steps": [],
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         self._stats["total_sessions"] += 1
         return {"success": True, "session_id": session_id, "agent_id": agent_id}
@@ -428,7 +428,7 @@ class LlmAgentFrameworkModule:
             return {"success": False, "error": "message is required"}
         session = self._sessions[session_id]
         agent = self._agents.get(session["agent_id"], {})
-        session["messages"].append({"role": "user", "content": message, "timestamp": datetime.now(timezone.utc).isoformat()})
+        session["messages"].append({"role": "user", "content": message, "timestamp": datetime.now(UTC).isoformat()})
         session["state"] = AgentState.THINKING
         t0 = time.time()
         try:
@@ -446,14 +446,14 @@ class LlmAgentFrameworkModule:
             steps.append({"type": "observation", "content": "Generating response", "step": step_count + 3})
             session["steps"].extend(steps)
             session["messages"].append(
-                {"role": "assistant", "content": reply, "timestamp": datetime.now(timezone.utc).isoformat()}
+                {"role": "assistant", "content": reply, "timestamp": datetime.now(UTC).isoformat()}
             )
             session["state"] = AgentState.FINISHED
             self._stats["total_steps"] += len(steps)
             self._stats["total_tokens"] += len(message) + len(reply)
             if agent.get("memory_enabled"):
                 self._memories[session["agent_id"]].append(
-                    {"query": message, "response": reply[:200], "timestamp": datetime.now(timezone.utc).isoformat()}
+                    {"query": message, "response": reply[:200], "timestamp": datetime.now(UTC).isoformat()}
                 )
             lat = int((time.time() - t0) * 1000)
             return {"success": True, "reply": reply, "steps": len(steps), "session_id": session_id, "latency_ms": lat}

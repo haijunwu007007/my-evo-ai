@@ -125,12 +125,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class PdfReport:
@@ -140,7 +140,7 @@ class PdfReport:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -161,16 +161,16 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, PdfReport] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, PdfReport] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
     @trace_operation("lifecycle.initialize")
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         """初始化"""
         try:
             pass
@@ -255,7 +255,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -350,7 +350,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -371,7 +371,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -388,7 +388,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -400,7 +400,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -465,9 +465,9 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": True, "result": r} if not isinstance(r, dict) else r
             except Exception as e:
                 return {"success": False, "error": str(e)}
-            return {"success": False, "error": "Unknown action: {}".format(action)}
+            return {"success": False, "error": f"Unknown action: {action}"}
 
-    def validate_template(self, template: Dict) -> Dict[str, Any]:
+    def validate_template(self, template: dict) -> dict[str, Any]:
         """验证PDF报告模板：必需字段检查、表达式语法、分页配置、样式一致性"""
         issues = []
         name = template.get("name", "")
@@ -514,7 +514,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "variable_count": len(template.get("variables", [])),
         }
 
-    def estimate_page_count(self, template: Dict, sample_data: Dict = None) -> Dict[str, Any]:
+    def estimate_page_count(self, template: dict, sample_data: dict = None) -> dict[str, Any]:
         """估算报告页数：基于内容量和分页规则"""
         sections = template.get("sections", [])
         chars_per_page = 3000
@@ -534,7 +534,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         total = pages + (1 if cover else 0) + (1 if toc else 0)
         return {"content_pages": pages, "cover": cover, "toc": toc, "estimated_total": total, "sections": section_pages}
 
-    def generate_toc(self, sections: List[Dict]) -> List[Dict[str, Any]]:
+    def generate_toc(self, sections: list[dict]) -> list[dict[str, Any]]:
         """自动生成目录：层级编号、页码占位"""
         toc = []
         page = 2
@@ -546,7 +546,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             page += max(1, len(sec.get("content", "")) // 3000)
         return toc
 
-    def check_pdf_accessibility(self, template: Dict) -> Dict[str, Any]:
+    def check_pdf_accessibility(self, template: dict) -> dict[str, Any]:
         """检查PDF可访问性：字体嵌入、颜色对比度、标题层级、表格标题"""
         issues = []
         styles = template.get("styles", {})
@@ -596,7 +596,7 @@ class PdfReportManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "wcag_aa_compliant": len(issues) == 0,
         }
 
-    def export_template_json(self, template: Dict, pretty: bool = True) -> str:
+    def export_template_json(self, template: dict, pretty: bool = True) -> str:
         """导出模板为JSON格式，用于版本管理和CI/CD集成"""
         import json
 

@@ -164,7 +164,7 @@ class BackupPolicy:
     timeout_minutes: int = 120
     compression: bool = True
     encryption: bool = False
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     enabled: bool = True
     created_at: str = ""
     updated_at: str = ""
@@ -190,8 +190,8 @@ class BackupTask:
     destination: str = ""
     size_bytes: int = 0
     duration_seconds: float = 0.0
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
     error_message: str = ""
     checksum: str = ""
     retry_count: int = 0
@@ -217,7 +217,7 @@ class BackupRecord:
     started_at: str = ""
     completed_at: str = ""
     duration_seconds: float = 0.0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.record_id:
@@ -227,19 +227,19 @@ class BackupRecord:
 class ScheduleState:
     """调度状态"""
 
-    next_run: Optional[str] = None
-    last_run: Optional[str] = None
-    last_status: Optional[TaskStatus] = None
+    next_run: str | None = None
+    last_run: str | None = None
+    last_status: TaskStatus | None = None
     run_count: int = 0
     consecutive_failures: int = 0
 
-class BackupPolicyAnalyzer(object):
+class BackupPolicyAnalyzer:
     """备份策略分析器 — 评估策略健康度、检测冗余、优化调度建议"""
 
     def __init__(self):
-        self._policy_stats: Dict[str, Dict] = {}
+        self._policy_stats: dict[str, dict] = {}
 
-    def analyze_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_policy(self, policy: dict[str, Any]) -> dict[str, Any]:
         """分析单个备份策略的健康度"""
         score = 100.0
         issues = []
@@ -277,7 +277,7 @@ class BackupPolicyAnalyzer(object):
             "estimated_total_gb": round(storage_needed_gb, 2),
         }
 
-    def detect_redundant_policies(self, policies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_redundant_policies(self, policies: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """检测冗余/重叠的备份策略"""
         redundant = []
         sources = {}
@@ -311,7 +311,7 @@ class BackupPolicyAnalyzer(object):
 
     def recommend_schedule(
         self, source_size_gb: float, recovery_rto_hours: float, recovery_rpo_hours: float
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """根据业务需求推荐备份调度策略"""
         if rpo_hours <= 0.5:
             rec_interval = 0.5
@@ -347,8 +347,8 @@ class BackupPolicyAnalyzer(object):
         }
 
     def get_storage_forecast(
-        self, current_usage_gb: float, growth_rate_pct: float, policies: List[Dict[str, Any]], days: int = 90
-    ) -> Dict[str, Any]:
+        self, current_usage_gb: float, growth_rate_pct: float, policies: list[dict[str, Any]], days: int = 90
+    ) -> dict[str, Any]:
         """预测未来N天的存储需求"""
         daily_backup_gb = 0
         for p in policies:
@@ -402,20 +402,20 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self.module_category = "数据保护"
 
         # 策略存储
-        self._policies: Dict[str, BackupPolicy] = {}
+        self._policies: dict[str, BackupPolicy] = {}
         # 任务队列
-        self._pending_tasks: List[BackupTask] = []
+        self._pending_tasks: list[BackupTask] = []
         # 活跃任务
-        self._active_tasks: Dict[str, BackupTask] = {}
+        self._active_tasks: dict[str, BackupTask] = {}
         # 备份记录
-        self._records: Dict[str, BackupRecord] = {}
+        self._records: dict[str, BackupRecord] = {}
         # 调度状态
-        self._schedule_states: Dict[str, ScheduleState] = {}
+        self._schedule_states: dict[str, ScheduleState] = {}
         # 统计
         self._total_backups = 0
         self._total_size = 0
         self._total_duration = 0.0
-        self._notification_handlers: Dict[str, List[str]] = defaultdict(list)
+        self._notification_handlers: dict[str, list[str]] = defaultdict(list)
 
     def initialize(self):
         """初始化备份调度器，加载默认策略"""
@@ -511,7 +511,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return target.isoformat()
 
-    def _create_policy(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_policy(self, params: dict[str, Any]) -> dict[str, Any]:
         """创建备份策略"""
         name = params.get("name", "")
         if not name:
@@ -547,7 +547,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         logger.info(f"[{self.module_name}] 创建策略: {policy.name} ({policy.policy_id})")
         return {"success": True, "result": {"policy_id": policy.policy_id, "name": policy.name}}
 
-    def _execute_backup(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_backup(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行备份任务"""
         policy_id = params.get("policy_id", "")
         policy = self._policies.get(policy_id)
@@ -655,7 +655,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 },
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             task.status = TaskStatus.TIMEOUT
             task.error_message = "备份执行超时"
         except Exception as e:
@@ -692,7 +692,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         if len(policy_records) <= 1:
             return
 
-        to_remove: List[str] = []
+        to_remove: list[str] = []
         now = datetime.now()
 
         if policy.retention == RetentionPolicy.KEEP_LAST_N:
@@ -709,7 +709,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                         to_remove.append(r.record_id)
 
         elif policy.retention == RetentionPolicy.KEEP_WEEKLY_N:
-            weekly: Dict[str, BackupRecord] = {}
+            weekly: dict[str, BackupRecord] = {}
             for r in sorted(policy_records, key=lambda x: x.completed_at or ""):
                 if r.completed_at:
                     week_key = datetime.fromisoformat(r.completed_at).strftime("%Y-W%W")
@@ -723,7 +723,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                     to_remove.append(r.record_id)
 
         elif policy.retention == RetentionPolicy.KEEP_MONTHLY_N:
-            monthly: Dict[str, BackupRecord] = {}
+            monthly: dict[str, BackupRecord] = {}
             for r in sorted(policy_records, key=lambda x: x.completed_at or ""):
                 if r.completed_at:
                     month_key = datetime.fromisoformat(r.completed_at).strftime("%Y-%m")
@@ -744,7 +744,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         if to_remove:
             logger.info(f"[{self.module_name}] 保留策略清理: 删除 {len(to_remove)} 个过期备份")
 
-    def _list_policies(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _list_policies(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """列出所有备份策略"""
         tag_filter = (params or {}).get("tag", "")
         result = []
@@ -775,7 +775,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return {"success": True, "result": result}
 
-    def _toggle_policy(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _toggle_policy(self, params: dict[str, Any]) -> dict[str, Any]:
         """启用/禁用策略"""
         policy_id = params.get("policy_id", "")
         enabled = params.get("enabled")
@@ -789,7 +789,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         logger.info(f"[{self.module_name}] 策略 {policy.name} {'启用' if enabled else '禁用'}")
         return {"success": True, "result": {"policy_id": policy_id, "name": policy.name, "enabled": enabled}}
 
-    def _delete_policy(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _delete_policy(self, params: dict[str, Any]) -> dict[str, Any]:
         """删除备份策略"""
         policy_id = params.get("policy_id", "")
         policy = self._policies.get(policy_id)
@@ -801,7 +801,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         logger.info(f"[{self.module_name}] 删除策略: {name}")
         return {"success": True, "result": {"deleted": policy_id, "name": name}}
 
-    def _get_history(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_history(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """查询备份历史"""
         params = params or {}
         policy_id = params.get("policy_id", "")
@@ -840,19 +840,19 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    def _get_stats(self, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _get_stats(self, params: dict[str, Any] = None) -> dict[str, Any]:
         """获取备份统计"""
         success_count = sum(1 for r in self._records.values() if r.status == TaskStatus.SUCCESS)
         failed_count = sum(1 for r in self._records.values() if r.status == TaskStatus.FAILED)
         active_count = len(self._active_tasks)
 
         # 按策略统计
-        by_policy: Dict[str, int] = defaultdict(int)
+        by_policy: dict[str, int] = defaultdict(int)
         for r in self._records.values():
             by_policy[r.policy_id] += 1
 
         # 按类型统计
-        by_type: Dict[str, int] = defaultdict(int)
+        by_type: dict[str, int] = defaultdict(int)
         for r in self._records.values():
             by_type[r.backup_type.value] += 1
 
@@ -877,7 +877,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             },
         }
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """执行备份调度操作"""
         _ = self.trace("execute")
         metrics_collector.counter("backup_scheduler_ops_total", labels={"operation": operation})
@@ -912,7 +912,7 @@ class BackupSchedulerManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._active_tasks.clear()
         logger.info(f"[{self.module_name}] 已关闭，共执行 {self._total_backups} 次备份")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         base = super().health_check() or {}
         result = dict(base)

@@ -78,7 +78,7 @@ from core.logging_config import get_logger
 import hashlib
 import threading
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass, field
@@ -96,7 +96,7 @@ except ImportError:
 
 logger = get_logger(__name__)
 
-class K8SOrchAnalyzer(object):
+class K8SOrchAnalyzer:
     """k8s_orch 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -378,7 +378,7 @@ class K8sEvent:
     message: str = ""
     reason: str = ""
 
-class ResourceScheduler(object):
+class ResourceScheduler:
     """Simulated K8s resource scheduling with affinity rules."""
 
     def __init__(self):
@@ -396,7 +396,7 @@ class ResourceScheduler(object):
                 "labels": {"zone": f"zone-{i % 2}", "node_type": "worker"},
             }
 
-    def schedule(self, pod: Pod) -> Optional[str]:
+    def schedule(self, pod: Pod) -> str | None:
         """Select best node for a pod based on resources and selectors."""
         candidates = []
         for name, node in self._nodes.items():
@@ -486,7 +486,7 @@ class K8sOrchestrator:
         self, event_type: str, resource_type: str, resource_name: str, namespace: str, message: str, reason: str = ""
     ):
         event = K8sEvent(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             event_type=event_type,
             resource_type=resource_type,
             resource_name=resource_name,
@@ -510,7 +510,7 @@ class K8sOrchestrator:
     def create_pod(self, pod: Pod) -> dict:
         key = f"{pod.namespace}/{pod.name}"
         pod.metadata["uid"] = self._generate_uid()
-        pod.metadata["created_at"] = datetime.now(timezone.utc).isoformat()
+        pod.metadata["created_at"] = datetime.now(UTC).isoformat()
         pod.status.phase = PodPhase.PENDING
         with self._lock:
             self._pods[key] = pod
@@ -519,7 +519,7 @@ class K8sOrchestrator:
             pod.status.phase = PodPhase.RUNNING
             pod.status.host_ip = f"10.0.{hash(node) % 256}.{1}"
             pod.status.pod_ip = f"10.244.{hash(key) % 256}.{hash(key) % 254 + 1}"
-            pod.status.started_at = datetime.now(timezone.utc).isoformat()
+            pod.status.started_at = datetime.now(UTC).isoformat()
         self._record_event("create", "pod", pod.name, pod.namespace, f"Pod {pod.name} created on {node or 'pending'}")
         return {
             "name": pod.name,
@@ -530,7 +530,7 @@ class K8sOrchestrator:
             "pod_ip": pod.status.pod_ip,
         }
 
-    def get_pod(self, name: str, namespace: str = "default") -> Optional[dict]:
+    def get_pod(self, name: str, namespace: str = "default") -> dict | None:
         key = f"{namespace}/{name}"
         pod = self._pods.get(key)
         if not pod:
@@ -583,7 +583,7 @@ class K8sOrchestrator:
                 "name": spec.name,
                 "namespace": spec.namespace,
                 "uid": uid,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "generation": 1,
             },
             "spec": spec,
@@ -620,7 +620,7 @@ class K8sOrchestrator:
             "pods_created": len(created_pods),
         }
 
-    def scale_deployment(self, name: str, namespace: str = "default", replicas: int = 0) -> Optional[dict]:
+    def scale_deployment(self, name: str, namespace: str = "default", replicas: int = 0) -> dict | None:
         key = f"{namespace}/{name}"
         dep = self._deployments.get(key)
         if not dep:
@@ -689,7 +689,7 @@ class K8sOrchestrator:
             "target_cpu": hpa.target_cpu_percent,
         }
 
-    def get_deployment(self, name: str, namespace: str = "default") -> Optional[dict]:
+    def get_deployment(self, name: str, namespace: str = "default") -> dict | None:
         key = f"{namespace}/{name}"
         dep = self._deployments.get(key)
         if not dep:
@@ -720,7 +720,7 @@ class K8sOrchestrator:
                 "name": name,
                 "namespace": namespace,
                 "uid": self._generate_uid(),
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
             "spec": {
                 "type": service_type,
@@ -801,7 +801,7 @@ class K8sOrchestrator:
             "initialized": self._initialized,
             "cluster": cluster,
             "nodes": self._scheduler.get_node_status(),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

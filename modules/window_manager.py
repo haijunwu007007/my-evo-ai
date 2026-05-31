@@ -112,7 +112,7 @@ class WindowInfo:
     created_at: float = 0.0
     last_focused_at: float = 0.0
     workspace_id: str = "default"
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 @dataclass
 class LayoutProfile:
@@ -122,7 +122,7 @@ class LayoutProfile:
     name: str = ""
     description: str = ""
     created_at: float = 0.0
-    window_configs: List[Dict] = field(default_factory=list)
+    window_configs: list[dict] = field(default_factory=list)
 
 @dataclass
 class Workspace:
@@ -131,14 +131,14 @@ class Workspace:
     workspace_id: str = ""
     name: str = ""
     monitor_index: int = 0
-    windows: List[str] = field(default_factory=list)
+    windows: list[str] = field(default_factory=list)
     is_active: bool = False
     layout: str = "grid"
 
 class LayoutEngine:
     """布局引擎：自动排列窗口、多显示器管理、预设布局恢复。"""
 
-    def tile_windows(self, windows: List[WindowInfo], monitor_rect: Dict) -> List[Dict]:
+    def tile_windows(self, windows: list[WindowInfo], monitor_rect: dict) -> list[dict]:
         """平铺排列窗口。企业场景：多窗口对比工作（如代码+文档+终端），
         一键将所有窗口均匀分布在屏幕上。
         """
@@ -177,7 +177,7 @@ class LayoutEngine:
             )
         return placements
 
-    def cascade_windows(self, windows: List[WindowInfo], monitor_rect: Dict) -> List[Dict]:
+    def cascade_windows(self, windows: list[WindowInfo], monitor_rect: dict) -> list[dict]:
         """层叠排列窗口。企业场景：快速找到特定窗口，每个窗口露出标题栏。"""
         visible = [w for w in windows if w.state != WindowState.MINIMIZED]
         placements = []
@@ -200,7 +200,7 @@ class LayoutEngine:
             )
         return placements
 
-    def distribute_monitors(self, windows: List[WindowInfo], monitors: List[Dict]) -> Dict[str, Any]:
+    def distribute_monitors(self, windows: list[WindowInfo], monitors: list[dict]) -> dict[str, Any]:
         """按显示器分布窗口。企业场景：双屏/三屏工作站，
         将窗口按类型自动分配到合适的显示器。
         """
@@ -228,7 +228,7 @@ class LayoutEngine:
             )
         return {"success": True, "monitors": summary, "total_windows": sum(len(v) for v in monitor_windows.values())}
 
-    def find_overlapping_windows(self, windows: List[WindowInfo]) -> List[Dict]:
+    def find_overlapping_windows(self, windows: list[WindowInfo]) -> list[dict]:
         """检测重叠窗口。企业场景：发现被完全遮挡的窗口，
         可能是用户忘记关闭的后台应用。
         """
@@ -266,7 +266,7 @@ class WindowTracker:
     """窗口追踪器：焦点历史、使用时间统计、高频应用检测。"""
 
     def __init__(self):
-        self._focus_history: List[Dict] = []
+        self._focus_history: list[dict] = []
 
     def record_focus(self, window: WindowInfo) -> None:
         """记录窗口焦点变更。"""
@@ -281,7 +281,7 @@ class WindowTracker:
         if len(self._focus_history) > 5000:
             self._focus_history = self._focus_history[-2000:]
 
-    def get_app_usage_report(self, hours: int = 24) -> Dict[str, Any]:
+    def get_app_usage_report(self, hours: int = 24) -> dict[str, Any]:
         """应用使用时间报告。企业场景：员工效率分析，
         统计每个应用的使用时间占比。
         """
@@ -316,7 +316,7 @@ class WindowTracker:
             "top_apps": report,
         }
 
-    def get_focus_frequency(self, top_n: int = 10) -> Dict[str, Any]:
+    def get_focus_frequency(self, top_n: int = 10) -> dict[str, Any]:
         """焦点切换频率。企业场景：检测上下文切换过多影响效率。"""
         if not self._focus_history:
             return {"success": True, "focus_changes": 0}
@@ -346,24 +346,24 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     - 安全审计：追踪窗口焦点历史，检测异常应用使用
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._windows: Dict[str, WindowInfo] = {}
-        self._monitors: List[Dict] = []
-        self._workspaces: Dict[str, Workspace] = {}
-        self._layout_profiles: Dict[str, LayoutProfile] = {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._windows: dict[str, WindowInfo] = {}
+        self._monitors: list[dict] = []
+        self._workspaces: dict[str, Workspace] = {}
+        self._layout_profiles: dict[str, LayoutProfile] = {}
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("window_manager")
         self._layout_engine = LayoutEngine()
@@ -460,7 +460,7 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._tracker.record_focus(win)
         return {"success": True, "window_id": window_id, "title": win.title, "z_order": win.z_order}
 
-    def list_windows(self, params: dict = None) -> Dict[str, Any]:
+    def list_windows(self, params: dict = None) -> dict[str, Any]:
         """列出所有窗口。企业场景：查看当前桌面状态，发现不需要的窗口。"""
         params = params or {}
         workspace = params.get("workspace_id", "")
@@ -495,7 +495,7 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "windows": win_list,
         }
 
-    def tile_all(self, params: dict = None) -> Dict[str, Any]:
+    def tile_all(self, params: dict = None) -> dict[str, Any]:
         """平铺排列所有窗口。企业场景：对比多个文档/代码文件。"""
         self.trace("tile_all", {})
         self.metrics_collector.counter("window_manager.tile_all.calls", 1)
@@ -519,7 +519,7 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "placements": placements,
         }
 
-    def save_layout(self, params: dict = None) -> Dict[str, Any]:
+    def save_layout(self, params: dict = None) -> dict[str, Any]:
         """保存当前布局为预设。企业场景：保存"开发模式"/"会议模式"等布局，
         下次一键恢复。
         """
@@ -556,7 +556,7 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("layout_saved", {"profile_id": profile_id, "name": name, "windows": len(window_configs)})
         return {"success": True, "profile_id": profile_id, "name": name, "saved_windows": len(window_configs)}
 
-    def restore_layout(self, params: dict = None) -> Dict[str, Any]:
+    def restore_layout(self, params: dict = None) -> dict[str, Any]:
         """恢复预设布局。企业场景：切换工作模式时一键恢复窗口排列。"""
         params = params or {}
         self.trace("restore_layout", {"profile_id": params.get("profile_id")})
@@ -589,27 +589,27 @@ class WindowManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "not_found": len(profile.window_configs) - restored,
         }
 
-    def get_app_usage(self, params: dict = None) -> Dict[str, Any]:
+    def get_app_usage(self, params: dict = None) -> dict[str, Any]:
         """获取应用使用报告。企业场景：效率分析，查看时间分配。"""
         self.trace("get_app_usage", {})
         self.metrics_collector.counter("window_manager.get_app_usage.calls", 1)
         hours = (params or {}).get("hours", 24)
         return self._tracker.get_app_usage_report(hours)
 
-    def get_focus_stats(self, params: dict = None) -> Dict[str, Any]:
+    def get_focus_stats(self, params: dict = None) -> dict[str, Any]:
         """焦点切换统计。企业场景：检测频繁切换是否影响效率。"""
         self.trace("get_focus_stats", {})
         self.metrics_collector.counter("window_manager.get_focus_stats.calls", 1)
         return self._tracker.get_focus_frequency()
 
-    def find_overlapping(self, params: dict = None) -> Dict[str, Any]:
+    def find_overlapping(self, params: dict = None) -> dict[str, Any]:
         """查找被遮挡的窗口。企业场景：发现被遗忘的窗口。"""
         self.trace("find_overlapping", {})
         self.metrics_collector.counter("window_manager.find_overlapping.calls", 1)
         overlaps = self._layout_engine.find_overlapping_windows(list(self._windows.values()))
         return {"success": True, "overlapping_windows": overlaps, "count": len(overlaps)}
 
-    def list_layouts(self, params: dict = None) -> Dict[str, Any]:
+    def list_layouts(self, params: dict = None) -> dict[str, Any]:
         """列出所有预设布局。"""
         profiles = list(self._layout_profiles.values())
         return {

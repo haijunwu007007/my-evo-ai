@@ -15,7 +15,7 @@ class EvoBrain:
     """主编排器 - LLM驱动意图理解 + 正则降级"""
 
     # 意图 -> (模块列表, 中文描述)
-    INTENT_MAP: Dict[str, tuple] = {
+    INTENT_MAP: dict[str, tuple] = {
         'search':      (['browser_auto','githubtrending','web_search'],           '搜索/查找'),
         'monitor':     (['system_monitor','incident_manager','health_monitor'],   '监控/追踪'),
         'automation':  (['cron_scheduler','workflow_manager','trigger_engine'],   '自动化/定时'),
@@ -32,11 +32,11 @@ class EvoBrain:
 
     def __init__(self, module_manager):
         self.mm = module_manager
-        self.context: Dict[str, Any] = {}
-        self.history: List[Dict] = []
+        self.context: dict[str, Any] = {}
+        self.history: list[dict] = []
         self._llm_available = False
 
-    async def think(self, user_input: str) -> Dict[str, Any]:
+    async def think(self, user_input: str) -> dict[str, Any]:
         """核心思考：先用LLM语义理解，正则兜底"""
         user_input = user_input.strip()
         if not user_input:
@@ -65,7 +65,7 @@ class EvoBrain:
             self.history = self.history[-50:]
         return entry
 
-    async def _llm_understand(self, text: str) -> Optional[Dict]:
+    async def _llm_understand(self, text: str) -> dict | None:
         """调用LLM做意图理解"""
         gateway = self.mm.get_module('ai_gateway')
         if not gateway:
@@ -103,7 +103,7 @@ class EvoBrain:
             logger.debug(f'[EvoBrain] LLM parse fail: {e}')
             return None
 
-    def _regex_understand(self, text: str) -> Dict:
+    def _regex_understand(self, text: str) -> dict:
         """正则兜底"""
         rules = [
             (r'搜索|查找|查一下|帮我找',          'search'),
@@ -130,7 +130,7 @@ class EvoBrain:
         return {'intent': best_intent, 'modules': modules,
                 'params': {'raw': text}, 'confidence': min(best_score / 5, 1.0)}
 
-    def _generate_plan(self, result: Dict, text: str) -> List[str]:
+    def _generate_plan(self, result: dict, text: str) -> list[str]:
         """生成可执行步骤"""
         steps = [f'理解意图: {result.get("intent","未知")}']
         modules = result.get('modules', [])
@@ -145,13 +145,13 @@ class EvoBrain:
     def set_context(self, key: str, value: Any):
         self.context[key] = value
 
-    def get_history(self, n: int = 10) -> List[Dict]:
+    def get_history(self, n: int = 10) -> list[dict]:
         return self.history[-n:]
 
     def clear_history(self):
         self.history.clear()
 
-    def suggest_best_module(self, intent: str = "", candidates: List[str] = None) -> Optional[str]:
+    def suggest_best_module(self, intent: str = "", candidates: list[str] = None) -> str | None:
         """
         根据进化引擎的评分推荐最佳模块。
         - intent: 意图描述（可选）
@@ -175,7 +175,7 @@ class EvoBrain:
         ranked = evo_engine.ranking(1)
         return ranked[0]["module"] if ranked else None
 
-    def get_adaptive_route(self, intent: str, candidates: List[str]) -> Dict:
+    def get_adaptive_route(self, intent: str, candidates: list[str]) -> dict:
         """
         自适应路由：返回候选模块的评分排序。
         用于 UI 展示和手动选择。

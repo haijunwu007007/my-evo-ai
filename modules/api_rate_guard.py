@@ -169,29 +169,29 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._configs: Dict[str, RateLimitConfig] = {}
-        self._quotas: Dict[str, ClientQuota] = {}
-        self._logs: List[RateLimitLog] = []
+        self._configs: dict[str, RateLimitConfig] = {}
+        self._quotas: dict[str, ClientQuota] = {}
+        self._logs: list[RateLimitLog] = []
         self._config_counter: int = 0
         self._log_counter: int = 0
         # 熔断器状态（每个限流规则独立熔断）
-        self._circuit_states: Dict[str, Dict] = {}
+        self._circuit_states: dict[str, dict] = {}
         self._circuit_failure_threshold: int = 10
         self._circuit_recovery_timeout: float = 60.0
         # 客户端分级（VIP/普通/黑名单）
-        self._client_tiers: Dict[str, str] = {}
-        self._tier_multiplier: Dict[str, float] = {"vip": 3.0, "premium": 2.0, "normal": 1.0, "blacklist": 0.0}
+        self._client_tiers: dict[str, str] = {}
+        self._tier_multiplier: dict[str, float] = {"vip": 3.0, "premium": 2.0, "normal": 1.0, "blacklist": 0.0}
         # 告警阈值
         self._alert_threshold: float = 0.8
-        self._alert_history: List[Dict] = []
+        self._alert_history: list[dict] = []
         # 限流统计
-        self._stats_counters: Dict[str, Dict] = {}
+        self._stats_counters: dict[str, dict] = {}
 
     def initialize(self) -> None:
         try:
@@ -246,7 +246,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         self.audit("execute", f"action={action}")
         params = params or {}
@@ -424,7 +424,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         total_allowed = sum(q.allowed for q in self._quotas.values())
         total_rejected = sum(q.rejected for q in self._quotas.values())
         open_cb = sum(1 for s in self._circuit_states.values() if s.get("state") == "open")
@@ -462,7 +462,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("rate_guard_shutdown", summary)
         logger.info("API限流守卫已关闭")
 
-    def _check_rate(self, client_id: str, path: str) -> Dict:
+    def _check_rate(self, client_id: str, path: str) -> dict:
         """检查请求是否被允许（含客户端分级+熔断）"""
         now = time.time()
 
@@ -612,7 +612,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "tier": tier,
         }
 
-    def batch_check(self, client_id: str, paths: List[str]) -> Dict[str, Dict]:
+    def batch_check(self, client_id: str, paths: list[str]) -> dict[str, dict]:
         """批量检查多个路径的限流状态"""
         results = {}
         for path in paths:
@@ -627,7 +627,7 @@ class ApiRateGuardManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "results": results,
         }
 
-    def get_usage_report(self, top_n: int = 10) -> Dict:
+    def get_usage_report(self, top_n: int = 10) -> dict:
         """获取配额使用报告（按拒绝率排序）"""
         sorted_clients = sorted(self._quotas.values(), key=lambda q: q.rejected, reverse=True)
         top = []

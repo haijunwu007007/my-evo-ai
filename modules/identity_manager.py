@@ -130,7 +130,7 @@ class PasswordPolicy:
     max_age_days: int = 90
     max_attempts: int = 5
     lockout_minutes: int = 30
-    forbidden_patterns: List[str] = field(default_factory=lambda: ["password", "123456", "qwerty"])
+    forbidden_patterns: list[str] = field(default_factory=lambda: ["password", "123456", "qwerty"])
 
 @dataclass
 class Identity:
@@ -139,10 +139,10 @@ class Identity:
     email: str
     phone: str = ""
     status: IdentityStatus = IdentityStatus.ACTIVE
-    auth_methods: List[AuthMethod] = field(default_factory=lambda: [AuthMethod.PASSWORD])
-    roles: List[str] = field(default_factory=list)
-    groups: List[str] = field(default_factory=list)
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    auth_methods: list[AuthMethod] = field(default_factory=lambda: [AuthMethod.PASSWORD])
+    roles: list[str] = field(default_factory=list)
+    groups: list[str] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
     mfa_enabled: bool = False
     mfa_secret: str = ""
     password_hash: str = ""
@@ -153,7 +153,7 @@ class Identity:
     locked_until: float = 0.0
     created_at: float = 0.0
     updated_at: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Session:
@@ -167,17 +167,17 @@ class Session:
     created_at: float = 0.0
     expires_at: float = 0.0
     last_activity: float = 0.0
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AuthResult:
     success: bool
-    identity_id: Optional[str] = None
-    session: Optional[Session] = None
+    identity_id: str | None = None
+    session: Session | None = None
     token: str = ""
     requires_mfa: bool = False
     error: str = ""
-    mfa_methods: List[AuthMethod] = field(default_factory=list)
+    mfa_methods: list[AuthMethod] = field(default_factory=list)
 
 @dataclass
 class ApiKey:
@@ -185,13 +185,13 @@ class ApiKey:
     identity_id: str
     name: str
     key_hash: str = ""
-    permissions: List[str] = field(default_factory=list)
+    permissions: list[str] = field(default_factory=list)
     expires_at: float = 0.0
     last_used_at: float = 0.0
     created_at: float = 0.0
     status: str = "active"
 
-class IdentityManagerAnalyzer(object):
+class IdentityManagerAnalyzer:
     """identity_manager 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -297,14 +297,14 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
         super().__init__()
 
-        self._identities: Dict[str, Identity] = {}
-        self._username_index: Dict[str, str] = {}
-        self._email_index: Dict[str, str] = {}
-        self._sessions: Dict[str, Session] = {}
-        self._token_index: Dict[str, str] = {}
-        self._api_keys: Dict[str, ApiKey] = {}
-        self._password_history: Dict[str, List[str]] = defaultdict(list)
-        self._audit_log: List[Dict[str, Any]] = []
+        self._identities: dict[str, Identity] = {}
+        self._username_index: dict[str, str] = {}
+        self._email_index: dict[str, str] = {}
+        self._sessions: dict[str, Session] = {}
+        self._token_index: dict[str, str] = {}
+        self._api_keys: dict[str, ApiKey] = {}
+        self._password_history: dict[str, list[str]] = defaultdict(list)
+        self._audit_log: list[dict[str, Any]] = []
         self.metrics_collector = self._NoopMetricsCollector()
         self._policy = PasswordPolicy()
         self._session_ttl = 3600
@@ -349,8 +349,8 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         logger.info("IdentityManager initialized with %d identities", len(self._identities))
 
     def create_identity(
-        self, username: str, email: str, password: str, roles: Optional[List[str]] = None, phone: str = ""
-    ) -> Tuple[Optional[Identity], str]:
+        self, username: str, email: str, password: str, roles: list[str] | None = None, phone: str = ""
+    ) -> tuple[Identity | None, str]:
         with self._lock:
             err = self._validate_password(password)
             if err:
@@ -467,7 +467,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._token_index[token] = sid
         return session
 
-    def verify_token(self, token: str) -> Optional[Identity]:
+    def verify_token(self, token: str) -> Identity | None:
         with self._lock:
             sid = self._token_index.get(token)
             if not sid:
@@ -492,8 +492,8 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return True
 
     def create_api_key(
-        self, identity_id: str, name: str, permissions: Optional[List[str]] = None, ttl_seconds: int = 0
-    ) -> Optional[ApiKey]:
+        self, identity_id: str, name: str, permissions: list[str] | None = None, ttl_seconds: int = 0
+    ) -> ApiKey | None:
         with self._lock:
             identity = self._identities.get(identity_id)
             if not identity:
@@ -516,7 +516,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             key._raw_key = raw_key
             return key
 
-    def verify_api_key(self, raw_key: str) -> Optional[Identity]:
+    def verify_api_key(self, raw_key: str) -> Identity | None:
         with self._lock:
             key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
             for key in self._api_keys.values():
@@ -527,7 +527,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     return self._identities.get(key.identity_id)
             return None
 
-    def change_password(self, identity_id: str, old_password: str, new_password: str) -> Tuple[bool, str]:
+    def change_password(self, identity_id: str, old_password: str, new_password: str) -> tuple[bool, str]:
         with self._lock:
             identity = self._identities.get(identity_id)
             if not identity:
@@ -551,7 +551,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._op_stats["password_change"] += 1
             return True, ""
 
-    def assign_roles(self, identity_id: str, roles: List[str]) -> bool:
+    def assign_roles(self, identity_id: str, roles: list[str]) -> bool:
         with self._lock:
             identity = self._identities.get(identity_id)
             if not identity:
@@ -583,14 +583,14 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._op_stats["lock"] += 1
             return True
 
-    def get_audit_log(self, identity_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_audit_log(self, identity_id: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         with self._lock:
             logs = self._audit_log
             if identity_id:
                 logs = [l for l in logs if l.get("identity_id") == identity_id]
             return logs[-limit:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             active = sum(1 for i in self._identities.values() if i.status == IdentityStatus.ACTIVE)
             active_sessions = sum(1 for s in self._sessions.values() if s.status == SessionStatus.ACTIVE)
@@ -604,7 +604,7 @@ class IdentityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "operations": dict(self._op_stats),
             }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         stats = self.get_stats()
         return {
             "healthy": True,

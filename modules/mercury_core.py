@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MercuryCoreAnalyzer(object):
+class MercuryCoreAnalyzer:
     """mercury_core 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -277,7 +278,7 @@ class Message:
     created_at: float = field(compare=False)
     message_id: str = field(compare=False, default_factory=lambda: uuid.uuid4().hex[:16])
     payload: Any = field(compare=False, default=None)
-    headers: Dict[str, str] = field(compare=False, default_factory=dict)
+    headers: dict[str, str] = field(compare=False, default_factory=dict)
     state: MessageState = field(compare=False, default=MessageState.CREATED)
     retry_count: int = field(compare=False, default=0)
     max_retries: int = field(compare=False, default=3)
@@ -348,7 +349,7 @@ class MercuryCore:
 
     """Enterprise message processing engine with priority queues and backpressure."""
 
-    def __init__(self, config: Optional[QueueConfig] = None):
+    def __init__(self, config: QueueConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -381,14 +382,14 @@ class MercuryCore:
         )()
 
         self._config = config or QueueConfig()
-        self._queues: Dict[str, list] = defaultdict(list)
-        self._processing: Dict[str, Dict[str, Message]] = defaultdict(dict)
-        self._dead_letter: Dict[str, deque] = defaultdict(lambda: deque(maxlen=self._config.dead_letter_max))
-        self._dedup_cache: Dict[str, float] = {}
+        self._queues: dict[str, list] = defaultdict(list)
+        self._processing: dict[str, dict[str, Message]] = defaultdict(dict)
+        self._dead_letter: dict[str, deque] = defaultdict(lambda: deque(maxlen=self._config.dead_letter_max))
+        self._dedup_cache: dict[str, float] = {}
         self._lock = threading.RLock()
-        self._consumer_threads: Dict[str, List[threading.Thread]] = {}
-        self._handlers: Dict[str, Callable] = {}
-        self._latencies: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._consumer_threads: dict[str, list[threading.Thread]] = {}
+        self._handlers: dict[str, Callable] = {}
+        self._latencies: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
         self._completed_count = defaultdict(int)
         self._failed_count = defaultdict(int)
         self._running = False
@@ -416,7 +417,7 @@ class MercuryCore:
             self._consumer_threads.clear()
         logger.info("MercuryCore shutdown")
 
-    def register_queue(self, name: str, handler: Callable, config: Optional[QueueConfig] = None) -> None:
+    def register_queue(self, name: str, handler: Callable, config: QueueConfig | None = None) -> None:
         with self._lock:
             self._handlers[name] = handler
             self._queues[name]
@@ -434,10 +435,10 @@ class MercuryCore:
         queue_name: str,
         payload: Any,
         priority: MessagePriority = MessagePriority.NORMAL,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         max_retries: int = 3,
         timeout: float = 30.0,
-    ) -> Optional[str]:
+    ) -> str | None:
         if queue_name not in self._handlers:
             logger.warning("No handler for queue: %s", queue_name)
             return None
@@ -462,9 +463,7 @@ class MercuryCore:
             if len(queue) >= self._config.max_size:
                 if self._config.backpressure == BackpressureStrategy.DROP_OLDEST:
                     queue.pop(0)
-                elif self._config.backpressure == BackpressureStrategy.DROP_NEWEST:
-                    return None
-                elif self._config.backpressure == BackpressureStrategy.REJECT:
+                elif self._config.backpressure == BackpressureStrategy.DROP_NEWEST or self._config.backpressure == BackpressureStrategy.REJECT:
                     return None
 
             heapq.heappush(queue, msg)
@@ -476,7 +475,7 @@ class MercuryCore:
 
         return msg.message_id
 
-    def get_stats(self, queue_name: Optional[str] = None) -> Dict[str, Any]:
+    def get_stats(self, queue_name: str | None = None) -> dict[str, Any]:
         with self._lock:
             names = [queue_name] if queue_name else list(self._queues.keys())
             result = {}
@@ -553,7 +552,7 @@ class MercuryCore:
                 logger.error("Consumer error: %s", e)
                 time.sleep(0.1)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

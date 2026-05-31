@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现）
@@ -187,7 +186,7 @@ class LRUCache:
         self._lock = threading.Lock()
         self._total_memory = 0
 
-    def get(self, key: str) -> Optional[CacheEntry]:
+    def get(self, key: str) -> CacheEntry | None:
         with self._lock:
             entry = self._cache.get(key)
             if entry is None:
@@ -260,7 +259,7 @@ class LRUCache:
                 del self._cache[k]
             return len(expired)
 
-    def keys(self, namespace: str = "") -> List[str]:
+    def keys(self, namespace: str = "") -> list[str]:
         with self._lock:
             if namespace:
                 return [k for k, v in self._cache.items() if v.namespace == namespace and not v.is_expired]
@@ -274,7 +273,7 @@ class LRUCache:
     def memory_bytes(self) -> int:
         return self._total_memory
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         with self._lock:
             namespaces = {}
             for v in self._cache.values():
@@ -298,12 +297,12 @@ class FileCache:
         safe = hashlib.md5(key.encode()).hexdigest()
         return os.path.join(self.cache_dir, f"{safe}.json")
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         path = self._key_to_path(key)
         if not os.path.exists(path):
             return None
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             if data.get("expires_at", 0) > 0 and time.time() > data["expires_at"]:
                 os.remove(path)
@@ -346,7 +345,7 @@ class FileCache:
             if not fname.endswith(".json"):
                 continue
             try:
-                with open(os.path.join(self.cache_dir, fname), "r") as f:
+                with open(os.path.join(self.cache_dir, fname)) as f:
                     data = json.load(f)
                 if data.get("expires_at", 0) > 0 and time.time() > data["expires_at"]:
                     os.remove(os.path.join(self.cache_dir, fname))
@@ -355,7 +354,7 @@ class FileCache:
                 pass
         return count
 
-class CacheEvictionManager(object):
+class CacheEvictionManager:
     """缓存淘汰管理引擎 - 负责LRU/LFU/TTL淘汰策略和内存管理"""
 
     def __init__(self, max_size: int = 10000):
@@ -364,7 +363,7 @@ class CacheEvictionManager(object):
         self._eviction_count: int = 0
         self._hit_count: int = 0
         self._miss_count: int = 0
-        self._access_log: List[Tuple[str, float]] = []
+        self._access_log: list[tuple[str, float]] = []
 
     def record_access(self, key: str) -> None:
         """记录缓存访问"""
@@ -378,17 +377,17 @@ class CacheEvictionManager(object):
     def record_miss(self) -> None:
         self._miss_count += 1
 
-    def get_eviction_candidates(self, cache_keys: List[str], count: int = 10) -> List[str]:
+    def get_eviction_candidates(self, cache_keys: list[str], count: int = 10) -> list[str]:
         """获取淘汰候选key列表"""
         if self._eviction_policy == "lru":
-            key_time: Dict[str, float] = {}
+            key_time: dict[str, float] = {}
             for k, t in self._access_log:
                 if k in cache_keys:
                     key_time[k] = max(key_time.get(k, 0), t)
             sorted_keys = sorted(key_time.items(), key=lambda x: x[1])
             return [k for k, _ in sorted_keys[:count]]
         elif self._eviction_policy == "lfu":
-            key_freq: Dict[str, int] = {}
+            key_freq: dict[str, int] = {}
             for k, _ in self._access_log:
                 if k in cache_keys:
                     key_freq[k] = key_freq.get(k, 0) + 1
@@ -400,13 +399,13 @@ class CacheEvictionManager(object):
         if policy in ("lru", "lfu", "ttl"):
             self._eviction_policy = policy
 
-    def get_ttl_candidates(self, cache_store: Dict[str, float], count: int = 10) -> List[str]:
+    def get_ttl_candidates(self, cache_store: dict[str, float], count: int = 10) -> list[str]:
         """获取TTL过期的候选key"""
         now = time.time()
         expired = [k for k, t in cache_store.items() if t > 0 and t < now]
         return expired[:count]
 
-    def estimate_memory(self, cache_store: Dict) -> Dict:
+    def estimate_memory(self, cache_store: dict) -> dict:
         """估算缓存内存占用"""
         import sys
 
@@ -417,7 +416,7 @@ class CacheEvictionManager(object):
             "estimated_mb": round(total_size / 1024 / 1024, 2),
         }
 
-    def warmup(self, keys: List[str], loader: callable) -> Dict:
+    def warmup(self, keys: list[str], loader: callable) -> dict:
         """缓存预热"""
         loaded = 0
         failed = 0
@@ -430,7 +429,7 @@ class CacheEvictionManager(object):
         metrics_collector.counter("cache_warmup_keys", loaded)
         return {"loaded": loaded, "failed": failed}
 
-    def invalidate_pattern(self, pattern: str, cache_keys: List[str]) -> List[str]:
+    def invalidate_pattern(self, pattern: str, cache_keys: list[str]) -> list[str]:
         """按模式批量失效"""
         import fnmatch
 
@@ -438,7 +437,7 @@ class CacheEvictionManager(object):
         metrics_collector.counter("cache_invalidation_total", len(matched))
         return matched
 
-    def snapshot(self) -> Dict:
+    def snapshot(self) -> dict:
         """获取当前管理器快照"""
         return {
             "policy": self._eviction_policy,
@@ -453,7 +452,7 @@ class CacheEvictionManager(object):
         metrics_collector.counter("cache_evictions_total")
         return 1
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         total = self._hit_count + self._miss_count
         return {
             "policy": self._eviction_policy,
@@ -472,7 +471,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -493,7 +492,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._misses = 0
         self._sets = 0
         self._evictions = 0
-        self._bg_cleanup: Optional[threading.Thread] = None
+        self._bg_cleanup: threading.Thread | None = None
         self.cleanup_interval = self.config.get("cleanup_interval", 60)
 
     def initialize(self) -> None:
@@ -508,7 +507,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"模式={l2_str}, L1最大={self.l1_max_size}, 默认TTL={self.default_ttl}s")
         self.info(f"缓存引擎就绪 ({l2_str})")
 
-    def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         params = params or {}
         trace_id = f"cache-{action}-{int(time.time() * 1000)}"
@@ -538,7 +537,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心缓存操作 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "get": lambda p: self._cache_get(p["key"], p.get("namespace")),
@@ -559,7 +558,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _cache_get(self, key: str, namespace: str = "default") -> Dict:
+    def _cache_get(self, key: str, namespace: str = "default") -> dict:
         """获取缓存（L1 → L2 逐层查找）"""
         # L1查找
         entry = self._l1.get(f"{namespace}:{key}" if namespace != "default" else key)
@@ -587,7 +586,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._misses += 1
         return {"found": False, "value": None, "source": None, "namespace": namespace}
 
-    def _cache_set(self, key: str, value: Any, ttl: float = 0, namespace: str = "default") -> Dict:
+    def _cache_set(self, key: str, value: Any, ttl: float = 0, namespace: str = "default") -> dict:
         """设置缓存（同时写L1+L2）"""
         full_key = f"{namespace}:{key}" if namespace != "default" else key
         l1_ok = self._l1.set(full_key, value, ttl, namespace)
@@ -598,20 +597,20 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.request_count += 1
         return {"success": l1_ok and l2_ok, "l1": l1_ok, "l2": l2_ok}
 
-    def _cache_delete(self, key: str, namespace: str = "") -> Dict:
+    def _cache_delete(self, key: str, namespace: str = "") -> dict:
         full_key = f"{namespace}:{key}" if namespace else key
         l1 = self._l1.delete(full_key)
         l2 = self._l2.delete(full_key) if self._l2 else True
         return {"deleted": l1 or l2}
 
-    def _cache_mget(self, keys: List[str], namespace: str = "") -> Dict:
+    def _cache_mget(self, keys: list[str], namespace: str = "") -> dict:
         results = {}
         for key in keys:
             r = self._cache_get(key, namespace)
             results[key] = r.get("value") if r.get("found") else None
         return {"values": results}
 
-    def _cache_mset(self, items: List[Dict], ttl: float = 0) -> Dict:
+    def _cache_mset(self, items: list[dict], ttl: float = 0) -> dict:
         success = 0
         for item in items:
             r = self._cache_set(item["key"], item["value"], ttl, item.get("namespace"))
@@ -619,7 +618,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 success += 1
         return {"total": len(items), "success": success}
 
-    def _cache_exists(self, key: str) -> Dict:
+    def _cache_exists(self, key: str) -> dict:
         entry = self._l1.get(key)
         if entry:
             return {"exists": True, "source": "L1"}
@@ -627,7 +626,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"exists": True, "source": "L2"}
         return {"exists": False}
 
-    def _cache_incr(self, key: str, amount: int = 1) -> Dict:
+    def _cache_incr(self, key: str, amount: int = 1) -> dict:
         entry = self._l1.get(key)
         current = entry.value if entry else 0
         if not isinstance(current, (int, float)):
@@ -636,20 +635,20 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._l1.set(key, new_val, entry.ttl if entry else 0, entry.namespace if entry else "default")
         return {"old": current, "new": new_val}
 
-    def _cache_keys(self, namespace: str = "") -> Dict:
+    def _cache_keys(self, namespace: str = "") -> dict:
         return {"keys": self._l1.keys(namespace)}
 
-    def _cache_clear(self, namespace: str = "") -> Dict:
+    def _cache_clear(self, namespace: str = "") -> dict:
         self._l1.clear(namespace)
         return {"cleared": True, "namespace": namespace or "all"}
 
-    def _cache_get_ttl(self, key: str) -> Dict:
+    def _cache_get_ttl(self, key: str) -> dict:
         entry = self._l1.get(key)
         if entry:
             return {"ttl_remaining": round(entry.remaining_ttl, 1)}
         return {"ttl_remaining": -1}
 
-    def _flush_all(self) -> Dict:
+    def _flush_all(self) -> dict:
         self._l1.clear()
         if self._l2:
             self._l2.clear()
@@ -658,7 +657,7 @@ class CacheEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._sets = 0
         return {"flushed": True}
 
-    def _full_stats(self) -> Dict:
+    def _full_stats(self) -> dict:
         total = self._hits + self._misses
         hit_rate = self._hits / total if total > 0 else 0
         return {

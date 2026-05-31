@@ -95,10 +95,10 @@ class PaymentGateway:
     CHANNELS = ["alipay", "wechat", "unionpay", "credit_card", "bank_transfer"]
 
     def __init__(self):
-        self._channels: Dict[str, Dict] = {}
+        self._channels: dict[str, dict] = {}
         self._transaction_log: deque = deque(maxlen=50000)
 
-    def register_channel(self, name: str, channel_type: str, config: Dict = None):
+    def register_channel(self, name: str, channel_type: str, config: dict = None):
         self._channels[name] = {
             "type": channel_type,
             "config": config or {},
@@ -107,7 +107,7 @@ class PaymentGateway:
             "count": 0,
         }
 
-    def pay(self, channel: str, order_id: str, amount: float, currency: str = "CNY", metadata: Dict = None) -> Dict:
+    def pay(self, channel: str, order_id: str, amount: float, currency: str = "CNY", metadata: dict = None) -> dict:
         ch = self._channels.get(channel)
         if not ch or not ch["enabled"]:
             return {"success": False, "error": "channel_not_available"}
@@ -139,7 +139,7 @@ class PaymentGateway:
         self._transaction_log.append(record)
         return {"success": record["status"] == "success", "txn_id": txn_id, "status": record["status"], **record}
 
-    def refund(self, txn_id: str, amount: float = None, reason: str = "") -> Dict:
+    def refund(self, txn_id: str, amount: float = None, reason: str = "") -> dict:
         for record in reversed(self._transaction_log):
             if record["txn_id"] == txn_id and record["status"] == "success":
                 refund_amount = amount if amount else record["amount"]
@@ -159,7 +159,7 @@ class PaymentGateway:
                 return {"success": True, "refund_id": refund_record["txn_id"], "refund_amount": refund_amount}
         return {"success": False, "error": "transaction_not_found"}
 
-    def get_channel_stats(self) -> Dict:
+    def get_channel_stats(self) -> dict:
         return {
             name: {
                 "type": ch["type"],
@@ -195,11 +195,11 @@ class PaymentGateway:
             params = {}
         return self.register_channel(**params)
 
-class OrderManager(object):
+class OrderManager:
     """订单管理引擎"""
 
     def __init__(self):
-        self._orders: Dict[str, Dict] = {}
+        self._orders: dict[str, dict] = {}
         self._status_flow = {
             "created": ["paid", "cancelled"],
             "paid": ["refunding", "completed"],
@@ -209,7 +209,7 @@ class OrderManager(object):
             "refunded": [],
         }
 
-    def create_order(self, items: List[Dict], currency: str = "CNY", metadata: Dict = None) -> Dict:
+    def create_order(self, items: list[dict], currency: str = "CNY", metadata: dict = None) -> dict:
         order_id = f"ORD{int(time.time())}{str(uuid.uuid4())[:6]}"
         total = sum(item.get("price", 0) * item.get("quantity", 1) for item in items)
         order = {
@@ -226,7 +226,7 @@ class OrderManager(object):
         self._orders[order_id] = order
         return {"success": True, "order_id": order_id, "total": order["total"]}
 
-    def update_status(self, order_id: str, new_status: str) -> Dict:
+    def update_status(self, order_id: str, new_status: str) -> dict:
         order = self._orders.get(order_id)
         if not order:
             return {"success": False, "error": "order_not_found"}
@@ -237,23 +237,23 @@ class OrderManager(object):
         order["updated_at"] = time.time()
         return {"success": True, "order_id": order_id, "status": new_status}
 
-    def get_order(self, order_id: str) -> Optional[Dict]:
+    def get_order(self, order_id: str) -> dict | None:
         return self._orders.get(order_id)
 
-    def list_orders(self, status: str = None, limit: int = 100) -> List[Dict]:
+    def list_orders(self, status: str = None, limit: int = 100) -> list[dict]:
         orders = list(self._orders.values())
         if status:
             orders = [o for o in orders if o["status"] == status]
         return sorted(orders, key=lambda x: x["created_at"], reverse=True)[:limit]
 
-class ReconciliationEngine(object):
+class ReconciliationEngine:
     """对账引擎"""
 
     def __init__(self):
-        self._reconciliation_log: List[Dict] = []
-        self._discrepancies: List[Dict] = []
+        self._reconciliation_log: list[dict] = []
+        self._discrepancies: list[dict] = []
 
-    def reconcile(self, orders: List[Dict], transactions: List[Dict]) -> Dict:
+    def reconcile(self, orders: list[dict], transactions: list[dict]) -> dict:
         order_totals = defaultdict(float)
         txn_totals = defaultdict(float)
         for order in orders:
@@ -290,19 +290,19 @@ class ReconciliationEngine(object):
         self._reconciliation_log.append({"ts": time.time(), **report})
         return {"success": True, "report": report, "discrepancies": discrepancies[:100]}
 
-    def get_discrepancies(self, limit: int = 100) -> List[Dict]:
+    def get_discrepancies(self, limit: int = 100) -> list[dict]:
         return self._discrepancies[-limit:]
 
 class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """支付中心 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "total_payments": 0,
@@ -311,7 +311,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -415,7 +415,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_transaction_summary(self, days: int = 7) -> Dict[str, Any]:
+    def get_transaction_summary(self, days: int = 7) -> dict[str, Any]:
         """交易汇总。企业场景：财务团队每日查看各支付渠道的交易量、
         成功率、退款率，对账和风险监控。
         """
@@ -449,7 +449,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "by_channel": by_channel,
         }
 
-    def get_daily_revenue_trend(self, days: int = 14) -> Dict[str, Any]:
+    def get_daily_revenue_trend(self, days: int = 14) -> dict[str, Any]:
         """每日营收趋势。企业场景：管理层查看营收变化曲线，
         识别增长/下降趋势。
         """
@@ -468,7 +468,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "data": [{"date": d, "revenue": round(a, 2)} for d, a in sorted_days[-days:]],
         }
 
-    def get_refund_analysis(self, days: int = 30) -> Dict[str, Any]:
+    def get_refund_analysis(self, days: int = 30) -> dict[str, Any]:
         """退款分析。企业场景：财务分析退款趋势，按原因分类统计退款金额，
         识别高退款率产品线，辅助产品优化决策。
         """
@@ -499,7 +499,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "top_refund_products": [{"product": p, "amount": round(a, 2)} for p, a in sorted_products[:5]],
         }
 
-    def get_payment_method_distribution(self) -> Dict[str, Any]:
+    def get_payment_method_distribution(self) -> dict[str, Any]:
         """支付方式分布。企业场景：产品分析用户支付偏好（微信/支付宝/银行卡），
         评估各渠道手续费成本和接入ROI。
         """
@@ -538,7 +538,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
         return {"success": True, "total_amount": round(total, 2), "methods": distribution}
 
-    def reconcile_transactions(self, date: str = None) -> Dict[str, Any]:
+    def reconcile_transactions(self, date: str = None) -> dict[str, Any]:
         """交易对账。企业场景：财务每日与支付渠道对账，发现金额不一致、
         重复扣款、掉单等异常交易，生成差异报告。
         """
@@ -580,7 +580,7 @@ class PaymentCenter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "duplicate_order_ids": list(duplicates),
         }
 
-    def get_payment_health(self) -> Dict[str, Any]:
+    def get_payment_health(self) -> dict[str, Any]:
         """支付健康检查。企业场景：SRE监控支付通道可用性，
         检测各通道成功率、响应时间、错误率，自动标记异常通道。
         """

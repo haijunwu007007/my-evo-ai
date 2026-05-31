@@ -90,17 +90,17 @@ class AlertAggregator:
 
     def __init__(self, dedup_window: float = 300.0):
         self.dedup_window = dedup_window
-        self._fingerprint_cache: Dict[str, Dict] = {}
-        self._groups: Dict[str, List[Dict]] = defaultdict(list)
+        self._fingerprint_cache: dict[str, dict] = {}
+        self._groups: dict[str, list[dict]] = defaultdict(list)
         self._max_group_size = 100
 
-    def _fingerprint(self, alert: Dict) -> str:
+    def _fingerprint(self, alert: dict) -> str:
         import hashlib
 
         key = f"{alert.get('source', '')}:{alert.get('metric', '')}:{alert.get('severity', '')}:{alert.get('category', '')}"
         return hashlib.md5(key.encode()).hexdigest()[:12]
 
-    def process(self, alert: Dict) -> Tuple[bool, Optional[Dict]]:
+    def process(self, alert: dict) -> tuple[bool, dict | None]:
         fp = self._fingerprint(alert)
         cached = self._fingerprint_cache.get(fp)
         if cached and (time.time() - cached["last_seen"]) < self.dedup_window:
@@ -120,10 +120,10 @@ class AlertAggregator:
         }
         return True, self._fingerprint_cache[fp]
 
-    def get_group(self, category: str) -> List[Dict]:
+    def get_group(self, category: str) -> list[dict]:
         return list(self._groups.get(category, []))
 
-    def get_all_fingerprints(self) -> List[Dict]:
+    def get_all_fingerprints(self) -> list[dict]:
         cutoff = time.time() - self.dedup_window * 3
         active = {k: v for k, v in self._fingerprint_cache.items() if v["last_seen"] > cutoff}
         self._fingerprint_cache = active
@@ -154,8 +154,8 @@ class EscalationPolicy:
     LEVELS = ["P4", "P3", "P2", "P1"]
 
     def __init__(self):
-        self._rules: List[Dict] = []
-        self._timers: Dict[str, Dict] = {}
+        self._rules: list[dict] = []
+        self._timers: dict[str, dict] = {}
 
     def add_rule(
         self,
@@ -163,7 +163,7 @@ class EscalationPolicy:
         match_severity: str,
         escalate_after: float,
         target_level: str,
-        notify_channels: List[str],
+        notify_channels: list[str],
         max_escalations: int = 3,
     ):
         self._rules.append(
@@ -178,7 +178,7 @@ class EscalationPolicy:
             }
         )
 
-    def check_escalation(self, alert: Dict) -> Optional[Dict]:
+    def check_escalation(self, alert: dict) -> dict | None:
         alert_id = alert.get("id", "")
         severity = alert.get("severity", "")
         for rule in self._rules:
@@ -203,11 +203,11 @@ class EscalationPolicy:
     def resolve(self, alert_id: str):
         self._timers.pop(alert_id, None)
 
-class SilenceManager(object):
+class SilenceManager:
     """静默管理器 - 计划静默/条件静默"""
 
     def __init__(self):
-        self._silences: Dict[str, Dict] = {}
+        self._silences: dict[str, dict] = {}
 
     def add_silence(
         self,
@@ -229,7 +229,7 @@ class SilenceManager(object):
             "active": True,
         }
 
-    def is_silenced(self, alert: Dict) -> Optional[str]:
+    def is_silenced(self, alert: dict) -> str | None:
         now = time.time()
         expired = []
         for sid, silence in self._silences.items():
@@ -246,7 +246,7 @@ class SilenceManager(object):
             self._silences[sid]["active"] = False
         return None
 
-    def list_active(self) -> List[Dict]:
+    def list_active(self) -> list[dict]:
         now = time.time()
         return [s for s in self._silences.values() if s["active"] and s["expires"] > now]
 
@@ -257,19 +257,19 @@ class NotificationRouter:
     """通知路由分发"""
 
     def __init__(self):
-        self._channels: Dict[str, List[str]] = defaultdict(list)
-        self._routing_rules: List[Dict] = []
+        self._channels: dict[str, list[str]] = defaultdict(list)
+        self._routing_rules: list[dict] = []
         self._history: deque = deque(maxlen=500)
 
-    def register_channel(self, name: str, channel_type: str, endpoint: str = "", config: Dict = None):
+    def register_channel(self, name: str, channel_type: str, endpoint: str = "", config: dict = None):
         self._channels[name] = [channel_type, endpoint, config or {}]
 
-    def add_routing_rule(self, match_severity: str, channels: List[str], match_source: str = ""):
+    def add_routing_rule(self, match_severity: str, channels: list[str], match_source: str = ""):
         self._routing_rules.append(
             {"match_severity": match_severity, "match_source": match_source, "channels": channels}
         )
 
-    def route(self, alert: Dict) -> List[Dict]:
+    def route(self, alert: dict) -> list[dict]:
         severity = alert.get("severity", "")
         source = alert.get("source", "")
         dispatched = []
@@ -296,13 +296,13 @@ class NotificationRouter:
 class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """告警中心 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "alerts_received": 0,
@@ -312,7 +312,7 @@ class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -321,8 +321,8 @@ class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.silence_mgr = SilenceManager()
         self.notifier = NotificationRouter()
         self._alerts: deque = deque(maxlen=5000)
-        self._stats_by_severity: Dict[str, int] = defaultdict(int)
-        self._stats_by_source: Dict[str, int] = defaultdict(int)
+        self._stats_by_severity: dict[str, int] = defaultdict(int)
+        self._stats_by_source: dict[str, int] = defaultdict(int)
         self._instance_id = str(uuid.uuid4())[:8]
 
     def initialize(self) -> dict:
@@ -487,7 +487,7 @@ class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def escalate_alert(self, alert_id: str, target_severity: str, reason: str) -> Dict[str, Any]:
+    def escalate_alert(self, alert_id: str, target_severity: str, reason: str) -> dict[str, Any]:
         """告警升级。企业场景：P2告警超过30分钟未确认自动升级为P1并通知主管。
         升级链路: P3→P2→P1→P0，每级对应不同通知渠道和响应SLA。
         """
@@ -527,7 +527,7 @@ class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "escalation_count": len(alert["escalation_history"]),
         }
 
-    def suppress_alerts(self, pattern: str, duration_seconds: int, reason: str) -> Dict[str, Any]:
+    def suppress_alerts(self, pattern: str, duration_seconds: int, reason: str) -> dict[str, Any]:
         """告警抑制。企业场景：变更窗口期（如发布、维护）临时抑制非关键告警防误报风暴。
         支持按告警名称正则匹配，到期自动恢复。
         """
@@ -554,14 +554,14 @@ class AlertManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "expires_at": time.time() + duration_seconds,
         }
 
-    def get_alert_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_alert_summary(self, hours: int = 24) -> dict[str, Any]:
         """获取告警统计摘要。企业场景：值班交接时生成告警概况，辅助判断系统健康趋势。
         包含各级别分布、平均响应时间、Top告警源、MTTA/MTTR指标。
         """
         now = time.time()
         cutoff = now - hours * 3600
         severity_counts = {"P0": 0, "P1": 0, "P2": 0, "P3": 0}
-        source_counts: Dict[str, int] = {}
+        source_counts: dict[str, int] = {}
         response_times = []
         resolve_times = []
         for alert in self._alerts.values():

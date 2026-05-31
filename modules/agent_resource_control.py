@@ -101,7 +101,8 @@ import queue
 import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, List, Callable, Any, Tuple
+from typing import Optional, Dict, List, Any, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from collections import defaultdict
@@ -203,7 +204,7 @@ class HardwareMetrics:
     gpu_memory_total: int = 0
     gpu_temperature: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     def get_summary(self) -> str:
@@ -237,9 +238,9 @@ class AgentInfo:
     idle_time: float = 0.0
     total_tasks_completed: int = 0
     error_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["pool_type"] = self.pool_type.value
         data["status"] = self.status.value
@@ -304,7 +305,7 @@ class APIResponse:
     error: str = ""
     code: int = 200
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "data": self.data,
@@ -337,20 +338,20 @@ class HardwareMonitor:
         self.sample_interval = sample_interval
         self.cache_size = cache_size
         self._monitoring = False
-        self._monitor_thread: Optional[threading.Thread] = None
+        self._monitor_thread: threading.Thread | None = None
         self._lock = threading.RLock()
 
         # 历史数据缓存
-        self._cpu_history: List[float] = []
-        self._memory_history: List[float] = []
-        self._disk_history: List[float] = []
-        self._metrics_history: List[HardwareMetrics] = []
+        self._cpu_history: list[float] = []
+        self._memory_history: list[float] = []
+        self._disk_history: list[float] = []
+        self._metrics_history: list[HardwareMetrics] = []
 
         # 初始数据获取
         self._current_metrics = self._get_initial_metrics()
 
         # 回调函数
-        self._alert_callbacks: List[Callable[[HardwareMetrics], None]] = []
+        self._alert_callbacks: list[Callable[[HardwareMetrics], None]] = []
 
         logger.info(f"HardwareMonitor 初始化完成，采样间隔: {sample_interval}s")
 
@@ -562,7 +563,7 @@ class HardwareMonitor:
         with self._lock:
             return copy.deepcopy(self._current_metrics)
 
-    def get_metrics_history(self, count: int = 10) -> List[HardwareMetrics]:
+    def get_metrics_history(self, count: int = 10) -> list[HardwareMetrics]:
         """获取历史指标"""
         with self._lock:
             return self._metrics_history[-count:]
@@ -590,7 +591,7 @@ class HardwareMonitor:
 
             return avg
 
-    def get_resource_status(self) -> Dict[str, Any]:
+    def get_resource_status(self) -> dict[str, Any]:
         """获取资源状态摘要（用于API响应）"""
         current = self.get_current_metrics()
         avg_60s = self.get_average_metrics(60)
@@ -605,7 +606,7 @@ class HardwareMonitor:
 
 # ==================== 资源配额管理类 ====================
 
-class ResourceQuotaManager(object):
+class ResourceQuotaManager:
     """
     资源配额管理器
 
@@ -613,7 +614,7 @@ class ResourceQuotaManager(object):
     """
 
     def __init__(self):
-        self._quotas: Dict[str, ResourceQuota] = {}
+        self._quotas: dict[str, ResourceQuota] = {}
         self._lock = threading.RLock()
         self._initialize_default_quotas()
         logger.info("ResourceQuotaManager 初始化完成")
@@ -669,12 +670,12 @@ class ResourceQuotaManager(object):
         for quota in default_quotas:
             self._quotas[quota.quota_id] = quota
 
-    def get_quota(self, quota_id: str) -> Optional[ResourceQuota]:
+    def get_quota(self, quota_id: str) -> ResourceQuota | None:
         """获取配额"""
         with self._lock:
             return copy.deepcopy(self._quotas.get(quota_id))
 
-    def get_quota_by_pool_type(self, pool_type: AgentPoolType) -> Optional[ResourceQuota]:
+    def get_quota_by_pool_type(self, pool_type: AgentPoolType) -> ResourceQuota | None:
         """根据池类型获取配额"""
         with self._lock:
             for quota in self._quotas.values():
@@ -682,12 +683,12 @@ class ResourceQuotaManager(object):
                     return copy.deepcopy(quota)
             return None
 
-    def list_quotas(self) -> List[Dict[str, Any]]:
+    def list_quotas(self) -> list[dict[str, Any]]:
         """列出所有配额"""
         with self._lock:
             return [quota.to_dict() for quota in self._quotas.values()]
 
-    def update_quota(self, quota_id: str, updates: Dict[str, Any]) -> APIResponse:
+    def update_quota(self, quota_id: str, updates: dict[str, Any]) -> APIResponse:
         """更新配额"""
         with self._lock:
             if quota_id not in self._quotas:
@@ -707,11 +708,11 @@ class ResourceQuotaManager(object):
     def set_pool_limit(
         self,
         pool_type: AgentPoolType,
-        max_agents: Optional[int] = None,
-        max_cpu: Optional[float] = None,
-        max_memory: Optional[int] = None,
-        max_gpu: Optional[float] = None,
-        weight_limit: Optional[float] = None,
+        max_agents: int | None = None,
+        max_cpu: float | None = None,
+        max_memory: int | None = None,
+        max_gpu: float | None = None,
+        weight_limit: float | None = None,
     ) -> APIResponse:
         """设置池资源限制"""
         quota = self.get_quota_by_pool_type(pool_type)
@@ -738,7 +739,7 @@ class ResourceQuotaManager(object):
         requested_cpu: float = 0.0,
         requested_memory: int = 0,
         requested_gpu: float = 0.0,
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """检查配额是否足够"""
         quota = self.get_quota_by_pool_type(pool_type)
         if not quota:
@@ -770,7 +771,7 @@ class AgentPool:
         self.quota_manager = quota_manager
 
         # 智能体存储
-        self._agents: Dict[str, AgentInfo] = {}
+        self._agents: dict[str, AgentInfo] = {}
         self._lock = threading.RLock()
 
         # 任务队列
@@ -786,7 +787,7 @@ class AgentPool:
         }
 
         # 定时任务
-        self._cleanup_thread: Optional[threading.Thread] = None
+        self._cleanup_thread: threading.Thread | None = None
         self._running = False
 
         logger.info(f"AgentPool [{pool_config.name}] 初始化完成，最大容量: {pool_config.max_size}")
@@ -859,7 +860,7 @@ class AgentPool:
 
     # ==================== 智能体管理 ====================
 
-    def register_agent(self, agent_id: str, metadata: Dict[str, Any] = None) -> AgentInfo:
+    def register_agent(self, agent_id: str, metadata: dict[str, Any] = None) -> AgentInfo:
         """注册智能体"""
         with self._lock:
             if agent_id in self._agents:
@@ -880,15 +881,15 @@ class AgentPool:
                 return True
             return False
 
-    def get_agent(self, agent_id: str) -> Optional[AgentInfo]:
+    def get_agent(self, agent_id: str) -> AgentInfo | None:
         """获取智能体信息"""
         with self._lock:
             agent = self._agents.get(agent_id)
             return copy.deepcopy(agent) if agent else None
 
     def list_agents(
-        self, status: Optional[AgentStatus] = None, limit: int = 100, offset: int = 0
-    ) -> List[Dict[str, Any]]:
+        self, status: AgentStatus | None = None, limit: int = 100, offset: int = 0
+    ) -> list[dict[str, Any]]:
         """列出智能体"""
         with self._lock:
             agents = list(self._agents.values())
@@ -902,9 +903,9 @@ class AgentPool:
     def update_agent_quota(
         self,
         agent_id: str,
-        cpu_limit: Optional[float] = None,
-        memory_limit: Optional[int] = None,
-        max_tasks: Optional[int] = None,
+        cpu_limit: float | None = None,
+        memory_limit: int | None = None,
+        max_tasks: int | None = None,
     ) -> APIResponse:
         """更新智能体配额"""
         with self._lock:
@@ -962,7 +963,7 @@ class AgentPool:
             logger.info(f"智能体 {agent_id} 已唤醒")
             return APIResponse(success=True, data=agent.to_dict())
 
-    def get_pool_stats(self) -> Dict[str, Any]:
+    def get_pool_stats(self) -> dict[str, Any]:
         """获取池统计信息"""
         with self._lock:
             status_counts = defaultdict(int)
@@ -1000,9 +1001,9 @@ class LoadBalancer:
 
     def __init__(self, strategy: Strategy = Strategy.RESOURCE_AWARE):
         self.strategy = strategy
-        self._pools: Dict[AgentPoolType, AgentPool] = {}
+        self._pools: dict[AgentPoolType, AgentPool] = {}
         self._lock = threading.RLock()
-        self._connection_counts: Dict[str, int] = defaultdict(int)
+        self._connection_counts: dict[str, int] = defaultdict(int)
 
         logger.info(f"LoadBalancer 初始化完成，策略: {strategy.value}")
 
@@ -1019,7 +1020,7 @@ class LoadBalancer:
 
     def select_pool(
         self, task_priority: ResourcePriority = ResourcePriority.NORMAL, requires_gpu: bool = False
-    ) -> Optional[AgentPool]:
+    ) -> AgentPool | None:
         """选择最佳池"""
         with self._lock:
             # 根据需求筛选候选池
@@ -1050,12 +1051,12 @@ class LoadBalancer:
             else:
                 return candidates[0][1] if candidates else None
 
-    def _select_weighted_round_robin(self, candidates: List[Tuple]) -> AgentPool:
+    def _select_weighted_round_robin(self, candidates: list[tuple]) -> AgentPool:
         """加权轮询选择"""
         # 简化实现：轮询选择
         return candidates[0][1]
 
-    def _select_least_connections(self, candidates: List[Tuple]) -> AgentPool:
+    def _select_least_connections(self, candidates: list[tuple]) -> AgentPool:
         """最少连接选择"""
         min_connections = float("inf")
         selected = None
@@ -1068,7 +1069,7 @@ class LoadBalancer:
 
         return selected
 
-    def _select_resource_aware(self, candidates: List[Tuple], requires_gpu: bool) -> AgentPool:
+    def _select_resource_aware(self, candidates: list[tuple], requires_gpu: bool) -> AgentPool:
         """资源感知选择"""
         from .agent_resource_control import HardwareMonitor
 
@@ -1095,7 +1096,7 @@ class LoadBalancer:
 
         return best_pool
 
-    def _select_priority_based(self, candidates: List[Tuple], task_priority: ResourcePriority) -> AgentPool:
+    def _select_priority_based(self, candidates: list[tuple], task_priority: ResourcePriority) -> AgentPool:
         """优先级调度选择"""
         # 根据优先级匹配池类型
         priority_pool_map = {
@@ -1116,7 +1117,7 @@ class LoadBalancer:
         # 降级选择
         return candidates[0][1] if candidates else None
 
-    def dispatch_task(self, task: Dict[str, Any]) -> Optional[str]:
+    def dispatch_task(self, task: dict[str, Any]) -> str | None:
         """
         分发任务到最佳智能体
 
@@ -1147,7 +1148,7 @@ class LoadBalancer:
 
         return None
 
-    def get_load_stats(self) -> Dict[str, Any]:
+    def get_load_stats(self) -> dict[str, Any]:
         """获取负载统计"""
         with self._lock:
             stats = {}
@@ -1180,18 +1181,18 @@ class CircuitBreaker:
     - HALF_OPEN: 半开状态，尝试恢复
     """
 
-    def __init__(self, name: str, config: Optional[CircuitBreakerConfig] = None):
+    def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
         self.name = name
         self.config = config or CircuitBreakerConfig()
         self.state = CircuitState.CLOSED
 
         self._failure_count = 0
         self._success_count = 0
-        self._last_failure_time: Optional[float] = None
+        self._last_failure_time: float | None = None
         self._half_open_calls = 0
 
         self._lock = threading.RLock()
-        self._call_history: List[bool] = []
+        self._call_history: list[bool] = []
 
         logger.info(f"CircuitBreaker [{name}] 初始化完成")
 
@@ -1271,7 +1272,7 @@ class CircuitBreaker:
         if len(self._call_history) > max_history:
             self._call_history = self._call_history[-max_history:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取熔断器统计"""
         with self._lock:
             total_calls = len(self._call_history)
@@ -1318,7 +1319,7 @@ class LowPerfAdapter:
 
     def __init__(self, perf_mode: PerfMode = PerfMode.BALANCED):
         self.perf_mode = perf_mode
-        self._original_settings: Dict[str, Any] = {}
+        self._original_settings: dict[str, Any] = {}
 
         # 性能配置
         self._perf_configs = {
@@ -1367,7 +1368,7 @@ class LowPerfAdapter:
         except Exception as e:
             return APIResponse(success=False, error=str(e))
 
-    def get_current_config(self) -> Dict[str, Any]:
+    def get_current_config(self) -> dict[str, Any]:
         """获取当前配置"""
         return {"mode": self.perf_mode.value, "config": self._current_config.copy()}
 
@@ -1387,7 +1388,7 @@ class LowPerfAdapter:
         """获取最大并发任务数"""
         return self._current_config.get("max_concurrent_tasks", 50)
 
-    def get_feature_flags(self) -> List[str]:
+    def get_feature_flags(self) -> list[str]:
         """获取功能开关"""
         return self._current_config.get("feature_flags", ["core"])
 
@@ -1404,10 +1405,10 @@ class QuotaEnforcer:
     """
 
     def __init__(self):
-        self._quotas: Dict[str, Dict] = {}  # agent_id -> {resource: {limit, used}}
-        self._pool_capacity: Dict[str, float] = {}  # resource -> total capacity
+        self._quotas: dict[str, dict] = {}  # agent_id -> {resource: {limit, used}}
+        self._pool_capacity: dict[str, float] = {}  # resource -> total capacity
         self._violation_log: deque = deque(maxlen=5000)
-        self._borrow_records: Dict[str, Dict] = {}
+        self._borrow_records: dict[str, dict] = {}
 
     def set_quota(self, agent_id: str, resource: str, hard_limit: float, soft_limit: float = None):
         """设置Agent的资源配额"""
@@ -1423,7 +1424,7 @@ class QuotaEnforcer:
         """设置资源池总容量"""
         self._pool_capacity[resource] = total
 
-    def check_and_consume(self, agent_id: str, resource: str, amount: float) -> Dict:
+    def check_and_consume(self, agent_id: str, resource: str, amount: float) -> dict:
         """检查并消费配额，返回是否允许"""
         quota = self._quotas.get(agent_id, {}).get(resource)
         if not quota:
@@ -1474,7 +1475,7 @@ class QuotaEnforcer:
             "remaining": round(quota["hard_limit"] - new_used, 2),
         }
 
-    def request_burst(self, agent_id: str, resource: str, amount: float, duration_sec: int = 300) -> Dict:
+    def request_burst(self, agent_id: str, resource: str, amount: float, duration_sec: int = 300) -> dict:
         """请求突发配额借用（从全局池借）"""
         pool_used = sum(q[resource]["used"] for q in self._quotas.values() if resource in q)
         pool_total = self._pool_capacity.get(resource, float("inf"))
@@ -1490,7 +1491,7 @@ class QuotaEnforcer:
         }
         return {"approved": True, "amount": amount, "expires_in": duration_sec}
 
-    def get_utilization_report(self) -> Dict:
+    def get_utilization_report(self) -> dict:
         """生成资源利用率报告"""
         report = {}
         for resource in self._pool_capacity:
@@ -1533,19 +1534,19 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
         self.load_balancer = LoadBalancer()
 
         # 池管理
-        self._pools: Dict[AgentPoolType, AgentPool] = {}
+        self._pools: dict[AgentPoolType, AgentPool] = {}
         self._initialize_default_pools()
 
         # 熔断器
-        self._circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self._circuit_breakers: dict[str, CircuitBreaker] = {}
 
         # 审计日志
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._audit_lock = threading.Lock()
         self._max_audit_entries = 10000
 
         # API限流
-        self._rate_limits: Dict[str, Dict] = {}
+        self._rate_limits: dict[str, dict] = {}
         self._rate_limit_lock = threading.Lock()
 
         # 启动
@@ -1691,7 +1692,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
     # ==================== 扩展 API ====================
 
-    def register_agent(self, agent_id: str, pool_type: str, metadata: Dict = None) -> APIResponse:
+    def register_agent(self, agent_id: str, pool_type: str, metadata: dict = None) -> APIResponse:
         """注册智能体"""
         metrics_collector.counter("resource_register_agent_total", labels={"pool_type": pool_type})
         self.audit("register_agent", f"agent_id={agent_id}, pool_type={pool_type}")
@@ -1709,7 +1710,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             logger.error(f"注册智能体失败: {e}")
             return APIResponse(success=False, error=str(e))
 
-    def dispatch_task(self, task: Dict) -> APIResponse:
+    def dispatch_task(self, task: dict) -> APIResponse:
         """分发任务"""
         metrics_collector.counter("resource_dispatch_total", labels={"task_type": task.get("type", "unknown")})
         self.audit("dispatch_task", f"task_type={task.get('type', '')}")
@@ -1723,7 +1724,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             logger.error(f"任务分发失败: {e}")
             return APIResponse(success=False, error=str(e))
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """获取系统整体状态"""
         hardware = self.hardware_monitor.get_current_metrics()
 
@@ -1743,7 +1744,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             "uptime": time.time(),
         }
 
-    def get_circuit_breaker(self, name: str) -> Optional[CircuitBreaker]:
+    def get_circuit_breaker(self, name: str) -> CircuitBreaker | None:
         """获取熔断器"""
         return self._circuit_breakers.get(name)
 
@@ -1756,7 +1757,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
 
     # ==================== 审计日志 ====================
 
-    def _record_audit(self, action: str, details: Dict = None) -> None:
+    def _record_audit(self, action: str, details: dict = None) -> None:
         """记录资源操作审计"""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -1768,7 +1769,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             if len(self._audit_log) > self._max_audit_entries:
                 self._audit_log = self._audit_log[-self._max_audit_entries :]
 
-    def get_audit_log(self, action: str = None, limit: int = 100) -> List[Dict]:
+    def get_audit_log(self, action: str = None, limit: int = 100) -> list[dict]:
         """查询审计日志"""
         with self._audit_lock:
             logs = self._audit_log
@@ -1793,7 +1794,7 @@ class AgentResourceController(EnterpriseModule, CircuitBreakerMixin, RateLimiter
             entry["count"] += 1
             return True
 
-    def get_rate_limit_status(self, client_id: str) -> Dict:
+    def get_rate_limit_status(self, client_id: str) -> dict:
         """获取限流状态"""
         with self._rate_limit_lock:
             entry = self._rate_limits.get(client_id)

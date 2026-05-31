@@ -112,14 +112,14 @@ class DistributedLock:
     acquired_at: float = 0.0
     expires_at: float = 0.0
     generation: int = 0
-    shared_owners: Set[str] = field(default_factory=set)
+    shared_owners: set[str] = field(default_factory=set)
 
 @dataclass
 class ElectionRecord:
     election_id: str = ""
     topic: str = ""
     leader: str = ""
-    candidates: List[str] = field(default_factory=list)
+    candidates: list[str] = field(default_factory=list)
     epoch: int = 0
     state: str = "pending"  # pending, elected, expired
     started_at: float = 0.0
@@ -131,7 +131,7 @@ class ServiceNode:
     name: str = ""
     address: str = ""
     port: int = 0
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
     status: str = "up"
     registered_at: float = 0.0
     last_heartbeat: float = 0.0
@@ -144,8 +144,8 @@ class CoordinationSession:
     created_at: float = 0.0
     last_heartbeat: float = 0.0
     timeout_ms: int = 30000
-    ephemeral_nodes: List[str] = field(default_factory=list)
-    watches: List[str] = field(default_factory=list)
+    ephemeral_nodes: list[str] = field(default_factory=list)
+    watches: list[str] = field(default_factory=list)
     is_active: bool = True
 
 class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -162,12 +162,12 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 "description": "分布式协调服务：锁/选举/命名服务/会话管理",
             }
         )
-        self._locks: Dict[str, DistributedLock] = {}
-        self._elections: Dict[str, ElectionRecord] = {}
-        self._nodes: Dict[str, ServiceNode] = {}
-        self._services: Dict[str, List[str]] = defaultdict(list)  # service_name -> node_ids
-        self._sessions: Dict[str, CoordinationSession] = {}
-        self._barriers: Dict[str, Dict] = {}  # barrier_id -> {required: n, arrived: set, released: bool}
+        self._locks: dict[str, DistributedLock] = {}
+        self._elections: dict[str, ElectionRecord] = {}
+        self._nodes: dict[str, ServiceNode] = {}
+        self._services: dict[str, list[str]] = defaultdict(list)  # service_name -> node_ids
+        self._sessions: dict[str, CoordinationSession] = {}
+        self._barriers: dict[str, dict] = {}  # barrier_id -> {required: n, arrived: set, released: bool}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -202,7 +202,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             return True
         return False
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "coordination"})
         self.metrics_collector.counter("coordination.execute.calls", 1)
         self.audit("execute", {"module": "coordination"})
@@ -427,7 +427,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             logger.error(f"[Coordination] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -448,7 +448,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_service_registry(self) -> Dict[str, Any]:
+    def get_service_registry(self) -> dict[str, Any]:
         """服务注册表。企业场景：微服务架构中查看所有已注册服务的状态、地址、版本。
         服务发现的核心数据源，供API Gateway和负载均衡器使用。
         """
@@ -475,7 +475,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "services": registry,
         }
 
-    def get_leader_status(self) -> Dict[str, Any]:
+    def get_leader_status(self) -> dict[str, Any]:
         """Leader选举状态。企业场景：排查主从切换问题，查看当前谁是Leader，
         上次选举时间和选举次数。
         """
@@ -493,7 +493,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             )
         return {"success": True, "election_groups": len(status), "status": status}
 
-    def deregister_service(self, service_id: str) -> Dict[str, Any]:
+    def deregister_service(self, service_id: str) -> dict[str, Any]:
         """注销服务。企业场景：服务下线/缩容时从注册中心移除实例，
         避免负载均衡将请求路由到已下线的节点。
         """
@@ -505,7 +505,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._audit.log("service_deregistered", {"service_id": service_id})
         return {"success": True, "service_id": service_id, "name": getattr(service, "name", service_id)}
 
-    def acquire_lock(self, resource: str, ttl_seconds: int = 30, owner: str = "default") -> Dict[str, Any]:
+    def acquire_lock(self, resource: str, ttl_seconds: int = 30, owner: str = "default") -> dict[str, Any]:
         """获取分布式锁。企业场景：定时任务/幂等操作前获取锁，
         防止多实例重复执行。支持TTL自动过期。
         """
@@ -524,7 +524,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         locks[resource] = {"owner": owner, "acquired_at": time.time(), "expires_at": time.time() + ttl_seconds}
         return {"success": True, "resource": resource, "owner": owner, "ttl_seconds": ttl_seconds}
 
-    def get_service_registry_snapshot(self) -> Dict[str, Any]:
+    def get_service_registry_snapshot(self) -> dict[str, Any]:
         """服务注册表快照。企业场景：运维dashboard实时展示集群中所有已注册服务
         及其健康状态，快速发现服务下线或异常。
         """
@@ -555,7 +555,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "services": snapshot,
         }
 
-    def run_leader_election(self, group: str, candidate_id: str) -> Dict[str, Any]:
+    def run_leader_election(self, group: str, candidate_id: str) -> dict[str, Any]:
         """执行Leader选举。企业场景：主从架构中选举主节点，基于租约机制
         确保同一时刻只有一个Leader处理写请求。
         """
@@ -574,7 +574,7 @@ class CoordinationManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         locks[lock_key] = {"owner": candidate_id, "acquired_at": time.time(), "expires_at": time.time() + lease_ttl}
         return {"success": True, "is_leader": True, "leader": candidate_id, "lease_ttl_s": lease_ttl}
 
-    def deregister_service(self, service_id: str) -> Dict[str, Any]:
+    def deregister_service(self, service_id: str) -> dict[str, Any]:
         """注销服务。企业场景：服务优雅下线时从注册表中移除，
         避免其他服务将请求路由到已下线的实例。
         """

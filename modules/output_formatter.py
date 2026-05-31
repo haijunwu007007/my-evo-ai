@@ -127,7 +127,7 @@ class FormatTemplate:
     date_format: str = "%Y-%m-%d"
     datetime_format: str = "%Y-%m-%d %H:%M:%S"
 
-class TransformEngine(object):
+class TransformEngine:
     """数据转换引擎"""
 
     @staticmethod
@@ -216,11 +216,11 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def register_template(self, template: FormatTemplate):
         self._templates[template.name] = template
 
-    def get_template(self, name: str) -> Optional[FormatTemplate]:
+    def get_template(self, name: str) -> FormatTemplate | None:
         return self._templates.get(name)
 
     def format_data(
-        self, data: Any, fmt: OutputFormat = OutputFormat.JSON, template: Optional[str] = None, **kwargs
+        self, data: Any, fmt: OutputFormat = OutputFormat.JSON, template: str | None = None, **kwargs
     ) -> str:
         tmpl = self._templates.get(template) if template else None
         try:
@@ -233,7 +233,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             raise
 
     def format_list(
-        self, items: list[dict], fmt: OutputFormat = OutputFormat.JSON, template: Optional[str] = None, **kwargs
+        self, items: list[dict], fmt: OutputFormat = OutputFormat.JSON, template: str | None = None, **kwargs
     ) -> str:
         if fmt == OutputFormat.JSON:
             return self._render_json(items, kwargs.get("indent", 2))
@@ -247,7 +247,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return self._render_plain_table(items)
         return self._render_json(items, 2)
 
-    def _apply_mappings(self, data: Any, tmpl: Optional[FormatTemplate]) -> Any:
+    def _apply_mappings(self, data: Any, tmpl: FormatTemplate | None) -> Any:
         if not tmpl or not tmpl.field_mappings:
             return data
         if isinstance(data, dict):
@@ -263,7 +263,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return [self._apply_mappings(item, tmpl) for item in data]
         return data
 
-    def _render(self, data: Any, fmt: OutputFormat, tmpl: Optional[FormatTemplate] = None, **kwargs) -> str:
+    def _render(self, data: Any, fmt: OutputFormat, tmpl: FormatTemplate | None = None, **kwargs) -> str:
         if isinstance(data, list) and data and isinstance(data[0], dict):
             return self.format_list(data, fmt, **kwargs)
         parts = []
@@ -274,7 +274,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             parts.append(tmpl.footer)
         return "\n".join(parts)
 
-    def _render_single(self, data: Any, fmt: OutputFormat, tmpl: Optional[FormatTemplate] = None) -> str:
+    def _render_single(self, data: Any, fmt: OutputFormat, tmpl: FormatTemplate | None = None) -> str:
         if fmt == OutputFormat.JSON:
             return self._render_json(data, (tmpl.indent if tmpl else 2))
         elif fmt == OutputFormat.YAML:

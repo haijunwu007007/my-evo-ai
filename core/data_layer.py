@@ -33,17 +33,17 @@ class DataEngine:
         rows = db.fetch_all("SELECT * FROM users")
     """
 
-    _instances: Dict[str, 'DataEngine'] = {}
+    _instances: dict[str, DataEngine] = {}
     _lock = threading.Lock()
-    _GLOBAL_MIGRATIONS: List[Migration] = []
-    _CONNECTION_POOL: Dict[str, sqlite3.Connection] = {}
+    _GLOBAL_MIGRATIONS: list[Migration] = []
+    _CONNECTION_POOL: dict[str, sqlite3.Connection] = {}
 
     @classmethod
     def register_migration(cls, version: int, description: str, sql: str):
         cls._GLOBAL_MIGRATIONS.append(Migration(version, description, sql))
 
     @classmethod
-    def get(cls, name: str = "default") -> 'DataEngine':
+    def get(cls, name: str = "default") -> DataEngine:
         """获取或创建命名 DataEngine 实例（单例）。"""
         if name not in cls._instances:
             with cls._lock:
@@ -102,7 +102,7 @@ class DataEngine:
 
     # ---- Schema ----
 
-    def create_table(self, table: str, columns: Dict[str, str], if_not_exists: bool = True) -> bool:
+    def create_table(self, table: str, columns: dict[str, str], if_not_exists: bool = True) -> bool:
         """自动建表。columns: {"col_name": "TYPE CONSTRAINTS", ...}"""
         cols = ", ".join(f"{k} {v}" for k, v in columns.items())
         ie = "IF NOT EXISTS " if if_not_exists else ""
@@ -129,11 +129,11 @@ class DataEngine:
         )
         return row is not None
 
-    def table_info(self, table: str) -> List[Dict]:
+    def table_info(self, table: str) -> list[dict]:
         """返回表结构信息。"""
         return self.fetch_all(f"PRAGMA table_info([{table}])")
 
-    def list_tables(self) -> List[str]:
+    def list_tables(self) -> list[str]:
         rows = self.fetch_all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_%' ORDER BY name")
         return [r["name"] for r in rows]
 
@@ -143,23 +143,23 @@ class DataEngine:
         with self.connect() as conn:
             return conn.execute(sql, params)
 
-    def execute_many(self, sql: str, params_list: List[tuple]):
+    def execute_many(self, sql: str, params_list: list[tuple]):
         with self.connect() as conn:
             conn.executemany(sql, params_list)
             conn.commit()
 
-    def fetch_one(self, sql: str, params: tuple = ()) -> Optional[Dict]:
+    def fetch_one(self, sql: str, params: tuple = ()) -> dict | None:
         with self.connect() as conn:
             row = conn.execute(sql, params).fetchone()
             return dict(row) if row else None
 
-    def fetch_all(self, sql: str, params: tuple = ()) -> List[Dict]:
+    def fetch_all(self, sql: str, params: tuple = ()) -> list[dict]:
         with self.connect() as conn:
             return [dict(r) for r in conn.execute(sql, params).fetchall()]
 
-    def insert(self, table: str, data: Dict) -> int:
+    def insert(self, table: str, data: dict) -> int:
         """插入一行并返回 lastrowid。"""
-        cols = ", ".join(f"[{k}]" for k in data.keys())
+        cols = ", ".join(f"[{k}]" for k in data)
         placeholders = ", ".join(["?"] * len(data))
         sql = f"INSERT INTO [{table}] ({cols}) VALUES ({placeholders})"
         with self.connect() as conn:
@@ -167,7 +167,7 @@ class DataEngine:
             conn.commit()
             return cur.lastrowid
 
-    def bulk_insert(self, table: str, rows: List[Dict]) -> int:
+    def bulk_insert(self, table: str, rows: list[dict]) -> int:
         """批量插入，返回插入行数。"""
         if not rows:
             return 0
@@ -180,19 +180,19 @@ class DataEngine:
             conn.commit()
             return len(rows)
 
-    def upsert(self, table: str, data: Dict, conflict_col: str):
+    def upsert(self, table: str, data: dict, conflict_col: str):
         """插入或更新。"""
-        cols = ", ".join(f"[{k}]" for k in data.keys())
+        cols = ", ".join(f"[{k}]" for k in data)
         placeholders = ", ".join(["?"] * len(data))
-        updates = ", ".join(f"[{k}]=excluded.[{k}]" for k in data.keys())
+        updates = ", ".join(f"[{k}]=excluded.[{k}]" for k in data)
         sql = f"INSERT INTO [{table}] ({cols}) VALUES ({placeholders}) ON CONFLICT([{conflict_col}]) DO UPDATE SET {updates}"
         with self.connect() as conn:
             cur = conn.execute(sql, tuple(data.values()))
             conn.commit()
             return cur.lastrowid
 
-    def update(self, table: str, data: Dict, where: str, where_params: tuple = ()):
-        sets = ", ".join(f"[{k}]=?" for k in data.keys())
+    def update(self, table: str, data: dict, where: str, where_params: tuple = ()):
+        sets = ", ".join(f"[{k}]=?" for k in data)
         sql = f"UPDATE [{table}] SET {sets} WHERE {where}"
         with self.connect() as conn:
             conn.execute(sql, tuple(data.values()) + where_params)
@@ -210,7 +210,7 @@ class DataEngine:
 
     # ---- JSON 迁移 ----
 
-    def import_json_file(self, path: Union[str, Path], table: str = None) -> Dict:
+    def import_json_file(self, path: str | Path, table: str = None) -> dict:
         """将 JSON 文件导入 SQLite 表。
         
         支持:
@@ -285,8 +285,8 @@ class DataEngine:
 
     # ---- 搜索 / 工具 ----
 
-    def search(self, table: str, query: str, fields: List[str] = None,
-               limit: int = 20, offset: int = 0) -> Dict:
+    def search(self, table: str, query: str, fields: list[str] = None,
+               limit: int = 20, offset: int = 0) -> dict:
         """简单 LIKE 搜索。"""
         if not fields:
             info = self.table_info(table)
@@ -310,7 +310,7 @@ class DataEngine:
             "offset": offset
         }
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         """数据库统计信息。"""
         size = os.path.getsize(self._db_path) if os.path.exists(self._db_path) else 0
         tables = self.fetch_all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -408,11 +408,11 @@ class JSONStore:
     def delete(self, key: str = "default"):
         self._db.delete("kvstore", "key=?", (key,))
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         rows = self._db.fetch_all("SELECT key FROM kvstore")
         return [r["key"] for r in rows]
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return self._db.stats()
 
 
@@ -427,7 +427,7 @@ class AutoMigrator:
         self._db = db or DataEngine.get("evo_system")
         self._results = []
 
-    def scan_and_migrate(self, paths: List[Union[str, Path]] = None) -> Dict:
+    def scan_and_migrate(self, paths: list[str | Path] = None) -> dict:
         """扫描并迁移所有 JSON 文件到 SQLite。
 
         Args:

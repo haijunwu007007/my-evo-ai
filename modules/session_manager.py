@@ -93,23 +93,23 @@ class SessionStoreManager:
     """
 
     def __init__(self, default_ttl: int = 1800, max_sessions_per_user: int = 5):
-        self._sessions: Dict[str, Dict] = {}
-        self._user_sessions: Dict[str, List[str]] = {}
+        self._sessions: dict[str, dict] = {}
+        self._user_sessions: dict[str, list[str]] = {}
         self._default_ttl = default_ttl
         self._max_per_user = max_sessions_per_user
         self._total_created = 0
         self._total_validated = 0
         self._total_revoked = 0
         self._total_expired = 0
-        self._login_history: List[Dict] = []
+        self._login_history: list[dict] = []
 
     def create(
         self,
         user_id: str,
-        device_info: Optional[Dict] = None,
-        metadata: Optional[Dict] = None,
-        ttl: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        device_info: dict | None = None,
+        metadata: dict | None = None,
+        ttl: int | None = None,
+    ) -> dict[str, Any]:
         """创建会话。企业场景：用户登录后创建Session，
         检查并发数限制，超出则踢掉最早的设备。
         返回session_id和access_token。
@@ -166,7 +166,7 @@ class SessionStoreManager:
             "concurrent_sessions": len(self._user_sessions[user_id]),
         }
 
-    def validate(self, session_id: str, token: str) -> Dict[str, Any]:
+    def validate(self, session_id: str, token: str) -> dict[str, Any]:
         """验证会话有效性。企业场景：每个API请求前验证Session，
         检查Token匹配、过期时间、是否被主动注销。
         支持滑动续期：验证通过时自动延长过期时间。
@@ -198,7 +198,7 @@ class SessionStoreManager:
             "last_active": now,
         }
 
-    def refresh(self, session_id: str, additional_ttl: Optional[int] = None) -> Dict[str, Any]:
+    def refresh(self, session_id: str, additional_ttl: int | None = None) -> dict[str, Any]:
         """手动刷新Session TTL。企业场景：用户长操作期间主动续期，
         避免操作到一半被踢出。
         """
@@ -221,11 +221,11 @@ class SessionStoreManager:
             "total_refreshes": session["refresh_count"],
         }
 
-    def revoke(self, session_id: str, reason: str = "user_logout") -> Dict[str, Any]:
+    def revoke(self, session_id: str, reason: str = "user_logout") -> dict[str, Any]:
         """注销会话。企业场景：用户主动退出登录、管理员踢人、密码修改后强制下线。"""
         return self._revoke_internal(session_id, reason)
 
-    def _revoke_internal(self, session_id: str, reason: str) -> Dict[str, Any]:
+    def _revoke_internal(self, session_id: str, reason: str) -> dict[str, Any]:
         session = self._sessions.get(session_id)
         if not session:
             return {"success": False, "error": "session_not_found"}
@@ -240,7 +240,7 @@ class SessionStoreManager:
                 self._user_sessions[user_id].remove(session_id)
         return {"success": True, "session_id": session_id, "user_id": user_id, "reason": reason}
 
-    def revoke_all_user_sessions(self, user_id: str, reason: str = "admin_revoke") -> Dict[str, Any]:
+    def revoke_all_user_sessions(self, user_id: str, reason: str = "admin_revoke") -> dict[str, Any]:
         """注销用户所有会话。企业场景：修改密码后强制所有设备下线、
         安全事件触发批量踢人。
         """
@@ -252,7 +252,7 @@ class SessionStoreManager:
                 revoked.append(sid)
         return {"success": True, "user_id": user_id, "revoked_count": len(revoked), "revoked_sessions": revoked}
 
-    def list_active_sessions(self, user_id: Optional[str] = None, limit: int = 50) -> List[Dict]:
+    def list_active_sessions(self, user_id: str | None = None, limit: int = 50) -> list[dict]:
         """列出活跃会话。企业场景：用户查看"我的设备"列表、
         管理员查看在线用户列表、运维统计实时在线人数。
         """
@@ -293,7 +293,7 @@ class SessionStoreManager:
 
     def detect_suspicious_logins(
         self, user_id: str, max_distinct_ips: int = 3, time_window: int = 3600
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """检测异常登录。企业场景：安全审计时发现同一用户短时间内
         从不同IP/设备登录，触发二次验证。
         """
@@ -326,7 +326,7 @@ class SessionStoreManager:
             "recent_logins": len(recent_logins),
         }
 
-    def get_user_session_summary(self, user_id: str) -> Dict[str, Any]:
+    def get_user_session_summary(self, user_id: str) -> dict[str, Any]:
         """获取用户会话摘要。企业场景：用户设置页面展示当前登录的所有设备，
         支持远程注销某个设备。
         """
@@ -362,7 +362,7 @@ class SessionStoreManager:
             "max_allowed": self._max_per_user,
         }
 
-    def cleanup_expired_sessions(self, batch_size: int = 1000) -> Dict[str, Any]:
+    def cleanup_expired_sessions(self, batch_size: int = 1000) -> dict[str, Any]:
         """清理过期会话。企业场景：定时任务每小时清理一次无效Session，
         释放内存中过期会话数据占用的空间，防止内存泄漏。
         """
@@ -384,7 +384,7 @@ class SessionStoreManager:
         self._total_expired += len(expired_ids)
         return {"success": True, "cleaned": len(expired_ids), "remaining_sessions": len(self._sessions)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取Session统计。企业场景：运维面板展示在线用户数、
         创建/过期速率、并发分布。
         """
@@ -477,20 +477,20 @@ class SessionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     6. 登录历史审计
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("session_manager")
         self._store = SessionStoreManager(

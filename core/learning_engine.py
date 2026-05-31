@@ -43,7 +43,7 @@ class LearningEngine:
                 "duration_ms": 200 + (i * 15), "success": True, "error": ""
             })
 
-    async def analyze(self, execution_log: List[Dict]) -> Dict:
+    async def analyze(self, execution_log: list[dict]) -> dict:
         """分析执行日志，识别优化机会"""
         now = datetime.now()
         insights = []
@@ -82,7 +82,7 @@ class LearningEngine:
         self._insights = insights
         return {"total": len(execution_log), "insights": insights, "generated": now.isoformat()}
 
-    async def auto_optimize(self, insights: List[Dict]) -> Dict:
+    async def auto_optimize(self, insights: list[dict]) -> dict:
         """自动应用优化规则"""
         applied = []
         for ins in insights:
@@ -107,7 +107,7 @@ class LearningEngine:
         self._save()
         return {"applied": len(applied), "total_rules": len(self._rules)}
 
-    async def generate_report(self) -> Dict:
+    async def generate_report(self) -> dict:
         """生成学习报告"""
         active = [r for r in self._rules.values() if r.get("status") == "active"]
         return {

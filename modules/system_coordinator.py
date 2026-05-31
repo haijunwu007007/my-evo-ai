@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - System Coordinator (v2→v3 Bridge)
 
 此模块是 system_coordinator_v3.py 的向后兼容桥接。

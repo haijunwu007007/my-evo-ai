@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - Prometheus 指标采集
 =======================================
@@ -34,7 +33,7 @@ class MetricPoint:
     """单个指标数据点"""
 
     def __init__(
-        self, name: str, value: float = 0.0, labels: Optional[Dict[str, str]] = None, metric_type: str = "counter"
+        self, name: str, value: float = 0.0, labels: dict[str, str] | None = None, metric_type: str = "counter"
     ):
         self.name = name
         self.value = value
@@ -42,8 +41,8 @@ class MetricPoint:
         self.metric_type = metric_type
         self.timestamp = time.time()
         # Histogram专用
-        self.buckets: List[float] = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
-        self.observations: List[float] = []
+        self.buckets: list[float] = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        self.observations: list[float] = []
 
     def inc(self, value: float = 1.0):
         self.value += value
@@ -80,17 +79,17 @@ class MetricsCollector:
     """
 
     def __init__(self, max_series: int = 50000):
-        self._series: Dict[str, MetricPoint] = {}
+        self._series: dict[str, MetricPoint] = {}
         self._lock = threading.Lock()
         self._max_series = max_series
 
-    def _label_key(self, name: str, labels: Dict[str, str]) -> str:
+    def _label_key(self, name: str, labels: dict[str, str]) -> str:
         """生成指标唯一键"""
         sorted_labels = sorted(labels.items())
         label_str = ",".join(f"{k}={v}" for k, v in sorted_labels)
         return f"{name}{{{label_str}}}" if label_str else name
 
-    def record(self, name: str, value: float = 1.0, tags: Optional[Dict[str, str]] = None, module_id: str = ""):
+    def record(self, name: str, value: float = 1.0, tags: dict[str, str] | None = None, module_id: str = ""):
         """
         记录计数器指标
         Example: metrics.record("request_count", 1, {"action": "execute"}, "health-check")
@@ -108,7 +107,7 @@ class MetricsCollector:
                 self._series[key] = MetricPoint(name, 0.0, labels, "counter")
             self._series[key].inc(value)
 
-    def observe(self, name: str, value: float, tags: Optional[Dict[str, str]] = None, module_id: str = ""):
+    def observe(self, name: str, value: float, tags: dict[str, str] | None = None, module_id: str = ""):
         """
         记录直方图指标（延迟分布）
         Example: metrics.observe("latency_ms", 42.5, {"action": "execute"}, "health-check")
@@ -126,8 +125,8 @@ class MetricsCollector:
         self,
         name: str,
         value: float = 1.0,
-        tags: Optional[Dict[str, str]] = None,
-        labels: Optional[Dict[str, str]] = None,
+        tags: dict[str, str] | None = None,
+        labels: dict[str, str] | None = None,
         module_id: str = "",
     ):
         """记录计数器指标（record的别名，兼容旧调用方式）"""
@@ -137,14 +136,14 @@ class MetricsCollector:
         self,
         name: str,
         value: float,
-        tags: Optional[Dict[str, str]] = None,
-        labels: Optional[Dict[str, str]] = None,
+        tags: dict[str, str] | None = None,
+        labels: dict[str, str] | None = None,
         module_id: str = "",
     ):
         """记录直方图指标（observe的别名，兼容旧调用方式）"""
         self.observe(name, value, tags or labels, module_id)
 
-    def gauge(self, name: str, value: float, tags: Optional[Dict[str, str]] = None, module_id: str = ""):
+    def gauge(self, name: str, value: float, tags: dict[str, str] | None = None, module_id: str = ""):
         """
         设置仪表盘指标
         Example: metrics.gauge("active_connections", 5, {}, "database-client")
@@ -159,7 +158,7 @@ class MetricsCollector:
             else:
                 self._series[key].set(value)
 
-    def get_metric(self, name: str, tags: Optional[Dict[str, str]] = None) -> Optional[float]:
+    def get_metric(self, name: str, tags: dict[str, str] | None = None) -> float | None:
         """获取单个指标值"""
         labels = tags or {}
         key = self._label_key(name, labels)
@@ -167,7 +166,7 @@ class MetricsCollector:
             point = self._series.get(key)
             return point.value if point else None
 
-    def get_module_metrics(self, module_id: str) -> Dict[str, Any]:
+    def get_module_metrics(self, module_id: str) -> dict[str, Any]:
         """获取指定模块的所有指标"""
         result = {
             "module_id": module_id,
@@ -228,7 +227,7 @@ class MetricsCollector:
                 lines.append("")
         return "\n".join(lines)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取指标采集器统计"""
         with self._lock:
             counters = sum(1 for p in self._series.values() if p.metric_type == "counter")
@@ -247,7 +246,7 @@ class MetricsCollector:
 
 
 # 全局单例
-_metrics: Optional[MetricsCollector] = None
+_metrics: MetricsCollector | None = None
 
 
 def get_metrics() -> MetricsCollector:

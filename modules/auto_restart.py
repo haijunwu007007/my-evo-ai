@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -181,14 +180,14 @@ class RestartPolicy:
     strategy: RestartStrategy = RestartStrategy.EXPONENTIAL_BACKOFF
     auto_restart_enabled: bool = True
 
-class RestartPolicyEvaluator(object):
+class RestartPolicyEvaluator:
     """重启策略评估器 — 分析重启频率、检测重启风暴、推荐冷却策略"""
 
     def __init__(self):
-        self._restart_history: List[Dict[str, Any]] = []
+        self._restart_history: list[dict[str, Any]] = []
         self._window_seconds = 300
 
-    def evaluate_restart(self, service_name: str, exit_code: int, consecutive_count: int = 1) -> Dict[str, Any]:
+    def evaluate_restart(self, service_name: str, exit_code: int, consecutive_count: int = 1) -> dict[str, Any]:
         """评估是否应该执行重启"""
         now = time.time()
         recent = [
@@ -226,7 +225,7 @@ class RestartPolicyEvaluator(object):
             "recent_count": len(recent),
         }
 
-    def detect_storm(self, all_services: bool = False) -> Dict[str, Any]:
+    def detect_storm(self, all_services: bool = False) -> dict[str, Any]:
         """检测系统级重启风暴"""
         now = time.time()
         recent_all = [r for r in self._restart_history if now - r["timestamp"] < self._window_seconds]
@@ -246,7 +245,7 @@ class RestartPolicyEvaluator(object):
 
     def compute_backoff(
         self, service_name: str, attempt: int, base_delay: float = 2.0, max_delay: float = 300.0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """计算指数退避延迟"""
         import math
 
@@ -259,7 +258,7 @@ class RestartPolicyEvaluator(object):
             "next_attempt_at": round(time.time() + delay, 2),
         }
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取重启统计"""
         if not self._restart_history:
             return {"total_restarts": 0, "services": {}}
@@ -282,7 +281,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -304,10 +303,10 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             }
         )
         self.check_interval = self.config.get("check_interval", 30)
-        self._restart_history: List[RestartRecord] = []
-        self._retry_counts: Dict[str, int] = defaultdict(int)
-        self._last_restart_time: Dict[str, float] = {}
-        self._bg_monitor: Optional[asyncio.Task] = None
+        self._restart_history: list[RestartRecord] = []
+        self._retry_counts: dict[str, int] = defaultdict(int)
+        self._last_restart_time: dict[str, float] = {}
+        self._bg_monitor: asyncio.Task | None = None
         self._restart_lock = asyncio.Lock()
 
     def initialize(self) -> None:
@@ -320,14 +319,14 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"策略={self.policy.strategy.value}, 最大重试={self.policy.max_retries}")
         self.info("自动重启服务就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("auto_restart_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
         params = params or {}
         return self._safe_execute(action, params, self._dispatch)
 
-    def _dispatch(self, action: str, params: Dict) -> Any:
+    def _dispatch(self, action: str, params: dict) -> Any:
         """路由到具体业务方法"""
         if action == "restart_service":
             return self._restart_service(params)
@@ -348,7 +347,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         else:
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def _restart_service(self, params: Dict) -> Dict:
+    def _restart_service(self, params: dict) -> dict:
         """执行服务重启"""
         service = params.get("service", "")
         exit_code = params.get("exit_code", -1)
@@ -362,7 +361,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"success": True, "action": "restarting", "service": service, "evaluation": result}
         return {"success": False, "action": "skipped", "service": service, "evaluation": result}
 
-    def _evaluate_restart(self, params: Dict) -> Dict:
+    def _evaluate_restart(self, params: dict) -> dict:
         """评估重启决策"""
         service = params.get("service", "")
         exit_code = params.get("exit_code", -1)
@@ -370,27 +369,27 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         evaluator = RestartPolicyEvaluator()
         return evaluator.evaluate_restart(service, exit_code, consecutive)
 
-    def _get_restart_stats(self) -> Dict:
+    def _get_restart_stats(self) -> dict:
         """获取重启统计"""
         return {"total_services": len(self._tracked_services), "status": "running"}
 
-    def _check_restart_storm(self) -> Dict:
+    def _check_restart_storm(self) -> dict:
         """检查重启风暴"""
         return {"storm_detected": False, "total_recent": 0}
 
-    def _configure_policy(self, params: Dict) -> Dict:
+    def _configure_policy(self, params: dict) -> dict:
         """配置重启策略"""
         max_retries = params.get("max_retries", 5)
         cooldown = params.get("cooldown_seconds", 60)
         return {"success": True, "max_retries": max_retries, "cooldown_seconds": cooldown}
 
-    def _get_history(self, params: Dict) -> Dict:
+    def _get_history(self, params: dict) -> dict:
         """获取重启历史"""
         service = params.get("service", "")
         limit = params.get("limit", 20)
         return {"service": service, "history": [], "limit": limit}
 
-    def _manage_blacklist(self, params: Dict) -> Dict:
+    def _manage_blacklist(self, params: dict) -> dict:
         """管理重启黑名单"""
         operation = params.get("operation", "list")
         service = params.get("service", "")
@@ -400,7 +399,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"success": True, "action": "removed_from_blacklist", "service": service}
         return {"blacklisted": []}
 
-    def _compute_backoff(self, params: Dict) -> Dict:
+    def _compute_backoff(self, params: dict) -> dict:
         """计算退避延迟"""
         service = params.get("service", "")
         attempt = params.get("attempt", 1)
@@ -427,7 +426,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 动作分发 ──
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "restart_module": self._restart_module,
@@ -446,7 +445,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心重启逻辑 ──
 
-    def _restart_module(self, params: Dict) -> Dict:
+    def _restart_module(self, params: dict) -> dict:
         """重启指定模块"""
         module_id = params.get("module_id", "")
         reason = params.get("reason", "手动重启")
@@ -454,7 +453,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": "缺少module_id参数"}
         return self._do_restart(module_id, reason)
 
-    def _do_restart(self, module_id: str, reason: str) -> Dict:
+    def _do_restart(self, module_id: str, reason: str) -> dict:
         """执行模块重启"""
         with self._restart_lock:
             start = time.time()
@@ -544,7 +543,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                     "attempts": attempts,
                 }
 
-    def _restart_all_unhealthy(self, params: Dict) -> Dict:
+    def _restart_all_unhealthy(self, params: dict) -> dict:
         """重启所有不健康模块"""
         registry = get_registry()
         unhealthy = [
@@ -596,7 +595,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 查询接口 ──
 
-    def _get_history(self, params: Dict) -> Dict:
+    def _get_history(self, params: dict) -> dict:
         limit = params.get("limit", 20)
         return {
             "total": len(self._restart_history),
@@ -614,7 +613,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _get_policy(self, params: Dict) -> Dict:
+    def _get_policy(self, params: dict) -> dict:
         return {
             "max_retries": self.policy.max_retries,
             "initial_delay": self.policy.initial_delay,
@@ -625,7 +624,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "auto_enabled": self.policy.auto_restart_enabled,
         }
 
-    def _set_policy(self, params: Dict) -> Dict:
+    def _set_policy(self, params: dict) -> dict:
         for key in ["max_retries", "initial_delay", "max_delay", "backoff_factor", "cooldown"]:
             if key in params:
                 setattr(self.policy, key, float(params[key]))
@@ -639,7 +638,7 @@ class AutoRestart(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("set_policy", str(params))
         return {"message": "策略已更新", "policy": self._get_policy({})}
 
-    def _get_modules_restart_status(self, params: Dict) -> Dict:
+    def _get_modules_restart_status(self, params: dict) -> dict:
         """获取所有模块的重启状态"""
         registry = get_registry()
         status = {}

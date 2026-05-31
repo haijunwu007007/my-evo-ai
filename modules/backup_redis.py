@@ -108,10 +108,10 @@ class RedisBackup:
     keys_count: int = 0
     checksum: str = ""
     status: str = "pending"  # pending, running, completed, failed, verified
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     storage_path: str = ""
 
 @dataclass
@@ -122,9 +122,9 @@ class RedisConnection:
     host: str = "localhost"
     port: int = 6379
     db: int = 0
-    password: Optional[str] = None
+    password: str | None = None
     role: str = "master"  # master, slave, sentinel
-    cluster_nodes: List[str] = field(default_factory=list)
+    cluster_nodes: list[str] = field(default_factory=list)
 
 @dataclass
 class BackupPolicy:
@@ -150,8 +150,8 @@ class RestoreSession:
     target_conn_id: str
     status: str = "pending"
     keys_restored: int = 0
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
 
 class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """
@@ -183,16 +183,16 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._running = False
 
         # 连接管理
-        self._connections: Dict[str, RedisConnection] = {}
+        self._connections: dict[str, RedisConnection] = {}
         # 备份记录
         self._backups: OrderedDict[str, RedisBackup] = OrderedDict()
         self._max_backups = 100
         # 备份策略
-        self._policies: Dict[str, BackupPolicy] = {}
+        self._policies: dict[str, BackupPolicy] = {}
         # 模拟Redis数据存储
-        self._data_store: Dict[str, Dict[str, Any]] = {}  # conn_id -> {key: value}
+        self._data_store: dict[str, dict[str, Any]] = {}  # conn_id -> {key: value}
         # 恢复会话
-        self._restore_sessions: Dict[str, RestoreSession] = {}
+        self._restore_sessions: dict[str, RestoreSession] = {}
         # 并发控制
         self._max_concurrent = 3
         self._active_backups = 0
@@ -246,7 +246,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._running = True
         logger.info(f"Redis备份管理器初始化完成, 连接: {len(self._connections)}, 策略: {len(self._policies)}")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         self.trace("execute", {"module": "backup_redis"})
         self.metrics_collector.counter("backup_redis.execute.calls", 1)
         self.audit("execute", {"module": "backup_redis"})
@@ -275,7 +275,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             logger.error(f"Redis备份操作失败 [{operation}]: {e}")
             return {"success": False, "error": str(e)}
 
-    def _create_backup(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_backup(self, p: dict[str, Any]) -> dict[str, Any]:
         """创建备份"""
         conn_id = p.get("conn_id", "redis_master")
         backup_type = p.get("backup_type", "rdb")
@@ -347,7 +347,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             with self._lock:
                 self._active_backups -= 1
 
-    def _restore_backup(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _restore_backup(self, p: dict[str, Any]) -> dict[str, Any]:
         """恢复备份"""
         backup_id = p["backup_id"]
         target_conn_id = p.get("target_conn_id", "redis_master")
@@ -382,7 +382,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "status": "completed",
         }
 
-    def _verify_backup(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _verify_backup(self, p: dict[str, Any]) -> dict[str, Any]:
         """验证备份"""
         backup_id = p["backup_id"]
         backup = self._backups.get(backup_id)
@@ -405,7 +405,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "keys_current": len(data),
         }
 
-    def _add_connection(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_connection(self, p: dict[str, Any]) -> dict[str, Any]:
         conn_id = p["conn_id"]
         conn = RedisConnection(
             conn_id=conn_id,
@@ -418,21 +418,21 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._data_store[conn_id] = {}
         return {"conn_id": conn_id, "host": conn.host, "port": conn.port, "role": conn.role}
 
-    def _set_data(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _set_data(self, p: dict[str, Any]) -> dict[str, Any]:
         conn_id = p.get("conn_id", "redis_master")
         if conn_id not in self._data_store:
             self._data_store[conn_id] = {}
         self._data_store[conn_id][p["key"]] = p.get("value", "")
         return {"set": True, "key": p["key"], "conn_id": conn_id}
 
-    def _get_data(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_data(self, p: dict[str, Any]) -> dict[str, Any]:
         conn_id = p.get("conn_id", "redis_master")
         data = self._data_store.get(conn_id, {})
         if p["key"] not in data:
             return {"found": False, "key": p["key"]}
         return {"found": True, "key": p["key"], "value": data[p["key"]]}
 
-    def _list_connections(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_connections(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         return [
             {
                 "conn_id": c.conn_id,
@@ -444,7 +444,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             for c in self._connections.values()
         ]
 
-    def _list_backups(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _list_backups(self, p: dict[str, Any]) -> dict[str, Any]:
         conn_id = p.get("conn_id")
         backup_type = p.get("backup_type")
         results = []
@@ -468,7 +468,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             )
         return {"backups": results, "total": len(results)}
 
-    def _create_policy(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_policy(self, p: dict[str, Any]) -> dict[str, Any]:
         policy_id = p.get("policy_id", f"policy_{hashlib.md5(p['name'].encode()).hexdigest()[:8]}")
         policy = BackupPolicy(
             policy_id=policy_id,
@@ -481,7 +481,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._policies[policy_id] = policy
         return {"policy_id": policy_id, "name": policy.name, "type": policy.backup_type}
 
-    def _list_policies(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_policies(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         return [
             {
                 "policy_id": pl.policy_id,
@@ -494,7 +494,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             for pl in self._policies.values()
         ]
 
-    def _delete_old_backups(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _delete_old_backups(self, p: dict[str, Any]) -> dict[str, Any]:
         retention_days = p.get("retention_days", 7)
         cutoff = time.time() - retention_days * 86400
         to_remove = [bid for bid, b in self._backups.items() if b.completed_at and b.completed_at < cutoff]
@@ -502,7 +502,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             del self._backups[bid]
         return {"removed": len(to_remove), "remaining": len(self._backups)}
 
-    def _get_stats(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_stats(self, p: dict[str, Any]) -> dict[str, Any]:
         return {
             "total_backups": self._total_backups,
             "successful": self._successful_backups,
@@ -515,7 +515,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "restores": self._total_restores,
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module": self.module_name,
@@ -533,7 +533,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         self._running = False
         logger.info(f"Redis备份管理器关闭, 备份数: {len(self._backups)}")
 
-    def verify_backup_integrity(self, backup_id: str) -> Dict[str, Any]:
+    def verify_backup_integrity(self, backup_id: str) -> dict[str, Any]:
         """校验Redis备份文件完整性。企业场景：灾备演练前验证备份是否可用，
         检查RDB文件头魔数、校验和、数据完整性标记。
         """
@@ -556,7 +556,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         result["verified_at"] = time.time()
         return result
 
-    def get_backup_trend(self, days: int = 30) -> Dict[str, Any]:
+    def get_backup_trend(self, days: int = 30) -> dict[str, Any]:
         """备份趋势分析。企业场景：评估Redis数据增长趋势，预测存储需求。
         统计各备份大小变化、备份频率、压缩比，辅助容量规划。
         """
@@ -599,7 +599,7 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "compression_ratio": compression_ratio,
         }
 
-    def list_backups(self, status_filter: str = "") -> List[Dict[str, Any]]:
+    def list_backups(self, status_filter: str = "") -> list[dict[str, Any]]:
         """列出所有Redis备份记录。企业场景：运维查看备份清单，选择恢复点。
         支持按状态过滤: completed/failed/expired/all。
         """

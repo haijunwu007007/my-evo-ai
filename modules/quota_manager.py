@@ -84,9 +84,10 @@ import time
 import threading
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
@@ -144,8 +145,8 @@ class QuotaUsage:
     burst_value: float = 0.0
     burst_window_start: float = 0.0
     violations: int = 0
-    last_violation: Optional[str] = None
-    throttled_until: Optional[float] = None
+    last_violation: str | None = None
+    throttled_until: float | None = None
 
 @dataclass
 class QuotaCheckResult:
@@ -162,8 +163,8 @@ class TierConfig:
     name: TierLevel
     display_name: str
     monthly_price: float = 0.0
-    rate_limits: List[QuotaLimit] = field(default_factory=list)
-    features: List[str] = field(default_factory=list)
+    rate_limits: list[QuotaLimit] = field(default_factory=list)
+    features: list[str] = field(default_factory=list)
     max_agents: int = 5
     max_workflows: int = 10
     support_level: str = "community"
@@ -179,17 +180,17 @@ class SlidingWindowCounter:
     def __init__(self, window_seconds: int = 86400, precision_seconds: int = 1):
         self.window_seconds = window_seconds
         self.precision = precision_seconds
-        self._buckets: Dict[int, float] = {}
+        self._buckets: dict[int, float] = {}
         self._lock = threading.Lock()
 
-    def add(self, value: float = 1.0, timestamp: Optional[float] = None):
+    def add(self, value: float = 1.0, timestamp: float | None = None):
         ts = timestamp or time.time()
         bucket_key = int(ts / self.precision)
         with self._lock:
             self._buckets[bucket_key] = self._buckets.get(bucket_key, 0) + value
             self._cleanup(ts)
 
-    def get_count(self, window_start: Optional[float] = None, window_end: Optional[float] = None) -> float:
+    def get_count(self, window_start: float | None = None, window_end: float | None = None) -> float:
         now = time.time()
         ws = window_start or (now - self.window_seconds)
         we = window_end or now
@@ -217,22 +218,22 @@ class SlidingWindowCounter:
 # 配额策略引擎
 # ──────────────────────────────────────────────
 
-class QuotaPolicyEngine(object):
+class QuotaPolicyEngine:
     """动态配额策略引擎：分级限速、自适应降级、白名单管理"""
 
     def __init__(self):
-        self._policies: Dict[str, Dict[str, Any]] = {}
+        self._policies: dict[str, dict[str, Any]] = {}
         self._whitelist: set = set()
         self._blacklist: set = set()
-        self._custom_rules: List[Dict[str, Any]] = []
+        self._custom_rules: list[dict[str, Any]] = []
 
-    def add_policy(self, policy_id: str, target_pattern: str, limits: List[QuotaLimit], priority: int = 100):
+    def add_policy(self, policy_id: str, target_pattern: str, limits: list[QuotaLimit], priority: int = 100):
         self._policies[policy_id] = {
             "pattern": target_pattern,
             "limits": limits,
             "priority": priority,
             "enabled": True,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         self._policies = dict(sorted(self._policies.items(), key=lambda x: -x[1]["priority"]))
 
@@ -242,7 +243,7 @@ class QuotaPolicyEngine(object):
             return True
         return False
 
-    def match_policy(self, target_id: str) -> Optional[Dict[str, Any]]:
+    def match_policy(self, target_id: str) -> dict[str, Any] | None:
         for pid, policy in self._policies.items():
             if not policy["enabled"]:
                 continue
@@ -274,7 +275,7 @@ class QuotaPolicyEngine(object):
             }
         )
 
-    def evaluate_custom_rules(self, target_id: str, usage: QuotaUsage, limit: QuotaLimit) -> Optional[QuotaAction]:
+    def evaluate_custom_rules(self, target_id: str, usage: QuotaUsage, limit: QuotaLimit) -> QuotaAction | None:
         for rule in self._custom_rules:
             if not rule["enabled"]:
                 continue
@@ -285,7 +286,7 @@ class QuotaPolicyEngine(object):
                 logger.warning(f"Custom rule {rule['rule_id']} error: {e}")
         return None
 
-    def get_all_policies(self) -> List[Dict[str, Any]]:
+    def get_all_policies(self) -> list[dict[str, Any]]:
         return [{"policy_id": pid, **pdata} for pid, pdata in self._policies.items()]
 
 # ──────────────────────────────────────────────
@@ -296,11 +297,11 @@ class QuotaAlerter:
     """配额使用率告警：阈值触发、分级通知、告警抑制"""
 
     def __init__(self):
-        self._alerts: List[Dict[str, Any]] = []
-        self._suppressions: Dict[str, float] = {}
+        self._alerts: list[dict[str, Any]] = []
+        self._suppressions: dict[str, float] = {}
         self._suppress_duration = 3600
         self._alert_thresholds = [0.5, 0.7, 0.8, 0.9, 0.95, 1.0]
-        self._callbacks: Dict[str, Callable] = {}
+        self._callbacks: dict[str, Callable] = {}
 
     def register_callback(self, level: str, callback: Callable):
         self._callbacks[level] = callback
@@ -318,7 +319,7 @@ class QuotaAlerter:
             if usage_pct >= threshold:
                 alert_level = "critical" if threshold >= 0.95 else "warning" if threshold >= 0.8 else "info"
                 alert = {
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "target_id": target_id,
                     "dimension": dimension,
                     "usage_pct": round(usage_pct, 4),
@@ -336,7 +337,7 @@ class QuotaAlerter:
                         logger.error(f"Alert callback error: {e}")
                 break
 
-    def get_recent_alerts(self, target_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_recent_alerts(self, target_id: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         alerts = self._alerts
         if target_id:
             alerts = [a for a in alerts if a["target_id"] == target_id]
@@ -357,15 +358,15 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         super().__init__(module_name="quota_manager", module_version="6.39.0")
         self.policy_engine = QuotaPolicyEngine()
         self.alerter = QuotaAlerter()
-        self._usage: Dict[str, Dict[str, QuotaUsage]] = defaultdict(dict)
-        self._counters: Dict[str, SlidingWindowCounter] = {}
-        self._tiers: Dict[str, TierConfig] = {}
-        self._user_tiers: Dict[str, str] = {}
+        self._usage: dict[str, dict[str, QuotaUsage]] = defaultdict(dict)
+        self._counters: dict[str, SlidingWindowCounter] = {}
+        self._tiers: dict[str, TierConfig] = {}
+        self._user_tiers: dict[str, str] = {}
         self._operation_count = 0
         self._rejection_count = 0
         self._throttle_count = 0
         # 链路追踪：记录关键操作span
-        self._trace_spans: Dict[str, Dict[str, Any]] = {}
+        self._trace_spans: dict[str, dict[str, Any]] = {}
         self._init_default_tiers()
 
     def _init_default_tiers(self):
@@ -478,7 +479,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 remaining=float("inf"),
                 used_pct=0.0,
                 action=QuotaAction.ALLOW,
-                reset_at=(datetime.now(timezone.utc) + timedelta(seconds=86400)).isoformat(),
+                reset_at=(datetime.now(UTC) + timedelta(seconds=86400)).isoformat(),
             )
 
         policy = self.policy_engine.match_policy(target_id)
@@ -495,7 +496,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 remaining=float("inf"),
                 used_pct=0.0,
                 action=QuotaAction.ALLOW,
-                reset_at=(datetime.now(timezone.utc) + timedelta(seconds=86400)).isoformat(),
+                reset_at=(datetime.now(UTC) + timedelta(seconds=86400)).isoformat(),
             )
 
         limit = matching_limits[0]
@@ -523,7 +524,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 self._rejection_count += 1
 
         now = time.time()
-        reset_at = datetime.fromtimestamp(now + limit.window_seconds, tz=timezone.utc).isoformat()
+        reset_at = datetime.fromtimestamp(now + limit.window_seconds, tz=UTC).isoformat()
 
         if usage_pct >= 0.5:
             self.alerter.check_and_alert(target_id, dimension.value, usage_pct)
@@ -537,7 +538,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             message=f"Quota {dimension.value}: {usage_pct:.1%} used" if not allowed else "",
         )
 
-    async def consume_quota(self, target_id: str, dimension: QuotaDimension, amount: float = 1.0) -> Dict[str, Any]:
+    async def consume_quota(self, target_id: str, dimension: QuotaDimension, amount: float = 1.0) -> dict[str, Any]:
         check = await self.check_quota(target_id, dimension, amount)
         if not check.allowed:
             return {"status": "rejected", "reason": check.message, "action": check.action.value}
@@ -551,7 +552,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ── 用户套餐管理 ──
 
-    async def assign_tier(self, user_id: str, tier_name: str) -> Dict[str, Any]:
+    async def assign_tier(self, user_id: str, tier_name: str) -> dict[str, Any]:
         if tier_name not in self._tiers:
             return {"status": "error", "message": f"Unknown tier: {tier_name}"}
         old_tier = self._user_tiers.get(user_id, "free")
@@ -559,7 +560,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._record_audit("assign_tier", {"user": user_id, "old_tier": old_tier, "new_tier": tier_name})
         return {"status": "success", "user_id": user_id, "tier": tier_name}
 
-    def get_tier_info(self, tier_name: str) -> Optional[Dict[str, Any]]:
+    def get_tier_info(self, tier_name: str) -> dict[str, Any] | None:
         tier = self._tiers.get(tier_name)
         if not tier:
             return None
@@ -582,12 +583,12 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "sla_pct": tier.sla_pct,
         }
 
-    def list_tiers(self) -> List[Dict[str, Any]]:
+    def list_tiers(self) -> list[dict[str, Any]]:
         return [self.get_tier_info(name) for name in self._tiers]
 
     # ── 监控 ──
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         return {
             "module": "quota_manager",
             "total_checks": self._operation_count,
@@ -603,7 +604,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "users_assigned": len(self._user_tiers),
         }
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict | None = None) -> dict[str, Any]:
         """统一执行入口 — 配额管理路由"""
         _ = self.trace("execute")
         metrics_collector.counter("quota_manager_ops_total", labels={"action": action})
@@ -615,7 +616,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return {"success": True, "result": self.health_check()}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "counters_active": len(self._counters),
@@ -636,7 +637,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._ready = False
         logger.info("QuotaManager shutdown complete")
 
-    def analyze_usage_trends(self, window_hours: int = 24) -> Dict[str, Any]:
+    def analyze_usage_trends(self, window_hours: int = 24) -> dict[str, Any]:
         """分析配额使用趋势：峰值时段、利用率、超限预警"""
         policies = self._policies if hasattr(self, "_policies") else {}
         tiers = self._tiers if hasattr(self, "_tiers") else {}

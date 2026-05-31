@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI 自主智能体引擎 (Autonomous Agent Engine)
 =====================================================
@@ -94,7 +93,7 @@ class AutonomousCycle:
     id: str = ""
     started_at: str = ""
     finished_at: str = ""
-    decisions: List[Dict] = field(default_factory=list)
+    decisions: list[dict] = field(default_factory=list)
     analysis_summary: dict = field(default_factory=dict)
     status: str = "running"
 
@@ -122,9 +121,9 @@ class SystemAnalyzer:
     """
 
     def __init__(self):
-        self._last_analysis: Dict[str, Any] = {}
+        self._last_analysis: dict[str, Any] = {}
 
-    async def analyze(self, context: Dict) -> Dict[str, Any]:
+    async def analyze(self, context: dict) -> dict[str, Any]:
         """
         综合分析系统状态, 返回分析报告
         
@@ -174,7 +173,7 @@ class SystemAnalyzer:
         self._last_analysis = report
         return report
 
-    async def _analyze_modules(self, context: Dict) -> Dict:
+    async def _analyze_modules(self, context: dict) -> dict:
         """分析模块健康状态"""
         result = {"issues": [], "opportunities": []}
 
@@ -215,7 +214,7 @@ class SystemAnalyzer:
 
         return result
 
-    def _analyze_scheduler(self, context: Dict) -> Dict:
+    def _analyze_scheduler(self, context: dict) -> dict:
         """分析调度器状态"""
         result = {"issues": [], "opportunities": []}
         scheduler = context.get("scheduler")
@@ -241,7 +240,7 @@ class SystemAnalyzer:
 
         return result
 
-    def _analyze_events(self, context: Dict) -> Dict:
+    def _analyze_events(self, context: dict) -> dict:
         """分析事件引擎状态"""
         result = {}
         ee = context.get("event_engine")
@@ -260,7 +259,7 @@ class SystemAnalyzer:
 
         return result
 
-    def _analyze_decision_engine(self, context: Dict) -> Dict:
+    def _analyze_decision_engine(self, context: dict) -> dict:
         """分析决策引擎经验"""
         result = {"opportunities": []}
         de = context.get("decision_engine")
@@ -289,7 +288,7 @@ class SystemAnalyzer:
 
         return result
 
-    def _calculate_health_score(self, report: Dict) -> float:
+    def _calculate_health_score(self, report: dict) -> float:
         """计算系统健康评分 0-100"""
         score = 100.0
 
@@ -337,8 +336,8 @@ class DataFlowDiscoverer:
     """
 
     def __init__(self):
-        self._discovered_links: List[DataFlowLink] = []
-        self._execution_patterns: Dict[str, List[Dict]] = defaultdict(list)
+        self._discovered_links: list[DataFlowLink] = []
+        self._execution_patterns: dict[str, list[dict]] = defaultdict(list)
 
     def record_execution(self, module_name: str, action: str, params: dict, result: dict):
         """记录一次模块执行, 用于后续分析数据流"""
@@ -354,7 +353,7 @@ class DataFlowDiscoverer:
         if len(self._execution_patterns[module_name]) > 100:
             self._execution_patterns[module_name] = self._execution_patterns[module_name][-100:]
 
-    def discover_links(self, context: Dict) -> List[Dict]:
+    def discover_links(self, context: dict) -> list[dict]:
         """
         分析执行历史, 发现潜在的模块间数据流关系
         
@@ -406,7 +405,7 @@ class DataFlowDiscoverer:
 
         return links
 
-    def get_discovered_links(self) -> List[Dict]:
+    def get_discovered_links(self) -> list[dict]:
         return [asdict(l) for l in self._discovered_links]
 
 
@@ -434,8 +433,8 @@ class AutonomousAgent:
         self._interval = interval_seconds
         self._analyzer = SystemAnalyzer()
         self._flow_discoverer = DataFlowDiscoverer()
-        self._decisions: List[AutonomousDecision] = []
-        self._cycles: List[AutonomousCycle] = []
+        self._decisions: list[AutonomousDecision] = []
+        self._cycles: list[AutonomousCycle] = []
         self._cycle_count = 0
         self._stats = {
             "total_decisions": 0,
@@ -536,7 +535,7 @@ class AutonomousAgent:
 
     # ─── 核心循环 ───
 
-    async def start(self, context: Dict = None):
+    async def start(self, context: dict = None):
         """启动自主决策循环"""
         if self._running:
             return
@@ -638,7 +637,7 @@ class AutonomousAgent:
                     self._cycle_count, decision_summary,
                     analysis.get("health_score", 0))
 
-    def _generate_decisions(self, analysis: Dict) -> List[AutonomousDecision]:
+    def _generate_decisions(self, analysis: dict) -> list[AutonomousDecision]:
         """根据分析结果产生自主决策"""
         decisions = []
         health = analysis.get("system_health", "unknown")
@@ -675,7 +674,7 @@ class AutonomousAgent:
 
         return decisions
 
-    def _handle_issue(self, issue: Dict, health: str, score: float) -> Optional[AutonomousDecision]:
+    def _handle_issue(self, issue: dict, health: str, score: float) -> AutonomousDecision | None:
         """处理发现的问题"""
         issue_type = issue.get("type", "")
         severity = issue.get("severity", "low")
@@ -712,7 +711,7 @@ class AutonomousAgent:
 
         return None
 
-    def _handle_opportunity(self, opp: Dict, health: str, score: float) -> Optional[AutonomousDecision]:
+    def _handle_opportunity(self, opp: dict, health: str, score: float) -> AutonomousDecision | None:
         """处理发现的机会"""
         opp_type = opp.get("type", "")
 
@@ -736,7 +735,7 @@ class AutonomousAgent:
 
         return None
 
-    async def _execute_decision(self, decision: AutonomousDecision) -> Dict:
+    async def _execute_decision(self, decision: AutonomousDecision) -> dict:
         """执行自主决策"""
         try:
             if not decision.auto_executed:
@@ -776,7 +775,7 @@ class AutonomousAgent:
 
     # ─── 决策动作实现 ───
 
-    async def _do_self_heal(self, config: Dict) -> Dict:
+    async def _do_self_heal(self, config: dict) -> dict:
         """执行自愈: 重新加载异常模块"""
         modules = config.get("modules", [])
         registry = self._context.get("registry")
@@ -799,14 +798,14 @@ class AutonomousAgent:
                     registry.lazy_load_module(name), timeout=30
                 )
                 results[name] = "reloaded" if new_mod else "load_failed"
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 results[name] = "timeout"
             except Exception as e:
                 results[name] = f"error: {e}"
 
         return results
 
-    async def _do_analysis(self, config: Dict) -> Dict:
+    async def _do_analysis(self, config: dict) -> dict:
         """执行深度分析"""
         # 触发学习引擎分析
         le = self._context.get("learning_engine")
@@ -830,7 +829,7 @@ class AutonomousAgent:
 
         return result
 
-    async def _do_rule_optimize(self) -> Dict:
+    async def _do_rule_optimize(self) -> dict:
         """优化决策规则"""
         de = self._context.get("decision_engine")
         le = self._context.get("learning_engine")
@@ -851,7 +850,7 @@ class AutonomousAgent:
         except Exception as e:
             return {"error": str(e)}
 
-    def _do_data_flow_discovery(self) -> Dict:
+    def _do_data_flow_discovery(self) -> dict:
         """发现模块间数据流"""
         links = self._flow_discoverer.discover_links(self._context)
         return {
@@ -859,7 +858,7 @@ class AutonomousAgent:
             "links": links[:10],
         }
 
-    async def _do_llm_reasoning(self) -> Dict:
+    async def _do_llm_reasoning(self) -> dict:
         """LLM深度推理分析"""
         ic = self._context.get("intelligent_coordinator")
         if not ic:
@@ -875,7 +874,7 @@ class AutonomousAgent:
         except Exception as e:
             return {"error": str(e)}
 
-    async def _do_schedule_action(self, config: Dict) -> Dict:
+    async def _do_schedule_action(self, config: dict) -> dict:
         """调度器操作"""
         scheduler = self._context.get("scheduler")
         action = config.get("action", "")
@@ -896,7 +895,7 @@ class AutonomousAgent:
 
     # ─── 学习反馈 ───
 
-    async def _apply_learning_feedback(self, analysis: Dict):
+    async def _apply_learning_feedback(self, analysis: dict):
         """将本轮分析结果反馈给学习引擎"""
         le = self._context.get("learning_engine")
         if not le:
@@ -920,7 +919,7 @@ class AutonomousAgent:
 
     # ─── 数据流持久化 ───
 
-    def _save_data_flow_links(self, links: List[Dict]):
+    def _save_data_flow_links(self, links: list[dict]):
         conn = self._get_conn()
         try:
             for link in links:
@@ -948,7 +947,7 @@ class AutonomousAgent:
 
     # ─── 状态查询 ───
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "running": self._running,
             "cycle_count": self._cycle_count,
@@ -958,7 +957,7 @@ class AutonomousAgent:
             "last_cycle": asdict(self._cycles[-1]) if self._cycles else None,
         }
 
-    def get_recent_decisions(self, limit: int = 20) -> List[Dict]:
+    def get_recent_decisions(self, limit: int = 20) -> list[dict]:
         conn = self._get_conn()
         try:
             rows = conn.execute(
@@ -969,7 +968,7 @@ class AutonomousAgent:
         finally:
             conn.close()
 
-    def get_recent_cycles(self, limit: int = 10) -> List[Dict]:
+    def get_recent_cycles(self, limit: int = 10) -> list[dict]:
         conn = self._get_conn()
         try:
             rows = conn.execute(
@@ -986,7 +985,7 @@ class AutonomousAgent:
         finally:
             conn.close()
 
-    def get_data_flow_links(self) -> List[Dict]:
+    def get_data_flow_links(self) -> list[dict]:
         conn = self._get_conn()
         try:
             rows = conn.execute(
@@ -1001,7 +1000,7 @@ class AutonomousAgent:
 # 全局单例
 # ============================================================================
 
-_autonomous_agent: Optional[AutonomousAgent] = None
+_autonomous_agent: AutonomousAgent | None = None
 
 
 def get_autonomous_agent() -> AutonomousAgent:

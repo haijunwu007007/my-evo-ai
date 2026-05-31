@@ -100,10 +100,10 @@ class ConsumerInstance:
     consumer_id: str = ""
     group_id: str = ""
     host: str = ""
-    topics: List[str] = field(default_factory=list)
-    assigned_partitions: Dict[str, List[int]] = field(default_factory=dict)
-    current_offset: Dict[str, int] = field(default_factory=dict)
-    committed_offset: Dict[str, int] = field(default_factory=dict)
+    topics: list[str] = field(default_factory=list)
+    assigned_partitions: dict[str, list[int]] = field(default_factory=dict)
+    current_offset: dict[str, int] = field(default_factory=dict)
+    committed_offset: dict[str, int] = field(default_factory=dict)
     lag: int = 0
     status: str = "active"  # active, idle, rebalancing, stopped
     last_heartbeat: float = 0.0
@@ -135,11 +135,11 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 "description": "消费者组管理，分区分配、偏移量跟踪、再平衡、延迟监控",
             }
         )
-        self._groups: Dict[str, Dict[str, ConsumerInstance]] = defaultdict(dict)  # group_id -> {consumer_id: Consumer}
-        self._group_topics: Dict[str, List[str]] = {}  # group_id -> subscribed topics
-        self._group_config: Dict[str, Dict] = {}  # group_id -> config
-        self._partitions: Dict[str, List[TopicPartition]] = defaultdict(list)
-        self._rebalance_log: List[Dict] = []
+        self._groups: dict[str, dict[str, ConsumerInstance]] = defaultdict(dict)  # group_id -> {consumer_id: Consumer}
+        self._group_topics: dict[str, list[str]] = {}  # group_id -> subscribed topics
+        self._group_config: dict[str, dict] = {}  # group_id -> config
+        self._partitions: dict[str, list[TopicPartition]] = defaultdict(list)
+        self._rebalance_log: list[dict] = []
         self._initialized = False
 
     def initialize(self) -> None:
@@ -220,7 +220,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 )
                 idx += count
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "consumer_group"})
         self.metrics_collector.counter("consumer_group.execute.calls", 1)
         self.audit("execute", {"module": "consumer_group"})
@@ -385,7 +385,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             logger.error(f"[ConsumerGroup] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -406,7 +406,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def rebalance_group(self, group_id: str, strategy: str = "range") -> Dict[str, Any]:
+    def rebalance_group(self, group_id: str, strategy: str = "range") -> dict[str, Any]:
         """手动触发消费组重平衡。企业场景：消费者上下线后分区分配不均，
         手动触发重平衡使分区均匀分配到可用消费者。
         strategy: range(按范围) / roundrobin(轮询) / sticky(粘性，减少重分配)。
@@ -456,7 +456,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "assignment": {k: len(v) for k, v in assignment.items()},
         }
 
-    def get_consumer_lag(self, group_id: str) -> Dict[str, Any]:
+    def get_consumer_lag(self, group_id: str) -> dict[str, Any]:
         """消费组延迟统计。企业场景：监控消费进度，发现消费延迟及时扩容消费者。
         lag = 最新消息offset - 消费者已提交offset。
         """
@@ -482,7 +482,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "details": lag_report,
         }
 
-    def pause_group(self, group_id: str) -> Dict[str, Any]:
+    def pause_group(self, group_id: str) -> dict[str, Any]:
         """暂停消费组。企业场景：消费处理出现异常时紧急暂停，
         排查问题后手动恢复。防止错误消费导致数据污染。
         """
@@ -493,7 +493,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._paused_groups.add(group_id)
         return {"success": True, "group_id": group_id, "status": "paused"}
 
-    def resume_group(self, group_id: str) -> Dict[str, Any]:
+    def resume_group(self, group_id: str) -> dict[str, Any]:
         """恢复消费组。企业场景：问题排查完成后恢复消费，
         从暂停点继续消费，不丢消息。
         """
@@ -503,7 +503,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._paused_groups.discard(group_id)
         return {"success": True, "group_id": group_id, "status": "resumed"}
 
-    def get_group_summary(self) -> Dict[str, Any]:
+    def get_group_summary(self) -> dict[str, Any]:
         """消费组总览。企业场景：运维看板展示所有消费组状态汇总。"""
         groups = getattr(self, "_groups", {})
         paused = getattr(self, "_paused_groups", set())
@@ -535,7 +535,7 @@ class ConsumerGroupManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             total += max(0, latest - committed)
         return total
 
-    def reset_consumer_offset(self, group_id: str, partition: int, new_offset: int) -> Dict[str, Any]:
+    def reset_consumer_offset(self, group_id: str, partition: int, new_offset: int) -> dict[str, Any]:
         """重置消费者offset。企业场景：消费处理出错后回退offset重新消费，
         或跳过 poison message 继续消费后续消息。
         """

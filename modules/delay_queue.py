@@ -110,8 +110,9 @@ import traceback
 import uuid
 import struct
 import pickle
-from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from datetime import datetime, timedelta, timezone, UTC
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from pathlib import Path
@@ -172,12 +173,12 @@ class DelayedMessage:
     payload: Any = field(default=None, compare=False)
     state: MessageState = field(default=MessageState.PENDING, compare=False)
     created_at: float = field(default_factory=time.time, compare=False)
-    delivered_at: Optional[float] = field(default=None, compare=False)
+    delivered_at: float | None = field(default=None, compare=False)
     ack_timeout: float = field(default=30.0, compare=False)
     retry_count: int = field(default=0, compare=False)
     max_retries: int = field(default=3, compare=False)
     delay_ms: float = field(default=0, compare=False)
-    headers: Dict[str, str] = field(default_factory=dict, compare=False)
+    headers: dict[str, str] = field(default_factory=dict, compare=False)
     callback_url: str = field(default="", compare=False)
 
 @dataclass
@@ -237,10 +238,10 @@ class MessageExpiredError(Exception):
 
     pass
 
-class PersistenceManager(object):
+class PersistenceManager:
     """消息持久化管理器"""
 
-    def __init__(self, data_dir: Optional[str] = None):
+    def __init__(self, data_dir: str | None = None):
         super().__init__()
         self._data_dir = Path(data_dir or "./.evo_data/delay_queue")
         self._data_dir.mkdir(parents=True, exist_ok=True)
@@ -249,7 +250,7 @@ class PersistenceManager(object):
         self._meta_file = self._data_dir / "meta.json"
         self._lock = threading.Lock()
 
-    def save_pending(self, messages: List[DelayedMessage]) -> bool:
+    def save_pending(self, messages: list[DelayedMessage]) -> bool:
         """保存待处理消息"""
         try:
             with self._lock:
@@ -277,7 +278,7 @@ class PersistenceManager(object):
         except Exception as e:
             return False
 
-    def load_pending(self) -> List[DelayedMessage]:
+    def load_pending(self) -> list[DelayedMessage]:
         """加载待处理消息"""
         try:
             with self._lock:
@@ -306,7 +307,7 @@ class PersistenceManager(object):
         except Exception:
             return []
 
-    def save_dead_letter(self, messages: List[DelayedMessage]) -> bool:
+    def save_dead_letter(self, messages: list[DelayedMessage]) -> bool:
         """保存死信消息"""
         try:
             with self._lock:
@@ -333,8 +334,8 @@ class MessageHandler:
     """消息处理器注册中心"""
 
     def __init__(self):
-        self._handlers: Dict[str, Callable] = {}
-        self._default_handler: Optional[Callable] = None
+        self._handlers: dict[str, Callable] = {}
+        self._default_handler: Callable | None = None
 
     def register(self, topic: str, handler: Callable[[DelayedMessage], bool]) -> None:
         """注册主题处理器"""
@@ -344,7 +345,7 @@ class MessageHandler:
         """注册默认处理器"""
         self._default_handler = handler
 
-    def get_handler(self, topic: str) -> Optional[Callable]:
+    def get_handler(self, topic: str) -> Callable | None:
         """获取处理器"""
         return self._handlers.get(topic, self._default_handler)
 
@@ -352,7 +353,7 @@ class TimeWheel:
     """分层时间轮"""
 
     def __init__(self):
-        self._heap: List[DelayedMessage] = []
+        self._heap: list[DelayedMessage] = []
         self._lock = threading.Lock()
         self._seq_counter = 0
 
@@ -363,14 +364,14 @@ class TimeWheel:
             message._seq = self._seq_counter
             heapq.heappush(self._heap, message)
 
-    def peek(self) -> Optional[DelayedMessage]:
+    def peek(self) -> DelayedMessage | None:
         """查看下一个到期消息"""
         with self._lock:
             if not self._heap:
                 return None
             return self._heap[0]
 
-    def pop_ready(self) -> List[DelayedMessage]:
+    def pop_ready(self) -> list[DelayedMessage]:
         """弹出所有到期消息"""
         now = time.time()
         ready = []
@@ -398,20 +399,20 @@ class TimeWheel:
         with self._lock:
             return len(self._heap)
 
-    def get_all_messages(self) -> List[DelayedMessage]:
+    def get_all_messages(self) -> list[DelayedMessage]:
         """获取所有消息（按执行时间排序）"""
         with self._lock:
             return sorted(list(self._heap))
 
-class QueueThroughputAnalyzer(object):
+class QueueThroughputAnalyzer:
     """队列吞吐量分析器 — 消息流速统计、延迟分布分析、消费者负载均衡检测、容量预警"""
 
     def __init__(self):
-        self._throughput_samples: List[Dict[str, Any]] = []
+        self._throughput_samples: list[dict[str, Any]] = []
 
     def record_throughput(
         self, topic: str, delivered: int, acked: int, nacked: int, window_seconds: int = 60
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """记录吞吐量采样"""
         sample = {
             "topic": topic,
@@ -428,7 +429,7 @@ class QueueThroughputAnalyzer(object):
             self._throughput_samples = self._throughput_samples[-500:]
         return sample
 
-    def analyze_latency_distribution(self, messages: List[Dict]) -> Dict[str, Any]:
+    def analyze_latency_distribution(self, messages: list[dict]) -> dict[str, Any]:
         """分析消息延迟分布：P50/P95/P99、平均延迟、尾部延迟"""
         if not messages:
             return {"error": "no messages"}
@@ -449,7 +450,7 @@ class QueueThroughputAnalyzer(object):
             "tail_ratio": round(tail_count / max(n, 1), 4),
         }
 
-    def detect_consumer_imbalance(self, topic_stats: Dict[str, Dict[str, int]]) -> List[Dict[str, Any]]:
+    def detect_consumer_imbalance(self, topic_stats: dict[str, dict[str, int]]) -> list[dict[str, Any]]:
         """检测消费者负载不均衡：对比各消费者处理量差异"""
         imbalances = []
         all_counts = [s.get("processed", 0) for s in topic_stats.values()]
@@ -472,7 +473,7 @@ class QueueThroughputAnalyzer(object):
         imbalances.sort(key=lambda x: x["deviation_ratio"], reverse=True)
         return imbalances
 
-    def predict_capacity_exhaustion(self, current_depth: int, avg_rate: float, max_capacity: int) -> Dict[str, Any]:
+    def predict_capacity_exhaustion(self, current_depth: int, avg_rate: float, max_capacity: int) -> dict[str, Any]:
         """预测队列容量耗尽时间"""
         if avg_rate <= 0 or current_depth >= max_capacity:
             return {
@@ -504,15 +505,15 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__(module_id="delay_queue", module_name="延迟队列引擎")
         self._time_wheel = TimeWheel()
-        self._dead_letter: List[DelayedMessage] = []
-        self._delivering: Dict[str, DelayedMessage] = {}
+        self._dead_letter: list[DelayedMessage] = []
+        self._delivering: dict[str, DelayedMessage] = {}
         self._handler = MessageHandler()
         self._retry_policy = RetryPolicy()
         self._persistence = PersistenceManager()
         self._lock = threading.RLock()
         self._running = False
-        self._dispatch_thread: Optional[threading.Thread] = None
-        self._ack_check_thread: Optional[threading.Thread] = None
+        self._dispatch_thread: threading.Thread | None = None
+        self._ack_check_thread: threading.Thread | None = None
         self._executor = ThreadPoolExecutor(max_workers=10)
         self._stats = {
             "total_enqueued": 0,
@@ -536,7 +537,7 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         delay_ms: float = 0,
         priority: MessagePriority = MessagePriority.NORMAL,
         max_retries: int = 3,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         callback_url: str = "",
         ack_timeout: float = 30.0,
     ) -> str:
@@ -589,8 +590,8 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     ) -> str:
         """在指定时间投递消息"""
         if execute_at.tzinfo is None:
-            execute_at = execute_at.replace(tzinfo=timezone.utc)
-        delay_ms = (execute_at - datetime.now(timezone.utc)).total_seconds() * 1000
+            execute_at = execute_at.replace(tzinfo=UTC)
+        delay_ms = (execute_at - datetime.now(UTC)).total_seconds() * 1000
         if delay_ms < 0:
             delay_ms = 0
         return self.publish(topic, payload, delay_ms=delay_ms, priority=priority, **kwargs)
@@ -644,7 +645,7 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     # ─────────────────────── 查询API ───────────────────────
 
-    def get_message(self, message_id: str) -> Optional[Dict]:
+    def get_message(self, message_id: str) -> dict | None:
         """查询消息状态"""
         with self._lock:
             if message_id in self._delivering:
@@ -683,7 +684,7 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """获取死信消息数"""
         return len(self._dead_letter)
 
-    def list_dead_letters(self, limit: int = 50) -> List[Dict]:
+    def list_dead_letters(self, limit: int = 50) -> list[dict]:
         """列出死信消息"""
         return [
             {

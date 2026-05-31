@@ -99,7 +99,7 @@ try:
 except ImportError:
     _HAS_NUMPY = False
 
-def _find_ffmpeg() -> Optional[str]:
+def _find_ffmpeg() -> str | None:
     for name in ["ffmpeg", "ffmpeg.exe"]:
         p = shutil.which(name)
         if p:
@@ -120,7 +120,7 @@ def _find_font() -> str:
     return ""
 
 @dataclass
-class HyperframesVideoAnalyzer(object):
+class HyperframesVideoAnalyzer:
     """hyperframes_video 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -288,7 +288,7 @@ class VideoTrack(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     start_time: float
     duration: float
     content: str
-    properties: Dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class VideoProject:
@@ -296,11 +296,11 @@ class VideoProject:
 
     id: str
     title: str
-    resolution: Tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = (1920, 1080)
     fps: int = 30
-    tracks: List[VideoTrack] = field(default_factory=list)
+    tracks: list[VideoTrack] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
-    bg_color: Tuple[int, int, int] = (20, 20, 40)
+    bg_color: tuple[int, int, int] = (20, 20, 40)
 
 class HyperframesVideo:
     """
@@ -315,14 +315,14 @@ class HyperframesVideo:
 
     VERSION = "V0.1"
 
-    def __init__(self, output_dir: str = "./videos", ffmpeg_path: Optional[str] = None):
+    def __init__(self, output_dir: str = "./videos", ffmpeg_path: str | None = None):
         super().__init__()
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
-        self.projects: Dict[str, VideoProject] = {}
+        self.projects: dict[str, VideoProject] = {}
         self.ffmpeg_path = ffmpeg_path or _find_ffmpeg()
         self.font_path = _find_font()
-        self._font_cache: Dict[int, Any] = {}
+        self._font_cache: dict[int, Any] = {}
 
     def _get_font(self, size: int):
         if size in self._font_cache:
@@ -338,9 +338,9 @@ class HyperframesVideo:
     def create_project(
         self,
         title: str,
-        resolution: Tuple[int, int] = (1920, 1080),
+        resolution: tuple[int, int] = (1920, 1080),
         fps: int = 30,
-        bg_color: Tuple[int, int, int] = (20, 20, 40),
+        bg_color: tuple[int, int, int] = (20, 20, 40),
     ) -> VideoProject:
         project_id = f"proj_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         project = VideoProject(id=project_id, title=title, resolution=resolution, fps=fps, bg_color=bg_color)
@@ -354,7 +354,7 @@ class HyperframesVideo:
         text: str,
         start_time: float,
         duration: float,
-        style: Optional[Dict[str, Any]] = None,
+        style: dict[str, Any] | None = None,
     ) -> VideoTrack:
         track = VideoTrack(
             id=f"track_{len(project.tracks) + 1}",
@@ -460,7 +460,7 @@ body {{ width:{w}px; height:{h}px; overflow:hidden;
         html += "</body></html>"
         return html
 
-    def render_html(self, project: VideoProject, output_name: Optional[str] = None) -> str:
+    def render_html(self, project: VideoProject, output_name: str | None = None) -> str:
         """渲染为HTML文件(预览用)"""
         name = output_name or f"{project.title}.html"
         path = os.path.join(self.output_dir, name)
@@ -491,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return path
 
     # ─── 真实视频渲染 ─────────────────────────────────
-    def render_video(self, project: VideoProject, output_name: Optional[str] = None) -> Dict[str, Any]:
+    def render_video(self, project: VideoProject, output_name: str | None = None) -> dict[str, Any]:
         """
         渲染为真实视频文件(MP4或GIF)
 
@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
             # 按时间排序轨道
             sorted_tracks = sorted(project.tracks, key=lambda t: t.start_time)
             # 预加载图片
-            image_cache: Dict[str, Image.Image] = {}
+            image_cache: dict[str, Image.Image] = {}
             for t in sorted_tracks:
                 if t.type == "image" and os.path.exists(t.content):
                     try:
@@ -653,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return output_path
 
     # ─── 查询 ──────────────────────────────────────────
-    def get_project_info(self, project: VideoProject) -> Dict[str, Any]:
+    def get_project_info(self, project: VideoProject) -> dict[str, Any]:
         return {
             "id": project.id,
             "title": project.title,
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
             "created_at": project.created_at.isoformat(),
         }
 
-    def get_capabilities(self) -> Dict:
+    def get_capabilities(self) -> dict:
         return {
             "pil": _HAS_PIL,
             "numpy": _HAS_NUMPY,
@@ -673,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function() {
             "version": self.VERSION,
         }
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         return {
             "healthy": _HAS_PIL,
             "ffmpeg": self.ffmpeg_path is not None,
@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
             "version": self.VERSION,
         }
 
-def create_video_project(title: str, resolution: Tuple[int, int] = (1920, 1080)):
+def create_video_project(title: str, resolution: tuple[int, int] = (1920, 1080)):
     renderer = HyperframesVideo()
     project = renderer.create_project(title, resolution)
     return renderer, project

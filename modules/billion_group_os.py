@@ -132,7 +132,7 @@ class Employee:
     status: EmployeeStatus = EmployeeStatus.ACTIVE
     join_date: str = ""
     salary_grade: int = 1
-    skills: List[str] = field(default_factory=list)
+    skills: list[str] = field(default_factory=list)
 
 @dataclass
 class AttendanceRecord:
@@ -151,7 +151,7 @@ class PerformanceReview:
     period: str
     score: float = 0.0
     level: PerformanceLevel = PerformanceLevel.AVERAGE
-    goals: List[str] = field(default_factory=list)
+    goals: list[str] = field(default_factory=list)
     comments: str = ""
     reviewer_id: str = ""
 
@@ -162,13 +162,13 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
     MODULE_NAME = "亿群OS企业管理"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._depts: Dict[str, Department] = {}
-        self._employees: Dict[str, Employee] = {}
-        self._attendance: Dict[str, List[AttendanceRecord]] = defaultdict(list)
-        self._reviews: Dict[str, List[PerformanceReview]] = defaultdict(list)
+        self._depts: dict[str, Department] = {}
+        self._employees: dict[str, Employee] = {}
+        self._attendance: dict[str, list[AttendanceRecord]] = defaultdict(list)
+        self._reviews: dict[str, list[PerformanceReview]] = defaultdict(list)
         self._counter = 0
 
     def _next_id(self, prefix: str) -> str:
@@ -229,7 +229,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 join_date="2024-01-15",
             )
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("billion_group_os_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -253,7 +253,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         return handler(params)
         return {"status": "healthy", "module": "billion_group_os"}
 
-    def _exec_add_dept(self, p: Dict) -> Dict:
+    def _exec_add_dept(self, p: dict) -> dict:
         did = self._next_id("dept")
         self._depts[did] = Department(
             dept_id=did,
@@ -266,7 +266,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         )
         return {"success": True, "result": {"dept_id": did, "name": p["name"]}}
 
-    def _exec_add_employee(self, p: Dict) -> Dict:
+    def _exec_add_employee(self, p: dict) -> dict:
         eid = self._next_id("emp")
         self._employees[eid] = Employee(
             emp_id=eid,
@@ -281,7 +281,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         )
         return {"success": True, "result": {"emp_id": eid, "name": p["name"]}}
 
-    def _exec_update_employee(self, p: Dict) -> Dict:
+    def _exec_update_employee(self, p: dict) -> dict:
         eid = p["emp_id"]
         if eid not in self._employees:
             return {"success": False, "error": "员工不存在"}
@@ -298,8 +298,8 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             emp.skills = p["skills"]
         return {"success": True, "result": {"emp_id": eid, "updated": True}}
 
-    def _exec_get_org_tree(self, p: Dict) -> Dict:
-        def build_tree(parent_id: str) -> List[Dict]:
+    def _exec_get_org_tree(self, p: dict) -> dict:
+        def build_tree(parent_id: str) -> list[dict]:
             children = []
             for d in self._depts.values():
                 if d.parent_id == parent_id:
@@ -318,7 +318,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         tree = build_tree("")
         return {"success": True, "result": tree}
 
-    def _exec_get_dept_info(self, p: Dict) -> Dict:
+    def _exec_get_dept_info(self, p: dict) -> dict:
         did = p["dept_id"]
         if did not in self._depts:
             return {"success": False, "error": "部门不存在"}
@@ -338,7 +338,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _exec_get_employee(self, p: Dict) -> Dict:
+    def _exec_get_employee(self, p: dict) -> dict:
         eid = p["emp_id"]
         if eid not in self._employees:
             return {"success": False, "error": "员工不存在"}
@@ -360,7 +360,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _exec_list_employees(self, p: Dict) -> Dict:
+    def _exec_list_employees(self, p: dict) -> dict:
         dept = p.get("dept_id", "")
         status = p.get("status", "")
         results = []
@@ -372,7 +372,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             results.append({"emp_id": e.emp_id, "name": e.name, "position": e.position, "status": e.status.value})
         return {"success": True, "result": {"total": len(results), "employees": results}}
 
-    def _exec_record_attendance(self, p: Dict) -> Dict:
+    def _exec_record_attendance(self, p: dict) -> dict:
         eid = p["emp_id"]
         date = p.get("date", datetime.now().strftime("%Y-%m-%d"))
         check_in = p.get("check_in", "09:00")
@@ -393,7 +393,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._attendance[eid].append(record)
         return {"success": True, "result": {"record_id": record.record_id, "hours": hours, "status": record.status}}
 
-    def _exec_get_attendance(self, p: Dict) -> Dict:
+    def _exec_get_attendance(self, p: dict) -> dict:
         eid = p.get("emp_id", "")
         date_from = p.get("date_from", "")
         date_to = p.get("date_to", "")
@@ -421,7 +421,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _exec_submit_review(self, p: Dict) -> Dict:
+    def _exec_submit_review(self, p: dict) -> dict:
         score = p.get("score", 0)
         if score >= 90:
             level = PerformanceLevel.EXCELLENT
@@ -446,7 +446,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         self._reviews[p["emp_id"]].append(review)
         return {"success": True, "result": {"review_id": review.review_id, "level": level.value, "score": score}}
 
-    def _exec_get_reviews(self, p: Dict) -> Dict:
+    def _exec_get_reviews(self, p: dict) -> dict:
         eid = p.get("emp_id", "")
         reviews = self._reviews.get(eid, [])
         return {
@@ -466,7 +466,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         active = sum(1 for e in self._employees.values() if e.status == EmployeeStatus.ACTIVE)
         total_salary = sum(e.salary_grade * 5000 for e in self._employees.values() if e.status == EmployeeStatus.ACTIVE)
         return {
@@ -483,7 +483,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -503,12 +503,12 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         logger.info("亿群OS关闭")
         return True
 
-    def _audit_log(self, event: str, actor: str, detail: Dict) -> None:
+    def _audit_log(self, event: str, actor: str, detail: dict) -> None:
         """记录组织管理审计日志"""
         if hasattr(self, "_audit") and self._audit:
             self._audit.log(event, {"actor": actor, **detail, "ts": datetime.now().isoformat()})
 
-    def audit_employee_change(self, emp_id: str, change_type: str, fields: Dict) -> None:
+    def audit_employee_change(self, emp_id: str, change_type: str, fields: dict) -> None:
         """审计员工信息变更"""
         self._audit_log("employee_change", emp_id, {"change_type": change_type, "fields": fields})
 
@@ -516,7 +516,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         """审计考勤记录"""
         self._audit_log("attendance_record", emp_id, {"status": status})
 
-    def get_org_statistics(self) -> Dict[str, Any]:
+    def get_org_statistics(self) -> dict[str, Any]:
         """获取组织统计概览"""
         dept_count = len(self._departments)
         emp_count = len(self._employees)
@@ -534,7 +534,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         """获取部门人数"""
         return sum(1 for e in self._employees.values() if e.get("dept_id") == dept_id)
 
-    def search_employees(self, keyword: str, field: str = "name") -> List[Dict]:
+    def search_employees(self, keyword: str, field: str = "name") -> list[dict]:
         """搜索员工"""
         results = []
         kw_lower = keyword.lower()
@@ -544,7 +544,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 results.append(emp)
         return results
 
-    def get_employee_timeline(self, emp_id: str) -> List[Dict]:
+    def get_employee_timeline(self, emp_id: str) -> list[dict]:
         """获取员工操作时间线"""
         timeline = []
         for att in self._attendance.values():
@@ -570,7 +570,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         walk(dept_id, 1)
         return max_depth
 
-    def batch_update_dept(self, updates: List[Dict]) -> Dict:
+    def batch_update_dept(self, updates: list[dict]) -> dict:
         """批量更新部门信息"""
         success = 0
         failed = 0
@@ -583,7 +583,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 failed += 1
         return {"success": success, "failed": failed, "total": len(updates)}
 
-    def export_org_chart(self, format_type: str = "tree") -> Dict:
+    def export_org_chart(self, format_type: str = "tree") -> dict:
         """导出组织架构"""
         root_depts = [d for d in self._departments.values() if not d.get("parent_id")]
 
@@ -600,7 +600,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
         tree = [build_node(d["dept_id"]) for d in root_depts]
         return {"format": format_type, "roots": tree, "total_depts": len(self._departments)}
 
-    def get_performance_summary(self, dept_id: Optional[str] = None) -> Dict:
+    def get_performance_summary(self, dept_id: str | None = None) -> dict:
         """获取绩效汇总"""
         reviews = [
             r
@@ -617,7 +617,7 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "min_score": min(scores),
         }
 
-    def generate_organization_health_report(self) -> Dict[str, Any]:
+    def generate_organization_health_report(self) -> dict[str, Any]:
         """生成组织健康报告：成员活跃度、部门效能、项目进度汇总"""
         members = self._members if hasattr(self, "_members") else {}
         departments = self._departments if hasattr(self, "_departments") else {}
@@ -640,13 +640,13 @@ class BillionGroupOSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
             "department_summary": dept_stats,
         }
 
-    def detect_member_bottlenecks(self) -> List[Dict[str, Any]]:
+    def detect_member_bottlenecks(self) -> list[dict[str, Any]]:
         """检测成员瓶颈：识别负载过高或参与度过低的成员"""
         members = self._members if hasattr(self, "_members") else {}
         tasks = self._tasks if hasattr(self, "_tasks") else {}
         if not members:
             return []
-        member_task_count: Dict[str, int] = {}
+        member_task_count: dict[str, int] = {}
         for tid, task in tasks.items():
             if isinstance(task, dict):
                 assignee = task.get("assignee", "")

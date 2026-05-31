@@ -86,16 +86,16 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("point_time_recover")
 
-class SnapshotManager(object):
+class SnapshotManager:
     """数据快照管理器"""
 
     def __init__(self, max_snapshots: int = 100, max_age_seconds: float = 86400 * 30):
         self.max_snapshots = max_snapshots
         self.max_age_seconds = max_age_seconds
-        self._snapshots: Dict[str, Dict] = {}
-        self._timeline: List[str] = []
+        self._snapshots: dict[str, dict] = {}
+        self._timeline: list[str] = []
 
-    def create_snapshot(self, data: Dict, label: str = "", tags: List[str] = None) -> Dict:
+    def create_snapshot(self, data: dict, label: str = "", tags: list[str] = None) -> dict:
         snap_id = str(uuid.uuid4())[:10]
         snap = {
             "id": snap_id,
@@ -113,7 +113,7 @@ class SnapshotManager(object):
             self._cleanup()
         return {"success": True, "id": snap_id, "created_at": snap["created_at"], "data_hash": snap["data_hash"]}
 
-    def get_snapshot(self, snap_id: str) -> Optional[Dict]:
+    def get_snapshot(self, snap_id: str) -> dict | None:
         snap = self._snapshots.get(snap_id)
         if not snap:
             return None
@@ -126,7 +126,7 @@ class SnapshotManager(object):
             "data": snap["data"],
         }
 
-    def restore_snapshot(self, snap_id: str) -> Dict:
+    def restore_snapshot(self, snap_id: str) -> dict:
         snap = self._snapshots.get(snap_id)
         if not snap:
             return {"success": False, "error": "snapshot_not_found"}
@@ -138,7 +138,7 @@ class SnapshotManager(object):
             "original_time": snap["created_at"],
         }
 
-    def list_snapshots(self, tag: str = None, since: float = None, until: float = None, limit: int = 50) -> List[Dict]:
+    def list_snapshots(self, tag: str = None, since: float = None, until: float = None, limit: int = 50) -> list[dict]:
         snaps = list(self._snapshots.values())
         if tag:
             snaps = [s for s in snaps if tag in s["tags"]]
@@ -159,7 +159,7 @@ class SnapshotManager(object):
             for s in snaps[:limit]
         ]
 
-    def find_nearest(self, target_time: float, direction: str = "before") -> Optional[str]:
+    def find_nearest(self, target_time: float, direction: str = "before") -> str | None:
         candidates = [sid for sid in self._timeline if self._snapshots[sid]["created_at"] <= target_time]
         if not candidates:
             if direction == "after":
@@ -187,7 +187,7 @@ class SnapshotManager(object):
             for sid in oldest[: len(self._snapshots) - self.max_snapshots]:
                 self.delete_snapshot(sid)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"total_snapshots": len(self._snapshots), "timeline_size": len(self._timeline)}
 
     # --- Auto-generated action dispatch methods ---
@@ -237,7 +237,7 @@ class DataDiffer:
     """数据差异比较引擎"""
 
     @staticmethod
-    def diff(data_a: Dict, data_b: Dict) -> Dict:
+    def diff(data_a: dict, data_b: dict) -> dict:
         hash_a = hashlib.md5(str(data_a).encode()).hexdigest()[:12]
         hash_b = hashlib.md5(str(data_b).encode()).hexdigest()[:12]
         if hash_a == hash_b:
@@ -268,7 +268,7 @@ class DataDiffer:
         }
 
     @staticmethod
-    def merge(base: Dict, overlay: Dict, strategy: str = "overlay") -> Dict:
+    def merge(base: dict, overlay: dict, strategy: str = "overlay") -> dict:
         if strategy == "overlay":
             if isinstance(base, dict) and isinstance(overlay, dict):
                 result = copy.deepcopy(base)
@@ -281,13 +281,13 @@ class DataDiffer:
             return copy.deepcopy(overlay)
         return copy.deepcopy(base)
 
-class RecoveryValidator(object):
+class RecoveryValidator:
     """恢复验证器"""
 
     def __init__(self):
-        self._validation_log: List[Dict] = []
+        self._validation_log: list[dict] = []
 
-    def validate(self, original_data: Dict, recovered_data: Dict, rules: List[Dict] = None) -> Dict:
+    def validate(self, original_data: dict, recovered_data: dict, rules: list[dict] = None) -> dict:
         diff = DataDiffer.diff(original_data, recovered_data)
         rule_results = []
         for rule in rules or []:
@@ -324,13 +324,13 @@ class RecoveryValidator(object):
 class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """时间点数据恢复 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "snapshots_created": 0,
@@ -338,7 +338,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
@@ -368,9 +368,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def recover_to_time(self, params: dict = None) -> dict:
         params = params or {}
         target = params.get("target_time")
-        if isinstance(target, str):
-            target = float(target)
-        elif isinstance(target, (int, float)):
+        if isinstance(target, str) or isinstance(target, (int, float)):
             target = float(target)
         else:
             target = time.time()
@@ -436,7 +434,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def estimate_recovery_time(self, db_name: str, data_size_gb: float, backup_type: str = "full") -> Dict[str, Any]:
+    def estimate_recovery_time(self, db_name: str, data_size_gb: float, backup_type: str = "full") -> dict[str, Any]:
         """预估恢复耗时。企业场景：DBA在执行恢复前评估需要的时间窗口，
         根据数据量和备份类型（全量/增量）计算预估耗时。
         """
@@ -454,7 +452,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recommendation": "建议在维护窗口执行" if estimated_min > 30 else "可在在线执行",
         }
 
-    def get_recovery_history(self, limit: int = 20) -> Dict[str, Any]:
+    def get_recovery_history(self, limit: int = 20) -> dict[str, Any]:
         """恢复历史记录。企业场景：审计和复盘，查看历史恢复操作的详情和结果。"""
         history = getattr(self, "_recovery_history", [])
         recent = history[-limit:]
@@ -468,7 +466,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recent": recent,
         }
 
-    def get_database_recovery_status(self, db_name: str) -> Dict[str, Any]:
+    def get_database_recovery_status(self, db_name: str) -> dict[str, Any]:
         """获取数据库恢复状态。企业场景：长时间恢复过程中运维查看进度，
         预估剩余时间。
         """
@@ -493,7 +491,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "est_remaining_seconds": est_remaining,
         }
 
-    def list_recovery_points(self, db_name: str) -> Dict[str, Any]:
+    def list_recovery_points(self, db_name: str) -> dict[str, Any]:
         """列出可用恢复点。企业场景：DBA选择PITR目标时间点，
         查看最近7天的可用备份时间线。
         """
@@ -523,7 +521,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "points": points[:20],
         }
 
-    def estimate_recovery_time(self, db_name: str, target_time: float) -> Dict[str, Any]:
+    def estimate_recovery_time(self, db_name: str, target_time: float) -> dict[str, Any]:
         """预估恢复耗时。企业场景：故障恢复前评估PITR需要多长时间，
         通知业务方预估服务恢复时间。
         """
@@ -558,7 +556,7 @@ class PointTimeRecover(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             ],
         }
 
-    def get_backup_timeline(self, db_name: str) -> Dict[str, Any]:
+    def get_backup_timeline(self, db_name: str) -> dict[str, Any]:
         """获取备份时间线。企业场景：DBA可视化查看备份连续性，
         发现备份缺口（等保要求每日备份不得中断）。
         """

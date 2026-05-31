@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 — 首次运行设置向导（上市公司级）
 # Grade: A
 
@@ -14,7 +13,8 @@ __module_meta__ = {
     "description": "首次运行设置向导 — 环境检测/依赖校验/配置引导/回滚",
 }
 import time, uuid, logging, os, sys, platform, subprocess
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from modules._base.enterprise_module import (
     EnterpriseModule, ModuleStatus, HealthReport,
     CircuitBreakerMixin, RateLimiterMixin,
@@ -42,10 +42,10 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "v3.0"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__(config)
         self._checks = [_copy_check(c) for c in DEFAULT_CHECKS]
-        self._snapshots: List[Dict] = []
+        self._snapshots: list[dict] = []
         self._stats = {
             "runs": 0,
             "passed": 0,
@@ -75,7 +75,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return await self._safe_execute(action, params, handler=self._dispatch)
 
     # ─── 检查执行引擎 ──────────────────────────────────
-    def run_check(self, check_id: str) -> Dict:
+    def run_check(self, check_id: str) -> dict:
         """执行单个检查项"""
         check = next((c for c in self._checks if c["id"] == check_id), None)
         if not check:
@@ -99,7 +99,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             check["checked_at"] = time.time()
             return {"success": False, "check": check_id, "status": "failed", "error": str(e)}
 
-    def run_all_checks(self) -> Dict:
+    def run_all_checks(self) -> dict:
         """运行全部检查"""
         results = []
         passed = failed = 0
@@ -123,12 +123,12 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
 
     # ─── 检查处理器 ────────────────────────────────────
-    def _check_python_version(self) -> Dict:
+    def _check_python_version(self) -> dict:
         v = sys.version_info
         ok = v.major >= 3 and v.minor >= 10
         return {"ok": ok, "detail": f"{v.major}.{v.minor}.{v.micro}"}
 
-    def _check_config_file(self) -> Dict:
+    def _check_config_file(self) -> dict:
         paths = [
             os.path.join(os.path.dirname(__file__), "..", "config.yaml"),
             os.path.join(os.path.dirname(__file__), "..", "config.yml"),
@@ -141,7 +141,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 return {"ok": True, "detail": f"{norm} ({size}B)"}
         return {"ok": False, "detail": "未找到 config.yaml"}
 
-    def _check_zhipu_api_key(self) -> Dict:
+    def _check_zhipu_api_key(self) -> dict:
         key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("ZHIPUAI_API_KEY") or ""
         if key:
             masked = key[:8] + "****" + key[-4:] if len(key) > 12 else "****"
@@ -152,7 +152,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"ok": True, "detail": "在 .env 文件中"}
         return {"ok": False, "detail": "未设置 ZHIPU_API_KEY"}
 
-    def _check_disk_space(self) -> Dict:
+    def _check_disk_space(self) -> dict:
         try:
             import shutil
             path = os.path.dirname(__file__)
@@ -163,7 +163,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"ok": False, "detail": f"检查失败: {e}"}
 
-    def _check_port_8765(self) -> Dict:
+    def _check_port_8765(self) -> dict:
         try:
             import socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -175,7 +175,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"ok": False, "detail": f"检查失败: {e}"}
 
-    def _check_core_modules(self) -> Dict:
+    def _check_core_modules(self) -> dict:
         core_ids = ["data-pipeline", "ai-gateway", "security-governance"]
         found = 0
         modules_dir = os.path.join(os.path.dirname(__file__))
@@ -186,7 +186,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         ok = found >= 2
         return {"ok": ok, "detail": f"找到 {found}/3 核心模块"}
 
-    def _check_db_connect(self) -> Dict:
+    def _check_db_connect(self) -> dict:
         try:
             import sqlite3
             conn = sqlite3.connect(":memory:")
@@ -197,7 +197,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"ok": False, "detail": f"连接失败: {e}"}
 
     # ─── 快照与回滚 ────────────────────────────────────
-    def take_snapshot(self) -> Dict:
+    def take_snapshot(self) -> dict:
         """创建当前配置快照"""
         snapshot = {
             "id": uuid.uuid4().hex[:12],
@@ -210,13 +210,13 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         logger.info("[FirstRunSetup] 快照已创建: %s", snapshot["id"])
         return {"success": True, "snapshot_id": snapshot["id"], "time": snapshot["timestamp"]}
 
-    def list_snapshots(self) -> Dict:
+    def list_snapshots(self) -> dict:
         return {"success": True, "snapshots": [
             {"id": s["id"], "time": s["timestamp"]} for s in self._snapshots
         ]}
 
     # ─── 分发器 ────────────────────────────────────────
-    def _dispatch(self, p: Dict) -> Dict:
+    def _dispatch(self, p: dict) -> dict:
         a = p.get("action", "status")
 
         try:
@@ -298,7 +298,7 @@ class FirstRunSetup(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.status = ModuleStatus.STOPPED
 
 
-def _copy_check(c: Dict) -> Dict:
+def _copy_check(c: dict) -> dict:
     return dict(c)
 
 

@@ -173,11 +173,11 @@ class KeyInfo:
     key_type: KeyType
     algorithm: str
     created_at: float = field(default_factory=time.time)
-    expires_at: Optional[float] = None
+    expires_at: float | None = None
     version: int = 1
     is_active: bool = True
     usage_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EncryptionResult:
@@ -186,20 +186,20 @@ class EncryptionResult:
     ciphertext: str
     algorithm: str
     key_id: str
-    iv: Optional[str] = None
-    tag: Optional[str] = None
+    iv: str | None = None
+    tag: str | None = None
     encrypted_at: float = field(default_factory=time.time)
 
-class CryptoHealthAnalyzer(object):
+class CryptoHealthAnalyzer:
     """加密健康检查器 — 扫描算法合规性、检测弱密钥、评估加密策略"""
 
     WEAK_ALGORITHMS = {"DES", "RC4", "ECB", "MD5", "SHA1"}
     STRONG_ALGORITHMS = {"AES-256-GCM", "AES-128-GCM", "ChaCha20-Poly1305", "RSA-4096"}
 
     def __init__(self):
-        self._scan_results: List[Dict[str, Any]] = []
+        self._scan_results: list[dict[str, Any]] = []
 
-    def check_algorithm(self, algorithm: str, key_size: int = 0) -> Dict[str, Any]:
+    def check_algorithm(self, algorithm: str, key_size: int = 0) -> dict[str, Any]:
         """检查单个加密算法的合规性"""
         algo_upper = algorithm.upper().replace(" ", "-")
         issues = []
@@ -235,7 +235,7 @@ class CryptoHealthAnalyzer(object):
             "compliant": grade in ("A", "B"),
         }
 
-    def scan_key_rotation(self, keys: List[Dict[str, Any]], max_age_days: int = 90) -> Dict[str, Any]:
+    def scan_key_rotation(self, keys: list[dict[str, Any]], max_age_days: int = 90) -> dict[str, Any]:
         """扫描密钥轮换状态"""
         now = time.time()
         stale = []
@@ -267,7 +267,7 @@ class CryptoHealthAnalyzer(object):
             "rotation_compliance": round(healthy / max(len(keys), 1) * 100, 1),
         }
 
-    def evaluate_encryption_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate_encryption_policy(self, policy: dict[str, Any]) -> dict[str, Any]:
         """评估加密策略整体合规性"""
         algo_result = self.check_algorithm(policy.get("algorithm", ""), policy.get("key_size", 0))
         key_rotation_ok = policy.get("auto_rotation", False)
@@ -296,7 +296,7 @@ class CryptoHealthAnalyzer(object):
             "recommendations": self._get_recommendations(score, algo_result, key_rotation_ok, tls_enforced),
         }
 
-    def _get_recommendations(self, score: int, algo: Dict, rotation: bool, tls: bool) -> List[str]:
+    def _get_recommendations(self, score: int, algo: dict, rotation: bool, tls: bool) -> list[str]:
         recs = []
         if not algo["compliant"]:
             recs.append(f"Upgrade algorithm: {algo['issues']}")
@@ -315,10 +315,10 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._keys: Dict[str, KeyInfo] = {}
-        self._key_store: Dict[str, bytes] = {}  # key_id -> key material
-        self._master_key: Optional[bytes] = None
-        self._encryption_log: List[Dict] = []
+        self._keys: dict[str, KeyInfo] = {}
+        self._key_store: dict[str, bytes] = {}  # key_id -> key material
+        self._master_key: bytes | None = None
+        self._encryption_log: list[dict] = []
 
     def initialize(self) -> None:
         self._master_key = self._derive_master_key()
@@ -351,8 +351,8 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         key_type: KeyType = KeyType.SYMMETRIC,
         algorithm: EncryptionAlgorithm = EncryptionAlgorithm.AES_256_GCM,
         key_size: int = 256,
-        expires_in_days: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        expires_in_days: int | None = None,
+    ) -> dict[str, Any]:
         """创建新密钥"""
         key_id = f"key_{uuid.uuid4().hex[:12]}"
         size_bytes = key_size // 8
@@ -383,8 +383,8 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("encrypt")
     def encrypt(
-        self, plaintext: str, key_id: Optional[str] = None, algorithm: Optional[EncryptionAlgorithm] = None
-    ) -> Dict[str, Any]:
+        self, plaintext: str, key_id: str | None = None, algorithm: EncryptionAlgorithm | None = None
+    ) -> dict[str, Any]:
         """加密数据"""
         if not key_id:
             key_id = self._get_active_key(KeyType.SYMMETRIC)
@@ -435,7 +435,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "duration_ms": round((time.time() - start) * 1000, 2),
         }
 
-    def _aes_encrypt(self, plaintext: str, key: bytes, algo: EncryptionAlgorithm) -> Dict[str, str]:
+    def _aes_encrypt(self, plaintext: str, key: bytes, algo: EncryptionAlgorithm) -> dict[str, str]:
         """AES加密（使用标准库Fernet模式模拟）"""
         try:
             from cryptography.fernet import Fernet
@@ -450,7 +450,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             # 回退：简单XOR加密 + Base64
             return self._xor_encrypt(plaintext, key)
 
-    def _xor_encrypt(self, plaintext: str, key: bytes) -> Dict[str, str]:
+    def _xor_encrypt(self, plaintext: str, key: bytes) -> dict[str, str]:
         """XOR加密（备用方案，实际应用中应使用AES）"""
         iv = os.urandom(16)
         plaintext_bytes = plaintext.encode("utf-8")
@@ -461,8 +461,8 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("decrypt")
     def decrypt(
-        self, ciphertext: str, key_id: str, iv: Optional[str] = None, tag: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, ciphertext: str, key_id: str, iv: str | None = None, tag: str | None = None
+    ) -> dict[str, Any]:
         """解密数据"""
         if key_id not in self._keys or key_id not in self._key_store:
             raise ValueError(f"密钥 {key_id} 不存在")
@@ -517,8 +517,8 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("hash_data")
     def hash_data(
-        self, data: str, algorithm: HashAlgorithm = HashAlgorithm.SHA256, salt: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, data: str, algorithm: HashAlgorithm = HashAlgorithm.SHA256, salt: str | None = None
+    ) -> dict[str, Any]:
         """哈希数据"""
         data_bytes = data.encode("utf-8")
         if salt:
@@ -542,7 +542,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"hash": digest, "algorithm": algorithm.value, "salt": salt, "length": len(digest)}
 
     @trace_operation("hmac_sign")
-    def hmac_sign(self, data: str, key_id: Optional[str] = None) -> Dict[str, Any]:
+    def hmac_sign(self, data: str, key_id: str | None = None) -> dict[str, Any]:
         """HMAC签名"""
         if not key_id:
             key_id = self._get_active_key(KeyType.HMAC)
@@ -557,7 +557,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"signature": signature, "algorithm": "HMAC-SHA256", "key_id": key_id}
 
     @trace_operation("hmac_verify")
-    def hmac_verify(self, data: str, signature: str, key_id: Optional[str] = None) -> Dict[str, Any]:
+    def hmac_verify(self, data: str, signature: str, key_id: str | None = None) -> dict[str, Any]:
         """HMAC验证"""
         if not key_id:
             key_id = self._get_active_key(KeyType.HMAC)
@@ -571,7 +571,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"valid": valid, "key_id": key_id}
 
     @trace_operation("generate_secure_random")
-    def generate_secure_random(self, length: int = 32, encoding: str = "hex") -> Dict[str, Any]:
+    def generate_secure_random(self, length: int = 32, encoding: str = "hex") -> dict[str, Any]:
         """生成安全随机数"""
         random_bytes = os.urandom(length)
         if encoding == "hex":
@@ -586,7 +586,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"random": result, "length_bytes": length, "encoding": encoding}
 
     @trace_operation("generate_password_hash")
-    def generate_password_hash(self, password: str, rounds: int = 12) -> Dict[str, Any]:
+    def generate_password_hash(self, password: str, rounds: int = 12) -> dict[str, Any]:
         """生成密码哈希"""
         salt = os.urandom(16)
         salt_hex = salt.hex()
@@ -598,7 +598,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"hash": password_hash, "salt": salt_hex, "algorithm": f"pbkdf2-sha256-{rounds}k"}
 
     @trace_operation("verify_password")
-    def verify_password(self, password: str, password_hash: str, salt: str) -> Dict[str, Any]:
+    def verify_password(self, password: str, password_hash: str, salt: str) -> dict[str, Any]:
         """验证密码"""
         salt_bytes = bytes.fromhex(salt)
         dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt_bytes, 12000)
@@ -618,7 +618,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         raise ValueError(f"无可用 {key_type.value} 密钥")
 
     @trace_operation("rotate_key")
-    def rotate_key(self, key_id: str) -> Dict[str, Any]:
+    def rotate_key(self, key_id: str) -> dict[str, Any]:
         """轮换密钥"""
         if key_id not in self._keys:
             raise ValueError(f"密钥 {key_id} 不存在")
@@ -639,7 +639,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         audit_logger.log(action="key_rotated", resource=key_id, details=f"密钥轮换: {key_id} -> {new_id}")
         return {"old_key_id": key_id, "new_key_id": new_id}
 
-    def list_keys(self) -> List[Dict]:
+    def list_keys(self) -> list[dict]:
         return [
             {
                 "key_id": k.key_id,
@@ -703,7 +703,7 @@ class EncryptionService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         active = sum(1 for k in self._keys.values() if k.is_active)
         base.update(

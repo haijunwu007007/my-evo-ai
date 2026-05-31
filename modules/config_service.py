@@ -93,7 +93,8 @@ import copy
 from core.logging_config import get_logger
 import hashlib
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Set
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -149,7 +150,7 @@ class ConfigItem:
     description: str = ""
     namespace: str = "default"
     environment: str = "default"
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     encrypted: bool = False
     version: int = 1
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -178,7 +179,7 @@ class Namespace:
 
     name: str = ""
     description: str = ""
-    environments: List[str] = field(default_factory=lambda: ["default", "development", "staging", "production"])
+    environments: list[str] = field(default_factory=lambda: ["default", "development", "staging", "production"])
     owner: str = ""
     is_public: bool = False
     max_keys: int = 10000
@@ -193,7 +194,7 @@ class GrayscaleConfig:
     namespace: str = ""
     environment: str = ""
     target_value: Any = None
-    match_rules: Dict[str, Any] = field(default_factory=dict)  # {"user_ids": [...], "percentage": 30}
+    match_rules: dict[str, Any] = field(default_factory=dict)  # {"user_ids": [...], "percentage": 30}
     active: bool = True
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -205,20 +206,20 @@ class ConfigChangeCallback:
     key_pattern: str = "*"
     namespace: str = "*"
     environment: str = "*"
-    handler: Optional[Callable] = None
+    handler: Callable | None = None
     active: bool = True
 
 # ============================================================================
 # ConfigDiffAnalyzer 配置差异分析引擎
 # ============================================================================
 
-class ConfigDiffAnalyzer(object):
+class ConfigDiffAnalyzer:
     """配置差异分析 — 比较两个配置集的差异、检测漂移、生成迁移计划"""
 
     def __init__(self):
-        self._drift_history: List[Dict] = []
+        self._drift_history: list[dict] = []
 
-    def compare_configs(self, source: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+    def compare_configs(self, source: dict[str, Any], target: dict[str, Any]) -> dict[str, Any]:
         """比较两个配置字典，返回差异报告"""
         all_keys = set(list(source.keys()) + list(target.keys()))
         added = []
@@ -258,7 +259,7 @@ class ConfigDiffAnalyzer(object):
             "has_drift": has_changes,
         }
 
-    def detect_drift(self, current: Dict[str, Any], baseline: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def detect_drift(self, current: dict[str, Any], baseline: dict[str, Any]) -> list[dict[str, Any]]:
         """检测配置漂移 — 与基线对比返回有风险的变更"""
         diff = self.compare_configs(baseline, current)
         risks = []
@@ -277,7 +278,7 @@ class ConfigDiffAnalyzer(object):
                 risks.append({"key": key, "risk": risk_level, "old": str(old_val)[:50], "new": str(new_val)[:50]})
         return sorted(risks, key=lambda x: x["risk"], reverse=True)
 
-    def generate_migration_plan(self, source: Dict[str, Any], target: Dict[str, Any]) -> List[Dict[str, str]]:
+    def generate_migration_plan(self, source: dict[str, Any], target: dict[str, Any]) -> list[dict[str, str]]:
         """生成从source迁移到target的执行计划"""
         diff = self.compare_configs(source, target)
         plan = []
@@ -309,20 +310,20 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 变更审计
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 配置存储: namespace -> environment -> key -> ConfigItem
-        self._store: Dict[str, Dict[str, Dict[str, ConfigItem]]] = defaultdict(lambda: defaultdict(dict))
+        self._store: dict[str, dict[str, dict[str, ConfigItem]]] = defaultdict(lambda: defaultdict(dict))
         # 命名空间
-        self._namespaces: Dict[str, Namespace] = {}
+        self._namespaces: dict[str, Namespace] = {}
         # 版本历史
-        self._versions: Dict[str, List[ConfigVersion]] = defaultdict(list)
+        self._versions: dict[str, list[ConfigVersion]] = defaultdict(list)
         # 灰度配置
-        self._grayscale: Dict[str, GrayscaleConfig] = {}
+        self._grayscale: dict[str, GrayscaleConfig] = {}
         # 变更回调
-        self._callbacks: List[ConfigChangeCallback] = []
+        self._callbacks: list[ConfigChangeCallback] = []
         # 加密密钥（简化）
         self._encryption_key = self.config.get("encryption_key", "default-key-32bytes!!")
         # 统计
@@ -358,7 +359,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         logger.info("[ConfigService] 初始化完成")
         return Result(success=True)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             stats = self.get_stats()
             return {
@@ -370,7 +371,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"status": "unhealthy", "error": str(e)}
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         trace_id = f"cfg-{action}-{int(time.time() * 1000)}"
         metrics_collector.counter("config_service_ops_total", labels={"action": action})
@@ -490,7 +491,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         environment: str = "default",
         value_type: str = "auto",
         description: str = "",
-        labels: Optional[Dict] = None,
+        labels: dict | None = None,
         encrypted: bool = False,
         changed_by: str = "",
         comment: str = "",
@@ -574,7 +575,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return grayscale_value
         return value
 
-    def get_json(self, key: str, **kwargs) -> Optional[Dict]:
+    def get_json(self, key: str, **kwargs) -> dict | None:
         value = self.get(key, **kwargs)
         if isinstance(value, str):
             try:
@@ -626,8 +627,8 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True)
 
     def list_configs(
-        self, namespace: str = "default", environment: str = "default", prefix: str = "", labels: Optional[Dict] = None
-    ) -> List[Dict]:
+        self, namespace: str = "default", environment: str = "default", prefix: str = "", labels: dict | None = None
+    ) -> list[dict]:
         env_store = self._store.get(namespace, {}).get(environment, {})
         result = []
         for key, item in env_store.items():
@@ -656,7 +657,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def get_versions(
         self, key: str, *, namespace: str = "default", environment: str = "default", limit: int = 20
-    ) -> List[Dict]:
+    ) -> list[dict]:
         version_key = f"{namespace}:{environment}:{key}"
         versions = self._versions.get(version_key, [])
         return [
@@ -719,7 +720,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         key: str,
         target_value: Any,
-        match_rules: Dict,
+        match_rules: dict,
         *,
         namespace: str = "default",
         environment: str = "default",
@@ -800,7 +801,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         configs = self.list_configs(namespace, environment)
         return json.dumps(configs, ensure_ascii=False, indent=2, default=str)
 
-    def import_configs(self, namespace: str, environment: str, configs_json: str, changed_by: str = "") -> Dict:
+    def import_configs(self, namespace: str, environment: str, configs_json: str, changed_by: str = "") -> dict:
         configs = json.loads(configs_json)
         imported = 0
         errors = []
@@ -837,7 +838,7 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._cs_stats["config_items"] = total
         self._cs_stats["environments"] = len(envs)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._cs_stats, "module_stats": self.stats.to_dict()}
 
     # ============================================================================

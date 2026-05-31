@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -170,7 +169,7 @@ class BackupRecord:
     size_bytes: int = 0
     file_count: int = 0
     checksum: str = ""
-    source_dirs: List[str] = field(default_factory=list)
+    source_dirs: list[str] = field(default_factory=list)
     archive_path: str = ""
     started_at: str = ""
     completed_at: str = ""
@@ -181,12 +180,12 @@ class BackupRecord:
         if not self.backup_id:
             self.backup_id = f"BK-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-class BackupScheduler(object):
+class BackupScheduler:
     """备份调度引擎 - 负责备份策略调度、定时任务和存储管理"""
 
     def __init__(self):
-        self._schedules: Dict[str, Dict] = {}
-        self._backup_history: List[Dict] = []
+        self._schedules: dict[str, dict] = {}
+        self._backup_history: list[dict] = []
         self._scheduled_count: int = 0
         self._completed_count: int = 0
         self._failed_count: int = 0
@@ -205,7 +204,7 @@ class BackupScheduler(object):
         metrics_collector.gauge("backup_schedules_count", len(self._schedules))
         return schedule_id
 
-    def run_backup(self, schedule_id: str) -> Dict:
+    def run_backup(self, schedule_id: str) -> dict:
         """执行备份"""
         start = time.time()
         schedule = self._schedules.get(schedule_id)
@@ -239,10 +238,10 @@ class BackupScheduler(object):
         metrics_collector.counter("backup_pruned_total", pruned)
         return pruned
 
-    def list_schedules(self) -> List[Dict]:
+    def list_schedules(self) -> list[dict]:
         return [{"id": sid, **cfg} for sid, cfg in self._schedules.items()]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "schedules": len(self._schedules),
             "history_size": len(self._backup_history),
@@ -250,7 +249,7 @@ class BackupScheduler(object):
             "failed": self._failed_count,
         }
 
-    def verify_backup(self, backup_id: str) -> Dict:
+    def verify_backup(self, backup_id: str) -> dict:
         """验证备份完整性"""
         backup = next((b for b in self._backup_history if b.get("backup_id") == backup_id), None)
         if not backup:
@@ -258,7 +257,7 @@ class BackupScheduler(object):
         metrics_collector.counter("backup_verifications_total")
         return {"backup_id": backup_id, "status": "verified", "source": backup.get("source")}
 
-    def estimate_storage(self, schedule_id: str, days: int = 30) -> Dict:
+    def estimate_storage(self, schedule_id: str, days: int = 30) -> dict:
         """估算备份存储需求"""
         schedule = self._schedules.get(schedule_id)
         if not schedule:
@@ -269,17 +268,17 @@ class BackupScheduler(object):
         avg_size = 50  # MB
         return {"estimated_count": est_count, "estimated_size_mb": est_count * avg_size, "frequency": freq}
 
-    def get_backup_trend(self, days: int = 7) -> Dict:
+    def get_backup_trend(self, days: int = 7) -> dict:
         """获取备份趋势统计"""
         cutoff = time.time() - days * 86400
         recent = [b for b in self._backup_history if b.get("timestamp", 0) > cutoff]
-        by_day: Dict[str, int] = {}
+        by_day: dict[str, int] = {}
         for b in recent:
             day = time.strftime("%Y-%m-%d", time.localtime(b.get("timestamp", time.time())))
             by_day[day] = by_day.get(day, 0) + 1
         return {"days": days, "total": len(recent), "daily": by_day}
 
-    def pause_schedule(self, schedule_id: str) -> Dict:
+    def pause_schedule(self, schedule_id: str) -> dict:
         """暂停备份计划"""
         schedule = self._schedules.get(schedule_id)
         if not schedule:
@@ -288,7 +287,7 @@ class BackupScheduler(object):
         metrics_collector.gauge("backup_schedules_active", sum(1 for s in self._schedules.values() if s.get("enabled")))
         return {"schedule_id": schedule_id, "status": "paused"}
 
-    def resume_schedule(self, schedule_id: str) -> Dict:
+    def resume_schedule(self, schedule_id: str) -> dict:
         """恢复备份计划"""
         schedule = self._schedules.get(schedule_id)
         if not schedule:
@@ -304,7 +303,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
@@ -315,12 +314,12 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.backup_dir = self.config.get("backup_dir", os.path.join(os.path.dirname(__file__), ".backups"))
         self.max_backups = self.config.get("max_backups", 30)
         self.retention_days = self.config.get("retention_days", 30)
-        self._source_dirs: List[str] = [
+        self._source_dirs: list[str] = [
             os.path.dirname(__file__),  # modules目录
         ]
-        self._records: List[BackupRecord] = []
+        self._records: list[BackupRecord] = []
         self._last_full_backup: str = ""
-        self._bg_scheduler: Optional[threading.Thread] = None
+        self._bg_scheduler: threading.Thread | None = None
 
     def initialize(self) -> None:
         self.info("初始化备份引擎...")
@@ -335,7 +334,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("initialize", f"dir={self.backup_dir}, retention={self.retention_days}d")
         self.info("备份引擎就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         params = params or {}
         trace_id = f"backup-{action}-{int(time.time() * 1000)}"
@@ -363,7 +362,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self._save_records()
         self.status = ModuleStatus.STOPPED
 
-    def verify_backup_integrity(self, backup_id: str) -> Dict[str, Any]:
+    def verify_backup_integrity(self, backup_id: str) -> dict[str, Any]:
         """校验备份数据完整性: CRC校验、大小验证、时间戳一致性"""
         record = self._records.get(backup_id) if hasattr(self, "_records") else None
         if not record:
@@ -387,7 +386,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "overall_valid": size_ok and crc_ok,
         }
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "create": self._do_create,
@@ -407,7 +406,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── 核心备份 ──
 
-    def _do_create(self, params: Dict) -> Dict:
+    def _do_create(self, params: dict) -> dict:
         backup_type = params.get("type", "full")
         sources = params.get("sources", self._source_dirs)
 
@@ -485,7 +484,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.stats.error_count += 1
             return {"success": False, "error": str(e)}
 
-    def _do_list(self, params: Dict) -> Dict:
+    def _do_list(self, params: dict) -> dict:
         limit = params.get("limit", 20)
         return {
             "total": len(self._records),
@@ -506,7 +505,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _do_delete(self, params: Dict) -> Dict:
+    def _do_delete(self, params: dict) -> dict:
         backup_id = params.get("backup_id", "")
         record = next((r for r in self._records if r.backup_id == backup_id), None)
         if not record:
@@ -517,7 +516,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("delete_backup", backup_id)
         return {"deleted": True, "backup_id": backup_id}
 
-    def _do_verify(self, params: Dict) -> Dict:
+    def _do_verify(self, params: dict) -> dict:
         backup_id = params.get("backup_id", "")
         record = next((r for r in self._records if r.backup_id == backup_id), None)
         if not record:
@@ -541,7 +540,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"valid": False, "error": str(e)}
 
-    def _do_restore(self, params: Dict) -> Dict:
+    def _do_restore(self, params: dict) -> dict:
         backup_id = params.get("backup_id", "")
         target_dir = params.get("target_dir", "")
         record = next((r for r in self._records if r.backup_id == backup_id), None)
@@ -562,7 +561,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _do_cleanup(self, params: Dict) -> Dict:
+    def _do_cleanup(self, params: dict) -> dict:
         """清理过期备份"""
         cutoff = datetime.now() - timedelta(days=self.retention_days)
         removed = 0
@@ -587,7 +586,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.audit("cleanup", f"removed={removed}")
         return {"cleaned": removed, "remaining": len(self._records)}
 
-    def _do_stats(self, params: Dict) -> Dict:
+    def _do_stats(self, params: dict) -> dict:
         total_size = sum(r.size_bytes for r in self._records)
         return {
             "total_backups": len(self._records),
@@ -597,7 +596,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "max_backups": self.max_backups,
         }
 
-    def _do_add_source(self, params: Dict) -> Dict:
+    def _do_add_source(self, params: dict) -> dict:
         path = params.get("path", "")
         if not path or not os.path.exists(path):
             return {"error": f"路径不存在: {path}"}
@@ -623,7 +622,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         filepath = os.path.join(self.backup_dir, "backup_records.json")
         try:
             if os.path.exists(filepath):
-                with open(filepath, "r") as f:
+                with open(filepath) as f:
                     data = json.load(f)
                 self._records = [BackupRecord(**r) for r in data]
                 full_records = [r for r in self._records if r.type == "full" and r.status == "completed"]

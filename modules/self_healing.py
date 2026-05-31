@@ -80,7 +80,8 @@ except ImportError:
     pass
 import traceback
 from core.logging_config import get_logger
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Any
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
@@ -90,7 +91,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector, threading
 
 logger = get_logger(__name__)
 
-class SelfHealingAnalyzer(object):
+class SelfHealingAnalyzer:
     """self_healing 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -268,7 +269,7 @@ class ErrorRecord:
     severity: str
     timestamp: str
     traceback: str
-    context: Dict
+    context: dict
     retry_count: int = 0
     resolved: bool = False
 
@@ -278,7 +279,7 @@ class RecoveryStrategy:
 
     name: str
     priority: int  # 1 = 最高
-    apply: Callable[["ErrorContext"], bool]
+    apply: Callable[[ErrorContext], bool]
     description: str = ""
 
 @dataclass
@@ -292,9 +293,9 @@ class ErrorContext:
     component: str
     timestamp: str
     retry_count: int
-    history: List[ErrorRecord]
+    history: list[ErrorRecord]
 
-class SelfHealingEngine(object):
+class SelfHealingEngine:
     """
     自我修复引擎
 
@@ -313,7 +314,7 @@ class SelfHealingEngine(object):
         self.critical_errors = 0
 
         # 熔断器状态
-        self.circuit_breakers: Dict[str, Dict] = {}
+        self.circuit_breakers: dict[str, dict] = {}
         self.default_circuit_config = {
             "failure_threshold": 5,  # 失败次数阈值
             "recovery_timeout": 60,  # 恢复超时(秒)
@@ -321,16 +322,16 @@ class SelfHealingEngine(object):
         }
 
         # 恢复策略
-        self.recovery_strategies: List[RecoveryStrategy] = []
+        self.recovery_strategies: list[RecoveryStrategy] = []
         self._register_default_strategies()
 
         # 健康检查
-        self.health_checks: Dict[str, Callable[[], bool]] = {}
+        self.health_checks: dict[str, Callable[[], bool]] = {}
         self.last_health_check = None
         self.health_score = 100.0
 
         # 组件状态
-        self.component_status: Dict[str, str] = {}
+        self.component_status: dict[str, str] = {}
 
         # 记忆引擎（缺口4修复：接入长期记忆，复用历史修复经验）
         self._memory = None
@@ -394,7 +395,7 @@ class SelfHealingEngine(object):
         else:
             return ErrorSeverity.LOW
 
-    def record_error(self, error: Exception, component: str = "unknown", context: Dict = None) -> ErrorRecord:
+    def record_error(self, error: Exception, component: str = "unknown", context: dict = None) -> ErrorRecord:
         """记录错误"""
         import uuid
 
@@ -432,7 +433,7 @@ class SelfHealingEngine(object):
 
         return record
 
-    def try_recover(self, error: Exception, component: str, context: Dict = None) -> bool:
+    def try_recover(self, error: Exception, component: str, context: dict = None) -> bool:
         """尝试恢复"""
         error_type = type(error).__name__
         severity = self._classify_error(error)
@@ -513,7 +514,7 @@ class SelfHealingEngine(object):
 
     # ==================== 熔断器 ====================
 
-    def _get_circuit_config(self, component: str) -> Dict:
+    def _get_circuit_config(self, component: str) -> dict:
         """获取熔断器配置"""
         return self.circuit_breakers.get(component, self.default_circuit_config.copy())
 
@@ -579,7 +580,7 @@ class SelfHealingEngine(object):
         self.health_checks[component] = check_func
         logger.info(f"[SelfHealing] 注册健康检查: {component}")
 
-    def check_health(self) -> Dict:
+    def check_health(self) -> dict:
         """执行健康检查"""
         results = {}
         healthy_count = 0
@@ -645,7 +646,7 @@ class SelfHealingEngine(object):
 
     # ==================== 统计和报告 ====================
 
-    def get_error_stats(self) -> Dict:
+    def get_error_stats(self) -> dict:
         """获取错误统计"""
         return {
             "total_errors": self.error_count,
@@ -665,7 +666,7 @@ class SelfHealingEngine(object):
             },
         }
 
-    def get_status_report(self) -> Dict:
+    def get_status_report(self) -> dict:
         """获取状态报告"""
         return {
             "health": self.check_health(),

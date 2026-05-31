@@ -135,7 +135,7 @@ class CronParser:
     }
 
     @staticmethod
-    def parse_field(expr: str, min_val: int, max_val: int, names: dict = None) -> List[int]:
+    def parse_field(expr: str, min_val: int, max_val: int, names: dict = None) -> list[int]:
         """解析单个Cron字段 → 值列表"""
         expr = expr.strip().lower()
         if names:
@@ -166,7 +166,7 @@ class CronParser:
         return sorted(result)
 
     @classmethod
-    def parse(cls, expr: str) -> Tuple[List[int], List[int], List[int], List[int], List[int]]:
+    def parse(cls, expr: str) -> tuple[list[int], list[int], list[int], list[int], list[int]]:
         """解析5字段Cron → (分钟, 小时, 日, 月, 周)"""
         fields = expr.strip().split()
         if len(fields) != 5:
@@ -181,7 +181,7 @@ class CronParser:
         return minutes, hours, days, months, weekdays
 
     @classmethod
-    def next_run(cls, expr: str, after: Optional[datetime] = None) -> Optional[datetime]:
+    def next_run(cls, expr: str, after: datetime | None = None) -> datetime | None:
         """计算下一次执行时间"""
         try:
             minutes, hours, days, months, weekdays = cls.parse(expr)
@@ -213,7 +213,7 @@ class CronParser:
         return None
 
     @classmethod
-    def get_calendar(cls, expr: str, count: int = 10, after: Optional[datetime] = None) -> List[str]:
+    def get_calendar(cls, expr: str, count: int = 10, after: datetime | None = None) -> list[str]:
         """获取未来N次执行时间"""
         times = []
         dt = after or datetime.now()
@@ -351,7 +351,7 @@ class ScheduleStore:
             conn.close()
         return task
 
-    def get_task(self, task_id: str) -> Optional[ScheduledTask]:
+    def get_task(self, task_id: str) -> ScheduledTask | None:
         conn = self._get_conn()
         try:
             row = conn.execute("SELECT * FROM scheduled_tasks WHERE id=?", (task_id,)).fetchone()
@@ -359,7 +359,7 @@ class ScheduleStore:
         finally:
             conn.close()
 
-    def list_tasks(self, status: Optional[str] = None, limit: int = 100, offset: int = 0) -> List[ScheduledTask]:
+    def list_tasks(self, status: str | None = None, limit: int = 100, offset: int = 0) -> list[ScheduledTask]:
         conn = self._get_conn()
         try:
             if status:
@@ -426,7 +426,7 @@ class ScheduleStore:
         finally:
             conn.close()
 
-    def list_executions(self, task_id: Optional[str] = None, limit: int = 50) -> List[dict]:
+    def list_executions(self, task_id: str | None = None, limit: int = 50) -> list[dict]:
         conn = self._get_conn()
         try:
             if task_id:
@@ -474,10 +474,10 @@ class SchedulerEngine:
     def __init__(self, data_dir: str = ".evo_data/scheduler") -> None:
         self._store = ScheduleStore(data_dir)
         self._running = False
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
-        self._task: Optional[asyncio.Task] = None
-        self._active_executions: Dict[str, datetime] = {}  # task_id → start_time (并发控制)
-        self._callbacks: List[callable] = []  # 执行回调
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._task: asyncio.Task | None = None
+        self._active_executions: dict[str, datetime] = {}  # task_id → start_time (并发控制)
+        self._callbacks: list[callable] = []  # 执行回调
         logger.info("[Scheduler] 引擎初始化")
 
     @property
@@ -573,7 +573,7 @@ class SchedulerEngine:
                 self._dispatch_target(task), timeout=task.timeout_seconds
             )
             exec_.status = "success"
-        except asyncio.TimeoutError:
+        except TimeoutError:
             exec_.status = "timeout"
             error_msg = f"执行超时 ({task.timeout_seconds}s)"
         except Exception as e:
@@ -626,7 +626,7 @@ class SchedulerEngine:
             )
             exec_.status = "success"
             exec_.result = result if isinstance(result, dict) else {"data": str(result)[:1000]}
-        except asyncio.TimeoutError:
+        except TimeoutError:
             exec_.status = "timeout"
             exec_.error = f"执行超时 ({task.timeout_seconds}s)"
         except Exception as e:
@@ -796,7 +796,7 @@ class SchedulerEngine:
         self._update_next_run(task)
         return task
 
-    def update_task(self, task_id: str, **kwargs) -> Optional[ScheduledTask]:
+    def update_task(self, task_id: str, **kwargs) -> ScheduledTask | None:
         """更新调度任务"""
         fields = {}
         allowed = ['name', 'description', 'schedule_type', 'cron_expr', 'interval_seconds',
@@ -822,7 +822,7 @@ class SchedulerEngine:
         """删除调度任务"""
         return self._store.delete_task(task_id)
 
-    def toggle_task(self, task_id: str) -> Optional[ScheduledTask]:
+    def toggle_task(self, task_id: str) -> ScheduledTask | None:
         """启用/禁用任务"""
         task = self._store.get_task(task_id)
         if not task:
@@ -839,7 +839,7 @@ class SchedulerEngine:
         await self._execute_task(task)
         return {"success": True, "task_id": task_id, "task_name": task.name}
 
-    def get_upcoming_runs(self, task: ScheduledTask, n: int = 10) -> List[str]:
+    def get_upcoming_runs(self, task: ScheduledTask, n: int = 10) -> list[str]:
         """获取未来N次执行时间"""
         runs = []
         if task.schedule_type == "cron" and task.cron_expr:
@@ -874,7 +874,7 @@ class SchedulerEngine:
     # ─── 预置模板 ───
 
     @staticmethod
-    def get_templates() -> List[dict]:
+    def get_templates() -> list[dict]:
         """预置调度模板"""
         return [
             {"name": "每日安全扫描", "schedule_type": "cron", "cron_expr": "0 8 * * *",
@@ -899,7 +899,7 @@ class SchedulerEngine:
 # 全局单例
 # ═══════════════════════════════════════════════════════════
 
-_scheduler_engine: Optional[SchedulerEngine] = None
+_scheduler_engine: SchedulerEngine | None = None
 
 def get_scheduler_engine() -> SchedulerEngine:
     global _scheduler_engine

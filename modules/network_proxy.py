@@ -83,13 +83,14 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class NetworkProxyAnalyzer(object):
+class NetworkProxyAnalyzer:
     """network_proxy 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -303,7 +304,7 @@ class UpstreamServer:
     health_check_path: str = "/health"
     health_check_interval: float = 30.0
     last_health_check: float = 0.0
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def url(self) -> str:
@@ -313,12 +314,12 @@ class UpstreamServer:
 class RouteRule:
     rule_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     path_pattern: str = "/*"
-    methods: List[str] = field(default_factory=lambda: ["GET", "POST", "PUT", "DELETE"])
-    headers_match: Dict[str, str] = field(default_factory=dict)
+    methods: list[str] = field(default_factory=lambda: ["GET", "POST", "PUT", "DELETE"])
+    headers_match: dict[str, str] = field(default_factory=dict)
     upstream_group: str = ""
     strip_prefix: str = ""
-    add_headers: Dict[str, str] = field(default_factory=dict)
-    remove_headers: List[str] = field(default_factory=list)
+    add_headers: dict[str, str] = field(default_factory=dict)
+    remove_headers: list[str] = field(default_factory=list)
     rewrite_path: str = ""
     timeout_ms: int = 30000
     retry_count: int = 0
@@ -335,8 +336,8 @@ class RateLimitRule:
     requests_per_second: float = 100.0
     burst: int = 200
     key_type: str = "ip"
-    whitelist: List[str] = field(default_factory=list)
-    blacklist: List[str] = field(default_factory=list)
+    whitelist: list[str] = field(default_factory=list)
+    blacklist: list[str] = field(default_factory=list)
     response_code: int = 429
 
 @dataclass
@@ -344,8 +345,8 @@ class ProxyRequest:
     request_id: str = field(default_factory=lambda: uuid.uuid4().hex[:14])
     method: str = "GET"
     path: str = "/"
-    headers: Dict[str, str] = field(default_factory=dict)
-    query_params: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
+    query_params: dict[str, str] = field(default_factory=dict)
     body: str = ""
     client_ip: str = "127.0.0.1"
     protocol: str = "http"
@@ -355,7 +356,7 @@ class ProxyRequest:
 class ProxyResponse:
     request_id: str = ""
     status_code: int = 200
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     body: str = ""
     upstream_server: str = ""
     latency_ms: float = 0.0
@@ -430,7 +431,7 @@ class NetworkProxy:
 
     """Enterprise network proxy with load balancing, caching, and SSL termination."""
 
-    def __init__(self, config: Optional[ProxyConfig] = None):
+    def __init__(self, config: ProxyConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -463,16 +464,16 @@ class NetworkProxy:
         )()
 
         self._config = config or ProxyConfig()
-        self._upstream_groups: Dict[str, List[UpstreamServer]] = defaultdict(list)
-        self._routes: List[RouteRule] = []
-        self._rate_limits: Dict[str, RateLimitRule] = {}
-        self._rate_counters: Dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
-        self._cache: Dict[str, CacheEntry] = {}
-        self._connection_pools: Dict[str, ConnectionPool] = {}
+        self._upstream_groups: dict[str, list[UpstreamServer]] = defaultdict(list)
+        self._routes: list[RouteRule] = []
+        self._rate_limits: dict[str, RateLimitRule] = {}
+        self._rate_counters: dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
+        self._cache: dict[str, CacheEntry] = {}
+        self._connection_pools: dict[str, ConnectionPool] = {}
         self._request_log: deque = deque(maxlen=10000)
-        self._lb_state: Dict[str, int] = {}
-        self._ip_connections: Dict[str, int] = defaultdict(int)
-        self._hooks: Dict[str, List[Callable]] = {
+        self._lb_state: dict[str, int] = {}
+        self._ip_connections: dict[str, int] = defaultdict(int)
+        self._hooks: dict[str, list[Callable]] = {
             "before_request": [],
             "after_response": [],
             "on_error": [],
@@ -598,7 +599,7 @@ class NetworkProxy:
                 pass
         return response
 
-    def _match_route(self, request: ProxyRequest) -> Optional[RouteRule]:
+    def _match_route(self, request: ProxyRequest) -> RouteRule | None:
         for route in self._routes:
             if request.method not in route.methods:
                 continue
@@ -613,7 +614,7 @@ class NetworkProxy:
             return path.startswith(pattern[:-1])
         return pattern == path
 
-    def _select_upstream(self, group: str, request: ProxyRequest) -> Optional[UpstreamServer]:
+    def _select_upstream(self, group: str, request: ProxyRequest) -> UpstreamServer | None:
         servers = self._upstream_groups.get(group, [])
         healthy = [s for s in servers if s.status == UpstreamStatus.HEALTHY]
         if not healthy:
@@ -627,7 +628,7 @@ class NetworkProxy:
         self._lb_state[group] = idx + 1
         return chosen
 
-    def _check_rate_limit(self, request: ProxyRequest) -> Tuple[bool, Optional[RateLimitRule]]:
+    def _check_rate_limit(self, request: ProxyRequest) -> tuple[bool, RateLimitRule | None]:
         with self._lock:
             client_key = request.client_ip
             for rule in self._rate_limits.values():
@@ -647,7 +648,7 @@ class NetworkProxy:
         raw = f"{request.method}:{request.path}:{hashlib.md5(str(sorted(request.headers.items())).encode()).hexdigest()[:8]}"
         return hashlib.md5(raw.encode()).hexdigest()[:16]
 
-    def _cache_get(self, key: str) -> Optional[CacheEntry]:
+    def _cache_get(self, key: str) -> CacheEntry | None:
         return self._cache.get(key)
 
     def _cache_set(self, key: str, response: ProxyResponse, ttl: int = 300):
@@ -656,7 +657,7 @@ class NetworkProxy:
             self._cache.pop(oldest_key, None)
         self._cache[key] = CacheEntry(key=key, response=response, ttl=ttl, size_bytes=len(response.body.encode()))
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         with self._lock:
             recent = [r for r in self._request_log if time.time() - r["timestamp"] < 60]
             avg_latency = (sum(r["latency_ms"] for r in recent) / len(recent)) if recent else 0
@@ -681,7 +682,7 @@ class NetworkProxy:
         if event in self._hooks:
             self._hooks[event].append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             stats = self.get_stats()

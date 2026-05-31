@@ -81,7 +81,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = logging.getLogger(__name__)
 
-class WindowsControlAnalyzer(object):
+class WindowsControlAnalyzer:
     """windows_control 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -252,14 +252,14 @@ class WindowInfo:
     title: str
     class_name: str
     process_id: int
-    rect: Tuple[int, int, int, int]
+    rect: tuple[int, int, int, int]
 
 @dataclass
 class ControlInfo:
     control_type: str
     class_name: str
     text: str
-    rect: Tuple[int, int, int, int]
+    rect: tuple[int, int, int, int]
     handle: int
     automation_id: str = ""
     name: str = ""
@@ -269,7 +269,7 @@ class ActionResult:
     success: bool
     message: str
     data: Any = None
-    screenshot_path: Optional[str] = None
+    screenshot_path: str | None = None
 
 class WindowsControl:
     """Windows原生控件操作引擎"""
@@ -297,7 +297,7 @@ class WindowsControl:
 
     # ── 窗口操作 ──
 
-    def list_windows(self, title_contains: str = "") -> List[WindowInfo]:
+    def list_windows(self, title_contains: str = "") -> list[WindowInfo]:
         """列出所有窗口"""
         if not self._available:
             return []
@@ -326,7 +326,7 @@ class WindowsControl:
             logger.error(f"list_windows: {e}")
             return []
 
-    def find_window(self, title: str, exact: bool = False) -> Optional[WindowInfo]:
+    def find_window(self, title: str, exact: bool = False) -> WindowInfo | None:
         """查找窗口"""
         wins = self.list_windows()
         for w in wins:
@@ -358,7 +358,7 @@ class WindowsControl:
 
     # ── 控件操作 ──
 
-    def get_controls(self) -> List[ControlInfo]:
+    def get_controls(self) -> list[ControlInfo]:
         """获取当前窗口的所有控件"""
         if not self._window:
             return []
@@ -385,7 +385,7 @@ class WindowsControl:
             logger.error(f"get_controls: {e}")
         return controls
 
-    def find_control(self, text: str = "", control_type: str = "", automation_id: str = "") -> Optional[ControlInfo]:
+    def find_control(self, text: str = "", control_type: str = "", automation_id: str = "") -> ControlInfo | None:
         """按条件查找控件"""
         controls = self.get_controls()
         for c in controls:
@@ -551,7 +551,7 @@ class WindowsControl:
     # ── 快速静态方法 ──
 
     @staticmethod
-    def quick_list_windows() -> List[str]:
+    def quick_list_windows() -> list[str]:
         """快速列出窗口标题列表"""
         wc = WindowsControl()
         return [f"[{w.handle}] {w.title}" for w in wc.list_windows()]

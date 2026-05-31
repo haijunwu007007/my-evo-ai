@@ -100,24 +100,24 @@ class ExpirationScheduler:
     """
 
     def __init__(self, default_ttl_seconds: int = 3600):
-        self._heap: List[Tuple[float, str]] = []  # (expire_timestamp, key)
-        self._entries: Dict[str, Dict] = {}  # key -> metadata
+        self._heap: list[tuple[float, str]] = []  # (expire_timestamp, key)
+        self._entries: dict[str, dict] = {}  # key -> metadata
         self._default_ttl = default_ttl_seconds
         self._total_set = 0
         self._total_expired = 0
         self._total_extended = 0
         self._total_deleted = 0
-        self._expired_callbacks: Dict[str, str] = {}  # key -> callback_action
+        self._expired_callbacks: dict[str, str] = {}  # key -> callback_action
 
     def set(
         self,
         key: str,
         value: Any,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
         policy: str = "fixed",
-        tags: Optional[List[str]] = None,
-        on_expire: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        tags: list[str] | None = None,
+        on_expire: str | None = None,
+    ) -> dict[str, Any]:
         """设置带TTL的Key。企业场景：设置验证码5分钟过期、缓存30分钟过期。
         支持fixed（固定到期）和sliding（滑动续期）两种策略。
         """
@@ -160,7 +160,7 @@ class ExpirationScheduler:
 
         return {"key": key, "ttl_seconds": ttl_seconds, "expire_at": expire_at, "policy": policy}
 
-    def get(self, key: str) -> Optional[Dict]:
+    def get(self, key: str) -> dict | None:
         """获取Key，同时检查是否过期。企业场景：读取Session时自动检查超时。
         支持sliding策略自动续期。
         """
@@ -179,7 +179,7 @@ class ExpirationScheduler:
             self._total_extended += 1
         return entry
 
-    def check_expired(self, key: str) -> Dict[str, Any]:
+    def check_expired(self, key: str) -> dict[str, Any]:
         """检查单个Key是否过期。企业场景：前端轮询验证码是否还有效。"""
         entry = self._entries.get(key)
         if not entry:
@@ -203,7 +203,7 @@ class ExpirationScheduler:
             "progress_pct": round((entry["ttl"] - remaining) / entry["ttl"] * 100, 1),
         }
 
-    def extend(self, key: str, additional_seconds: Optional[int] = None) -> Dict[str, Any]:
+    def extend(self, key: str, additional_seconds: int | None = None) -> dict[str, Any]:
         """延长Key的TTL。企业场景：用户活跃时续期Session，避免频繁重新登录。"""
         entry = self._entries.get(key)
         if not entry:
@@ -226,7 +226,7 @@ class ExpirationScheduler:
             "total_extensions": entry["extend_count"],
         }
 
-    def scan_and_expire(self, batch_size: int = 1000) -> Dict[str, Any]:
+    def scan_and_expire(self, batch_size: int = 1000) -> dict[str, Any]:
         """主动扫描过期Key并清理。企业场景：定时任务每分钟扫描一次，
         批量清理过期缓存Key释放内存。
         """
@@ -255,7 +255,7 @@ class ExpirationScheduler:
             "heap_size": len(self._heap),
         }
 
-    def delete(self, key: str) -> Dict[str, Any]:
+    def delete(self, key: str) -> dict[str, Any]:
         """主动删除Key。企业场景：用户退出登录时清除Session。"""
         entry = self._entries.pop(key, None)
         if not entry:
@@ -269,7 +269,7 @@ class ExpirationScheduler:
             "existed_seconds": round(time.time() - entry["created_at"], 1),
         }
 
-    def get_by_tag(self, tag: str) -> List[Dict]:
+    def get_by_tag(self, tag: str) -> list[dict]:
         """按标签查询Key。企业场景：查询所有user_session标签的Key用于批量清理。"""
         now = time.time()
         results = []
@@ -288,7 +288,7 @@ class ExpirationScheduler:
         results.sort(key=lambda x: x["remaining_seconds"])
         return results
 
-    def get_expiring_soon(self, seconds: int = 300, limit: int = 50) -> List[Dict]:
+    def get_expiring_soon(self, seconds: int = 300, limit: int = 50) -> list[dict]:
         """获取即将过期的Key。企业场景：发送即将过期提醒（如证书续期、会员到期）。"""
         now = time.time()
         results = []
@@ -306,7 +306,7 @@ class ExpirationScheduler:
         results.sort(key=lambda x: x["remaining_seconds"])
         return results[:limit]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取TTL统计。企业场景：监控面板展示Key数量、过期速率、命中率。"""
         now = time.time()
         policy_counts = {}
@@ -338,24 +338,24 @@ class TtlManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     7. 生命周期统计与分析
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger("ttl_manager")
         self._scheduler = ExpirationScheduler(default_ttl_seconds=self.config.get("default_ttl", 3600))
-        self._namespaces: Dict[str, ExpirationScheduler] = {}
+        self._namespaces: dict[str, ExpirationScheduler] = {}
 
     def initialize(self) -> dict:
         try:
@@ -516,7 +516,7 @@ class TtlManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_ttl_distribution(self, namespace: Optional[str] = None) -> Dict[str, Any]:
+    def get_ttl_distribution(self, namespace: str | None = None) -> dict[str, Any]:
         """TTL分布统计。企业场景：分析Key的过期时间分布，
         发现大量短命Key（可能是缓存穿透攻击）或过长TTL（内存浪费）。
         """

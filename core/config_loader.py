@@ -22,15 +22,15 @@ def _find_config_dir() -> Path:
     return Path(__file__).resolve().parent.parent / "config"
 
 
-def _load_yaml(path: Path) -> Dict[str, Any]:
+def _load_yaml(path: Path) -> dict[str, Any]:
     """加载单个 YAML 文件，文件不存在时返回空字典"""
     if not path.exists():
         return {}
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
-def _deep_merge(base: Dict, override: Dict) -> Dict:
+def _deep_merge(base: dict, override: dict) -> dict:
     """深度合并字典（override 覆盖 base）"""
     result = dict(base)
     for key, val in override.items():
@@ -41,13 +41,13 @@ def _deep_merge(base: Dict, override: Dict) -> Dict:
     return result
 
 
-def _env_overrides() -> Dict[str, Any]:
+def _env_overrides() -> dict[str, Any]:
     """将 EVO_ 前缀的环境变量转为嵌套字典
 
     例: EVO_SERVER_PORT=9000 → {"server": {"port": 9000}}
         EVO_SECURITY_RATE_LIMIT_MAX_REQUESTS=5000 → {"security": {"rate_limit": {"max_requests": 5000}}}
     """
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     prefix = "EVO_"
     for key, val in os.environ.items():
         if not key.startswith(prefix):
@@ -78,7 +78,7 @@ def _env_overrides() -> Dict[str, Any]:
     return result
 
 
-def load_config(env: str | None = None) -> Dict[str, Any]:
+def load_config(env: str | None = None) -> dict[str, Any]:
     """加载完整配置链
 
     Args:
@@ -105,7 +105,7 @@ def load_config(env: str | None = None) -> Dict[str, Any]:
     return config
 
 
-def get_config_value(config: Dict[str, Any], key: str, default: Any = None) -> Any:
+def get_config_value(config: dict[str, Any], key: str, default: Any = None) -> Any:
     """点分键取值，例如 get_config_value(cfg, 'server.port', 8765)"""
     parts = key.split(".")
     target = config

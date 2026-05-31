@@ -85,7 +85,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class IndexAdvisorAnalyzer(object):
+class IndexAdvisorAnalyzer:
     """index_advisor 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -733,7 +733,7 @@ class IndexAdvisor:
         t1_clean = t1.rstrip("s")
         return f"{t1_clean}_id"
 
-    def get_table_stats(self, table: str) -> Optional[dict]:
+    def get_table_stats(self, table: str) -> dict | None:
         return self._table_stats.get(table)
 
     def get_existing_indexes(self, table: str) -> list[dict]:

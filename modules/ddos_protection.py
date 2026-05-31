@@ -85,19 +85,19 @@ from modules._base.mixins import CircuitBreakerMixin, RateLimiterMixin
 
 logger = get_logger("ddos_protection")
 
-class TrafficAnalyzer(object):
+class TrafficAnalyzer:
     """流量分析引擎"""
 
     def __init__(self, window_seconds: int = 60, max_track: int = 10000):
         self.window_seconds = window_seconds
         self.max_track = max_track
-        self._ip_requests: Dict[str, deque] = {}
+        self._ip_requests: dict[str, deque] = {}
         self._global_window: deque = deque(maxlen=100000)
-        self._protocol_stats: Dict[str, int] = defaultdict(int)
-        self._path_stats: Dict[str, int] = defaultdict(int)
-        self._baseline: Dict[str, float] = {}
+        self._protocol_stats: dict[str, int] = defaultdict(int)
+        self._path_stats: dict[str, int] = defaultdict(int)
+        self._baseline: dict[str, float] = {}
 
-    def record(self, ip: str, path: str = "/", method: str = "GET", protocol: str = "HTTP/1.1", size: int = 0) -> Dict:
+    def record(self, ip: str, path: str = "/", method: str = "GET", protocol: str = "HTTP/1.1", size: int = 0) -> dict:
         ts = time.time()
         entry = {"ip": ip, "path": path, "method": method, "protocol": protocol, "size": size, "ts": ts}
         self._global_window.append(entry)
@@ -123,7 +123,7 @@ class TrafficAnalyzer(object):
         active = sum(1 for t in q if t > cutoff)
         return active / self.window_seconds
 
-    def get_global_rate(self) -> Dict:
+    def get_global_rate(self) -> dict:
         now = time.time()
         cutoff = now - self.window_seconds
         recent = sum(1 for e in self._global_window if e.get("ts", 0) > cutoff)
@@ -184,19 +184,19 @@ class TrafficAnalyzer(object):
 class RateLimiter:
     """多维度速率限制器"""
 
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: dict = None):
         config = config or {}
         self._limits = {
             "global": config.get("global_rps", 1000),
             "per_ip": config.get("per_ip_rps", 30),
             "per_path": config.get("per_path_rps", 100),
         }
-        self._ip_counters: Dict[str, deque] = {}
-        self._path_counters: Dict[str, deque] = {}
+        self._ip_counters: dict[str, deque] = {}
+        self._path_counters: dict[str, deque] = {}
         self._global_counter: deque = deque(maxlen=100000)
-        self._blocked: Dict[str, Dict] = {}
+        self._blocked: dict[str, dict] = {}
 
-    def check(self, ip: str, path: str = "/") -> Dict:
+    def check(self, ip: str, path: str = "/") -> dict:
         now = time.time()
         for key, limit in self._limits.items():
             if key == "global":
@@ -236,16 +236,16 @@ class RateLimiter:
             return False
         return True
 
-class IPRputationEngine(object):
+class IPRputationEngine:
     """IP信誉评估引擎"""
 
     def __init__(self):
-        self._scores: Dict[str, Dict] = {}
-        self._blacklists: List[str] = []
+        self._scores: dict[str, dict] = {}
+        self._blacklists: list[str] = []
 
     def score_ip(
         self, ip: str, request_rate: float = 0, error_rate: float = 0, bot_score: float = 0, geographic_risk: float = 0
-    ) -> Dict:
+    ) -> dict:
         score = 100.0
         if request_rate > 20:
             score -= min(40, (request_rate - 20) * 0.5)
@@ -264,19 +264,19 @@ class IPRputationEngine(object):
         }
         return {"ip": ip, "score": round(score, 1), "risk": "high" if score < 30 else "medium" if score < 60 else "low"}
 
-    def get_reputation(self, ip: str) -> Dict:
+    def get_reputation(self, ip: str) -> dict:
         return self._scores.get(ip, {"ip": ip, "score": 100, "risk": "unknown"})
 
 class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """DDoS防护 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__(config=config)
         self.metrics_collector = self._NoopMetricsCollector()
 
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "requests_analyzed": 0,
@@ -286,14 +286,14 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 
         self.traffic = TrafficAnalyzer(window_seconds=self.config.get("window_seconds", 60))
         self.limiter = RateLimiter(config)
         self.reputation = IPRputationEngine()
-        self._attack_log: List[Dict] = []
+        self._attack_log: list[dict] = []
         self._whitelist: set = set(self.config.get("whitelist", []))
 
     def initialize(self) -> dict:
@@ -397,7 +397,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 return {"success": False, "error": str(e)}
         return {"success": False, "error": f"Unknown action: {action}"}
 
-    def get_blocked_ip_summary(self) -> Dict[str, Any]:
+    def get_blocked_ip_summary(self) -> dict[str, Any]:
         """已封禁IP摘要。企业场景：安全运营中心看板展示当前所有封禁IP列表，
         按封禁原因分类统计。
         """
@@ -426,7 +426,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "recent_blocks": sorted(active_blocks, key=lambda x: x["expires_in_s"])[:20],
         }
 
-    def get_traffic_anomaly_report(self, hours: int = 1) -> Dict[str, Any]:
+    def get_traffic_anomaly_report(self, hours: int = 1) -> dict[str, Any]:
         """流量异常报告。企业场景：SOC分析师每小时审查流量异常事件，
         判断是否为DDoS攻击或误报，决定是否需要升级响应。
         """
@@ -450,7 +450,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "ips_blocked_total": self._metrics.get("ips_blocked", 0),
         }
 
-    def get_blocked_ips(self, reason: Optional[str] = None, limit: int = 50) -> Dict[str, Any]:
+    def get_blocked_ips(self, reason: str | None = None, limit: int = 50) -> dict[str, Any]:
         """查看被封禁IP列表。企业场景：安全团队审查被自动封禁的IP，
         识别误封并手动解封，或导出给防火墙同步。
         """
@@ -483,7 +483,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "ips": results,
         }
 
-    def unblock_ip(self, ip: str) -> Dict[str, Any]:
+    def unblock_ip(self, ip: str) -> dict[str, Any]:
         """手动解封IP。企业场景：安全团队确认误封后手动解封，
         解封操作记录审计日志。
         """
@@ -498,7 +498,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "original_reason": info.get("reason", "unknown"),
         }
 
-    def get_traffic_baseline(self, hours: int = 168) -> Dict[str, Any]:
+    def get_traffic_baseline(self, hours: int = 168) -> dict[str, Any]:
         """流量基线分析。企业场景：根据最近7天历史流量计算正常基线，
         用于区分正常流量波动和真正的DDoS攻击，减少误报。
         """
@@ -528,7 +528,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "peak_rps": peak_hour.get("rps", 0),
         }
 
-    def get_attack_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_attack_summary(self, hours: int = 24) -> dict[str, Any]:
         """攻击摘要。企业场景：安全团队每日查看DDoS攻击统计，
         按类型/来源/持续时间分类，评估防护效果。
         """
@@ -556,7 +556,7 @@ class DDoSProtection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "latest_attack": recent[-1] if recent else None,
         }
 
-    def get_protected_endpoints(self) -> Dict[str, Any]:
+    def get_protected_endpoints(self) -> dict[str, Any]:
         """查看受保护端点列表。企业场景：安全团队审计哪些API端点
         已开启DDoS防护，哪些还未保护。
         """

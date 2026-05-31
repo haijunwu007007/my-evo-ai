@@ -149,17 +149,17 @@ class CachedItem:
     content_type: str = ""
     status: str = "active"
     hits: int = 0
-    last_hit: Optional[datetime] = None
+    last_hit: datetime | None = None
 
 @dataclass
 class InvalidationTask:
     task_id: str = field(default_factory=lambda: f"inv_{uuid.uuid4().hex[:8]}")
-    urls: List[str] = field(default_factory=list)
-    patterns: List[str] = field(default_factory=list)
+    urls: list[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
     status: InvalidationStatus = InvalidationStatus.PENDING
     provider: CDNProvider = CDNProvider.CUSTOM
     created_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
     affected_items: int = 0
     failed_items: int = 0
     error_message: str = ""
@@ -174,18 +174,18 @@ class HitRateSample:
     misses: int
     bandwidth_bytes: int = 0
 
-class InvalidationBatchProcessor(object):
+class InvalidationBatchProcessor:
     """缓存失效批处理器 - 批量URL失效、进度追踪、部分失败处理"""
 
     def __init__(self):
-        self._batches: Dict[str, List[str]] = {}
-        self._batch_status: Dict[str, str] = {}
+        self._batches: dict[str, list[str]] = {}
+        self._batch_status: dict[str, str] = {}
 
-    def create_batch(self, batch_id: str, urls: List[str]) -> None:
+    def create_batch(self, batch_id: str, urls: list[str]) -> None:
         self._batches[batch_id] = urls
         self._batch_status[batch_id] = "pending"
 
-    def process_batch(self, batch_id: str, invalidate_fn: callable) -> Dict:
+    def process_batch(self, batch_id: str, invalidate_fn: callable) -> dict:
         if batch_id not in self._batches:
             return {"error": "batch not found"}
         urls = self._batches[batch_id]
@@ -201,7 +201,7 @@ class InvalidationBatchProcessor(object):
         self._batch_status[batch_id] = "completed"
         return {"batch_id": batch_id, "total": len(urls), "succeeded": succeeded, "failed": failed}
 
-    def get_batch_status(self, batch_id: str) -> Dict:
+    def get_batch_status(self, batch_id: str) -> dict:
         return {
             "batch_id": batch_id,
             "status": self._batch_status.get(batch_id, "unknown"),
@@ -220,13 +220,13 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self.module_name = "cdn_invalidate"
         self.module_id = self.module_name
         self.module_version = "7.0.0"
-        self._cache: Dict[str, CachedItem] = {}
-        self._tasks: Dict[str, InvalidationTask] = {}
-        self._hit_history: Dict[CDNProvider, List[HitRateSample]] = defaultdict(list)
+        self._cache: dict[str, CachedItem] = {}
+        self._tasks: dict[str, InvalidationTask] = {}
+        self._hit_history: dict[CDNProvider, list[HitRateSample]] = defaultdict(list)
         self._audit = AuditLogger()
         self._total_invalidations = 0
         self._total_urls_invalidated = 0
-        self._providers: Dict[str, CDNProvider] = {
+        self._providers: dict[str, CDNProvider] = {
             "cf-us": CDNProvider.CLOUDFLARE,
             "ak-global": CDNProvider.AKAMAI,
             "aws-cf": CDNProvider.AWS_CLOUDFRONT,
@@ -275,7 +275,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             misses = requests - hits
             self._hit_history[provider].append(HitRateSample(provider, now, requests, hits, misses, hits * 15000))
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("cdn_invalidate_ops_total", labels={"action": operation})
         self.audit("execute", f"operation={operation}")
@@ -318,7 +318,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 ],
             }
 
-    def _invalidate(self, p: Dict) -> Dict:
+    def _invalidate(self, p: dict) -> dict:
         url = p.get("url", "")
         provider_name = p.get("provider", "")
 
@@ -357,7 +357,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _invalidate_pattern(self, p: Dict) -> Dict:
+    def _invalidate_pattern(self, p: dict) -> dict:
         pattern = p.get("pattern", "")
         provider_name = p.get("provider", "")
 
@@ -397,7 +397,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _batch_invalidate(self, p: Dict) -> Dict:
+    def _batch_invalidate(self, p: dict) -> dict:
         urls = p.get("urls", [])
         patterns = p.get("patterns", [])
 
@@ -432,7 +432,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _get_task(self, p: Dict) -> Dict:
+    def _get_task(self, p: dict) -> dict:
         task_id = p.get("task_id")
         if not task_id or task_id not in self._tasks:
             return {"success": False, "error": "task not found"}
@@ -452,7 +452,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _list_tasks(self, p: Dict) -> Dict:
+    def _list_tasks(self, p: dict) -> dict:
         limit = p.get("limit", 20)
         status_filter = p.get("status")
         tasks = list(self._tasks.values())
@@ -478,7 +478,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "total": len(tasks),
         }
 
-    def _cache_status(self, p: Dict) -> Dict:
+    def _cache_status(self, p: dict) -> dict:
         url = p.get("url", "")
         if not url:
             return {"success": False, "error": "missing url"}
@@ -502,7 +502,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             )
         return {"success": True, "result": {"url": url, "cached": True, "entries": result}}
 
-    def _hit_rate(self, p: Dict) -> Dict:
+    def _hit_rate(self, p: dict) -> dict:
         provider_name = p.get("provider", "")
 
         if provider_name:
@@ -536,7 +536,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _list_cached(self, p: Dict) -> Dict:
+    def _list_cached(self, p: dict) -> dict:
         provider_name = p.get("provider", "")
         content_type = p.get("content_type", "")
         limit = p.get("limit", 50)
@@ -572,7 +572,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "total": len(items),
         }
 
-    def _prefetch(self, p: Dict) -> Dict:
+    def _prefetch(self, p: dict) -> dict:
         urls = p.get("urls", [])
         if not urls:
             return {"success": False, "error": "missing urls"}
@@ -599,7 +599,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._audit.log("prefetch", {"urls": len(urls), "prefetched": prefetched})
         return {"success": True, "result": {"requested": len(urls), "prefetched": prefetched}}
 
-    def _purge_all(self, p: Dict) -> Dict:
+    def _purge_all(self, p: dict) -> dict:
         provider_name = p.get("provider", "")
         count_before = len(self._cache)
 
@@ -630,7 +630,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._initialized = False
         self._audit.log("shutdown", "cdn_invalidate shutdown")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -645,7 +645,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         )
         return result
 
-    def get_invalidation_history(self, limit: int = 50) -> List[Dict]:
+    def get_invalidation_history(self, limit: int = 50) -> list[dict]:
         """获取缓存失效历史记录"""
         history = []
         for task in self._tasks.values() if hasattr(self, "_tasks") else []:
@@ -662,7 +662,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 )
         return history[-limit:]
 
-    def get_hit_rate_summary(self) -> Dict:
+    def get_hit_rate_summary(self) -> dict:
         """获取CDN命中率摘要"""
         samples = self._hit_rate_samples if hasattr(self, "_hit_rate_samples") else []
         if not samples:
@@ -675,7 +675,7 @@ class CDNInvalidateManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "samples": len(rates),
         }
 
-    def get_invalidation_efficiency(self) -> Dict[str, Any]:
+    def get_invalidation_efficiency(self) -> dict[str, Any]:
         """计算缓存失效效率：平均传播延迟、失败率、节点覆盖率"""
         history = self._history if hasattr(self, "_history") else []
         if not history:

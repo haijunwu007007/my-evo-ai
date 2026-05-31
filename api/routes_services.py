@@ -266,7 +266,7 @@ async def generate_presentation(request: Request):
 
 
 @router.post("/api/docs/excel")
-async def generate_excel(tables: Dict = None):
+async def generate_excel(tables: dict = None):
     """生成Excel并下载"""
     gen = get_doc_generator()
     buf = gen.data_to_excel_bytes(tables or {})
@@ -275,7 +275,7 @@ async def generate_excel(tables: Dict = None):
 
 
 @router.post("/api/docs/word")
-async def generate_word(title: str = "文档", sections: List[Dict] = []):
+async def generate_word(title: str = "文档", sections: list[dict] = []):
     """生成Word并下载"""
     gen = get_doc_generator()
     buf = gen.data_to_word_bytes(title, sections)
@@ -621,7 +621,7 @@ async def browser_extract(what: str = "all"):
 
 
 @router.post("/api/browser/form/auto-fill")
-async def browser_auto_fill(form_index: int = 0, data: Dict = None):
+async def browser_auto_fill(form_index: int = 0, data: dict = None):
     """自动填写表单"""
     import base64 as _b64
     engine = await get_browser_engine()
@@ -637,7 +637,7 @@ async def browser_cookies():
 
 
 @router.post("/api/browser/cookies/set")
-async def browser_set_cookies(cookies: List[Dict] = None):
+async def browser_set_cookies(cookies: list[dict] = None):
     """设置Cookie"""
     engine = await get_browser_engine()
     return await engine.set_cookies(cookies or [])
@@ -652,7 +652,7 @@ async def browser_network_log():
 
 
 @router.post("/api/browser/task")
-async def browser_run_task(task: Dict):
+async def browser_run_task(task: dict):
     """执行自动化任务脚本"""
     from core.browser_engine import BrowserTask
     engine = await get_browser_engine()

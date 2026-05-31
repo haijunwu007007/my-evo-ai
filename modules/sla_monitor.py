@@ -139,12 +139,12 @@ class ManagedComponent:
     name: str
     state: LifecycleState = LifecycleState.INITIALIZING
     priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     health_check_interval: int = 30
     last_health_check: float = field(default_factory=time.time)
     failure_count: int = 0
     max_failures: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class SlaMonitor:
@@ -154,7 +154,7 @@ class SlaMonitor:
     name: str
     description: str = ""
     # 启动策略
-    startup_order: List[str] = field(default_factory=list)
+    startup_order: list[str] = field(default_factory=list)
     startup_timeout: int = 60
     startup_retry_count: int = 3
     # 健康检查策略
@@ -175,11 +175,11 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def __init__(self):
 
         super().__init__()
-        self._components: Dict[str, ManagedComponent] = {}
-        self._policies: Dict[str, SlaMonitor] = {}
+        self._components: dict[str, ManagedComponent] = {}
+        self._policies: dict[str, SlaMonitor] = {}
         self._state = LifecycleState.INITIALIZING
-        self._startup_time: Optional[float] = None
-        self._shutdown_start_time: Optional[float] = None
+        self._startup_time: float | None = None
+        self._shutdown_start_time: float | None = None
         self._audit = AuditLogger()
         self._metrics = metrics_collector
 
@@ -269,7 +269,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 component_id=comp_id, name=name, state=LifecycleState.INITIALIZING, priority=priority
             )
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """统一execute入口"""
         _ = self.trace("execute")
         metrics_collector.counter("sla_monitor_ops_total", labels={"action": action})
@@ -304,7 +304,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             return {"success": False, "error": str(e)}
 
     @trace_operation("lifecycle.health_check")
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         failed_components = []
         degraded_components = []
@@ -398,7 +398,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
     @trace_operation("lifecycle.register_component")
     def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: List[str] = None
+        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
     ) -> bool:
         """注册新组件"""
         try:
@@ -419,7 +419,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             return False
 
     @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> Optional[Dict[str, Any]]:
+    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
         """获取组件状态"""
         if component_id not in self._components:
             return None
@@ -436,7 +436,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     @trace_operation("lifecycle.list_components")
-    def list_components(self) -> List[Dict[str, Any]]:
+    def list_components(self) -> list[dict[str, Any]]:
         """列出所有组件"""
         return [
             {
@@ -448,7 +448,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for comp in self._components.values()
         ]
 
-    def get_policies(self) -> List[Dict[str, Any]]:
+    def get_policies(self) -> list[dict[str, Any]]:
         """获取所有策略"""
         return [
             {
@@ -461,7 +461,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for p in self._policies.values()
         ]
 
-    def compute_sla_compliance(self, hours: int = 24) -> Dict[str, Any]:
+    def compute_sla_compliance(self, hours: int = 24) -> dict[str, Any]:
         """计算SLA合规率：按策略统计可用性、违规次数、累计中断时长"""
         policies = self._policies if hasattr(self, "_policies") else {}
         incidents = self._incidents if hasattr(self, "_incidents") else []
@@ -490,7 +490,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             }
         return {"window_hours": hours, "policies": results}
 
-    def generate_breach_alert(self, policy_id: str) -> Dict[str, Any]:
+    def generate_breach_alert(self, policy_id: str) -> dict[str, Any]:
         """生成SLA违规告警：包含违规详情、影响评估、修复建议"""
         policies = self._policies if hasattr(self, "_policies") else {}
         policy = policies.get(policy_id)
@@ -539,14 +539,14 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "timestamp": time.time(),
         }
 
-    def analyze_incident_trends(self, days: int = 7) -> Dict[str, Any]:
+    def analyze_incident_trends(self, days: int = 7) -> dict[str, Any]:
         """分析SLA事件趋势：按日/按策略统计，识别恶化或改善趋势"""
         incidents = self._incidents if hasattr(self, "_incidents") else []
         cutoff = time.time() - days * 86400
         recent = [i for i in incidents if isinstance(i, dict) and i.get("timestamp", 0) >= cutoff]
         # 按日分组
-        daily_counts: Dict[str, int] = {}
-        daily_violations: Dict[str, int] = {}
+        daily_counts: dict[str, int] = {}
+        daily_violations: dict[str, int] = {}
         for inc in recent:
             ts = inc.get("timestamp", 0)
             day_key = time.strftime("%Y-%m-%d", time.localtime(ts))
@@ -554,7 +554,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             if inc.get("is_violation", False):
                 daily_violations[day_key] = daily_violations.get(day_key, 0) + 1
         # 按策略分组
-        policy_counts: Dict[str, int] = {}
+        policy_counts: dict[str, int] = {}
         for inc in recent:
             pid = inc.get("policy_id", "unknown")
             policy_counts[pid] = policy_counts.get(pid, 0) + 1
@@ -582,7 +582,7 @@ class SlaMonitorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "top_policy": max(policy_counts.items(), key=lambda x: x[1])[0] if policy_counts else None,
         }
 
-    def export_compliance_report(self, period_days: int = 30) -> Dict[str, Any]:
+    def export_compliance_report(self, period_days: int = 30) -> dict[str, Any]:
         """导出SLA合规报告：月度汇总、达标率、罚金风险估算"""
         compliance = self.compute_sla_compliance(hours=period_days * 24)
         policies = compliance.get("policies", {})

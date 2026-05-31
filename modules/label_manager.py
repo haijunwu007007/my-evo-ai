@@ -113,8 +113,8 @@ class Label:
     scope: ScopeType = ScopeType.GLOBAL
     description: str = ""
     color: str = "#3B82F6"
-    parent_key: Optional[str] = None
-    allowed_values: List[str] = field(default_factory=list)
+    parent_key: str | None = None
+    allowed_values: list[str] = field(default_factory=list)
     weight: float = 1.0
     searchable: bool = True
     required: bool = False
@@ -123,9 +123,9 @@ class Label:
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     version: int = 1
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "key": self.key,
             "value": self.value,
@@ -145,7 +145,7 @@ class Label:
             "version": self.version,
         }
 
-    def validate_value(self, value: Any) -> Tuple[bool, str]:
+    def validate_value(self, value: Any) -> tuple[bool, str]:
         if self.readonly:
             return False, f"Label '{self.key}' is read-only"
         if self.label_type == LabelType.NUMERIC:
@@ -171,7 +171,7 @@ class LabelGroup:
     group_id: str
     name: str
     description: str = ""
-    label_keys: List[str] = field(default_factory=list)
+    label_keys: list[str] = field(default_factory=list)
     color: str = "#6366F1"
     weight: float = 1.0
     created_at: float = field(default_factory=time.time)
@@ -182,13 +182,13 @@ class AuditEntry:
 
     action: str
     label_key: str
-    old_value: Optional[str]
-    new_value: Optional[str]
+    old_value: str | None
+    new_value: str | None
     actor: str
     timestamp: float = field(default_factory=time.time)
-    scope: Optional[str] = None
+    scope: str | None = None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "action": self.action,
             "label_key": self.label_key,
@@ -199,7 +199,7 @@ class AuditEntry:
             "scope": self.scope,
         }
 
-class LabelManagerAnalyzer(object):
+class LabelManagerAnalyzer:
     """label_manager 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -320,13 +320,13 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         self._max_labels = max_labels
         self._max_groups = max_groups
-        self._labels: Dict[str, Label] = {}
-        self._groups: Dict[str, LabelGroup] = {}
-        self._label_index: Dict[str, Set[str]] = defaultdict(set)  # value -> keys
-        self._scope_index: Dict[ScopeType, Set[str]] = defaultdict(set)
-        self._group_index: Dict[str, Set[str]] = defaultdict(set)
-        self._audit_log: List[AuditEntry] = []
-        self._auto_rules: List[Dict] = []
+        self._labels: dict[str, Label] = {}
+        self._groups: dict[str, LabelGroup] = {}
+        self._label_index: dict[str, set[str]] = defaultdict(set)  # value -> keys
+        self._scope_index: dict[ScopeType, set[str]] = defaultdict(set)
+        self._group_index: dict[str, set[str]] = defaultdict(set)
+        self._audit_log: list[AuditEntry] = []
+        self._auto_rules: list[dict] = []
         self._lock = threading.RLock()
         self._initialized = False
 
@@ -424,12 +424,12 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             for k in keys:
                 self._group_index[gid].add(k)
 
-    def get(self, key: str) -> Optional[Dict]:
+    def get(self, key: str) -> dict | None:
         with self._lock:
             label = self._labels.get(key)
             return label.to_dict() if label else None
 
-    def set(self, key: str, value: Any, actor: str = "system", scope: Optional[ScopeType] = None) -> Tuple[bool, str]:
+    def set(self, key: str, value: Any, actor: str = "system", scope: ScopeType | None = None) -> tuple[bool, str]:
         with self._lock:
             existing = self._labels.get(key)
             if existing:
@@ -484,8 +484,8 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return True
 
     def search(
-        self, pattern: str = "*", scope: Optional[ScopeType] = None, label_type: Optional[LabelType] = None
-    ) -> List[Dict]:
+        self, pattern: str = "*", scope: ScopeType | None = None, label_type: LabelType | None = None
+    ) -> list[dict]:
         import fnmatch
 
         with self._lock:
@@ -500,23 +500,23 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 results.append(label.to_dict())
             return sorted(results, key=lambda x: x["key"])
 
-    def get_by_scope(self, scope: ScopeType) -> List[Dict]:
+    def get_by_scope(self, scope: ScopeType) -> list[dict]:
         with self._lock:
             keys = self._scope_index.get(scope, set())
             return [self._labels[k].to_dict() for k in keys if k in self._labels]
 
-    def get_by_value(self, value: str) -> List[Dict]:
+    def get_by_value(self, value: str) -> list[dict]:
         with self._lock:
             keys = self._label_index.get(value, set())
             return [self._labels[k].to_dict() for k in keys if k in self._labels]
 
-    def bulk_set(self, mapping: Dict[str, Any], actor: str = "system") -> Dict[str, Tuple[bool, str]]:
+    def bulk_set(self, mapping: dict[str, Any], actor: str = "system") -> dict[str, tuple[bool, str]]:
         results = {}
         for key, value in mapping.items():
             results[key] = self.set(key, value, actor=actor)
         return results
 
-    def get_children(self, parent_key: str) -> List[Dict]:
+    def get_children(self, parent_key: str) -> list[dict]:
         with self._lock:
             return [l.to_dict() for l in self._labels.values() if l.parent_key == parent_key]
 
@@ -525,7 +525,7 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         group_id: str,
         name: str,
         description: str = "",
-        label_keys: Optional[List[str]] = None,
+        label_keys: list[str] | None = None,
         color: str = "#6366F1",
     ) -> bool:
         with self._lock:
@@ -541,7 +541,7 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     self._group_index[group_id].add(k)
             return True
 
-    def get_group(self, group_id: str) -> Optional[Dict]:
+    def get_group(self, group_id: str) -> dict | None:
         with self._lock:
             g = self._groups.get(group_id)
             if not g:
@@ -572,7 +572,7 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             )
             return True
 
-    def apply_auto_rules(self, target: str) -> List[Dict]:
+    def apply_auto_rules(self, target: str) -> list[dict]:
         results = []
         with self._lock:
             for rule in self._auto_rules:
@@ -586,8 +586,8 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return results
 
     def get_audit_log(
-        self, limit: int = 100, action: Optional[str] = None, label_key: Optional[str] = None
-    ) -> List[Dict]:
+        self, limit: int = 100, action: str | None = None, label_key: str | None = None
+    ) -> list[dict]:
         with self._lock:
             entries = self._audit_log
             if action:
@@ -596,7 +596,7 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 entries = [e for e in entries if e.label_key == label_key]
             return [e.to_dict() for e in entries[-limit:]]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         with self._lock:
             return {
                 "total_labels": len(self._labels),
@@ -609,7 +609,7 @@ class LabelManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "audit_entries": len(self._audit_log),
             }
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         stats = self.get_stats()
         return {
             "healthy": self._initialized,

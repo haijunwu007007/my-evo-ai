@@ -84,13 +84,14 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MilvusVectorAnalyzer(object):
+class MilvusVectorAnalyzer:
     """milvus_vector 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -291,39 +292,39 @@ class FieldSchema:
 class IndexParams:
     index_type: IndexType = IndexType.HNSW
     metric_type: MetricType = MetricType.COSINE
-    params: Dict[str, Any] = field(default_factory=lambda: {"M": 16, "efConstruction": 200})
+    params: dict[str, Any] = field(default_factory=lambda: {"M": 16, "efConstruction": 200})
 
 @dataclass
 class CollectionSchema:
     name: str
     description: str = ""
-    fields: List[FieldSchema] = field(default_factory=list)
-    index_params: Optional[IndexParams] = None
+    fields: list[FieldSchema] = field(default_factory=list)
+    index_params: IndexParams | None = None
     enable_dynamic_field: bool = True
 
 @dataclass
 class VectorRecord:
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
-    vector: List[float] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    vector: list[float] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     score: float = 0.0
 
 @dataclass
 class SearchParams:
     top_k: int = 10
-    metric_type: Optional[MetricType] = None
-    params: Dict[str, Any] = field(default_factory=lambda: {"ef": 64})
+    metric_type: MetricType | None = None
+    params: dict[str, Any] = field(default_factory=lambda: {"ef": 64})
     filter_expr: str = ""
-    output_fields: List[str] = field(default_factory=list)
+    output_fields: list[str] = field(default_factory=list)
 
 @dataclass
 class SearchResult:
     id: str
     score: float
     distance: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    vector: Optional[List[float]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    vector: list[float] | None = None
 
 @dataclass
 class CollectionStats:
@@ -348,7 +349,7 @@ class MilvusConfig:
     default_index: IndexType = IndexType.HNSW
     default_metric: MetricType = MetricType.COSINE
 
-def cosine_similarity(a: List[float], b: List[float]) -> float:
+def cosine_similarity(a: list[float], b: list[float]) -> float:
     dot = sum(x * y for x, y in zip(a, b))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(x * x for x in b))
@@ -356,10 +357,10 @@ def cosine_similarity(a: List[float], b: List[float]) -> float:
         return 0.0
     return dot / (norm_a * norm_b)
 
-def l2_distance(a: List[float], b: List[float]) -> float:
+def l2_distance(a: list[float], b: list[float]) -> float:
     return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))
 
-def dot_product(a: List[float], b: List[float]) -> float:
+def dot_product(a: list[float], b: list[float]) -> float:
     return sum(x * y for x, y in zip(a, b))
 
 class MilvusVector:
@@ -385,7 +386,7 @@ class MilvusVector:
 
     """Enterprise vector database operations with collection management and search."""
 
-    def __init__(self, config: Optional[MilvusConfig] = None):
+    def __init__(self, config: MilvusConfig | None = None):
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -418,10 +419,10 @@ class MilvusVector:
         )()
 
         self._config = config or MilvusConfig()
-        self._collections: Dict[str, CollectionSchema] = {}
-        self._data: Dict[str, List[VectorRecord]] = defaultdict(list)
-        self._indexes: Dict[str, IndexParams] = {}
-        self._load_states: Dict[str, LoadState] = {}
+        self._collections: dict[str, CollectionSchema] = {}
+        self._data: dict[str, list[VectorRecord]] = defaultdict(list)
+        self._indexes: dict[str, IndexParams] = {}
+        self._load_states: dict[str, LoadState] = {}
         self._lock = threading.RLock()
         self._initialized = False
         logger.info("MilvusVector created")
@@ -438,7 +439,7 @@ class MilvusVector:
                 self._config.db_name,
             )
 
-    def create_collection(self, schema: CollectionSchema, index_params: Optional[IndexParams] = None) -> bool:
+    def create_collection(self, schema: CollectionSchema, index_params: IndexParams | None = None) -> bool:
         with self._lock:
             if schema.name in self._collections:
                 logger.warning("Collection already exists: %s", schema.name)
@@ -475,10 +476,10 @@ class MilvusVector:
     def insert(
         self,
         collection_name: str,
-        vectors: List[List[float]],
-        ids: Optional[List[str]] = None,
-        metadata: Optional[List[Dict]] = None,
-    ) -> List[str]:
+        vectors: list[list[float]],
+        ids: list[str] | None = None,
+        metadata: list[dict] | None = None,
+    ) -> list[str]:
         with self._lock:
             if collection_name not in self._collections:
                 raise ValueError(f"Collection not found: {collection_name}")
@@ -492,8 +493,8 @@ class MilvusVector:
             return inserted_ids
 
     def search(
-        self, collection_name: str, query_vector: List[float], search_params: Optional[SearchParams] = None
-    ) -> List[SearchResult]:
+        self, collection_name: str, query_vector: list[float], search_params: SearchParams | None = None
+    ) -> list[SearchResult]:
         params = search_params or SearchParams()
         metric = params.metric_type or self._config.default_metric
         with self._lock:
@@ -525,7 +526,7 @@ class MilvusVector:
             scored.sort(key=lambda x: x.score, reverse=True)
             return scored[: params.top_k]
 
-    def delete(self, collection_name: str, ids: List[str]) -> int:
+    def delete(self, collection_name: str, ids: list[str]) -> int:
         with self._lock:
             if collection_name not in self._data:
                 return 0
@@ -534,13 +535,13 @@ class MilvusVector:
             self._data[collection_name] = [r for r in self._data[collection_name] if r.id not in id_set]
             return before - len(self._data[collection_name])
 
-    def get(self, collection_name: str, ids: List[str]) -> List[VectorRecord]:
+    def get(self, collection_name: str, ids: list[str]) -> list[VectorRecord]:
         with self._lock:
             records = self._data.get(collection_name, [])
             id_set = set(ids)
             return [r for r in records if r.id in id_set]
 
-    def describe_collection(self, name: str) -> Optional[Dict[str, Any]]:
+    def describe_collection(self, name: str) -> dict[str, Any] | None:
         with self._lock:
             schema = self._collections.get(name)
             if not schema:
@@ -555,11 +556,11 @@ class MilvusVector:
                 "load_state": self._load_states.get(name, LoadState.NOT_LOADED).value,
             }
 
-    def list_collections(self) -> List[str]:
+    def list_collections(self) -> list[str]:
         with self._lock:
             return list(self._collections.keys())
 
-    def get_stats(self, collection_name: str) -> Optional[CollectionStats]:
+    def get_stats(self, collection_name: str) -> CollectionStats | None:
         with self._lock:
             if collection_name not in self._collections:
                 return None
@@ -589,7 +590,7 @@ class MilvusVector:
         except Exception:
             return True
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         try:
             self.initialize()
             collections = self.list_collections()

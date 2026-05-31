@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -90,7 +89,8 @@ import json
 from core.logging_config import get_logger
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -167,7 +167,7 @@ class FaultConfig:
     fault_type: FaultType = FaultType.NETWORK_DELAY
     target: str = ""  # 目标服务/主机/pod
     scope: str = "service"  # service/pod/host/az
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     duration_seconds: float = 60.0
     probability: float = 1.0  # 概率
     progressive: bool = False  # 渐进式
@@ -179,7 +179,7 @@ class RollbackAction:
 
     action_type: str = ""  # restart/restore/clear/reconnect
     target: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     timeout_seconds: float = 60.0
 
 @dataclass
@@ -189,21 +189,21 @@ class Experiment:
     experiment_id: str = field(default_factory=lambda: str(uuid.uuid4())[:10])
     name: str = ""
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     status: ExperimentStatus = ExperimentStatus.DRAFT
-    hypotheses: List[SteadyStateHypothesis] = field(default_factory=list)
-    faults: List[FaultConfig] = field(default_factory=list)
-    rollback_actions: List[RollbackAction] = field(default_factory=list)
+    hypotheses: list[SteadyStateHypothesis] = field(default_factory=list)
+    faults: list[FaultConfig] = field(default_factory=list)
+    rollback_actions: list[RollbackAction] = field(default_factory=list)
     dry_run: bool = False  # 演练模式
     auto_rollback: bool = True
     abort_on_slo_violation: bool = True
-    schedule: Optional[str] = None  # cron表达式
+    schedule: str | None = None  # cron表达式
     created_by: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
+    started_at: str | None = None
+    finished_at: str | None = None
     duration_seconds: float = 0.0
-    results: Dict[str, Any] = field(default_factory=dict)
+    results: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class SLODefinition:
@@ -249,7 +249,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 实验编排（串行/并行）
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config=config or {})
         self.metric = type(
@@ -270,19 +270,19 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._initialized = False
         self.config = config or {}
         # 实验存储
-        self._experiments: Dict[str, Experiment] = {}
+        self._experiments: dict[str, Experiment] = {}
         # SLO定义
-        self._slos: Dict[str, SLODefinition] = {}
+        self._slos: dict[str, SLODefinition] = {}
         # 安全护栏
-        self._guard_rails: List[GuardRail] = []
+        self._guard_rails: list[GuardRail] = []
         # 活跃故障
-        self._active_faults: Dict[str, asyncio.Task] = {}
+        self._active_faults: dict[str, asyncio.Task] = {}
         # 查询回调
-        self._query_callback: Optional[Callable] = None
+        self._query_callback: Callable | None = None
         # 报警回调
-        self._alert_callback: Optional[Callable] = None
+        self._alert_callback: Callable | None = None
         # 故障回调（实际注入）
-        self._fault_callback: Optional[Callable] = None
+        self._fault_callback: Callable | None = None
         # 统计
         self._chaos_stats = {
             "experiments_total": 0,
@@ -316,7 +316,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._guard_rails.append(guard)
         logger.info("[ChaosEngine] 初始化完成")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "running" if self._initialized else "stopped",
             "healthy": True,
@@ -339,7 +339,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 统一执行入口 (EnterpriseModule execute)
     # ----------------------------------------------------------------
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         metrics_collector.counter("chaos_engine_ops_total", labels={"action": action})
         """统一execute入口，桥接所有业务方法。"""
         params = params or {}
@@ -433,10 +433,10 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         name: str,
         *,
-        hypotheses: Optional[List[Dict]] = None,
-        faults: Optional[List[Dict]] = None,
-        rollback_actions: Optional[List[Dict]] = None,
-        tags: Optional[List[str]] = None,
+        hypotheses: list[dict] | None = None,
+        faults: list[dict] | None = None,
+        rollback_actions: list[dict] | None = None,
+        tags: list[str] | None = None,
         dry_run: bool = False,
         description: str = "",
         created_by: str = "",
@@ -481,7 +481,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._chaos_stats["experiments_total"] = len(self._experiments)
         return Result(success=True, data={"experiment_id": exp.experiment_id})
 
-    def get_experiment(self, experiment_id: str) -> Optional[Dict]:
+    def get_experiment(self, experiment_id: str) -> dict | None:
         exp = self._experiments.get(experiment_id)
         if not exp:
             return None
@@ -508,7 +508,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "created_at": exp.created_at,
         }
 
-    def list_experiments(self, limit: int = 20) -> List[Dict]:
+    def list_experiments(self, limit: int = 20) -> list[dict]:
         return [
             {
                 "id": e.experiment_id,
@@ -729,7 +729,7 @@ class ChaosEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._chaos_stats, "active_faults": len(self._active_faults)}
 
 # ============================================================================

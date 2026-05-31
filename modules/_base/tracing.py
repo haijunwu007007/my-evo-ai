@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - 分布式链路追踪
 ==================================
@@ -39,13 +38,13 @@ class Span:
 
     trace_id: str
     span_id: str
-    parent_id: Optional[str]
+    parent_id: str | None
     operation_name: str
     module_id: str = ""
     start_time: float = 0.0
     end_time: float = 0.0
-    tags: Dict[str, Any] = field(default_factory=dict)
-    logs: List[Dict[str, Any]] = field(default_factory=list)
+    tags: dict[str, Any] = field(default_factory=dict)
+    logs: list[dict[str, Any]] = field(default_factory=list)
     status: str = "ok"  # ok / error
 
     @property
@@ -57,10 +56,10 @@ class Span:
     def set_tag(self, key: str, value: Any):
         self.tags[key] = value
 
-    def log_kv(self, kv: Dict[str, Any]):
+    def log_kv(self, kv: dict[str, Any]):
         self.logs.append({"timestamp": datetime.now().isoformat(), **kv})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "trace_id": self.trace_id,
             "span_id": self.span_id,
@@ -93,7 +92,7 @@ class TracingContext:
 
     def __init__(self, max_traces: int = 10000):
         self._max_traces = max_traces
-        self._traces: Dict[str, List[Span]] = {}  # trace_id -> [spans]
+        self._traces: dict[str, list[Span]] = {}  # trace_id -> [spans]
         self._current: threading.local = threading.local()
         self._lock = threading.Lock()
         self._stats = {
@@ -105,10 +104,10 @@ class TracingContext:
     def _gen_id(self) -> str:
         return uuid.uuid4().hex[:16]
 
-    def _get_current_context(self) -> Optional[TraceContext]:
+    def _get_current_context(self) -> TraceContext | None:
         return getattr(self._current, "context", None)
 
-    def _set_current_context(self, ctx: Optional[TraceContext]):
+    def _set_current_context(self, ctx: TraceContext | None):
         self._current.context = ctx
 
     @contextmanager
@@ -169,13 +168,13 @@ class TracingContext:
             # 恢复父上下文
             self._set_current_context(current)
 
-    def get_trace(self, trace_id: str) -> List[Dict[str, Any]]:
+    def get_trace(self, trace_id: str) -> list[dict[str, Any]]:
         """获取完整调用链"""
         with self._lock:
             spans = self._traces.get(trace_id, [])
             return [s.to_dict() for s in spans]
 
-    def get_recent_traces(self, limit: int = 20) -> List[List[Dict[str, Any]]]:
+    def get_recent_traces(self, limit: int = 20) -> list[list[dict[str, Any]]]:
         """获取最近的调用链"""
         with self._lock:
             trace_ids = list(self._traces.keys())[-limit:]
@@ -185,7 +184,7 @@ class TracingContext:
                 result.append(spans)
             return result
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取追踪统计"""
         return {
             **self._stats,
@@ -199,7 +198,7 @@ class TracingContext:
 
 
 # 全局单例
-_tracer: Optional[TracingContext] = None
+_tracer: TracingContext | None = None
 
 
 def get_tracer() -> TracingContext:

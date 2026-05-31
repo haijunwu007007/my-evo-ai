@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -93,7 +92,8 @@ import json
 import logging
 import heapq
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable, Set, Awaitable
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable, Awaitable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
@@ -128,19 +128,19 @@ class BrokerMessage:
     message_id: str = field(default_factory=lambda: str(uuid.uuid4()), compare=False)
     topic: str = field(default="", compare=False)
     payload: Any = field(default=None, compare=False)
-    headers: Dict[str, str] = field(default_factory=dict, compare=False)
+    headers: dict[str, str] = field(default_factory=dict, compare=False)
     status: MessageStatus = field(default=MessageStatus.CREATED, compare=False)
     delivery_mode: DeliveryMode = field(default=DeliveryMode.AT_LEAST_ONCE, compare=False)
-    ttl_seconds: Optional[float] = field(default=None, compare=False)
+    ttl_seconds: float | None = field(default=None, compare=False)
     delay_seconds: float = field(default=0.0, compare=False)
     deliver_at: float = field(default=0.0, compare=False)
     delivery_count: int = field(default=0, compare=False)
     max_deliveries: int = field(default=3, compare=False)
     producer_id: str = field(default="", compare=False)
-    consumer_id: Optional[str] = field(default=None, compare=False)
-    trace_id: Optional[str] = field(default=None, compare=False)
-    correlation_id: Optional[str] = field(default=None, compare=False)
-    expires_at: Optional[float] = field(default=None, compare=False)
+    consumer_id: str | None = field(default=None, compare=False)
+    trace_id: str | None = field(default=None, compare=False)
+    correlation_id: str | None = field(default=None, compare=False)
+    expires_at: float | None = field(default=None, compare=False)
     size_bytes: int = field(default=0, compare=False)
     body: str = field(default="", compare=False)
 
@@ -192,19 +192,19 @@ class TopicStats:
 # MessageBroker 主类
 # ============================================================================
 
-class MessageRouterEngine(object):
+class MessageRouterEngine:
     """消息路由引擎：主题匹配、负载均衡、消息分发"""
 
     def __init__(self):
-        self._routes: Dict[str, List[str]] = {}
+        self._routes: dict[str, list[str]] = {}
         self._routing_count = 0
         self._dead_letter_count = 0
 
-    def add_route(self, pattern: str, destinations: List[str]) -> None:
+    def add_route(self, pattern: str, destinations: list[str]) -> None:
         """添加路由规则"""
         self._routes[pattern] = destinations
 
-    def route_message(self, topic: str, message_id: str) -> List[str]:
+    def route_message(self, topic: str, message_id: str) -> list[str]:
         """根据主题匹配路由目标，返回目标队列列表"""
         self._routing_count += 1
         matched = []
@@ -216,7 +216,7 @@ class MessageRouterEngine(object):
             matched = ["__dead_letter__"]
         return list(set(matched))
 
-    def get_router_stats(self) -> Dict:
+    def get_router_stats(self) -> dict:
         return {
             "total_routes": len(self._routes),
             "routing_count": self._routing_count,
@@ -242,25 +242,25 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 消息持久化（内存）
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # Topic -> 优先级堆
-        self._queues: Dict[str, List[BrokerMessage]] = defaultdict(list)
+        self._queues: dict[str, list[BrokerMessage]] = defaultdict(list)
         # Topic -> 消费者列表
-        self._consumers: Dict[str, List[Consumer]] = defaultdict(list)
+        self._consumers: dict[str, list[Consumer]] = defaultdict(list)
         # 消费者组 -> topic -> Consumer（点对点模式）
-        self._consumer_groups: Dict[str, Dict[str, List[Consumer]]] = defaultdict(lambda: defaultdict(list))
+        self._consumer_groups: dict[str, dict[str, list[Consumer]]] = defaultdict(lambda: defaultdict(list))
         # 死信Topic
         self._dead_letter_topic = self.config.get("dead_letter_topic", "dlq.default")
-        self._dead_letters: List[BrokerMessage] = []
+        self._dead_letters: list[BrokerMessage] = []
         # 消息存储（已投递+未ACK）
-        self._inflight: Dict[str, BrokerMessage] = {}
+        self._inflight: dict[str, BrokerMessage] = {}
         # 已完成消息（保留最近N条）
         self._completed: deque = deque(maxlen=50000)
         # 投递统计
-        self._topic_stats: Dict[str, TopicStats] = {}
+        self._topic_stats: dict[str, TopicStats] = {}
         # 全局统计
         self._broker_stats = {
             "messages_published": 0,
@@ -271,8 +271,8 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "messages_dead_letter": 0,
         }
         # 调度协程
-        self._scheduler_task: Optional[asyncio.Task] = None
-        self._ttl_checker_task: Optional[asyncio.Task] = None
+        self._scheduler_task: asyncio.Task | None = None
+        self._ttl_checker_task: asyncio.Task | None = None
         # 配置
         self._max_queue_size = self.config.get("max_queue_size", 1000000)
         self._default_prefetch = self.config.get("default_prefetch", 10)
@@ -427,7 +427,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.audit("topic.deleted", {"topic": topic, "force": force})
         return Result(success=True)
 
-    def list_topics(self) -> List[Dict]:
+    def list_topics(self) -> list[dict]:
         """列出所有Topic及统计"""
         result = []
         for topic, stats in self._topic_stats.items():
@@ -456,13 +456,13 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         topic: str,
         payload: Any,
         *,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         priority: int = 0,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
         delay: float = 0.0,
         delivery_mode: DeliveryMode = DeliveryMode.AT_LEAST_ONCE,
         producer_id: str = "",
-        correlation_id: Optional[str] = None,
+        correlation_id: str | None = None,
     ) -> Result:
         """发送消息到Topic"""
         start = time.time()
@@ -511,7 +511,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         handler: Callable,
         *,
         consumer_group: str = "default",
-        consumer_id: Optional[str] = None,
+        consumer_id: str | None = None,
         prefetch: int = 0,
         auto_ack: bool = False,
     ) -> str:
@@ -670,7 +670,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取代理统计"""
         total_pending = sum(len(q) for q in self._queues.values())
         return {
@@ -684,7 +684,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def get_topic_detail(self, topic: str) -> Optional[Dict]:
+    def get_topic_detail(self, topic: str) -> dict | None:
         """获取Topic详情"""
         if topic not in self._topic_stats:
             return None
@@ -712,7 +712,7 @@ class MessageBroker(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             },
         }
 
-    def get_dead_letters(self, limit: int = 50) -> List[Dict]:
+    def get_dead_letters(self, limit: int = 50) -> list[dict]:
         """查看死信"""
         return [
             {

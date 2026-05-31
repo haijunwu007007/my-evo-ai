@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -92,7 +91,8 @@ import time as tmod
 from core.logging_config import get_logger
 import time as tmod
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -139,7 +139,7 @@ class SpanEvent:
     event_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class SpanLink:
@@ -147,7 +147,7 @@ class SpanLink:
 
     trace_id: str = ""
     span_id: str = ""
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Span:
@@ -160,14 +160,14 @@ class Span:
     kind: SpanKind = SpanKind.INTERNAL
     status: SpanStatus = SpanStatus.UNSET
     start_time: str = field(default_factory=lambda: datetime.now().isoformat())
-    end_time: Optional[str] = None
+    end_time: str | None = None
     duration_ms: float = 0.0
     service_name: str = ""
-    resource: Dict[str, str] = field(default_factory=dict)
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[SpanEvent] = field(default_factory=list)
-    links: List[SpanLink] = field(default_factory=list)
-    baggage: Dict[str, str] = field(default_factory=dict)
+    resource: dict[str, str] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[SpanEvent] = field(default_factory=list)
+    links: list[SpanLink] = field(default_factory=list)
+    baggage: dict[str, str] = field(default_factory=dict)
     error_message: str = ""
     stack_trace: str = ""
 
@@ -176,12 +176,12 @@ class Trace:
     """Trace"""
 
     trace_id: str = field(default_factory=lambda: uuid.uuid4().hex[:32])
-    root_span: Optional[Span] = None
-    spans: List[Span] = field(default_factory=list)
-    baggage: Dict[str, str] = field(default_factory=dict)
+    root_span: Span | None = None
+    spans: list[Span] = field(default_factory=list)
+    baggage: dict[str, str] = field(default_factory=dict)
     status: SpanStatus = SpanStatus.UNSET
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    start_time: str | None = None
+    end_time: str | None = None
     duration_ms: float = 0.0
     service_count: int = 0
     span_count: int = 0
@@ -193,8 +193,8 @@ class ServiceTopology:
     """服务拓扑"""
 
     service_name: str = ""
-    inbound_services: List[str] = field(default_factory=list)
-    outbound_services: List[str] = field(default_factory=list)
+    inbound_services: list[str] = field(default_factory=list)
+    outbound_services: list[str] = field(default_factory=list)
     call_count: int = 0
     error_count: int = 0
     avg_latency_ms: float = 0.0
@@ -214,11 +214,11 @@ class ExporterConfig:
 # DistributedTracer 主类
 # ============================================================================
 
-class TraceQueryEngine(object):
+class TraceQueryEngine:
     """链路查询引擎 - 支持按服务、标签、耗时等维度检索链路数据"""
 
     def __init__(self, max_cache: int = 10000):
-        self._cache: List[Trace] = []
+        self._cache: list[Trace] = []
         self._max_cache = max_cache
         self._query_count = 0
 
@@ -228,7 +228,7 @@ class TraceQueryEngine(object):
         if len(self._cache) > self._max_cache:
             self._cache = self._cache[-self._max_cache // 2 :]
 
-    def query_by_service(self, service_name: str, limit: int = 50) -> List[Dict]:
+    def query_by_service(self, service_name: str, limit: int = 50) -> list[dict]:
         """按服务名查询链路"""
         self._query_count += 1
         results = []
@@ -239,7 +239,7 @@ class TraceQueryEngine(object):
                     break
         return results
 
-    def query_slow_traces(self, threshold_ms: float = 1000, limit: int = 20) -> List[Dict]:
+    def query_slow_traces(self, threshold_ms: float = 1000, limit: int = 20) -> list[dict]:
         """查询慢链路"""
         self._query_count += 1
         results = []
@@ -251,7 +251,7 @@ class TraceQueryEngine(object):
                     break
         return results
 
-    def query_by_tag(self, tag_key: str, tag_value: str, limit: int = 50) -> List[Dict]:
+    def query_by_tag(self, tag_key: str, tag_value: str, limit: int = 50) -> list[dict]:
         """按标签查询链路"""
         self._query_count += 1
         results = []
@@ -265,7 +265,7 @@ class TraceQueryEngine(object):
                 break
         return results
 
-    def get_error_traces(self, limit: int = 20) -> List[Dict]:
+    def get_error_traces(self, limit: int = 20) -> list[dict]:
         """查询包含错误的链路"""
         self._query_count += 1
         results = []
@@ -277,7 +277,7 @@ class TraceQueryEngine(object):
                     break
         return results
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """查询引擎统计"""
         return {
             "cached_traces": len(self._cache),
@@ -302,16 +302,16 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
       - 追踪查询
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # Trace存储
-        self._traces: Dict[str, Trace] = {}
+        self._traces: dict[str, Trace] = {}
         # 活跃Span（trace_id -> span_id -> Span）
-        self._active_spans: Dict[str, Dict[str, Span]] = defaultdict(dict)
+        self._active_spans: dict[str, dict[str, Span]] = defaultdict(dict)
         # 服务拓扑
-        self._topology: Dict[str, ServiceTopology] = {}
+        self._topology: dict[str, ServiceTopology] = {}
         # 采样
         self._sampling_strategy = SamplingStrategy(self.config.get("sampling_strategy", "probabilistic"))
         self._sampling_rate = self.config.get("sampling_rate", 0.1)
@@ -323,8 +323,8 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._exporter_config = ExporterConfig(
             **{k: v for k, v in self.config.get("exporter", {}).items() if k in ExporterConfig.__dataclass_fields__}
         )
-        self._export_buffer: List[Span] = []
-        self._flush_task: Optional[asyncio.Task] = None
+        self._export_buffer: list[Span] = []
+        self._flush_task: asyncio.Task | None = None
         # 统计
         self._tracer_stats = {
             "traces_received": 0,
@@ -336,7 +336,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "exported_spans": 0,
         }
         # 导出回调
-        self._export_callbacks: List[Callable] = []
+        self._export_callbacks: list[Callable] = []
 
     # ----------------------------------------------------------------
     # 生命周期
@@ -461,8 +461,8 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         *,
         service_name: str = "",
         kind: SpanKind = SpanKind.INTERNAL,
-        attributes: Optional[Dict] = None,
-        baggage: Optional[Dict[str, str]] = None,
+        attributes: dict | None = None,
+        baggage: dict[str, str] | None = None,
     ) -> Span:
         """开始新Trace"""
         metrics_collector.counter("dtracer_ops_total")
@@ -505,9 +505,9 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         *,
         service_name: str = "",
         kind: SpanKind = SpanKind.INTERNAL,
-        attributes: Optional[Dict] = None,
-        links: Optional[List[SpanLink]] = None,
-    ) -> Optional[Span]:
+        attributes: dict | None = None,
+        links: list[SpanLink] | None = None,
+    ) -> Span | None:
         """创建子Span"""
         trace = self._traces.get(trace_id)
         if not trace or not trace.sampled:
@@ -540,8 +540,8 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         *,
         status: SpanStatus = SpanStatus.OK,
         error_message: str = "",
-        attributes: Optional[Dict] = None,
-    ) -> Optional[Span]:
+        attributes: dict | None = None,
+    ) -> Span | None:
         """结束Span"""
         span_dict = self._active_spans.get(trace_id, {})
         span = span_dict.pop(span_id, None)
@@ -578,13 +578,13 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                     self._tracer_stats["slow_traces"] += 1
         return span
 
-    def add_span_event(self, trace_id: str, span_id: str, event_name: str, attributes: Optional[Dict] = None):
+    def add_span_event(self, trace_id: str, span_id: str, event_name: str, attributes: dict | None = None):
         span = self._active_spans.get(trace_id, {}).get(span_id)
         if span:
             span.events.append(SpanEvent(name=event_name, attributes=attributes or {}))
 
     def add_span_link(
-        self, trace_id: str, span_id: str, link_trace_id: str, link_span_id: str, attributes: Optional[Dict] = None
+        self, trace_id: str, span_id: str, link_trace_id: str, link_span_id: str, attributes: dict | None = None
     ):
         span = self._active_spans.get(trace_id, {}).get(span_id)
         if span:
@@ -594,7 +594,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     # 上下文传播
     # ----------------------------------------------------------------
 
-    def inject(self, span: Span) -> Dict[str, str]:
+    def inject(self, span: Span) -> dict[str, str]:
         """注入Trace上下文到Carrier"""
         return {
             "traceparent": f"00-{span.trace_id}-{span.span_id}-01",
@@ -604,7 +604,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "x-b3-parentspanid": span.parent_span_id,
         }
 
-    def extract(self, carrier: Dict[str, str]) -> Optional[Dict]:
+    def extract(self, carrier: dict[str, str]) -> dict | None:
         """从Carrier提取Trace上下文"""
         traceparent = carrier.get("traceparent") or carrier.get("Traceparent")
         if traceparent:
@@ -629,7 +629,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for span in self._active_spans.get(trace_id, {}).values():
                 span.baggage[key] = value
 
-    def get_baggage(self, trace_id: str, key: str) -> Optional[str]:
+    def get_baggage(self, trace_id: str, key: str) -> str | None:
         trace = self._traces.get(trace_id)
         return trace.baggage.get(key) if trace else None
 
@@ -693,7 +693,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     # 查询
     # ----------------------------------------------------------------
 
-    def get_trace(self, trace_id: str) -> Optional[Dict]:
+    def get_trace(self, trace_id: str) -> dict | None:
         trace = self._traces.get(trace_id)
         if not trace:
             return None
@@ -729,7 +729,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         status: str = "",
         min_duration_ms: float = 0,
         limit: int = 20,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         results = []
         for trace in list(self._traces.values()):
             if not trace.sampled:
@@ -754,7 +754,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
         return sorted(results, key=lambda x: x["duration_ms"], reverse=True)[:limit]
 
-    def get_topology(self) -> Dict[str, Any]:
+    def get_topology(self) -> dict[str, Any]:
         return {
             name: {
                 "inbound": t.inbound_services,
@@ -765,7 +765,7 @@ class DistributedTracer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             for name, t in self._topology.items()
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._tracer_stats, "module_stats": self.stats.to_dict()}
 
 # ============================================================================

@@ -118,7 +118,7 @@ class ConnConfig:
     max_lifetime: float = 3600.0
     keep_alive: bool = True
     tls: bool = False
-    auth_token: Optional[str] = None
+    auth_token: str | None = None
 
 @dataclass
 class Connection:
@@ -163,10 +163,10 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self.description = "HTTP/TCP/WS客户端连接池管理，连接复用、健康检查、负载均衡"
 
         self._initialized = False
-        self._pools: Dict[str, ConnConfig] = {}
-        self._connections: Dict[str, List[Connection]] = {}
-        self._pool_stats: Dict[str, PoolStats] = {}
-        self._request_history: List[Dict[str, Any]] = []
+        self._pools: dict[str, ConnConfig] = {}
+        self._connections: dict[str, list[Connection]] = {}
+        self._pool_stats: dict[str, PoolStats] = {}
+        self._request_history: list[dict[str, Any]] = []
 
     def initialize(self) -> None:
         if self._initialized:
@@ -253,7 +253,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             conns.clear()
         self._initialized = False
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "client_pool"})
         self.metrics_collector.counter("client_pool.execute.calls", 1)
         self.audit("execute", {"module": "client_pool"})
@@ -280,7 +280,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _acquire(self, p: Dict) -> Dict:
+    def _acquire(self, p: dict) -> dict:
         pool = p.get("pool", "")
         if pool not in self._pools:
             return {"success": False, "error": f"连接池不存在: {pool}"}
@@ -324,7 +324,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         return {"success": False, "error": f"连接池已满: {pool} ({len(conns)}/{cfg.max_connections})"}
 
-    def _release(self, p: Dict) -> Dict:
+    def _release(self, p: dict) -> dict:
         conn_id = p.get("conn_id", "")
         pool = p.get("pool", "")
         if pool not in self._connections:
@@ -336,7 +336,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 return {"success": True, "result": {"conn_id": conn_id, "state": "idle"}}
         return {"success": False, "error": f"连接不存在: {conn_id}"}
 
-    def _exec_request(self, p: Dict) -> Dict:
+    def _exec_request(self, p: dict) -> dict:
         pool = p.get("pool", "api_internal")
         method = p.get("method", "GET")
         path = p.get("path", "/")
@@ -389,7 +389,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 self._release({"conn_id": conn_id, "pool": pool})
         return {"success": False, "error": "所有重试失败"}
 
-    def _create_pool(self, p: Dict) -> Dict:
+    def _create_pool(self, p: dict) -> dict:
         name = p.get("name", "")
         host = p.get("host", "")
         port = p.get("port", 80)
@@ -421,7 +421,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _remove_pool(self, p: Dict) -> Dict:
+    def _remove_pool(self, p: dict) -> dict:
         name = p.get("name", "")
         if name not in self._pools:
             return {"success": False, "error": f"连接池不存在: {name}"}
@@ -432,7 +432,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         del self._pool_stats[name]
         return {"success": True, "result": {"pool": name, "removed": True}}
 
-    def _pool_status(self, p: Dict) -> Dict:
+    def _pool_status(self, p: dict) -> dict:
         pool = p.get("pool", "")
         if pool not in self._pools:
             return {"success": False, "error": f"连接池不存在: {pool}"}
@@ -467,7 +467,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def _list_pools(self, p: Dict) -> Dict:
+    def _list_pools(self, p: dict) -> dict:
         result = []
         for name, cfg in self._pools.items():
             conns = self._connections.get(name, [])
@@ -489,7 +489,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
         return {"success": True, "result": result}
 
-    def _resize_pool(self, p: Dict) -> Dict:
+    def _resize_pool(self, p: dict) -> dict:
         pool = p.get("pool", "")
         new_max = p.get("max_connections", 50)
         if pool not in self._pools:
@@ -508,7 +508,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "result": {"pool": pool, "old_max": old_max, "new_max": new_max, "current": len(conns)},
         }
 
-    def _health_check_all(self, p: Dict) -> Dict:
+    def _health_check_all(self, p: dict) -> dict:
         results = {}
         pool = p.get("pool", "")
         targets = [pool] if pool else list(self._pools.keys())
@@ -529,7 +529,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             results[name] = {"healthy": healthy, "unhealthy": unhealthy, "total": len(self._connections[name])}
         return {"success": True, "result": results}
 
-    def _cleanup(self, p: Dict) -> Dict:
+    def _cleanup(self, p: dict) -> dict:
         now = time.time()
         cleaned = 0
         for pool_name, conns in self._connections.items():
@@ -546,7 +546,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 cleaned += 1
         return {"success": True, "result": {"cleaned_connections": cleaned}}
 
-    def _get_stats(self, p: Dict) -> Dict:
+    def _get_stats(self, p: dict) -> dict:
         total = sum(len(c) for c in self._connections.values())
         idle = sum(
             sum(1 for c in conns if c.state in (ConnState.IDLE, ConnState.HEALTHY))
@@ -569,7 +569,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"status": "not_initialized", "module_id": self.module_id}
         total = sum(len(c) for c in self._connections.values())
@@ -581,7 +581,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "connections": total,
         }
 
-    def get_pool_utilization(self) -> Dict[str, Any]:
+    def get_pool_utilization(self) -> dict[str, Any]:
         """连接池利用率报告。企业场景：SRE监控连接池使用率，识别连接泄漏风险。
         统计各池的活跃/空闲/等待连接数，连接创建/销毁频率。
         """
@@ -609,7 +609,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             report["summary"]["total_waiting"] += waiting
         return report
 
-    def detect_connection_leaks(self, threshold_seconds: int = 300) -> Dict[str, Any]:
+    def detect_connection_leaks(self, threshold_seconds: int = 300) -> dict[str, Any]:
         """连接泄漏检测。企业场景：自动检测长时间未归还的连接，预警连接泄漏。
         超过threshold_seconds未归还的连接视为疑似泄漏。
         """
@@ -637,7 +637,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "total_checked": sum(len(c) for c in self._connections.values()),
         }
 
-    def get_connection_stats(self, pool_name: str) -> Dict[str, Any]:
+    def get_connection_stats(self, pool_name: str) -> dict[str, Any]:
         """获取连接池详细统计。企业场景：监控面板展示单个连接池的实时指标。"""
         connections = self._connections.get(pool_name, [])
         active = sum(1 for c in connections if getattr(c, "in_use", False))
@@ -649,12 +649,12 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "idle": len(connections) - active,
         }
 
-    def get_pool_list(self) -> Dict[str, Any]:
+    def get_pool_list(self) -> dict[str, Any]:
         """列出所有连接池。企业场景：运维查看管理的连接池清单。"""
         pools = [{"name": p, "max_size": getattr(self._pools[p], "max_size", 10)} for p in self._pools]
         return {"success": True, "pools": pools, "total": len(pools)}
 
-    def pool_health_check(self, pool_name: str, test_query: str = "SELECT 1") -> Dict[str, Any]:
+    def pool_health_check(self, pool_name: str, test_query: str = "SELECT 1") -> dict[str, Any]:
         """连接池健康检查。企业场景：定时巡检所有数据库连接池，发现断连自动剔除，
         确保连接池中都是可用连接。生产环境每30秒执行一次。
         """
@@ -685,7 +685,7 @@ class ClientPoolManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "current_size": total,
         }
 
-    def get_all_pools_summary(self) -> Dict[str, Any]:
+    def get_all_pools_summary(self) -> dict[str, Any]:
         """全局连接池汇总。企业场景：SRE看板展示所有连接池健康度。"""
         summary = []
         total_connections = 0

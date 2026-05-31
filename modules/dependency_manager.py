@@ -166,8 +166,8 @@ class Dependency:
     is_dev: bool = False
     license: str = ""
     description: str = ""
-    vulnerabilities: List[Dict[str, Any]] = field(default_factory=list)
-    dependents: List[str] = field(default_factory=list)
+    vulnerabilities: list[dict[str, Any]] = field(default_factory=list)
+    dependents: list[str] = field(default_factory=list)
     size_bytes: int = 0
 
 @dataclass
@@ -181,10 +181,10 @@ class VulnReport:
     severity: VulnSeverity
     title: str
     description: str
-    cve: Optional[str] = None
-    patch_version: Optional[str] = None
-    references: List[str] = field(default_factory=list)
-    published_at: Optional[str] = None
+    cve: str | None = None
+    patch_version: str | None = None
+    references: list[str] = field(default_factory=list)
+    published_at: str | None = None
 
 @dataclass
 class LockEntry:
@@ -194,7 +194,7 @@ class LockEntry:
     version: str
     hash: str = ""
     source: str = "pypi"
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """依赖管理器"""
@@ -203,10 +203,10 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._dependencies: Dict[str, Dependency] = {}
-        self._lockfile: Dict[str, LockEntry] = {}
-        self._vulns: List[VulnReport] = []
-        self._scan_history: List[Dict] = []
+        self._dependencies: dict[str, Dependency] = {}
+        self._lockfile: dict[str, LockEntry] = {}
+        self._vulns: list[VulnReport] = []
+        self._scan_history: list[dict] = []
         self._manifest_files = {
             "requirements.txt": self._parse_requirements_txt,
             "setup.py": self._parse_setup_py,
@@ -215,14 +215,14 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "package.json": self._parse_package_json,
         }
         self._known_vulns = self._load_known_vulnerabilities()
-        self._version_cache: Dict[str, str] = {}
+        self._version_cache: dict[str, str] = {}
 
     def initialize(self) -> None:
         logger.info("依赖管理器初始化完成")
         self.record_metrics("unknown.init", 1)
         self.audit("initialized", "Unknown初始化完成")
 
-    def _load_known_vulnerabilities(self) -> List[Dict]:
+    def _load_known_vulnerabilities(self) -> list[dict]:
         """加载已知漏洞数据库（模拟）"""
         return [
             {
@@ -276,7 +276,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         ]
 
     @trace_operation("scan_dependencies")
-    def scan_project(self, project_path: str) -> Dict[str, Any]:
+    def scan_project(self, project_path: str) -> dict[str, Any]:
         """扫描项目依赖"""
         start = time.time()
         self._dependencies.clear()
@@ -287,7 +287,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             filepath = os.path.join(project_path, filename)
             if os.path.exists(filepath):
                 try:
-                    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+                    with open(filepath, encoding="utf-8", errors="replace") as f:
                         content = f.read()
                     deps = parser(content)
                     for dep in deps:
@@ -343,7 +343,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "duration_ms": round(duration, 2),
         }
 
-    def _parse_requirements_txt(self, content: str) -> List[Dependency]:
+    def _parse_requirements_txt(self, content: str) -> list[Dependency]:
         """解析 requirements.txt"""
         deps = []
         for line in content.split("\n"):
@@ -363,7 +363,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                     deps.append(Dependency(name=name.group(1).lower(), version="*"))
         return deps
 
-    def _parse_setup_py(self, content: str) -> List[Dependency]:
+    def _parse_setup_py(self, content: str) -> list[Dependency]:
         """解析 setup.py"""
         deps = []
         match = re.search(r"install_requires\s*=\s*\[(.*?)\]", content, re.DOTALL)
@@ -373,7 +373,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 deps.append(Dependency(name=m.group(1).lower().split(">=")[0].split("<")[0], version="*"))
         return deps
 
-    def _parse_pyproject_toml(self, content: str) -> List[Dependency]:
+    def _parse_pyproject_toml(self, content: str) -> list[Dependency]:
         """解析 pyproject.toml"""
         deps = []
         match = re.search(r"dependencies\s*=\s*\[(.*?)\]", content, re.DOTALL)
@@ -385,7 +385,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 deps.append(Dependency(name=name, version="*"))
         return deps
 
-    def _parse_pipfile(self, content: str) -> List[Dependency]:
+    def _parse_pipfile(self, content: str) -> list[Dependency]:
         """解析 Pipfile"""
         deps = []
         match = re.search(r"\[packages\](.*?)\[", content, re.DOTALL)
@@ -394,7 +394,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 deps.append(Dependency(name=m.group(1).lower(), version=m.group(2)))
         return deps
 
-    def _parse_package_json(self, content: str) -> List[Dependency]:
+    def _parse_package_json(self, content: str) -> list[Dependency]:
         """解析 package.json"""
         deps = []
         try:
@@ -505,7 +505,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 )
                 dep.status = DepStatus.VULNERABLE
 
-    def _build_dependency_tree(self) -> Dict[str, Any]:
+    def _build_dependency_tree(self) -> dict[str, Any]:
         """构建依赖树"""
         tree = {}
         for name, dep in self._dependencies.items():
@@ -520,7 +520,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return tree
 
     @trace_operation("generate_lockfile")
-    def generate_lockfile(self, output_path: Optional[str] = None) -> Dict[str, Any]:
+    def generate_lockfile(self, output_path: str | None = None) -> dict[str, Any]:
         """生成锁文件"""
         lockfile = {}
         for name, dep in self._dependencies.items():
@@ -543,7 +543,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return {"entries": len(lockfile), "output_path": output_path, "content": content if not output_path else None}
 
     @trace_operation("update_dependencies")
-    def get_update_plan(self, strategy: str = "safe") -> Dict[str, Any]:
+    def get_update_plan(self, strategy: str = "safe") -> dict[str, Any]:
         """获取更新计划"""
         plan = {"major": [], "minor": [], "patch": [], "vulnerable": []}
 
@@ -571,7 +571,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "recommended_order": plan["vulnerable"] + plan["minor"] + plan["major"],
         }
 
-    def get_vulnerability_report(self) -> Dict[str, Any]:
+    def get_vulnerability_report(self) -> dict[str, Any]:
         """获取漏洞报告"""
         severity_counts = defaultdict(int)
         for v in self._vulns:
@@ -594,7 +594,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             ],
         }
 
-    def get_dependency_report(self) -> Dict[str, Any]:
+    def get_dependency_report(self) -> dict[str, Any]:
         """获取依赖报告"""
         status_counts = defaultdict(int)
         for dep in self._dependencies.values():
@@ -653,7 +653,7 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

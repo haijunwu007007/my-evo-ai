@@ -101,9 +101,9 @@ class OutboxStore:
 
     def __init__(self, max_size: int = 100000):
         self.max_size = max_size
-        self._messages: Dict[str, Dict] = {}
-        self._by_aggregate: Dict[str, List[str]] = defaultdict(list)
-        self._by_status: Dict[str, List[str]] = defaultdict(list)
+        self._messages: dict[str, dict] = {}
+        self._by_aggregate: dict[str, list[str]] = defaultdict(list)
+        self._by_status: dict[str, list[str]] = defaultdict(list)
         self._idempotency_keys: set = set()
 
     def insert(
@@ -111,10 +111,10 @@ class OutboxStore:
         aggregate_type: str,
         aggregate_id: str,
         event_type: str,
-        payload: Dict,
+        payload: dict,
         idempotency_key: str = None,
-        headers: Dict = None,
-    ) -> Dict:
+        headers: dict = None,
+    ) -> dict:
         if idempotency_key and idempotency_key in self._idempotency_keys:
             return {"success": False, "error": "duplicate", "idempotency_key": idempotency_key}
         msg_id = str(uuid.uuid4())[:12]
@@ -176,7 +176,7 @@ class OutboxStore:
         self._by_status["pending"].append(msg_id)
         return True
 
-    def get_pending(self, batch_size: int = 100, lock_timeout: float = 60) -> List[Dict]:
+    def get_pending(self, batch_size: int = 100, lock_timeout: float = 60) -> list[dict]:
         now = time.time()
         cutoff = now - lock_timeout
         pending = []
@@ -190,7 +190,7 @@ class OutboxStore:
             msg["locked_at"] = now
         return pending
 
-    def get_by_aggregate(self, aggregate_type: str, aggregate_id: str) -> List[Dict]:
+    def get_by_aggregate(self, aggregate_type: str, aggregate_id: str) -> list[dict]:
         key = f"{aggregate_type}:{aggregate_id}"
         ids = self._by_aggregate.get(key, [])
         return [self._messages[mid] for mid in ids if mid in self._messages]
@@ -205,7 +205,7 @@ class OutboxStore:
                     self._by_aggregate[agg_key].remove(mid)
         self._by_status["published"] = [m for m in self._by_status["published"] if m in self._messages]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "total": len(self._messages),
             "pending": len(self._by_status["pending"]),
@@ -220,11 +220,11 @@ class MessagePublisher:
 
     def __init__(self):
         self._published: deque = deque(maxlen=5000)
-        self._topics: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._topics: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
         self._publish_count = 0
         self._error_rate = 0.0
 
-    def publish(self, topic: str, message: Dict, headers: Dict = None) -> Dict:
+    def publish(self, topic: str, message: dict, headers: dict = None) -> dict:
         self._publish_count += 1
         if self._error_rate > 0 and (self._publish_count % int(1 / self._error_rate) == 0):
             return {"success": False, "error": "simulated_publish_failure"}
@@ -239,7 +239,7 @@ class MessagePublisher:
         self._topics[topic].append(event)
         return {"success": True, "message_id": event["message_id"], "topic": topic}
 
-    def get_published(self, topic: str = None, limit: int = 100) -> List[Dict]:
+    def get_published(self, topic: str = None, limit: int = 100) -> list[dict]:
         if topic:
             return list(self._topics.get(topic, []))[-limit:]
         return list(self._published)[-limit:]
@@ -264,7 +264,7 @@ class OutboxPoller:
         self._last_poll = 0
         self._running = False
 
-    def poll_once(self) -> Dict:
+    def poll_once(self) -> dict:
         self._poll_count += 1
         self._last_poll = time.time()
         pending = self.store.get_pending(self.batch_size)
@@ -281,7 +281,7 @@ class OutboxPoller:
                 failed += 1
         return {"poll_count": self._poll_count, "pending_found": len(pending), "published": published, "failed": failed}
 
-    def retry_failed(self, max_count: int = 50) -> Dict:
+    def retry_failed(self, max_count: int = 50) -> dict:
         retryable = [
             mid
             for mid in list(self.store._by_status.get("failed", []))
@@ -298,15 +298,15 @@ class TransactionalWriter:
 
     def __init__(self, store: OutboxStore):
         self.store = store
-        self._transaction_log: List[Dict] = []
-        self._active_transactions: Dict[str, Dict] = {}
+        self._transaction_log: list[dict] = []
+        self._active_transactions: dict[str, dict] = {}
 
-    def begin(self, txn_id: str = None) -> Dict:
+    def begin(self, txn_id: str = None) -> dict:
         txn_id = txn_id or str(uuid.uuid4())[:12]
         self._active_transactions[txn_id] = {"started_at": time.time(), "operations": [], "outbox_messages": []}
         return {"txn_id": txn_id, "status": "active"}
 
-    def write(self, txn_id: str, data: Dict) -> Dict:
+    def write(self, txn_id: str, data: dict) -> dict:
         txn = self._active_transactions.get(txn_id)
         if not txn:
             return {"success": False, "error": "no_active_transaction"}
@@ -314,8 +314,8 @@ class TransactionalWriter:
         return {"success": True}
 
     def add_outbox_message(
-        self, txn_id: str, aggregate_type: str, aggregate_id: str, event_type: str, payload: Dict
-    ) -> Dict:
+        self, txn_id: str, aggregate_type: str, aggregate_id: str, event_type: str, payload: dict
+    ) -> dict:
         txn = self._active_transactions.get(txn_id)
         if not txn:
             return {"success": False, "error": "no_active_transaction"}
@@ -329,7 +329,7 @@ class TransactionalWriter:
         )
         return {"success": True}
 
-    def commit(self, txn_id: str) -> Dict:
+    def commit(self, txn_id: str) -> dict:
         txn = self._active_transactions.get(txn_id)
         if not txn:
             return {"success": False, "error": "no_active_transaction"}
@@ -349,13 +349,13 @@ class TransactionalWriter:
         del self._active_transactions[txn_id]
         return {"success": True, "outbox_ids": msg_ids, **record}
 
-    def rollback(self, txn_id: str) -> Dict:
+    def rollback(self, txn_id: str) -> dict:
         txn = self._active_transactions.pop(txn_id, None)
         if not txn:
             return {"success": False, "error": "no_active_transaction"}
         return {"success": True, "rolled_back": True, "discarded_operations": len(txn["operations"])}
 
-class OutboxAnalyzer(object):
+class OutboxAnalyzer:
     """outbox_pattern 运营分析引擎
 
     - 分析消息发送延迟
@@ -381,11 +381,11 @@ class OutboxAnalyzer(object):
 class OutboxPattern(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """Outbox模式 - 生产级实现"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "messages_stored": 0,
@@ -395,7 +395,7 @@ class OutboxPattern(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = logger
 

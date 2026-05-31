@@ -84,7 +84,7 @@ from dataclasses import dataclass, field
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
-class ExactlyOnceAnalyzer(object):
+class ExactlyOnceAnalyzer:
     """exactly_once 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -263,15 +263,15 @@ class MessageRecord:
 
     message_id: str
     content_hash: str
-    business_key: Optional[str]
+    business_key: str | None
     status: ProcessingStatus
     attempt_count: int = 0
     max_attempts: int = 3
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
-    error: Optional[str] = None
-    result: Optional[Dict] = None
+    completed_at: float | None = None
+    error: str | None = None
+    result: dict | None = None
 
 @dataclass
 class ProcessingMetrics:
@@ -305,14 +305,14 @@ class IdempotencyCache:
     """LRU幂等缓存"""
 
     def __init__(self, max_size: int = 10000, ttl_seconds: int = 3600):
-        self._cache: OrderedDict[str, Tuple[MessageRecord, float]] = OrderedDict()
+        self._cache: OrderedDict[str, tuple[MessageRecord, float]] = OrderedDict()
         self._max_size = max_size
         self._ttl = ttl_seconds
         self._lock = threading.Lock()
         self._hits = 0
         self._misses = 0
 
-    def get(self, key: str) -> Optional[MessageRecord]:
+    def get(self, key: str) -> MessageRecord | None:
         with self._lock:
             if key in self._cache:
                 record, ts = self._cache[key]
@@ -355,7 +355,7 @@ class DeadLetterQueue:
     """死信队列"""
 
     def __init__(self, max_size: int = 1000):
-        self._queue: List[Dict] = []
+        self._queue: list[dict] = []
         self._max_size = max_size
         self._lock = threading.Lock()
 
@@ -372,11 +372,11 @@ class DeadLetterQueue:
                 self._queue.pop(0)
             self._queue.append(entry)
 
-    def pop(self) -> Optional[Dict]:
+    def pop(self) -> dict | None:
         with self._lock:
             return self._queue.pop(0) if self._queue else None
 
-    def peek_all(self) -> List[Dict]:
+    def peek_all(self) -> list[dict]:
         with self._lock:
             return list(self._queue)
 
@@ -390,18 +390,18 @@ class DeadLetterQueue:
             self._queue.clear()
             return n
 
-class ExactlyOnceProcessor(object):
+class ExactlyOnceProcessor:
     """精确一次处理器核心"""
 
     def __init__(self, config: ExactlyOnceConfig = None):
         self._config = config or ExactlyOnceConfig()
         self._cache = IdempotencyCache(self._config.max_cache_size, self._config.cache_ttl_seconds)
         self._dead_letter = DeadLetterQueue(self._config.max_dead_letter_size)
-        self._processing_locks: Dict[str, threading.Lock] = {}
+        self._processing_locks: dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
         self._metrics = ProcessingMetrics()
-        self._processing_times: List[float] = []
-        self._handlers: Dict[str, callable] = {}
+        self._processing_times: list[float] = []
+        self._handlers: dict[str, callable] = {}
         self._running = False
 
     def register_handler(self, message_type: str, handler: callable) -> None:
@@ -411,7 +411,7 @@ class ExactlyOnceProcessor(object):
         serialized = json.dumps(content, sort_keys=True, default=str)
         return hashlib.sha256(serialized.encode()).hexdigest()[:32]
 
-    def _get_dedup_key(self, message_id: str, content: Any, business_key: Optional[str]) -> str:
+    def _get_dedup_key(self, message_id: str, content: Any, business_key: str | None) -> str:
         strategy = self._config.idempotency_strategy
         if strategy == IdempotencyStrategy.BUSINESS_KEY and business_key:
             return f"biz:{business_key}"
@@ -431,8 +431,8 @@ class ExactlyOnceProcessor(object):
                 self._processing_locks.clear()
 
     def check_duplicate(
-        self, message_id: str, content: Any = None, business_key: Optional[str] = None
-    ) -> Tuple[bool, Optional[MessageRecord]]:
+        self, message_id: str, content: Any = None, business_key: str | None = None
+    ) -> tuple[bool, MessageRecord | None]:
         key = self._get_dedup_key(message_id, content, business_key)
         existing = self._cache.get(key)
         if existing and existing.status == ProcessingStatus.COMPLETED:
@@ -441,8 +441,8 @@ class ExactlyOnceProcessor(object):
         return False, None
 
     def process(
-        self, message_id: str, content: Any, message_type: str = "default", business_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, message_id: str, content: Any, message_type: str = "default", business_key: str | None = None
+    ) -> dict[str, Any]:
         start = time.time()
         self._metrics.total_received += 1
 
@@ -502,13 +502,13 @@ class ExactlyOnceProcessor(object):
             self._metrics.active_messages -= 1
             proc_lock.release()
 
-    def _execute_handler(self, message_type: str, content: Any, record: MessageRecord) -> Dict:
+    def _execute_handler(self, message_type: str, content: Any, record: MessageRecord) -> dict:
         handler = self._handlers.get(message_type)
         if handler:
             return handler(content, record)
         return {"success": True, "processed": True, "message_type": message_type}
 
-    def retry_failed(self) -> List[Dict]:
+    def retry_failed(self) -> list[dict]:
         results = []
         for key, (record, _) in list(self._cache._cache.items()):
             if record.status == ProcessingStatus.FAILED and record.attempt_count < self._config.max_retry_attempts:
@@ -516,10 +516,10 @@ class ExactlyOnceProcessor(object):
                 results.append(retry_result)
         return results
 
-    def get_dead_letters(self) -> List[Dict]:
+    def get_dead_letters(self) -> list[dict]:
         return self._dead_letter.peek_all()
 
-    def reprocess_dead_letter(self, count: int = 10) -> List[Dict]:
+    def reprocess_dead_letter(self, count: int = 10) -> list[dict]:
         results = []
         for _ in range(count):
             entry = self._dead_letter.pop()
@@ -529,7 +529,7 @@ class ExactlyOnceProcessor(object):
             results.append(result)
         return results
 
-    def get_metrics(self) -> Dict:
+    def get_metrics(self) -> dict:
         self._metrics.cache_hit_rate = self._cache.hit_rate
         return {
             "total_received": self._metrics.total_received,
@@ -554,7 +554,7 @@ class ExactlyOnceProcessor(object):
 class ExactlyOnceModule:
     """精确一次消息处理模块"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or {}
         self._module_config = ExactlyOnceConfig(
             max_cache_size=self.config.get("max_cache_size", 10000),
@@ -564,7 +564,7 @@ class ExactlyOnceModule:
             max_dead_letter_size=self.config.get("max_dead_letter_size", 1000),
         )
         self._processor = ExactlyOnceProcessor(self._module_config)
-        self._registered_handlers: List[str] = []
+        self._registered_handlers: list[str] = []
         self._initialized = False
 
     def initialize(self) -> None:
@@ -581,13 +581,13 @@ class ExactlyOnceModule:
         self._processor.register_handler("notification", self._handle_notification)
         self._registered_handlers = ["event", "command", "notification"]
 
-    def _handle_event(self, content: Any, record: MessageRecord) -> Dict:
+    def _handle_event(self, content: Any, record: MessageRecord) -> dict:
         return {"success": True, "processed": True, "type": "event"}
 
-    def _handle_command(self, content: Any, record: MessageRecord) -> Dict:
+    def _handle_command(self, content: Any, record: MessageRecord) -> dict:
         return {"success": True, "processed": True, "type": "command"}
 
-    def _handle_notification(self, content: Any, record: MessageRecord) -> Dict:
+    def _handle_notification(self, content: Any, record: MessageRecord) -> dict:
         return {"success": True, "processed": True, "type": "notification"}
 
     def register_handler(self, message_type: str, handler: callable) -> None:
@@ -596,31 +596,31 @@ class ExactlyOnceModule:
             self._registered_handlers.append(message_type)
 
     def process_message(
-        self, message_id: str, content: Any, message_type: str = "default", business_key: Optional[str] = None
-    ) -> Dict:
+        self, message_id: str, content: Any, message_type: str = "default", business_key: str | None = None
+    ) -> dict:
         return self._processor.process(message_id, content, message_type, business_key)
 
     def check_duplicate(
-        self, message_id: str, content: Any = None, business_key: Optional[str] = None
-    ) -> Tuple[bool, Optional[Dict]]:
+        self, message_id: str, content: Any = None, business_key: str | None = None
+    ) -> tuple[bool, dict | None]:
         is_dup, record = self._processor.check_duplicate(message_id, content, business_key)
         if record:
             return is_dup, {"status": record.status.value, "result": record.result}
         return is_dup, None
 
-    def retry_failed(self) -> List[Dict]:
+    def retry_failed(self) -> list[dict]:
         return self._processor.retry_failed()
 
-    def get_dead_letters(self) -> List[Dict]:
+    def get_dead_letters(self) -> list[dict]:
         return self._processor.get_dead_letters()
 
-    def reprocess_dead_letter(self, count: int = 10) -> List[Dict]:
+    def reprocess_dead_letter(self, count: int = 10) -> list[dict]:
         return self._processor.reprocess_dead_letter(count)
 
-    def get_metrics(self) -> Dict:
+    def get_metrics(self) -> dict:
         return self._processor.get_metrics()
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         self.trace("exactly_once.health_check", "start")
         metrics = self.get_metrics()
         healthy = (
@@ -642,7 +642,7 @@ class ExactlyOnceModule:
         self._initialized = False
         self._registered_handlers.clear()
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Dict:
+    async def execute(self, action: str, params: dict | None = None) -> dict:
         self.trace("exactly_once.execute", "start", action=action)
 
         params = params or {}

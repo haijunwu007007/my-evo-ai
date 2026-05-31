@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎
@@ -102,7 +101,8 @@ import textwrap
 import ast
 import stat
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -188,12 +188,12 @@ class SandboxConfig:
     language: SandboxLanguage = SandboxLanguage.PYTHON
     security_level: SecurityLevel = SecurityLevel.MEDIUM
     resource_limits: ResourceLimits = field(default_factory=ResourceLimits)
-    working_dir: Optional[str] = None
-    env_vars: Dict[str, str] = field(default_factory=dict)
+    working_dir: str | None = None
+    env_vars: dict[str, str] = field(default_factory=dict)
     input_data: str = ""
-    pre_imports: List[str] = field(default_factory=list)
-    allowed_modules: Set[str] = field(default_factory=set)
-    denied_modules: Set[str] = field(default_factory=set)
+    pre_imports: list[str] = field(default_factory=list)
+    allowed_modules: set[str] = field(default_factory=set)
+    denied_modules: set[str] = field(default_factory=set)
     capture_output: bool = True
     throw_on_error: bool = False
 
@@ -364,8 +364,8 @@ class ModuleWhitelist:
 
     def __init__(
         self,
-        allowed: Optional[Set[str]] = None,
-        denied: Optional[Set[str]] = None,
+        allowed: set[str] | None = None,
+        denied: set[str] | None = None,
         security_level: SecurityLevel = SecurityLevel.MEDIUM,
     ):
         self.security_level = security_level
@@ -382,7 +382,7 @@ class ModuleWhitelist:
         if denied:
             self._denied.update(denied)
 
-    def check_code(self, code: str) -> List[str]:
+    def check_code(self, code: str) -> list[str]:
         """检查代码中的导入，返回被拒绝的模块列表"""
         violations = []
         try:
@@ -413,19 +413,19 @@ class ModuleWhitelist:
                 return True
         return False
 
-    def get_allowed_list(self) -> Set[str]:
+    def get_allowed_list(self) -> set[str]:
         return self._allowed - self._denied
 
-    def get_denied_list(self) -> Set[str]:
+    def get_denied_list(self) -> set[str]:
         return self._denied.copy()
 
 class VirtualFileSystem:
     """虚拟文件系统"""
 
-    def __init__(self, base_dir: Optional[str] = None):
+    def __init__(self, base_dir: str | None = None):
         self.base_dir = Path(base_dir or tempfile.mkdtemp(prefix="evo_sandbox_"))
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        self._created_files: Set[str] = set()
+        self._created_files: set[str] = set()
 
     def write_file(self, relative_path: str, content: str) -> str:
         """写入文件"""
@@ -442,7 +442,7 @@ class VirtualFileSystem:
             return full_path.read_text(encoding="utf-8")
         raise FileNotFoundError(f"文件不存在: {relative_path}")
 
-    def list_files(self, relative_path: str = ".") -> List[str]:
+    def list_files(self, relative_path: str = ".") -> list[str]:
         """列出文件"""
         full_path = self._resolve(relative_path)
         if not full_path.exists():
@@ -471,7 +471,7 @@ class VirtualFileSystem:
             raise SandboxSecurityError(f"路径遍历攻击: {relative_path}")
         return resolved
 
-class CodeAnalyzer(object):
+class CodeAnalyzer:
     """代码安全分析器"""
 
     DANGEROUS_PATTERNS = [
@@ -500,7 +500,7 @@ class CodeAnalyzer(object):
         (r"\bwinreg\s*\.", "访问Windows注册表"),
     ]
 
-    def analyze(self, code: str) -> Dict[str, Any]:
+    def analyze(self, code: str) -> dict[str, Any]:
         """分析代码安全性"""
         import re
 
@@ -780,7 +780,7 @@ class CodeSandbox(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def __init__(self):
 
         super().__init__(module_id="code_sandbox", module_name="代码沙箱引擎")
-        self._execution_history: List[SandboxResult] = []
+        self._execution_history: list[SandboxResult] = []
         self._lock = threading.Lock()
         self._executor = ThreadPoolExecutor(max_workers=5)
         self._default_config = SandboxConfig()
@@ -800,7 +800,7 @@ class CodeSandbox(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         timeout: float = 30.0,
         max_memory_mb: int = 256,
         input_data: str = "",
-        env_vars: Optional[Dict[str, str]] = None,
+        env_vars: dict[str, str] | None = None,
     ) -> SandboxResult:
         """执行代码"""
         if self._active_count >= self._max_concurrent:
@@ -866,7 +866,7 @@ class CodeSandbox(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         finally:
             self._active_count -= 1
 
-    def analyze_code(self, code: str) -> Dict[str, Any]:
+    def analyze_code(self, code: str) -> dict[str, Any]:
         """分析代码安全性"""
         return self._analyzer.analyze(code)
 
@@ -875,8 +875,8 @@ class CodeSandbox(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def get_execution_history(
         self,
         limit: int = 50,
-        status: Optional[SandboxStatus] = None,
-    ) -> List[Dict]:
+        status: SandboxStatus | None = None,
+    ) -> list[dict]:
         """获取执行历史"""
         with self._lock:
             results = self._execution_history
@@ -896,7 +896,7 @@ class CodeSandbox(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 for r in reversed(results[-limit:])
             ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取沙箱统计"""
         with self._lock:
             total = self._total_executions

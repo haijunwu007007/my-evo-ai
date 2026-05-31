@@ -322,7 +322,7 @@ class PlatformInfo:
     home_dir: str
     is_wsl: bool = False
     is_64bit: bool = True
-    env_vars: Dict[str, str] = field(default_factory=dict)
+    env_vars: dict[str, str] = field(default_factory=dict)
 
 class PathAdapter:
     """跨平台路径适配器"""
@@ -401,7 +401,7 @@ class ShellAdapter:
             return ShellType.BASH
         return ShellType.SH
 
-    def build_command(self, cmd: str, shell: Optional[ShellType] = None) -> List[str]:
+    def build_command(self, cmd: str, shell: ShellType | None = None) -> list[str]:
         """构建平台适配的命令列表"""
         target_shell = shell or self.detect_default_shell()
 
@@ -419,12 +419,12 @@ class ShellAdapter:
     def execute(
         self,
         cmd: str,
-        cwd: Optional[str] = None,
-        timeout: Optional[int] = None,
-        env: Optional[Dict[str, str]] = None,
+        cwd: str | None = None,
+        timeout: int | None = None,
+        env: dict[str, str] | None = None,
         capture: bool = True,
-        shell: Optional[ShellType] = None,
-    ) -> Tuple[int, str, str]:
+        shell: ShellType | None = None,
+    ) -> tuple[int, str, str]:
         """
         跨平台执行命令
         Returns: (return_code, stdout, stderr)
@@ -453,7 +453,7 @@ class ShellAdapter:
         except Exception as e:
             return -1, "", str(e)
 
-    def which(self, program: str) -> Optional[str]:
+    def which(self, program: str) -> str | None:
         """跨平台查找可执行文件"""
         return shutil.which(program)
 
@@ -461,7 +461,7 @@ class EnvAdapter:
     """跨平台环境变量适配器"""
 
     @staticmethod
-    def get(key: str, default: Optional[str] = None) -> Optional[str]:
+    def get(key: str, default: str | None = None) -> str | None:
         """获取环境变量"""
         return os.environ.get(key, default)
 
@@ -483,7 +483,7 @@ class EnvAdapter:
             EnvAdapter._unpersist_env(key)
 
     @staticmethod
-    def get_all() -> Dict[str, str]:
+    def get_all() -> dict[str, str]:
         """获取所有环境变量"""
         return dict(os.environ)
 
@@ -521,7 +521,7 @@ class EnvAdapter:
                 for rc in ["~/.bashrc", "~/.zshrc"]:
                     rc_path = os.path.expanduser(rc)
                     if os.path.exists(rc_path):
-                        with open(rc_path, "r", encoding="utf-8") as f:
+                        with open(rc_path, encoding="utf-8") as f:
                             lines = f.readlines()
                         with open(rc_path, "w", encoding="utf-8") as f:
                             for line in lines:
@@ -590,14 +590,14 @@ class ProcessAdapter:
     """跨平台进程管理"""
 
     def __init__(self):
-        self._processes: Dict[str, subprocess.Popen] = {}
+        self._processes: dict[str, subprocess.Popen] = {}
 
     def spawn(
         self,
         name: str,
-        cmd: List[str],
-        cwd: Optional[str] = None,
-        env: Optional[Dict[str, str]] = None,
+        cmd: list[str],
+        cwd: str | None = None,
+        env: dict[str, str] | None = None,
         detached: bool = False,
     ) -> bool:
         """启动一个命名进程"""
@@ -635,7 +635,7 @@ class ProcessAdapter:
             logger.error(f"Failed to kill process '{name}': {e}")
             return False
 
-    def list_processes(self) -> Dict[str, Dict[str, Any]]:
+    def list_processes(self) -> dict[str, dict[str, Any]]:
         """列出所有托管进程的状态"""
         result = {}
         for name, proc in self._processes.items():
@@ -690,7 +690,7 @@ class CrossPlatformAdapter:
         elif system == "Linux":
             if "microsoft" in release.lower() or os.path.exists("/proc/version"):
                 try:
-                    with open("/proc/version", "r") as f:
+                    with open("/proc/version") as f:
                         if "microsoft" in f.read().lower():
                             os_type = OSType.WSL
                             is_wsl = True
@@ -721,7 +721,7 @@ class CrossPlatformAdapter:
         info.shell_type = shell_adapter.detect_default_shell()
         return info
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """导出平台信息为字典"""
         return {
             "os_type": self.info.os_type.value,
@@ -736,11 +736,11 @@ class CrossPlatformAdapter:
             "is_64bit": self.info.is_64bit,
         }
 
-    def run(self, cmd: str, **kwargs) -> Tuple[int, str, str]:
+    def run(self, cmd: str, **kwargs) -> tuple[int, str, str]:
         """快捷执行命令"""
         return self.shell.execute(cmd, **kwargs)
 
-    def check_dependency(self, name: str) -> Dict[str, Any]:
+    def check_dependency(self, name: str) -> dict[str, Any]:
         """检查系统依赖是否安装"""
         path = shutil.which(name)
         if path:
@@ -752,12 +752,12 @@ class CrossPlatformAdapter:
                 return {"installed": True, "path": path, "version": "unknown"}
         return {"installed": False, "path": None, "version": None}
 
-    def check_dependencies(self, names: List[str]) -> Dict[str, Dict[str, Any]]:
+    def check_dependencies(self, names: list[str]) -> dict[str, dict[str, Any]]:
         """批量检查依赖"""
         return {name: self.check_dependency(name) for name in names}
 
 # ── 模块初始化 ──────────────────────────────────────────────
-adapter_instance: Optional[CrossPlatformAdapter] = None
+adapter_instance: CrossPlatformAdapter | None = None
 
 def get_adapter() -> CrossPlatformAdapter:
     """获取全局单例"""

@@ -163,10 +163,10 @@ class SentimentResult:
     sentiment: SentimentType
     score: float  # -1.0 到 1.0
     confidence: float
-    positive_words: List[str] = field(default_factory=list)
-    negative_words: List[str] = field(default_factory=list)
-    emotions: Dict[str, float] = field(default_factory=dict)
-    aspects: List[Dict[str, Any]] = field(default_factory=list)
+    positive_words: list[str] = field(default_factory=list)
+    negative_words: list[str] = field(default_factory=list)
+    emotions: dict[str, float] = field(default_factory=dict)
+    aspects: list[dict[str, Any]] = field(default_factory=list)
 
 @dataclass
 class SentimentTrend:
@@ -179,30 +179,30 @@ class SentimentTrend:
     neutral_count: int
     volume: int
 
-class SentimentScoringEngine(object):
+class SentimentScoringEngine:
     """情感评分引擎 - 负责多维度情感评分、关键词提取和情感趋势分析"""
 
     def __init__(self):
         self._positive_words: Set[str] = set()
         self._negative_words: Set[str] = set()
-        self._intensifiers: Dict[str, float] = {}
+        self._intensifiers: dict[str, float] = {}
         self._negators: Set[str] = set()
         self._scored_count: int = 0
 
-    def load_lexicon(self, positive: List[str], negative: List[str]) -> None:
+    def load_lexicon(self, positive: list[str], negative: list[str]) -> None:
         """加载情感词典"""
         self._positive_words.update(w.lower() for w in positive)
         self._negative_words.update(w.lower() for w in negative)
 
-    def load_intensifiers(self, intensifiers: Dict[str, float]) -> None:
+    def load_intensifiers(self, intensifiers: dict[str, float]) -> None:
         """加载程度副词"""
         self._intensifiers.update({k.lower(): v for k, v in intensifiers.items()})
 
-    def load_negators(self, negators: List[str]) -> None:
+    def load_negators(self, negators: list[str]) -> None:
         """加载否定词"""
         self._negators.update(w.lower() for w in negators)
 
-    def score(self, text: str) -> Dict:
+    def score(self, text: str) -> dict:
         """对文本进行情感评分"""
         self._scored_count += 1
         words = text.lower().split()
@@ -254,14 +254,14 @@ class SentimentScoringEngine(object):
             "matched_negative": matched_negative,
         }
 
-    def batch_score(self, texts: List[str]) -> List[Dict]:
+    def batch_score(self, texts: list[str]) -> list[dict]:
         """批量评分"""
         return [self.score(text) for text in texts]
 
-    def extract_keywords(self, text: str, top_n: int = 10) -> List[Dict]:
+    def extract_keywords(self, text: str, top_n: int = 10) -> list[dict]:
         """提取关键词及情感倾向"""
         words = text.lower().split()
-        word_scores: Dict[str, Dict] = {}
+        word_scores: dict[str, dict] = {}
         for word in words:
             clean = word.strip(".,!?;:\"'()[]{}")
             if not clean:
@@ -277,7 +277,7 @@ class SentimentScoringEngine(object):
         sorted_words = sorted(word_scores.items(), key=lambda x: x[1]["count"], reverse=True)
         return [{"word": w, **scores} for w, scores in sorted_words[:top_n]]
 
-    def analyze_trend(self, scores: List[Dict]) -> Dict:
+    def analyze_trend(self, scores: list[dict]) -> dict:
         """分析情感趋势"""
         if not scores:
             return {"trend": "unknown"}
@@ -292,7 +292,7 @@ class SentimentScoringEngine(object):
             trend = "insufficient_data"
         return {"trend": trend, "avg_score": round(avg_recent, 4), "data_points": len(values)}
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "positive_words": len(self._positive_words),
             "negative_words": len(self._negative_words),
@@ -308,13 +308,13 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         super().__init__()
         self._metrics = _MetricsAdapter()
-        self._positive_words: Dict[str, float] = {}
-        self._negative_words: Dict[str, float] = {}
+        self._positive_words: dict[str, float] = {}
+        self._negative_words: dict[str, float] = {}
         self._negation_words: Set[str] = set()
-        self._intensifiers: Dict[str, float] = {}
-        self._emotion_lexicon: Dict[str, Dict[str, float]] = {}
-        self._analysis_history: List[Dict] = []
-        self._trend_data: List[Dict] = []
+        self._intensifiers: dict[str, float] = {}
+        self._emotion_lexicon: dict[str, dict[str, float]] = {}
+        self._analysis_history: list[dict] = []
+        self._trend_data: list[dict] = []
 
     def initialize(self) -> None:
         self._load_lexicons()
@@ -502,7 +502,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "surprise": {"surprise": 0.8},
         }
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """分词"""
         tokens = []
         for segment in re.findall(r"[\u4e00-\u9fff]+|[a-zA-Z']+|[.!?,;:]+", text.lower()):
@@ -517,7 +517,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         return tokens
 
     @trace_operation("sentiment_analyze")
-    def analyze(self, text: str, include_aspects: bool = False) -> Dict[str, Any]:
+    def analyze(self, text: str, include_aspects: bool = False) -> dict[str, Any]:
         """分析文本情感"""
         start = time.time()
         tokens = self._tokenize(text)
@@ -623,7 +623,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     @trace_operation("sentiment_batch")
-    def batch_analyze(self, texts: List[str]) -> Dict[str, Any]:
+    def batch_analyze(self, texts: list[str]) -> dict[str, Any]:
         """批量情感分析"""
         results = []
         sentiment_counts = defaultdict(int)
@@ -649,7 +649,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         }
 
     @trace_operation("sentiment_trend")
-    def analyze_trend(self, period: str = "daily") -> Dict[str, Any]:
+    def analyze_trend(self, period: str = "daily") -> dict[str, Any]:
         """分析情感趋势"""
         if not self._analysis_history:
             return {"trend": [], "message": "无足够数据"}
@@ -701,7 +701,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "overall_avg": round(sum(t["avg_score"] for t in trends) / max(len(trends), 1), 4),
         }
 
-    def add_custom_word(self, word: str, score: float, category: str = "sentiment") -> Dict[str, Any]:
+    def add_custom_word(self, word: str, score: float, category: str = "sentiment") -> dict[str, Any]:
         """添加自定义情感词"""
         word = word.lower()
         if category == "positive":
@@ -765,7 +765,7 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

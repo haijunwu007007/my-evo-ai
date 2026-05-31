@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 数据目录（A级）"""
 # Grade: A
 __module_meta__ = {"id":"data-catalog","name":"Data Catalog","version":"V0.1","group":"data","grade":"B",
@@ -40,8 +39,8 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     def __init__(self, config=None):
         super().__init__(config)
-        self._catalog: Dict[str, Dict[str, Any]] = {}
-        self._last_scan: Optional[str] = None
+        self._catalog: dict[str, dict[str, Any]] = {}
+        self._last_scan: str | None = None
 
     def initialize(self) -> None:
         self.status = ModuleStatus.RUNNING
@@ -77,7 +76,7 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         return {"error": f"unknown:{a}"}
 
     # ── public API: scan_directory ──────────────────────────────────────
-    def scan_directory(self, path: str) -> Dict[str, Any]:
+    def scan_directory(self, path: str) -> dict[str, Any]:
         """扫描目录，建立文件元数据索引"""
         if not os.path.isdir(path):
             logger.error("scan_directory: not a directory: %s", path)
@@ -116,7 +115,7 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "total_in_catalog": len(self._catalog)
         }
 
-    def _index_file(self, fpath: str) -> Optional[Dict[str, Any]]:
+    def _index_file(self, fpath: str) -> dict[str, Any] | None:
         stat = os.stat(fpath)
         ext = os.path.splitext(fpath)[1].lower()
         ftype = _FILE_TYPE_MAP.get(ext, "other")
@@ -146,7 +145,7 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
 
     # ── public API: get_summary ─────────────────────────────────────────
-    def get_summary(self, path: Optional[str] = None) -> Dict[str, Any]:
+    def get_summary(self, path: str | None = None) -> dict[str, Any]:
         """返回已索引文件的摘要统计"""
         if path:
             # 只统计某个目录下的文件
@@ -159,7 +158,7 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"success": True, "total_files": 0, "message": "no files indexed"}
 
         # 按类型分组
-        by_type: Dict[str, int] = {}
+        by_type: dict[str, int] = {}
         total_size = 0
         largest = None
         latest = None
@@ -185,7 +184,7 @@ class DataCatalog(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # ── public API: search_files ────────────────────────────────────────
     def search_files(self, pattern: str,
-                     directory: Optional[str] = None) -> List[Dict[str, Any]]:
+                     directory: str | None = None) -> list[dict[str, Any]]:
         """使用 fnmatch 搜索文件名，支持通配符"""
         results = []
         for fpath, meta in self._catalog.items():

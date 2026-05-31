@@ -178,20 +178,20 @@ class CanaryRelease:
     step_interval_seconds: int = 300
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    metrics: List[ReleaseMetric] = field(default_factory=list)
-    rules: List[CanaryRule] = field(default_factory=list)
-    violations: List[Dict[str, Any]] = field(default_factory=list)
+    metrics: list[ReleaseMetric] = field(default_factory=list)
+    rules: list[CanaryRule] = field(default_factory=list)
+    violations: list[dict[str, Any]] = field(default_factory=list)
     rollback_reason: str = ""
-    success: Optional[bool] = None
+    success: bool | None = None
 
-class TrafficSplitEngine(object):
+class TrafficSplitEngine:
     """流量分配引擎 - 权重计算、用户分桶、渐进式调整"""
 
     def __init__(self):
-        self._current_weights: Dict[str, float] = {}
-        self._bucket_assignments: Dict[str, str] = {}
+        self._current_weights: dict[str, float] = {}
+        self._bucket_assignments: dict[str, str] = {}
 
-    def calculate_split(self, canary_id: str, canary_pct: float, total_pct: float = 100.0) -> Dict:
+    def calculate_split(self, canary_id: str, canary_pct: float, total_pct: float = 100.0) -> dict:
         canary_pct = max(0.0, min(canary_pct, total_pct))
         stable_pct = total_pct - canary_pct
         return {"canary_id": canary_id, "canary_weight": canary_pct, "stable_weight": stable_pct}
@@ -200,13 +200,13 @@ class TrafficSplitEngine(object):
         h = int(hashlib.md5(user_id.encode()).hexdigest(), 16) % 100
         return canary_id if h < canary_pct else "stable"
 
-    def get_current_weights(self) -> Dict[str, float]:
+    def get_current_weights(self) -> dict[str, float]:
         return dict(self._current_weights)
 
     def update_weight(self, canary_id: str, weight: float) -> None:
         self._current_weights[canary_id] = weight
 
-    def gradual_increase(self, canary_id: str, step_pct: float, max_pct: float) -> Dict:
+    def gradual_increase(self, canary_id: str, step_pct: float, max_pct: float) -> dict:
         """渐进式增加金丝雀流量"""
         current = self._current_weights.get(canary_id, 0.0)
         new_weight = min(current + step_pct, max_pct)
@@ -220,7 +220,7 @@ class TrafficSplitEngine(object):
             return True
         return False
 
-    def get_distribution_summary(self) -> Dict:
+    def get_distribution_summary(self) -> dict:
         """获取所有金丝雀发布的流量分布摘要"""
         total = sum(self._current_weights.values()) + max(0, 100.0 - sum(self._current_weights.values()))
         canary_total = sum(self._current_weights.values())
@@ -242,14 +242,14 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self.module_name = "canary_release"
         self.module_id = self.module_name
         self.module_version = "7.0.0"
-        self._releases: Dict[str, CanaryRelease] = {}
+        self._releases: dict[str, CanaryRelease] = {}
         self._audit = AuditLogger()
         self._total_releases = 0
         self._total_rollbacks = 0
-        self._active_releases: List[str] = []
+        self._active_releases: list[str] = []
         self._default_rules = self._setup_default_rules()
 
-    def _setup_default_rules(self) -> List[CanaryRule]:
+    def _setup_default_rules(self) -> list[CanaryRule]:
         return [
             CanaryRule("rule_err_rate", MetricType.ERROR_RATE, 0.05, "gt", 300, "错误率超过5%"),
             CanaryRule("rule_latency_p99", MetricType.LATENCY_P99, 500, "gt", 300, "P99延迟超过500ms"),
@@ -261,7 +261,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def initialize(self):
         logger.info("canary_release initialized")
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("canary_release_ops_total", labels={"operation": operation})
         self.audit("execute", f"operation={operation}")
@@ -307,7 +307,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 ],
             }
 
-    def _create_release(self, p: Dict) -> Dict:
+    def _create_release(self, p: dict) -> dict:
         app_name = p.get("app_name", "")
         version = p.get("version", "")
         previous_version = p.get("previous_version", "")
@@ -343,7 +343,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _start_release(self, p: Dict) -> Dict:
+    def _start_release(self, p: dict) -> dict:
         rid = p.get("release_id")
         if not rid or rid not in self._releases:
             return {"success": False, "error": "release not found"}
@@ -367,7 +367,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _advance(self, p: Dict) -> Dict:
+    def _advance(self, p: dict) -> dict:
         rid = p.get("release_id")
         if not rid or rid not in self._releases:
             return {"success": False, "error": "release not found"}
@@ -399,7 +399,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _report_metric(self, p: Dict) -> Dict:
+    def _report_metric(self, p: dict) -> dict:
         rid = p.get("release_id")
         metric_type = p.get("metric_type", "error_rate")
         value = p.get("value", 0)
@@ -429,7 +429,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _evaluate(self, p: Dict) -> Dict:
+    def _evaluate(self, p: dict) -> dict:
         rid = p.get("release_id")
         if not rid or rid not in self._releases:
             return {"success": False, "error": "release not found"}
@@ -439,7 +439,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return {"success": True, "result": {"status": "no_metrics", "can_continue": True}}
 
         violations = []
-        latest_metrics: Dict[MetricType, ReleaseMetric] = {}
+        latest_metrics: dict[MetricType, ReleaseMetric] = {}
         for m in rel.metrics:
             if m.metric_type not in latest_metrics or m.timestamp > latest_metrics[m.metric_type].timestamp:
                 latest_metrics[m.metric_type] = m
@@ -448,13 +448,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             if rule.metric in latest_metrics:
                 lm = latest_metrics[rule.metric]
                 triggered = False
-                if rule.comparison == "gt" and lm.value > rule.threshold:
-                    triggered = True
-                elif rule.comparison == "lt" and lm.value < rule.threshold:
-                    triggered = True
-                elif rule.comparison == "gte" and lm.value >= rule.threshold:
-                    triggered = True
-                elif rule.comparison == "lte" and lm.value <= rule.threshold:
+                if rule.comparison == "gt" and lm.value > rule.threshold or rule.comparison == "lt" and lm.value < rule.threshold or rule.comparison == "gte" and lm.value >= rule.threshold or rule.comparison == "lte" and lm.value <= rule.threshold:
                     triggered = True
                 if triggered:
                     violations.append(
@@ -480,7 +474,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _rollback(self, p: Dict) -> Dict:
+    def _rollback(self, p: dict) -> dict:
         rid = p.get("release_id")
         reason = p.get("reason", "manual")
         if not rid or rid not in self._releases:
@@ -510,7 +504,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _pause(self, p: Dict) -> Dict:
+    def _pause(self, p: dict) -> dict:
         rid = p.get("release_id")
         if not rid or rid not in self._releases:
             return {"success": False, "error": "release not found"}
@@ -523,7 +517,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._audit.log("release_paused", {"release_id": rid})
         return {"success": True, "result": {"release_id": rid, "state": "paused", "canary_pct": rel.canary_pct}}
 
-    def _get_release(self, p: Dict) -> Dict:
+    def _get_release(self, p: dict) -> dict:
         rid = p.get("release_id")
         if not rid or rid not in self._releases:
             return {"success": False, "error": "release not found"}
@@ -547,7 +541,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _list_releases(self, p: Dict) -> Dict:
+    def _list_releases(self, p: dict) -> dict:
         limit = p.get("limit", 20)
         app_name = p.get("app_name")
         releases = list(self._releases.values())
@@ -571,7 +565,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "total": len(releases),
         }
 
-    def _get_status(self, p: Dict) -> Dict:
+    def _get_status(self, p: dict) -> dict:
         active = [self._releases[rid] for rid in self._active_releases if rid in self._releases]
         return {
             "success": True,
@@ -592,7 +586,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _add_rule(self, p: Dict) -> Dict:
+    def _add_rule(self, p: dict) -> dict:
         rid = p.get("release_id")
         metric_type = p.get("metric_type", "error_rate")
         threshold = p.get("threshold", 5.0)
@@ -626,7 +620,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._initialized = False
         self._audit.log("shutdown", "canary_release shutdown")
 
-    def get_release_dashboard(self) -> Dict[str, Any]:
+    def get_release_dashboard(self) -> dict[str, Any]:
         """发布仪表盘概览：活跃发布数、成功/回滚/暂停统计"""
         releases = self._releases if hasattr(self, "_releases") else {}
         total = len(releases)
@@ -653,7 +647,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "recent": recent_summary,
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check() or {}
         result = dict(base)
         result.update(
@@ -667,7 +661,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         )
         return result
 
-    def batch_update_weights(self, updates: List[Dict]) -> Dict[str, float]:
+    def batch_update_weights(self, updates: list[dict]) -> dict[str, float]:
         """批量更新金丝雀流量权重"""
         results = {}
         for u in updates:
@@ -677,7 +671,7 @@ class CanaryReleaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             results[cid] = weight
         return results
 
-    def get_release_timeline(self, release_id: str) -> List[Dict]:
+    def get_release_timeline(self, release_id: str) -> list[dict]:
         """获取发布时间线（用于审计和分析）"""
         release = self._releases.get(release_id)
         if not release:

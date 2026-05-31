@@ -93,7 +93,7 @@ logger = logging.getLogger("evo.stock")
 
 __version__ = "V0.1"
 
-class StockApiAnalyzer(object):
+class StockApiAnalyzer:
     """stock_api 分析引擎 - 运营分析核心组件"""
 
     def __init__(self):
@@ -278,7 +278,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.info("[StockAPI] AKShare 已加载")
         return self._akshare
 
-    def _get_tencent_quote(self, symbol: str) -> Optional[Dict]:
+    def _get_tencent_quote(self, symbol: str) -> dict | None:
         """通过腾讯行情接口获取实时数据"""
         try:
             import urllib.request
@@ -309,7 +309,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.warning(f"[StockAPI] 腾讯行情获取失败: {e}")
         return None
 
-    def quote(self, symbols: List[str]) -> Dict[str, Any]:
+    def quote(self, symbols: list[str]) -> dict[str, Any]:
         """
         获取实时行情（支持批量）
 
@@ -348,7 +348,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     results[sym] = {"symbol": sym, "error": "无可用数据源，请安装AKShare: pip install akshare"}
         return results
 
-    def kline(self, symbol: str, period: str = "daily", count: int = 20) -> Dict[str, Any]:
+    def kline(self, symbol: str, period: str = "daily", count: int = 20) -> dict[str, Any]:
         """
         获取K线数据
 
@@ -383,7 +383,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def fundamentals(self, symbol: str) -> Dict[str, Any]:
+    def fundamentals(self, symbol: str) -> dict[str, Any]:
         """获取财务数据"""
         ak = self._get_akshare()
         if not ak:
@@ -405,7 +405,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def capital_flow(self, symbol: str) -> Dict[str, Any]:
+    def capital_flow(self, symbol: str) -> dict[str, Any]:
         """获取资金流向"""
         ak = self._get_akshare()
         if not ak:
@@ -428,11 +428,11 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             pass
         return {"success": False, "error": str(e) if str(e) else "数据不可用"}
 
-    def batch_quote(self, symbols: List[str]) -> Dict[str, Any]:
+    def batch_quote(self, symbols: list[str]) -> dict[str, Any]:
         """批量行情（主要接口）"""
         return self.quote(symbols)
 
-    def search(self, keyword: str) -> Dict[str, Any]:
+    def search(self, keyword: str) -> dict[str, Any]:
         """搜索股票"""
         ak = self._get_akshare()
         if not ak:
@@ -447,7 +447,7 @@ class StockAPI(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_market_summary(self) -> Dict[str, Any]:
+    def get_market_summary(self) -> dict[str, Any]:
         """市场概况（上证/深证/创业板/科创板）"""
         # 先尝试腾讯行情（无需安装）
         tencent_result = {}

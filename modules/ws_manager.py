@@ -43,7 +43,8 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Set
+from typing import Any, Dict, List, Optional, Set
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
@@ -77,15 +78,15 @@ class WSConnection:
     ws: Any = None  # WebSocket实例
     remote_addr: str = ""
     state: ConnectionState = ConnectionState.CONNECTING
-    user_id: Optional[str] = None
+    user_id: str | None = None
     username: str = ""
-    scopes: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    rooms: Set[str] = field(default_factory=set)
+    scopes: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    rooms: set[str] = field(default_factory=set)
     connected_at: str = field(default_factory=lambda: datetime.now().isoformat())
     last_active: str = field(default_factory=lambda: datetime.now().isoformat())
-    last_ping: Optional[str] = None
-    last_pong: Optional[str] = None
+    last_ping: str | None = None
+    last_pong: str | None = None
     messages_sent: int = 0
     messages_received: int = 0
     bytes_sent: int = 0
@@ -132,11 +133,11 @@ class WSRoom:
     persistent: bool = False
     message_history: bool = False
     history_max: int = 100
-    history: List[Dict[str, Any]] = field(default_factory=list)
+    history: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     total_messages: int = 0
-    _members: Set[str] = field(default_factory=set)
+    _members: set[str] = field(default_factory=set)
 
     @property
     def member_count(self) -> int:
@@ -150,12 +151,12 @@ class WSMessage:
     sender_id: str = ""
     room_id: str = ""
     target_type: str = "broadcast"  # broadcast/unicast/multicast
-    target_ids: List[str] = field(default_factory=list)
+    target_ids: list[str] = field(default_factory=list)
     message_type: MessageType = MessageType.TEXT
     content: str = ""
     binary_data: bytes = b""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     ttl_seconds: float = 0.0
 
 # ============================================================================
@@ -179,27 +180,27 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
       - 健康检查
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 连接表
-        self._connections: Dict[str, WSConnection] = {}
+        self._connections: dict[str, WSConnection] = {}
         # 用户 -> 连接ID映射
-        self._user_connections: Dict[str, Set[str]] = defaultdict(set)
+        self._user_connections: dict[str, set[str]] = defaultdict(set)
         # 房间表
-        self._rooms: Dict[str, WSRoom] = {}
+        self._rooms: dict[str, WSRoom] = {}
         # 发送工作协程（每连接一个）
-        self._sender_tasks: Dict[str, asyncio.Task] = {}
+        self._sender_tasks: dict[str, asyncio.Task] = {}
         # 链路追踪上下文（trace_id -> span信息）
-        self._trace_contexts: Dict[str, Dict[str, Any]] = {}
+        self._trace_contexts: dict[str, dict[str, Any]] = {}
         self._trace_enabled = self.config.get("trace_enabled", True)
         # 心跳检查任务
-        self._heartbeat_task: Optional[asyncio.Task] = None
+        self._heartbeat_task: asyncio.Task | None = None
         # 事件回调
-        self._event_handlers: Dict[str, List[Callable]] = defaultdict(list)
+        self._event_handlers: dict[str, list[Callable]] = defaultdict(list)
         # 消息处理器（按消息类型）
-        self._message_handlers: Dict[str, Callable] = {}
+        self._message_handlers: dict[str, Callable] = {}
         # 统计
         self._ws_stats = {
             "total_connections": 0,
@@ -421,7 +422,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return Result(success=True)
 
     def authenticate_connection(
-        self, connection_id: str, user_id: str, username: str = "", scopes: Optional[List[str]] = None
+        self, connection_id: str, user_id: str, username: str = "", scopes: list[str] | None = None
     ) -> Result:
         """认证连接"""
         conn = self._connections.get(connection_id)
@@ -436,10 +437,10 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._emit_event("connection.authenticated", {"id": connection_id, "user_id": user_id})
         return Result(success=True)
 
-    def get_connection(self, connection_id: str) -> Optional[WSConnection]:
+    def get_connection(self, connection_id: str) -> WSConnection | None:
         return self._connections.get(connection_id)
 
-    def get_user_connections(self, user_id: str) -> List[WSConnection]:
+    def get_user_connections(self, user_id: str) -> list[WSConnection]:
         conn_ids = self._user_connections.get(user_id, set())
         return [self._connections[cid] for cid in conn_ids if cid in self._connections]
 
@@ -537,7 +538,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._emit_event("room.left", {"room_id": room_id, "connection_id": connection_id})
         return Result(success=True)
 
-    def list_rooms(self) -> List[Dict]:
+    def list_rooms(self) -> list[dict]:
         return [
             {
                 "room_id": r.room_id,
@@ -614,7 +615,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         except asyncio.QueueFull:
             return Result(success=False, error="send_queue_full")
 
-    def send_to_room(self, room_id: str, message: str, exclude: Optional[str] = None) -> int:
+    def send_to_room(self, room_id: str, message: str, exclude: str | None = None) -> int:
         """广播消息到房间"""
         room = self._rooms.get(room_id)
         if not room:
@@ -659,7 +660,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 if conn.ws:
                     conn.ws.send(message)
                 conn.last_active = datetime.now().isoformat()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except asyncio.CancelledError:
                 break
@@ -671,23 +672,23 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 内置消息处理器
     # ----------------------------------------------------------------
 
-    def _handle_ping(self, conn_id: str, data: Dict):
+    def _handle_ping(self, conn_id: str, data: dict):
         conn = self._connections.get(conn_id)
         if conn:
             conn.last_ping = datetime.now().isoformat()
             self.send_to_connection(conn_id, json.dumps({"type": "pong", "timestamp": datetime.now().isoformat()}))
 
-    def _handle_pong(self, conn_id: str, data: Dict):
+    def _handle_pong(self, conn_id: str, data: dict):
         conn = self._connections.get(conn_id)
         if conn:
             conn.last_pong = datetime.now().isoformat()
 
-    def _handle_join(self, conn_id: str, data: Dict):
+    def _handle_join(self, conn_id: str, data: dict):
         room_id = data.get("room_id", "")
         if room_id:
             self.join_room(conn_id, room_id)
 
-    def _handle_leave(self, conn_id: str, data: Dict):
+    def _handle_leave(self, conn_id: str, data: dict):
         room_id = data.get("room_id", "")
         if room_id:
             self.leave_room(conn_id, room_id)
@@ -736,7 +737,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """注册事件处理器"""
         self._event_handlers[event_name].append(handler)
 
-    def _emit_event(self, event_name: str, data: Dict):
+    def _emit_event(self, event_name: str, data: dict):
         """触发事件"""
         for handler in self._event_handlers.get(event_name, []):
             try:
@@ -748,7 +749,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     # 查询接口
     # ----------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(
             1
             for c in self._connections.values()
@@ -763,7 +764,7 @@ class WebSocketManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "module_stats": self.stats.to_dict(),
         }
 
-    def get_room_info(self, room_id: str) -> Optional[Dict]:
+    def get_room_info(self, room_id: str) -> dict | None:
         room = self._rooms.get(room_id)
         if not room:
             return None

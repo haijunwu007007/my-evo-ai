@@ -90,7 +90,8 @@ import json
 import math
 from core.logging_config import get_logger
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, Counter
@@ -111,7 +112,7 @@ logger = get_logger("evo.user_profile")
 # 数据模型
 # ============================================================================
 
-class UserProfileAnalyzer(object):
+class UserProfileAnalyzer:
     """user profile 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -322,8 +323,8 @@ class TagDefinition:
     category: str = "default"
     description: str = ""
     source: TagSource = TagSource.MANUAL
-    parent_tag: Optional[str] = None
-    rule: Optional[Dict[str, Any]] = None
+    parent_tag: str | None = None
+    rule: dict[str, Any] | None = None
     value_type: str = "bool"  # bool/number/string/list
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -335,7 +336,7 @@ class UserTag:
     value: Any = None
     source: TagSource = TagSource.MANUAL
     confidence: float = 1.0
-    expires_at: Optional[str] = None
+    expires_at: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -348,7 +349,7 @@ class BehaviorEvent:
     behavior_type: BehaviorType = BehaviorType.VIEW
     target_id: str = ""
     target_type: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     session_id: str = ""
     platform: str = ""
@@ -363,7 +364,7 @@ class Preference:
     item_id: str = ""
     score: float = 0.0
     count: int = 0
-    last_interacted: Optional[str] = None
+    last_interacted: str | None = None
 
 @dataclass
 class RFMScore:
@@ -384,15 +385,15 @@ class UserProfile:
     """用户画像"""
 
     user_id: str = ""
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    tags: Dict[str, UserTag] = field(default_factory=dict)
-    preferences: List[Preference] = field(default_factory=list)
-    behaviors: List[BehaviorEvent] = field(default_factory=list)
-    rfm: Optional[RFMScore] = None
+    attributes: dict[str, Any] = field(default_factory=dict)
+    tags: dict[str, UserTag] = field(default_factory=dict)
+    preferences: list[Preference] = field(default_factory=list)
+    behaviors: list[BehaviorEvent] = field(default_factory=list)
+    rfm: RFMScore | None = None
     lifecycle: LifecycleStage = LifecycleStage.NEW
-    segment_ids: List[str] = field(default_factory=list)
-    first_seen: Optional[str] = None
-    last_seen: Optional[str] = None
+    segment_ids: list[str] = field(default_factory=list)
+    first_seen: str | None = None
+    last_seen: str | None = None
     total_behaviors: int = 0
     total_value: float = 0.0
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -404,8 +405,8 @@ class Segment:
     segment_id: str = field(default_factory=lambda: str(uuid.uuid4())[:10])
     name: str = ""
     description: str = ""
-    rules: Dict[str, Any] = field(default_factory=dict)
-    user_ids: Set[str] = field(default_factory=set)
+    rules: dict[str, Any] = field(default_factory=dict)
+    user_ids: set[str] = field(default_factory=set)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     user_count: int = 0
 
@@ -413,7 +414,7 @@ class Segment:
 # UserProfile 主类
 # ============================================================================
 
-class UserProfileAnalyzer(object):
+class UserProfileAnalyzer:
     """user_profile核心分析引擎
 
     为user_profile模块提供深度分析能力，包括数据聚合、
@@ -484,18 +485,18 @@ class UserProfile(EnterpriseModule):
       - 画像导出
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__()
         self.config = config or {}
         # 用户画像存储
-        self._profiles: Dict[str, UserProfile] = {}
+        self._profiles: dict[str, UserProfile] = {}
         # 标签定义
-        self._tag_defs: Dict[str, TagDefinition] = {}
+        self._tag_defs: dict[str, TagDefinition] = {}
         # 分群定义
-        self._segments: Dict[str, Segment] = {}
+        self._segments: dict[str, Segment] = {}
         # 行为事件总表（按用户分片）
-        self._event_buffer: List[BehaviorEvent] = []
+        self._event_buffer: list[BehaviorEvent] = []
         self._event_buffer_max = 50000
         # 偏好权重
         self._preference_decay = self.config.get("preference_decay", 0.95)
@@ -603,13 +604,13 @@ class UserProfile(EnterpriseModule):
             self._profiles[user_id] = UserProfile(user_id=user_id, first_seen=now, last_seen=now)
         return self._profiles[user_id]
 
-    def set_attributes(self, user_id: str, attributes: Dict[str, Any]) -> Result:
+    def set_attributes(self, user_id: str, attributes: dict[str, Any]) -> Result:
         profile = self.ensure_user(user_id)
         profile.attributes.update(attributes)
         profile.updated_at = datetime.now().isoformat()
         return Result(success=True)
 
-    def get_attributes(self, user_id: str) -> Dict[str, Any]:
+    def get_attributes(self, user_id: str) -> dict[str, Any]:
         return self._profiles.get(user_id, UserProfile()).attributes
 
     # ----------------------------------------------------------------
@@ -622,8 +623,8 @@ class UserProfile(EnterpriseModule):
         category: str = "default",
         source: TagSource = TagSource.MANUAL,
         description: str = "",
-        parent: Optional[str] = None,
-        rule: Optional[Dict] = None,
+        parent: str | None = None,
+        rule: dict | None = None,
     ) -> Result:
         if tag_name in self._tag_defs:
             return Result(success=False, error=f"标签已存在: {tag_name}")
@@ -640,7 +641,7 @@ class UserProfile(EnterpriseModule):
         value: Any = True,
         source: TagSource = TagSource.MANUAL,
         confidence: float = 1.0,
-        expires_at: Optional[str] = None,
+        expires_at: str | None = None,
     ) -> Result:
         profile = self.ensure_user(user_id)
         ut = UserTag(tag_name=tag_name, value=value, source=source, confidence=confidence, expires_at=expires_at)
@@ -655,7 +656,7 @@ class UserProfile(EnterpriseModule):
         del profile.tags[tag_name]
         return Result(success=True)
 
-    def get_tags(self, user_id: str) -> Dict[str, Any]:
+    def get_tags(self, user_id: str) -> dict[str, Any]:
         profile = self._profiles.get(user_id)
         if not profile:
             return {}
@@ -664,7 +665,7 @@ class UserProfile(EnterpriseModule):
             for name, t in profile.tags.items()
         }
 
-    def apply_rule_tags(self, user_id: str) -> List[str]:
+    def apply_rule_tags(self, user_id: str) -> list[str]:
         """执行规则标签"""
         profile = self._profiles.get(user_id)
         if not profile:
@@ -682,7 +683,7 @@ class UserProfile(EnterpriseModule):
         self._up_stats["rules_executed"] += 1
         return applied
 
-    def _evaluate_tag_rule(self, rule: Dict, profile: UserProfile) -> bool:
+    def _evaluate_tag_rule(self, rule: dict, profile: UserProfile) -> bool:
         """评估标签规则"""
         rule_type = rule.get("type", "attribute")
         if rule_type == "attribute":
@@ -738,7 +739,7 @@ class UserProfile(EnterpriseModule):
         platform: str = "",
         duration: float = 0.0,
         value: float = 0.0,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> Result:
         profile = self.ensure_user(user_id)
         event = BehaviorEvent(
@@ -899,13 +900,13 @@ class UserProfile(EnterpriseModule):
     # 分群
     # ----------------------------------------------------------------
 
-    def create_segment(self, name: str, rules: Dict, description: str = "") -> Result:
+    def create_segment(self, name: str, rules: dict, description: str = "") -> Result:
         seg = Segment(name=name, rules=rules, description=description)
         self._segments[seg.segment_id] = seg
         self._up_stats["segments_total"] = len(self._segments)
         return Result(success=True, data={"segment_id": seg.segment_id})
 
-    def compute_segment(self, segment_id: str) -> Dict:
+    def compute_segment(self, segment_id: str) -> dict:
         seg = self._segments.get(segment_id)
         if not seg:
             return {"error": "分群不存在"}
@@ -918,7 +919,7 @@ class UserProfile(EnterpriseModule):
         seg.user_count = len(matched)
         return {"segment_id": segment_id, "name": seg.name, "user_count": seg.user_count}
 
-    def _match_segment_rules(self, rules: Dict, profile: UserProfile) -> bool:
+    def _match_segment_rules(self, rules: dict, profile: UserProfile) -> bool:
         # 标签匹配
         tag_rules = rules.get("tags", {})
         for tag, required in tag_rules.items():
@@ -958,7 +959,7 @@ class UserProfile(EnterpriseModule):
     # 查询
     # ----------------------------------------------------------------
 
-    def get_profile(self, user_id: str) -> Optional[Dict]:
+    def get_profile(self, user_id: str) -> dict | None:
         p = self._profiles.get(user_id)
         if not p:
             return None
@@ -994,7 +995,7 @@ class UserProfile(EnterpriseModule):
         self._up_stats["tags_total"] = sum(len(p.tags) for p in self._profiles.values())
         self._up_stats["segments_total"] = len(self._segments)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {**self._up_stats, "module_stats": self.stats.to_dict()}
 
 # ============================================================================

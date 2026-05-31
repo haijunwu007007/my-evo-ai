@@ -88,7 +88,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class VoiceNotifyAnalyzer(object):
+class VoiceNotifyAnalyzer:
     """voice_notify 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -288,7 +288,7 @@ class VoiceProfile:
     volume: float = 1.0
     style: str = "general"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "voice_id": self.voice_id,
             "name": self.name,
@@ -315,7 +315,7 @@ class SynthTask:
     completed: float = 0
     duration_ms: float = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "text": self.text[:80],
@@ -335,11 +335,11 @@ class VoiceTemplate:
     template_id: str = ""
     name: str = ""
     text: str = ""
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     language: str = "zh-CN"
     voice_id: str = ""
 
-    def render(self, context: Dict[str, str]) -> str:
+    def render(self, context: dict[str, str]) -> str:
         result = self.text
         for k, v in context.items():
             result = result.replace(f"${{{k}}}", str(v))
@@ -382,10 +382,10 @@ class VoiceNotifyModule:
     """企业级语音通知模块"""
 
     def __init__(self):
-        self._voices: Dict[str, VoiceProfile] = {}
-        self._templates: Dict[str, VoiceTemplate] = {}
-        self._tasks: Dict[str, SynthTask] = {}
-        self._calls: Dict[str, CallRecord] = {}
+        self._voices: dict[str, VoiceProfile] = {}
+        self._templates: dict[str, VoiceTemplate] = {}
+        self._tasks: dict[str, SynthTask] = {}
+        self._calls: dict[str, CallRecord] = {}
         self.metrics_collector = type(
             "_NMC",
             (),
@@ -492,14 +492,14 @@ class VoiceNotifyModule:
         for t in default_templates:
             self._templates[t.template_id] = t
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._initialized = True
             return {"success": True, "voices": len(self._voices), "templates": len(self._templates)}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         return {
@@ -521,7 +521,7 @@ class VoiceNotifyModule:
         gender: str = "female",
         speed: float = 1.0,
         pitch: float = 1.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         try:
@@ -535,7 +535,7 @@ class VoiceNotifyModule:
         )
         return {"success": True, "voice_id": voice_id, "name": name}
 
-    def list_voices(self, language: str = "") -> Dict[str, Any]:
+    def list_voices(self, language: str = "") -> dict[str, Any]:
         items = [v.to_dict() for v in self._voices.values() if not language or v.language == language]
         return {"success": True, "voices": items, "total": len(items)}
 
@@ -549,7 +549,7 @@ class VoiceNotifyModule:
         output_format: str = "mp3",
         speed: float = 1.0,
         pitch: float = 1.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import time as tmod
@@ -593,8 +593,8 @@ class VoiceNotifyModule:
         return {"success": True, **task.to_dict()}
 
     def synthesize_from_template(
-        self, template_id: str, variables: Dict[str, str], voice_id: str = "", output_format: str = "mp3"
-    ) -> Dict[str, Any]:
+        self, template_id: str, variables: dict[str, str], voice_id: str = "", output_format: str = "mp3"
+    ) -> dict[str, Any]:
         if template_id not in self._templates:
             return {"success": False, "error": "template_not_found"}
         tmpl = self._templates[template_id]
@@ -608,10 +608,10 @@ class VoiceNotifyModule:
         template_id: str,
         name: str,
         text: str,
-        variables: List[str] = None,
+        variables: list[str] = None,
         language: str = "zh-CN",
         voice_id: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         import re
 
         if not self._initialized:
@@ -623,7 +623,7 @@ class VoiceNotifyModule:
         )
         return {"success": True, "template_id": template_id, "variables": variables}
 
-    def list_templates(self) -> Dict[str, Any]:
+    def list_templates(self) -> dict[str, Any]:
         items = [
             {"template_id": t.template_id, "name": t.name, "variables": t.variables, "language": t.language}
             for t in self._templates.values()
@@ -637,9 +637,9 @@ class VoiceNotifyModule:
         text: str = "",
         task_id: str = "",
         template_id: str = "",
-        variables: Dict[str, str] = None,
+        variables: dict[str, str] = None,
         voice_id: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         import time as tmod
@@ -676,8 +676,8 @@ class VoiceNotifyModule:
         }
 
     def batch_call(
-        self, phones: List[str], template_id: str = "", text: str = "", variables: Dict[str, str] = None
-    ) -> Dict[str, Any]:
+        self, phones: list[str], template_id: str = "", text: str = "", variables: dict[str, str] = None
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         results = []
@@ -693,12 +693,12 @@ class VoiceNotifyModule:
         }
 
     # --- Query ---
-    def get_task(self, task_id: str) -> Dict[str, Any]:
+    def get_task(self, task_id: str) -> dict[str, Any]:
         if task_id not in self._tasks:
             return {"success": False, "error": "not_found"}
         return {"success": True, **self._tasks[task_id].to_dict()}
 
-    def get_call(self, call_id: str) -> Dict[str, Any]:
+    def get_call(self, call_id: str) -> dict[str, Any]:
         if call_id not in self._calls:
             return {"success": False, "error": "not_found"}
         c = self._calls[call_id]
@@ -710,7 +710,7 @@ class VoiceNotifyModule:
             "duration_sec": c.duration_sec,
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "success": True,
             **self._stats,

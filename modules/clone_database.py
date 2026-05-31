@@ -115,7 +115,7 @@ class DatabaseSource:
     engine: str = "postgresql"
     size_gb: float = 0.0
     table_count: int = 0
-    last_clone_at: Optional[str] = None
+    last_clone_at: str | None = None
 
 @dataclass
 class CloneTask:
@@ -131,9 +131,9 @@ class CloneTask:
     rows_copied: int = 0
     size_bytes: int = 0
     masked: bool = False
-    error: Optional[str] = None
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
+    error: str | None = None
+    started_at: float | None = None
+    finished_at: float | None = None
 
 @dataclass
 class CloneSchedule:
@@ -146,8 +146,8 @@ class CloneSchedule:
     cron_expr: str = ""
     retention_hours: int = 24
     enabled: bool = True
-    last_run: Optional[str] = None
-    next_run: Optional[str] = None
+    last_run: str | None = None
+    next_run: str | None = None
 
 class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """数据库克隆管理器 - 生产级实现"""
@@ -163,11 +163,11 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self.description = "数据库克隆/快照管理，全量克隆、增量同步、环境复制、数据脱敏"
 
         self._initialized = False
-        self._sources: Dict[str, DatabaseSource] = {}
-        self._tasks: Dict[str, CloneTask] = {}
-        self._clones: Dict[str, Dict[str, Any]] = {}
-        self._schedules: Dict[str, CloneSchedule] = {}
-        self._masking_rules: Dict[str, List[Dict[str, str]]] = {}
+        self._sources: dict[str, DatabaseSource] = {}
+        self._tasks: dict[str, CloneTask] = {}
+        self._clones: dict[str, dict[str, Any]] = {}
+        self._schedules: dict[str, CloneSchedule] = {}
+        self._masking_rules: dict[str, list[dict[str, str]]] = {}
 
     def initialize(self) -> None:
         if self._initialized:
@@ -238,7 +238,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def shutdown(self) -> None:
         self._initialized = False
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "clone_database"})
         self.metrics_collector.counter("clone_database.execute.calls", 1)
         self.audit("execute", {"module": "clone_database"})
@@ -265,7 +265,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _exec_clone(self, p: Dict) -> Dict:
+    def _exec_clone(self, p: dict) -> dict:
         source_id = p.get("source_id", "prod_pg")
         target_name = p.get("target_name", f"clone_{uuid.uuid4().hex[:6]}")
         clone_type = p.get("clone_type", "full")
@@ -351,7 +351,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             task.finished_at = time.time()
             return {"success": False, "error": str(e), "task_id": task_id}
 
-    def _exec_sync(self, p: Dict) -> Dict:
+    def _exec_sync(self, p: dict) -> dict:
         """增量同步"""
         clone_id = p.get("clone_id", "")
         if not clone_id or clone_id not in self._clones:
@@ -360,7 +360,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._clones[clone_id]["last_sync"] = datetime.now().isoformat()
         return {"success": True, "result": {"clone_id": clone_id, "synced_changes": 1247, "elapsed_ms": 125.3}}
 
-    def _list_sources(self, p: Dict) -> Dict:
+    def _list_sources(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -378,7 +378,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             ],
         }
 
-    def _add_source(self, p: Dict) -> Dict:
+    def _add_source(self, p: dict) -> dict:
         sid = p.get("source_id", f"src_{uuid.uuid4().hex[:6]}")
         if sid in self._sources:
             return {"success": False, "error": f"数据源已存在: {sid}"}
@@ -395,7 +395,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         self._sources[sid] = src
         return {"success": True, "result": {"source_id": sid}}
 
-    def _task_status(self, p: Dict) -> Dict:
+    def _task_status(self, p: dict) -> dict:
         tid = p.get("task_id", "")
         if tid not in self._tasks:
             return {"success": False, "error": f"任务不存在: {tid}"}
@@ -412,7 +412,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def _cancel_task(self, p: Dict) -> Dict:
+    def _cancel_task(self, p: dict) -> dict:
         tid = p.get("task_id", "")
         if tid not in self._tasks:
             return {"success": False, "error": f"任务不存在: {tid}"}
@@ -423,17 +423,17 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return {"success": True, "result": {"task_id": tid, "status": "cancelled"}}
         return {"success": False, "error": f"任务状态不可取消: {t.status.value}"}
 
-    def _list_clones(self, p: Dict) -> Dict:
+    def _list_clones(self, p: dict) -> dict:
         return {"success": True, "result": list(self._clones.values())}
 
-    def _drop_clone(self, p: Dict) -> Dict:
+    def _drop_clone(self, p: dict) -> dict:
         cid = p.get("clone_id", "")
         if cid not in self._clones:
             return {"success": False, "error": f"克隆不存在: {cid}"}
         del self._clones[cid]
         return {"success": True, "result": {"clone_id": cid, "dropped": True}}
 
-    def _manage_schedule(self, p: Dict) -> Dict:
+    def _manage_schedule(self, p: dict) -> dict:
         action = p.get("action", "create")
         if action == "create":
             sid = p.get("schedule_id", f"sch_{uuid.uuid4().hex[:6]}")
@@ -454,7 +454,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return {"success": True, "result": {"schedule_id": sid, "enabled": self._schedules[sid].enabled}}
         return {"success": False, "error": f"未知schedule action: {action}"}
 
-    def _list_schedules(self, p: Dict) -> Dict:
+    def _list_schedules(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -469,7 +469,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             ],
         }
 
-    def _get_stats(self, p: Dict) -> Dict:
+    def _get_stats(self, p: dict) -> dict:
         completed = sum(1 for t in self._tasks.values() if t.status == CloneStatus.COMPLETED)
         failed = sum(1 for t in self._tasks.values() if t.status == CloneStatus.FAILED)
         total_size = sum(c.get("size_gb", 0) for c in self._clones.values())
@@ -485,7 +485,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             },
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"status": "not_initialized", "module_id": self.module_id}
         return {
@@ -497,7 +497,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "schedules": len(self._schedules),
         }
 
-    def estimate_clone_time(self, source_db: str, size_gb: float) -> Dict[str, Any]:
+    def estimate_clone_time(self, source_db: str, size_gb: float) -> dict[str, Any]:
         """预估克隆耗时。企业场景：运维评估大数据库克隆需要的时间窗口，
         安排维护时段避免影响业务。
         """
@@ -513,7 +513,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "recommendation": recommendation,
         }
 
-    def get_clone_storage_usage(self) -> Dict[str, Any]:
+    def get_clone_storage_usage(self) -> dict[str, Any]:
         """克隆存储占用统计。企业场景：容量规划，评估克隆数据库占用的总存储空间，
         识别长期未使用的克隆以便清理。
         """
@@ -539,7 +539,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         details.sort(key=lambda x: -x["size_gb"])
         return {"success": True, "total_clones": len(clones), "total_size_gb": round(total_size, 2), "clones": details}
 
-    def schedule_auto_clone(self, source_db: str, cron_expression: str, retention_days: int = 7) -> Dict[str, Any]:
+    def schedule_auto_clone(self, source_db: str, cron_expression: str, retention_days: int = 7) -> dict[str, Any]:
         """配置自动克隆计划。企业场景：每天凌晨自动创建测试数据库克隆，
         供QA团队使用，自动清理过期克隆释放存储。
         cron_expression: 如 "0 2 * * *" (每天凌晨2点)
@@ -562,7 +562,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "retention_days": retention_days,
         }
 
-    def cleanup_expired_clones(self) -> Dict[str, Any]:
+    def cleanup_expired_clones(self) -> dict[str, Any]:
         """清理过期克隆。企业场景：定时任务清理超过保留期的克隆数据库，
         回收存储空间。
         """
@@ -581,7 +581,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             removed += 1
         return {"success": True, "removed": removed, "freed_gb": round(freed_gb, 2), "remaining": len(clones)}
 
-    def estimate_clone_cost(self, source_db: str, duration_hours: int = 24) -> Dict[str, Any]:
+    def estimate_clone_cost(self, source_db: str, duration_hours: int = 24) -> dict[str, Any]:
         """预估克隆成本。企业场景：开发团队申请克隆生产库用于测试，
         DBA审核前需要评估存储和计算成本。
         """
@@ -603,7 +603,7 @@ class CloneDatabaseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             "currency": "CNY",
         }
 
-    def get_clone_usage_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_clone_usage_report(self, days: int = 7) -> dict[str, Any]:
         """克隆使用报告。企业场景：管理层月度审查数据库克隆资源消耗，
         识别长期占用但无人使用的克隆，优化成本。
         """

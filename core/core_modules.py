@@ -13,7 +13,7 @@ from core.module_base import ModuleBase, AsyncModule
 class SystemMonitorModule(ModuleBase):
     """系统监控模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         try:
             import psutil
             cpu_percent = psutil.cpu_percent(interval=1)
@@ -31,14 +31,14 @@ class SystemMonitorModule(ModuleBase):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "系统监控", "desc": "实时监控系统状态"}
 
 
 class GitHubTrendingModule(ModuleBase):
     """GitHub Trending 模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         language = params.get("language", "python")
         trending = [
             {"name": "browser-use", "desc": "AI browser automation", "stars": "55k"},
@@ -47,14 +47,14 @@ class GitHubTrendingModule(ModuleBase):
         ]
         return {"success": True, "data": trending, "language": language}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "GitHub Trending", "desc": "获取热门项目"}
 
 
 class PushNotifyModule(ModuleBase):
     """消息推送模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         message = params.get("message", "")
         channel = params.get("channel", "feishu")
         return {
@@ -64,31 +64,31 @@ class PushNotifyModule(ModuleBase):
             "sent_at": datetime.now().isoformat()
         }
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "消息推送", "desc": "多渠道消息推送"}
 
 
 class WorkflowManagerModule(ModuleBase):
     """工作流管理模块"""
 
-    def __init__(self, module_id: str, config: Dict = None):
+    def __init__(self, module_id: str, config: dict = None):
         super().__init__(module_id, config)
         self.workflows = {}
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "list")
         if action == "list":
             return {"success": True, "workflows": list(self.workflows.values())}
         return {"success": True}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "工作流管理", "desc": "编排自动化工作流"}
 
 
 class MindmapGeneratorModule(ModuleBase):
     """思维导图生成模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         topic = params.get("topic", "主题")
         mindmap = f"""mindmap
   root(({topic}))
@@ -103,14 +103,14 @@ class MindmapGeneratorModule(ModuleBase):
       方法2"""
         return {"success": True, "mindmap": mindmap, "topic": topic}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "思维导图生成", "desc": "AI生成思维导图"}
 
 
 class ReportGeneratorModule(ModuleBase):
     """报告生成模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         period = params.get("period", "weekly")
         report = {
             "period": period,
@@ -120,37 +120,37 @@ class ReportGeneratorModule(ModuleBase):
         }
         return {"success": True, "report": report}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "报告生成", "desc": "自动生成周报/月报"}
 
 
 class VoiceRecorderModule(ModuleBase):
     """语音录音模块"""
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "start")
         if action == "start":
             return {"success": True, "recording": True, "started_at": datetime.now().isoformat()}
         return {"success": True, "recording": False}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "语音录音", "desc": "系统音频录制"}
 
 
 class AutoRecoveryModule(ModuleBase):
     """服务自动恢复模块"""
 
-    def __init__(self, module_id: str, config: Dict = None):
+    def __init__(self, module_id: str, config: dict = None):
         super().__init__(module_id, config)
         self.services = {}
 
-    async def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         action = params.get("action", "status")
         if action == "status":
             return {"success": True, "services": self.services}
         return {"success": True}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return {"id": self.id, "name": "服务自动恢复", "desc": "监控和自动恢复服务"}
 
 

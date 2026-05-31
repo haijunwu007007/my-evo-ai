@@ -125,7 +125,7 @@ class PerformanceMetric:
     metric_type: MetricType
     value: float
     unit: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
 
 @dataclass
@@ -140,7 +140,7 @@ class Bottleneck:
     current_value: float
     threshold: float
     impact: str = "medium"
-    suggestions: List[str] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
     detected_at: float = field(default_factory=time.time)
 
 @dataclass
@@ -170,13 +170,13 @@ class OptimizationRule:
     condition_metric: str
     threshold: float
     severity: SeverityLevel
-    suggestions: List[str]
+    suggestions: list[str]
     auto_fixable: bool = False
 
-class PerformanceAnalyzer(object):
+class PerformanceAnalyzer:
     """性能分析引擎 — 趋势分析、瓶颈根因定位、优化建议优先级排序、资源饱和度评估"""
 
-    def analyze_trend(self, metrics: List[Dict[str, Any]], window: int = 60) -> Dict[str, Any]:
+    def analyze_trend(self, metrics: list[dict[str, Any]], window: int = 60) -> dict[str, Any]:
         """分析性能指标趋势：移动平均、变化率、异常检测"""
         if not metrics:
             return {"error": "no metrics data"}
@@ -207,7 +207,7 @@ class PerformanceAnalyzer(object):
             "data_points": len(values),
         }
 
-    def diagnose_bottleneck(self, metrics_map: Dict[str, List[Dict]]) -> List[Dict[str, Any]]:
+    def diagnose_bottleneck(self, metrics_map: dict[str, list[dict]]) -> list[dict[str, Any]]:
         """综合诊断瓶颈根因：跨指标关联分析，定位最可能的瓶颈源"""
         findings = []
         for metric_name, data_points in metrics_map.items():
@@ -242,7 +242,7 @@ class PerformanceAnalyzer(object):
         findings.sort(key=lambda x: {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(x["severity"], 4))
         return findings
 
-    def rank_optimizations(self, optimizations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def rank_optimizations(self, optimizations: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """对优化建议按影响/成本比排序"""
         scored = []
         for opt in optimizations:
@@ -274,16 +274,16 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
     def __init__(self):
 
         super().__init__()
-        self._metrics_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
-        self._current_metrics: Dict[str, float] = {}
-        self._gauges: Dict[str, float] = {}
-        self._counters: Dict[str, float] = defaultdict(float)
-        self._histograms: Dict[str, List[float]] = defaultdict(list)
-        self._bottlenecks: List[Bottleneck] = []
-        self._benchmarks: List[BenchmarkResult] = []
-        self._rules: List[OptimizationRule] = []
-        self._baseline: Dict[str, float] = {}
-        self._alerts_sent: List[Dict] = []
+        self._metrics_history: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self._current_metrics: dict[str, float] = {}
+        self._gauges: dict[str, float] = {}
+        self._counters: dict[str, float] = defaultdict(float)
+        self._histograms: dict[str, list[float]] = defaultdict(list)
+        self._bottlenecks: list[Bottleneck] = []
+        self._benchmarks: list[BenchmarkResult] = []
+        self._rules: list[OptimizationRule] = []
+        self._baseline: dict[str, float] = {}
+        self._alerts_sent: list[dict] = []
 
     def initialize(self) -> None:
         self._register_rules()
@@ -424,8 +424,8 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         value: float,
         metric_type: MetricType = MetricType.GAUGE,
         unit: str = "",
-        labels: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        labels: dict | None = None,
+    ) -> dict[str, Any]:
         """记录性能指标"""
         metric_id = f"met_{uuid.uuid4().hex[:8]}"
         metric = PerformanceMetric(
@@ -450,7 +450,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         return {"metric_id": metric_id, "name": name, "value": value}
 
     @trace_operation("analyze_bottlenecks")
-    def analyze_bottlenecks(self) -> Dict[str, Any]:
+    def analyze_bottlenecks(self) -> dict[str, Any]:
         """分析性能瓶颈"""
         self._bottlenecks.clear()
 
@@ -492,7 +492,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         }
 
     @trace_operation("run_benchmark")
-    def run_benchmark(self, name: str, target_fn, iterations: int = 1000, warmup: int = 100) -> Dict[str, Any]:
+    def run_benchmark(self, name: str, target_fn, iterations: int = 1000, warmup: int = 100) -> dict[str, Any]:
         """执行基准测试"""
         import gc
 
@@ -553,7 +553,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         }
 
     @trace_operation("get_optimization_report")
-    def get_optimization_report(self) -> Dict[str, Any]:
+    def get_optimization_report(self) -> dict[str, Any]:
         """生成优化报告"""
         bottlenecks = self.analyze_bottlenecks()
 
@@ -628,7 +628,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         return max(0, min(100, round(score, 1)))
 
     @trace_operation("get_metrics_history")
-    def get_metrics_history(self, metric_name: str, limit: int = 100) -> Dict[str, Any]:
+    def get_metrics_history(self, metric_name: str, limit: int = 100) -> dict[str, Any]:
         """获取指标历史数据"""
         history = list(self._metrics_history.get(metric_name, []))
         return {
@@ -640,7 +640,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             ],
         }
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         """获取仪表盘数据"""
         gauges = {}
         for name, value in self._current_metrics.items():
@@ -703,7 +703,7 @@ class PerformanceOptimizer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
                 return {"status": "success", **result}
             return {"status": "success", "data": result}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         base.update(
             {

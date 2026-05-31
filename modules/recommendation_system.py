@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 推荐系统（A级）"""
 # Grade: B
 __module_meta__ = {"id":"recommendation-system","name":"Recommendation","version":"V0.1","group":"system","grade":"C","tags":["system","recommend","ml"],"description":"推荐系统"}

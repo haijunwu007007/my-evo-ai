@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """API 路由共享数据存储层 — 持久化、配置中心、公共辅助函数"""
 from typing import Any, Dict, List, Optional
 from pathlib import Path
@@ -14,12 +13,12 @@ _now = datetime.now
 DATA_DIR = BASE_DIR / "_data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-_scheduler_tasks_db: Dict[str, dict] = {}
-_events_db: List[dict] = []
-_pipelines_db: Dict[str, dict] = {}
-_queue_tasks_db: Dict[str, dict] = {}
-_rules_db: Dict[str, dict] = {}
-_monitor_history: List[dict] = []
+_scheduler_tasks_db: dict[str, dict] = {}
+_events_db: list[dict] = []
+_pipelines_db: dict[str, dict] = {}
+_queue_tasks_db: dict[str, dict] = {}
+_rules_db: dict[str, dict] = {}
+_monitor_history: list[dict] = []
 
 _PERSISTENT_DBS = {
     "scheduler": (_scheduler_tasks_db, dict),

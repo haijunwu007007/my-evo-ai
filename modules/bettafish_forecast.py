@@ -135,10 +135,10 @@ class ForecastResult:
     forecast_id: str
     model_name: str
     method: ForecastMethod
-    predicted_values: List[float]
-    confidence_lower: List[float]
-    confidence_upper: List[float]
-    metrics: Dict[str, float]
+    predicted_values: list[float]
+    confidence_lower: list[float]
+    confidence_upper: list[float]
+    metrics: dict[str, float]
     created_at: str
     horizon: int
 
@@ -161,7 +161,7 @@ class ForecastModel:
     model_id: str
     name: str
     method: ForecastMethod
-    params: Dict[str, Any]
+    params: dict[str, Any]
     trained_at: str
     accuracy: float
     data_points: int = 0
@@ -171,9 +171,9 @@ class ForecastModelSelector:
     """预测模型选择器 — 根据数据特征自动选择最佳预测算法"""
 
     def __init__(self):
-        self._model_performance: Dict[str, Dict[str, float]] = {}
+        self._model_performance: dict[str, dict[str, float]] = {}
 
-    def select_model(self, data_points: List[float], horizon: int = 10, seasonality: str = "auto") -> Dict[str, Any]:
+    def select_model(self, data_points: list[float], horizon: int = 10, seasonality: str = "auto") -> dict[str, Any]:
         """分析数据特征并推荐最佳预测模型"""
         n = len(data_points)
         if n < 5:
@@ -217,7 +217,7 @@ class ForecastModelSelector:
             "recommended_horizon": min(horizon, n // 3),
         }
 
-    def evaluate_model(self, actual: List[float], predicted: List[float]) -> Dict[str, Any]:
+    def evaluate_model(self, actual: list[float], predicted: list[float]) -> dict[str, Any]:
         """评估预测模型的准确度"""
         if len(actual) != len(predicted) or len(actual) == 0:
             return {"error": "mismatched or empty data"}
@@ -243,7 +243,7 @@ class ForecastModelSelector:
             "grade": "A" if mape < 5 else "B" if mape < 15 else "C" if mape < 30 else "D",
         }
 
-    def cross_validate(self, data: List[float], model_name: str = "arima", folds: int = 5) -> Dict[str, Any]:
+    def cross_validate(self, data: list[float], model_name: str = "arima", folds: int = 5) -> dict[str, Any]:
         """简单时间序列交叉验证"""
         n = len(data)
         fold_size = n // (folds + 1)
@@ -270,7 +270,7 @@ class ForecastModelSelector:
             "stability": "stable" if max(r["mae"] for r in fold_results) < avg_mae * 2 else "unstable",
         }
 
-    def _detect_trend(self, data: List[float]) -> float:
+    def _detect_trend(self, data: list[float]) -> float:
         n = len(data)
         if n < 2:
             return 0
@@ -279,7 +279,7 @@ class ForecastModelSelector:
         second_half = sum(data[half:]) / (n - half)
         return (second_half - first_half) / max(abs(first_half), 0.001)
 
-    def _detect_seasonality(self, data: List[float]) -> bool:
+    def _detect_seasonality(self, data: list[float]) -> bool:
         n = len(data)
         if n < 10:
             return False
@@ -289,7 +289,7 @@ class ForecastModelSelector:
         sign_changes = sum(1 for i in range(len(diffs) - 1) if (diffs[i] > 0) != (diffs[i + 1] > 0))
         return sign_changes / len(diffs) > 0.4
 
-    def _count_outliers(self, data: List[float], mean: float, std: float) -> int:
+    def _count_outliers(self, data: list[float], mean: float, std: float) -> int:
         if std == 0:
             return 0
         return sum(1 for x in data if abs(x - mean) > 2 * std)
@@ -301,13 +301,13 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
     MODULE_NAME = "Bettafish预测引擎"
     VERSION = "V0.1"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
-        self._series: Dict[str, deque] = {}
-        self._models: Dict[str, ForecastModel] = {}
-        self._forecasts: Dict[str, ForecastResult] = {}
-        self._anomalies: Dict[str, List[AnomalyRecord]] = {}
+        self._series: dict[str, deque] = {}
+        self._models: dict[str, ForecastModel] = {}
+        self._forecasts: dict[str, ForecastResult] = {}
+        self._anomalies: dict[str, list[AnomalyRecord]] = {}
         self._counter = 0
         self._max_series_length = 10000
         self._anomaly_threshold = 2.0
@@ -348,13 +348,13 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
 
     # ─── 核心预测算法 ───
 
-    def _moving_average(self, values: List[float], window: int) -> float:
+    def _moving_average(self, values: list[float], window: int) -> float:
         if not values:
             return 0.0
         window = min(window, len(values))
         return sum(values[-window:]) / window
 
-    def _exponential_smooth(self, values: List[float], alpha: float) -> float:
+    def _exponential_smooth(self, values: list[float], alpha: float) -> float:
         if not values:
             return 0.0
         s = values[0]
@@ -362,7 +362,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             s = alpha * v + (1 - alpha) * s
         return s
 
-    def _linear_regression_coeffs(self, x: List[float], y: List[float]) -> Tuple[float, float]:
+    def _linear_regression_coeffs(self, x: list[float], y: list[float]) -> tuple[float, float]:
         """计算线性回归 y = slope * x + intercept"""
         n = len(x)
         if n < 2:
@@ -378,7 +378,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
         intercept = (sy - slope * sx) / n
         return slope, intercept
 
-    def _detect_anomaly(self, values: List[float], new_val: float) -> AnomalyRecord:
+    def _detect_anomaly(self, values: list[float], new_val: float) -> AnomalyRecord:
         """基于统计方法检测异常"""
         if len(values) < 5:
             return AnomalyRecord(
@@ -416,7 +416,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
 
     # ─── execute 接口 ───
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("bettafish_forecast_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -438,7 +438,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
         return handler(params)
         return {"status": "healthy", "module": "bettafish_forecast"}
 
-    def _exec_add_data(self, p: Dict) -> Dict:
+    def _exec_add_data(self, p: dict) -> dict:
         """添加时间序列数据"""
         series_id = p.get("series_id", "default")
         values = p.get("values", [])
@@ -478,7 +478,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_forecast(self, p: Dict) -> Dict:
+    def _exec_forecast(self, p: dict) -> dict:
         """执行预测"""
         series_id = p.get("series_id", "default")
         model_id = p.get("model_id", "ma_model")
@@ -574,7 +574,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_detect_anomalies(self, p: Dict) -> Dict:
+    def _exec_detect_anomalies(self, p: dict) -> dict:
         """批量异常检测"""
         series_id = p.get("series_id", "default")
         threshold = p.get("threshold", self._anomaly_threshold)
@@ -613,7 +613,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_get_anomalies(self, p: Dict) -> Dict:
+    def _exec_get_anomalies(self, p: dict) -> dict:
         """获取异常记录"""
         series_id = p.get("series_id", "default")
         limit = p.get("limit", 20)
@@ -636,7 +636,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_create_model(self, p: Dict) -> Dict:
+    def _exec_create_model(self, p: dict) -> dict:
         """创建自定义模型"""
         mid = self._next_id("mdl")
         method_str = p.get("method", "moving_average")
@@ -652,7 +652,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
         self._models[mid] = model
         return {"success": True, "result": {"model_id": mid, "name": model.name, "method": method.value}}
 
-    def _exec_list_models(self, p: Dict) -> Dict:
+    def _exec_list_models(self, p: dict) -> dict:
         return {
             "success": True,
             "result": [
@@ -667,7 +667,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             ],
         }
 
-    def _exec_get_stats(self, p: Dict) -> Dict:
+    def _exec_get_stats(self, p: dict) -> dict:
         return {
             "success": True,
             "result": {
@@ -679,7 +679,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_trend_analysis(self, p: Dict) -> Dict:
+    def _exec_trend_analysis(self, p: dict) -> dict:
         """趋势分析"""
         series_id = p.get("series_id", "default")
         if series_id not in self._series or len(self._series[series_id]) < 3:
@@ -709,7 +709,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             },
         }
 
-    def _exec_compare_forecast(self, p: Dict) -> Dict:
+    def _exec_compare_forecast(self, p: dict) -> dict:
         """多模型预测对比"""
         series_id = p.get("series_id", "default")
         horizon = min(p.get("horizon", 5), 50)
@@ -737,7 +737,7 @@ class BettafishForecastManager(EnterpriseModule, CircuitBreakerMixin, RateLimite
             )
         return {"success": True, "result": {"comparisons": results, "horizon": horizon}}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         result = {
             "status": "healthy",
             "module_id": self.MODULE_ID,

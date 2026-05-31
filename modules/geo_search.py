@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 | 地理位置搜索引擎
@@ -97,7 +96,8 @@ import threading
 import hashlib
 import base64
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -132,8 +132,8 @@ class GeoPoint:
     latitude: float
     longitude: float
     altitude: float = 0
-    timestamp: Optional[datetime] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not (-90 <= self.latitude <= 90):
@@ -145,7 +145,7 @@ class GeoPoint:
     def geohash(self) -> str:
         return encode_geohash(self.latitude, self.longitude, 12)
 
-    def distance_to(self, other: "GeoPoint", formula: str = "haversine") -> float:
+    def distance_to(self, other: GeoPoint, formula: str = "haversine") -> float:
         """计算到另一点的距离（米）"""
         if formula == "haversine":
             return haversine_distance(self.latitude, self.longitude, other.latitude, other.longitude)
@@ -153,7 +153,7 @@ class GeoPoint:
             return vincenty_distance(self.latitude, self.longitude, other.latitude, other.longitude)
         return haversine_distance(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "latitude": self.latitude,
             "longitude": self.longitude,
@@ -191,9 +191,9 @@ class POI:
     location: GeoPoint
     category: str = "default"
     address: str = ""
-    tags: Set[str] = field(default_factory=set)
+    tags: set[str] = field(default_factory=set)
     rating: float = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class GeoFence:
@@ -202,9 +202,9 @@ class GeoFence:
     fence_id: str
     name: str
     fence_type: str = "circle"  # circle / polygon
-    center: Optional[GeoPoint] = None
+    center: GeoPoint | None = None
     radius_meters: float = 0
-    vertices: List[GeoPoint] = field(default_factory=list)
+    vertices: list[GeoPoint] = field(default_factory=list)
     active: bool = True
 
 @dataclass
@@ -224,7 +224,7 @@ class TrajectoryPoint:
     bearing: float = 0
     accuracy_meters: float = 0
 
-class GeoSearchAnalyzer(object):
+class GeoSearchAnalyzer:
     """geo search 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -401,7 +401,7 @@ def decode_geohash(geohash: str) -> GeoPoint:
         longitude=(lon_range[0] + lon_range[1]) / 2,
     )
 
-def geohash_neighbors(geohash: str) -> Dict[str, str]:
+def geohash_neighbors(geohash: str) -> dict[str, str]:
     """获取GeoHash的邻居"""
     result = {"n": "", "s": "", "e": "", "w": "", "ne": "", "nw": "", "se": "", "sw": ""}
     for direction in result:
@@ -498,7 +498,7 @@ def vincenty_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> flo
 
 # ─────────────────────── 坐标转换 ───────────────────────
 
-def wgs84_to_gcj02(lat: float, lon: float) -> Tuple[float, float]:
+def wgs84_to_gcj02(lat: float, lon: float) -> tuple[float, float]:
     """WGS84 -> GCJ02（国测局坐标）"""
     a = 6378245.0
     ee = 0.00669342162296594323
@@ -516,7 +516,7 @@ def wgs84_to_gcj02(lat: float, lon: float) -> Tuple[float, float]:
     dlon = (dlon * 180.0) / (a / sqrtmagic * math.cos(radlat) * math.pi)
     return lat + dlat, lon + dlon
 
-def gcj02_to_wgs84(lat: float, lon: float) -> Tuple[float, float]:
+def gcj02_to_wgs84(lat: float, lon: float) -> tuple[float, float]:
     """GCJ02 -> WGS84"""
     if _out_of_china(lat, lon):
         return lat, lon
@@ -532,7 +532,7 @@ def gcj02_to_wgs84(lat: float, lon: float) -> Tuple[float, float]:
     dlon = (dlon * 180.0) / (a / sqrtmagic * math.cos(radlat) * math.pi)
     return lat - dlat, lon - dlon
 
-def gcj02_to_bd09(lat: float, lon: float) -> Tuple[float, float]:
+def gcj02_to_bd09(lat: float, lon: float) -> tuple[float, float]:
     """GCJ02 -> BD09（百度坐标）"""
     x_pi = math.pi * 3000.0 / 180.0
     z = math.sqrt(lon * lon + lat * lat) + 0.00002 * math.sin(lat * x_pi)
@@ -541,7 +541,7 @@ def gcj02_to_bd09(lat: float, lon: float) -> Tuple[float, float]:
     bd_lat = z * math.sin(theta) + 0.006
     return bd_lat, bd_lon
 
-def bd09_to_gcj02(lat: float, lon: float) -> Tuple[float, float]:
+def bd09_to_gcj02(lat: float, lon: float) -> tuple[float, float]:
     """BD09 -> GCJ02"""
     x_pi = math.pi * 3000.0 / 180.0
     x = lon - 0.0065
@@ -572,7 +572,7 @@ def _transform_lon(x: float, y: float) -> float:
 
 # ─────────────────────── 主引擎 ───────────────────────
 
-class GeoSpatialIndexer(object):
+class GeoSpatialIndexer:
     """地理空间索引构建和范围查询优化
 
     为geo_search模块提供深度分析能力，包括数据聚合、
@@ -638,9 +638,9 @@ class GeoSearch(EnterpriseModule):
     def __init__(self):
 
         super().__init__(module_id="geo_search", module_name="地理位置搜索引擎")
-        self._pois: Dict[str, POI] = {}
-        self._geohash_index: Dict[str, List[str]] = defaultdict(list)
-        self._fences: Dict[str, GeoFence] = {}
+        self._pois: dict[str, POI] = {}
+        self._geohash_index: dict[str, list[str]] = defaultdict(list)
+        self._fences: dict[str, GeoFence] = {}
         self._lock = threading.RLock()
         self._stats = {
             "total_queries": 0,
@@ -676,8 +676,8 @@ class GeoSearch(EnterpriseModule):
         center: GeoPoint,
         radius_meters: float,
         limit: int = 50,
-        category: Optional[str] = None,
-    ) -> List[GeoSearchResult]:
+        category: str | None = None,
+    ) -> list[GeoSearchResult]:
         """搜索附近POI"""
         self._stats["total_queries"] += 1
         results = []
@@ -701,8 +701,8 @@ class GeoSearch(EnterpriseModule):
         self,
         center: GeoPoint,
         k: int = 10,
-        category: Optional[str] = None,
-    ) -> List[GeoSearchResult]:
+        category: str | None = None,
+    ) -> list[GeoSearchResult]:
         """K近邻搜索"""
         self._stats["total_queries"] += 1
         results = []
@@ -715,7 +715,7 @@ class GeoSearch(EnterpriseModule):
         results.sort(key=lambda r: r.distance_meters)
         return results[:k]
 
-    def search_by_geohash(self, geohash: str, precision: int = 6) -> List[POI]:
+    def search_by_geohash(self, geohash: str, precision: int = 6) -> list[POI]:
         """按GeoHash前缀搜索"""
         prefix = geohash[:precision]
         poi_ids = self._geohash_index.get(prefix, [])
@@ -730,7 +730,7 @@ class GeoSearch(EnterpriseModule):
         self._audit_log("create_fence", fence.fence_id)
         return fence.fence_id
 
-    def check_fence(self, point: GeoPoint, fence_id: Optional[str] = None) -> Dict[str, bool]:
+    def check_fence(self, point: GeoPoint, fence_id: str | None = None) -> dict[str, bool]:
         """检测点是否在围栏内"""
         self._stats["total_fence_checks"] += 1
         result = {}
@@ -759,7 +759,7 @@ class GeoSearch(EnterpriseModule):
             return vincenty_distance(lat1, lon1, lat2, lon2)
         return haversine_distance(lat1, lon1, lat2, lon2)
 
-    def batch_distance(self, origin: GeoPoint, points: List[GeoPoint]) -> List[float]:
+    def batch_distance(self, origin: GeoPoint, points: list[GeoPoint]) -> list[float]:
         """批量计算距离"""
         return [origin.distance_to(p) for p in points]
 
@@ -771,7 +771,7 @@ class GeoSearch(EnterpriseModule):
         lon: float,
         from_cs: CoordinateSystem = CoordinateSystem.WGS84,
         to_cs: CoordinateSystem = CoordinateSystem.GCJ02,
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """坐标转换"""
         if from_cs == to_cs:
             return lat, lon
@@ -795,7 +795,7 @@ class GeoSearch(EnterpriseModule):
 
     # ─────────────────────── 轨迹分析 ───────────────────────
 
-    def analyze_trajectory(self, points: List[GeoPoint]) -> Dict[str, Any]:
+    def analyze_trajectory(self, points: list[GeoPoint]) -> dict[str, Any]:
         """分析轨迹"""
         if len(points) < 2:
             return {"total_distance_m": 0, "avg_speed_mps": 0, "duration_s": 0, "point_count": len(points)}
@@ -847,7 +847,7 @@ class GeoSearch(EnterpriseModule):
             avg_latency_ms=2.0,
         )
 
-def _point_in_polygon(point: GeoPoint, vertices: List[GeoPoint]) -> bool:
+def _point_in_polygon(point: GeoPoint, vertices: list[GeoPoint]) -> bool:
     """射线法判断点是否在多边形内"""
     n = len(vertices)
     inside = False

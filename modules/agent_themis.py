@@ -140,7 +140,7 @@ class AuditCheck:
     severity: RiskLevel = RiskLevel.MEDIUM
     result: AuditStatus = AuditStatus.SKIPPED
     details: str = ""
-    checked_at: Optional[float] = None
+    checked_at: float | None = None
 
 @dataclass
 class Vulnerability:
@@ -162,11 +162,11 @@ class AuditReport:
     report_id: str
     title: str
     framework: ComplianceFramework
-    checks: List[Dict] = field(default_factory=list)
+    checks: list[dict] = field(default_factory=list)
     score: float = 0.0
     generated_at: float = field(default_factory=time.time)
 
-class CompliancePolicyEngine(object):
+class CompliancePolicyEngine:
     """合规策略引擎 — 管理合规框架、检查规则和违规分级"""
 
     FRAMEWORKS = {
@@ -190,11 +190,11 @@ class CompliancePolicyEngine(object):
     }
 
     def __init__(self):
-        self._policies: Dict[str, Dict] = {}
-        self._check_results: List[Dict] = []
-        self._compliance_scores: Dict[str, float] = {}
+        self._policies: dict[str, dict] = {}
+        self._check_results: list[dict] = []
+        self._compliance_scores: dict[str, float] = {}
 
-    def register_policy(self, policy_id: str, framework: str, rules: List[Dict]) -> Dict:
+    def register_policy(self, policy_id: str, framework: str, rules: list[dict]) -> dict:
         """注册合规策略"""
         fw = self.FRAMEWORKS.get(framework, {"name": framework, "categories": []})
         self._policies[policy_id] = {
@@ -206,7 +206,7 @@ class CompliancePolicyEngine(object):
         }
         return {"policy_id": policy_id, "framework": framework, "rules_count": len(rules)}
 
-    def evaluate_compliance(self, policy_id: str, context: Dict) -> Dict:
+    def evaluate_compliance(self, policy_id: str, context: dict) -> dict:
         """评估指定策略的合规状态"""
         policy = self._policies.get(policy_id)
         if not policy:
@@ -237,7 +237,7 @@ class CompliancePolicyEngine(object):
             "violations": violations,
         }
 
-    def _check_rule(self, rule: Dict, context: Dict) -> bool:
+    def _check_rule(self, rule: dict, context: dict) -> bool:
         """检查单条规则（框架集成点）"""
         check_type = rule.get("type", "manual")
         if check_type == "auto":
@@ -247,7 +247,7 @@ class CompliancePolicyEngine(object):
             return actual == expected if expected else actual != expected
         return True  # manual rules default pass
 
-    def get_compliance_summary(self) -> Dict:
+    def get_compliance_summary(self) -> dict:
         """获取整体合规摘要"""
         scores = self._compliance_scores
         avg = sum(scores.values()) / len(scores) if scores else 1.0
@@ -264,9 +264,9 @@ class CompliancePolicyEngine(object):
             "by_framework": fw_summary,
         }
 
-    def cross_framework_analysis(self) -> Dict:
+    def cross_framework_analysis(self) -> dict:
         """跨框架合规分析 — 找出多框架共有的控制点和差异"""
-        framework_controls: Dict[str, set] = {}
+        framework_controls: dict[str, set] = {}
         for pid, policy in self._policies.items():
             fw = policy.get("framework", "unknown")
             rule_ids = {r.get("id", f"rule_{i}") for i, r in enumerate(policy.get("rules", []))}
@@ -291,7 +291,7 @@ class CompliancePolicyEngine(object):
             "overlaps": overlap,
         }
 
-    def export_evidence(self, policy_id: str) -> Dict:
+    def export_evidence(self, policy_id: str) -> dict:
         """导出合规证据包"""
         policy = self._policies.get(policy_id)
         score = self._compliance_scores.get(policy_id, 0)
@@ -316,7 +316,7 @@ class CompliancePolicyEngine(object):
             "evidence": evidence,
         }
 
-    def detect_drift(self, baseline: Dict, current: Dict) -> Dict:
+    def detect_drift(self, baseline: dict, current: dict) -> dict:
         """合规漂移检测 — 比较基线和当前状态差异"""
         drifts = []
         for control_id, expected in baseline.items():
@@ -342,7 +342,7 @@ class CompliancePolicyEngine(object):
             "status": "stable" if not drifts else "drifted",
         }
 
-    def get_remediation_plan(self, policy_id: str) -> Dict:
+    def get_remediation_plan(self, policy_id: str) -> dict:
         """生成修复计划 — 按优先级排列待修复项"""
         eval_result = self.evaluate_compliance(policy_id, {})
         violations = eval_result.get("violations", [])
@@ -374,16 +374,16 @@ class AgentThemisManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._checks: Dict[str, AuditCheck] = {}
-        self._vulnerabilities: Dict[str, Vulnerability] = {}
+        self._checks: dict[str, AuditCheck] = {}
+        self._vulnerabilities: dict[str, Vulnerability] = {}
         self._policy_engine = CompliancePolicyEngine()
-        self._reports: List[AuditReport] = []
+        self._reports: list[AuditReport] = []
         self._check_counter: int = 0
         self._vuln_counter: int = 0
         self._report_counter: int = 0
@@ -422,7 +422,7 @@ class AgentThemisManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("agent_themis_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -587,7 +587,7 @@ class AgentThemisManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         critical_vulns = sum(
             1 for v in self._vulnerabilities.values() if v.severity == RiskLevel.CRITICAL and v.status == "open"
         )
@@ -637,7 +637,7 @@ class AgentThemisManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule
         self.stats.success_count += 1
         return report
 
-    def analyze_compliance_gaps(self, framework: str = "all") -> Dict[str, Any]:
+    def analyze_compliance_gaps(self, framework: str = "all") -> dict[str, Any]:
         """分析合规缺口：扫描已启用策略，对比框架要求识别缺失项"""
         policies = self._policies if hasattr(self, "_policies") else {}
         framework_requirements = {

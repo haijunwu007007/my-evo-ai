@@ -122,14 +122,14 @@ class DrainPolicy:
 class DrainSession:
     session_id: str = ""
     service_name: str = ""
-    policy: Optional[DrainPolicy] = None
+    policy: DrainPolicy | None = None
     state: str = "pending"
     started_at: float = 0.0
     completed_at: float = 0.0
     initial_connections: int = 0
     drained_connections: int = 0
     forced_closures: int = 0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.policy is None:
@@ -149,11 +149,11 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
                 "description": "连接排空管理，优雅关闭时有序排空现有连接",
             }
         )
-        self._connections: Dict[str, Connection] = {}
-        self._policies: Dict[str, DrainPolicy] = {}
-        self._sessions: Dict[str, DrainSession] = {}
-        self._service_conns: Dict[str, set] = defaultdict(set)
-        self._notifications: List[Dict] = []
+        self._connections: dict[str, Connection] = {}
+        self._policies: dict[str, DrainPolicy] = {}
+        self._sessions: dict[str, DrainSession] = {}
+        self._service_conns: dict[str, set] = defaultdict(set)
+        self._notifications: list[dict] = []
         self._initialized = False
 
     def initialize(self) -> None:
@@ -178,7 +178,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             self._connections[conn.conn_id] = conn
             self._service_conns["api-server"].add(conn.conn_id)
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "connection_draining"})
         self.metrics_collector.counter("connection_draining.execute.calls", 1)
         self.audit("execute", {"module": "connection_draining"})
@@ -365,7 +365,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             logger.error(f"[ConnectionDraining] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -387,7 +387,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def get_draining_progress(self, service_id: str) -> Dict[str, Any]:
+    def get_draining_progress(self, service_id: str) -> dict[str, Any]:
         """获取连接排空进度。企业场景：滚动更新时运维监控页面实时展示
         当前服务剩余活跃连接数和预估排空完成时间。
         """
@@ -410,7 +410,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             "est_completion": "即将完成" if active == 0 else f"最长等待 {idle_timeout}s",
         }
 
-    def batch_drain_services(self, service_ids: List[str], grace_period: int = 30) -> Dict[str, Any]:
+    def batch_drain_services(self, service_ids: list[str], grace_period: int = 30) -> dict[str, Any]:
         """批量排空服务连接。企业场景：K8s rolling update一次排空多个Pod的连接。
         返回每个服务的排空结果和汇总统计。
         """
@@ -428,7 +428,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             results["details"].append({"service_id": sid, "status": "draining", "connections": len(conns)})
         return results
 
-    def force_close_idle_connections(self, service_id: str, idle_threshold: int = 300) -> Dict[str, Any]:
+    def force_close_idle_connections(self, service_id: str, idle_threshold: int = 300) -> dict[str, Any]:
         """强制关闭空闲超时连接。企业场景：排空超时后仍有僵尸连接未释放，
         强制关闭idle超过阈值的连接，避免阻塞Pod回收。
         """
@@ -442,7 +442,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
                     closed += 1
         return {"success": True, "service_id": service_id, "closed": closed, "idle_threshold_s": idle_threshold}
 
-    def get_connection_metrics_summary(self) -> Dict[str, Any]:
+    def get_connection_metrics_summary(self) -> dict[str, Any]:
         """连接排空指标汇总。企业场景：SRE看板展示全集群连接排空状态，
         快速发现排空卡住的服务。
         """
@@ -469,7 +469,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
         summary["stuck_services"] = stuck_services
         return {"success": True, **summary}
 
-    def get_service_drain_detail(self, service_id: str) -> Dict[str, Any]:
+    def get_service_drain_detail(self, service_id: str) -> dict[str, Any]:
         """查看服务排空详情。企业场景：SRE调试排空卡住的服务，
         查看每个连接的来源、存活时间、状态。
         """
@@ -501,7 +501,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             "connections": conn_details[:50],
         }
 
-    def batch_drain_services(self, service_ids: List[str], timeout_seconds: int = 300) -> Dict[str, Any]:
+    def batch_drain_services(self, service_ids: list[str], timeout_seconds: int = 300) -> dict[str, Any]:
         """批量排空服务连接。企业场景：滚动发布时一次性排空多个实例的连接，
         等待所有连接关闭后再终止Pod。
         """
@@ -526,7 +526,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             )
         return {"success": True, **results}
 
-    def get_drain_timeout_config(self) -> Dict[str, Any]:
+    def get_drain_timeout_config(self) -> dict[str, Any]:
         """获取各服务排空超时配置。企业场景：SRE检查不同服务的排空超时是否合理，
         长连接服务（WebSocket）需更长时间。
         """
@@ -549,7 +549,7 @@ class ConnectionDrainingManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
             )
         return {"success": True, "default_timeout": default_timeout, "configs": configs}
 
-    def get_connection_timeline(self, service_id: str) -> Dict[str, Any]:
+    def get_connection_timeline(self, service_id: str) -> dict[str, Any]:
         """连接时间线。企业场景：分析服务连接建立和关闭的时间分布，
         发现异常流量模式（如突发连接风暴）。
         """

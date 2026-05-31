@@ -61,10 +61,10 @@ class AdaptiveEngine:
             return
         self._initialized = True
         self._mem_lock = threading.Lock()
-        self._history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=HISTORY_MAX))
-        self._states: Dict[str, Dict] = {}
+        self._history: dict[str, deque] = defaultdict(lambda: deque(maxlen=HISTORY_MAX))
+        self._states: dict[str, dict] = {}
         self._scoring_active = False
-        self._scoring_thread: Optional[threading.Thread] = None
+        self._scoring_thread: threading.Thread | None = None
         # SQLite 初始化
         self._init_db()
         self._load_from_db()
@@ -253,7 +253,7 @@ class AdaptiveEngine:
 
     # ─── 评分 ───────────────────────────────────────────
 
-    def score_module(self, module: str) -> Optional[Dict]:
+    def score_module(self, module: str) -> dict | None:
         with self._mem_lock:
             records = list(self._history.get(module, []))
             state = self._states.get(module, {})
@@ -285,21 +285,21 @@ class AdaptiveEngine:
             "consecutive_failures": state.get("consecutive_failures", 0),
         }
 
-    def ranking(self, top_n: int = TOP_N) -> List[Dict]:
+    def ranking(self, top_n: int = TOP_N) -> list[dict]:
         with self._mem_lock:
             modules = list(self._history.keys())
         scored = [s for m in modules if (s := self.score_module(m))]
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored[:top_n]
 
-    def degraded_modules(self) -> List[Dict]:
+    def degraded_modules(self) -> list[dict]:
         with self._mem_lock:
             return [{"module": k, **v} for k, v in self._states.items()
                     if v.get("state") in ("degraded",)]
 
     # ─── 优化建议 ───────────────────────────────────────
 
-    def suggestions(self) -> List[Dict]:
+    def suggestions(self) -> list[dict]:
         result = []
         with self._mem_lock:
             for module, st in self._states.items():
@@ -343,7 +343,7 @@ class AdaptiveEngine:
 
     # ─── 查询 ───────────────────────────────────────────
 
-    def summary(self) -> Dict:
+    def summary(self) -> dict:
         with self._mem_lock:
             total_modules = len(self._history)
             total_records = sum(len(q) for q in self._history.values())
@@ -357,13 +357,13 @@ class AdaptiveEngine:
             "suggestions": self.suggestions(),
         }
 
-    def module_detail(self, module: str) -> Optional[Dict]:
+    def module_detail(self, module: str) -> dict | None:
         with self._mem_lock:
             records = list(self._history.get(module, []))[-20:]
             state = self._states.get(module, {})
         return {"module": module, "score": self.score_module(module), "state": state, "recent": records}
 
-    def module_info(self, module: str) -> Optional[Dict]:
+    def module_info(self, module: str) -> dict | None:
         return self.module_detail(module)
 
     # ════════════════════════════════════════════════════
@@ -416,7 +416,7 @@ class AdaptiveEngine:
         except Exception as e:
             logger.warning(f"[ADAPT] recalc eff error: {e}")
 
-    def suggest_params(self, module: str, action: str = "") -> Optional[dict]:
+    def suggest_params(self, module: str, action: str = "") -> dict | None:
         """返回该(module, action)下最高分的参数组合"""
         if not self._conn:
             return None
@@ -445,7 +445,7 @@ class AdaptiveEngine:
             logger.warning(f"[ADAPT] suggest_params error: {e}")
         return None
 
-    def get_param_profiles(self, module: str) -> List[Dict]:
+    def get_param_profiles(self, module: str) -> list[dict]:
         """获取模块所有参数配置及其效果"""
         if not self._conn:
             return []

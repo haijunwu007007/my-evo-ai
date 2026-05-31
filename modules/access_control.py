@@ -137,7 +137,7 @@ class Permission:
     resource: str
     action: str
     effect: PermissionEffect = PermissionEffect.ALLOW
-    conditions: Dict[str, Any] = field(default_factory=dict)
+    conditions: dict[str, Any] = field(default_factory=dict)
     description: str = ""
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
@@ -161,17 +161,17 @@ class Role:
 
     name: str
     description: str = ""
-    permissions: Set[str] = field(default_factory=set)
-    parent_roles: Set[str] = field(default_factory=set)
+    permissions: set[str] = field(default_factory=set)
+    parent_roles: set[str] = field(default_factory=set)
     priority: int = 0
     is_system: bool = False
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     max_session_duration: int = 28800  # 默认8小时
-    allowed_ip_ranges: List[str] = field(default_factory=list)
-    allowed_time_ranges: List[Tuple[str, str]] = field(default_factory=list)
+    allowed_ip_ranges: list[str] = field(default_factory=list)
+    allowed_time_ranges: list[tuple[str, str]] = field(default_factory=list)
 
-    def get_effective_permissions(self, role_registry: "RoleRegistry") -> Set[str]:
+    def get_effective_permissions(self, role_registry: RoleRegistry) -> set[str]:
         """获取包含继承角色的全部有效权限"""
         all_perms = set(self.permissions)
         for parent_name in self.parent_roles:
@@ -185,7 +185,7 @@ class AccessContext:
     """访问上下文（ABAC属性）"""
 
     user_id: str = ""
-    user_roles: Set[str] = field(default_factory=set)
+    user_roles: set[str] = field(default_factory=set)
     source_ip: str = ""
     user_agent: str = ""
     request_method: str = ""
@@ -194,7 +194,7 @@ class AccessContext:
     device_fingerprint: str = ""
     session_id: str = ""
     request_time: datetime = field(default_factory=datetime.now)
-    additional_attributes: Dict[str, Any] = field(default_factory=dict)
+    additional_attributes: dict[str, Any] = field(default_factory=dict)
 
     @property
     def is_weekday(self) -> bool:
@@ -229,7 +229,7 @@ class AccessContext:
         ]
         return any(self.source_ip.startswith(p) for p in internal_patterns)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "user_id": self.user_id,
             "user_roles": list(self.user_roles),
@@ -251,14 +251,14 @@ class AccessDecision:
     allowed: bool
     effect: PermissionEffect
     matched_policy: str = ""
-    matched_rules: List[str] = field(default_factory=list)
+    matched_rules: list[str] = field(default_factory=list)
     deny_reason: str = ""
     decision_time: float = field(default_factory=time.time)
     evaluation_count: int = 0
     cache_hit: bool = False
     trace_id: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "allowed": self.allowed,
             "effect": self.effect.value,
@@ -282,8 +282,8 @@ class PolicyRule:
     effect: PermissionEffect = PermissionEffect.ALLOW
     resource_pattern: str = "*"
     action_pattern: str = "*"
-    role_match: List[str] = field(default_factory=list)
-    conditions: Dict[str, Any] = field(default_factory=dict)
+    role_match: list[str] = field(default_factory=list)
+    conditions: dict[str, Any] = field(default_factory=dict)
     condition_expression: str = ""
     enabled: bool = True
     version: int = 1
@@ -322,7 +322,7 @@ class AuditEntry:
     deny_reason: str = ""
     evaluation_duration_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "trace_id": self.trace_id,
             "user_id": self.user_id,
@@ -341,8 +341,8 @@ class RoleRegistry:
     """角色注册中心"""
 
     def __init__(self):
-        self._roles: Dict[str, Role] = {}
-        self._permission_index: Dict[str, Set[str]] = defaultdict(set)  # permission -> roles
+        self._roles: dict[str, Role] = {}
+        self._permission_index: dict[str, set[str]] = defaultdict(set)  # permission -> roles
         self._initialized = False
 
     def register_role(self, role: Role) -> bool:
@@ -353,7 +353,7 @@ class RoleRegistry:
         self._rebuild_permission_index()
         return True
 
-    def get_role(self, name: str) -> Optional[Role]:
+    def get_role(self, name: str) -> Role | None:
         return self._roles.get(name)
 
     def remove_role(self, name: str) -> bool:
@@ -365,10 +365,10 @@ class RoleRegistry:
             return True
         return False
 
-    def get_all_roles(self) -> Dict[str, Role]:
+    def get_all_roles(self) -> dict[str, Role]:
         return dict(self._roles)
 
-    def get_roles_with_permission(self, permission_key: str) -> Set[str]:
+    def get_roles_with_permission(self, permission_key: str) -> set[str]:
         return self._permission_index.get(permission_key, set())
 
     def _rebuild_permission_index(self):
@@ -453,7 +453,7 @@ class RoleRegistry:
         self._rebuild_permission_index()
         self._initialized = True
 
-class ConditionEvaluator(object):
+class ConditionEvaluator:
     """条件表达式求值器"""
 
     def __init__(self):
@@ -470,7 +470,7 @@ class ConditionEvaluator(object):
             "today": datetime.now().date,
         }
 
-    def evaluate(self, expression: str, context: Dict[str, Any]) -> bool:
+    def evaluate(self, expression: str, context: dict[str, Any]) -> bool:
         """安全评估条件表达式"""
         try:
             safe_globals = {"__builtins__": self._safe_builtins}
@@ -479,7 +479,7 @@ class ConditionEvaluator(object):
         except Exception:
             return False
 
-    def evaluate_conditions(self, conditions: Dict[str, Any], context: AccessContext) -> bool:
+    def evaluate_conditions(self, conditions: dict[str, Any], context: AccessContext) -> bool:
         """评估条件字典"""
         ctx_dict = context.to_dict()
         ctx_dict.update(context.additional_attributes)
@@ -526,7 +526,7 @@ class AccessCache:
     """访问决策缓存"""
 
     def __init__(self, max_size: int = 10000, ttl_seconds: int = 300):
-        self._cache: Dict[str, Tuple[AccessDecision, float]] = {}
+        self._cache: dict[str, tuple[AccessDecision, float]] = {}
         self._max_size = max_size
         self._ttl = ttl_seconds
         self._hit_count = 0
@@ -541,7 +541,7 @@ class AccessCache:
         data = f"{context.user_id}|{context.source_ip}|{sorted(context.user_roles)}|{context.request_time.hour}"
         return hashlib.md5(data.encode()).hexdigest()[:16]
 
-    def get(self, user_id: str, resource: str, action: str, context: AccessContext) -> Optional[AccessDecision]:
+    def get(self, user_id: str, resource: str, action: str, context: AccessContext) -> AccessDecision | None:
         key = self._make_key(user_id, resource, action, self._context_hash(context))
         entry = self._cache.get(key)
         if entry is None:
@@ -578,7 +578,7 @@ class AccessCache:
         del self._cache[oldest_key]
 
     @property
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         total = self._hit_count + self._miss_count
         return {
             "size": len(self._cache),
@@ -597,15 +597,15 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._role_registry = RoleRegistry()
         self._condition_eval = ConditionEvaluator()
         self._cache = AccessCache()
-        self._policy_rules: Dict[str, PolicyRule] = {}
-        self._audit_log: List[AuditEntry] = []
+        self._policy_rules: dict[str, PolicyRule] = {}
+        self._audit_log: list[AuditEntry] = []
         self._max_audit_entries = 100000
-        self._user_roles: Dict[str, Set[str]] = defaultdict(set)
-        self._user_permissions_override: Dict[str, Set[str]] = defaultdict(set)
-        self._resource_owners: Dict[str, str] = {}  # resource -> owner user_id
-        self._ip_blacklist: Set[str] = set()
-        self._ip_whitelist: Set[str] = set()
-        self._rate_limits: Dict[str, Dict[str, Any]] = defaultdict(
+        self._user_roles: dict[str, set[str]] = defaultdict(set)
+        self._user_permissions_override: dict[str, set[str]] = defaultdict(set)
+        self._resource_owners: dict[str, str] = {}  # resource -> owner user_id
+        self._ip_blacklist: set[str] = set()
+        self._ip_whitelist: set[str] = set()
+        self._rate_limits: dict[str, dict[str, Any]] = defaultdict(
             lambda: {"count": 0, "window_start": time.time(), "limit": 1000, "window_seconds": 3600}
         )
         self._denied_count = 0
@@ -688,7 +688,7 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             self._policy_rules[rule.rule_id] = rule
 
     def check_access(
-        self, user_id: str, resource: str, action: str, context: Optional[AccessContext] = None
+        self, user_id: str, resource: str, action: str, context: AccessContext | None = None
     ) -> AccessDecision:
         """检查访问权限（同步接口）"""
         if context is None:
@@ -781,7 +781,7 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         }
         return reasons.get(rule.rule_id, f"策略 [{rule.name}] 拦截")
 
-    async def execute(self, params: Dict[str, Any]) -> Result:
+    async def execute(self, params: dict[str, Any]) -> Result:
         _ = self.trace("execute")
         """执行访问控制检查"""
         user_id = params.get("user_id", "")
@@ -810,7 +810,7 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             data=decision.to_dict(),
         )
 
-    def check_batch(self, checks: List[Dict[str, str]]) -> List[AccessDecision]:
+    def check_batch(self, checks: list[dict[str, str]]) -> list[AccessDecision]:
         """批量权限检查"""
         self.audit("execute", f"action={action}")
 
@@ -845,7 +845,7 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             return True
         return False
 
-    def get_user_permissions(self, user_id: str) -> Set[str]:
+    def get_user_permissions(self, user_id: str) -> set[str]:
         """获取用户全部权限"""
         perms = set()
         for role_name in self._user_roles.get(user_id, set()):
@@ -985,13 +985,13 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self.logger.info("访问控制引擎已关闭")
         return Result(success=True, message="访问控制引擎已关闭")
 
-    def get_audit_log(self, user_id: Optional[str] = None, limit: int = 100) -> List[Dict]:
+    def get_audit_log(self, user_id: str | None = None, limit: int = 100) -> list[dict]:
         entries = self._audit_log
         if user_id:
             entries = [e for e in entries if e.user_id == user_id]
         return [e.to_dict() for e in entries[-limit:]]
 
-    def get_compliance_report(self) -> Dict[str, Any]:
+    def get_compliance_report(self) -> dict[str, Any]:
         """生成合规报告"""
         total = self._allowed_count + self._denied_count
         return {
@@ -1015,12 +1015,10 @@ class AccessControlEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             "cache_performance": self._cache.stats,
         }
 
-    def _get_top_resources(self, filter_type: str, top_n: int = 10) -> List[Dict]:
+    def _get_top_resources(self, filter_type: str, top_n: int = 10) -> list[dict]:
         resource_counts = defaultdict(int)
         for entry in self._audit_log:
-            if filter_type == "denied" and not entry.allowed:
-                resource_counts[entry.resource] += 1
-            elif filter_type == "allowed" and entry.allowed:
+            if filter_type == "denied" and not entry.allowed or filter_type == "allowed" and entry.allowed:
                 resource_counts[entry.resource] += 1
         sorted_resources = sorted(resource_counts.items(), key=lambda x: x[1], reverse=True)[:top_n]
         return [{"resource": r, "count": c} for r, c in sorted_resources]

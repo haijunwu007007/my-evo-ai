@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Grade: A
 
 """
@@ -165,13 +164,13 @@ class IdempotentRecord:
     request_hash: str = ""
     hit_count: int = 0
 
-class IdempotencyConflictDetector(object):
+class IdempotencyConflictDetector:
     """幂等冲突检测器 — 检测重复请求、评估幂等风险、生成幂等键"""
 
     def __init__(self):
-        self._request_fingerprint: Dict[str, Dict[str, Any]] = {}
+        self._request_fingerprint: dict[str, dict[str, Any]] = {}
 
-    def generate_idempotency_key(self, method: str, path: str, body: Dict[str, Any] = None, user_id: str = "") -> str:
+    def generate_idempotency_key(self, method: str, path: str, body: dict[str, Any] = None, user_id: str = "") -> str:
         """生成幂等键"""
         import hashlib, json
 
@@ -180,7 +179,7 @@ class IdempotencyConflictDetector(object):
         key = hashlib.sha256(raw.encode()).hexdigest()[:32]
         return key
 
-    def check_duplicate(self, idempotency_key: str, ttl_seconds: float = 300) -> Dict[str, Any]:
+    def check_duplicate(self, idempotency_key: str, ttl_seconds: float = 300) -> dict[str, Any]:
         """检查是否为重复请求"""
         now = time.time()
         record = self._request_fingerprint.get(idempotency_key)
@@ -199,12 +198,12 @@ class IdempotencyConflictDetector(object):
             del self._request_fingerprint[idempotency_key]
             return {"is_duplicate": False, "key": idempotency_key, "reason": "expired"}
 
-    def record_request(self, idempotency_key: str, result: Any = None) -> Dict[str, Any]:
+    def record_request(self, idempotency_key: str, result: Any = None) -> dict[str, Any]:
         """记录请求结果用于幂等去重"""
         self._request_fingerprint[idempotency_key] = {"timestamp": time.time(), "result": result}
         return {"key": idempotency_key, "recorded": True}
 
-    def assess_risk(self, endpoint: str, method: str = "POST") -> Dict[str, Any]:
+    def assess_risk(self, endpoint: str, method: str = "POST") -> dict[str, Any]:
         """评估端点的幂等风险等级"""
         risk_score = 0
         if method in ("POST", "PATCH", "PUT"):
@@ -230,7 +229,7 @@ class IdempotencyConflictDetector(object):
             "recommendation": recommendation,
         }
 
-    def cleanup_expired(self, ttl_seconds: float = 300) -> Dict[str, Any]:
+    def cleanup_expired(self, ttl_seconds: float = 300) -> dict[str, Any]:
         """清理过期记录"""
         now = time.time()
         expired = [k for k, v in self._request_fingerprint.items() if now - v["timestamp"] > ttl_seconds]
@@ -238,7 +237,7 @@ class IdempotencyConflictDetector(object):
             del self._request_fingerprint[k]
         return {"cleaned": len(expired), "remaining": len(self._request_fingerprint)}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {"tracked_keys": len(self._request_fingerprint), "keys": list(self._request_fingerprint.keys())[:20]}
 
 class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
@@ -249,19 +248,19 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self._metrics = _MetricsAdapter()
         self._circuits = {}
         self._buckets = {}
         self._windows = {}
-        self._store: Dict[str, IdempotentRecord] = {}
-        self._locks: Dict[str, threading.Lock] = {}
+        self._store: dict[str, IdempotentRecord] = {}
+        self._locks: dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
         self.default_ttl = self.config.get("default_ttl", 3600)
         self._cleanup_interval = self.config.get("cleanup_interval", 300)
-        self._bg_cleanup: Optional[threading.Thread] = None
+        self._bg_cleanup: threading.Thread | None = None
 
     def initialize(self) -> None:
         self.info("初始化幂等保障...")
@@ -274,14 +273,14 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.start_time = datetime.now()
         self.info("幂等保障就绪")
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Result:
+    async def execute(self, action: str, params: dict | None = None) -> Result:
         _ = self.trace("execute")
         metrics_collector.counter("idempotent_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
         params = params or {}
         return self._safe_execute(action, params, self._dispatch)
 
-    def _dispatch(self, action: str, params: Dict) -> Any:
+    def _dispatch(self, action: str, params: dict) -> Any:
         """路由到具体业务方法"""
         if action == "check":
             return self._check_idempotency(params)
@@ -304,7 +303,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         else:
             return {"success": False, "error": f"Unknown action: {action}"}
 
-    def _check_idempotency(self, params: Dict) -> Dict:
+    def _check_idempotency(self, params: dict) -> dict:
         """检查请求是否已处理过"""
         key = params.get("idempotency_key", "")
         if not key:
@@ -323,7 +322,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 "age_seconds": round(time.time() - record.created_at, 2),
             }
 
-    def _record_result(self, params: Dict) -> Dict:
+    def _record_result(self, params: dict) -> dict:
         """记录请求结果"""
         key = params.get("idempotency_key", "")
         result = params.get("result")
@@ -339,7 +338,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.record_metrics("idempotent.records", 1)
         return {"success": True, "key": key, "ttl": ttl}
 
-    def _process_with_idempotency(self, params: Dict) -> Dict:
+    def _process_with_idempotency(self, params: dict) -> dict:
         """带幂等保护的处理流程"""
         key = params.get("idempotency_key", "")
         handler_name = params.get("handler", "")
@@ -374,7 +373,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.audit("process_with_idempotency", f"key={key}, handler={handler_name}")
             return {"success": True, "from_cache": False, "result": result}
 
-    def _manual_cleanup(self, params: Dict) -> Dict:
+    def _manual_cleanup(self, params: dict) -> dict:
         """手动清理过期记录"""
         max_age = params.get("max_age_seconds", self.default_ttl)
         now = time.time()
@@ -387,7 +386,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.record_metrics("idempotent.cleaned", len(expired_keys))
         return {"cleaned": len(expired_keys), "remaining": len(self._store)}
 
-    def _get_idempotent_stats(self) -> Dict:
+    def _get_idempotent_stats(self) -> dict:
         """获取幂等统计"""
         total = len(self._store)
         now = time.time()
@@ -403,7 +402,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
                 by_age["stale"] += 1
         return {"total_records": total, "by_age": by_age, "default_ttl": self.default_ttl}
 
-    def _configure_ttl(self, params: Dict) -> Dict:
+    def _configure_ttl(self, params: dict) -> dict:
         """动态配置TTL"""
         new_ttl = params.get("ttl")
         if new_ttl is not None and isinstance(new_ttl, (int, float)) and new_ttl > 0:
@@ -411,7 +410,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"success": True, "new_ttl": new_ttl}
         return {"success": False, "error": "invalid ttl", "current_ttl": self.default_ttl}
 
-    def _batch_check(self, params: Dict) -> Dict:
+    def _batch_check(self, params: dict) -> dict:
         """批量检查幂等键"""
         keys = params.get("keys", [])
         results = []
@@ -420,14 +419,14 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         duplicates = sum(1 for r in results if r.get("is_duplicate"))
         return {"total": len(keys), "duplicates": duplicates, "results": results}
 
-    def _assess_endpoint_risk(self, params: Dict) -> Dict:
+    def _assess_endpoint_risk(self, params: dict) -> dict:
         """评估端点幂等风险"""
         endpoint = params.get("endpoint", "")
         method = params.get("method", "POST")
         detector = IdempotencyConflictDetector()
         return detector.assess_risk(endpoint, method)
 
-    def _list_active_keys(self) -> Dict:
+    def _list_active_keys(self) -> dict:
         """列出所有活跃的幂等键"""
         now = time.time()
         active = []
@@ -461,7 +460,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._bg_cleanup.join(timeout=5)
         self.status = ModuleStatus.STOPPED
 
-    def _dispatch(self, params: Dict[str, Any]) -> Any:
+    def _dispatch(self, params: dict[str, Any]) -> Any:
         action = params.get("action", "")
         handlers = {
             "check": self._do_check,
@@ -479,12 +478,12 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"error": f"未知动作: {action}", "available": list(handlers.keys())}
         return handler(params)
 
-    def _generate_key(self, action: str, params: Dict) -> str:
+    def _generate_key(self, action: str, params: dict) -> str:
         """生成幂等key"""
         raw = f"{action}:{json.dumps(params, sort_keys=True, default=str)}"
         return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
-    def _do_check(self, params: Dict) -> Dict:
+    def _do_check(self, params: dict) -> dict:
         """检查请求是否已处理（幂等检查入口）"""
         action = params.get("action", "")
         req_params = params.get("params", {})
@@ -527,7 +526,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             }
         return {"idempotent": False, "key": key, "status": record.status}
 
-    def _do_register(self, params: Dict) -> Dict:
+    def _do_register(self, params: dict) -> dict:
         """注册请求（开始处理前调用）"""
         key = params.get("key", self._generate_key(params.get("action", ""), params.get("params", {})))
         ttl = params.get("ttl", self.default_ttl)
@@ -556,7 +555,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.request_count += 1
         return {"registered": True, "key": key}
 
-    def _do_complete(self, params: Dict) -> Dict:
+    def _do_complete(self, params: dict) -> dict:
         """标记完成"""
         key = params.get("key", "")
         result = params.get("result")
@@ -568,7 +567,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         record.completed_at = time.time()
         return {"completed": True, "key": key}
 
-    def _do_fail(self, params: Dict) -> Dict:
+    def _do_fail(self, params: dict) -> dict:
         """标记失败"""
         key = params.get("key", "")
         error = params.get("error", "")
@@ -581,7 +580,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         self.stats.error_count += 1
         return {"failed": True, "key": key}
 
-    def _do_get(self, params: Dict) -> Dict:
+    def _do_get(self, params: dict) -> dict:
         key = params.get("key", "")
         record = self._store.get(key)
         if not record:
@@ -597,7 +596,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "ttl_remaining": round(record.ttl - (time.time() - record.created_at), 1),
         }
 
-    def _do_delete(self, params: Dict) -> Dict:
+    def _do_delete(self, params: dict) -> dict:
         key = params.get("key", "")
         if key in self._store:
             del self._store[key]
@@ -605,7 +604,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"deleted": True}
         return {"error": "记录不存在"}
 
-    def _do_cleanup(self, params: Dict) -> Dict:
+    def _do_cleanup(self, params: dict) -> dict:
         """手动清理过期记录"""
         now = time.time()
         expired = []
@@ -617,7 +616,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self._locks.pop(key, None)
         return {"cleaned": len(expired), "remaining": len(self._store)}
 
-    def _do_list(self, params: Dict) -> Dict:
+    def _do_list(self, params: dict) -> dict:
         limit = params.get("limit", 50)
         status = params.get("status", "")
         records = list(self._store.values())
@@ -637,7 +636,7 @@ class Idempotent(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             ],
         }
 
-    def _do_stats(self, params: Dict) -> Dict:
+    def _do_stats(self, params: dict) -> dict:
         by_status = {}
         for r in self._store.values():
             by_status[r.status] = by_status.get(r.status, 0) + 1

@@ -83,7 +83,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Set, Tuple
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 from modules._base.enterprise_module import (
     EnterpriseModule,
@@ -131,25 +131,25 @@ class ServerConfig:
     version: str = "1.0.0"
     transport: TransportType = TransportType.STDIO
     command: str = ""
-    args: List[str] = field(default_factory=list)
-    env: Dict[str, str] = field(default_factory=dict)
+    args: list[str] = field(default_factory=list)
+    env: dict[str, str] = field(default_factory=dict)
     url: str = ""
     auth_type: AuthType = AuthType.NONE
-    auth_config: Dict[str, str] = field(default_factory=dict)
+    auth_config: dict[str, str] = field(default_factory=dict)
     max_connections: int = 100
     timeout_seconds: float = 30.0
     retry_count: int = 3
     retry_delay: float = 1.0
     health_check_interval: float = 30.0
-    tags: Set[str] = field(default_factory=set)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: set[str] = field(default_factory=set)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ToolDefinition:
     tool_id: str
     name: str
     description: str
-    input_schema: Dict[str, Any]
+    input_schema: dict[str, Any]
     server_id: str
     is_deprecated: bool = False
     version: str = "1.0.0"
@@ -190,7 +190,7 @@ class RateLimiter:
     def __init__(self, max_requests: int = 100, window_seconds: float = 60.0):
         self._max = max_requests
         self._window = window_seconds
-        self._requests: List[float] = []
+        self._requests: list[float] = []
         self._lock = threading.Lock()
 
     def allow(self) -> bool:
@@ -262,23 +262,23 @@ class MCPServersManager(
     def __init__(self):
 
         super().__init__()
-        self._servers: Dict[str, ServerConfig] = {}
-        self._statuses: Dict[str, ServerStatus] = {}
-        self._metrics: Dict[str, ServerMetrics] = {}
-        self._tools: Dict[str, ToolDefinition] = {}
-        self._resources: Dict[str, ResourceDefinition] = {}
-        self._pools: Dict[str, ConnectionPool] = {}
-        self._breakers: Dict[str, CircuitBreaker] = {}
-        self._rate_limiters: Dict[str, RateLimiter] = {}
-        self._tool_index: Dict[str, Set[str]] = defaultdict(set)
-        self._tag_index: Dict[str, Set[str]] = defaultdict(set)
-        self._latencies: Dict[str, List[float]] = defaultdict(list)
+        self._servers: dict[str, ServerConfig] = {}
+        self._statuses: dict[str, ServerStatus] = {}
+        self._metrics: dict[str, ServerMetrics] = {}
+        self._tools: dict[str, ToolDefinition] = {}
+        self._resources: dict[str, ResourceDefinition] = {}
+        self._pools: dict[str, ConnectionPool] = {}
+        self._breakers: dict[str, CircuitBreaker] = {}
+        self._rate_limiters: dict[str, RateLimiter] = {}
+        self._tool_index: dict[str, set[str]] = defaultdict(set)
+        self._tag_index: dict[str, set[str]] = defaultdict(set)
+        self._latencies: dict[str, list[float]] = defaultdict(list)
         self._lock = threading.RLock()
-        self._health_thread: Optional[threading.Thread] = None
+        self._health_thread: threading.Thread | None = None
         self._running = False
-        self._event_callbacks: List = []
+        self._event_callbacks: list = []
         self._initialized = False
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._trace_span_counter = 0
 
     def initialize(self) -> bool:
@@ -303,7 +303,7 @@ class MCPServersManager(
 
     # === 服务器生命周期管理 ===
 
-    def register_server(self, config: ServerConfig) -> Dict[str, Any]:
+    def register_server(self, config: ServerConfig) -> dict[str, Any]:
         trace_id = f"mcp-reg-{uuid.uuid4().hex[:8]}"
         self._trace_span_counter += 1
         with self._lock:
@@ -322,7 +322,7 @@ class MCPServersManager(
             self._emit_event("server_registered", config.server_id)
             return {"success": True, "server_id": config.server_id}
 
-    def unregister_server(self, server_id: str) -> Dict[str, Any]:
+    def unregister_server(self, server_id: str) -> dict[str, Any]:
         with self._lock:
             if server_id not in self._servers:
                 return {"success": False, "error": "Server not found"}
@@ -343,7 +343,7 @@ class MCPServersManager(
             self._emit_event("server_unregistered", server_id)
             return {"success": True, "server_id": server_id}
 
-    def start_server(self, server_id: str) -> Dict[str, Any]:
+    def start_server(self, server_id: str) -> dict[str, Any]:
         with self._lock:
             if server_id not in self._servers:
                 return {"success": False, "error": "Server not found"}
@@ -354,7 +354,7 @@ class MCPServersManager(
         self._emit_event("server_started", server_id)
         return {"success": True, "server_id": server_id, "status": "running"}
 
-    def stop_server(self, server_id: str, graceful: bool = True) -> Dict[str, Any]:
+    def stop_server(self, server_id: str, graceful: bool = True) -> dict[str, Any]:
         with self._lock:
             if server_id not in self._servers:
                 return {"success": False, "error": "Server not found"}
@@ -365,7 +365,7 @@ class MCPServersManager(
         self._emit_event("server_stopped", server_id)
         return {"success": True, "server_id": server_id}
 
-    def restart_server(self, server_id: str) -> Dict[str, Any]:
+    def restart_server(self, server_id: str) -> dict[str, Any]:
         stop = self.stop_server(server_id, graceful=True)
         if not stop["success"]:
             return stop
@@ -374,7 +374,7 @@ class MCPServersManager(
 
     # === 工具与资源管理 ===
 
-    def register_tool(self, tool: ToolDefinition) -> Dict[str, Any]:
+    def register_tool(self, tool: ToolDefinition) -> dict[str, Any]:
         with self._lock:
             if tool.tool_id in self._tools:
                 return {"success": False, "error": "Tool already registered"}
@@ -383,7 +383,7 @@ class MCPServersManager(
             self._tool_index[tool.name].add(tool.tool_id)
         return {"success": True, "tool_id": tool.tool_id}
 
-    def unregister_tool(self, tool_id: str) -> Dict[str, Any]:
+    def unregister_tool(self, tool_id: str) -> dict[str, Any]:
         with self._lock:
             tool = self._tools.pop(tool_id, None)
             if not tool:
@@ -392,12 +392,12 @@ class MCPServersManager(
             self._tool_index[tool.name].discard(tool_id)
         return {"success": True, "tool_id": tool_id}
 
-    def register_resource(self, resource: ResourceDefinition) -> Dict[str, Any]:
+    def register_resource(self, resource: ResourceDefinition) -> dict[str, Any]:
         with self._lock:
             self._resources[resource.resource_id] = resource
         return {"success": True, "resource_id": resource.resource_id}
 
-    def discover_tools(self, server_id: str) -> Dict[str, Any]:
+    def discover_tools(self, server_id: str) -> dict[str, Any]:
         with self._lock:
             tools = [
                 {"tool_id": t.tool_id, "name": t.name, "description": t.description}
@@ -406,7 +406,7 @@ class MCPServersManager(
             ]
         return {"success": True, "server_id": server_id, "tools": tools, "count": len(tools)}
 
-    def search_tools(self, query: str, tags: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    def search_tools(self, query: str, tags: list[str] | None = None) -> list[dict[str, Any]]:
         query_lower = query.lower()
         results = []
         with self._lock:
@@ -436,7 +436,7 @@ class MCPServersManager(
 
     # === 请求路由与执行 ===
 
-    def execute_tool(self, server_id: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def execute_tool(self, server_id: str, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         _ = self.trace("execute_tool")
         self.audit("execute", f"action=execute_tool")
         metrics_collector.counter("mcp_ops_total")
@@ -476,17 +476,17 @@ class MCPServersManager(
                     metrics.last_error_time = time.time()
             return {"success": False, "error": str(e), "server_id": server_id}
 
-    def _simulate_execution(self, server_id: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def _simulate_execution(self, server_id: str, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         time.sleep(0.001)
         return {
             "server_id": server_id,
             "tool": tool_name,
             "arguments": arguments,
             "status": "executed",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
-    def read_resource(self, server_id: str, uri: str) -> Dict[str, Any]:
+    def read_resource(self, server_id: str, uri: str) -> dict[str, Any]:
         resources = [r for r in self._resources.values() if r.server_id == server_id and r.uri == uri]
         if not resources:
             return {"success": False, "error": "Resource not found"}
@@ -497,7 +497,7 @@ class MCPServersManager(
 
     # === 负载均衡 ===
 
-    def select_server(self, tool_name: str, strategy: str = "least_connections") -> Optional[str]:
+    def select_server(self, tool_name: str, strategy: str = "least_connections") -> str | None:
         candidates = []
         with self._lock:
             for sid, status in self._statuses.items():
@@ -525,7 +525,7 @@ class MCPServersManager(
 
     # === 监控与指标 ===
 
-    def get_server_status(self, server_id: str) -> Dict[str, Any]:
+    def get_server_status(self, server_id: str) -> dict[str, Any]:
         config = self._servers.get(server_id)
         status = self._statuses.get(server_id)
         metrics = self._metrics.get(server_id)
@@ -563,8 +563,8 @@ class MCPServersManager(
         }
 
     def list_servers(
-        self, status_filter: Optional[ServerStatus] = None, tag: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, status_filter: ServerStatus | None = None, tag: str | None = None
+    ) -> list[dict[str, Any]]:
         results = []
         with self._lock:
             for sid, config in self._servers.items():
@@ -586,7 +586,7 @@ class MCPServersManager(
                 )
         return results
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         total_servers = len(self._servers)
         running = sum(1 for s in self._statuses.values() if s == ServerStatus.RUNNING)
         failed = sum(1 for s in self._statuses.values() if s == ServerStatus.FAILED)
@@ -607,7 +607,7 @@ class MCPServersManager(
 
     # === 配置热更新 ===
 
-    def update_config(self, server_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+    def update_config(self, server_id: str, updates: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
             config = self._servers.get(server_id)
             if not config:
@@ -624,7 +624,7 @@ class MCPServersManager(
 
     # === 安全鉴权 ===
 
-    def authenticate_request(self, server_id: str, credentials: Dict[str, str]) -> Dict[str, Any]:
+    def authenticate_request(self, server_id: str, credentials: dict[str, str]) -> dict[str, Any]:
         config = self._servers.get(server_id)
         if not config:
             return {"authenticated": False, "error": "Server not found"}
@@ -670,7 +670,7 @@ class MCPServersManager(
                         metrics.uptime_seconds += 30
 
     def _emit_event(self, event_type: str, server_id: str, data: Any = None):
-        event = {"event": event_type, "server_id": server_id, "timestamp": datetime.now(timezone.utc).isoformat(), "data": data}
+        event = {"event": event_type, "server_id": server_id, "timestamp": datetime.now(UTC).isoformat(), "data": data}
         for cb in self._event_callbacks:
             try:
                 cb(event)
@@ -680,7 +680,7 @@ class MCPServersManager(
     def subscribe_events(self, callback):
         self._event_callbacks.append(callback)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         summary = self.get_metrics_summary()
         return {
             "healthy": True,
@@ -694,7 +694,7 @@ class MCPServersManager(
             "uptime": time.time(),
         }
 
-    def _log_audit(self, action: str, details: Dict[str, Any]) -> None:
+    def _log_audit(self, action: str, details: dict[str, Any]) -> None:
         """记录审计日志"""
         self._audit_log.append(
             {
@@ -706,7 +706,7 @@ class MCPServersManager(
         if len(self._audit_log) > 10000:
             self._audit_log = self._audit_log[-5000:]
 
-    def get_audit_log(self, limit: int = 100) -> List[Dict]:
+    def get_audit_log(self, limit: int = 100) -> list[dict]:
         """获取审计日志"""
         return self._audit_log[-limit:]
 

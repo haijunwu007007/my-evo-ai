@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class U001Analyzer(object):
+class U001Analyzer:
     """u_001 运营分析引擎
 
     - 分析模块运行指标
@@ -116,7 +116,7 @@ class U001Analyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "U001Analyzer", "module": "u_001", "summary": summary}
 
-class U001Analyzer(object):
+class U001Analyzer:
     """u 001 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -215,7 +215,7 @@ class U001Analyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class U001Analyzer(object):
+class U001Analyzer:
     """u_001核心分析引擎
 
     为u_001模块提供深度分析能力，包括数据聚合、
@@ -273,18 +273,18 @@ class U001Analyzer(object):
 class U001Protocol(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """U001协议网关"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
 
         super().__init__()
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"u_001")
 

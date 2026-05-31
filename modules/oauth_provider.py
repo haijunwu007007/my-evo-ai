@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - OAuth2 授权服务器（A级生产实现）
@@ -41,16 +40,16 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
         # 已注册的客户端 {client_id: {name, secret, redirect_uris, grants}}
-        self._clients: Dict[str, Dict] = {}
+        self._clients: dict[str, dict] = {}
         # 授权码 {code: {client_id, redirect_uri, scopes, expires_at, user_id}}
-        self._auth_codes: Dict[str, Dict] = {}
+        self._auth_codes: dict[str, dict] = {}
         # 已颁发的令牌 {token: {client_id, user_id, scopes, expires_at, type}}
-        self._tokens: Dict[str, Dict] = {}
+        self._tokens: dict[str, dict] = {}
         # 刷新令牌映射 {refresh_token: access_token}
-        self._refresh_tokens: Dict[str, str] = {}
+        self._refresh_tokens: dict[str, str] = {}
         self._access_ttl = int(self.config.get("access_ttl", 3600))
         self._refresh_ttl = int(self.config.get("refresh_ttl", 2592000))
         self._code_ttl = int(self.config.get("code_ttl", 300))  # 5分钟
@@ -66,10 +65,10 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             checks={"clients": len(self._clients), "tokens": len(self._tokens)},
         )
 
-    async def execute(self, action: str, params: Optional[Dict] = None) -> Any:
+    async def execute(self, action: str, params: dict | None = None) -> Any:
         return await self._safe_execute(action, params, handler=self._dispatch)
 
-    def _dispatch(self, params: Dict) -> Dict:
+    def _dispatch(self, params: dict) -> dict:
         action = params.get("action", "status")
         if action == "register_client": return self._register_client(params)
         elif action == "authorize": return self._authorize(params)
@@ -81,7 +80,7 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         elif action == "introspect": return self._introspect(params)
         return {"success": False, "error": f"unknown action: {action}"}
 
-    def _register_client(self, params: Dict) -> Dict:
+    def _register_client(self, params: dict) -> dict:
         client_id = params.get("client_id", f"client_{uuid.uuid4().hex[:8]}")
         if client_id in self._clients:
             return {"success": False, "error": "client_id already exists"}
@@ -97,13 +96,13 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         metrics_collector.counter("oauth_client_registered")
         return {"success": True, "client_id": client_id, "client_secret": client_secret}
 
-    def _authenticate_client(self, client_id: str, client_secret: str) -> Optional[Dict]:
+    def _authenticate_client(self, client_id: str, client_secret: str) -> dict | None:
         client = self._clients.get(client_id)
         if not client or client["secret"] != client_secret:
             return None
         return client
 
-    def _authorize(self, params: Dict) -> Dict:
+    def _authorize(self, params: dict) -> dict:
         """授权码模式：生成授权码"""
         client_id = params.get("client_id", "")
         redirect_uri = params.get("redirect_uri", "")
@@ -127,7 +126,7 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         }
         return {"success": True, "code": code, "redirect_uri": redirect_uri}
 
-    def _issue_token(self, params: Dict) -> Dict:
+    def _issue_token(self, params: dict) -> dict:
         """通过授权码或客户端凭证颁发令牌"""
         grant_type = params.get("grant_type", "authorization_code")
         client_id = params.get("client_id", "")
@@ -181,7 +180,7 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "refresh_token": refresh_token, "scope": " ".join(scopes),
         }
 
-    def _refresh_token(self, params: Dict) -> Dict:
+    def _refresh_token(self, params: dict) -> dict:
         ref_token = params.get("refresh_token", "")
         client_id = params.get("client_id", "")
         client_secret = params.get("client_secret", "")
@@ -204,7 +203,7 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "refresh_token": new_refresh,
         }
 
-    def _validate_token(self, params: Dict) -> Dict:
+    def _validate_token(self, params: dict) -> dict:
         token = params.get("token", "")
         required_scope = params.get("scope", "")
         token_data = self._tokens.get(token)
@@ -217,12 +216,12 @@ class OAuthProvider(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             return {"success": False, "valid": False, "error": "insufficient scope"}
         return {"success": True, "valid": True, **token_data}
 
-    def _revoke_token(self, params: Dict) -> Dict:
+    def _revoke_token(self, params: dict) -> dict:
         token = params.get("token", "")
         self._tokens.pop(token, None)
         return {"success": True, "revoked": True}
 
-    def _introspect(self, params: Dict) -> Dict:
+    def _introspect(self, params: dict) -> dict:
         token = params.get("token", "")
         result = self._validate_token({"token": token})
         if result.get("valid"):

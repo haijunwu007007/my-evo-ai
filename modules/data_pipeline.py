@@ -35,7 +35,8 @@ __module_meta__ = {
 }
 import json, os, csv, hashlib, time, traceback, io, re, logging
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Callable
+from typing import Optional, Dict, Any, List
+from collections.abc import Callable
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -249,8 +250,8 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         self.data_dir = data_dir
         os.makedirs(data_dir, exist_ok=True)
-        self.pipelines: Dict[str, Dict] = {}
-        self.history: List[Dict] = []
+        self.pipelines: dict[str, dict] = {}
+        self.history: list[dict] = []
         self._db_client = None
         self._analyzer = DataPipelineAnalyzer()  # 可注入的外部数据库客户端
 
@@ -266,7 +267,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self.history = self.history[-self.MAX_HISTORY // 2 :]
 
     # ─── 管道管理 ──────────────────────────────────────
-    def create_pipeline(self, name: str, steps: Optional[List] = None, config: Optional[Dict] = None) -> Dict:
+    def create_pipeline(self, name: str, steps: list | None = None, config: dict | None = None) -> dict:
         self.pipelines[name] = {
             "steps": steps or [],
             "status": "draft",
@@ -284,10 +285,10 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self,
         pipeline_name: str,
         step_type: str,
-        config: Optional[Dict] = None,
+        config: dict | None = None,
         on_error: str = "stop",
         retry_count: int = 0,
-    ) -> Dict:
+    ) -> dict:
         """添加步骤
         Args:
             on_error: stop(停止) / skip(跳过) / retry(重试)
@@ -317,9 +318,9 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         pipeline_name: str,
         condition_field: str,
         condition_value: Any,
-        then_steps: List[Dict],
-        else_steps: Optional[List[Dict]] = None,
-    ) -> Dict:
+        then_steps: list[dict],
+        else_steps: list[dict] | None = None,
+    ) -> dict:
         """添加条件分支"""
         step_cfg = {
             "condition_field": condition_field,
@@ -329,14 +330,14 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         }
         return self.add_step(pipeline_name, "condition_branch", step_cfg)
 
-    def remove_pipeline(self, name: str) -> Dict:
+    def remove_pipeline(self, name: str) -> dict:
         if name in self.pipelines:
             del self.pipelines[name]
             return {"success": True}
         return {"success": False, "error": "不存在"}
 
     # ─── 管道执行 ──────────────────────────────────────
-    def run_pipeline(self, name: str, input_data=None) -> Dict:
+    def run_pipeline(self, name: str, input_data=None) -> dict:
         p = self.pipelines.get(name)
         if not p:
             return {"success": False, "error": f"管道 {name} 不存在"}
@@ -428,7 +429,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "duration_ms": elapsed,
         }
 
-    def _execute_single_step(self, step: Dict, data, df, use_df):
+    def _execute_single_step(self, step: dict, data, df, use_df):
         """执行单个步骤，返回 (data, df, use_df)"""
         t = step["type"]
         cfg = step.get("config", {})
@@ -442,7 +443,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 data = df.to_dict("records")
                 use_df = True
             else:
-                with open(filepath, "r", encoding=encoding, errors="ignore") as f:
+                with open(filepath, encoding=encoding, errors="ignore") as f:
                     reader = csv.DictReader(f)
                     data = list(reader)
                 use_df = False
@@ -450,7 +451,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         elif t == "json_read":
             filepath = cfg.get("path", "")
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 raw = json.load(f)
             if isinstance(raw, list):
                 data = raw
@@ -631,15 +632,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             result = []
             for r in data:
                 rv = r.get(field)
-                if op == "eq" and str(rv) == str(value):
-                    result.append(r)
-                elif op == "ne" and str(rv) != str(value):
-                    result.append(r)
-                elif op == "gt" and rv is not None and rv > value:
-                    result.append(r)
-                elif op == "lt" and rv is not None and rv < value:
-                    result.append(r)
-                elif op == "contains" and value in str(rv):
+                if op == "eq" and str(rv) == str(value) or op == "ne" and str(rv) != str(value) or op == "gt" and rv is not None and rv > value or op == "lt" and rv is not None and rv < value or op == "contains" and value in str(rv):
                     result.append(r)
             return result, df, use_df
 
@@ -709,9 +702,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 for rule in rules:
                     field = rule.get("field", "")
                     check = rule.get("type", "")
-                    if check == "not_null" and not r.get(field):
-                        valid = False
-                    elif check == "type_int" and not str(r.get(field, "")).isdigit():
+                    if check == "not_null" and not r.get(field) or check == "type_int" and not str(r.get(field, "")).isdigit():
                         valid = False
                     elif check == "range":
                         min_v, max_v = rule.get("min"), rule.get("max")
@@ -782,7 +773,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return data, df, use_df
 
     # ─── 数据质量报告 ──────────────────────────────────
-    def data_quality_report(self, data) -> Dict:
+    def data_quality_report(self, data) -> dict:
         """生成数据质量报告"""
         if not isinstance(data, list) or not data:
             return {"total_rows": 0, "total_columns": 0}
@@ -817,7 +808,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return report
 
     # ─── 管道模板 ──────────────────────────────────────
-    def template_csv_to_db(self, pipeline_name: str, csv_path: str, table_name: str) -> Dict:
+    def template_csv_to_db(self, pipeline_name: str, csv_path: str, table_name: str) -> dict:
         """模板: CSV导入数据库"""
         self.create_pipeline(pipeline_name)
         self.add_step(pipeline_name, "csv_read", {"path": csv_path})
@@ -825,7 +816,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self.add_step(pipeline_name, "db_read", {"query": f"INSERT INTO {table_name}"})
         return {"success": True, "pipeline": pipeline_name, "steps": 3}
 
-    def template_api_to_csv(self, pipeline_name: str, api_url: str, output_path: str) -> Dict:
+    def template_api_to_csv(self, pipeline_name: str, api_url: str, output_path: str) -> dict:
         """模板: API数据导出CSV"""
         self.create_pipeline(pipeline_name)
         self.add_step(pipeline_name, "api_read", {"url": api_url})
@@ -840,7 +831,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         output_path: str,
         read_type: str = "csv_read",
         write_type: str = "csv_write",
-    ) -> Dict:
+    ) -> dict:
         """模板: 数据清洗后导出"""
         self.create_pipeline(pipeline_name)
         self.add_step(pipeline_name, read_type, {"path": input_path})
@@ -850,16 +841,16 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "pipeline": pipeline_name, "steps": 4}
 
     # ─── 查询 ──────────────────────────────────────────
-    def get_pipeline(self, name: str) -> Dict:
+    def get_pipeline(self, name: str) -> dict:
         p = self.pipelines.get(name)
         if p:
             return {"success": True, **p}
         return {"success": False, "error": "不存在"}
 
-    def list_pipelines(self) -> Dict:
+    def list_pipelines(self) -> dict:
         return {"success": True, "pipelines": list(self.pipelines.keys()), "count": len(self.pipelines)}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "pipelines": len(self.pipelines),
             "data_dir": self.data_dir,
@@ -869,7 +860,7 @@ class DataPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "version": self.VERSION,
         }
 
-    def health_check(self) -> Dict:
+    def health_check(self) -> dict:
         return {"healthy": True, "pipelines": len(self.pipelines), "version": self.VERSION}
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

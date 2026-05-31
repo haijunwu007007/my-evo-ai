@@ -114,16 +114,16 @@ class CopilotAgent:
     model: str = "gpt-4"
     temperature: float = 0.7
     max_tokens: int = 4096
-    tools: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tools: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Conversation:
     conversation_id: str = ""
     title: str = ""
-    agent_ids: List[str] = field(default_factory=list)
-    messages: List[Dict] = field(default_factory=list)
-    context: Dict[str, Any] = field(default_factory=dict)
+    agent_ids: list[str] = field(default_factory=list)
+    messages: list[dict] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
     created_at: float = 0.0
     updated_at: float = 0.0
 
@@ -133,7 +133,7 @@ class Message:
     role: str = "user"  # user, assistant, system, tool
     content: str = ""
     agent_id: str = ""
-    tool_calls: List[Dict] = field(default_factory=list)
+    tool_calls: list[dict] = field(default_factory=list)
     tokens_input: int = 0
     tokens_output: int = 0
     created_at: float = 0.0
@@ -143,7 +143,7 @@ class ToolDefinition:
     tool_id: str = ""
     name: str = ""
     description: str = ""
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     handler: str = ""
 
 class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
@@ -160,9 +160,9 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 "description": "CopilotKit AI助手集成：对话/Agent编排/工具调用/上下文管理",
             }
         )
-        self._agents: Dict[str, CopilotAgent] = {}
-        self._conversations: Dict[str, Conversation] = {}
-        self._tools: Dict[str, ToolDefinition] = {}
+        self._agents: dict[str, CopilotAgent] = {}
+        self._conversations: dict[str, Conversation] = {}
+        self._tools: dict[str, ToolDefinition] = {}
         self._initialized = False
 
     def initialize(self) -> None:
@@ -219,7 +219,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         ]:
             self._tools[tid] = ToolDefinition(tool_id=tid, name=name, description=desc, parameters=params)
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         self.trace("execute", {"module": "copilotkit"})
         self.metrics_collector.counter("copilotkit.execute.calls", 1)
         self.audit("execute", {"module": "copilotkit"})
@@ -416,7 +416,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             logger.error(f"[CopilotKit] execute异常: {action}, {e}")
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         base = super().health_check()
         if base and hasattr(base, "to_dict"):
             base = base.to_dict()
@@ -436,7 +436,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     async def shutdown(self) -> None:
         self._initialized = False
 
-    def create_agent(self, agent_config: Dict[str, Any]) -> Dict[str, Any]:
+    def create_agent(self, agent_config: dict[str, Any]) -> dict[str, Any]:
         """创建AI Agent。企业场景：产品团队为不同业务线创建专属AI助手
         （客服Agent、数据分析Agent、代码审查Agent），各自独立配置。
         """
@@ -460,7 +460,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._agents[agent_id] = agent
         return {"success": True, "agent_id": agent_id, "name": agent["name"]}
 
-    def list_agents(self) -> Dict[str, Any]:
+    def list_agents(self) -> dict[str, Any]:
         """列出所有AI Agent。企业场景：管理员查看当前系统注册了哪些Agent，
         各自配置和使用情况。
         """
@@ -479,7 +479,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             )
         return {"success": True, "total": len(agents), "agents": agents}
 
-    def register_tool(self, tool_config: Dict[str, Any]) -> Dict[str, Any]:
+    def register_tool(self, tool_config: dict[str, Any]) -> dict[str, Any]:
         """注册Agent工具。企业场景：为Agent接入企业内部API（工单系统、CRM、
         知识库查询），让AI能调用真实业务接口。
         """
@@ -497,7 +497,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         self._tools[tool_id] = tool
         return {"success": True, "tool_id": tool_id, "name": tool["name"]}
 
-    def get_agent_usage_report(self, days: int = 7) -> Dict[str, Any]:
+    def get_agent_usage_report(self, days: int = 7) -> dict[str, Any]:
         """Agent使用报告。企业场景：管理层月度审查各AI Agent的使用量、
         Token消耗，评估ROI和是否需要调整配额。
         """
@@ -531,7 +531,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "report": report,
         }
 
-    def get_cost_analysis(self, days: int = 30) -> Dict[str, Any]:
+    def get_cost_analysis(self, days: int = 30) -> dict[str, Any]:
         """AI Agent成本分析。企业场景：财务核算AI调用成本，
         按Agent/模型/团队维度分析Token消耗和费用。
         """
@@ -575,7 +575,7 @@ class CopilotKitManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             "by_team": team_costs,
         }
 
-    def get_model_performance(self, days: int = 7) -> Dict[str, Any]:
+    def get_model_performance(self, days: int = 7) -> dict[str, Any]:
         """模型性能对比。企业场景：评估不同LLM模型在业务场景中的
         响应质量和速度，辅助模型选型决策。
         """

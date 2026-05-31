@@ -93,7 +93,7 @@ from modules._base.metrics import prometheus_timer, metrics_collector
 
 logger = get_logger(__name__)
 
-class MessageTraceAnalyzer(object):
+class MessageTraceAnalyzer:
     """message_trace 分析引擎 - 运营分析核心组件
 
     聚合模块运行指标，检测异常模式，统计操作分布与成功率。
@@ -280,12 +280,12 @@ class TraceSpan:
     status: TraceStatus = TraceStatus.CREATED
     timestamp: float = field(default_factory=time.time)
     duration_ms: float = 0
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
     service: str = ""
     error: str = ""
     parent_span: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "span_id": self.span_id,
             "operation": self.operation,
@@ -309,7 +309,7 @@ class MessageTrace:
     created: float = field(default_factory=time.time)
     updated: float = field(default_factory=time.time)
     completed: float = 0
-    spans: List[TraceSpan] = field(default_factory=list)
+    spans: list[TraceSpan] = field(default_factory=list)
     total_duration_ms: float = 0
     retry_count: int = 0
     max_retries: int = 3
@@ -318,7 +318,7 @@ class MessageTrace:
     priority: int = 0
     size_bytes: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "trace_id": self.trace_id,
             "message_id": self.message_id,
@@ -385,11 +385,11 @@ class MessageTraceModule:
     """企业级消息追踪模块"""
 
     def __init__(self):
-        self._traces: Dict[str, MessageTrace] = {}
-        self._message_index: Dict[str, str] = {}
-        self._service_traces: Dict[str, set] = defaultdict(set)
-        self._sla_targets: Dict[str, SLATarget] = {}
-        self._sla_history: Dict[str, List[SLAReport]] = defaultdict(list)
+        self._traces: dict[str, MessageTrace] = {}
+        self._message_index: dict[str, str] = {}
+        self._service_traces: dict[str, set] = defaultdict(set)
+        self._sla_targets: dict[str, SLATarget] = {}
+        self._sla_history: dict[str, list[SLAReport]] = defaultdict(list)
         self._dead_letters: deque = deque(maxlen=10000)
         self.metrics_collector = type(
             "_NMC",
@@ -432,7 +432,7 @@ class MessageTraceModule:
         }
         self._initialized = False
 
-    def initialize(self) -> Dict[str, Any]:
+    def initialize(self) -> dict[str, Any]:
         try:
             self._sla_targets["default"] = SLATarget(
                 name="default", max_latency_ms=5000, min_delivery_rate=0.999, window_sec=300
@@ -445,7 +445,7 @@ class MessageTraceModule:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         if not self._initialized:
             return {"healthy": False, "reason": "not_initialized"}
         active = sum(
@@ -479,7 +479,7 @@ class MessageTraceModule:
         payload_hash: str = "",
         priority: int = 0,
         size_bytes: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
         trace_id = f"tr_{uuid.uuid4().hex[:12]}"
@@ -510,10 +510,10 @@ class MessageTraceModule:
         operation: str,
         service: str = "",
         status: str = "dispatched",
-        attributes: Dict[str, Any] = None,
+        attributes: dict[str, Any] = None,
         error: str = "",
         duration_ms: float = 0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if trace_id not in self._traces:
             return {"success": False, "error": "trace_not_found"}
         trace = self._traces[trace_id]
@@ -542,7 +542,7 @@ class MessageTraceModule:
             self._stats["traces_failed"] += 1
         return {"success": True, "span_id": span.span_id, "operation": operation, "status": st.value}
 
-    def complete_trace(self, trace_id: str, status: str = "delivered", error: str = "") -> Dict[str, Any]:
+    def complete_trace(self, trace_id: str, status: str = "delivered", error: str = "") -> dict[str, Any]:
         if trace_id not in self._traces:
             return {"success": False, "error": "trace_not_found"}
         trace = self._traces[trace_id]
@@ -571,13 +571,13 @@ class MessageTraceModule:
             "duration_ms": round(trace.total_duration_ms, 2),
         }
 
-    def get_trace(self, trace_id: str) -> Dict[str, Any]:
+    def get_trace(self, trace_id: str) -> dict[str, Any]:
         if trace_id not in self._traces:
             return {"success": False, "error": "trace_not_found"}
         trace = self._traces[trace_id]
         return {"success": True, **trace.to_dict(), "spans": [s.to_dict() for s in trace.spans]}
 
-    def get_trace_by_message(self, message_id: str) -> Dict[str, Any]:
+    def get_trace_by_message(self, message_id: str) -> dict[str, Any]:
         trace_id = self._message_index.get(message_id)
         if not trace_id:
             return {"success": False, "error": "message_not_found"}
@@ -586,7 +586,7 @@ class MessageTraceModule:
     # --- Query ---
     def search_traces(
         self, topic: str = None, source: str = None, status: str = None, limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         results = []
         for trace in sorted(self._traces.values(), key=lambda t: t.created, reverse=True):
             if topic and trace.topic != topic:
@@ -600,7 +600,7 @@ class MessageTraceModule:
                 break
         return {"success": True, "traces": results, "total": len(results)}
 
-    def get_service_stats(self, service: str) -> Dict[str, Any]:
+    def get_service_stats(self, service: str) -> dict[str, Any]:
         trace_ids = self._service_traces.get(service, set())
         traces = [self._traces[tid] for tid in trace_ids if tid in self._traces]
         completed = [t for t in traces if t.completed > 0]
@@ -620,11 +620,11 @@ class MessageTraceModule:
         }
 
     # --- Dead Letter ---
-    def list_dead_letters(self, limit: int = 100) -> Dict[str, Any]:
+    def list_dead_letters(self, limit: int = 100) -> dict[str, Any]:
         items = list(self._dead_letters)[-limit:]
         return {"success": True, "items": items, "total": len(self._dead_letters)}
 
-    def purge_dead_letters(self) -> Dict[str, Any]:
+    def purge_dead_letters(self) -> dict[str, Any]:
         count = len(self._dead_letters)
         self._dead_letters.clear()
         return {"success": True, "purged": count}
@@ -632,13 +632,13 @@ class MessageTraceModule:
     # --- SLA ---
     def set_sla_target(
         self, name: str, max_latency_ms: float = 5000, min_delivery_rate: float = 0.999, window_sec: int = 300
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         self._sla_targets[name] = SLATarget(
             name=name, max_latency_ms=max_latency_ms, min_delivery_rate=min_delivery_rate, window_sec=window_sec
         )
         return {"success": True, "name": name, "max_latency_ms": max_latency_ms}
 
-    def check_sla(self, name: str = "default") -> Dict[str, Any]:
+    def check_sla(self, name: str = "default") -> dict[str, Any]:
         if name not in self._sla_targets:
             return {"success": False, "error": "sla_target_not_found"}
         target = self._sla_targets[name]
@@ -674,7 +674,7 @@ class MessageTraceModule:
         self._sla_history[name].append(report)
         return {"success": True, **report.__dict__}
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         active = sum(
             1
             for t in self._traces.values()

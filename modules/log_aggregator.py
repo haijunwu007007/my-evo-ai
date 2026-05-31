@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 日志聚合器（A级）
 # Grade: B
 
@@ -15,7 +14,7 @@ class LogAggregator(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,Enterprise
     MODULE_ID="log-aggregator";MODULE_NAME="日志聚合器";VERSION="v1.0";MODULE_LEVEL="A"
     _MAX_ENTRIES=10000
     def __init__(self,config=None):
-        super().__init__(config);self._entries:List[Dict]=[];self._lock=threading.Lock()
+        super().__init__(config);self._entries:list[dict]=[];self._lock=threading.Lock()
     def initialize(self)->None:self.status=ModuleStatus.RUNNING
     def health_check(self)->HealthReport:
         return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"entries":len(self._entries)})

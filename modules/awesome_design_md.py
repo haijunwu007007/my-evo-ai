@@ -99,13 +99,13 @@ class DesignDocument:
     doc_type: str = "design"  # design, spec, architecture, api, ux
     status: str = "draft"  # draft, review, approved, deprecated
     author: str = "system"
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     version: str = "1.0.0"
-    versions: List[Dict[str, Any]] = field(default_factory=list)
-    reviewers: List[str] = field(default_factory=list)
-    comments: List[Dict[str, Any]] = field(default_factory=list)
-    attachments: List[Dict[str, Any]] = field(default_factory=list)
-    linked_docs: List[str] = field(default_factory=list)
+    versions: list[dict[str, Any]] = field(default_factory=list)
+    reviewers: list[str] = field(default_factory=list)
+    comments: list[dict[str, Any]] = field(default_factory=list)
+    attachments: list[dict[str, Any]] = field(default_factory=list)
+    linked_docs: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     size_bytes: int = 0
@@ -121,9 +121,9 @@ class ReviewRequest:
     doc_id: str
     reviewer: str
     status: str = "pending"  # pending, approved, rejected, changes_requested
-    comments: List[Dict[str, Any]] = field(default_factory=list)
+    comments: list[dict[str, Any]] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
 
 @dataclass
 class DocTemplate:
@@ -133,7 +133,7 @@ class DocTemplate:
     name: str
     category: str
     content: str = ""
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     description: str = ""
     created_at: float = field(default_factory=time.time)
 
@@ -167,15 +167,15 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._running = False
 
         # 文档存储
-        self._docs: Dict[str, DesignDocument] = {}
+        self._docs: dict[str, DesignDocument] = {}
         # 评审请求
-        self._reviews: Dict[str, ReviewRequest] = {}
+        self._reviews: dict[str, ReviewRequest] = {}
         # 模板
-        self._templates: Dict[str, DocTemplate] = {}
+        self._templates: dict[str, DocTemplate] = {}
         # 标签索引
-        self._tag_index: Dict[str, List[str]] = {}
+        self._tag_index: dict[str, list[str]] = {}
         # 全文索引（简单关键词）
-        self._text_index: Dict[str, List[str]] = {}
+        self._text_index: dict[str, list[str]] = {}
         # 并发控制
         self._max_concurrent_writes = 5
         self._active_writes = 0
@@ -232,7 +232,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 template_id=tid, name=name, category=cat, content=content, variables=variables
             )
 
-    async def execute(self, operation: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def execute(self, operation: str, params: dict[str, Any] = None) -> dict[str, Any]:
         self.trace("execute", {"module": "awesome_design_md"})
         self.metrics_collector.counter("awesome_design_md.execute.calls", 1)
         self.audit("execute", {"module": "awesome_design_md"})
@@ -264,7 +264,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             logger.error(f"文档操作失败 [{operation}]: {e}")
             return {"success": False, "error": str(e)}
 
-    def _create_doc(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_doc(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p.get("doc_id", f"doc_{hashlib.md5(p['title'].encode()).hexdigest()[:8]}")
         content = p.get("content", "")
         checksum = hashlib.sha256(content.encode()).hexdigest()[:16]
@@ -306,7 +306,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         for word in words:
             self._text_index.setdefault(word, []).append(doc_id)
 
-    def _get_doc(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_doc(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         doc = self._docs.get(doc_id)
         if not doc:
@@ -326,7 +326,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "linked_docs": doc.linked_docs,
         }
 
-    def _update_doc(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _update_doc(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         doc = self._docs.get(doc_id)
         if not doc:
@@ -350,7 +350,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return {"doc_id": doc_id, "title": doc.title, "version": doc.version, "word_count": doc.word_count}
 
-    def _delete_doc(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _delete_doc(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         if doc_id not in self._docs:
             return {"error": f"文档不存在: {doc_id}"}
@@ -360,7 +360,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 self._tag_index[tag] = [d for d in self._tag_index[tag] if d != doc_id]
         return {"deleted": True, "doc_id": doc_id, "title": doc.title}
 
-    def _create_version(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_version(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         doc = self._docs.get(doc_id)
         if not doc:
@@ -387,7 +387,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return {"doc_id": doc_id, "version": new_ver, "total_versions": len(doc.versions)}
 
-    def _rollback_version(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _rollback_version(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         doc = self._docs.get(doc_id)
         if not doc:
@@ -408,7 +408,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return {"rolled_back": True, "doc_id": doc_id, "to_version": target_ver}
 
-    def _search_docs(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _search_docs(self, p: dict[str, Any]) -> dict[str, Any]:
         query = p.get("query", "").lower()
         doc_type = p.get("doc_type")
         tag = p.get("tag")
@@ -447,7 +447,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
         return {"results": results[:limit], "total": len(results)}
 
-    def _request_review(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _request_review(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         if doc_id not in self._docs:
             return {"error": f"文档不存在: {doc_id}"}
@@ -458,7 +458,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._docs[doc_id].reviewers.append(p["reviewer"])
         return {"review_id": review_id, "doc_id": doc_id, "reviewer": p["reviewer"]}
 
-    def _submit_review(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _submit_review(self, p: dict[str, Any]) -> dict[str, Any]:
         review_id = p["review_id"]
         review = self._reviews.get(review_id)
         if not review:
@@ -473,7 +473,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             doc.status = "approved"
         return {"review_id": review_id, "status": review.status}
 
-    def _add_comment(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_comment(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         doc = self._docs.get(doc_id)
         if not doc:
@@ -487,7 +487,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         doc.comments.append(comment)
         return {"comment_id": comment["comment_id"], "doc_id": doc_id, "total_comments": len(doc.comments)}
 
-    def _from_template(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _from_template(self, p: dict[str, Any]) -> dict[str, Any]:
         template_id = p["template_id"]
         tpl = self._templates.get(template_id)
         if not tpl:
@@ -501,7 +501,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         )
         return {"doc_id": result["doc_id"], "template": tpl.name, "variables_applied": len(variables)}
 
-    def _list_templates(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_templates(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         cat = p.get("category")
         return [
             {
@@ -515,7 +515,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             if not cat or t.category == cat
         ]
 
-    def _link_docs(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _link_docs(self, p: dict[str, Any]) -> dict[str, Any]:
         doc_id = p["doc_id"]
         target_id = p["target_id"]
         if doc_id not in self._docs or target_id not in self._docs:
@@ -526,7 +526,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             self._docs[target_id].linked_docs.append(doc_id)
         return {"linked": True, "from": doc_id, "to": target_id}
 
-    def _get_stats(self, p: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_stats(self, p: dict[str, Any]) -> dict[str, Any]:
         by_status = {}
         by_type = {}
         for doc in self._docs.values():
@@ -543,7 +543,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "by_type": by_type,
         }
 
-    def _list_docs(self, p: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _list_docs(self, p: dict[str, Any]) -> list[dict[str, Any]]:
         doc_type = p.get("doc_type")
         status = p.get("status")
         limit = p.get("limit", 20)
@@ -565,7 +565,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         results.sort(key=lambda x: x["updated"], reverse=True)
         return results[:limit]
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         return {
             "status": "healthy",
             "module": self.module_name,
@@ -583,8 +583,8 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         logger.info(f"设计文档管理器关闭, 文档数: {len(self._docs)}")
 
     def create_template(
-        self, name: str, category: str, content: str, description: str = "", variables: List[str] = None
-    ) -> Dict:
+        self, name: str, category: str, content: str, description: str = "", variables: list[str] = None
+    ) -> dict:
         """创建设计文档模板。企业场景：标准化架构文档、API设计规范、UX评审模板。
         模板支持变量占位符 {{variable}} ，使用时自动替换。
         """
@@ -601,7 +601,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._templates[tpl_id] = tpl
         return {"template_id": tpl_id, "name": name, "status": "created"}
 
-    def apply_template(self, template_id: str, variables: Dict[str, str] = None) -> Dict:
+    def apply_template(self, template_id: str, variables: dict[str, str] = None) -> dict:
         """使用模板生成文档。传入变量值，替换模板中的 {{key}} 占位符。
         企业场景：新项目启动时快速生成标准化设计文档。
         """
@@ -624,7 +624,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
         self._docs[doc_id] = doc
         return {"success": True, "doc_id": doc_id, "title": doc.title}
 
-    def search_templates(self, keyword: str = "", category: str = "") -> List[Dict]:
+    def search_templates(self, keyword: str = "", category: str = "") -> list[dict]:
         """搜索文档模板。按关键词或分类过滤，返回匹配的模板列表。"""
         results = []
         for tpl_id, tpl in self._templates.items():
@@ -646,7 +646,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             )
         return results
 
-    def export_doc(self, doc_id: str, format_type: str = "markdown") -> Dict:
+    def export_doc(self, doc_id: str, format_type: str = "markdown") -> dict:
         """导出文档。支持 markdown / plain_text / json 三种格式。
         企业场景：设计评审时导出为不同格式分发。
         """

@@ -92,7 +92,7 @@ class ModuleStatus(str, Enum):
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, CircuitBreakerMixin, RateLimiterMixin
 
-class TSAnalyzer(object):
+class TSAnalyzer:
     """time_series 运营分析引擎
 
     - 分析时序数据写入速率
@@ -116,7 +116,7 @@ class TSAnalyzer(object):
                 summary[k] = {"count": len(v), "avg": sum(v) / len(v), "last": v[-1]}
         return {"analyzer": "TSAnalyzer", "module": "time_series", "summary": summary}
 
-class TimeSeriesAnalyzer(object):
+class TimeSeriesAnalyzer:
     """time series 分析引擎 - 运营分析引擎
 
     - 聚合核心指标与运行趋势统计
@@ -216,7 +216,7 @@ class TimeSeriesAnalyzer(object):
             results.append(self.analyze({"data": item}))
         return {"total": len(results), "results": results}
 
-class TimeSeriesAnalyzer(object):
+class TimeSeriesAnalyzer:
     """time_series核心分析引擎
 
     为time_series模块提供深度分析能力，包括数据聚合、
@@ -274,18 +274,18 @@ class TimeSeriesAnalyzer(object):
 class TimeSeries(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """时序数据库"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: dict | None = None):
         super().__init__()
 
         self.config = config or {}
-        self._data: Dict[str, Any] = {}
-        self._metrics: Dict[str, Any] = {
+        self._data: dict[str, Any] = {}
+        self._metrics: dict[str, Any] = {
             "total_operations": 0,
             "errors": 0,
             "avg_latency_ms": 0,
             "last_success_ts": None,
         }
-        self._audit_log: List[Dict] = []
+        self._audit_log: list[dict] = []
         self._status = ModuleStatus.INITIALIZING
         self._logger = get_logger(f"time_series")
 

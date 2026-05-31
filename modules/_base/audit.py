@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 AUTO-EVO-AI V0.1 - 审计日志系统
 ===============================
@@ -76,7 +75,7 @@ class AuditEvent:
         event_type: str = "EXEC",
         operator: str = "system",
         source_ip: str = "",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ):
         self.timestamp = datetime.now().isoformat()
         self.event_type = event_type
@@ -90,7 +89,7 @@ class AuditEvent:
         self.source_ip = source_ip
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp,
             "event_type": self.event_type,
@@ -123,7 +122,7 @@ class AuditLogger:
 
     def __init__(self, max_events: int = 100000):
         self._events: deque = deque(maxlen=max_events)
-        self._module_index: Dict[str, List[int]] = {}  # module_id -> [deque indices]
+        self._module_index: dict[str, list[int]] = {}  # module_id -> [deque indices]
         self._lock = threading.Lock()
         self._stats = {
             "total_events": 0,
@@ -142,7 +141,7 @@ class AuditLogger:
         event_type: str = "",
         operator: str = "system",
         source_ip: str = "",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """
         记录审计事件
@@ -225,7 +224,7 @@ class AuditLogger:
         start_time: str = "",
         end_time: str = "",
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         查询审计记录
 
@@ -251,11 +250,11 @@ class AuditLogger:
                     break
         return results
 
-    def get_module_audit(self, module_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_module_audit(self, module_id: str, limit: int = 50) -> list[dict[str, Any]]:
         """获取指定模块的审计记录"""
         return self.query(module_id=module_id, limit=limit)
 
-    def get_recent(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_recent(self, limit: int = 50) -> list[dict[str, Any]]:
         """获取最近审计记录"""
         with self._lock:
             recent = list(self._events)[-limit:]
@@ -266,7 +265,7 @@ class AuditLogger:
         events = self.query(start_time=start_time, end_time=end_time, limit=100000)
         return json.dumps(events, ensure_ascii=False, indent=2, default=str)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取审计统计"""
         return {
             **self._stats,
@@ -282,7 +281,7 @@ class AuditLogger:
 
 
 # 全局单例
-_audit: Optional[AuditLogger] = None
+_audit: AuditLogger | None = None
 
 
 def get_audit_logger() -> AuditLogger:

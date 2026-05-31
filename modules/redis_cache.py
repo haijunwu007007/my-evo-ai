@@ -123,10 +123,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CacheEntry:
     value: Any
-    ttl: Optional[float] = None
+    ttl: float | None = None
     created_at: float = field(default_factory=time.time)
     version: int = 1
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
     @property
     def expired(self) -> bool:
@@ -168,16 +168,16 @@ class DistributedLock:
 class StreamEntry:
     stream_key: str
     entry_id: str
-    fields: Dict[str, str] = field(default_factory=dict)
+    fields: dict[str, str] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
 
-class CacheEvictionEngine(object):
+class CacheEvictionEngine:
     """缓存淘汰策略引擎 - LRU/LFU/TTL策略选择和执行"""
 
     def __init__(self):
         self._policy = "lru"
-        self._lru_order: List[str] = []
-        self._frequency: Dict[str, int] = {}
+        self._lru_order: list[str] = []
+        self._frequency: dict[str, int] = {}
 
     def access(self, key: str) -> None:
         if key in self._lru_order:
@@ -185,7 +185,7 @@ class CacheEvictionEngine(object):
         self._lru_order.append(key)
         self._frequency[key] = self._frequency.get(key, 0) + 1
 
-    def evict(self, cache: Dict[str, object], ttl_map: Dict[str, float], max_size: int) -> Optional[str]:
+    def evict(self, cache: dict[str, object], ttl_map: dict[str, float], max_size: int) -> str | None:
         if len(cache) <= max_size:
             return None
         if self._policy == "lru" and self._lru_order:
@@ -213,10 +213,10 @@ class RedisCacheModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         super().__init__(config)
         self._store: OrderedDict = OrderedDict()
-        self._locks: Dict[str, DistributedLock] = {}
-        self._streams: Dict[str, List[StreamEntry]] = {}
-        self._pubsub_channels: Dict[str, List[str]] = {}
-        self._pubsub_history: List[dict] = []
+        self._locks: dict[str, DistributedLock] = {}
+        self._streams: dict[str, list[StreamEntry]] = {}
+        self._pubsub_channels: dict[str, list[str]] = {}
+        self._pubsub_history: list[dict] = []
         self._lock = threading.RLock()
         self._max_memory_mb = self._cfg("max_memory_mb", 256)
         self._eviction_policy = self._cfg("eviction_policy", "allkeys-lru")

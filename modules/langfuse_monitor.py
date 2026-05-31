@@ -120,15 +120,15 @@ class LangfuseMonitor(EnterpriseModule):
 
     def __init__(self):
         super().__init__()
-        self._traces: Dict[str, Dict] = {}
-        self._observations: Dict[str, Dict] = {}
-        self._scores: Dict[str, List[Dict]] = defaultdict(list)
-        self._webhooks: Dict[str, Dict] = {}
-        self._dashboards: Dict[str, Dict] = {}
+        self._traces: dict[str, dict] = {}
+        self._observations: dict[str, dict] = {}
+        self._scores: dict[str, list[dict]] = defaultdict(list)
+        self._webhooks: dict[str, dict] = {}
+        self._dashboards: dict[str, dict] = {}
         self._api_url = "https://cloud.langfuse.com/api/public"
         self._api_key = ""
         self._project_id = ""
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: aiohttp.ClientSession | None = None
         self._lock = asyncio.Lock() if hasattr(asyncio, "Lock") else None
         self._trace_counter = 0
         self._obs_counter = 0
@@ -195,7 +195,7 @@ class LangfuseMonitor(EnterpriseModule):
 
     # ─── Trace Management ───────────────────────────────────────────
 
-    def _create_trace(self, params: Dict) -> Dict:
+    def _create_trace(self, params: dict) -> dict:
         name = params.get("name", "unnamed-trace")
         user_id = params.get("user_id", "")
         metadata = params.get("metadata", {})
@@ -224,7 +224,7 @@ class LangfuseMonitor(EnterpriseModule):
         self._trace_counter += 1
         return {"success": True, "trace_id": trace_id}
 
-    def _get_trace(self, params: Dict) -> Dict:
+    def _get_trace(self, params: dict) -> dict:
         trace_id = params.get("trace_id", "")
         if not trace_id:
             return {"success": False, "error": "trace_id required"}
@@ -233,7 +233,7 @@ class LangfuseMonitor(EnterpriseModule):
             return {"success": False, "error": "trace not found"}
         return {"success": True, "trace": t}
 
-    def _update_trace(self, params: Dict) -> Dict:
+    def _update_trace(self, params: dict) -> dict:
         trace_id = params.get("trace_id", "")
         if not trace_id:
             return {"success": False, "error": "trace_id required"}
@@ -256,7 +256,7 @@ class LangfuseMonitor(EnterpriseModule):
                 t[k] = params[k]
         return {"success": True}
 
-    def _delete_trace(self, params: Dict) -> Dict:
+    def _delete_trace(self, params: dict) -> dict:
         trace_id = params.get("trace_id", "")
         if not trace_id:
             return {"success": False, "error": "trace_id required"}
@@ -269,7 +269,7 @@ class LangfuseMonitor(EnterpriseModule):
         del self._traces[trace_id]
         return {"success": True}
 
-    def _list_traces(self, params: Dict) -> Dict:
+    def _list_traces(self, params: dict) -> dict:
         user_id = params.get("user_id")
         name = params.get("name")
         tag = params.get("tag")
@@ -289,7 +289,7 @@ class LangfuseMonitor(EnterpriseModule):
 
     # ─── Observation Management ────────────────────────────────────
 
-    def _create_observation(self, params: Dict) -> Dict:
+    def _create_observation(self, params: dict) -> dict:
         obs_type = params.get("type", "SPAN").upper()
         trace_id = params.get("trace_id", "")
         name = params.get("name", "unnamed-observation")
@@ -339,7 +339,7 @@ class LangfuseMonitor(EnterpriseModule):
             obs["latency"] = end_time - start_time
         return {"success": True, "observation_id": obs_id}
 
-    def _get_observation(self, params: Dict) -> Dict:
+    def _get_observation(self, params: dict) -> dict:
         obs_id = params.get("observation_id", "")
         if not obs_id:
             return {"success": False, "error": "observation_id required"}
@@ -348,7 +348,7 @@ class LangfuseMonitor(EnterpriseModule):
             return {"success": False, "error": "observation not found"}
         return {"success": True, "observation": o}
 
-    def _update_observation(self, params: Dict) -> Dict:
+    def _update_observation(self, params: dict) -> dict:
         obs_id = params.get("observation_id", "")
         if not obs_id:
             return {"success": False, "error": "observation_id required"}
@@ -375,7 +375,7 @@ class LangfuseMonitor(EnterpriseModule):
             o["latency"] = o["end_time"] - o["start_time"]
         return {"success": True}
 
-    def _delete_observation(self, params: Dict) -> Dict:
+    def _delete_observation(self, params: dict) -> dict:
         obs_id = params.get("observation_id", "")
         if not obs_id:
             return {"success": False, "error": "observation_id required"}
@@ -390,7 +390,7 @@ class LangfuseMonitor(EnterpriseModule):
                 to.remove(obs_id)
         return {"success": True}
 
-    def _list_observations(self, params: Dict) -> Dict:
+    def _list_observations(self, params: dict) -> dict:
         trace_id = params.get("trace_id")
         obs_type = params.get("type")
         name = params.get("name")
@@ -410,7 +410,7 @@ class LangfuseMonitor(EnterpriseModule):
 
     # ─── Score Management ───────────────────────────────────────────
 
-    def _create_score(self, params: Dict) -> Dict:
+    def _create_score(self, params: dict) -> dict:
         trace_id = params.get("trace_id")
         observation_id = params.get("observation_id")
         name = params.get("name", "unnamed-score")
@@ -437,7 +437,7 @@ class LangfuseMonitor(EnterpriseModule):
         self._score_counter += 1
         return {"success": True, "score_id": score_id}
 
-    def _get_scores(self, params: Dict) -> Dict:
+    def _get_scores(self, params: dict) -> dict:
         trace_id = params.get("trace_id")
         observation_id = params.get("observation_id")
         key = trace_id or observation_id or "global"
@@ -447,7 +447,7 @@ class LangfuseMonitor(EnterpriseModule):
             scores = [s for s in scores if s["name"] == name]
         return {"success": True, "scores": scores, "count": len(scores)}
 
-    def _delete_score(self, params: Dict) -> Dict:
+    def _delete_score(self, params: dict) -> dict:
         score_id = params.get("score_id", "")
         if not score_id:
             return {"success": False, "error": "score_id required"}
@@ -455,7 +455,7 @@ class LangfuseMonitor(EnterpriseModule):
             self._scores[key] = [s for s in self._scores[key] if s["score_id"] != score_id]
         return {"success": True}
 
-    def _list_scores(self, params: Dict) -> Dict:
+    def _list_scores(self, params: dict) -> dict:
         all_scores = []
         for scores in self._scores.values():
             all_scores.extend(scores)
@@ -468,7 +468,7 @@ class LangfuseMonitor(EnterpriseModule):
 
     # ─── Dashboard Management ───────────────────────────────────────
 
-    def _create_dashboard(self, params: Dict) -> Dict:
+    def _create_dashboard(self, params: dict) -> dict:
         name = params.get("name", "unnamed-dashboard")
         description = params.get("description", "")
         widgets = params.get("widgets", [])
@@ -485,14 +485,14 @@ class LangfuseMonitor(EnterpriseModule):
         }
         return {"success": True, "dashboard_id": dashboard_id}
 
-    def _get_dashboard(self, params: Dict) -> Dict:
+    def _get_dashboard(self, params: dict) -> dict:
         dashboard_id = params.get("dashboard_id", "")
         d = self._dashboards.get(dashboard_id)
         if not d:
             return {"success": False, "error": "dashboard not found"}
         return {"success": True, "dashboard": d}
 
-    def _update_dashboard(self, params: Dict) -> Dict:
+    def _update_dashboard(self, params: dict) -> dict:
         dashboard_id = params.get("dashboard_id", "")
         d = self._dashboards.get(dashboard_id)
         if not d:
@@ -503,20 +503,20 @@ class LangfuseMonitor(EnterpriseModule):
         d["updated_at"] = time.time()
         return {"success": True}
 
-    def _delete_dashboard(self, params: Dict) -> Dict:
+    def _delete_dashboard(self, params: dict) -> dict:
         dashboard_id = params.get("dashboard_id", "")
         if dashboard_id not in self._dashboards:
             return {"success": False, "error": "dashboard not found"}
         del self._dashboards[dashboard_id]
         return {"success": True}
 
-    def _list_dashboards(self, params: Dict) -> Dict:
+    def _list_dashboards(self, params: dict) -> dict:
         dashboards = list(self._dashboards.values())
         return {"success": True, "dashboards": dashboards, "total": len(dashboards)}
 
     # ─── Webhook Management ─────────────────────────────────────────
 
-    def _add_webhook(self, params: Dict) -> Dict:
+    def _add_webhook(self, params: dict) -> dict:
         url = params.get("url", "")
         events = params.get("events", ["trace.create"])
         secret = params.get("secret", "")
@@ -535,17 +535,17 @@ class LangfuseMonitor(EnterpriseModule):
         }
         return {"success": True, "webhook_id": webhook_id}
 
-    def _remove_webhook(self, params: Dict) -> Dict:
+    def _remove_webhook(self, params: dict) -> dict:
         webhook_id = params.get("webhook_id", "")
         if webhook_id not in self._webhooks:
             return {"success": False, "error": "webhook not found"}
         del self._webhooks[webhook_id]
         return {"success": True}
 
-    def _list_webhooks(self, params: Dict) -> Dict:
+    def _list_webhooks(self, params: dict) -> dict:
         return {"success": True, "webhooks": list(self._webhooks.values())}
 
-    def _test_webhook(self, params: Dict) -> Dict:
+    def _test_webhook(self, params: dict) -> dict:
         webhook_id = params.get("webhook_id", "")
         wh = self._webhooks.get(webhook_id)
         if not wh:
@@ -557,7 +557,7 @@ class LangfuseMonitor(EnterpriseModule):
 
     # ─── Configuration ──────────────────────────────────────────────
 
-    def _configure(self, params: Dict) -> Dict:
+    def _configure(self, params: dict) -> dict:
         if "api_url" in params:
             self._api_url = params["api_url"]
         if "api_key" in params:
@@ -566,7 +566,7 @@ class LangfuseMonitor(EnterpriseModule):
             self._project_id = params["project_id"]
         return {"success": True}
 
-    def _health(self, params: Dict) -> Dict:
+    def _health(self, params: dict) -> dict:
         return {
             "success": True,
             "healthy": True,
@@ -579,7 +579,7 @@ class LangfuseMonitor(EnterpriseModule):
             },
         }
 
-    def _status(self, params: Dict) -> Dict:
+    def _status(self, params: dict) -> dict:
         return {
             "success": True,
             "module": "langfuse_monitor",
@@ -592,7 +592,7 @@ class LangfuseMonitor(EnterpriseModule):
             "project_id": self._project_id,
         }
 
-    def _stats(self, params: Dict) -> Dict:
+    def _stats(self, params: dict) -> dict:
         score_values = []
         for scores in self._scores.values():
             for s in scores:
@@ -610,7 +610,7 @@ class LangfuseMonitor(EnterpriseModule):
             "dashboard_count": len(self._dashboards),
         }
 
-    def _reset(self, params: Dict) -> Dict:
+    def _reset(self, params: dict) -> dict:
         self._traces.clear()
         self._observations.clear()
         self._scores.clear()
@@ -624,13 +624,13 @@ class LangfuseMonitor(EnterpriseModule):
 class TraceEngine:
     """Manages trace CRUD and tree structure."""
 
-    def __init__(self, traces_store: Dict):
+    def __init__(self, traces_store: dict):
         self._traces = traces_store
 
-    def get(self, trace_id: str) -> Optional[Dict]:
+    def get(self, trace_id: str) -> dict | None:
         return self._traces.get(trace_id)
 
-    def get_detail(self, trace_id: str) -> Dict:
+    def get_detail(self, trace_id: str) -> dict:
         t = self._traces.get(trace_id)
         if not t:
             return {}
@@ -639,10 +639,10 @@ class TraceEngine:
 class ObservationEngine:
     """Manages observation logging, timing, and model usage tracking."""
 
-    def __init__(self, obs_store: Dict):
+    def __init__(self, obs_store: dict):
         self._obs = obs_store
 
-    def get_by_trace(self, trace_id: str) -> List[Dict]:
+    def get_by_trace(self, trace_id: str) -> list[dict]:
         return [o for o in self._obs.values() if o.get("trace_id") == trace_id]
 
     def calculate_cost(self, obs_id: str) -> float:
@@ -658,10 +658,10 @@ class ObservationEngine:
 class ScoreEngine:
     """Manages score submission, aggregation, and evaluation metrics."""
 
-    def __init__(self, scores_store: Dict):
+    def __init__(self, scores_store: dict):
         self._scores = scores_store
 
-    def aggregate(self, trace_id: str = None) -> Dict:
+    def aggregate(self, trace_id: str = None) -> dict:
         scores = []
         if trace_id:
             scores = self._scores.get(trace_id, [])
@@ -673,7 +673,7 @@ class ScoreEngine:
         values = [s["value"] for s in scores]
         return {"count": len(values), "avg": sum(values) / len(values), "min": min(values), "max": max(values)}
 
-    def evaluate(self, trace_id: str, criteria: List[str]) -> Dict:
+    def evaluate(self, trace_id: str, criteria: list[str]) -> dict:
         results = {}
         scores = self._scores.get(trace_id, [])
         for c in criteria:
@@ -686,10 +686,10 @@ class ScoreEngine:
 class DashboardEngine:
     """Manages dashboard widgets, metric queries, and alert configurations."""
 
-    def __init__(self, dashboards_store: Dict):
+    def __init__(self, dashboards_store: dict):
         self._dashboards = dashboards_store
 
-    def render_widget(self, dashboard_id: str, widget_id: str) -> Dict:
+    def render_widget(self, dashboard_id: str, widget_id: str) -> dict:
         d = self._dashboards.get(dashboard_id)
         if not d:
             return {"error": "dashboard not found"}
@@ -701,7 +701,7 @@ class DashboardEngine:
 class WebhookEngine:
     """Manages webhook event forwarding, retry logic, and delivery tracking."""
 
-    def __init__(self, webhooks_store: Dict):
+    def __init__(self, webhooks_store: dict):
         self._webhooks = webhooks_store
 
     def matches_event(self, webhook_id: str, event_type: str) -> bool:

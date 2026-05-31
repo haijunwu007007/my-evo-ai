@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """AUTO-EVO-AI V0.1 - 文件扫描迭代器（A级）"""
 # Grade: A
 __module_meta__ = {"id":"scan-iterator","name":"ScanIterator","version":"V0.1","group":"ops","grade":"B",
@@ -17,7 +16,7 @@ class ScanIterator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     def __init__(self, config=None):
         super().__init__(config)
-        self._scans: Dict[str, dict] = {}
+        self._scans: dict[str, dict] = {}
         self._max_file_size = int(config.get("max_file_size", 50_000_000)) if config else 50_000_000
         self._max_results = int(config.get("max_results", 10_000)) if config else 10_000
 
@@ -140,7 +139,7 @@ class ScanIterator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             path = p.get("path", ".")
             max_depth = int(p.get("max_depth", 0))
             all_files = self._walk_path(path, "*", max_depth)
-            by_size_name: Dict[str, list] = {}
+            by_size_name: dict[str, list] = {}
             for f in all_files:
                 key = f"{f['size']}:{f['name']}"
                 by_size_name.setdefault(key, []).append(f)
@@ -160,7 +159,7 @@ class ScanIterator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             max_depth = int(p.get("max_depth", 1))
             files = self._walk_path(path, "*", max_depth)
             total_size = sum(f["size"] for f in files)
-            by_ext: Dict[str, int] = {}
+            by_ext: dict[str, int] = {}
             for f in files:
                 ext = Path(f["name"]).suffix.lower() or "(none)"
                 by_ext[ext] = by_ext.get(ext, 0) + 1

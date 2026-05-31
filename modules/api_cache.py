@@ -131,7 +131,7 @@ class CacheEntry:
     last_accessed: float = field(default_factory=time.time)
     hit_count: int = 0
     size_bytes: int = 0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     cache_level: str = "l1"  # l1=内存, l2=持久
     source: str = ""  # 来源API端点
     expires_at: float = 0  # 绝对过期时间戳
@@ -151,16 +151,16 @@ class CacheEntry:
 class CacheRule:
     """缓存规则"""
 
-class CacheWarmingEngine(object):
+class CacheWarmingEngine:
     """缓存预热引擎 — 预热高频接口、防缓存穿透、批量加载"""
 
     def __init__(self):
-        self._warmup_tasks: Dict[str, Dict] = {}
+        self._warmup_tasks: dict[str, dict] = {}
         self._bloom_filter: set = set()  # 简易布隆过滤防穿透
 
     def add_warmup_task(
-        self, task_id: str, endpoint: str, params: Dict, priority: int = 5, repeat_interval: int = 0
-    ) -> Dict:
+        self, task_id: str, endpoint: str, params: dict, priority: int = 5, repeat_interval: int = 0
+    ) -> dict:
         """添加预热任务"""
         self._warmup_tasks[task_id] = {
             "endpoint": endpoint,
@@ -172,7 +172,7 @@ class CacheWarmingEngine(object):
         }
         return {"task_id": task_id, "status": "scheduled"}
 
-    def get_warmup_queue(self, limit: int = 10) -> List[Dict]:
+    def get_warmup_queue(self, limit: int = 10) -> list[dict]:
         """获取待执行的预热队列（按优先级排序）"""
         pending = [t for t in self._warmup_tasks.values() if t["status"] == "pending"]
         pending.sort(key=lambda t: -t["priority"])
@@ -193,7 +193,7 @@ class CacheWarmingEngine(object):
         """标记为穿透保护的key"""
         self._bloom_filter.add(key)
 
-    def get_warming_stats(self) -> Dict:
+    def get_warming_stats(self) -> dict:
         pending = sum(1 for t in self._warmup_tasks.values() if t["status"] == "pending")
         warmed = sum(1 for t in self._warmup_tasks.values() if t["status"] == "warmed")
         return {
@@ -203,7 +203,7 @@ class CacheWarmingEngine(object):
             "bloom_filter_size": len(self._bloom_filter),
         }
 
-    def predict_warmup_candidates(self, access_log: List[Dict]) -> List[Dict]:
+    def predict_warmup_candidates(self, access_log: list[dict]) -> list[dict]:
         """基于访问日志预测需要预热的key（访问频率突然上升的）"""
         from collections import Counter
 
@@ -215,7 +215,7 @@ class CacheWarmingEngine(object):
         hot_candidates.sort(key=lambda x: -x[1])
         return [{"key": k, "access_count": c, "is_above_avg": True} for k, c in hot_candidates[:10]]
 
-    def generate_warmup_plan(self, hot_keys: List[str], concurrency: int = 5) -> Dict:
+    def generate_warmup_plan(self, hot_keys: list[str], concurrency: int = 5) -> dict:
         """生成并行预热计划"""
         batches = []
         for i in range(0, len(hot_keys), concurrency):
@@ -228,7 +228,7 @@ class CacheWarmingEngine(object):
             "batch_plan": [{"batch": j + 1, "keys": batch} for j, batch in enumerate(batches)],
         }
 
-    def validate_cache_consistency(self, cache_snapshot: Dict[str, Dict]) -> Dict:
+    def validate_cache_consistency(self, cache_snapshot: dict[str, dict]) -> dict:
         """验证缓存一致性 — 对比预热任务与实际缓存"""
         warmed_keys = {t["endpoint"] for t in self._warmup_tasks.values() if t["status"] == "warmed"}
         cached_keys = set(cache_snapshot.keys())
@@ -252,7 +252,7 @@ class CacheRule:
     rule_id: str
     pattern: str
     ttl_seconds: float
-    methods: List[str] = field(default_factory=lambda: ["GET"])
+    methods: list[str] = field(default_factory=lambda: ["GET"])
     enabled: bool = True
     priority: int = 0
 
@@ -264,14 +264,14 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
 
         super().__init__(config)
         self.module_level = self.MODULE_LEVEL
         self._audit = None
         self._metrics = metrics_collector
-        self._cache: Dict[str, CacheEntry] = {}
-        self._rules: Dict[str, CacheRule] = {}
+        self._cache: dict[str, CacheEntry] = {}
+        self._rules: dict[str, CacheRule] = {}
         self._eviction_policy = EvictionPolicy.LRU
         self._max_size_mb: float = 100.0
         self._max_entries: int = 10000
@@ -307,7 +307,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             self.stats.error_count += 1
             raise
 
-    async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         _ = self.trace("execute")
         metrics_collector.counter("api_cache_ops_total", labels={"action": action})
         self.audit("execute", f"action={action}")
@@ -441,7 +441,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         finally:
             self.stats.record_request((time.time() - start) * 1000, ok, err)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         usage_pct = len(self._cache) / max(self._max_entries, 1)
         return {
             "status": "degraded" if usage_pct > 0.9 else "healthy",
@@ -455,7 +455,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     def shutdown(self) -> None:
         self._cache.clear()
 
-    def _get(self, key: str) -> Dict:
+    def _get(self, key: str) -> dict:
         entry = self._cache.get(key)
         if entry is None:
             self._stats_misses += 1
@@ -475,7 +475,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "hit_count": entry.hit_count,
         }
 
-    def _set(self, key: str, value: str, ttl: float, tags: List[str]) -> Dict:
+    def _set(self, key: str, value: str, ttl: float, tags: list[str]) -> dict:
         if len(self._cache) >= self._max_entries:
             self._evict()
         entry = CacheEntry(key=key, value=value, ttl_seconds=ttl, tags=tags, size_bytes=len(value.encode()))
@@ -500,9 +500,9 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             del self._cache[k]
         return len(expired_keys)
 
-    def _detect_hotkeys(self, top_n: int = 10) -> List[Dict]:
+    def _detect_hotkeys(self, top_n: int = 10) -> list[dict]:
         """识别热点Key — 按访问频率排序"""
-        access_counts: Dict[str, int] = {}
+        access_counts: dict[str, int] = {}
         for entry in self._cache.values():
             access_counts[entry.key] = entry.hit_count
         sorted_keys = sorted(access_counts.items(), key=lambda x: -x[1])[:top_n]
@@ -525,7 +525,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         jitter = base_ttl * jitter_pct * ((int(tmod.time()*1000000)%1000000/1000000) * 2 - 1)
         return max(1, base_ttl + jitter)
 
-    def _analyze_eviction_candidates(self, count: int = 10) -> List[Dict]:
+    def _analyze_eviction_candidates(self, count: int = 10) -> list[dict]:
         """分析即将被淘汰的缓存条目"""
         candidates = []
         for key, entry in self._cache.items():
@@ -543,7 +543,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         candidates.sort(key=lambda x: x["ttl_remaining"])
         return candidates[:count]
 
-    def _multi_level_stats(self) -> Dict:
+    def _multi_level_stats(self) -> dict:
         """多级缓存统计"""
         total_bytes = sum(e.size_bytes for e in self._cache.values())
         avg_ttl = 0
@@ -559,7 +559,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "eviction_candidates": self._analyze_eviction_candidates(5),
         }
 
-    def _diagnose_cache_health(self) -> Dict:
+    def _diagnose_cache_health(self) -> dict:
         """缓存健康诊断 — 识别内存压力、TTL分布、碎片化"""
         entries = list(self._cache.values())
         if not entries:
@@ -604,7 +604,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "issue_count": len(issues),
         }
 
-    def get_cache_utilization_report(self) -> Dict[str, Any]:
+    def get_cache_utilization_report(self) -> dict[str, Any]:
         """缓存利用率报告：命中率趋势、内存占用分布、热点Key统计、淘汰统计"""
         stats = self._stats if hasattr(self, "_stats") else {}
         cache = self._cache if hasattr(self, "_cache") else {}
@@ -631,7 +631,7 @@ class ApiCacheManager(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             "size_distribution": entries_by_size,
         }
 
-    def get_hot_keys(self, top_n: int = 10) -> List[Dict[str, Any]]:
+    def get_hot_keys(self, top_n: int = 10) -> list[dict[str, Any]]:
         """获取热点Key列表：按访问频次排序，标记潜在缓存穿透风险"""
         access_counts = self._access_counts if hasattr(self, "_access_counts") else {}
         if not access_counts:
