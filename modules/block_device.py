@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 基础设施
 """
 
 __module_meta__ = {
-    "id": "block-device",
-    "name": "Block Device",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "device_id", "type": "string", "required": True, "description": ""},
-        {"name": "op", "type": "string", "required": True, "description": ""},
-        {"name": "size_kb", "type": "string", "required": True, "description": ""},
-        {"name": "latency", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "block"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 块设备管理模块 Grade: A (生产级) | Category: 基础设施",
-}
+        "id": "block-device",
+        "name": "Block Device",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "device_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "op",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "size_kb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "latency",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "block"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 块设备管理模块 Grade: A (生产级) | Category: 基础设施"
+    }
 
 import os
 import asyncio

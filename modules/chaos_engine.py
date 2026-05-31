@@ -13,29 +13,75 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "chaos-engine",
-    "name": "Chaos Engine",
-    "version": "V0.1",
-    "group": "chaos",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "callback", "type": "string", "required": True, "description": ""},
-        {"name": "callback", "type": "string", "required": True, "description": ""},
-        {"name": "callback", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["chaos", "engine", "config"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - ChaosEngine 混沌工程引擎 ============================================",
-}
+        "id": "chaos-engine",
+        "name": "Chaos Engine",
+        "version": "V0.1",
+        "group": "chaos",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "callback",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "callback_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "callback_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "chaos",
+            "engine",
+            "config"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - ChaosEngine 混沌工程引擎 ============================================"
+    }
 
 import os
 import time

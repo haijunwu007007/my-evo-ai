@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 自动化
 """
 
 __module_meta__ = {
-    "id": "browser-auto",
-    "name": "Browser Auto",
-    "version": "V0.1",
-    "group": "browser",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "url", "type": "string", "required": True, "description": ""},
-        {"name": "url", "type": "string", "required": True, "description": ""},
-        {"name": "selectors", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["browser", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 浏览器自动化模块 Grade: A (生产级) | Category: 自动化",
-}
+        "id": "browser-auto",
+        "name": "Browser Auto",
+        "version": "V0.1",
+        "group": "browser",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "url",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "url_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "selectors",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "browser",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 浏览器自动化模块 Grade: A (生产级) | Category: 自动化"
+    }
 
 import os
 import asyncio

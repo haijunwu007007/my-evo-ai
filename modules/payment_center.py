@@ -4,29 +4,76 @@
 """
 
 __module_meta__ = {
-    "id": "payment-center",
-    "name": "Payment Center",
-    "version": "V0.1",
-    "group": "finance",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "channel_type", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "channel", "type": "string", "required": True, "description": ""},
-        {"name": "order_id", "type": "string", "required": True, "description": ""},
-        {"name": "amount", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "payment", "manager", "gateway"],
-    "grade": "A",
-    "description": "Production-grade 支付中心模块 V0.1 上市公司生产级实现 - 多渠道支付/订单管理/退款/对账/风控/分账",
-}
+        "id": "payment-center",
+        "name": "Payment Center",
+        "version": "V0.1",
+        "group": "finance",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "channel_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "channel",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "order_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "amount",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "payment",
+            "manager",
+            "gateway"
+        ],
+        "grade": "A",
+        "description": "Production-grade 支付中心模块 V0.1 上市公司生产级实现 - 多渠道支付/订单管理/退款/对账/风控/分账"
+    }
 import hashlib
 import time as tmod
 import logging

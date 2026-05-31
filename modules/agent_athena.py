@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: 核心基础
 """
 
 __module_meta__ = {
-    "id": "agent-athena",
-    "name": "Agent Athena",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "component_id", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "priority", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_athena.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础",
-}
+        "id": "agent-athena",
+        "name": "Agent Athena",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "component_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "priority",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_athena.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础"
+    }
 
 import os
 import asyncio

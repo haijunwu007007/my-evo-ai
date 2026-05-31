@@ -17,29 +17,76 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "kubernetes-orchestrator",
-    "name": "Kubernetes Orchestrator",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "deployment", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "engine", "kubernetes", "service"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - KubernetesOrchestrator K8s集群编排 =====================================================",
-}
+        "id": "kubernetes-orchestrator",
+        "name": "Kubernetes Orchestrator",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "deployment",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "engine",
+            "kubernetes",
+            "service"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - KubernetesOrchestrator K8s集群编排 ====================================================="
+    }
 
 import time
 import asyncio

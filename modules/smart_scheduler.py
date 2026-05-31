@@ -6,29 +6,80 @@ Smart Scheduler - 智能任务调度引擎
 """
 
 __module_meta__ = {
-    "id": "smart-scheduler",
-    "name": "Smart Scheduler",
-    "version": "V0.1",
-    "group": "scheduler",
-    "inputs": [
-        {"name": "expression", "type": "string", "required": True, "description": ""},
-        {"name": "field_str", "type": "string", "required": True, "description": ""},
-        {"name": "min_val", "type": "string", "required": True, "description": ""},
-        {"name": "max_val", "type": "string", "required": True, "description": ""},
-        {"name": "name_map", "type": "string", "required": True, "description": ""},
-        {"name": "val", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["smart"],
-    "grade": "A",
-    "description": "Smart Scheduler - 智能任务调度引擎 上市公司级生产实现：支持CRON表达式解析、任务依赖DAG、并发控制、",
-}
+        "id": "smart-scheduler",
+        "name": "Smart Scheduler",
+        "version": "V0.1",
+        "group": "scheduler",
+        "inputs": [
+            {
+                "name": "expression",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "field_str",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "min_val",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_val",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_map",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "val",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "smart"
+        ],
+        "grade": "A",
+        "description": "Smart Scheduler - 智能任务调度引擎 上市公司级生产实现：支持CRON表达式解析、任务依赖DAG、并发控制、"
+    }
 
 import time
 import uuid

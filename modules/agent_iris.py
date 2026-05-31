@@ -9,29 +9,81 @@ AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎)
 """
 
 __module_meta__ = {
-    "id": "agent-iris",
-    "name": "Agent Iris",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "feature_dim", "type": "string", "required": True, "description": ""},
-        {"name": "pixel_data", "type": "string", "required": True, "description": ""},
-        {"name": "bins", "type": "string", "required": True, "description": ""},
-        {"name": "pixel_data", "type": "string", "required": True, "description": ""},
-        {"name": "width", "type": "string", "required": True, "description": ""},
-        {"name": "height", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_iris.task.request"}}],
-    "depends_on": [],
-    "tags": ["multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎) ===============================================",
-}
+        "id": "agent-iris",
+        "name": "Agent Iris",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "feature_dim",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pixel_data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "bins",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pixel_data_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "width",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "height",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_iris.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎) ==============================================="
+    }
 
 import time
 import json

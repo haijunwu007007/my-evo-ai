@@ -5,29 +5,75 @@ UI TARS桥接模块 - 企业级UI自动化智能代理
 """
 
 __module_meta__ = {
-    "id": "ui-tars-bridge",
-    "name": "Ui Tars Bridge",
-    "version": "V0.1",
-    "group": "ui",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "bridge", "ui"],
-    "grade": "A",
-    "description": "UI TARS桥接模块 - 企业级UI自动化智能代理 提供UI元素识别/交互自动化/页面导航/表单填充/数据提取/视觉验证",
-}
+        "id": "ui-tars-bridge",
+        "name": "Ui Tars Bridge",
+        "version": "V0.1",
+        "group": "ui",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "bridge",
+            "ui"
+        ],
+        "grade": "A",
+        "description": "UI TARS桥接模块 - 企业级UI自动化智能代理 提供UI元素识别/交互自动化/页面导航/表单填充/数据提取/视觉验证"
+    }
 import os
 import time
 import uuid

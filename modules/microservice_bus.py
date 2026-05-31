@@ -6,29 +6,82 @@ service discovery, circuit breaker, and dead letter handling.
 """
 
 __module_meta__ = {
-    "id": "microservice-bus",
-    "name": "Microservice Bus",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "microservice_bus.trigger"}}],
-    "depends_on": [],
-    "tags": ["config", "microservice", "service"],
-    "grade": "A",
-    "description": "Microservice Bus Module - Enterprise Production Grade Service mesh message bus with pub/sub, request/reply,",
-}
+        "id": "microservice-bus",
+        "name": "Microservice Bus",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "microservice_bus.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "microservice",
+            "service"
+        ],
+        "grade": "A",
+        "description": "Microservice Bus Module - Enterprise Production Grade Service mesh message bus with pub/sub, request/reply,"
+    }
 
 import logging
 import hashlib

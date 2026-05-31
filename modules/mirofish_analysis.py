@@ -6,29 +6,73 @@ catch monitoring, ecosystem analysis, and regulatory compliance.
 """
 
 __module_meta__ = {
-    "id": "mirofish-analysis",
-    "name": "Mirofish Analysis",
-    "version": "V0.1",
-    "group": "finance",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["mirofish"],
-    "grade": "A",
-    "description": "Mirofish Analysis Module - Enterprise Production Grade Fishery data analytics engine with stock assessment models,",
-}
+        "id": "mirofish-analysis",
+        "name": "Mirofish Analysis",
+        "version": "V0.1",
+        "group": "finance",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "mirofish"
+        ],
+        "grade": "A",
+        "description": "Mirofish Analysis Module - Enterprise Production Grade Fishery data analytics engine with stock assessment models,"
+    }
 
 import logging
 import math

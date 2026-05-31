@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: 数据保护
 """
 
 __module_meta__ = {
-    "id": "backup-scheduler",
-    "name": "Backup Scheduler",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "policy", "type": "string", "required": True, "description": ""},
-        {"name": "policies", "type": "string", "required": True, "description": ""},
-        {"name": "source_size_gb", "type": "string", "required": True, "description": ""},
-        {"name": "recovery_rto_hours", "type": "string", "required": True, "description": ""},
-        {"name": "recovery_rpo_hours", "type": "string", "required": True, "description": ""},
-        {"name": "current_usage_gb", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["backup", "manager", "resilience"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 备份调度管理模块 Grade: A (生产级) | Category: 数据保护",
-}
+        "id": "backup-scheduler",
+        "name": "Backup Scheduler",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "policy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "policies",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_size_gb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "recovery_rto_hours",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "recovery_rpo_hours",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "current_usage_gb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "backup",
+            "manager",
+            "resilience"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 备份调度管理模块 Grade: A (生产级) | Category: 数据保护"
+    }
 
 import os
 import asyncio

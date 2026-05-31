@@ -7,29 +7,73 @@ Grade: A (生产级) | Category: 工具链
 """
 
 __module_meta__ = {
-    "id": "performance-optimizer",
-    "name": "Performance Optimizer",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "metrics", "type": "string", "required": True, "description": ""},
-        {"name": "window", "type": "string", "required": True, "description": ""},
-        {"name": "metrics_map", "type": "string", "required": True, "description": ""},
-        {"name": "optimizations", "type": "string", "required": True, "description": ""},
-        {"name": "metric_name", "type": "string", "required": True, "description": ""},
-        {"name": "severity", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["performance"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 性能优化引擎 Grade: A (生产级) | Category: 工具链",
-}
+        "id": "performance-optimizer",
+        "name": "Performance Optimizer",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "metrics",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metrics_map",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "optimizations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "severity",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "performance"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 性能优化引擎 Grade: A (生产级) | Category: 工具链"
+    }
 
 import asyncio
 import time

@@ -7,29 +7,82 @@
 """
 
 __module_meta__ = {
-    "id": "agent-boreas",
-    "name": "Agent Boreas",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "buffer_size", "type": "string", "required": True, "description": ""},
-        {"name": "hook", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "metrics", "type": "string", "required": True, "description": ""},
-        {"name": "metric_name", "type": "string", "required": True, "description": ""},
-        {"name": "seconds", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_boreas.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Boreas智能体模块 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作",
-}
+        "id": "agent-boreas",
+        "name": "Agent Boreas",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "buffer_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hook",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metrics",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_boreas.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Boreas智能体模块 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作"
+    }
 
 import time
 import json

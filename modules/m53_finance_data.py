@@ -25,29 +25,74 @@ A级企业级模块 — 继承 EnterpriseModule
 """
 
 __module_meta__ = {
-    "id": "m53-finance-data",
-    "name": "M53 Finance Data",
-    "version": "V0.1",
-    "group": "finance",
-    "inputs": [
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "tokens", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "latency_ms", "type": "string", "required": True, "description": ""},
-        {"name": "success", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "m53"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎 ================================================================",
-}
+        "id": "m53-finance-data",
+        "name": "M53 Finance Data",
+        "version": "V0.1",
+        "group": "finance",
+        "inputs": [
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tokens",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "latency_ms",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "success",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "m53"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 - m53 FinanceData 金融数据采集引擎 ================================================================"
+    }
 
 import time
 import json

@@ -5,29 +5,80 @@
 """
 
 __module_meta__ = {
-    "id": "message-trace",
-    "name": "Message Trace",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "message_trace.trigger"}}],
-    "depends_on": [],
-    "tags": ["message"],
-    "grade": "A",
-    "description": "消息追踪模块 - 企业级消息全链路追踪系统 提供消息生命周期追踪/延迟分析/投递确认/死信分析/SLA监控",
-}
+        "id": "message-trace",
+        "name": "Message Trace",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "message_trace.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "message"
+        ],
+        "grade": "A",
+        "description": "消息追踪模块 - 企业级消息全链路追踪系统 提供消息生命周期追踪/延迟分析/投递确认/死信分析/SLA监控"
+    }
 import os
 import time
 import uuid

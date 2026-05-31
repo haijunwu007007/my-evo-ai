@@ -9,29 +9,82 @@ AUTO-EVO-AI V0.1 — Agent Hera (人力资源管理引擎)
 """
 
 __module_meta__ = {
-    "id": "agent-hera",
-    "name": "Agent Hera",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "emp_id", "type": "string", "required": True, "description": ""},
-        {"name": "check_time", "type": "string", "required": True, "description": ""},
-        {"name": "record_date", "type": "string", "required": True, "description": ""},
-        {"name": "emp_id", "type": "string", "required": True, "description": ""},
-        {"name": "check_time", "type": "string", "required": True, "description": ""},
-        {"name": "record_date", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_hera.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Hera (人力资源管理引擎) ===================================================",
-}
+        "id": "agent-hera",
+        "name": "Agent Hera",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "emp_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "check_time",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "record_date",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "emp_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "check_time_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "record_date_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_hera.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Hera (人力资源管理引擎) ==================================================="
+    }
 
 import time
 import json

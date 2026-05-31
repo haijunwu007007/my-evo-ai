@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据存储
 """
 
 __module_meta__ = {
-    "id": "clone-database",
-    "name": "Clone Database",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["clone", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 数据库克隆管理模块 Grade: A (生产级) | Category: 数据存储",
-}
+        "id": "clone-database",
+        "name": "Clone Database",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "clone",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 数据库克隆管理模块 Grade: A (生产级) | Category: 数据存储"
+    }
 
 import asyncio
 import time

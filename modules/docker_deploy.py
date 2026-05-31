@@ -4,29 +4,74 @@ Container lifecycle, image management, orchestration, health monitoring, deploym
 """
 
 __module_meta__ = {
-    "id": "docker-deploy",
-    "name": "Docker Deploy",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["devops", "docker"],
-    "grade": "A",
-    "description": "Production-grade module: Docker部署管理 Container lifecycle, image management, orchestration, health monitoring, deployment strategies.",
-}
+        "id": "docker-deploy",
+        "name": "Docker Deploy",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "devops",
+            "docker"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: Docker部署管理 Container lifecycle, image management, orchestration, health monitoring, deployment strategies."
+    }
 import hashlib
 import logging
 import time

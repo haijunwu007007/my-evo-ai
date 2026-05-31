@@ -5,29 +5,74 @@
 """
 
 __module_meta__ = {
-    "id": "secret-manager",
-    "name": "Secret Manager",
-    "version": "V0.1",
-    "group": "crypto",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "secret_value", "type": "string", "required": True, "description": ""},
-        {"name": "secret_type", "type": "string", "required": True, "description": ""},
-        {"name": "created_at", "type": "string", "required": True, "description": ""},
-        {"name": "secret_type", "type": "string", "required": True, "description": ""},
-        {"name": "length", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "secret"],
-    "grade": "A",
-    "description": "Production-grade module: 密钥管理器 企业级密钥生命周期引擎 - 管理API Key、数据库密码、证书私钥等敏感凭证。",
-}
+        "id": "secret-manager",
+        "name": "Secret Manager",
+        "version": "V0.1",
+        "group": "crypto",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "secret_value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "secret_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "created_at",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "secret_type_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "length",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "secret"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 密钥管理器 企业级密钥生命周期引擎 - 管理API Key、数据库密码、证书私钥等敏感凭证。"
+    }
 import hashlib
 import hmac
 import logging

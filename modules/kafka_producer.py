@@ -24,29 +24,74 @@ AUTO-EVO-AI V0.1 | Kafka生产者引擎
 """
 
 __module_meta__ = {
-    "id": "kafka-producer",
-    "name": "Kafka Producer",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "kafka"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | Kafka生产者引擎 企业级消息生产者 - 分区策略、消息保证、批量发送",
-}
+        "id": "kafka-producer",
+        "name": "Kafka Producer",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "kafka"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | Kafka生产者引擎 企业级消息生产者 - 分区策略、消息保证、批量发送"
+    }
 
 import os
 import sys

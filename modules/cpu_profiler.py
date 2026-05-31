@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 性能监控
 """
 
 __module_meta__ = {
-    "id": "cpu-profiler",
-    "name": "Cpu Profiler",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "count", "type": "string", "required": True, "description": ""},
-        {"name": "samples", "type": "string", "required": True, "description": ""},
-        {"name": "hotspots", "type": "string", "required": True, "description": ""},
-        {"name": "frames", "type": "string", "required": True, "description": ""},
-        {"name": "session_name", "type": "string", "required": True, "description": ""},
-        {"name": "duration_seconds", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cpu", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — CPU性能分析器 Grade: A (生产级) | Category: 性能监控",
-}
+        "id": "cpu-profiler",
+        "name": "Cpu Profiler",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "count",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "samples",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hotspots",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "frames",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "session_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "duration_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cpu",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — CPU性能分析器 Grade: A (生产级) | Category: 性能监控"
+    }
 
 import os
 import time

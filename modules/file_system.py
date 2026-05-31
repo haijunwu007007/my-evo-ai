@@ -5,29 +5,73 @@
 """
 
 __module_meta__ = {
-    "id": "file-system",
-    "name": "File System",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["file"],
-    "grade": "A",
-    "description": "文件系统管理模块 - 企业级虚拟文件系统 提供文件/目录CRUD、权限管理、配额控制、版本管理、搜索索引",
-}
+        "id": "file-system",
+        "name": "File System",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "file"
+        ],
+        "grade": "A",
+        "description": "文件系统管理模块 - 企业级虚拟文件系统 提供文件/目录CRUD、权限管理、配额控制、版本管理、搜索索引"
+    }
 import os
 import time
 import uuid

@@ -23,29 +23,74 @@ AUTO-EVO-AI V0.1 | 配置管理中心引擎
 """
 
 __module_meta__ = {
-    "id": "config-manager",
-    "name": "Config Manager",
-    "version": "V0.1",
-    "group": "config",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "plaintext", "type": "string", "required": True, "description": ""},
-        {"name": "ciphertext", "type": "string", "required": True, "description": ""},
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "fmt", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 配置管理中心引擎 企业级动态配置管理 - 支持多源加载、热更新、版本回滚、加密存储",
-}
+        "id": "config-manager",
+        "name": "Config Manager",
+        "version": "V0.1",
+        "group": "config",
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plaintext",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ciphertext",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "fmt",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 配置管理中心引擎 企业级动态配置管理 - 支持多源加载、热更新、版本回滚、加密存储"
+    }
 
 import os
 import sys

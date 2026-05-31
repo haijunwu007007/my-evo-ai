@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 安全合规
 """
 
 __module_meta__ = {
-    "id": "encryption-service",
-    "name": "Encryption Service",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "encryption", "service"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 加密服务 Grade: A (生产级) | Category: 安全合规",
-}
+        "id": "encryption-service",
+        "name": "Encryption Service",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "encryption",
+            "service"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 加密服务 Grade: A (生产级) | Category: 安全合规"
+    }
 
 import re
 import asyncio

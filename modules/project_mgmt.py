@@ -19,29 +19,75 @@ Architectural Standards:
 """
 
 __module_meta__ = {
-    "id": "project-mgmt",
-    "name": "Project Mgmt",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "cls", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "max_allocation", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["project", "engine", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | Enterprise Project Management Module Production-grade project lifecycle management with resource allocation, milestone tracking,",
-}
+        "id": "project-mgmt",
+        "name": "Project Mgmt",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "cls",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_allocation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "project",
+            "engine",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | Enterprise Project Management Module Production-grade project lifecycle management with resource allocation, milestone tracking,"
+    }
 
 import asyncio
 import hashlib

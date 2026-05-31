@@ -8,29 +8,81 @@ AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版)
 """
 
 __module_meta__ = {
-    "id": "stock-api",
-    "name": "Stock Api",
-    "version": "V0.1",
-    "group": "finance",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/stock_api", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["stock"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版) 数据源: AKShare / 腾讯自选股API",
-}
+        "id": "stock-api",
+        "name": "Stock Api",
+        "version": "V0.1",
+        "group": "finance",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/stock_api",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "stock"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI - 股票数据API模块 (V0.1 真实版) 数据源: AKShare / 腾讯自选股API"
+    }
 import json, os, time, logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any

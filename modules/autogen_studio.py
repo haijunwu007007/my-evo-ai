@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "autogen-studio",
-    "name": "Autogen Studio",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["autogen", "manager", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — AutoGen Studio 多智能体编排模块 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "autogen-studio",
+        "name": "Autogen Studio",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "autogen",
+            "manager",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — AutoGen Studio 多智能体编排模块 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

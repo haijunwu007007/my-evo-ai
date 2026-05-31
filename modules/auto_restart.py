@@ -16,29 +16,74 @@ AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现）
 """
 
 __module_meta__ = {
-    "id": "auto-restart",
-    "name": "Auto Restart",
-    "version": "V0.1",
-    "group": "resilience",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "auto"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现） =============================================",
-}
+        "id": "auto-restart",
+        "name": "Auto Restart",
+        "version": "V0.1",
+        "group": "resilience",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "auto"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 自动重启服务（A级生产实现） ============================================="
+    }
 
 import time
 import asyncio

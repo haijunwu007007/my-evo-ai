@@ -5,32 +5,87 @@ Grade: A (生产级) | Category: 运维监控
 """
 
 __module_meta__ = {
-    "id": "health-monitor",
-    "name": "Health Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "health_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["health", "monitor"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 健康监控 Grade: A (生产级) | Category: 运维监控",
-}
+        "id": "health-monitor",
+        "name": "Health Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "health_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "health",
+            "monitor"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 健康监控 Grade: A (生产级) | Category: 运维监控"
+    }
 
 import os
 import asyncio

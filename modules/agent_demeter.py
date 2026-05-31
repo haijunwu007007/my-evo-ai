@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-demeter",
-    "name": "Agent Demeter",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "pool_id", "type": "string", "required": True, "description": ""},
-        {"name": "rtype", "type": "string", "required": True, "description": ""},
-        {"name": "total", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_demeter.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Demeter AI智能体 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-demeter",
+        "name": "Agent Demeter",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pool_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rtype",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "total",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_demeter.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Demeter AI智能体 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

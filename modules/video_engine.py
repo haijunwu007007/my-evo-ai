@@ -5,29 +5,75 @@
 """
 
 __module_meta__ = {
-    "id": "video-engine",
-    "name": "Video Engine",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "engine", "video"],
-    "grade": "A",
-    "description": "视频引擎模块 - 企业级视频处理服务 提供转码/剪辑/截图/水印/元数据提取/GIF生成/视频拼接/字幕处理",
-}
+        "id": "video-engine",
+        "name": "Video Engine",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "engine",
+            "video"
+        ],
+        "grade": "A",
+        "description": "视频引擎模块 - 企业级视频处理服务 提供转码/剪辑/截图/水印/元数据提取/GIF生成/视频拼接/字幕处理"
+    }
 import os
 import time
 import uuid

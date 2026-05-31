@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-themis",
-    "name": "Agent Themis",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "policy_id", "type": "string", "required": True, "description": ""},
-        {"name": "framework", "type": "string", "required": True, "description": ""},
-        {"name": "rules", "type": "string", "required": True, "description": ""},
-        {"name": "policy_id", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "rule", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_themis.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Themis AI智能体 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-themis",
+        "name": "Agent Themis",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "policy_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "framework",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rules",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "policy_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rule",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_themis.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Themis AI智能体 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

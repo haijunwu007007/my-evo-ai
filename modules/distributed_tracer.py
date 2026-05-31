@@ -14,29 +14,76 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "distributed-tracer",
-    "name": "Distributed Tracer",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "max_cache", "type": "string", "required": True, "description": ""},
-        {"name": "trace", "type": "string", "required": True, "description": ""},
-        {"name": "service_name", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "threshold_ms", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "engine", "distributed", "service"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - DistributedTracer 分布式追踪 ================================================",
-}
+        "id": "distributed-tracer",
+        "name": "Distributed Tracer",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "max_cache",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "trace",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "threshold_ms",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "engine",
+            "distributed",
+            "service"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - DistributedTracer 分布式追踪 ================================================"
+    }
 
 import time
 import asyncio

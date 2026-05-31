@@ -9,29 +9,82 @@ AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎)
 """
 
 __module_meta__ = {
-    "id": "agent-hermes",
-    "name": "Agent Hermes",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "max_messages", "type": "string", "required": True, "description": ""},
-        {"name": "message", "type": "string", "required": True, "description": ""},
-        {"name": "msg_id", "type": "string", "required": True, "description": ""},
-        {"name": "msg_id", "type": "string", "required": True, "description": ""},
-        {"name": "status", "type": "string", "required": True, "description": ""},
-        {"name": "channel", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_hermes.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎) =====================================================",
-}
+        "id": "agent-hermes",
+        "name": "Agent Hermes",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "max_messages",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "msg_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "msg_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "channel",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_hermes.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Hermes (消息路由与通信引擎) ====================================================="
+    }
 
 import time
 import json

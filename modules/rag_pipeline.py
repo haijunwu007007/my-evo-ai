@@ -6,29 +6,73 @@ embedding, vector search, context assembly, generation orchestration
 """
 
 __module_meta__ = {
-    "id": "rag-pipeline",
-    "name": "Rag Pipeline",
-    "version": "V0.1",
-    "group": "search",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "default", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["rag"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - RAG Pipeline Module Grade: A | Category: AI/Pipeline",
-}
+        "id": "rag-pipeline",
+        "name": "Rag Pipeline",
+        "version": "V0.1",
+        "group": "search",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "default",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "rag"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - RAG Pipeline Module Grade: A | Category: AI/Pipeline"
+    }
 import os, time, logging, threading, hashlib, json, re, math
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime

@@ -5,29 +5,74 @@
 """
 
 __module_meta__ = {
-    "id": "rollback-manager",
-    "name": "Rollback Manager",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "max_checkpoints", "type": "string", "required": True, "description": ""},
-        {"name": "target_id", "type": "string", "required": True, "description": ""},
-        {"name": "snapshot", "type": "string", "required": True, "description": ""},
-        {"name": "description", "type": "string", "required": True, "description": ""},
-        {"name": "labels", "type": "string", "required": True, "description": ""},
-        {"name": "target_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "rollback"],
-    "grade": "A",
-    "description": "Production-grade module: 回滚管理器 企业级版本回滚引擎 - 管理配置/代码/数据库/部署的版本回滚。",
-}
+        "id": "rollback-manager",
+        "name": "Rollback Manager",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "max_checkpoints",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "snapshot",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "description",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "labels",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "rollback"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 回滚管理器 企业级版本回滚引擎 - 管理配置/代码/数据库/部署的版本回滚。"
+    }
 import hashlib
 import json
 import logging

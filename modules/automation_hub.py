@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 编排调度
 """
 
 __module_meta__ = {
-    "id": "automation-hub",
-    "name": "Automation Hub",
-    "version": "V0.1",
-    "group": "marketplace",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "automation"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 自动化中心 Grade: A (生产级) | Category: 编排调度",
-}
+        "id": "automation-hub",
+        "name": "Automation Hub",
+        "version": "V0.1",
+        "group": "marketplace",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "automation"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 自动化中心 Grade: A (生产级) | Category: 编排调度"
+    }
 
 import os
 import asyncio

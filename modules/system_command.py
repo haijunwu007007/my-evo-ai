@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 工具链
 """
 
 __module_meta__ = {
-    "id": "system-command",
-    "name": "System Command",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "system"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 系统命令执行器 Grade: A (生产级) | Category: 工具链",
-}
+        "id": "system-command",
+        "name": "System Command",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "system"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 系统命令执行器 Grade: A (生产级) | Category: 工具链"
+    }
 
 import re
 import asyncio

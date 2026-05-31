@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-mas",
-    "name": "Agent Mas",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "coalition_id", "type": "string", "required": True, "description": ""},
-        {"name": "agent_ids", "type": "string", "required": True, "description": ""},
-        {"name": "task_type", "type": "string", "required": True, "description": ""},
-        {"name": "task_counts", "type": "string", "required": True, "description": ""},
-        {"name": "coalition_id", "type": "string", "required": True, "description": ""},
-        {"name": "success_rate", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_mas.task.request"}}],
-    "depends_on": [],
-    "tags": ["manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — MAS多智能体系统 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-mas",
+        "name": "Agent Mas",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "coalition_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "agent_ids",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_counts",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "coalition_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "success_rate",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_mas.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — MAS多智能体系统 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

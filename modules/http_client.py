@@ -25,29 +25,75 @@ AUTO-EVO-AI V0.1 | HTTP客户端引擎
 """
 
 __module_meta__ = {
-    "id": "http-client",
-    "name": "Http Client",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "client", "http"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | HTTP客户端引擎 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器",
-}
+        "id": "http-client",
+        "name": "Http Client",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "client",
+            "http"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | HTTP客户端引擎 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器"
+    }
 
 import os
 import sys

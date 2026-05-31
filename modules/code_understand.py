@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 开发工具
 """
 
 __module_meta__ = {
-    "id": "code-understand",
-    "name": "Code Understand",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "file_path", "type": "string", "required": True, "description": ""},
-        {"name": "node", "type": "string", "required": True, "description": ""},
-        {"name": "node", "type": "string", "required": True, "description": ""},
-        {"name": "node", "type": "string", "required": True, "description": ""},
-        {"name": "node", "type": "string", "required": True, "description": ""},
-        {"name": "is_async", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["code", "developer", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 代码理解引擎 Grade: A (生产级) | Category: 开发工具",
-}
+        "id": "code-understand",
+        "name": "Code Understand",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "file_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "is_async",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "code",
+            "developer",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 代码理解引擎 Grade: A (生产级) | Category: 开发工具"
+    }
 
 import os
 import ast

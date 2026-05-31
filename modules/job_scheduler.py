@@ -5,29 +5,80 @@ Grade: A (生产级) | Category: 调度编排
 """
 
 __module_meta__ = {
-    "id": "job-scheduler",
-    "name": "Job Scheduler",
-    "version": "V0.1",
-    "group": "scheduler",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "jid", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["job"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 任务调度 Grade: A (生产级) | Category: 调度编排",
-}
+        "id": "job-scheduler",
+        "name": "Job Scheduler",
+        "version": "V0.1",
+        "group": "scheduler",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "jid",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "job"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 任务调度 Grade: A (生产级) | Category: 调度编排"
+    }
 
 import os
 import asyncio

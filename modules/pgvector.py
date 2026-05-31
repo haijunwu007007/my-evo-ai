@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "pgvector",
-    "name": "Pgvector",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "dim", "type": "string", "required": True, "description": ""},
-        {"name": "m", "type": "string", "required": True, "description": ""},
-        {"name": "ef_construction", "type": "string", "required": True, "description": ""},
-        {"name": "ef_search", "type": "string", "required": True, "description": ""},
-        {"name": "vector_id", "type": "string", "required": True, "description": ""},
-        {"name": "vector", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "pgvector"],
-    "grade": "A",
-    "description": "Production-grade PGVector向量存储模块 V0.1 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理",
-}
+        "id": "pgvector",
+        "name": "Pgvector",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "dim",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "m",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ef_construction",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ef_search",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "vector_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "vector",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "pgvector"
+        ],
+        "grade": "A",
+        "description": "Production-grade PGVector向量存储模块 V0.1 上市公司生产级实现 - 向量CRUD/HNSW索引/相似度搜索/过滤/集合管理"
+    }
 import logging
 import math
 import time

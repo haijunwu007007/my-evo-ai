@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-marketplace",
-    "name": "Agent Marketplace",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "package_id", "type": "string", "required": True, "description": ""},
-        {"name": "registry", "type": "string", "required": True, "description": ""},
-        {"name": "packages", "type": "string", "required": True, "description": ""},
-        {"name": "package_ids", "type": "string", "required": True, "description": ""},
-        {"name": "registry", "type": "string", "required": True, "description": ""},
-        {"name": "packages", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_marketplace.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 智能体市场 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-marketplace",
+        "name": "Agent Marketplace",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "package_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "registry",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "packages",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "package_ids",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "registry_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "packages_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_marketplace.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 智能体市场 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

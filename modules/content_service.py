@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 内容管理
 """
 
 __module_meta__ = {
-    "id": "content-service",
-    "name": "Content Service",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "content_type", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "context_chars", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["content", "service", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 内容管理服务 Grade: A (生产级) | Category: 内容管理",
-}
+        "id": "content-service",
+        "name": "Content Service",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "content_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context_chars",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "content",
+            "service",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 内容管理服务 Grade: A (生产级) | Category: 内容管理"
+    }
 
 import os
 import time

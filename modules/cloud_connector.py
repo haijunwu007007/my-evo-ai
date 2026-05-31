@@ -22,29 +22,75 @@ AUTO-EVO-AI V0.1 | 多云服务连接器引擎
 """
 
 __module_meta__ = {
-    "id": "cloud-connector",
-    "name": "Cloud Connector",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "data_dir", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "creds", "type": "string", "required": True, "description": ""},
-        {"name": "persist", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["provider", "cloud", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 多云服务连接器引擎 企业级云服务统一适配层 - 支持AWS/Azure/GCP/阿里云/腾讯云多云管理",
-}
+        "id": "cloud-connector",
+        "name": "Cloud Connector",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "data_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "creds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "persist",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "provider",
+            "cloud",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 多云服务连接器引擎 企业级云服务统一适配层 - 支持AWS/Azure/GCP/阿里云/腾讯云多云管理"
+    }
 
 import os
 import sys

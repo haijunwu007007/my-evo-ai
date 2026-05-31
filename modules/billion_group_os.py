@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 企业管理
 """
 
 __module_meta__ = {
-    "id": "billion-group-os",
-    "name": "Billion Group Os",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "billion"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 亿群OS企业管理模块 Grade: A (生产级) | Category: 企业管理",
-}
+        "id": "billion-group-os",
+        "name": "Billion Group Os",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "billion"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 亿群OS企业管理模块 Grade: A (生产级) | Category: 企业管理"
+    }
 
 import os
 import asyncio

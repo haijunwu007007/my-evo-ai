@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 核心基础
 """
 
 __module_meta__ = {
-    "id": "cluster-shard",
-    "name": "Cluster Shard",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cluster", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 集群分片管理模块 Grade: A (生产级) | Category: 核心基础",
-}
+        "id": "cluster-shard",
+        "name": "Cluster Shard",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cluster",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 集群分片管理模块 Grade: A (生产级) | Category: 核心基础"
+    }
 
 import os
 import asyncio

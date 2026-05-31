@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: DevOps自动化
 """
 
 __module_meta__ = {
-    "id": "ansible-runner",
-    "name": "Ansible Runner",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "playbook_path", "type": "string", "required": True, "description": ""},
-        {"name": "host", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "playbook_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["ansible", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Ansible自动化执行器 Grade: A (生产级) | Category: DevOps自动化",
-}
+        "id": "ansible-runner",
+        "name": "Ansible Runner",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "playbook_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "host",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "playbook_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "ansible",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Ansible自动化执行器 Grade: A (生产级) | Category: DevOps自动化"
+    }
 
 import os
 import asyncio

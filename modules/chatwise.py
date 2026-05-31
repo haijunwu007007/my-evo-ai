@@ -11,29 +11,74 @@ AUTO-EVO-AI V0.1 - Chatwise 智能对话管理
 """
 
 __module_meta__ = {
-    "id": "chatwise",
-    "name": "Chatwise",
-    "version": "V0.1",
-    "group": "communication",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "conversation_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "chatwise"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Chatwise 智能对话管理 ======================================",
-}
+        "id": "chatwise",
+        "name": "Chatwise",
+        "version": "V0.1",
+        "group": "communication",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "conversation_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "chatwise"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Chatwise 智能对话管理 ======================================"
+    }
 
 import os
 import sys

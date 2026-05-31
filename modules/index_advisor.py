@@ -5,29 +5,73 @@ Index Advisor — 企业级数据库索引优化顾问
 """
 
 __module_meta__ = {
-    "id": "index-advisor",
-    "name": "Index Advisor",
-    "version": "V0.1",
-    "group": "search",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["index"],
-    "grade": "A",
-    "description": "Index Advisor — 企业级数据库索引优化顾问 生产级实现：查询分析、索引推荐、执行计划解读、成本估算、回滚方案",
-}
+        "id": "index-advisor",
+        "name": "Index Advisor",
+        "version": "V0.1",
+        "group": "search",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "index"
+        ],
+        "grade": "A",
+        "description": "Index Advisor — 企业级数据库索引优化顾问 生产级实现：查询分析、索引推荐、执行计划解读、成本估算、回滚方案"
+    }
 import time
 import logging
 import hashlib

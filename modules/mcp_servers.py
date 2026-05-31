@@ -5,29 +5,75 @@ MCP Servers Management — 上市公司级MCP服务器生命周期管理
 """
 
 __module_meta__ = {
-    "id": "mcp-servers",
-    "name": "Mcp Servers",
-    "version": "V0.1",
-    "group": "mcp",
-    "inputs": [
-        {"name": "max_requests", "type": "string", "required": True, "description": ""},
-        {"name": "window_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "failure_threshold", "type": "string", "required": True, "description": ""},
-        {"name": "recovery_timeout", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "server_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "manager", "mcp"],
-    "grade": "A",
-    "description": "MCP Servers Management — 上市公司级MCP服务器生命周期管理 支持服务器注册/发现/健康监控/负载均衡/配置热更新/安全鉴权",
-}
+        "id": "mcp-servers",
+        "name": "Mcp Servers",
+        "version": "V0.1",
+        "group": "mcp",
+        "inputs": [
+            {
+                "name": "max_requests",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "failure_threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "recovery_timeout",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "server_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "manager",
+            "mcp"
+        ],
+        "grade": "A",
+        "description": "MCP Servers Management — 上市公司级MCP服务器生命周期管理 支持服务器注册/发现/健康监控/负载均衡/配置热更新/安全鉴权"
+    }
 import logging
 import time
 import uuid

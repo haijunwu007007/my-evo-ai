@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 消息中间件
 """
 
 __module_meta__ = {
-    "id": "compaction-topic",
-    "name": "Compaction Topic",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-        {"name": "strategy", "type": "string", "required": True, "description": ""},
-        {"name": "trigger_size_mb", "type": "string", "required": True, "description": ""},
-        {"name": "trigger_age_hours", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "compaction"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Kafka Compaction Topic 管理器 Grade: A (生产级) | Category: 消息中间件",
-}
+        "id": "compaction-topic",
+        "name": "Compaction Topic",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "topic",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "strategy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "trigger_size_mb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "trigger_age_hours",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "compaction"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Kafka Compaction Topic 管理器 Grade: A (生产级) | Category: 消息中间件"
+    }
 
 import os
 import time

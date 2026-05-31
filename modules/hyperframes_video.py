@@ -9,29 +9,73 @@ Hyperframes 视频渲染集成 v2.0
 """
 
 __module_meta__ = {
-    "id": "hyperframes-video",
-    "name": "Hyperframes Video",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "title", "type": "string", "required": True, "description": ""},
-        {"name": "resolution", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["hyperframes"],
-    "grade": "A",
-    "description": "Hyperframes 视频渲染集成 v2.0 版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg",
-}
+        "id": "hyperframes-video",
+        "name": "Hyperframes Video",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "title",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resolution",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "hyperframes"
+        ],
+        "grade": "A",
+        "description": "Hyperframes 视频渲染集成 v2.0 版本: V0.1 | HeyGen开源集成 + Pillow/numpy + ffmpeg"
+    }
 import os, json, logging, subprocess, shutil, tempfile, math
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field

@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 消息中间件
 """
 
 __module_meta__ = {
-    "id": "consumer-group",
-    "name": "Consumer Group",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "group_id", "type": "string", "required": True, "description": ""},
-        {"name": "group_id", "type": "string", "required": True, "description": ""},
-        {"name": "strategy", "type": "string", "required": True, "description": ""},
-        {"name": "group_id", "type": "string", "required": True, "description": ""},
-        {"name": "group_id", "type": "string", "required": True, "description": ""},
-        {"name": "group_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["consumer", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 消费者组管理器 Grade: A (生产级) | Category: 消息中间件",
-}
+        "id": "consumer-group",
+        "name": "Consumer Group",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "group_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "group_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "strategy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "group_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "group_id_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "group_id_5",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "consumer",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 消费者组管理器 Grade: A (生产级) | Category: 消息中间件"
+    }
 
 import os
 import time

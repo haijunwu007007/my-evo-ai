@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "decision-engine",
-    "name": "Decision Engine",
-    "version": "V0.1",
-    "group": "workflow",
-    "inputs": [
-        {"name": "rule", "type": "string", "required": True, "description": ""},
-        {"name": "rule_id", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "conditions", "type": "string", "required": True, "description": ""},
-        {"name": "actions", "type": "string", "required": True, "description": ""},
-        {"name": "conditions", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "decision"],
-    "grade": "A",
-    "description": "Production-grade 决策引擎模块 V0.1 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计",
-}
+        "id": "decision-engine",
+        "name": "Decision Engine",
+        "version": "V0.1",
+        "group": "workflow",
+        "inputs": [
+            {
+                "name": "rule",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rule_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "conditions",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "actions",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "conditions_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "decision"
+        ],
+        "grade": "A",
+        "description": "Production-grade 决策引擎模块 V0.1 上市公司生产级实现 - 规则引擎/决策树/评分模型/A/B测试/决策审计"
+    }
 import hashlib
 import logging
 import math

@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 运维工具
 """
 
 __module_meta__ = {
-    "id": "command-stats",
-    "name": "Command Stats",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "cmd", "type": "string", "required": True, "description": ""},
-        {"name": "cmd", "type": "string", "required": True, "description": ""},
-        {"name": "cmd", "type": "string", "required": True, "description": ""},
-        {"name": "is_dangerous", "type": "string", "required": True, "description": ""},
-        {"name": "exit_code", "type": "string", "required": True, "description": ""},
-        {"name": "duration_ms", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "command"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 命令统计管理器 Grade: A (生产级) | Category: 运维工具",
-}
+        "id": "command-stats",
+        "name": "Command Stats",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "cmd",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cmd_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cmd_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "is_dangerous",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "exit_code",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "duration_ms",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "command"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 命令统计管理器 Grade: A (生产级) | Category: 运维工具"
+    }
 
 import os
 import time

@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 部署管理
 """
 
 __module_meta__ = {
-    "id": "blue-green",
-    "name": "Blue Green",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "app", "type": "string", "required": True, "description": ""},
-        {"name": "color", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "manager", "blue"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 蓝绿部署模块 Grade: A (生产级) | Category: 部署管理",
-}
+        "id": "blue-green",
+        "name": "Blue Green",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "app",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "color",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "blue"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 蓝绿部署模块 Grade: A (生产级) | Category: 部署管理"
+    }
 
 import os
 import asyncio

@@ -9,29 +9,74 @@ AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎)
 """
 
 __module_meta__ = {
-    "id": "auto-summary",
-    "name": "Auto Summary",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "damping", "type": "string", "required": True, "description": ""},
-        {"name": "iterations", "type": "string", "required": True, "description": ""},
-        {"name": "threshold", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "s1", "type": "string", "required": True, "description": ""},
-        {"name": "s2", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "auto"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎) =================================================",
-}
+        "id": "auto-summary",
+        "name": "Auto Summary",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "damping",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "iterations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "s1",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "s2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "auto"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Auto Summary (自动摘要引擎) ================================================="
+    }
 
 import time
 import json

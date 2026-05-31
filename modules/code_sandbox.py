@@ -19,29 +19,75 @@ AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎
 """
 
 __module_meta__ = {
-    "id": "code-sandbox",
-    "name": "Code Sandbox",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "allowed", "type": "string", "required": True, "description": ""},
-        {"name": "denied", "type": "string", "required": True, "description": ""},
-        {"name": "security_level", "type": "string", "required": True, "description": ""},
-        {"name": "code", "type": "string", "required": True, "description": ""},
-        {"name": "module_name", "type": "string", "required": True, "description": ""},
-        {"name": "base_dir", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["code", "developer", "config"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎 企业级隔离执行环境 - 安全运行用户提交的代码片段",
-}
+        "id": "code-sandbox",
+        "name": "Code Sandbox",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "allowed",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "denied",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "security_level",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "code",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "module_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "code",
+            "developer",
+            "config"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 代码沙箱安全执行引擎 企业级隔离执行环境 - 安全运行用户提交的代码片段"
+    }
 
 import os
 import sys

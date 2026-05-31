@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 安全与权限
 """
 
 __module_meta__ = {
-    "id": "cerbos-permission",
-    "name": "Cerbos Permission",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "condition", "type": "string", "required": True, "description": ""},
-        {"name": "principal", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "principal", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cerbos", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Cerbos权限策略引擎模块 Grade: A (生产级) | Category: 安全与权限",
-}
+        "id": "cerbos-permission",
+        "name": "Cerbos Permission",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "condition",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "principal",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "principal_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cerbos",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Cerbos权限策略引擎模块 Grade: A (生产级) | Category: 安全与权限"
+    }
 
 import os
 import asyncio

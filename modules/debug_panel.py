@@ -6,29 +6,75 @@ AUTO-EVO-AI V0.1 — m41 轻量调试面板
 """
 
 __module_meta__ = {
-    "id": "debug-panel",
-    "name": "Debug Panel",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "module", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "result", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["debug", "manager", "handler"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — m41 轻量调试面板 为RPA自动化提供可视化调试能力：步骤回放、变量监控、断点调试、执行轨迹记录。",
-}
+        "id": "debug-panel",
+        "name": "Debug Panel",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "module",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "result",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "debug",
+            "manager",
+            "handler"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — m41 轻量调试面板 为RPA自动化提供可视化调试能力：步骤回放、变量监控、断点调试、执行轨迹记录。"
+    }
 
 import time
 import logging

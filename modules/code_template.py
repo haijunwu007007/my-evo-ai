@@ -11,29 +11,75 @@ import logging
 import threading
 
 __module_meta__ = {
-    "id": "code-template",
-    "name": "Code Template",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "variables", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["code", "developer", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 代码模板管理器 Grade: A (生产级) | Category: 开发工具",
-}
+        "id": "code-template",
+        "name": "Code Template",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "variables",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "code",
+            "developer",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 代码模板管理器 Grade: A (生产级) | Category: 开发工具"
+    }
 
 import os
 import json

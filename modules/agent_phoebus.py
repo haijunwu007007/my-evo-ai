@@ -5,32 +5,89 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-phoebus",
-    "name": "Agent Phoebus",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "match_type", "type": "string", "required": True, "description": ""},
-        {"name": "target", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "event", "config": {"on": "agent_phoebus.trigger"}},
-        {"type": "event", "config": {"on": "agent_phoebus.task.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["gateway", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Phoebus AI智能体 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-phoebus",
+        "name": "Agent Phoebus",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "match_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_phoebus.trigger"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_phoebus.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "gateway",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Phoebus AI智能体 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

@@ -5,32 +5,88 @@ Grade: A (生产级) | Category: 安全合规
 """
 
 __module_meta__ = {
-    "id": "security-scanner",
-    "name": "Security Scanner",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "security_scanner.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["adapter", "scanner", "security"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 安全扫描器 Grade: A (生产级) | Category: 安全合规",
-}
+        "id": "security-scanner",
+        "name": "Security Scanner",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "security_scanner.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "scanner",
+            "security"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 安全扫描器 Grade: A (生产级) | Category: 安全合规"
+    }
 
 import asyncio
 import sys

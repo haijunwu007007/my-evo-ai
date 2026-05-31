@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-apollo",
-    "name": "Agent Apollo",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "title", "type": "string", "required": True, "description": ""},
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "doc_type", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_apollo.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Apollo AI智能体 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-apollo",
+        "name": "Agent Apollo",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "title",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "doc_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_apollo.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Apollo AI智能体 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

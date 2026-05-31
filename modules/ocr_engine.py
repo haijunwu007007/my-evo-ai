@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 核心基础
 """
 
 __module_meta__ = {
-    "id": "ocr-engine",
-    "name": "Ocr Engine",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "component_id", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "priority", "type": "string", "required": True, "description": ""},
-        {"name": "dependencies", "type": "string", "required": True, "description": ""},
-        {"name": "component_id", "type": "string", "required": True, "description": ""},
-        {"name": "images", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "manager", "ocr"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础",
-}
+        "id": "ocr-engine",
+        "name": "Ocr Engine",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "component_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "priority",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dependencies",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "component_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "images",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "ocr"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础"
+    }
 
 import os
 import asyncio

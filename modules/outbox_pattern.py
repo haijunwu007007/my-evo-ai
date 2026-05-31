@@ -4,29 +4,73 @@
 """
 
 __module_meta__ = {
-    "id": "outbox-pattern",
-    "name": "Outbox Pattern",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "max_size", "type": "string", "required": True, "description": ""},
-        {"name": "aggregate_type", "type": "string", "required": True, "description": ""},
-        {"name": "aggregate_id", "type": "string", "required": True, "description": ""},
-        {"name": "event_type", "type": "string", "required": True, "description": ""},
-        {"name": "payload", "type": "string", "required": True, "description": ""},
-        {"name": "msg_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["outbox"],
-    "grade": "A",
-    "description": "Production-grade Outbox模式模块 V0.1 上市公司生产级实现 - 事务性消息/双写一致性/轮询发布/幂等消费/状态追踪",
-}
+        "id": "outbox-pattern",
+        "name": "Outbox Pattern",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "max_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "aggregate_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "aggregate_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "event_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "payload",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "msg_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "outbox"
+        ],
+        "grade": "A",
+        "description": "Production-grade Outbox模式模块 V0.1 上市公司生产级实现 - 事务性消息/双写一致性/轮询发布/幂等消费/状态追踪"
+    }
 import hashlib
 import json
 import logging

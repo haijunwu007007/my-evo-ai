@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据处理
 """
 
 __module_meta__ = {
-    "id": "compress-algorithm",
-    "name": "Compress Algorithm",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "sample_data", "type": "string", "required": True, "description": ""},
-        {"name": "iterations", "type": "string", "required": True, "description": ""},
-        {"name": "file_path", "type": "string", "required": True, "description": ""},
-        {"name": "algorithm", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "algorithm", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["compress", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 压缩算法管理器 Grade: A (生产级) | Category: 数据处理",
-}
+        "id": "compress-algorithm",
+        "name": "Compress Algorithm",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "sample_data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "iterations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "file_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "algorithm",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "algorithm_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "compress",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 压缩算法管理器 Grade: A (生产级) | Category: 数据处理"
+    }
 
 import os
 import io

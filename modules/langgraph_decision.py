@@ -5,29 +5,73 @@ langgraph_decision — LangGraph决策引擎
 """
 
 __module_meta__ = {
-    "id": "langgraph-decision",
-    "name": "Langgraph Decision",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["langgraph"],
-    "grade": "A",
-    "description": "langgraph_decision — LangGraph决策引擎 上市公司生产级 — 状态机/有向图决策流程、条件路由、并行分支、循环检测、快照回滚",
-}
+        "id": "langgraph-decision",
+        "name": "Langgraph Decision",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "langgraph"
+        ],
+        "grade": "A",
+        "description": "langgraph_decision — LangGraph决策引擎 上市公司生产级 — 状态机/有向图决策流程、条件路由、并行分支、循环检测、快照回滚"
+    }
 
 import time
 import hashlib

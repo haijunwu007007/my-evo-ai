@@ -5,29 +5,73 @@ keyword_extract — 关键词提取引擎
 """
 
 __module_meta__ = {
-    "id": "keyword-extract",
-    "name": "Keyword Extract",
-    "version": "V0.1",
-    "group": "search",
-    "inputs": [
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["keyword"],
-    "grade": "A",
-    "description": "keyword_extract — 关键词提取引擎 上市公司生产级 — TF-IDF/TextRank/RAKE/YAKE多算法、短语提取、关键词聚合、自定义词典",
-}
+        "id": "keyword-extract",
+        "name": "Keyword Extract",
+        "version": "V0.1",
+        "group": "search",
+        "inputs": [
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "keyword"
+        ],
+        "grade": "A",
+        "description": "keyword_extract — 关键词提取引擎 上市公司生产级 — TF-IDF/TextRank/RAKE/YAKE多算法、短语提取、关键词聚合、自定义词典"
+    }
 
 import time
 import math

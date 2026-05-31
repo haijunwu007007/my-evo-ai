@@ -5,29 +5,74 @@
 """
 
 __module_meta__ = {
-    "id": "session-manager",
-    "name": "Session Manager",
-    "version": "V0.1",
-    "group": "auth",
-    "inputs": [
-        {"name": "default_ttl", "type": "string", "required": True, "description": ""},
-        {"name": "max_sessions_per_user", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "device_info", "type": "string", "required": True, "description": ""},
-        {"name": "metadata", "type": "string", "required": True, "description": ""},
-        {"name": "ttl", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["session", "manager"],
-    "grade": "A",
-    "description": "Production-grade module: 会话管理器 企业级Session生命周期引擎 - 管理用户登录会话、Token刷新、并发控制、安全审计。",
-}
+        "id": "session-manager",
+        "name": "Session Manager",
+        "version": "V0.1",
+        "group": "auth",
+        "inputs": [
+            {
+                "name": "default_ttl",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_sessions_per_user",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "device_info",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metadata",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ttl",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "session",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 会话管理器 企业级Session生命周期引擎 - 管理用户登录会话、Token刷新、并发控制、安全审计。"
+    }
 import hashlib
 import logging
 import time

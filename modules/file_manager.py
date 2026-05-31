@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 存储服务
 """
 
 __module_meta__ = {
-    "id": "file-manager",
-    "name": "File Manager",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "size", "type": "string", "required": True, "description": ""},
-        {"name": "owner", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "file"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 文件管理 Grade: A (生产级) | Category: 存储服务",
-}
+        "id": "file-manager",
+        "name": "File Manager",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "owner",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "file"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 文件管理 Grade: A (生产级) | Category: 存储服务"
+    }
 
 import os
 import asyncio

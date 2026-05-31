@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "bot-detection",
-    "name": "Bot Detection",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "window_size", "type": "string", "required": True, "description": ""},
-        {"name": "session_id", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "method", "type": "string", "required": True, "description": ""},
-        {"name": "user_agent", "type": "string", "required": True, "description": ""},
-        {"name": "session_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["bot", "engine"],
-    "grade": "A",
-    "description": "Production-grade 机器人检测模块 V0.1 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分",
-}
+        "id": "bot-detection",
+        "name": "Bot Detection",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "window_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "session_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "method",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_agent",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "session_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "bot",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "Production-grade 机器人检测模块 V0.1 上市公司生产级实现 - 行为分析/指纹识别/挑战验证/黑白名单/威胁评分"
+    }
 import hashlib
 import logging
 import math

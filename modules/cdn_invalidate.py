@@ -4,29 +4,75 @@ CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控
 """
 
 __module_meta__ = {
-    "id": "cdn-invalidate",
-    "name": "Cdn Invalidate",
-    "version": "V0.1",
-    "group": "cdn",
-    "inputs": [
-        {"name": "batch_id", "type": "string", "required": True, "description": ""},
-        {"name": "urls", "type": "string", "required": True, "description": ""},
-        {"name": "batch_id", "type": "string", "required": True, "description": ""},
-        {"name": "invalidate_fn", "type": "string", "required": True, "description": ""},
-        {"name": "batch_id", "type": "string", "required": True, "description": ""},
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["provider", "manager", "cdn"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - CDN Invalidation Module (Grade: A Production) CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控",
-}
+        "id": "cdn-invalidate",
+        "name": "Cdn Invalidate",
+        "version": "V0.1",
+        "group": "cdn",
+        "inputs": [
+            {
+                "name": "batch_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "urls",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "batch_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "invalidate_fn",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "batch_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "provider",
+            "manager",
+            "cdn"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - CDN Invalidation Module (Grade: A Production) CDN缓存管理：缓存失效、批量刷新、URL管理、命中率监控"
+    }
 
 import os
 import asyncio

@@ -9,29 +9,74 @@ JSON Schema驱动表单生成、20+字段类型、验证引擎、条件逻辑、
 """
 
 __module_meta__ = {
-    "id": "form-builder",
-    "name": "Form Builder",
-    "version": "V0.1",
-    "group": "documents",
-    "inputs": [
-        {"name": "field", "type": "string", "required": True, "description": ""},
-        {"name": "rule_type", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "field", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["form", "engine"],
-    "grade": "A",
-    "description": "表单构建器 — 生产级A级模块 JSON Schema驱动表单生成、20+字段类型、验证引擎、条件逻辑、多步表单、数据绑定",
-}
+        "id": "form-builder",
+        "name": "Form Builder",
+        "version": "V0.1",
+        "group": "documents",
+        "inputs": [
+            {
+                "name": "field",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rule_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "field_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "form",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "表单构建器 — 生产级A级模块 JSON Schema驱动表单生成、20+字段类型、验证引擎、条件逻辑、多步表单、数据绑定"
+    }
 
 import json
 import re

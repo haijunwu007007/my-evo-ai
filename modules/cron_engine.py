@@ -9,29 +9,81 @@ AUTO-EVO-AI - Cron调度引擎 v3.0
 """
 
 __module_meta__ = {
-    "id": "cron-engine",
-    "name": "Cron Engine",
-    "version": "V0.1",
-    "group": "scheduler",
-    "inputs": [
-        {"name": "data_dir", "type": "string", "required": True, "description": ""},
-        {"name": "scheduler_type", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "detail", "type": "string", "required": True, "description": ""},
-        {"name": "success", "type": "string", "required": True, "description": ""},
-        {"name": "expression", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["engine", "cron"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI - Cron调度引擎 v3.0 版本: V0.1 | 自研 + APScheduler集成",
-}
+        "id": "cron-engine",
+        "name": "Cron Engine",
+        "version": "V0.1",
+        "group": "scheduler",
+        "inputs": [
+            {
+                "name": "data_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "scheduler_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "detail",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "success",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "expression",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "cron"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI - Cron调度引擎 v3.0 版本: V0.1 | 自研 + APScheduler集成"
+    }
 import json, os, re, time, threading, traceback, logging
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, Callable, List

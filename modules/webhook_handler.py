@@ -6,29 +6,84 @@ Webhook Handler - 企业级Webhook管理引擎
 """
 
 __module_meta__ = {
-    "id": "webhook-handler",
-    "name": "Webhook Handler",
-    "version": "V0.1",
-    "group": "webhook",
-    "inputs": [
-        {"name": "payload", "type": "string", "required": True, "description": ""},
-        {"name": "secret", "type": "string", "required": True, "description": ""},
-        {"name": "algorithm", "type": "string", "required": True, "description": ""},
-        {"name": "payload", "type": "string", "required": True, "description": ""},
-        {"name": "secret", "type": "string", "required": True, "description": ""},
-        {"name": "signature", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/webhook_handler", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["engine", "handler", "webhook", "manager"],
-    "grade": "A",
-    "description": "Webhook Handler - 企业级Webhook管理引擎 生产级Webhook接收、签名验证、事件路由、重试投递、日志审计",
-}
+        "id": "webhook-handler",
+        "name": "Webhook Handler",
+        "version": "V0.1",
+        "group": "webhook",
+        "inputs": [
+            {
+                "name": "payload",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "secret",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "algorithm",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "payload_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "secret_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "signature",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/webhook_handler",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "handler",
+            "webhook",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Webhook Handler - 企业级Webhook管理引擎 生产级Webhook接收、签名验证、事件路由、重试投递、日志审计"
+    }
 
 import hashlib
 import hmac

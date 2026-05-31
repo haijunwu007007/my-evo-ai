@@ -11,29 +11,76 @@ AUTO-EVO-AI V0.1 - ClawGateway API网关管理器
 """
 
 __module_meta__ = {
-    "id": "claw-gateway",
-    "name": "Claw Gateway",
-    "version": "V0.1",
-    "group": "github",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "route_id", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "claw", "manager", "gateway"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - ClawGateway API网关管理器 ============================================",
-}
+        "id": "claw-gateway",
+        "name": "Claw Gateway",
+        "version": "V0.1",
+        "group": "github",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "route_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "claw",
+            "manager",
+            "gateway"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - ClawGateway API网关管理器 ============================================"
+    }
 
 import os
 import sys

@@ -4,29 +4,74 @@ DNS record management, caching, TTL tracking, health probing, zone management.
 """
 
 __module_meta__ = {
-    "id": "dns-manager",
-    "name": "Dns Manager",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "domain", "type": "string", "required": True, "description": ""},
-        {"name": "dns_servers", "type": "string", "required": True, "description": ""},
-        {"name": "timeout", "type": "string", "required": True, "description": ""},
-        {"name": "servers", "type": "string", "required": True, "description": ""},
-        {"name": "interval_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "window_minutes", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["dns", "manager"],
-    "grade": "A",
-    "description": "Production-grade module: DNS域名管理系统 DNS record management, caching, TTL tracking, health probing, zone management.",
-}
+        "id": "dns-manager",
+        "name": "Dns Manager",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "domain",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dns_servers",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "timeout",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "servers",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "interval_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window_minutes",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "dns",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: DNS域名管理系统 DNS record management, caching, TTL tracking, health probing, zone management."
+    }
 import hashlib
 import logging
 import time

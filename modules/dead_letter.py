@@ -4,29 +4,73 @@
 """
 
 __module_meta__ = {
-    "id": "dead-letter",
-    "name": "Dead Letter",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "strategy", "type": "string", "required": True, "description": ""},
-        {"name": "max_retries", "type": "string", "required": True, "description": ""},
-        {"name": "base_delay", "type": "string", "required": True, "description": ""},
-        {"name": "max_delay", "type": "string", "required": True, "description": ""},
-        {"name": "attempt", "type": "string", "required": True, "description": ""},
-        {"name": "attempt", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["dead"],
-    "grade": "A",
-    "description": "Production-grade 死信队列模块 V0.1 上市公司生产级实现 - 消息重试/退避策略/死信存储/告警/手动重放",
-}
+        "id": "dead-letter",
+        "name": "Dead Letter",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "strategy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_retries",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base_delay",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_delay",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "attempt",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "attempt_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "dead"
+        ],
+        "grade": "A",
+        "description": "Production-grade 死信队列模块 V0.1 上市公司生产级实现 - 消息重试/退避策略/死信存储/告警/手动重放"
+    }
 import hashlib
 import json
 import time as tmod

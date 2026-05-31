@@ -12,29 +12,81 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "message-broker",
-    "name": "Message Broker",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "pattern", "type": "string", "required": True, "description": ""},
-        {"name": "destinations", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-        {"name": "message_id", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "message_broker.trigger"}}],
-    "depends_on": [],
-    "tags": ["engine", "message"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - MessageBroker 消息代理服务 ===============================================",
-}
+        "id": "message-broker",
+        "name": "Message Broker",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "pattern",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "destinations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "message_broker.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "message"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - MessageBroker 消息代理服务 ==============================================="
+    }
 import time
 import asyncio
 import json

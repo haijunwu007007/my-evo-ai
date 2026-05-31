@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据治理
 """
 
 __module_meta__ = {
-    "id": "data-lineage",
-    "name": "Data Lineage",
-    "version": "V0.1",
-    "group": "data",
-    "inputs": [
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "node_type", "type": "string", "required": True, "description": ""},
-        {"name": "source_system", "type": "string", "required": True, "description": ""},
-        {"name": "metadata", "type": "string", "required": True, "description": ""},
-        {"name": "source_node_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["data", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 数据血缘追踪模块 Grade: A (生产级) | Category: 数据治理",
-}
+        "id": "data-lineage",
+        "name": "Data Lineage",
+        "version": "V0.1",
+        "group": "data",
+        "inputs": [
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_system",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metadata",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_node_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "data",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 数据血缘追踪模块 Grade: A (生产级) | Category: 数据治理"
+    }
 
 import os
 import re

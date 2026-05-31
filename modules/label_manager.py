@@ -5,29 +5,74 @@ Production-grade label/tag management with hierarchy, ACL, audit trail, and auto
 """
 
 __module_meta__ = {
-    "id": "label-manager",
-    "name": "Label Manager",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["label", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Enterprise Label Manager Module Production-grade label/tag management with hierarchy, ACL, audit trail, and auto-tagging.",
-}
+        "id": "label-manager",
+        "name": "Label Manager",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "label",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Enterprise Label Manager Module Production-grade label/tag management with hierarchy, ACL, audit trail, and auto-tagging."
+    }
 
 import time
 import re

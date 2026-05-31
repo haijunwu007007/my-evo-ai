@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: AI能力
 """
 
 __module_meta__ = {
-    "id": "data-scraping",
-    "name": "Data Scraping",
-    "version": "V0.1",
-    "group": "data",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/data_scraping", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["adapter", "engine", "data"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 数据采集引擎 Grade: A (生产级) | Category: AI能力",
-}
+        "id": "data-scraping",
+        "name": "Data Scraping",
+        "version": "V0.1",
+        "group": "data",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/data_scraping",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "engine",
+            "data"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 数据采集引擎 Grade: A (生产级) | Category: AI能力"
+    }
 
 import asyncio
 import time

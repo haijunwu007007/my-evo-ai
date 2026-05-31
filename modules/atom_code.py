@@ -6,29 +6,75 @@ snippet management, and multi-language code analysis.
 """
 
 __module_meta__ = {
-    "id": "atom-code",
-    "name": "Atom Code",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "snippet_id", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "language", "type": "string", "required": True, "description": ""},
-        {"name": "code", "type": "string", "required": True, "description": ""},
-        {"name": "snippet_id", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "manager", "atom"],
-    "grade": "A",
-    "description": "Atom Code - Intelligent Code Generation and Refactoring Engine Provides code generation from specifications, automated refactoring, code review,",
-}
+        "id": "atom-code",
+        "name": "Atom Code",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "snippet_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "language",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "code",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "snippet_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "atom"
+        ],
+        "grade": "A",
+        "description": "Atom Code - Intelligent Code Generation and Refactoring Engine Provides code generation from specifications, automated refactoring, code review,"
+    }
 
 import time
 import json

@@ -13,29 +13,74 @@ Bucket Policy Manager - 对象存储桶策略管理
 """
 
 __module_meta__ = {
-    "id": "bucket-policy",
-    "name": "Bucket Policy",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "cls", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "bucket_name", "type": "string", "required": True, "description": ""},
-        {"name": "now", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "message", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["bucket", "manager"],
-    "grade": "A",
-    "description": "Bucket Policy Manager - 对象存储桶策略管理 生产级模块：S3兼容桶策略的完整生命周期管理",
-}
+        "id": "bucket-policy",
+        "name": "Bucket Policy",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "cls",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "bucket_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "now",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "bucket",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Bucket Policy Manager - 对象存储桶策略管理 生产级模块：S3兼容桶策略的完整生命周期管理"
+    }
 
 import asyncio
 import hashlib

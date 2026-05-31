@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 开发工具
 """
 
 __module_meta__ = {
-    "id": "code-quality",
-    "name": "Code Quality",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "function_body", "type": "string", "required": True, "description": ""},
-        {"name": "lines", "type": "string", "required": True, "description": ""},
-        {"name": "window", "type": "string", "required": True, "description": ""},
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "file_path", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["code", "developer", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 代码质量管理模块 Grade: A (生产级) | Category: 开发工具",
-}
+        "id": "code-quality",
+        "name": "Code Quality",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "function_body",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "lines",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "file_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "code",
+            "developer",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 代码质量管理模块 Grade: A (生产级) | Category: 开发工具"
+    }
 
 import os
 import re

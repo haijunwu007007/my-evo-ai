@@ -7,29 +7,73 @@ parallel_executor — 企业级并行执行引擎
 """
 
 __module_meta__ = {
-    "id": "parallel-executor",
-    "name": "Parallel Executor",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "max_memory_mb", "type": "string", "required": True, "description": ""},
-        {"name": "max_cpu_percent", "type": "string", "required": True, "description": ""},
-        {"name": "timeout", "type": "string", "required": True, "description": ""},
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-        {"name": "status", "type": "string", "required": True, "description": ""},
-        {"name": "result", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["parallel"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | Enterprise Module parallel_executor — 企业级并行执行引擎",
-}
+        "id": "parallel-executor",
+        "name": "Parallel Executor",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "max_memory_mb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_cpu_percent",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "timeout",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "result",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "parallel"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | Enterprise Module parallel_executor — 企业级并行执行引擎"
+    }
 
 import threading
 import time

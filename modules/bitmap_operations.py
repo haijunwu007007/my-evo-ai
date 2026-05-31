@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据结构
 """
 
 __module_meta__ = {
-    "id": "bitmap-operations",
-    "name": "Bitmap Operations",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "size", "type": "string", "required": True, "description": ""},
-        {"name": "index", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "index", "type": "string", "required": True, "description": ""},
-        {"name": "index", "type": "string", "required": True, "description": ""},
-        {"name": "start", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["bitmap", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 位图操作模块 Grade: A (生产级) | Category: 数据结构",
-}
+        "id": "bitmap-operations",
+        "name": "Bitmap Operations",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "index",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "index_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "index_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "start",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "bitmap",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 位图操作模块 Grade: A (生产级) | Category: 数据结构"
+    }
 
 import os
 import asyncio

@@ -9,29 +9,75 @@ Supports sparse/dense representation, union, intersection estimation, and persis
 """
 
 __module_meta__ = {
-    "id": "hyperloglog",
-    "name": "Hyperloglog",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "precision", "type": "string", "required": True, "description": ""},
-        {"name": "idx", "type": "string", "required": True, "description": ""},
-        {"name": "val", "type": "string", "required": True, "description": ""},
-        {"name": "idx", "type": "string", "required": True, "description": ""},
-        {"name": "num_registers", "type": "string", "required": True, "description": ""},
-        {"name": "other", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "hyperloglog", "manager"],
-    "grade": "A",
-    "description": "HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI V0.1 Production-grade probabilistic cardinality estimation for distributed systems.",
-}
+        "id": "hyperloglog",
+        "name": "Hyperloglog",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "precision",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "idx",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "val",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "idx_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "num_registers",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "other",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "hyperloglog",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "HyperLogLog Cardinality Estimation Module — AUTO-EVO-AI V0.1 Production-grade probabilistic cardinality estimation for distributed systems."
+    }
 
 import hashlib
 import math

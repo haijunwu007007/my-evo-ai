@@ -16,29 +16,76 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "docker-manager",
-    "name": "Docker Manager",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "devops", "docker", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - DockerManager Docker容器编排管理 ===================================================",
-}
+        "id": "docker-manager",
+        "name": "Docker Manager",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "devops",
+            "docker",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - DockerManager Docker容器编排管理 ==================================================="
+    }
 
 import time
 import json

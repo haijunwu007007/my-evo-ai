@@ -5,29 +5,73 @@ pipeline_batch - 批处理流水线引擎（上市生产级）
 """
 
 __module_meta__ = {
-    "id": "pipeline-batch",
-    "name": "Pipeline Batch",
-    "version": "V0.1",
-    "group": "pipeline",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["pipeline"],
-    "grade": "A",
-    "description": "pipeline_batch - 批处理流水线引擎（上市生产级） 支持：批处理编排/DAG依赖/并行分片/失败重试/检查点恢复/资源配额/执行监控",
-}
+        "id": "pipeline-batch",
+        "name": "Pipeline Batch",
+        "version": "V0.1",
+        "group": "pipeline",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "pipeline"
+        ],
+        "grade": "A",
+        "description": "pipeline_batch - 批处理流水线引擎（上市生产级） 支持：批处理编排/DAG依赖/并行分片/失败重试/检查点恢复/资源配额/执行监控"
+    }
 import logging
 import hashlib
 import threading

@@ -17,29 +17,74 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "cicd-pipeline",
-    "name": "Ci/cd Pipeline",
-    "version": "V0.1",
-    "group": "cicd",
-    "inputs": [
-        {"name": "success", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "error", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "pipeline_id", "type": "string", "required": True, "description": ""},
-        {"name": "stage", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["devops", "cicd"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - CICDPipeline CI/CD流水线引擎 ==============================================",
-}
+        "id": "cicd-pipeline",
+        "name": "Ci/cd Pipeline",
+        "version": "V0.1",
+        "group": "cicd",
+        "inputs": [
+            {
+                "name": "success",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "error",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pipeline_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "stage",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "devops",
+            "cicd"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - CICDPipeline CI/CD流水线引擎 =============================================="
+    }
 
 import time
 import asyncio

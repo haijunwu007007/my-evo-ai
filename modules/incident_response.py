@@ -5,29 +5,74 @@ Incident lifecycle management: detection, triage, escalation, resolution, post-m
 """
 
 __module_meta__ = {
-    "id": "incident-response",
-    "name": "Incident Response",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "playbook_id", "type": "string", "required": True, "description": ""},
-        {"name": "match_rules", "type": "string", "required": True, "description": ""},
-        {"name": "actions", "type": "string", "required": True, "description": ""},
-        {"name": "severity_threshold", "type": "string", "required": True, "description": ""},
-        {"name": "incident", "type": "string", "required": True, "description": ""},
-        {"name": "playbook_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "incident"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Incident Response Module Grade: A | Category: Deployment & Operations",
-}
+        "id": "incident-response",
+        "name": "Incident Response",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "playbook_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "match_rules",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "actions",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "severity_threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "incident",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "playbook_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "incident"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Incident Response Module Grade: A | Category: Deployment & Operations"
+    }
 import os, time, logging, threading, hashlib, json, re
 from typing import Any, Dict, List, Optional
 from datetime import datetime

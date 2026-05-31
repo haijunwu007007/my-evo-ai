@@ -17,29 +17,76 @@ AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现）
 """
 
 __module_meta__ = {
-    "id": "email-automation",
-    "name": "Email Automation",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "email", "engine", "config"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现） ============================================",
-}
+        "id": "email-automation",
+        "name": "Email Automation",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "email",
+            "engine",
+            "config"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 邮件自动化（A级生产实现） ============================================"
+    }
 
 import time
 import asyncio

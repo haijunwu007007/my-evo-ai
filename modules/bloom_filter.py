@@ -25,29 +25,75 @@ AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎
 """
 
 __module_meta__ = {
-    "id": "bloom-filter",
-    "name": "Bloom Filter",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "hash_count", "type": "string", "required": True, "description": ""},
-        {"name": "seed", "type": "string", "required": True, "description": ""},
-        {"name": "salt", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "bit_count", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "bloom", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎 ================================================",
-}
+        "id": "bloom-filter",
+        "name": "Bloom Filter",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "hash_count",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "seed",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "salt",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "bit_count",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "bloom",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - BloomFilter 布隆过滤器引擎 ================================================"
+    }
 
 import math
 import time

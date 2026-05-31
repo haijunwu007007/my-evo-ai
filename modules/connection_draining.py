@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 网络基础设施
 """
 
 __module_meta__ = {
-    "id": "connection-draining",
-    "name": "Connection Draining",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "service_id", "type": "string", "required": True, "description": ""},
-        {"name": "service_ids", "type": "string", "required": True, "description": ""},
-        {"name": "grace_period", "type": "string", "required": True, "description": ""},
-        {"name": "service_id", "type": "string", "required": True, "description": ""},
-        {"name": "idle_threshold", "type": "string", "required": True, "description": ""},
-        {"name": "service_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["connection", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 连接排空管理器 Grade: A (生产级) | Category: 网络基础设施",
-}
+        "id": "connection-draining",
+        "name": "Connection Draining",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "service_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_ids",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "grace_period",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "idle_threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "connection",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 连接排空管理器 Grade: A (生产级) | Category: 网络基础设施"
+    }
 
 import os
 import time

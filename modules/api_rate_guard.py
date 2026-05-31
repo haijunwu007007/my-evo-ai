@@ -5,29 +5,84 @@ Grade: A (生产级) | Category: API基础设施
 """
 
 __module_meta__ = {
-    "id": "api-rate-guard",
-    "name": "Api Rate Guard",
-    "version": "V0.1",
-    "group": "api",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "client_id", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "client_id", "type": "string", "required": True, "description": ""},
-        {"name": "paths", "type": "string", "required": True, "description": ""},
-        {"name": "top_n", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_rate_guard", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["config", "api", "client", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — API限流守卫 Grade: A (生产级) | Category: API基础设施",
-}
+        "id": "api-rate-guard",
+        "name": "Api Rate Guard",
+        "version": "V0.1",
+        "group": "api",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "client_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "client_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "paths",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "top_n",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/api_rate_guard",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "api",
+            "client",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — API限流守卫 Grade: A (生产级) | Category: API基础设施"
+    }
 
 import os
 import asyncio

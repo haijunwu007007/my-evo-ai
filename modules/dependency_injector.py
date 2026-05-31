@@ -22,29 +22,74 @@ AUTO-EVO-AI V0.1 | 依赖注入容器引擎
 """
 
 __module_meta__ = {
-    "id": "dependency-injector",
-    "name": "Dependency Injector",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "instance", "type": "string", "required": True, "description": ""},
-        {"name": "container", "type": "string", "required": True, "description": ""},
-        {"name": "impl_class", "type": "string", "required": True, "description": ""},
-        {"name": "resolving", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["service", "dependency"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 依赖注入容器引擎 企业级IoC容器 - 控制反转与依赖注入管理",
-}
+        "id": "dependency-injector",
+        "name": "Dependency Injector",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "instance",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "container",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "impl_class",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resolving",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "service",
+            "dependency"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 依赖注入容器引擎 企业级IoC容器 - 控制反转与依赖注入管理"
+    }
 
 import os
 import sys

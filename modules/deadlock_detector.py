@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "deadlock-detector",
-    "name": "Deadlock Detector",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "txn_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "txn_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "txn_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["deadlock", "manager"],
-    "grade": "A",
-    "description": "Production-grade 死锁检测模块 V0.1 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪",
-}
+        "id": "deadlock-detector",
+        "name": "Deadlock Detector",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "txn_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "txn_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "txn_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "deadlock",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade 死锁检测模块 V0.1 上市公司生产级实现 - 等待图分析/环检测/超时管理/自动解除/资源追踪"
+    }
 import logging
 import time
 import uuid

@@ -5,29 +5,73 @@
 """
 
 __module_meta__ = {
-    "id": "githubtrending",
-    "name": "Githubtrending",
-    "version": "V0.1",
-    "group": "github",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["githubtrending"],
-    "grade": "A",
-    "description": "GitHub趋势追踪模块 - GitHub Trending Tracker Service 生产级实现：趋势仓库采集、语言分类、增速计算、历史对比、热点分析",
-}
+        "id": "githubtrending",
+        "name": "Githubtrending",
+        "version": "V0.1",
+        "group": "github",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "githubtrending"
+        ],
+        "grade": "A",
+        "description": "GitHub趋势追踪模块 - GitHub Trending Tracker Service 生产级实现：趋势仓库采集、语言分类、增速计算、历史对比、热点分析"
+    }
 import logging
 import time
 import hashlib

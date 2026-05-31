@@ -5,29 +5,76 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agentseek",
-    "name": "Agentseek",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "query_tags", "type": "string", "required": True, "description": ""},
-        {"name": "agent_tags", "type": "string", "required": True, "description": ""},
-        {"name": "query_desc", "type": "string", "required": True, "description": ""},
-        {"name": "agent_desc", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "candidates", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "agentseek", "manager", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — AgentSeek智能体搜索 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agentseek",
+        "name": "Agentseek",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "query_tags",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "agent_tags",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query_desc",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "agent_desc",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "candidates",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "agentseek",
+            "manager",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — AgentSeek智能体搜索 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

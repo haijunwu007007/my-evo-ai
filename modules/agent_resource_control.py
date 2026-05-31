@@ -11,29 +11,83 @@ Agent Resource Control - 250万级智能体分层池化、硬件监控、资源�
 """
 
 __module_meta__ = {
-    "id": "agent-resource-control",
-    "name": "Agent Resource Control",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "sample_interval", "type": "string", "required": True, "description": ""},
-        {"name": "cache_size", "type": "string", "required": True, "description": ""},
-        {"name": "metrics", "type": "string", "required": True, "description": ""},
-        {"name": "callback", "type": "string", "required": True, "description": ""},
-        {"name": "count", "type": "string", "required": True, "description": ""},
-        {"name": "seconds", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_resource_control.task.request"}}],
-    "depends_on": [],
-    "tags": ["config", "monitor", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断",
-}
+        "id": "agent-resource-control",
+        "name": "Agent Resource Control",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "sample_interval",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cache_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metrics",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "callback",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "count",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_resource_control.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "monitor",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO EVO AI V0.1 - 智能体集群资源精细化管控模块 Agent Resource Control - 250万级智能体分层池化、硬件监控、资源配额、过载熔断"
+    }
 
 import os
 import sys

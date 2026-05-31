@@ -19,29 +19,74 @@ AUTO-EVO-AI V0.1 - Second Brain Memory Module
 """
 
 __module_meta__ = {
-    "id": "second-brain",
-    "name": "Second Brain",
-    "version": "V0.1",
-    "group": "memory",
-    "inputs": [
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "memory_type", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "memory_types", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["memory", "second-brain"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统",
-}
+        "id": "second-brain",
+        "name": "Second Brain",
+        "version": "V0.1",
+        "group": "memory",
+        "inputs": [
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "memory_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "memory_types",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "memory",
+            "second-brain"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Second Brain Memory Module 基于 Mercury Agent 的第二大脑记忆系统"
+    }
 
 import os
 import json

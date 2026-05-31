@@ -7,29 +7,75 @@ retry with exponential backoff, dead letter queue, ordering guarantees.
 """
 
 __module_meta__ = {
-    "id": "idempotent-msg",
-    "name": "Idempotent Msg",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "idempotent", "handler"],
-    "grade": "A",
-    "description": "Idempotent Message Module — AUTO-EVO-AI V0.1 Enterprise-grade idempotent message processing.",
-}
+        "id": "idempotent-msg",
+        "name": "Idempotent Msg",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "idempotent",
+            "handler"
+        ],
+        "grade": "A",
+        "description": "Idempotent Message Module — AUTO-EVO-AI V0.1 Enterprise-grade idempotent message processing."
+    }
 
 import hashlib
 import time

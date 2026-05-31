@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: DevOps自动化
 """
 
 __module_meta__ = {
-    "id": "argocd-deploy",
-    "name": "Argocd Deploy",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "app_id", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "revision", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "argocd"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — ArgoCD部署管理 Grade: A (生产级) | Category: DevOps自动化",
-}
+        "id": "argocd-deploy",
+        "name": "Argocd Deploy",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "app_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "revision",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "argocd"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — ArgoCD部署管理 Grade: A (生产级) | Category: DevOps自动化"
+    }
 
 import os
 import asyncio

@@ -5,32 +5,88 @@ Provides trace management, observation logging, score tracking, and dashboard in
 """
 
 __module_meta__ = {
-    "id": "langfuse-monitor",
-    "name": "Langfuse Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "langfuse_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["monitor", "langfuse", "engine"],
-    "grade": "A",
-    "description": "Langfuse Monitor - LLM Observability Platform Integration Provides trace management, observation logging, score tracking, and dashboard integration.",
-}
+        "id": "langfuse-monitor",
+        "name": "Langfuse Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_5",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "langfuse_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "monitor",
+            "langfuse",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "Langfuse Monitor - LLM Observability Platform Integration Provides trace management, observation logging, score tracking, and dashboard integration."
+    }
 
 import time
 import json

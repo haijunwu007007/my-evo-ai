@@ -10,29 +10,73 @@ from modules._base.enterprise_module import EnterpriseModule
 from modules._base.metrics import prometheus_timer, metrics_collector
 
 __module_meta__ = {
-    "id": "template-registry",
-    "name": "Template Registry",
-    "version": "V0.1",
-    "group": "marketplace",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["template"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 生产级模板注册中心 模块ID: template_registry",
-}
+        "id": "template-registry",
+        "name": "Template Registry",
+        "version": "V0.1",
+        "group": "marketplace",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "template"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 生产级模板注册中心 模块ID: template_registry"
+    }
 
 import json
 import time

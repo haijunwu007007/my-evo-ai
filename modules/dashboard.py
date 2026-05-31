@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 监控展示
 """
 
 __module_meta__ = {
-    "id": "dashboard",
-    "name": "Dashboard",
-    "version": "V0.1",
-    "group": "ui",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "desc", "type": "string", "required": True, "description": ""},
-        {"name": "owner", "type": "string", "required": True, "description": ""},
-        {"name": "tags", "type": "string", "required": True, "description": ""},
-        {"name": "pid", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["dashboard", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 仪表盘管理 Grade: A (生产级) | Category: 监控展示",
-}
+        "id": "dashboard",
+        "name": "Dashboard",
+        "version": "V0.1",
+        "group": "ui",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "desc",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "owner",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tags",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pid",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "dashboard",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 仪表盘管理 Grade: A (生产级) | Category: 监控展示"
+    }
 
 import os
 import asyncio

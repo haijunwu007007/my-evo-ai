@@ -5,29 +5,74 @@ awesome_design_md.py - 设计文档管理模块
 """
 
 __module_meta__ = {
-    "id": "awesome-design-md",
-    "name": "Awesome Design Md",
-    "version": "V0.1",
-    "group": "ui",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "doc_id", "type": "string", "required": True, "description": ""},
-        {"name": "content", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["awesome", "manager"],
-    "grade": "A",
-    "description": "awesome_design_md.py - 设计文档管理模块 上市公司级生产实现 - 文档创建、版本控制、协作评审、模板管理、知识库",
-}
+        "id": "awesome-design-md",
+        "name": "Awesome Design Md",
+        "version": "V0.1",
+        "group": "ui",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "doc_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "awesome",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "awesome_design_md.py - 设计文档管理模块 上市公司级生产实现 - 文档创建、版本控制、协作评审、模板管理、知识库"
+    }
 
 import asyncio
 import logging

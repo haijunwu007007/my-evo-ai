@@ -17,24 +17,76 @@ AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现）
 """
 
 __module_meta__ = {
-    "id": "cache-engine",
-    "name": "Cache Engine",
-    "version": "V0.1",
-    "group": "cache",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": "缓存键"},
-        {"name": "value", "type": "string", "required": False, "description": "缓存值"},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "found", "type": "bool", "description": "是否命中"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "cache", "manager", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现） ===============================================",
-}
+        "id": "cache-engine",
+        "name": "Cache Engine",
+        "version": "V0.1",
+        "group": "cache",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "cache",
+            "manager",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 多级缓存引擎（A级生产实现） ==============================================="
+    }
 
 import time
 import asyncio

@@ -22,29 +22,82 @@ AUTO-EVO-AI V0.1 | EVO备份引擎
 """
 
 __module_meta__ = {
-    "id": "evo-backup",
-    "name": "Evo Backup",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "base_snapshot", "type": "string", "required": True, "description": ""},
-        {"name": "current_path", "type": "string", "required": True, "description": ""},
-        {"name": "base_snapshot", "type": "string", "required": True, "description": ""},
-        {"name": "current_path", "type": "string", "required": True, "description": ""},
-        {"name": "source_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["evo", "manager", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | EVO备份引擎 企业级备份系统 - 支持全量/增量/差异备份、压缩加密、定时调度",
-}
+        "id": "evo-backup",
+        "name": "Evo Backup",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base_snapshot",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "current_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base_snapshot_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "current_path_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "evo",
+            "manager",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | EVO备份引擎 企业级备份系统 - 支持全量/增量/差异备份、压缩加密、定时调度"
+    }
 
 import os
 import sys

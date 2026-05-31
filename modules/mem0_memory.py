@@ -5,29 +5,73 @@ Mem0 Memory Layer — 上市公司生产级实现
 """
 
 __module_meta__ = {
-    "id": "mem0-memory",
-    "name": "Mem0 Memory",
-    "version": "V0.1",
-    "group": "memory",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["mem0"],
-    "grade": "A",
-    "description": "Mem0 Memory Layer — 上市公司生产级实现 企业级AI记忆管理：语义记忆、上下文窗口、记忆衰减、检索增强",
-}
+        "id": "mem0-memory",
+        "name": "Mem0 Memory",
+        "version": "V0.1",
+        "group": "memory",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "mem0"
+        ],
+        "grade": "A",
+        "description": "Mem0 Memory Layer — 上市公司生产级实现 企业级AI记忆管理：语义记忆、上下文窗口、记忆衰减、检索增强"
+    }
 
 import hashlib
 import json

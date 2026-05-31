@@ -18,29 +18,75 @@ AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级）
 """
 
 __module_meta__ = {
-    "id": "flow-engine",
-    "name": "Flow Engine",
-    "version": "V0.1",
-    "group": "workflow",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "engine", "flow"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级） =================================================",
-}
+        "id": "flow-engine",
+        "name": "Flow Engine",
+        "version": "V0.1",
+        "group": "workflow",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "engine",
+            "flow"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - FlowEngine 工作流引擎（A级） ================================================="
+    }
 
 import re
 import time

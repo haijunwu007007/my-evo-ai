@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据处理
 """
 
 __module_meta__ = {
-    "id": "graph-engine",
-    "name": "Graph Engine",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "source", "type": "string", "required": True, "description": ""},
-        {"name": "target", "type": "string", "required": True, "description": ""},
-        {"name": "relation", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "graph"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 图引擎 Grade: A (生产级) | Category: 数据处理",
-}
+        "id": "graph-engine",
+        "name": "Graph Engine",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "relation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "graph"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 图引擎 Grade: A (生产级) | Category: 数据处理"
+    }
 
 import os
 import asyncio

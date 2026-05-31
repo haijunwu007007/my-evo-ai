@@ -5,29 +5,81 @@ Grade: A (生产级) | Category: 智能分析
 """
 
 __module_meta__ = {
-    "id": "business-analyst",
-    "name": "Business Analyst",
-    "version": "V0.1",
-    "group": "business",
-    "inputs": [
-        {"name": "metric_name", "type": "string", "required": True, "description": ""},
-        {"name": "values", "type": "string", "required": True, "description": ""},
-        {"name": "labels", "type": "string", "required": True, "description": ""},
-        {"name": "current", "type": "string", "required": True, "description": ""},
-        {"name": "previous_period", "type": "string", "required": True, "description": ""},
-        {"name": "year_ago", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "business_analyst.trigger"}}],
-    "depends_on": [],
-    "tags": ["manager", "business"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 商业分析师模块 Grade: A (生产级) | Category: 智能分析",
-}
+        "id": "business-analyst",
+        "name": "Business Analyst",
+        "version": "V0.1",
+        "group": "business",
+        "inputs": [
+            {
+                "name": "metric_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "values",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "labels",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "current",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "previous_period",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "year_ago",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "business_analyst.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "business"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 商业分析师模块 Grade: A (生产级) | Category: 智能分析"
+    }
 
 import os
 import asyncio

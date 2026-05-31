@@ -6,29 +6,74 @@ automated transitions, compliance gating, and audit trail for上市企业生产�
 """
 
 __module_meta__ = {
-    "id": "lifecycle-policy",
-    "name": "Lifecycle Policy",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "resource_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource_type", "type": "string", "required": True, "description": ""},
-        {"name": "policy_id", "type": "string", "required": True, "description": ""},
-        {"name": "metadata", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["lifecycle", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Enterprise Lifecycle Policy Manager Production-grade resource lifecycle management with state machines, TTL enforcement,",
-}
+        "id": "lifecycle-policy",
+        "name": "Lifecycle Policy",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "policy_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metadata",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "lifecycle",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Enterprise Lifecycle Policy Manager Production-grade resource lifecycle management with state machines, TTL enforcement,"
+    }
 import time
 import json
 import re

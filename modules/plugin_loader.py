@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "plugin-loader",
-    "name": "Plugin Loader",
-    "version": "V0.1",
-    "group": "plugin",
-    "inputs": [
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "dependencies", "type": "string", "required": True, "description": ""},
-        {"name": "version", "type": "string", "required": True, "description": ""},
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "plugin"],
-    "grade": "A",
-    "description": "Production-grade 插件加载器模块 V0.1 上市公司生产级实现 - 动态加载/依赖解析/生命周期管理/沙箱隔离/版本兼容",
-}
+        "id": "plugin-loader",
+        "name": "Plugin Loader",
+        "version": "V0.1",
+        "group": "plugin",
+        "inputs": [
+            {
+                "name": "plugin_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dependencies",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plugin_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plugin_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "plugin"
+        ],
+        "grade": "A",
+        "description": "Production-grade 插件加载器模块 V0.1 上市公司生产级实现 - 动态加载/依赖解析/生命周期管理/沙箱隔离/版本兼容"
+    }
 import importlib
 import importlib.util
 import logging

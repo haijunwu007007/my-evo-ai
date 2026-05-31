@@ -4,29 +4,73 @@
 """
 
 __module_meta__ = {
-    "id": "data-archival",
-    "name": "Data Archival",
-    "version": "V0.1",
-    "group": "data",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "default", "type": "string", "required": True, "description": ""},
-        {"name": "tokens", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["data"],
-    "grade": "A",
-    "description": "Data Archival Module - 企业级数据归档管理模块 生产级实现：归档策略引擎、生命周期管理、冷热分层、压缩加密、合规保留",
-}
+        "id": "data-archival",
+        "name": "Data Archival",
+        "version": "V0.1",
+        "group": "data",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "default",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tokens",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "data"
+        ],
+        "grade": "A",
+        "description": "Data Archival Module - 企业级数据归档管理模块 生产级实现：归档策略引擎、生命周期管理、冷热分层、压缩加密、合规保留"
+    }
 import time, json, hashlib, os, shutil, gzip, threading
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple

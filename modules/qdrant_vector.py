@@ -5,29 +5,76 @@ AUTO-EVO-AI V0.1 — Qdrant 向量数据库管理模块
 """
 
 __module_meta__ = {
-    "id": "qdrant-vector",
-    "name": "Qdrant Vector",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "default_model", "type": "string", "required": True, "description": ""},
-        {"name": "dimensions", "type": "string", "required": True, "description": ""},
-        {"name": "vector", "type": "string", "required": True, "description": ""},
-        {"name": "a", "type": "string", "required": True, "description": ""},
-        {"name": "b", "type": "string", "required": True, "description": ""},
-        {"name": "a", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "engine", "qdrant", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Qdrant 向量数据库管理模块 生产级实现：企业级向量存储、索引管理、混合检索、集群同步",
-}
+        "id": "qdrant-vector",
+        "name": "Qdrant Vector",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "default_model",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dimensions",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "vector",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "a_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "engine",
+            "qdrant",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Qdrant 向量数据库管理模块 生产级实现：企业级向量存储、索引管理、混合检索、集群同步"
+    }
 
 import asyncio
 import hashlib

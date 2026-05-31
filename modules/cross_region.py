@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 基础设施
 """
 
 __module_meta__ = {
-    "id": "cross-region",
-    "name": "Cross Region",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "from_region", "type": "string", "required": True, "description": ""},
-        {"name": "to_region", "type": "string", "required": True, "description": ""},
-        {"name": "source_region", "type": "string", "required": True, "description": ""},
-        {"name": "target_region", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cross", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 跨区域管理 Grade: A (生产级) | Category: 基础设施",
-}
+        "id": "cross-region",
+        "name": "Cross Region",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "from_region",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "to_region",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_region",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_region",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cross",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 跨区域管理 Grade: A (生产级) | Category: 基础设施"
+    }
 
 import os
 import time

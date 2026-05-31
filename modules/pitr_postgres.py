@@ -4,29 +4,75 @@
 """
 
 __module_meta__ = {
-    "id": "pitr-postgres",
-    "name": "Pitr Postgres",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "max_segments", "type": "string", "required": True, "description": ""},
-        {"name": "segment_name", "type": "string", "required": True, "description": ""},
-        {"name": "size_mb", "type": "string", "required": True, "description": ""},
-        {"name": "segment_name", "type": "string", "required": True, "description": ""},
-        {"name": "start_ts", "type": "string", "required": True, "description": ""},
-        {"name": "end_ts", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["pitr", "engine", "manager"],
-    "grade": "A",
-    "description": "Production-grade PITR PostgreSQL模块 V0.1 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理",
-}
+        "id": "pitr-postgres",
+        "name": "Pitr Postgres",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "max_segments",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "segment_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "size_mb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "segment_name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "start_ts",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "end_ts",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "pitr",
+            "engine",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade PITR PostgreSQL模块 V0.1 上市公司生产级实现 - 时间点恢复/WAL归档/备份策略/恢复演练/保留管理"
+    }
 import logging
 import time
 import uuid

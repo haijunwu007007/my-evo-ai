@@ -12,29 +12,75 @@ AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台
 """
 
 __module_meta__ = {
-    "id": "chaos-engineering",
-    "name": "Chaos Engineering",
-    "version": "V0.1",
-    "group": "chaos",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "experiment_id", "type": "string", "required": True, "description": ""},
-        {"name": "experiment_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["chaos", "engine", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台 ====================================================",
-}
+        "id": "chaos-engineering",
+        "name": "Chaos Engineering",
+        "version": "V0.1",
+        "group": "chaos",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "experiment_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "experiment_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "chaos",
+            "engine",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - ChaosEngineering 混沌工程实践平台 ===================================================="
+    }
 
 import os
 import sys

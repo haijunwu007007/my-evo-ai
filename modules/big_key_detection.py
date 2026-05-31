@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 性能监控
 """
 
 __module_meta__ = {
-    "id": "big-key-detection",
-    "name": "Big Key Detection",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "data_type", "type": "string", "required": True, "description": ""},
-        {"name": "size", "type": "string", "required": True, "description": ""},
-        {"name": "access_freq", "type": "string", "required": True, "description": ""},
-        {"name": "history", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "big", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 大Key检测模块 Grade: A (生产级) | Category: 性能监控",
-}
+        "id": "big-key-detection",
+        "name": "Big Key Detection",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "access_freq",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "history",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "big",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 大Key检测模块 Grade: A (生产级) | Category: 性能监控"
+    }
 
 import os
 import asyncio

@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "ddos-protection",
-    "name": "Ddos Protection",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "window_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "max_track", "type": "string", "required": True, "description": ""},
-        {"name": "ip", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "method", "type": "string", "required": True, "description": ""},
-        {"name": "protocol", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["ddos", "engine"],
-    "grade": "A",
-    "description": "Production-grade DDoS防护模块 V0.1 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解",
-}
+        "id": "ddos-protection",
+        "name": "Ddos Protection",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "window_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_track",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ip",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "method",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "protocol",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "ddos",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "Production-grade DDoS防护模块 V0.1 上市公司生产级实现 - 流量分析/速率限制/IP信誉/协议分析/自动缓解"
+    }
 import logging
 import math
 import time

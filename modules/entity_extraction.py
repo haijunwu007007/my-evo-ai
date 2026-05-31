@@ -4,29 +4,73 @@ NER entity extraction, pattern matching, dictionary-based extraction, entity lin
 """
 
 __module_meta__ = {
-    "id": "entity-extraction",
-    "name": "Entity Extraction",
-    "version": "V0.1",
-    "group": "ai",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["entity"],
-    "grade": "A",
-    "description": "Production-grade module: 实体抽取引擎 NER entity extraction, pattern matching, dictionary-based extraction, entity linking, relation extraction.",
-}
+        "id": "entity-extraction",
+        "name": "Entity Extraction",
+        "version": "V0.1",
+        "group": "ai",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "entity"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 实体抽取引擎 NER entity extraction, pattern matching, dictionary-based extraction, entity linking, relation extraction."
+    }
 import hashlib
 import logging
 import re

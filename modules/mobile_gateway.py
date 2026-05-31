@@ -6,29 +6,75 @@ API versioning, rate limiting, and offline sync support.
 """
 
 __module_meta__ = {
-    "id": "mobile-gateway",
-    "name": "Mobile Gateway",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["provider", "mobile", "gateway"],
-    "grade": "A",
-    "description": "Mobile Gateway Module - Enterprise Production Grade Mobile API gateway with device management, push notifications,",
-}
+        "id": "mobile-gateway",
+        "name": "Mobile Gateway",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "provider",
+            "mobile",
+            "gateway"
+        ],
+        "grade": "A",
+        "description": "Mobile Gateway Module - Enterprise Production Grade Mobile API gateway with device management, push notifications,"
+    }
 
 import hashlib
 import json

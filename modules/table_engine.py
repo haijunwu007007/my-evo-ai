@@ -9,29 +9,74 @@ AUTO-EVO-AI V0.1 — Table Engine
 """
 
 __module_meta__ = {
-    "id": "table-engine",
-    "name": "Table Engine",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "table_id", "type": "string", "required": True, "description": ""},
-        {"name": "columns", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "selection", "type": "string", "required": True, "description": ""},
-        {"name": "table_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "table"],
-    "grade": "A",
-    "description": "表格引擎 — 生产级A级模块 虚拟滚动、排序/筛选/分页、列固定、行选择、单元格编辑、导出、树形表格",
-}
+        "id": "table-engine",
+        "name": "Table Engine",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "table_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "columns",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "selection",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "table_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "table"
+        ],
+        "grade": "A",
+        "description": "表格引擎 — 生产级A级模块 虚拟滚动、排序/筛选/分页、列固定、行选择、单元格编辑、导出、树形表格"
+    }
 
 import csv
 import io

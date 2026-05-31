@@ -12,29 +12,74 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "rule-engine",
-    "name": "Rule Engine",
-    "version": "V0.1",
-    "group": "workflow",
-    "inputs": [
-        {"name": "facts", "type": "string", "required": True, "description": ""},
-        {"name": "facts", "type": "string", "required": True, "description": ""},
-        {"name": "facts", "type": "string", "required": True, "description": ""},
-        {"name": "field_path", "type": "string", "required": True, "description": ""},
-        {"name": "a", "type": "string", "required": True, "description": ""},
-        {"name": "b", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["rule", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - RuleEngine 规则引擎 ======================================",
-}
+        "id": "rule-engine",
+        "name": "Rule Engine",
+        "version": "V0.1",
+        "group": "workflow",
+        "inputs": [
+            {
+                "name": "facts",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "facts_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "facts_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "field_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "rule",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - RuleEngine 规则引擎 ======================================"
+    }
 
 import time
 import asyncio

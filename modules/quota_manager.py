@@ -5,29 +5,76 @@ AUTO-EVO-AI V0.1 — 配额管理模块
 """
 
 __module_meta__ = {
-    "id": "quota-manager",
-    "name": "Quota Manager",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "window_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "precision_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "timestamp", "type": "string", "required": True, "description": ""},
-        {"name": "window_start", "type": "string", "required": True, "description": ""},
-        {"name": "window_end", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "quota", "manager", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 配额管理模块 生产级实现：多维度配额控制、滑动窗口限速、分级告警、自动降级",
-}
+        "id": "quota-manager",
+        "name": "Quota Manager",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "window_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "precision_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "timestamp",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window_start",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window_end",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "quota",
+            "manager",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 配额管理模块 生产级实现：多维度配额控制、滑动窗口限速、分级告警、自动降级"
+    }
 
 import asyncio
 import hashlib

@@ -4,29 +4,76 @@
 """
 
 __module_meta__ = {
-    "id": "rpa-controller",
-    "name": "Rpa Controller",
-    "version": "V0.1",
-    "group": "rpa",
-    "inputs": [
-        {"name": "script_id", "type": "string", "required": True, "description": ""},
-        {"name": "steps", "type": "string", "required": True, "description": ""},
-        {"name": "metadata", "type": "string", "required": True, "description": ""},
-        {"name": "script_id", "type": "string", "required": True, "description": ""},
-        {"name": "from_step", "type": "string", "required": True, "description": ""},
-        {"name": "execution_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "controller", "automation", "rpa"],
-    "grade": "A",
-    "description": "Production-grade RPA机器人控制器模块 V0.1 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度",
-}
+        "id": "rpa-controller",
+        "name": "Rpa Controller",
+        "version": "V0.1",
+        "group": "rpa",
+        "inputs": [
+            {
+                "name": "script_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "steps",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metadata",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "script_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "from_step",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "execution_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "controller",
+            "automation",
+            "rpa"
+        ],
+        "grade": "A",
+        "description": "Production-grade RPA机器人控制器模块 V0.1 上市公司生产级实现 - 浏览器自动化/桌面自动化/任务编排/录放管理/资源调度"
+    }
 import hashlib
 import logging
 import re

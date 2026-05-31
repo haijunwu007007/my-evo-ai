@@ -7,29 +7,75 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 __module_meta__ = {
-    "id": "code-generator",
-    "name": "Code Generator",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["code", "developer", "adapter"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 智能代码生成器 Grade: A (生产级) | Category: 工具链",
-}
+        "id": "code-generator",
+        "name": "Code Generator",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "code",
+            "developer",
+            "adapter"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 智能代码生成器 Grade: A (生产级) | Category: 工具链"
+    }
 
 import asyncio
 import time

@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "pinecone-managed",
-    "name": "Pinecone Managed",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "default_dim", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "dimension", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "replicas", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "pinecone"],
-    "grade": "A",
-    "description": "Production-grade Pinecone托管向量库模块 V0.1 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标",
-}
+        "id": "pinecone-managed",
+        "name": "Pinecone Managed",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "default_dim",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dimension",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "replicas",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "pinecone"
+        ],
+        "grade": "A",
+        "description": "Production-grade Pinecone托管向量库模块 V0.1 上市公司生产级实现 - 索引管理/向量CRUD/命名空间/过滤搜索/批量操作/指标"
+    }
 import hashlib
 import logging
 import math

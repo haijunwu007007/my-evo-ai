@@ -4,29 +4,73 @@
 """
 
 __module_meta__ = {
-    "id": "pii-detection",
-    "name": "Pii Detection",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "regex", "type": "string", "required": True, "description": ""},
-        {"name": "category", "type": "string", "required": True, "description": ""},
-        {"name": "severity", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["pii"],
-    "grade": "A",
-    "description": "Production-grade PII检测模块 V0.1 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务",
-}
+        "id": "pii-detection",
+        "name": "Pii Detection",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "regex",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "severity",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "pii"
+        ],
+        "grade": "A",
+        "description": "Production-grade PII检测模块 V0.1 上市公司生产级实现 - 多类型PII识别/正则+规则引擎/数据脱敏/合规报告/扫描任务"
+    }
 import logging
 import re
 import time

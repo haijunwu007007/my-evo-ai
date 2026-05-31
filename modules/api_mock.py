@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: API基础设施
 """
 
 __module_meta__ = {
-    "id": "api-mock",
-    "name": "Api Mock",
-    "version": "V0.1",
-    "group": "api",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "method", "type": "string", "required": True, "description": ""},
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "headers", "type": "string", "required": True, "description": ""},
-        {"name": "file_path", "type": "string", "required": True, "description": ""},
-        {"name": "format", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_mock", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["api", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — API Mock服务 Grade: A (生产级) | Category: API基础设施",
-}
+        "id": "api-mock",
+        "name": "Api Mock",
+        "version": "V0.1",
+        "group": "api",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "method",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "headers",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "file_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/api_mock",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "api",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — API Mock服务 Grade: A (生产级) | Category: API基础设施"
+    }
 
 import os
 import asyncio

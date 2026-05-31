@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 网络基础
 """
 
 __module_meta__ = {
-    "id": "client-pool",
-    "name": "Client Pool",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "pool_name", "type": "string", "required": True, "description": ""},
-        {"name": "cfg", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "client", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 客户端连接池管理模块 Grade: A (生产级) | Category: 网络基础",
-}
+        "id": "client-pool",
+        "name": "Client Pool",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "pool_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cfg",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "client",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 客户端连接池管理模块 Grade: A (生产级) | Category: 网络基础"
+    }
 
 import asyncio
 import time

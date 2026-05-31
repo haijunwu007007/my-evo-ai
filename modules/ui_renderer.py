@@ -9,29 +9,74 @@ UI渲染引擎 — 生产级A级模块
 """
 
 __module_meta__ = {
-    "id": "ui-renderer",
-    "name": "Ui Renderer",
-    "version": "V0.1",
-    "group": "ui",
-    "inputs": [
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "ui"],
-    "grade": "A",
-    "description": "UI渲染引擎 — 生产级A级模块 支持模板渲染、SSR/CSR双模式、布局系统、主题引擎、国际化、缓存",
-}
+        "id": "ui-renderer",
+        "name": "Ui Renderer",
+        "version": "V0.1",
+        "group": "ui",
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "ui"
+        ],
+        "grade": "A",
+        "description": "UI渲染引擎 — 生产级A级模块 支持模板渲染、SSR/CSR双模式、布局系统、主题引擎、国际化、缓存"
+    }
 
 import re
 import asyncio

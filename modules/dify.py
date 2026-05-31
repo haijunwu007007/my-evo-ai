@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: AI集成
 """
 
 __module_meta__ = {
-    "id": "dify",
-    "name": "Dify",
-    "version": "V0.1",
-    "group": "nocode",
-    "inputs": [
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "workflow_id", "type": "string", "required": True, "description": ""},
-        {"name": "status", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["dify", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Dify LLM应用平台集成模块 Grade: A (生产级) | Category: AI集成",
-}
+        "id": "dify",
+        "name": "Dify",
+        "version": "V0.1",
+        "group": "nocode",
+        "inputs": [
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "workflow_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "dify",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Dify LLM应用平台集成模块 Grade: A (生产级) | Category: AI集成"
+    }
 
 import os
 import asyncio

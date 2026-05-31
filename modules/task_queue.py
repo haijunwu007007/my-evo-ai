@@ -5,29 +5,81 @@ Grade: A (生产级) | Category: 工作流
 """
 
 __module_meta__ = {
-    "id": "task-queue",
-    "name": "Task Queue",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-        {"name": "priority", "type": "string", "required": True, "description": ""},
-        {"name": "delay_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "dependencies", "type": "string", "required": True, "description": ""},
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "task_queue.trigger"}}],
-    "depends_on": [],
-    "tags": ["engine", "task"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 任务队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
-}
+        "id": "task-queue",
+        "name": "Task Queue",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "task_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "priority",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "delay_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dependencies",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "task_queue.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "task"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 任务队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流"
+    }
 
 import os
 import heapq

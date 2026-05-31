@@ -5,29 +5,73 @@ Grade: A (生产级) | Category: 数据质量
 """
 
 __module_meta__ = {
-    "id": "data-validator",
-    "name": "Data Validator",
-    "version": "V0.1",
-    "group": "data",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "ruleset", "type": "string", "required": True, "description": ""},
-        {"name": "record", "type": "string", "required": True, "description": ""},
-        {"name": "rules", "type": "string", "required": True, "description": ""},
-        {"name": "rule", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["data"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 数据验证器 Grade: A (生产级) | Category: 数据质量",
-}
+        "id": "data-validator",
+        "name": "Data Validator",
+        "version": "V0.1",
+        "group": "data",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ruleset",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "record",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rules",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rule",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "data"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 数据验证器 Grade: A (生产级) | Category: 数据质量"
+    }
 
 import os
 import asyncio

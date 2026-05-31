@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 高可用
 """
 
 __module_meta__ = {
-    "id": "auto-failover",
-    "name": "Auto Failover",
-    "version": "V0.1",
-    "group": "resilience",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "node_id", "type": "string", "required": True, "description": ""},
-        {"name": "health", "type": "string", "required": True, "description": ""},
-        {"name": "from_node", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "auto"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 自动故障转移 Grade: A (生产级) | Category: 高可用",
-}
+        "id": "auto-failover",
+        "name": "Auto Failover",
+        "version": "V0.1",
+        "group": "resilience",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "health",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "from_node",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "auto"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 自动故障转移 Grade: A (生产级) | Category: 高可用"
+    }
 
 import os
 import asyncio

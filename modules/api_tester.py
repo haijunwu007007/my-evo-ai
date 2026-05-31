@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: 测试基础设施
 """
 
 __module_meta__ = {
-    "id": "api-tester",
-    "name": "Api Tester",
-    "version": "V0.1",
-    "group": "api",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "test_id", "type": "string", "required": True, "description": ""},
-        {"name": "suite_id", "type": "string", "required": True, "description": ""},
-        {"name": "baseline_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_tester", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["api", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — API测试器 Grade: A (生产级) | Category: 测试基础设施",
-}
+        "id": "api-tester",
+        "name": "Api Tester",
+        "version": "V0.1",
+        "group": "api",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "test_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "suite_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "baseline_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/api_tester",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "api",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — API测试器 Grade: A (生产级) | Category: 测试基础设施"
+    }
 
 import os
 import asyncio

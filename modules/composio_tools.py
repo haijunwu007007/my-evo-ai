@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 开源生态
 """
 
 __module_meta__ = {
-    "id": "composio-tools",
-    "name": "Composio Tools",
-    "version": "V0.1",
-    "group": "plugin",
-    "inputs": [
-        {"name": "tool", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "tools", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "composio", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Composio工具集成管理器 Grade: A (生产级) | Category: 开源生态",
-}
+        "id": "composio-tools",
+        "name": "Composio Tools",
+        "version": "V0.1",
+        "group": "plugin",
+        "inputs": [
+            {
+                "name": "tool",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tools",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "composio",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Composio工具集成管理器 Grade: A (生产级) | Category: 开源生态"
+    }
 
 import os
 import time

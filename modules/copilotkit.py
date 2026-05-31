@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: AI集成
 """
 
 __module_meta__ = {
-    "id": "copilotkit",
-    "name": "Copilotkit",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "agent_config", "type": "string", "required": True, "description": ""},
-        {"name": "tool_config", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["copilotkit", "manager", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — CopilotKit AI助手集成 Grade: A (生产级) | Category: AI集成",
-}
+        "id": "copilotkit",
+        "name": "Copilotkit",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "agent_config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tool_config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "copilotkit",
+            "manager",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — CopilotKit AI助手集成 Grade: A (生产级) | Category: AI集成"
+    }
 
 import os
 import time

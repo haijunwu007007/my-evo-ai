@@ -19,32 +19,88 @@ AUTO-EVO-AI V0.1 - Cronus 智能体模块
 """
 
 __module_meta__ = {
-    "id": "agent-cronus",
-    "name": "Agent Cronus",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "expr", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "field_name", "type": "string", "required": True, "description": ""},
-        {"name": "dt", "type": "string", "required": True, "description": ""},
-        {"name": "pattern", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 0 * * *"}},
-        {"type": "event", "config": {"on": "agent_cronus.task.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["manager", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Cronus 智能体模块 =====================================",
-}
+        "id": "agent-cronus",
+        "name": "Agent Cronus",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "expr",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "field_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "dt",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pattern",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_cronus.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Cronus 智能体模块 ====================================="
+    }
 
 import time
 import hashlib

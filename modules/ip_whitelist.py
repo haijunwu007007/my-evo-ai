@@ -5,29 +5,74 @@ IP Whitelist Manager — 企业级IP白名单策略引擎
 """
 
 __module_meta__ = {
-    "id": "ip-whitelist",
-    "name": "Ip Whitelist",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["ip", "manager"],
-    "grade": "A",
-    "description": "IP Whitelist Manager — 企业级IP白名单策略引擎 生产级实现：白名单CRUD、CIDR解析、通配符匹配、标签分组、过期管理、审计日志",
-}
+        "id": "ip-whitelist",
+        "name": "Ip Whitelist",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "ip",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "IP Whitelist Manager — 企业级IP白名单策略引擎 生产级实现：白名单CRUD、CIDR解析、通配符匹配、标签分组、过期管理、审计日志"
+    }
 
 import time
 import fnmatch

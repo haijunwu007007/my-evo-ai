@@ -6,32 +6,87 @@ disk I/O, network stats, memory analysis, alerting, and historical metrics for�
 """
 
 __module_meta__ = {
-    "id": "local-monitor",
-    "name": "Local Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "local_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["monitor", "local"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Enterprise Local Resource Monitor Production-grade local system resource monitoring with process tracking,",
-}
+        "id": "local-monitor",
+        "name": "Local Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "local_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "monitor",
+            "local"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Enterprise Local Resource Monitor Production-grade local system resource monitoring with process tracking,"
+    }
 
 import time
 import os

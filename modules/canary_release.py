@@ -4,29 +4,75 @@ AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production)
 """
 
 __module_meta__ = {
-    "id": "canary-release",
-    "name": "Canary Release",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "canary_id", "type": "string", "required": True, "description": ""},
-        {"name": "canary_pct", "type": "string", "required": True, "description": ""},
-        {"name": "total_pct", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "canary_id", "type": "string", "required": True, "description": ""},
-        {"name": "canary_pct", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "canary", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production) 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚",
-}
+        "id": "canary-release",
+        "name": "Canary Release",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "canary_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "canary_pct",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "total_pct",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "canary_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "canary_pct_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "canary",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 - Canary Release Module (Grade: A Production) 金丝雀发布：渐进式发布、流量分配、指标监控、自动回滚"
+    }
 
 import os
 import asyncio

@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "supermemory",
-    "name": "Supermemory",
-    "version": "V0.1",
-    "group": "memory",
-    "inputs": [
-        {"name": "memory_id", "type": "string", "required": True, "description": ""},
-        {"name": "embedding", "type": "string", "required": True, "description": ""},
-        {"name": "query_vector", "type": "string", "required": True, "description": ""},
-        {"name": "top_k", "type": "string", "required": True, "description": ""},
-        {"name": "threshold", "type": "string", "required": True, "description": ""},
-        {"name": "query_vector", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "supermemory"],
-    "grade": "A",
-    "description": "Production-grade 超级记忆引擎模块 V0.1 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计",
-}
+        "id": "supermemory",
+        "name": "Supermemory",
+        "version": "V0.1",
+        "group": "memory",
+        "inputs": [
+            {
+                "name": "memory_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "embedding",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query_vector",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "top_k",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query_vector_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "supermemory"
+        ],
+        "grade": "A",
+        "description": "Production-grade 超级记忆引擎模块 V0.1 上市公司生产级实现 - 多模态记忆存储/语义检索/自动标签/关联图谱/遗忘策略/记忆审计"
+    }
 import hashlib
 import logging
 import math

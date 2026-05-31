@@ -7,29 +7,74 @@ output_formatter — 企业级输出格式化引擎
 """
 
 __module_meta__ = {
-    "id": "output-formatter",
-    "name": "Output Formatter",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "transform", "type": "string", "required": True, "description": ""},
-        {"name": "format_str", "type": "string", "required": True, "description": ""},
-        {"name": "size", "type": "string", "required": True, "description": ""},
-        {"name": "template", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "output"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | Enterprise Module output_formatter — 企业级输出格式化引擎",
-}
+        "id": "output-formatter",
+        "name": "Output Formatter",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "transform",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_str",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "template",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "output"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | Enterprise Module output_formatter — 企业级输出格式化引擎"
+    }
 
 import json
 import csv

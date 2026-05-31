@@ -5,29 +5,74 @@ autoskills.py - 自动技能管理模块
 """
 
 __module_meta__ = {
-    "id": "autoskills",
-    "name": "Autoskills",
-    "version": "V0.1",
-    "group": "skills",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "autoskills"],
-    "grade": "A",
-    "description": "autoskills.py - 自动技能管理模块 上市公司级生产实现 - 技能注册、自动学习、能力评估、技能编排、市场交易",
-}
+        "id": "autoskills",
+        "name": "Autoskills",
+        "version": "V0.1",
+        "group": "skills",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "autoskills"
+        ],
+        "grade": "A",
+        "description": "autoskills.py - 自动技能管理模块 上市公司级生产实现 - 技能注册、自动学习、能力评估、技能编排、市场交易"
+    }
 
 import asyncio
 import logging

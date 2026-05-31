@@ -5,29 +5,76 @@ Grade: A (生产级) | Category: 监控运维
 """
 
 __module_meta__ = {
-    "id": "log-collector",
-    "name": "Log Collector",
-    "version": "V0.1",
-    "group": "logging",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "regex", "type": "string", "required": True, "description": ""},
-        {"name": "field_name", "type": "string", "required": True, "description": ""},
-        {"name": "extractor_fn", "type": "string", "required": True, "description": ""},
-        {"name": "line", "type": "string", "required": True, "description": ""},
-        {"name": "pattern_name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["logging", "monitor", "log", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 日志采集模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维",
-}
+        "id": "log-collector",
+        "name": "Log Collector",
+        "version": "V0.1",
+        "group": "logging",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "regex",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "field_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "extractor_fn",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "line",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "pattern_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "logging",
+            "monitor",
+            "log",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 日志采集模块（真实业务逻辑） Grade: A (生产级) | Category: 监控运维"
+    }
 
 import os
 import re

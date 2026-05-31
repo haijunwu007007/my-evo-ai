@@ -5,29 +5,73 @@ K8s Orchestrator — 企业级Kubernetes编排管理引擎
 """
 
 __module_meta__ = {
-    "id": "k8s-orch",
-    "name": "K8s Orch",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "s", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["k8s"],
-    "grade": "A",
-    "description": "K8s Orchestrator — 企业级Kubernetes编排管理引擎 生产级实现：Pod/Deployment/Service CRUD、滚动更新、HPA自动伸缩、资源调度、事件审计",
-}
+        "id": "k8s-orch",
+        "name": "K8s Orch",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "s",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "k8s"
+        ],
+        "grade": "A",
+        "description": "K8s Orchestrator — 企业级Kubernetes编排管理引擎 生产级实现：Pod/Deployment/Service CRUD、滚动更新、HPA自动伸缩、资源调度、事件审计"
+    }
 
 import time
 import logging

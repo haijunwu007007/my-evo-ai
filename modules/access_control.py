@@ -13,29 +13,74 @@ AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine)
 """
 
 __module_meta__ = {
-    "id": "access-control",
-    "name": "Access Control",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "other", "type": "string", "required": True, "description": ""},
-        {"name": "role_registry", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "role", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["access", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine) ==========================================================",
-}
+        "id": "access-control",
+        "name": "Access Control",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "other",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "role_registry",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "role",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_3",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "access",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine) =========================================================="
+    }
 
 import time
 import hashlib

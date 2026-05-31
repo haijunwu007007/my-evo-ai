@@ -4,32 +4,87 @@ Evolution monitoring, fitness tracking, generation analysis, convergence detecti
 """
 
 __module_meta__ = {
-    "id": "evo-monitor",
-    "name": "Evo Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "evo_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["evo", "monitor"],
-    "grade": "A",
-    "description": "Production-grade module: 进化监控 Evolution monitoring, fitness tracking, generation analysis, convergence detection, diversity metrics.",
-}
+        "id": "evo-monitor",
+        "name": "Evo Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "evo_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "evo",
+            "monitor"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 进化监控 Evolution monitoring, fitness tracking, generation analysis, convergence detection, diversity metrics."
+    }
 import hashlib
 import logging
 import math

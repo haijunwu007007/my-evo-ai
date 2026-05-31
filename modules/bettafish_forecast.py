@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 数据分析
 """
 
 __module_meta__ = {
-    "id": "bettafish-forecast",
-    "name": "Bettafish Forecast",
-    "version": "V0.1",
-    "group": "finance",
-    "inputs": [
-        {"name": "data_points", "type": "string", "required": True, "description": ""},
-        {"name": "horizon", "type": "string", "required": True, "description": ""},
-        {"name": "seasonality", "type": "string", "required": True, "description": ""},
-        {"name": "actual", "type": "string", "required": True, "description": ""},
-        {"name": "predicted", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["bettafish", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Bettafish预测分析模块 Grade: A (生产级) | Category: 数据分析",
-}
+        "id": "bettafish-forecast",
+        "name": "Bettafish Forecast",
+        "version": "V0.1",
+        "group": "finance",
+        "inputs": [
+            {
+                "name": "data_points",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "horizon",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "seasonality",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "actual",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "predicted",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "bettafish",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Bettafish预测分析模块 Grade: A (生产级) | Category: 数据分析"
+    }
 
 import os
 import asyncio

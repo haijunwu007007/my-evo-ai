@@ -5,29 +5,82 @@ backup_checksum.py - 备份校验模块
 """
 
 __module_meta__ = {
-    "id": "backup-checksum",
-    "name": "Backup Checksum",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "algorithm", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["backup", "manager", "resilience"],
-    "grade": "A",
-    "description": "backup_checksum.py - 备份校验模块 上市公司级生产实现 - 完整性校验、哈希验证、差异比较、修复建议",
-}
+        "id": "backup-checksum",
+        "name": "Backup Checksum",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "algorithm",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "backup",
+            "manager",
+            "resilience"
+        ],
+        "grade": "A",
+        "description": "backup_checksum.py - 备份校验模块 上市公司级生产实现 - 完整性校验、哈希验证、差异比较、修复建议"
+    }
 
 import asyncio
 import logging

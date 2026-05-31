@@ -5,29 +5,83 @@ Grade: A (生产级) | Category: API基础设施
 """
 
 __module_meta__ = {
-    "id": "api-cache",
-    "name": "Api Cache",
-    "version": "V0.1",
-    "group": "api",
-    "inputs": [
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-        {"name": "endpoint", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "priority", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "task_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_cache", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["engine", "api", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — API缓存 Grade: A (生产级) | Category: API基础设施",
-}
+        "id": "api-cache",
+        "name": "Api Cache",
+        "version": "V0.1",
+        "group": "api",
+        "inputs": [
+            {
+                "name": "task_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "endpoint",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "priority",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "task_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/api_cache",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "api",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — API缓存 Grade: A (生产级) | Category: API基础设施"
+    }
 
 import os
 import asyncio

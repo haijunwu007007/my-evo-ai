@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: 分布式基础
 """
 
 __module_meta__ = {
-    "id": "coordination",
-    "name": "Coordination",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "lock_key", "type": "string", "required": True, "description": ""},
-        {"name": "service_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "ttl_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "owner", "type": "string", "required": True, "description": ""},
-        {"name": "group", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["coordination", "service", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 分布式协调服务 Grade: A (生产级) | Category: 分布式基础",
-}
+        "id": "coordination",
+        "name": "Coordination",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "lock_key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ttl_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "owner",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "group",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "coordination",
+            "service",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 分布式协调服务 Grade: A (生产级) | Category: 分布式基础"
+    }
 
 import os
 import time

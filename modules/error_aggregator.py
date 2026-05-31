@@ -4,29 +4,73 @@ Error collection, aggregation, deduplication, root cause analysis, trend trackin
 """
 
 __module_meta__ = {
-    "id": "error-aggregator",
-    "name": "Error Aggregator",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "message", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["error"],
-    "grade": "A",
-    "description": "Production-grade module: 错误聚合分析 Error collection, aggregation, deduplication, root cause analysis, trend tracking, alerting.",
-}
+        "id": "error-aggregator",
+        "name": "Error Aggregator",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "error"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 错误聚合分析 Error collection, aggregation, deduplication, root cause analysis, trend tracking, alerting."
+    }
 import hashlib
 import logging
 import time

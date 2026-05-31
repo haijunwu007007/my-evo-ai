@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "point-time-recover",
-    "name": "Point Time Recover",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "max_snapshots", "type": "string", "required": True, "description": ""},
-        {"name": "max_age_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "label", "type": "string", "required": True, "description": ""},
-        {"name": "tags", "type": "string", "required": True, "description": ""},
-        {"name": "snap_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["point", "manager"],
-    "grade": "A",
-    "description": "Production-grade 时间点数据恢复模块 V0.1 上市公司生产级实现 - 快照管理/时间线追踪/数据版本/差异恢复/验证对比",
-}
+        "id": "point-time-recover",
+        "name": "Point Time Recover",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "max_snapshots",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_age_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "label",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tags",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "snap_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "point",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade 时间点数据恢复模块 V0.1 上市公司生产级实现 - 快照管理/时间线追踪/数据版本/差异恢复/验证对比"
+    }
 import copy
 import hashlib
 import logging

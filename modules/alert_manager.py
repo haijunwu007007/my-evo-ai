@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "alert-manager",
-    "name": "Alert Manager",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "dedup_window", "type": "string", "required": True, "description": ""},
-        {"name": "alert", "type": "string", "required": True, "description": ""},
-        {"name": "alert", "type": "string", "required": True, "description": ""},
-        {"name": "category", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["alert", "manager"],
-    "grade": "A",
-    "description": "Production-grade 告警中心模块 V0.1 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理",
-}
+        "id": "alert-manager",
+        "name": "Alert Manager",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "dedup_window",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "alert",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "alert_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "alert",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade 告警中心模块 V0.1 上市公司生产级实现 - 多级告警/智能聚合/升级策略/通知分发/静默管理"
+    }
 import logging
 import math
 import time

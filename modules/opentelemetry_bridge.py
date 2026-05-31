@@ -5,29 +5,75 @@ Enterprise OpenTelemetry Bridge Module
 """
 
 __module_meta__ = {
-    "id": "opentelemetry-bridge",
-    "name": "Opentelemetry Bridge",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "status", "type": "string", "required": True, "description": ""},
-        {"name": "message", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "attributes", "type": "string", "required": True, "description": ""},
-        {"name": "trace_id", "type": "string", "required": True, "description": ""},
-        {"name": "span_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["provider", "bridge", "opentelemetry"],
-    "grade": "A",
-    "description": "Enterprise OpenTelemetry Bridge Module 上市公司生产级 - 分布式链路追踪、指标采集、日志关联",
-}
+        "id": "opentelemetry-bridge",
+        "name": "Opentelemetry Bridge",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "status",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "attributes",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "trace_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "span_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "provider",
+            "bridge",
+            "opentelemetry"
+        ],
+        "grade": "A",
+        "description": "Enterprise OpenTelemetry Bridge Module 上市公司生产级 - 分布式链路追踪、指标采集、日志关联"
+    }
 import threading
 import time
 import uuid

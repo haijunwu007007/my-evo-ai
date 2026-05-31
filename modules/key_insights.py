@@ -12,29 +12,74 @@ AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎
 """
 
 __module_meta__ = {
-    "id": "key-insights",
-    "name": "Key Insights",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "db_path", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "series_a", "type": "string", "required": True, "description": ""},
-        {"name": "series_b", "type": "string", "required": True, "description": ""},
-        {"name": "time_series", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "key"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎 上市公司级 A级模块，提供多维数据分析与洞察提取能力：",
-}
+        "id": "key-insights",
+        "name": "Key Insights",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "db_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "series_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "series_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "time_series",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "key"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — KeyInsights 关键洞察分析引擎 上市公司级 A级模块，提供多维数据分析与洞察提取能力："
+    }
 
 import os
 import time

@@ -4,29 +4,73 @@ Atomic counters with TTL, rate limiting, sliding window, and consistent hashing.
 """
 
 __module_meta__ = {
-    "id": "distributed-counter",
-    "name": "Distributed Counter",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "count", "type": "string", "required": True, "description": ""},
-        {"name": "node_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["distributed"],
-    "grade": "A",
-    "description": "Production-grade module: 分布式计数器 Atomic counters with TTL, rate limiting, sliding window, and consistent hashing.",
-}
+        "id": "distributed-counter",
+        "name": "Distributed Counter",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "count",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "distributed"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 分布式计数器 Atomic counters with TTL, rate limiting, sliding window, and consistent hashing."
+    }
 import hashlib
 import logging
 import threading

@@ -21,29 +21,81 @@ AUTO-EVO-AI V0.1 | 增量备份引擎
 """
 
 __module_meta__ = {
-    "id": "incremental-backup",
-    "name": "Incremental Backup",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "path", "type": "string", "required": True, "description": ""},
-        {"name": "file_path", "type": "string", "required": True, "description": ""},
-        {"name": "block_size", "type": "string", "required": True, "description": ""},
-        {"name": "old", "type": "string", "required": True, "description": ""},
-        {"name": "new", "type": "string", "required": True, "description": ""},
-        {"name": "backup_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["incremental", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 增量备份引擎 企业级增量备份系统 - 基于文件变更检测的增量备份与恢复",
-}
+        "id": "incremental-backup",
+        "name": "Incremental Backup",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "file_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "block_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "old",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "new",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "backup_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "incremental",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 增量备份引擎 企业级增量备份系统 - 基于文件变更检测的增量备份与恢复"
+    }
 
 import os
 import sys

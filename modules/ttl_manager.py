@@ -5,29 +5,74 @@
 """
 
 __module_meta__ = {
-    "id": "ttl-manager",
-    "name": "Ttl Manager",
-    "version": "V0.1",
-    "group": "storage",
-    "inputs": [
-        {"name": "default_ttl_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "ttl", "type": "string", "required": True, "description": ""},
-        {"name": "policy", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["ttl", "manager"],
-    "grade": "A",
-    "description": "Production-grade module: TTL过期管理器 企业级TTL生命周期引擎 - 管理缓存/会话/临时文件/验证码等资源的自动过期。",
-}
+        "id": "ttl-manager",
+        "name": "Ttl Manager",
+        "version": "V0.1",
+        "group": "storage",
+        "inputs": [
+            {
+                "name": "default_ttl_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ttl",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "policy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "ttl",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: TTL过期管理器 企业级TTL生命周期引擎 - 管理缓存/会话/临时文件/验证码等资源的自动过期。"
+    }
 import heapq
 import logging
 import time

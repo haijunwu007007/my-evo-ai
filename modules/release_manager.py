@@ -13,29 +13,74 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "release-manager",
-    "name": "Release Manager",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "version_str", "type": "string", "required": True, "description": ""},
-        {"name": "bump_type", "type": "string", "required": True, "description": ""},
-        {"name": "other", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "release"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器 ============================================",
-}
+        "id": "release-manager",
+        "name": "Release Manager",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "version_str",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "bump_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "other",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "release"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器 ============================================"
+    }
 
 import time
 import asyncio

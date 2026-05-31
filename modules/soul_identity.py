@@ -12,29 +12,74 @@ Token效率优化：每次请求仅注入约400 tokens。
 """
 
 __module_meta__ = {
-    "id": "soul-identity",
-    "name": "Soul Identity",
-    "version": "V0.1",
-    "group": "memory",
-    "inputs": [
-        {"name": "soul_name", "type": "string", "required": True, "description": ""},
-        {"name": "soul_dir", "type": "string", "required": True, "description": ""},
-        {"name": "default_soul", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "soul_name", "type": "string", "required": True, "description": ""},
-        {"name": "filename", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["identity", "soul"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统",
-}
+        "id": "soul-identity",
+        "name": "Soul Identity",
+        "version": "V0.1",
+        "group": "memory",
+        "inputs": [
+            {
+                "name": "soul_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "soul_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "default_soul",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "soul_name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "filename",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "identity",
+            "soul"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Soul Identity Module 基于 Mercury Agent 的 Soul-Driven 身份系统"
+    }
 
 import os
 import re

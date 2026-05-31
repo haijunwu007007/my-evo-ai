@@ -5,29 +5,73 @@ AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块
 """
 
 __module_meta__ = {
-    "id": "windows-control",
-    "name": "Windows Control",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["windows"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块 基于pywinauto封装，实现控件级精准操作（对标OpenClaw系统级操作）",
-}
+        "id": "windows-control",
+        "name": "Windows Control",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "windows"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - m32 Windows原生控件操作模块 基于pywinauto封装，实现控件级精准操作（对标OpenClaw系统级操作）"
+    }
 import time, logging, os
 from typing import Optional, List, Dict, Any, Tuple
 from dataclasses import dataclass, field

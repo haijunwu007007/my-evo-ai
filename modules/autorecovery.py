@@ -5,29 +5,74 @@ autorecovery.py - 自动恢复管理模块
 """
 
 __module_meta__ = {
-    "id": "autorecovery",
-    "name": "Autorecovery",
-    "version": "V0.1",
-    "group": "resilience",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "service_id", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["autorecovery", "manager"],
-    "grade": "A",
-    "description": "autorecovery.py - 自动恢复管理模块 上市公司级生产实现 - 支持服务恢复、状态重建、断点续传、灾后自愈",
-}
+        "id": "autorecovery",
+        "name": "Autorecovery",
+        "version": "V0.1",
+        "group": "resilience",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "service_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "autorecovery",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "autorecovery.py - 自动恢复管理模块 上市公司级生产实现 - 支持服务恢复、状态重建、断点续传、灾后自愈"
+    }
 
 import asyncio
 import logging

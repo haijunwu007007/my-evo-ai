@@ -4,29 +4,75 @@
 """
 
 __module_meta__ = {
-    "id": "registry-center",
-    "name": "Registry Center",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "service_name", "type": "string", "required": True, "description": ""},
-        {"name": "host", "type": "string", "required": True, "description": ""},
-        {"name": "port", "type": "string", "required": True, "description": ""},
-        {"name": "instance_id", "type": "string", "required": True, "description": ""},
-        {"name": "ttl_seconds", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "service", "registry"],
-    "grade": "A",
-    "description": "Production-grade 服务注册中心模块 V0.1 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡",
-}
+        "id": "registry-center",
+        "name": "Registry Center",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "service_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "host",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "port",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "instance_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ttl_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "service",
+            "registry"
+        ],
+        "grade": "A",
+        "description": "Production-grade 服务注册中心模块 V0.1 上市公司生产级实现 - Consul/Etcd/Nacos多注册中心适配/服务发现/健康检查/负载均衡"
+    }
 import hashlib
 import logging
 import random

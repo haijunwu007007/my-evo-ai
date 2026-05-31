@@ -5,29 +5,75 @@ EnterpriseModule implementation with real business logic.
 """
 
 __module_meta__ = {
-    "id": "window-manager",
-    "name": "Window Manager",
-    "version": "V0.1",
-    "group": "rpa",
-    "inputs": [
-        {"name": "windows", "type": "string", "required": True, "description": ""},
-        {"name": "monitor_rect", "type": "string", "required": True, "description": ""},
-        {"name": "windows", "type": "string", "required": True, "description": ""},
-        {"name": "monitor_rect", "type": "string", "required": True, "description": ""},
-        {"name": "windows", "type": "string", "required": True, "description": ""},
-        {"name": "monitors", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "manager", "window"],
-    "grade": "A",
-    "description": "Production-grade module: 窗口管理 EnterpriseModule implementation with real business logic.",
-}
+        "id": "window-manager",
+        "name": "Window Manager",
+        "version": "V0.1",
+        "group": "rpa",
+        "inputs": [
+            {
+                "name": "windows",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "monitor_rect",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "windows_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "monitor_rect_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "windows_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "monitors",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "window"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 窗口管理 EnterpriseModule implementation with real business logic."
+    }
 import logging
 import time
 import uuid

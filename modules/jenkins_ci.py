@@ -5,29 +5,73 @@ CI/CD pipeline management: build, test, deploy, artifacts, stages, triggers
 """
 
 __module_meta__ = {
-    "id": "jenkins-ci",
-    "name": "Jenkins Ci",
-    "version": "V0.1",
-    "group": "devops",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["jenkins"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Jenkins CI/CD Module Grade: A | Category: Deployment & Operations",
-}
+        "id": "jenkins-ci",
+        "name": "Jenkins Ci",
+        "version": "V0.1",
+        "group": "devops",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "jenkins"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Jenkins CI/CD Module Grade: A | Category: Deployment & Operations"
+    }
 import os, time, logging, threading, hashlib, json, re, copy, urllib.request, base64
 from typing import Any, Dict, List, Optional
 from datetime import datetime

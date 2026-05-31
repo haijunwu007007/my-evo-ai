@@ -16,29 +16,74 @@ Enterprise features:
 """
 
 __module_meta__ = {
-    "id": "ragflow",
-    "name": "Ragflow",
-    "version": "V0.1",
-    "group": "ai",
-    "inputs": [
-        {"name": "title", "type": "string", "required": True, "description": ""},
-        {"name": "source_uri", "type": "string", "required": True, "description": ""},
-        {"name": "author", "type": "string", "required": True, "description": ""},
-        {"name": "language", "type": "string", "required": True, "description": ""},
-        {"name": "cls", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "ragflow"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — RAGFlow Document Intelligence Engine ========================================================",
-}
+        "id": "ragflow",
+        "name": "Ragflow",
+        "version": "V0.1",
+        "group": "ai",
+        "inputs": [
+            {
+                "name": "title",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_uri",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "author",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "language",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cls",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "ragflow"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — RAGFlow Document Intelligence Engine ========================================================"
+    }
 
 import asyncio
 import hashlib

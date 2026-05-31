@@ -13,29 +13,73 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "git-ops",
-    "name": "Git Ops",
-    "version": "V0.1",
-    "group": "github",
-    "inputs": [
-        {"name": "commit_hash", "type": "string", "required": True, "description": ""},
-        {"name": "author", "type": "string", "required": True, "description": ""},
-        {"name": "message", "type": "string", "required": True, "description": ""},
-        {"name": "files_changed", "type": "string", "required": True, "description": ""},
-        {"name": "base_branch", "type": "string", "required": True, "description": ""},
-        {"name": "target_branch", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["git"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - GitOps GitOps部署引擎 ========================================",
-}
+        "id": "git-ops",
+        "name": "Git Ops",
+        "version": "V0.1",
+        "group": "github",
+        "inputs": [
+            {
+                "name": "commit_hash",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "author",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "files_changed",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base_branch",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_branch",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "git"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - GitOps GitOps部署引擎 ========================================"
+    }
 import time
 import asyncio
 import json

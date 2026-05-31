@@ -9,29 +9,83 @@ AUTO-EVO-AI V0.1 — Agent Market (智能体市场)
 """
 
 __module_meta__ = {
-    "id": "agent-market",
-    "name": "Agent Market",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "source_code", "type": "string", "required": True, "description": ""},
-        {"name": "skill_name", "type": "string", "required": True, "description": ""},
-        {"name": "skill", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "all_skills", "type": "string", "required": True, "description": ""},
-        {"name": "category", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_market.task.request"}}],
-    "depends_on": [],
-    "tags": ["engine", "manager", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Market (智能体市场) ============================================",
-}
+        "id": "agent-market",
+        "name": "Agent Market",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "source_code",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "skill_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "skill",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "all_skills",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_market.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Market (智能体市场) ============================================"
+    }
 
 import time
 import json

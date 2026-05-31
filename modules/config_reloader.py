@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 配置管理
 """
 
 __module_meta__ = {
-    "id": "config-reloader",
-    "name": "Config Reloader",
-    "version": "V0.1",
-    "group": "config",
-    "inputs": [
-        {"name": "source_id", "type": "string", "required": True, "description": ""},
-        {"name": "d", "type": "string", "required": True, "description": ""},
-        {"name": "old", "type": "string", "required": True, "description": ""},
-        {"name": "new", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-        {"name": "base", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 配置热重载管理器 Grade: A (生产级) | Category: 配置管理",
-}
+        "id": "config-reloader",
+        "name": "Config Reloader",
+        "version": "V0.1",
+        "group": "config",
+        "inputs": [
+            {
+                "name": "source_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "d",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "old",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "new",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "base",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 配置热重载管理器 Grade: A (生产级) | Category: 配置管理"
+    }
 
 import os
 import time

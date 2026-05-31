@@ -17,29 +17,73 @@ A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔�
 """
 
 __module_meta__ = {
-    "id": "resource-server",
-    "name": "Resource Server",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "method", "type": "string", "required": True, "description": ""},
-        {"name": "granted", "type": "string", "required": True, "description": ""},
-        {"name": "top_n", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["resource"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - ResourceServer OAuth2资源服务器 ==================================================",
-}
+        "id": "resource-server",
+        "name": "Resource Server",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "user_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "method",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "granted",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "top_n",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "resource"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - ResourceServer OAuth2资源服务器 =================================================="
+    }
 import time
 import asyncio
 import json

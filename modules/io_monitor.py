@@ -5,32 +5,87 @@ I/O Monitor — 企业级I/O性能监控引擎
 """
 
 __module_meta__ = {
-    "id": "io-monitor",
-    "name": "Io Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "io_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["monitor", "io"],
-    "grade": "A",
-    "description": "I/O Monitor — 企业级I/O性能监控引擎 生产级实现：磁盘/网络I/O监控、瓶颈检测、容量预测、延迟分析、告警规则",
-}
+        "id": "io-monitor",
+        "name": "Io Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "io_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "monitor",
+            "io"
+        ],
+        "grade": "A",
+        "description": "I/O Monitor — 企业级I/O性能监控引擎 生产级实现：磁盘/网络I/O监控、瓶颈检测、容量预测、延迟分析、告警规则"
+    }
 import time
 import logging
 

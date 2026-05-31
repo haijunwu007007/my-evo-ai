@@ -16,29 +16,81 @@ AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现）
 """
 
 __module_meta__ = {
-    "id": "cron-scheduler",
-    "name": "Cron Scheduler",
-    "version": "V0.1",
-    "group": "scheduler",
-    "inputs": [
-        {"name": "interval_str", "type": "string", "required": True, "description": ""},
-        {"name": "cron_expr", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["adapter", "cron"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现） ===============================================",
-}
+        "id": "cron-scheduler",
+        "name": "Cron Scheduler",
+        "version": "V0.1",
+        "group": "scheduler",
+        "inputs": [
+            {
+                "name": "interval_str",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cron_expr",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "cron"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 定时任务调度器（A级生产实现） ==============================================="
+    }
 
 import time
 import asyncio

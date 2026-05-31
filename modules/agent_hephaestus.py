@@ -10,29 +10,83 @@ AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎)
 """
 
 __module_meta__ = {
-    "id": "agent-hephaestus",
-    "name": "Agent Hephaestus",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "cache_dir", "type": "string", "required": True, "description": ""},
-        {"name": "max_cache_size_mb", "type": "string", "required": True, "description": ""},
-        {"name": "project_path", "type": "string", "required": True, "description": ""},
-        {"name": "include_patterns", "type": "string", "required": True, "description": ""},
-        {"name": "cache_key", "type": "string", "required": True, "description": ""},
-        {"name": "cache_key", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_hephaestus.task.request"}}],
-    "depends_on": [],
-    "tags": ["config", "manager", "multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎) ====================================================",
-}
+        "id": "agent-hephaestus",
+        "name": "Agent Hephaestus",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "cache_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_cache_size_mb",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "project_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "include_patterns",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cache_key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cache_key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_hephaestus.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎) ===================================================="
+    }
 
 import os
 import sys

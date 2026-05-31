@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 自愈
 """
 
 __module_meta__ = {
-    "id": "auto-healing",
-    "name": "Auto Healing",
-    "version": "V0.1",
-    "group": "resilience",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "issue", "type": "string", "required": True, "description": ""},
-        {"name": "severity", "type": "string", "required": True, "description": ""},
-        {"name": "target", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "auto"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 自动修复 Grade: A (生产级) | Category: 自愈",
-}
+        "id": "auto-healing",
+        "name": "Auto Healing",
+        "version": "V0.1",
+        "group": "resilience",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "issue",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "severity",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "auto"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 自动修复 Grade: A (生产级) | Category: 自愈"
+    }
 
 import os
 import asyncio

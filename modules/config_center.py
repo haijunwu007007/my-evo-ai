@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 基础设施
 """
 
 __module_meta__ = {
-    "id": "config-center",
-    "name": "Config Center",
-    "version": "V0.1",
-    "group": "config",
-    "inputs": [
-        {"name": "base", "type": "string", "required": True, "description": ""},
-        {"name": "target", "type": "string", "required": True, "description": ""},
-        {"name": "expected", "type": "string", "required": True, "description": ""},
-        {"name": "actual", "type": "string", "required": True, "description": ""},
-        {"name": "environment", "type": "string", "required": True, "description": ""},
-        {"name": "current", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — 配置中心模块（真实业务逻辑） Grade: A (生产级) | Category: 基础设施",
-}
+        "id": "config-center",
+        "name": "Config Center",
+        "version": "V0.1",
+        "group": "config",
+        "inputs": [
+            {
+                "name": "base",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "expected",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "actual",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "environment",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "current",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — 配置中心模块（真实业务逻辑） Grade: A (生产级) | Category: 基础设施"
+    }
 
 import os
 import json

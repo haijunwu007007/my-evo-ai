@@ -22,29 +22,75 @@ AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎
 """
 
 __module_meta__ = {
-    "id": "cli-interface",
-    "name": "Cli Interface",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "color", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-        {"name": "text", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cli", "manager", "engine"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展",
-}
+        "id": "cli-interface",
+        "name": "Cli Interface",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "text",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "color",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "text_5",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "results_2",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cli",
+            "manager",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | CLI交互式命令行接口引擎 企业级命令行交互框架 - 支持命令注册、自动补全、历史记录、权限控制、插件扩展"
+    }
 
 import os
 import sys

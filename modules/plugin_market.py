@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "plugin-market",
-    "name": "Plugin Market",
-    "version": "V0.1",
-    "group": "plugin",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "version", "type": "string", "required": True, "description": ""},
-        {"name": "author", "type": "string", "required": True, "description": ""},
-        {"name": "category", "type": "string", "required": True, "description": ""},
-        {"name": "query", "type": "string", "required": True, "description": ""},
-        {"name": "category", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "plugin"],
-    "grade": "A",
-    "description": "Production-grade 插件市场模块 V0.1 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核",
-}
+        "id": "plugin-market",
+        "name": "Plugin Market",
+        "version": "V0.1",
+        "group": "plugin",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "author",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "query",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "category_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "plugin"
+        ],
+        "grade": "A",
+        "description": "Production-grade 插件市场模块 V0.1 上市公司生产级实现 - 插件注册/搜索/安装/版本管理/评分/依赖检查/发布审核"
+    }
 import hashlib
 import logging
 import time

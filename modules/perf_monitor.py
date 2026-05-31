@@ -4,32 +4,87 @@
 """
 
 __module_meta__ = {
-    "id": "perf-monitor",
-    "name": "Perf Monitor",
-    "version": "V0.1",
-    "group": "monitor",
-    "inputs": [
-        {"name": "history_size", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "timestamp", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [
-        {"type": "schedule", "config": {"cron": "0 */4 * * *"}},
-        {"type": "event", "config": {"on": "perf_monitor.scan.request"}},
-    ],
-    "depends_on": [],
-    "tags": ["perf", "monitor"],
-    "grade": "A",
-    "description": "Production-grade 性能监控模块 V0.1 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算",
-}
+        "id": "perf-monitor",
+        "name": "Perf Monitor",
+        "version": "V0.1",
+        "group": "monitor",
+        "inputs": [
+            {
+                "name": "history_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "timestamp",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metric_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 */4 * * *"
+                }
+            },
+            {
+                "type": "event",
+                "config": {
+                    "on": "perf_monitor.scan.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "perf",
+            "monitor"
+        ],
+        "grade": "A",
+        "description": "Production-grade 性能监控模块 V0.1 上市公司生产级实现 - CPU/内存/磁盘/网络监控/进程分析/瓶颈检测/SLA计算"
+    }
 import logging
 import math
 import time

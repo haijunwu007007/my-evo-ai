@@ -5,29 +5,73 @@ Instant Messaging — 企业级即时通讯引擎
 """
 
 __module_meta__ = {
-    "id": "instant-messaging",
-    "name": "Instant Messaging",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["instant"],
-    "grade": "A",
-    "description": "Instant Messaging — 企业级即时通讯引擎 生产级实现：多租户会话管理、消息持久化、已读回执、@提及、文件传输、消息搜索",
-}
+        "id": "instant-messaging",
+        "name": "Instant Messaging",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "instant"
+        ],
+        "grade": "A",
+        "description": "Instant Messaging — 企业级即时通讯引擎 生产级实现：多租户会话管理、消息持久化、已读回执、@提及、文件传输、消息搜索"
+    }
 import time
 import logging
 import hashlib

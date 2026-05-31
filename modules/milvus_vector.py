@@ -6,29 +6,74 @@ index building, hybrid search, and similarity ranking.
 """
 
 __module_meta__ = {
-    "id": "milvus-vector",
-    "name": "Milvus Vector",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "a", "type": "string", "required": True, "description": ""},
-        {"name": "b", "type": "string", "required": True, "description": ""},
-        {"name": "a", "type": "string", "required": True, "description": ""},
-        {"name": "b", "type": "string", "required": True, "description": ""},
-        {"name": "a", "type": "string", "required": True, "description": ""},
-        {"name": "b", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "milvus"],
-    "grade": "A",
-    "description": "Milvus Vector Module - Enterprise Production Grade Vector database management with collection operations,",
-}
+        "id": "milvus-vector",
+        "name": "Milvus Vector",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "a_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "b_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "a_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "b_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "milvus"
+        ],
+        "grade": "A",
+        "description": "Milvus Vector Module - Enterprise Production Grade Vector database management with collection operations,"
+    }
 
 import logging
 import hashlib

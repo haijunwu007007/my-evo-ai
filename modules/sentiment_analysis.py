@@ -5,29 +5,75 @@ Grade: A (生产级) | Category: AI能力
 """
 
 __module_meta__ = {
-    "id": "sentiment-analysis",
-    "name": "Sentiment Analysis",
-    "version": "V0.1",
-    "group": "ai",
-    "inputs": [
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["adapter", "sentiment", "engine"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 情感分析引擎 Grade: A (生产级) | Category: AI能力",
-}
+        "id": "sentiment-analysis",
+        "name": "Sentiment Analysis",
+        "version": "V0.1",
+        "group": "ai",
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "adapter",
+            "sentiment",
+            "engine"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 情感分析引擎 Grade: A (生产级) | Category: AI能力"
+    }
 
 import os
 import asyncio

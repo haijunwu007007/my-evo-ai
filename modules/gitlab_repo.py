@@ -5,29 +5,73 @@
 """
 
 __module_meta__ = {
-    "id": "gitlab-repo",
-    "name": "Gitlab Repo",
-    "version": "V0.1",
-    "group": "github",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["gitlab"],
-    "grade": "A",
-    "description": "GitLab仓库管理模块 - GitLab Repository Management Service 生产级实现：仓库CRUD、分支管理、MR/PR管理、CI/CD管道、Webhook、权限控制",
-}
+        "id": "gitlab-repo",
+        "name": "Gitlab Repo",
+        "version": "V0.1",
+        "group": "github",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "gitlab"
+        ],
+        "grade": "A",
+        "description": "GitLab仓库管理模块 - GitLab Repository Management Service 生产级实现：仓库CRUD、分支管理、MR/PR管理、CI/CD管道、Webhook、权限控制"
+    }
 import logging
 import time
 import re

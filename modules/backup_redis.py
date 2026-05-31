@@ -5,29 +5,82 @@ backup_redis.py - Redis备份管理模块
 """
 
 __module_meta__ = {
-    "id": "backup-redis",
-    "name": "Backup Redis",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["backup", "manager", "resilience"],
-    "grade": "A",
-    "description": "backup_redis.py - Redis备份管理模块 上市公司级生产实现 - RDB快照、AOF备份、集群备份、恢复验证、定时备份",
-}
+        "id": "backup-redis",
+        "name": "Backup Redis",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p_4",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "backup",
+            "manager",
+            "resilience"
+        ],
+        "grade": "A",
+        "description": "backup_redis.py - Redis备份管理模块 上市公司级生产实现 - RDB快照、AOF备份、集群备份、恢复验证、定时备份"
+    }
 
 import asyncio
 import logging

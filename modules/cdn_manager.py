@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 网络基础设施
 """
 
 __module_meta__ = {
-    "id": "cdn-manager",
-    "name": "Cdn Manager",
-    "version": "V0.1",
-    "group": "cdn",
-    "inputs": [
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "region", "type": "string", "required": True, "description": ""},
-        {"name": "status", "type": "string", "required": True, "description": ""},
-        {"name": "node_id", "type": "string", "required": True, "description": ""},
-        {"name": "name", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "cdn"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — CDN内容分发网络管理模块 Grade: A (生产级) | Category: 网络基础设施",
-}
+        "id": "cdn-manager",
+        "name": "Cdn Manager",
+        "version": "V0.1",
+        "group": "cdn",
+        "inputs": [
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "region",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "node_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "cdn"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — CDN内容分发网络管理模块 Grade: A (生产级) | Category: 网络基础设施"
+    }
 
 import os
 import asyncio

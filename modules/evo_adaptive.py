@@ -4,29 +4,73 @@ Adaptive evolution, strategy evaluation, parameter tuning, fitness scoring, popu
 """
 
 __module_meta__ = {
-    "id": "evo-adaptive",
-    "name": "Evo Adaptive",
-    "version": "V0.1",
-    "group": "evolution",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "prefix", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["evo"],
-    "grade": "A",
-    "description": "Production-grade module: 自适应进化引擎 Adaptive evolution, strategy evaluation, parameter tuning, fitness scoring, population management.",
-}
+        "id": "evo-adaptive",
+        "name": "Evo Adaptive",
+        "version": "V0.1",
+        "group": "evolution",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "evo"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 自适应进化引擎 Adaptive evolution, strategy evaluation, parameter tuning, fitness scoring, population management."
+    }
 import hashlib
 import time as tmod
 import logging

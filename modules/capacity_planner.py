@@ -4,29 +4,75 @@ AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production)
 """
 
 __module_meta__ = {
-    "id": "capacity-planner",
-    "name": "Capacity Planner",
-    "version": "V0.1",
-    "group": "system",
-    "inputs": [
-        {"name": "sample", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "resource", "type": "string", "required": True, "description": ""},
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "manager", "capacity"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production) 容量规划：资源预测、负载分析、扩缩容建议、成本优化",
-}
+        "id": "capacity-planner",
+        "name": "Capacity Planner",
+        "version": "V0.1",
+        "group": "system",
+        "inputs": [
+            {
+                "name": "sample",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "resource_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "manager",
+            "capacity"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 - Capacity Planner Module (Grade: A Production) 容量规划：资源预测、负载分析、扩缩容建议、成本优化"
+    }
 
 import os
 import asyncio

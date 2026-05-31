@@ -20,29 +20,73 @@ AUTO-EVO-AI V0.1 | DNS解析器引擎
 """
 
 __module_meta__ = {
-    "id": "dns-resolver",
-    "name": "Dns Resolver",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "max_size", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "entry", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "domain", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["dns"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | DNS解析器引擎 企业级DNS解析与缓存系统 - 支持多DNS服务器、缓存、健康检查",
-}
+        "id": "dns-resolver",
+        "name": "Dns Resolver",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "max_size",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "entry",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "domain",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "dns"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | DNS解析器引擎 企业级DNS解析与缓存系统 - 支持多DNS服务器、缓存、健康检查"
+    }
 
 import os
 import sys

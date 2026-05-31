@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: AI智能体
 """
 
 __module_meta__ = {
-    "id": "agent-poseidon",
-    "name": "Agent Poseidon",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "path_prefix", "type": "string", "required": True, "description": ""},
-        {"name": "upstream", "type": "string", "required": True, "description": ""},
-        {"name": "strategy", "type": "string", "required": True, "description": ""},
-        {"name": "rate_limit", "type": "string", "required": True, "description": ""},
-        {"name": "host", "type": "string", "required": True, "description": ""},
-        {"name": "port", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_poseidon.task.request"}}],
-    "depends_on": [],
-    "tags": ["manager", "multi-agent", "agent"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Poseidon AI智能体 Grade: A (生产级) | Category: AI智能体",
-}
+        "id": "agent-poseidon",
+        "name": "Agent Poseidon",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "path_prefix",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "upstream",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "strategy",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rate_limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "host",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "port",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_poseidon.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Poseidon AI智能体 Grade: A (生产级) | Category: AI智能体"
+    }
 
 import os
 import asyncio

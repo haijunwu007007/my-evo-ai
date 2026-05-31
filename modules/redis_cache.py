@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 缓存
 """
 
 __module_meta__ = {
-    "id": "redis-cache",
-    "name": "Redis Cache",
-    "version": "V0.1",
-    "group": "cache",
-    "inputs": [
-        {"name": "ttl", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "key", "type": "string", "required": True, "description": ""},
-        {"name": "cache", "type": "string", "required": True, "description": ""},
-        {"name": "ttl_map", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["engine", "redis"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — Redis缓存管理模块 Grade: A (生产级) | Category: 缓存",
-}
+        "id": "redis-cache",
+        "name": "Redis Cache",
+        "version": "V0.1",
+        "group": "cache",
+        "inputs": [
+            {
+                "name": "ttl",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "key",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cache",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "ttl_map",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "redis"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — Redis缓存管理模块 Grade: A (生产级) | Category: 缓存"
+    }
 
 import os
 import asyncio

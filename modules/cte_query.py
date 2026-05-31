@@ -4,29 +4,74 @@
 """
 
 __module_meta__ = {
-    "id": "cte-query",
-    "name": "Cte Query",
-    "version": "V0.1",
-    "group": "database",
-    "inputs": [
-        {"name": "sql", "type": "string", "required": True, "description": ""},
-        {"name": "sql", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "max_iterations", "type": "string", "required": True, "description": ""},
-        {"name": "max_rows", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["cte", "engine"],
-    "grade": "A",
-    "description": "Production-grade CTE查询引擎模块 V0.1 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存",
-}
+        "id": "cte-query",
+        "name": "Cte Query",
+        "version": "V0.1",
+        "group": "database",
+        "inputs": [
+            {
+                "name": "sql",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "sql_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_iterations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_rows",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "cte",
+            "engine"
+        ],
+        "grade": "A",
+        "description": "Production-grade CTE查询引擎模块 V0.1 上市公司生产级实现 - 递归CTE/窗口CTE/查询优化/执行计划/结果缓存"
+    }
 import logging
 import re
 import time

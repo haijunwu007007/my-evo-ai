@@ -14,29 +14,74 @@ Token预算控制帮助管理AI API的使用成本：
 """
 
 __module_meta__ = {
-    "id": "token-budget",
-    "name": "Token Budget",
-    "version": "V0.1",
-    "group": "auth",
-    "inputs": [
-        {"name": "tokens", "type": "string", "required": True, "description": ""},
-        {"name": "model", "type": "string", "required": True, "description": ""},
-        {"name": "config_path", "type": "string", "required": True, "description": ""},
-        {"name": "daily_limit", "type": "string", "required": True, "description": ""},
-        {"name": "tokens_to_use", "type": "string", "required": True, "description": ""},
-        {"name": "tokens", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["manager", "token"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Token Budget Control Module 基于 Mercury Agent 的Token预算控制系统",
-}
+        "id": "token-budget",
+        "name": "Token Budget",
+        "version": "V0.1",
+        "group": "auth",
+        "inputs": [
+            {
+                "name": "tokens",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "model",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "daily_limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tokens_to_use",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tokens_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "manager",
+            "token"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Token Budget Control Module 基于 Mercury Agent 的Token预算控制系统"
+    }
 
 import json
 import os

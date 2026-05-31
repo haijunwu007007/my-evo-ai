@@ -9,29 +9,73 @@ AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎)
 """
 
 __module_meta__ = {
-    "id": "audio-transcription",
-    "name": "Audio Transcription",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "sample_rate", "type": "string", "required": True, "description": ""},
-        {"name": "frame_ms", "type": "string", "required": True, "description": ""},
-        {"name": "energy_threshold", "type": "string", "required": True, "description": ""},
-        {"name": "silence_duration_ms", "type": "string", "required": True, "description": ""},
-        {"name": "audio_samples", "type": "string", "required": True, "description": ""},
-        {"name": "sample_rate", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["audio"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎) ========================================================",
-}
+        "id": "audio-transcription",
+        "name": "Audio Transcription",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "sample_rate",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "frame_ms",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "energy_threshold",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "silence_duration_ms",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "audio_samples",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "sample_rate_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "audio"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Audio Transcription (音频转录引擎) ========================================================"
+    }
 
 import time
 import json

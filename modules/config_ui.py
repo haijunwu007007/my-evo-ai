@@ -5,29 +5,74 @@ Grade: A (生产级) | Category: 配置管理
 """
 
 __module_meta__ = {
-    "id": "config-ui",
-    "name": "Config Ui",
-    "version": "V0.1",
-    "group": "config",
-    "inputs": [
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "detail", "type": "string", "required": True, "description": ""},
-        {"name": "user", "type": "string", "required": True, "description": ""},
-        {"name": "user_id", "type": "string", "required": True, "description": ""},
-        {"name": "theme_id", "type": "string", "required": True, "description": ""},
-        {"name": "widget_id", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 配置UI管理器 Grade: A (生产级) | Category: 配置管理",
-}
+        "id": "config-ui",
+        "name": "Config Ui",
+        "version": "V0.1",
+        "group": "config",
+        "inputs": [
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "detail",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "user_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "theme_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "widget_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 配置UI管理器 Grade: A (生产级) | Category: 配置管理"
+    }
 
 import os
 import time

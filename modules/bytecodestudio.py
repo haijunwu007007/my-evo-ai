@@ -4,29 +4,74 @@ AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production)
 """
 
 __module_meta__ = {
-    "id": "bytecodestudio",
-    "name": "Bytecodestudio",
-    "version": "V0.1",
-    "group": "developer",
-    "inputs": [
-        {"name": "code_obj", "type": "string", "required": True, "description": ""},
-        {"name": "instr", "type": "string", "required": True, "description": ""},
-        {"name": "module_name", "type": "string", "required": True, "description": ""},
-        {"name": "operation", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "p", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["bytecodestudio", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production) 字节码工作室：Python字节码分析、安全审计、优化建议、反编译辅助",
-}
+        "id": "bytecodestudio",
+        "name": "Bytecodestudio",
+        "version": "V0.1",
+        "group": "developer",
+        "inputs": [
+            {
+                "name": "code_obj",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "instr",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "module_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "operation",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "p",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "bytecodestudio",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Bytecode Studio Module (Grade: A Production) 字节码工作室：Python字节码分析、安全审计、优化建议、反编译辅助"
+    }
 
 import os
 import sys

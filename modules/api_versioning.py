@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: API基础设施
 """
 
 __module_meta__ = {
-    "id": "api-versioning",
-    "name": "Api Versioning",
-    "version": "V0.1",
-    "group": "api",
-    "inputs": [
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "api_name", "type": "string", "required": True, "description": ""},
-        {"name": "version", "type": "string", "required": True, "description": ""},
-        {"name": "from_ver", "type": "string", "required": True, "description": ""},
-        {"name": "to_ver", "type": "string", "required": True, "description": ""},
-        {"name": "version", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/api_versioning", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["api", "manager"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — API版本管理 Grade: A (生产级) | Category: API基础设施",
-}
+        "id": "api-versioning",
+        "name": "Api Versioning",
+        "version": "V0.1",
+        "group": "api",
+        "inputs": [
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "api_name",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "from_ver",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "to_ver",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "version_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/api_versioning",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "api",
+            "manager"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — API版本管理 Grade: A (生产级) | Category: API基础设施"
+    }
 
 import os
 import asyncio

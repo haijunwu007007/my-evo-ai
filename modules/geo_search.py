@@ -20,29 +20,73 @@ AUTO-EVO-AI V0.1 | 地理位置搜索引擎
 """
 
 __module_meta__ = {
-    "id": "geo-search",
-    "name": "Geo Search",
-    "version": "V0.1",
-    "group": "international",
-    "inputs": [
-        {"name": "latitude", "type": "string", "required": True, "description": ""},
-        {"name": "longitude", "type": "string", "required": True, "description": ""},
-        {"name": "precision", "type": "string", "required": True, "description": ""},
-        {"name": "geohash", "type": "string", "required": True, "description": ""},
-        {"name": "geohash", "type": "string", "required": True, "description": ""},
-        {"name": "geohash", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["geo"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 地理位置搜索引擎 企业级地理位置搜索与空间索引系统",
-}
+        "id": "geo-search",
+        "name": "Geo Search",
+        "version": "V0.1",
+        "group": "international",
+        "inputs": [
+            {
+                "name": "latitude",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "longitude",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "precision",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "geohash",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "geohash_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "geohash_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "geo"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 地理位置搜索引擎 企业级地理位置搜索与空间索引系统"
+    }
 
 import os
 import sys

@@ -5,29 +5,74 @@ EnterpriseModule implementation with real business logic.
 """
 
 __module_meta__ = {
-    "id": "tunnel-manager",
-    "name": "Tunnel Manager",
-    "version": "V0.1",
-    "group": "network",
-    "inputs": [
-        {"name": "tunnel", "type": "string", "required": True, "description": ""},
-        {"name": "history", "type": "string", "required": True, "description": ""},
-        {"name": "tunnel", "type": "string", "required": True, "description": ""},
-        {"name": "history", "type": "string", "required": True, "description": ""},
-        {"name": "tunnel", "type": "string", "required": True, "description": ""},
-        {"name": "history", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["tunnel", "manager"],
-    "grade": "A",
-    "description": "Production-grade module: 隧道管理 EnterpriseModule implementation with real business logic.",
-}
+        "id": "tunnel-manager",
+        "name": "Tunnel Manager",
+        "version": "V0.1",
+        "group": "network",
+        "inputs": [
+            {
+                "name": "tunnel",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "history",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tunnel_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "history_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "tunnel_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "history_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "tunnel",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 隧道管理 EnterpriseModule implementation with real business logic."
+    }
 import logging
 import time
 import uuid

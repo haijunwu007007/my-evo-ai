@@ -18,29 +18,75 @@ AUTO-EVO-AI V0.1 P2 行业垂直模块
 """
 
 __module_meta__ = {
-    "id": "media-content-agent",
-    "name": "Media Content Agent",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["media", "manager", "agent"],
-    "grade": "A",
-    "description": "media_content_agent.py - 新媒体内容 Agent AUTO-EVO-AI V0.1 P2 行业垂直模块",
-}
+        "id": "media-content-agent",
+        "name": "Media Content Agent",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "media",
+            "manager",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "media_content_agent.py - 新媒体内容 Agent AUTO-EVO-AI V0.1 P2 行业垂直模块"
+    }
 
 __version__ = "1.0.0"
 __author__ = "AUTO-EVO-AI Team"

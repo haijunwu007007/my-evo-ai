@@ -5,29 +5,74 @@ EnterpriseModule implementation with real business logic.
 """
 
 __module_meta__ = {
-    "id": "ssl-cert-manager",
-    "name": "Ssl Cert Manager",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "certs", "type": "string", "required": True, "description": ""},
-        {"name": "domains", "type": "string", "required": True, "description": ""},
-        {"name": "cert", "type": "string", "required": True, "description": ""},
-        {"name": "certs", "type": "string", "required": True, "description": ""},
-        {"name": "cert", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["ssl", "manager"],
-    "grade": "A",
-    "description": "Production-grade module: SSL证书管理 EnterpriseModule implementation with real business logic.",
-}
+        "id": "ssl-cert-manager",
+        "name": "Ssl Cert Manager",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "certs",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "domains",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cert",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "certs_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "cert_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "ssl",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: SSL证书管理 EnterpriseModule implementation with real business logic."
+    }
 import hashlib
 import logging
 import time

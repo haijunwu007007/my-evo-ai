@@ -21,29 +21,73 @@ AUTO-EVO-AI V0.1 - Permission Guard Module
 """
 
 __module_meta__ = {
-    "id": "permission-guard",
-    "name": "Permission Guard",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "command", "type": "string", "required": True, "description": ""},
-        {"name": "command", "type": "string", "required": True, "description": ""},
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["permission"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - Permission Guard Module 基于 Mercury Agent 的权限加固系统",
-}
+        "id": "permission-guard",
+        "name": "Permission Guard",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "command",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "command_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "permission"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - Permission Guard Module 基于 Mercury Agent 的权限加固系统"
+    }
 
 import os
 import re

@@ -4,29 +4,80 @@ Event triggers, condition matching, action dispatching, webhook integration, eve
 """
 
 __module_meta__ = {
-    "id": "event-trigger",
-    "name": "Event Trigger",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "metric", "type": "string", "required": True, "description": ""},
-        {"name": "value", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "event_type", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "event_trigger.trigger"}}],
-    "depends_on": [],
-    "tags": ["event"],
-    "grade": "A",
-    "description": "Production-grade module: 事件触发器 Event triggers, condition matching, action dispatching, webhook integration, event chaining.",
-}
+        "id": "event-trigger",
+        "name": "Event Trigger",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "metric",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "value",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "event_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "event_trigger.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "event"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 事件触发器 Event triggers, condition matching, action dispatching, webhook integration, event chaining."
+    }
 import hashlib
 import logging
 import re

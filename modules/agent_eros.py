@@ -10,29 +10,81 @@ AUTO-EVO-AI V0.1 — Agent Eros (关系管理引擎)
 """
 
 __module_meta__ = {
-    "id": "agent-eros",
-    "name": "Agent Eros",
-    "version": "V0.1",
-    "group": "agent",
-    "inputs": [
-        {"name": "custom_weights", "type": "string", "required": True, "description": ""},
-        {"name": "source", "type": "string", "required": True, "description": ""},
-        {"name": "target", "type": "string", "required": True, "description": ""},
-        {"name": "interaction_type", "type": "string", "required": True, "description": ""},
-        {"name": "metadata", "type": "string", "required": True, "description": ""},
-        {"name": "source", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "agent_eros.task.request"}}],
-    "depends_on": [],
-    "tags": ["multi-agent", "agent"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 — Agent Eros (关系管理引擎) ================================================",
-}
+        "id": "agent-eros",
+        "name": "Agent Eros",
+        "version": "V0.1",
+        "group": "agent",
+        "inputs": [
+            {
+                "name": "custom_weights",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "interaction_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "metadata",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "source_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "agent_eros.task.request"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "multi-agent",
+            "agent"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 — Agent Eros (关系管理引擎) ================================================"
+    }
 
 import time
 import json

@@ -9,29 +9,73 @@ Pixelle-Video AI短视频引擎 v2.0
 """
 
 __module_meta__ = {
-    "id": "pixelle-video",
-    "name": "Pixelle Video",
-    "version": "V0.1",
-    "group": "media",
-    "inputs": [
-        {"name": "context", "type": "string", "required": True, "description": ""},
-        {"name": "keyword", "type": "string", "required": True, "description": ""},
-        {"name": "limit", "type": "string", "required": True, "description": ""},
-        {"name": "hours_a", "type": "string", "required": True, "description": ""},
-        {"name": "hours_b", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["pixelle"],
-    "grade": "A",
-    "description": "Pixelle-Video AI短视频引擎 v2.0 版本: V0.1 | 自研 + Pillow/numpy + ffmpeg",
-}
+        "id": "pixelle-video",
+        "name": "Pixelle Video",
+        "version": "V0.1",
+        "group": "media",
+        "inputs": [
+            {
+                "name": "context",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "keyword",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_a",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "hours_b",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "pixelle"
+        ],
+        "grade": "A",
+        "description": "Pixelle-Video AI短视频引擎 v2.0 版本: V0.1 | 自研 + Pillow/numpy + ffmpeg"
+    }
 import os, json, logging, subprocess, shutil, tempfile, math, random
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass, field

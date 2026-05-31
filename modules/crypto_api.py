@@ -4,29 +4,81 @@
 """
 
 __module_meta__ = {
-    "id": "crypto-api",
-    "name": "Crypto Api",
-    "version": "V0.1",
-    "group": "crypto",
-    "inputs": [
-        {"name": "operations", "type": "string", "required": True, "description": ""},
-        {"name": "format_type", "type": "string", "required": True, "description": ""},
-        {"name": "data", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "target_path", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "webhook", "config": {"path": "/hooks/crypto_api", "method": "POST"}}],
-    "depends_on": [],
-    "tags": ["crypto"],
-    "grade": "A",
-    "description": "Production-grade module: 加密货币API网关 聚合多源加密货币行情数据，提供统一查询接口、价格预警、行情订阅。",
-}
+        "id": "crypto-api",
+        "name": "Crypto Api",
+        "version": "V0.1",
+        "group": "crypto",
+        "inputs": [
+            {
+                "name": "operations",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "format_type",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "target_path",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "webhook",
+                "config": {
+                    "path": "/hooks/crypto_api",
+                    "method": "POST"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "crypto"
+        ],
+        "grade": "A",
+        "description": "Production-grade module: 加密货币API网关 聚合多源加密货币行情数据，提供统一查询接口、价格预警、行情订阅。"
+    }
 import hashlib
 import hmac
 import logging

@@ -5,29 +5,82 @@ Grade: A (生产级) | Category: 数据保护
 """
 
 __module_meta__ = {
-    "id": "backup-verify",
-    "name": "Backup Verify",
-    "version": "V0.1",
-    "group": "backup",
-    "inputs": [
-        {"name": "result", "type": "string", "required": True, "description": ""},
-        {"name": "backup_id", "type": "string", "required": True, "description": ""},
-        {"name": "days", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "params", "type": "string", "required": True, "description": ""},
-        {"name": "r", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [{"type": "schedule", "config": {"cron": "0 0 * * *"}}],
-    "depends_on": [],
-    "tags": ["backup", "manager", "resilience"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 备份验证模块 Grade: A (生产级) | Category: 数据保护",
-}
+        "id": "backup-verify",
+        "name": "Backup Verify",
+        "version": "V0.1",
+        "group": "backup",
+        "inputs": [
+            {
+                "name": "result",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "backup_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "days",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "params_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "r",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_3",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "schedule",
+                "config": {
+                    "cron": "0 0 * * *"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "backup",
+            "manager",
+            "resilience"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 备份验证模块 Grade: A (生产级) | Category: 数据保护"
+    }
 
 import os
 import asyncio

@@ -23,29 +23,74 @@ AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现）
 """
 
 __module_meta__ = {
-    "id": "evo-nexus-core",
-    "name": "Evo Nexus Core",
-    "version": "V0.1",
-    "group": "github",
-    "inputs": [
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "plugin_config", "type": "string", "required": True, "description": ""},
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "plugin_id", "type": "string", "required": True, "description": ""},
-        {"name": "config", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["evo", "manager"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现） =============================================",
-}
+        "id": "evo-nexus-core",
+        "name": "Evo Nexus Core",
+        "version": "V0.1",
+        "group": "github",
+        "inputs": [
+            {
+                "name": "plugin_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plugin_config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plugin_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "plugin_id_3",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "config",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "evo",
+            "manager"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 - 自进化引擎（A级生产实现） ============================================="
+    }
 
 import time
 import uuid

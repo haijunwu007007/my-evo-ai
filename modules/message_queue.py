@@ -5,29 +5,81 @@ Grade: A (生产级) | Category: 工作流
 """
 
 __module_meta__ = {
-    "id": "message-queue",
-    "name": "Message Queue",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "topic_pattern", "type": "string", "required": True, "description": ""},
-        {"name": "consumer_id", "type": "string", "required": True, "description": ""},
-        {"name": "topic_pattern", "type": "string", "required": True, "description": ""},
-        {"name": "consumer_id", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "message_queue.trigger"}}],
-    "depends_on": [],
-    "tags": ["engine", "message"],
-    "grade": "B",
-    "description": "AUTO-EVO-AI V0.1 — 消息队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流",
-}
+        "id": "message-queue",
+        "name": "Message Queue",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "topic_pattern",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "consumer_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic_pattern_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "consumer_id_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "message_queue.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "engine",
+            "message"
+        ],
+        "grade": "B",
+        "description": "AUTO-EVO-AI V0.1 — 消息队列模块（真实业务逻辑） Grade: A (生产级) | Category: 工作流"
+    }
 
 import os
 import json

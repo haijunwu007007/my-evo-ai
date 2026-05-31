@@ -5,29 +5,74 @@ Production-level IP whitelist/blacklist, rate limiting, geo-blocking, and access
 """
 
 __module_meta__ = {
-    "id": "ip-access-control",
-    "name": "Ip Access Control",
-    "version": "V0.1",
-    "group": "security",
-    "inputs": [
-        {"name": "allowed", "type": "string", "required": True, "description": ""},
-        {"name": "action", "type": "string", "required": True, "description": ""},
-        {"name": "rule_id", "type": "string", "required": True, "description": ""},
-        {"name": "reason", "type": "string", "required": True, "description": ""},
-        {"name": "max_requests", "type": "string", "required": True, "description": ""},
-        {"name": "window_seconds", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "result", "type": "dict", "description": "执行结果"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "result", "type": "dict", "description": "执行结果"},
-    ],
-    "triggers": [],
-    "depends_on": [],
-    "tags": ["config", "ip"],
-    "grade": "A",
-    "description": "IP Access Control Module - Enterprise Grade Production-level IP whitelist/blacklist, rate limiting, geo-blocking, and access audit.",
-}
+        "id": "ip-access-control",
+        "name": "Ip Access Control",
+        "version": "V0.1",
+        "group": "security",
+        "inputs": [
+            {
+                "name": "allowed",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "action",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "rule_id",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "reason",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "max_requests",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "window_seconds",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "dict",
+                "description": "执行结果"
+            },
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "result_2",
+                "type": "dict",
+                "description": "执行结果"
+            }
+        ],
+        "triggers": [],
+        "depends_on": [],
+        "tags": [
+            "config",
+            "ip"
+        ],
+        "grade": "A",
+        "description": "IP Access Control Module - Enterprise Grade Production-level IP whitelist/blacklist, rate limiting, geo-blocking, and access audit."
+    }
 
 import time
 import hashlib

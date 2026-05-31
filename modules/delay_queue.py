@@ -23,29 +23,82 @@ AUTO-EVO-AI V0.1 — Delay Queue
 """
 
 __module_meta__ = {
-    "id": "delay-queue",
-    "name": "Delay Queue",
-    "version": "V0.1",
-    "group": "messaging",
-    "inputs": [
-        {"name": "attempt", "type": "string", "required": True, "description": ""},
-        {"name": "data_dir", "type": "string", "required": True, "description": ""},
-        {"name": "messages", "type": "string", "required": True, "description": ""},
-        {"name": "messages", "type": "string", "required": True, "description": ""},
-        {"name": "topic", "type": "string", "required": True, "description": ""},
-        {"name": "handler", "type": "string", "required": True, "description": ""},
-    ],
-    "outputs": [
-        {"name": "success", "type": "bool", "description": "是否成功"},
-        {"name": "results", "type": "list[dict]", "description": "结果列表"},
-        {"name": "success", "type": "bool", "description": "是否成功"},
-    ],
-    "triggers": [{"type": "event", "config": {"on": "delay_queue.trigger"}}],
-    "depends_on": [],
-    "tags": ["handler", "manager", "delay"],
-    "grade": "A",
-    "description": "AUTO-EVO-AI V0.1 | 延迟队列引擎 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略",
-}
+        "id": "delay-queue",
+        "name": "Delay Queue",
+        "version": "V0.1",
+        "group": "messaging",
+        "inputs": [
+            {
+                "name": "attempt",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "data_dir",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "messages",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "messages_2",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "topic",
+                "type": "string",
+                "required": True,
+                "description": ""
+            },
+            {
+                "name": "handler",
+                "type": "string",
+                "required": True,
+                "description": ""
+            }
+        ],
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool",
+                "description": "是否成功"
+            },
+            {
+                "name": "results",
+                "type": "list[dict]",
+                "description": "结果列表"
+            },
+            {
+                "name": "success_2",
+                "type": "bool",
+                "description": "是否成功"
+            }
+        ],
+        "triggers": [
+            {
+                "type": "event",
+                "config": {
+                    "on": "delay_queue.trigger"
+                }
+            }
+        ],
+        "depends_on": [],
+        "tags": [
+            "handler",
+            "manager",
+            "delay"
+        ],
+        "grade": "A",
+        "description": "AUTO-EVO-AI V0.1 | 延迟队列引擎 企业级定时消息投递系统 - 支持延迟消息、定时任务、重试策略"
+    }
 
 import os
 import sys
