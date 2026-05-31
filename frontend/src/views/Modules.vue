@@ -147,7 +147,7 @@ const allModules = ref<any[]>([])
 
 const allCats = computed(() => Object.keys(cats.value))
 
-const gradeClass = (g) => {
+const gradeClass = (g: any) => {
   if (!g) return 'grade-unknown'
   const upper = String(g).toUpperCase()
   if (upper === 'A') return 'grade-a'
@@ -156,7 +156,7 @@ const gradeClass = (g) => {
   return 'grade-stub'
 }
 
-const gradeTagType = (g) => {
+const gradeTagType = (g: any) => {
   if (!g) return 'info'
   const upper = String(g).toUpperCase()
   if (upper === 'A') return 'success'
@@ -166,10 +166,10 @@ const gradeTagType = (g) => {
 }
 
 const filteredCatMap = computed(() => {
-  const result = {}
+  const result: Record<string, any[]> = {}
   for (const [cat, mods] of Object.entries(cats.value)) {
     if (filterCat.value && cat !== filterCat.value) continue
-    const filtered = mods.filter(m => {
+    const filtered = (mods as any[]).filter(m => {
       const name = typeof m === 'string' ? m : (m.name || '')
       const grade = typeof m === 'object' ? (m.grade || '') : ''
       if (search.value && !name.toLowerCase().includes(search.value.toLowerCase()) && !cat.toLowerCase().includes(search.value.toLowerCase())) return false
@@ -182,9 +182,9 @@ const filteredCatMap = computed(() => {
 })
 
 const flatModules = computed(() => {
-  const list = []
+  const list: any[] = []
   for (const [cat, mods] of Object.entries(filteredCatMap.value)) {
-    for (const m of mods) {
+    for (const m of mods as any[]) {
       list.push(typeof m === 'string' ? { name: m, group: cat } : { ...m, group: m.group || cat })
     }
   }
@@ -205,7 +205,7 @@ const stats = computed(() => {
   ]
 })
 
-const selectModule = (m) => {
+const selectModule = (m: any) => {
   selectedMod.value = typeof m === 'string' ? { name: m } : m
   drawerVisible.value = true
 }
@@ -214,10 +214,11 @@ const load = async () => {
   try {
     // 从 /api/modules/list 获取全部模块（limit=500 不打分页）
     const r = await api.get('/modules/list', { params: { limit: 500, offset: 0 } })
-    const mods = r.modules || []
+    const d = r.data || r
+    const mods: any[] = d.modules || []
     allModules.value = mods
     // 按 category 分组
-    const grouped = {}
+    const grouped: Record<string, any[]> = {}
     for (const m of mods) {
       const cat = m.category || '其他'
       if (!grouped[cat]) grouped[cat] = []

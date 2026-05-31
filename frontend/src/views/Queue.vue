@@ -50,7 +50,7 @@ const stats = ref<Record<string,number>>({}); const tasks = ref<any[]>([])
 const showEnqueue = ref(false); const form = ref({name:'',type:'execute'})
 const colors: Record<string,string> = {total:'#6366f1',pending:'#f59e0b',running:'#06b6d4',completed:'#10b981',failed:'#ef4444',backlog:'#f59e0b'}
 const labels: Record<string,string> = {total:'总任务',pending:'待处理',running:'运行中',completed:'已完成',failed:'失败',backlog:'积压'}
-const tagMap = {pending:'warning',running:'primary',completed:'success',failed:'danger',cancelled:'info'}
+const tagMap: Record<string, string> = {pending:'warning',running:'primary',completed:'success',failed:'danger',cancelled:'info'}
 const load = async () => {
   loading.value = true; loadErr.value = false
   try { const [qs, qt] = await Promise.all([getQueueStats(), getQueueTasks()]); stats.value = qs; tasks.value = qt.tasks||[] }

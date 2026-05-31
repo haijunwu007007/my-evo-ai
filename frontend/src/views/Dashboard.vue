@@ -192,7 +192,7 @@ const gradeData = ref([
 ])
 
 // ── 折线图数据 ────────────────────────────────────────────────────────────
-const lineData = { times: [], values: [] }
+const lineData: { times: string[]; values: number[] } = { times: [], values: [] }
 
 const initLineChart = () => {
   if (!chartRef.value) return

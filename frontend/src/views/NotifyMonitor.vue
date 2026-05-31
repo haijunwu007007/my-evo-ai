@@ -70,9 +70,9 @@ const load = async () => {
       api.get('/notify/stats'),
       api.get('/notify/history', { params: { limit: 30 } })
     ])
-    stats.value[0].val = st.total||0; stats.value[1].val = st.success||0
-    stats.value[2].val = st.failed||0; stats.value[3].val = st.channels?.length||0
-    history.value = h.history||[]
+    stats.value[0].val = (st.data||st).total||0; stats.value[1].val = (st.data||st).success||0
+    stats.value[2].val = (st.data||st).failed||0; stats.value[3].val = (st.data||st).channels?.length||0
+    history.value = (h.data||h).history||[]
   } catch {} finally { loading.value = false }
 }
 const sendTest = async () => {

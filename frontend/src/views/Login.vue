@@ -51,13 +51,14 @@ export default {
         if (!username.value) { ElMessage.warning('请输入用户名'); return }
         loginLoading.value = true
         const r = await http.post('/auth/login', { username: username.value })
-        if (r && r.access_token) {
-          localStorage.setItem('evo_token', r.access_token)
+        const d = r?.data || r
+        if (d && d.access_token) {
+          localStorage.setItem('evo_token', d.access_token)
           ElMessage.success('登录成功')
           const redirect = route.query.redirect || '/dashboard'
           setTimeout(() => router.push(redirect), 100)
         } else {
-          ElMessage.error(r?.detail || '登录失败')
+          ElMessage.error(d?.detail || '登录失败')
         }
       } catch (e: any) {
         const msg = e.response?.data?.detail || e.message || '请求失败'
