@@ -39,6 +39,8 @@ from typing import Any, Dict, List, Optional, AsyncContextManager
 from functools import wraps
 import threading
 
+from modules._prometheus import increment as _pm_inc
+
 logger = logging.getLogger("evo.base")
 
 
@@ -690,7 +692,7 @@ class EnterpriseModule(ABC):
                 try:
                     return self._tracer.trace(name)
                 except Exception as e:
-            logger.warning(f"enterprise_module: {e}")
+                    logger.warning(f"enterprise_module: {e}")
 
         # 无追踪器时返回空上下文
         class _NoopSpan:
@@ -722,7 +724,7 @@ class EnterpriseModule(ABC):
                 try:
                     self._metrics.inc(name, value, tags or {})
                 except Exception as e:
-            logger.warning(f"enterprise_module: {e}")
+                    logger.warning(f"enterprise_module: {e}")
 
     def audit(self, action: str, detail: str = "", level: str = "INFO"):
         """记录审计日志"""
@@ -774,6 +776,7 @@ class EnterpriseModule(ABC):
                 latency = (time.time() - start_time) * 1000
                 self.stats.record_request(latency, success=True)
                 self.record_metrics(f"{self.module_id}.{action}", latency, {"status": "success"})
+                _pm_inc(self.module_id, action, latency)
 
                 return Result(
                     success=True,
@@ -787,6 +790,7 @@ class EnterpriseModule(ABC):
                 error_msg = f"{type(e).__name__}: {str(e)}"
                 self.stats.record_request(latency, success=False, error=error_msg)
                 self.record_metrics(f"{self.module_id}.{action}", latency, {"status": "error"})
+                _pm_inc(self.module_id, action, latency, error=True)
                 self._logger.error(f"[{self.module_id}] {action}失败: {error_msg}")
 
                 return Result(

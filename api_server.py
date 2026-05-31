@@ -83,6 +83,13 @@ app.include_router(scheduler_router)
 app.include_router(coordinator_router)
 app.include_router(insights_router)
 
+# ── Prometheus 指标端点 ──
+@app.get("/metrics", include_in_schema=False)
+async def prometheus_metrics():
+    from modules._prometheus import get_prometheus_text
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(get_prometheus_text())
+
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"
 if static_dir.exists():

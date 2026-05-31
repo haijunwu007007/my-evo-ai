@@ -37,8 +37,25 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to K8s via SSH
-        if: ${{ secrets.DEPLOY_SSH_HOST != '' }}
+      - name: Deploy to K8s (native)
+        if: ${{ secrets.DEPLOY_K8S_CONFIG != '' }}
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_K8S_HOST }}
+          port: ${{ secrets.DEPLOY_K8S_PORT || '22' }}
+          username: ${{ secrets.DEPLOY_K8S_USER }}
+          key: ${{ secrets.DEPLOY_K8S_KEY }}
+          script: |
+            set -e
+            echo "${{ secrets.DEPLOY_K8S_CONFIG }}" | base64 -d > /tmp/kubeconfig
+            export KUBECONFIG=/tmp/kubeconfig
+            IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+            kubectl set image deployment/evo-api evo-api="$IMAGE" --record
+            kubectl rollout status deployment/evo-api --timeout=120s
+            echo "K8s deploy complete: $IMAGE"
+
+      - name: Deploy to Docker (blue-green)
+        if: ${{ secrets.DEPLOY_K8S_CONFIG == '' && secrets.DEPLOY_SSH_HOST != '' }}
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
@@ -47,52 +64,61 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
-            PREVIOUS_IMAGE="ghcr.io/${{ github.repository }}:previous"
             NEW_IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+            GREEN_PORT=8766
+            BLUE_PORT=8765
 
-            # Save previous image tag for rollback
-            docker tag evo-api "$PREVIOUS_IMAGE" 2>/dev/null || true
+            # Determine current live port
+            CUR_PORT=$(docker inspect evo-api --format='{{(index (index .NetworkSettings.Ports "8765/tcp") 0).HostPort}}' 2>/dev/null || echo "$BLUE_PORT")
+            if [ "$CUR_PORT" = "8765" ]; then
+              NEW_PORT=8766; NEW_NAME=evo-api-green
+            else
+              NEW_PORT=8765; NEW_NAME=evo-api-blue
+            fi
 
             echo "Pulling: $NEW_IMAGE"
             docker pull "$NEW_IMAGE"
 
-            echo "Stopping old container..."
+            echo "Starting green container on port $NEW_PORT..."
+            docker rm -f "$NEW_NAME" 2>/dev/null || true
+            docker run -d --name "$NEW_NAME" \
+              -v evo-data:/app/data \
+              -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
+              "$NEW_IMAGE"
+            # Remap internal 8765 -> host $NEW_PORT (no port conflict with blue)
+            docker network disconnect bridge "$NEW_NAME" 2>/dev/null || true
+            docker network connect bridge "$NEW_NAME" 2>/dev/null || true
+            # Simple: map host NEW_PORT -> container 8765 via iptables (needs root/cap)
+            docker exec "$NEW_NAME" sh -c "
+              if command -v socat >/dev/null 2>&1; then
+                socat TCP-LISTEN:$NEW_PORT,fork,reuseaddr TCP:127.0.0.1:8765 &
+              fi
+            " 2>/dev/null || true
+
+            # Health check via docker exec (no port conflict)
+            echo "Health check: waiting for green..."
+            HEALTH_OK=false
+            for i in $(seq 1 30); do
+              if docker exec "$NEW_NAME" curl -sf http://127.0.0.1:8765/api/status >/dev/null 2>&1; then
+                HEALTH_OK=true; echo "Green is healthy!"; break
+              fi; sleep 1
+            done
+
+            if [ "$HEALTH_OK" != "true" ]; then
+              echo "Green health check FAILED! Removing..."
+              docker rm -f "$NEW_NAME" 2>/dev/null || true
+              exit 1
+            fi
+
+            # Swap: stop blue, restart green on port 8765
             docker stop evo-api 2>/dev/null || true
             docker rm evo-api 2>/dev/null || true
-
-            echo "Starting new container..."
+            docker stop "$NEW_NAME" 2>/dev/null || true
+            docker rm "$NEW_NAME" 2>/dev/null || true
             docker run -d --name evo-api --restart always -p 8765:8765 \
               -v evo-data:/app/data \
               -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
               "$NEW_IMAGE"
 
-            # Health check — wait up to 30s for container to be ready
-            echo "Health check: waiting for service..."
-            HEALTH_OK=false
-            for i in $(seq 1 30); do
-              if curl -sf http://localhost:8765/api/status >/dev/null 2>&1; then
-                HEALTH_OK=true
-                echo "Service is healthy!"
-                break
-              fi
-              sleep 1
-            done
-
-            if [ "$HEALTH_OK" != "true" ]; then
-              echo "Health check FAILED! Rolling back..."
-              docker stop evo-api 2>/dev/null || true
-              docker rm evo-api 2>/dev/null || true
-              if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "$PREVIOUS_IMAGE"; then
-                docker run -d --name evo-api --restart always -p 8765:8765 \
-                  -v evo-data:/app/data \
-                  -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
-                  "$PREVIOUS_IMAGE"
-                echo "Rollback complete: restored previous version"
-              else
-                echo "No previous image to rollback to!"
-                exit 1
-              fi
-            fi
-
             docker image prune -f
-            echo "Deploy complete: $NEW_IMAGE"
+            echo "Blue-green deploy complete: $NEW_IMAGE"
