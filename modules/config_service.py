@@ -367,8 +367,8 @@ class ConfigService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "config_items": stats.get("config_items", 0),
                 "callbacks": len(self._callbacks),
             }
-        except Exception:
-            return {"status": "healthy"}
+        except Exception as e:
+            return {"status": "unhealthy", "error": str(e)}
 
     async def execute(self, action: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         _ = self.trace("execute")

@@ -69,7 +69,7 @@ class FinanceData(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                     params=urllib.parse.urlencode({"from":frm,"to":to,"amount":"1","apikey":self._api_key or "demo"})
                     r=self._requests.get(f"https://v6.exchangerate-api.com/v6/{self._api_key}/pair/{frm}/{to}",timeout=5)
                     if r.ok:rate=r.json().get("conversion_rate",1);return{"success":True,"from":frm,"to":to,"amount":amount,"rate":rate,"result":round(amount*rate,4),"mode":"real"}
-                except:pass
+                except: logger.warning("finance_data: real-time rate failed, fallback to mock")
             rates={"USD":{"CNY":7.24,"HKD":7.82,"EUR":0.92},"CNY":{"USD":0.138,"HKD":1.08,"EUR":0.127},
                 "HKD":{"USD":0.128,"CNY":0.926,"EUR":0.118}}
             rate=rates.get(frm,{}).get(to,1)

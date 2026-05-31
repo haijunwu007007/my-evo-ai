@@ -31,7 +31,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 if len(parts)==2 and float(parts[1])<time.time():
                     os.remove(path)
                     return self._acquire_file(path,owner,ttl)
-            except:pass
+            except: logger.warning("distributed_lock: acquire retry failed")
             return False
     def _stats(self)->Dict:
         locks=os.listdir(self._lock_dir)if os.path.isdir(self._lock_dir)else[]

@@ -27,7 +27,7 @@ class SqlGenerator(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 from _zhipu_helper import llm_chat
                 sql=llm_chat(f"将以下自然语言转换为SQL查询语句，表名{table}，只返回SQL：\n{nl}")
                 if sql:return {"success":True,"sql":sql,"natural_language":nl,"llm":True}
-            except Exception:pass
+            except Exception: logger.warning("sql_generator: LLM SQL generation failed, fallback")
             sql=f"SELECT * FROM {table} LIMIT 100"
             return {"success":True,"sql":sql,"natural_language":nl,"llm":False}
         if a=="validate":sql=p.get("sql","")

@@ -445,7 +445,7 @@ class MySQLCdcEngine:
             self._output.close()
         if self._conn:
             try: self._conn.close()
-            except: pass
+            except: logger.warning("mysql_cdc: conn close failed (may be already closed)")
             self._conn = None
         logger.info("[CDC] 已停止")
 

@@ -104,7 +104,7 @@ except ImportError:
             pass
 
         def health_check(self):
-            return {"status": "healthy"}
+            return {"status": "healthy", "component": "_MetricsAdapter_internal", "note": "placeholder"}
 
     class CircuitBreakerMixin:
         pass

@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 生产级 AI Agent 自动化平台 — **456 模块** · **40+ API** · **4 核心引擎** · **120+ 测试通过**
+> 生产级 AI Agent 自动化平台 — **457 模块** · **185+ API** · **4 核心引擎** · **3500+ 测试通过**
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
@@ -70,7 +70,7 @@ AUTO-EVO-AI V0.1/
 │   ├── scheduler_engine.py # 定时调度器
 │   ├── task_queue_engine.py # 持久化任务队列
 │   └── ws_engine.py        # WebSocket 实时推送
-├── modules/               # 456个功能模块 (0空壳)
+├── modules/               # 457个功能模块 (0空壳)
 │   └── _base/             # 企业级模块基类 (熔断/限流/审计/追踪)
 ├── config/                # 配置系统
 │   ├── defaults.yaml       # 默认配置
@@ -103,11 +103,11 @@ AUTO-EVO-AI V0.1/
 
 | 指标 | 数值 |
 |------|------|
-| **Python 代码** | 722 文件 / 13.9 MB |
-| **功能模块** | 456 个（0 空壳，全部有真实 dispatch 逻辑） |
-| **API 端点** | 154 路由 |
-| **测试覆盖** | 19 个测试文件，100% 真实 HTTP 请求，零 Stub / Mock |
-| **Git 提交** | 28 commits |
+| **Python 代码** | 722+ 文件 / 13.9 MB |
+| **功能模块** | 457 个（0 空壳，全部有真实 dispatch 逻辑） |
+| **API 端点** | 185 路由 |
+| **测试覆盖** | 34 个测试文件 / 3534 用例，100% 真实 HTTP 请求，零 Stub / Mock |
+| **Git 提交** | 125 commits |
 | **CI 管道** | GitHub Actions（推代码自动跑合规+E2E测试） |
 | **模块平均 actions** | 8-10 个 |
 | **基础设施** | SQLite 数据层 / JWT 认证 / 消息总线 / JSON 日志 |
@@ -117,7 +117,7 @@ AUTO-EVO-AI V0.1/
 - **后端**: Python 3.13 / FastAPI / Uvicorn / SQLite WAL / asyncio
 - **前端**: 原生 HTML/CSS/JS (零框架依赖, 57KB) / 响应式设计 / PWA
 - **AI**: 智谱 GLM-4-Flash (默认) / DeepSeek / OpenAI / Anthropic / Ollama
-- **测试**: pytest 9.x / 19 个真实测试文件 / 全真实链路校验 / 零 Stub / GitHub Actions CI
+- **测试**: pytest 9.x / 34 个真实测试文件 / 3500+ 测试用例 / 全真实链路校验 / 零 Stub / GitHub Actions CI
 - **安全**: JWT / RBAC / 限流 / 熔断 / 链路追踪 / 审计
 
 ## 配置向导
@@ -139,7 +139,7 @@ AUTO-EVO-AI V0.1/
 # .github/workflows/ci.yml
 # 推送到 master/develop 或 PR 时自动:
 #   1. 安装依赖
-#   2. 运行 120+ 测试
+#   2. 运行 3500+ 测试
 #   3. 启动服务验证 API
 #   4. 运行基准测试
 ```

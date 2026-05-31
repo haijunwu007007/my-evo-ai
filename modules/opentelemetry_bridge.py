@@ -595,7 +595,7 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
     def initialize(self) -> ModuleStatus:
         _ = self.trace("initialize")
         try:
-            self._resource = Resource("auto-evo-ai", "6.38", "production")
+            self._resource = Resource("auto-evo-ai", "V0.1", "production")
             self._propagator = Propagator()
             batch_proc = BatchSpanProcessor()
             self._processors = [batch_proc]

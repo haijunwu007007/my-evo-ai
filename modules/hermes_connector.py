@@ -36,7 +36,7 @@ class HermesConnector(EnterpriseModule, CircuitBreakerMixin):
                 for s in subs:
                     try:
                         if callable(s):s(msg)
-                    except Exception:pass
+                    except Exception: logger.warning("hermes_connector: subscriber failed")
                 return {"success":True,"message_id":mid,"delivered_to":len(subs)}
             if a=="broadcast":
                 content=p.get("content","")

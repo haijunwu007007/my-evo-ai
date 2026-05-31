@@ -27,8 +27,8 @@ class MongoDBNoSQL(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     def health_check(self)->HealthReport:
         if not self._marked_as_mock:
             try:
-                self._client.admin.command('ping');return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"collections":len(self._db.list_collection_names()),"mode":"real"})
-            except:pass
+                    self._client.admin.command('ping');return HealthReport(status=self.status.value,healthy=True,module_id=self.MODULE_ID,checks={"collections":len(self._db.list_collection_names()),"mode":"real"})
+            except: logger.warning("mongodb_nosql: real ping failed, mock fallback")
         return HealthReport(status=self.status.value,healthy=not self._marked_as_mock,module_id=self.MODULE_ID,checks={"collections":len(self._collections),"mode":"mock"})
     async def execute(self,action=None,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
     def _dispatch(self,p):

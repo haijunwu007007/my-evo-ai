@@ -41,7 +41,7 @@ class SchedulerPro(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             if m=="*" and h=="*":return 60
             if h!="*":
                 try:return int(h)*3600
-                except:pass
+                except: logger.warning("scheduler_pro: invalid hour: %s", h)
             if m!="*":
                 try:return int(m)*60
                 except:pass

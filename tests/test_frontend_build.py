@@ -241,7 +241,7 @@ class TestFrontendBuild(unittest.TestCase):
     def test_030_no_node_modules_committed(self):
         """node_modules 未被意外包含在源码中"""
         nm = os.path.join(self.frontend_dir, 'node_modules')
-        self.assertTrue(True)  # 不做硬检查，只是标记
+        self.assertFalse(os.path.isdir(nm), "node_modules 不应被提交到源码")
 
     def test_031_router_guard_exists(self):
         """路由守卫存在"""

@@ -23,7 +23,7 @@ class LearningEngine:
             try:
                 self._rules = json.loads(f.read_text(encoding="utf-8"))
                 logger.info(f"[LEARNING] 已加载 {len(self._rules)} 条优化规则")
-            except: pass
+            except: logger.warning("learning_engine: rules load failed")
 
     def _save(self):
         f = self.base / "learning_rules.json"

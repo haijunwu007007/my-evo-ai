@@ -24,7 +24,7 @@ class ForexApi(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                     if resp.status == 200:
                         d = await resp.json();rates = d.get("rates", {})
                         return rates.get(quote, 0.0)
-        except: pass
+        except: logger.warning("forex_api: real-time quote failed, fallback")
         return 0.0
     def _dispatch(self,p):
         a=p.get("action","status")
