@@ -430,19 +430,19 @@ class EnterpriseModule(ABC):
         """标准action: 返回模块完整状态"""
         try:
             status_val = self.status.value if hasattr(self.status, "value") else str(self.status)
-        except:
+        except Exception:
             status_val = "unknown"
         try:
             stats = self.stats.to_dict() if hasattr(self.stats, "to_dict") else {}
-        except:
+        except Exception:
             stats = {}
         try:
             caps = self._get_available_actions()
-        except:
+        except Exception:
             caps = []
         try:
             level = self.MODULE_LEVEL
-        except:
+        except Exception:
             level = "?"
         return {
             "module_id": getattr(self, "module_id", ""),

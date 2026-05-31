@@ -79,18 +79,8 @@ include = ["api*", "core*", "modules*"]
 exclude = ["tests*", "_archive*"]
 
 # ══════════════════════════════════════════════════
-# Code Style — Ruff
+# NOTE: Ruff 配置统一在 .ruff.toml 中
 # ══════════════════════════════════════════════════
-[tool.ruff]
-line-length = 120
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "W"]
-
-[tool.ruff.format]
-quote-style = "double"
-
 # ══════════════════════════════════════════════════
 # Type Checking — Mypy
 # ══════════════════════════════════════════════════

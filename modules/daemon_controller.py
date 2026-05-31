@@ -25,7 +25,7 @@ class DaemonController(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 return str(pid) in r.stdout
             else:
                 os.kill(pid,0);return True
-        except:return False
+        except Exception:return False
     async def execute(self,action,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
     def _dispatch(self,p):
         a=p.get("action","status")

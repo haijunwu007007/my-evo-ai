@@ -42,7 +42,7 @@ class PersistMixin:
         if r.get("success") and r["data"]:
             try:
                 return json.loads(r["data"][0]["value"])
-            except:
+            except Exception:
                 return r["data"][0]["value"]
         return default
 
@@ -73,7 +73,7 @@ class PersistMixin:
             for row in r["data"]:
                 try:
                     result[row["key"]] = json.loads(row["value"])
-                except:
+                except Exception:
                     result[row["key"]] = row["value"]
             return result
         return {}

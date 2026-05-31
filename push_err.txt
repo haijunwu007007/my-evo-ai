@@ -1,2 +1,0 @@
-To https://github.com/haijunwu007007/my-evo-ai.git
-   05b7db8..f5032d9  master -> master

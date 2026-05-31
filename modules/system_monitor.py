@@ -300,7 +300,7 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
             if hasattr(os, "getloadavg"):
                 l1,l5,l15 = os.getloadavg()
                 return {"1min": round(l1,2), "5min": round(l5,2), "15min": round(l15,2)}
-        except: logger.warning("system_monitor: getloadavg not supported on this platform")
+        except Exception: logger.warning("system_monitor: getloadavg not supported on this platform")
         cpu = self._last_metrics.get("cpu_percent",0)/100.0
         return {"1min": round(cpu*3,2), "5min": round(cpu*2.5,2), "15min": round(cpu*2,2)}
 

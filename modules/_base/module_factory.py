@@ -146,7 +146,7 @@ class ModuleFactory:
             if module_obj and hasattr(module_obj, 'execute') and callable(module_obj.execute):
                 return GRADE_REAL
             return GRADE_LIGHT
-        except:
+        except Exception:
             return GRADE_STUB
 
     def _assess_standard(self, name: str, filepath: str, module_obj=None) -> str:
@@ -160,7 +160,7 @@ class ModuleFactory:
             elif size >= 5000:
                 return GRADE_PROXY
             return GRADE_STUB
-        except:
+        except Exception:
             return GRADE_STUB
 
     def proxy_execute(self, mod_name: str, action: str, params: dict = None) -> dict:

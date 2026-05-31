@@ -176,7 +176,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             conn.execute("DELETE FROM sso_sessions WHERE token=?", (token,))
             conn.commit()
             conn.close()
-        except: logger.warning("sso_auth: session cleanup failed")
+        except Exception: logger.warning("sso_auth: session cleanup failed")
 
     # ── JWT ──
 

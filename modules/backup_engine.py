@@ -647,7 +647,7 @@ class BackupEngine(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         """标准action: 模块状态"""
         try:
             status = self.get_status() if hasattr(self, "get_status") else {}
-        except:
+        except Exception:
             status = {}
         if isinstance(status, dict):
             status["module_id"] = self.module_id

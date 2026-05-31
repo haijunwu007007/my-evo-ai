@@ -43,7 +43,7 @@ class SchedulerPro(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseM
             if m=="*" and h=="*":return 60
             if h!="*":
                 try:return int(h)*3600
-                except: logger.warning("scheduler_pro: invalid hour: %s", h)
+                except Exception: logger.warning("scheduler_pro: invalid hour: %s", h)
             if m!="*":
                 try:return int(m)*60
                 except Exception as e:

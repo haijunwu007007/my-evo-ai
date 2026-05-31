@@ -31,7 +31,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 if len(parts)==2 and float(parts[1])<time.time():
                     os.remove(path)
                     return self._acquire_file(path,owner,ttl)
-            except: logger.warning("distributed_lock: acquire retry failed")
+            except Exception: logger.warning("distributed_lock: acquire retry failed")
             return False
     def _stats(self)->Dict:
         locks=os.listdir(self._lock_dir)if os.path.isdir(self._lock_dir)else[]
@@ -42,7 +42,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                     parts=f.read().strip().split('|')
                     if len(parts)==2 and float(parts[1])>time.time():active+=1
                     else:expired+=1
-            except:expired+=1
+            except Exception:expired+=1
         return{"total":len(locks),"active":active,"expired":expired,"held":len(self._held)}
     def _dispatch(self,p):
         a=p.get("action","status")
@@ -77,7 +77,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                 try:
                     with open(path,'r') as f:data=f.read().strip().split('|')
                     return{"success":True,"locked":True,"owner":data[0],"expires_at":float(data[1]),"remaining":max(0,float(data[1])-time.time())}
-                except:return{"success":True,"locked":True}
+                except Exception:return{"success":True,"locked":True}
             return{"success":True,"locked":False}
         if a=="stats":
             return{"success":True,"stats":self._stats()}
@@ -90,7 +90,7 @@ class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
                     owner=parts[0];now=time.time()
                     with open(path,'w')as f:f.write(f"{owner}|{now+ttl}")
                     return{"success":True,"lock":name,"extended_until":now+ttl}
-                except:return{"success":False,"error":"heartbeat_failed"}
+                except Exception:return{"success":False,"error":"heartbeat_failed"}
             return{"success":False,"error":"lock_not_found"}
         if a=="release_all":
             count=0
