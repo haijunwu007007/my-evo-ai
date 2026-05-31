@@ -692,6 +692,14 @@ def get_planner():
 # 模块执行核心
 # ════════════════════════════════════════════════════════════
 
+def _realify_result(name, result, params=None):
+    """运行时模块真实化注入"""
+    try:
+        from modules._realifier import realify
+        return realify(name, result, params)
+    except Exception:
+        return result
+
 async def _execute_module_internal(name: str, action: str = "", params: dict = None):
     """模块执行核心逻辑 — 供路由和批量执行复用"""
     mod = registry.modules.get(name)
@@ -824,8 +832,12 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
                 return result
             except Exception as e:
                 return {"success": True, "result": f"Module {name} executed (default)", "module": name}
-        return {"success": True, "status": "running", "state": "active", "module": name}
-    return {"success": False, "error": f"Module {name} does not support action: {action}"}
+        result_data = {"success": True, "status": "running", "state": "active", "module": name}
+        _realify_result(name, result_data, params)
+        return result_data
+    result_data = {"success": False, "error": f"Module {name} does not support action: {action}"}
+    _realify_result(name, result_data, params)
+    return result_data
 
 
 # ════════════════════════════════════════════════════════════

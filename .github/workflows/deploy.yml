@@ -36,3 +36,25 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to K8s via SSH
+        if: ${{ secrets.DEPLOY_SSH_HOST != '' }}
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT || '22' }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+            echo "Pulling: $IMAGE"
+            docker pull "$IMAGE"
+            docker stop evo-api 2>/dev/null || true
+            docker rm evo-api 2>/dev/null || true
+            docker run -d --name evo-api --restart always -p 8765:8765 \
+              -v evo-data:/app/data \
+              -e ZHIPU_API_KEY="${{ secrets.ZHIPU_API_KEY }}" \
+              "$IMAGE"
+            docker image prune -f
+            echo "Deploy complete: $IMAGE"
