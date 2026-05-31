@@ -83,13 +83,13 @@ async def list_modules(category: str = "", page: int = 1, limit: int = 100):
                 _mod_path = None
                 if not inspect.ismodule(mod):
                     try: _mod_path = inspect.getfile(type(mod))
-                    except: pass  # non-critical
+                    except Exception: _mod_path = None
                 try:
                     if not _mod_path and isinstance(mod, type):
                         import importlib as _il
                         _src = _il.util.find_spec(name)
                         if _src: _mod_path = _src.origin
-                except: pass
+                except Exception: logger.debug(f"模块{name}路径获取失败")
                 _fsize = _os.path.getsize(_mod_path) if _mod_path and _os.path.isfile(_mod_path) else 0
                 result.append({
                     "name": name, "class": cls_name,
@@ -122,13 +122,13 @@ async def list_modules(category: str = "", page: int = 1, limit: int = 100):
         filtered = [m for m in filtered if m.get("category") == category]
 
     if no_page:
-        return {"modules": filtered, "count": len(filtered), "categories": registry.get_categories()}
+        return {"success": True, "modules": filtered, "count": len(filtered), "categories": registry.get_categories()}
 
     total = len(filtered)
     start = (page - 1) * limit
     paged = filtered[start:start + limit]
     return {
-        "modules": paged, "count": total, "page": page, "limit": limit,
+        "success": True, "modules": paged, "count": total, "page": page, "limit": limit,
         "total_pages": max(1, (total + limit - 1) // limit),
         "categories": registry.get_categories(),
     }
@@ -154,7 +154,7 @@ async def search_modules(q: str = "", status: str = "", limit: int = 50, offset:
 
     total = len(filtered)
     paged = filtered[offset:offset + limit]
-    return {"modules": paged, "total": total, "offset": offset, "limit": limit}
+    return {"success": True, "modules": paged, "total": total, "offset": offset, "limit": limit}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -337,7 +337,7 @@ async def list_batches():
             "modules": batch_modules,
         })
     return {
-        "batches": batches, "total_batches": len(batches),
+        "success": True, "batches": batches, "total_batches": len(batches),
         "total_modules": len(all_modules), "total_loaded": len(registry.modules),
     }
 
@@ -410,8 +410,8 @@ async def execute_module_endpoint(name: str, request: Request):
                 if isinstance(_result, _R):
                     return {"success": _result.success, "result": _result.data, "error": _result.error}
                 return {"success": True, "result": _result}
-        except Exception:
-            import traceback; traceback.print_exc()
+        except Exception as e:
+            logger.warning(f"[EXECUTE] 调用失败: {e}")
 
     t0 = time.time()
     try:

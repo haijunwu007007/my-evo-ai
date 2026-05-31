@@ -138,6 +138,7 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 @app.get("/")
 async def root():
     return {
+        "success": True,
         "system": "AUTO-EVO-AI V0.1",
         "status": "running",
         "modules_loaded": len(registry.modules),
@@ -165,6 +166,7 @@ async def system_status():
         except Exception:
             coord_data = {"status": "initializing"}
     return {
+        "success": True,
         "system": "AUTO-EVO-AI V0.1",
         "status": "running",
         "uptime": datetime.now().isoformat(),
