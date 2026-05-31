@@ -31,7 +31,17 @@ router = APIRouter()
 @router.get("/api/diagnosis/system")
 async def system_diagnosis():
     u = time.time() - _START_TIME
-    return {"success": True, "uptime_seconds": round(u, 1), "uptime_human": f"{int(u//3600)}h{int(u%3600//60)}m", "memory_mb": 0, "cpu_percent": 0, "threads": 0, "api_version": "0.1.0"}
+    memory_mb = 0
+    cpu_percent = 0
+    threads = 0
+    try:
+        import psutil
+        memory_mb = round(psutil.Process().memory_info().rss / 1024 / 1024, 1)
+        cpu_percent = psutil.Process().cpu_percent(interval=0.1)
+        threads = psutil.Process().num_threads()
+    except Exception:
+        pass
+    return {"success": True, "uptime_seconds": round(u, 1), "uptime_human": f"{int(u//3600)}h{int(u%3600//60)}m", "memory_mb": memory_mb, "cpu_percent": cpu_percent, "threads": threads, "api_version": "0.1.0"}
 @router.get("/api/diagnosis/modules")
 async def modules_diagnosis():
     m = registry.list_modules() if hasattr(registry, 'list_modules') else []
@@ -48,7 +58,7 @@ async def config_entries():
         if isinstance(all_cfg, dict):
             entries = [{"key": k, "value": str(v)[:200]} for k, v in all_cfg.items()]
             return {"success": True, "entries": entries, "count": len(entries)}
-    except: pass
+    except: logger.warning("auth/system: config read failed")
     return {"success": True, "entries": [], "count": 0}
 @router.get("/api/config/{key:path}")
 async def config_get(key: str):

@@ -6,7 +6,7 @@ AUTO-EVO-AI — 模块管理路由
 
 from __future__ import annotations
 
-import os, sys, json, time, asyncio, importlib, inspect, hashlib, secrets
+import os, sys, json, time, asyncio, importlib, inspect, hashlib, secrets, logging
 from typing import Any, Dict, List, Optional
 from api.category_map import CATEGORY_MAP
 from datetime import datetime
@@ -45,7 +45,7 @@ async def get_module_categories():
         key = CATEGORY_MAP.get(raw_cat.upper(), raw_cat.capitalize())
         normalized[key] = normalized.get(key, 0) + count
     total = sum(normalized.values())
-    return {"categories": normalized, "total": total}
+    return {"success": True, "categories": normalized, "total": total}
 
 
 @router.get("/api/modules")
@@ -83,7 +83,7 @@ async def list_modules(category: str = "", page: int = 1, limit: int = 100):
                 _mod_path = None
                 if not inspect.ismodule(mod):
                     try: _mod_path = inspect.getfile(type(mod))
-                    except: pass
+                    except: pass  # non-critical
                 try:
                     if not _mod_path and isinstance(mod, type):
                         import importlib as _il
@@ -237,10 +237,10 @@ async def module_health(name: str):
         health = registry.health.get(name)
         if health:
             return health
-        return {"status": "unknown", "module": name, "detail": "无health_check方法"}
+        return {"success": False, "status": "unknown", "module": name, "detail": "无health_check方法"}
     except Exception as e:
         logger.error(f"health_check失败 {name}: {e}")
-        return {"status": "error", "module": name, "error": str(e)}
+        return {"success": False, "status": "error", "module": name, "error": str(e)}
 
 
 @router.get("/api/modules/{name}/code")
@@ -511,4 +511,4 @@ async def batch_execute(request: Request):
 @router.get("/api/execution-log")
 async def get_execution_log(limit: int = 50):
     """Get Execution Log - GET /api/execution-log"""
-    return {"log": _execution_log[-limit:], "total": len(_execution_log)}
+    return {"success": True, "log": _execution_log[-limit:], "total": len(_execution_log)}

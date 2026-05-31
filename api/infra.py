@@ -327,12 +327,31 @@ class ModuleRegistry:
 
     _STUB_SIZE_THRESHOLD = 2048
 
+    @staticmethod
+    def _is_true_stub_file(mod_path: str) -> bool:
+        """检查文件是否为真正的桩模块（无真实业务逻辑）"""
+        try:
+            if not os.path.exists(mod_path):
+                return False
+            if os.path.getsize(mod_path) >= 2048:
+                return False
+            src = open(mod_path, encoding="utf-8").read()
+            # 有 def 函数且不仅仅是 __init__ → 不是桩
+            lines = src.split("\n")
+            for ln in lines:
+                stripped = ln.strip()
+                if stripped.startswith("def ") and "__init__" not in stripped:
+                    return False
+            return True
+        except Exception:
+            return False
+
     def get_stub_count(self):
-        """返回 < 2KB 的桩模块数量"""
+        """返回真正的桩模块数量（< 2KB 且无业务逻辑）"""
         stub_names = set()
         for name in set(self._pending_modules.keys()) | set(self.classes.keys()):
             mod_file = BASE_DIR / "modules" / f"{name}.py"
-            if mod_file.exists() and mod_file.stat().st_size < self._STUB_SIZE_THRESHOLD:
+            if self._is_true_stub_file(str(mod_file)):
                 stub_names.add(name)
         return len(stub_names)
 
@@ -341,7 +360,7 @@ class ModuleRegistry:
         stubs = []
         for name in set(self._pending_modules.keys()) | set(self.classes.keys()):
             mod_file = BASE_DIR / "modules" / f"{name}.py"
-            if mod_file.exists() and mod_file.stat().st_size < self._STUB_SIZE_THRESHOLD:
+            if self._is_true_stub_file(str(mod_file)):
                 stubs.append({
                     "name": name,
                     "size_bytes": mod_file.stat().st_size,
@@ -719,7 +738,7 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
             acts = []
             if hasattr(mod, '_get_available_actions'):
                 try: acts = mod._get_available_actions()
-                except: pass
+                except: logger.warning("infra: failed to get actions")
             if not acts:
                 acts = [m for m in dir(mod) if not m.startswith('_') and callable(getattr(mod, m, None)) and m not in ('execute', 'initialize', 'shutdown', 'health_check')]
             return {"success": True, "actions": acts, "module": name}
