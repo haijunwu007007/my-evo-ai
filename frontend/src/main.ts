@@ -1,25 +1,14 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import App from './App.vue'
 import router from './router'
+import App from './App.vue'
+import naive from 'naive-ui'
 
 const app = createApp(App)
-
-// 注册所有 Element Plus 图标
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component)
-}
-
-const pinia = createPinia()
-if (import.meta.env.DEV) {
-  pinia.use((ctx) => { ctx.store.$id; })  // 激活 Vue DevTools Pinia 面板
-}
-
-app.use(pinia)
+app.use(createPinia())
 app.use(router)
-app.use(ElementPlus, { locale: zhCn })
+app.use(naive)
+
+// Naive UI 消息组件注入
+app.config.globalProperties.$message = (window as any).$message || undefined
 app.mount('#app')
