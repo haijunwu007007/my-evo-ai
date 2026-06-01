@@ -219,6 +219,7 @@ async def root():
 
 
 @app.get("/api/status")
+@app.get("/api/v1/status")
 async def system_status():
     coord = get_coordinator_v3()
     coord_data = {}
@@ -301,6 +302,7 @@ class TokenRefreshRequest:
     token: str = ""
 
 @app.post("/api/auth/login")
+@app.post("/api/v1/auth/login")
 async def auth_login(req: LoginRequest):
     """登录获取 JWT 令牌。"""
     from core.auth_provider import create_token, verify_api_key, _ADMIN_KEY
@@ -318,12 +320,14 @@ async def auth_login(req: LoginRequest):
     return JSONResponse(status_code=400, content={"detail": "请提供 username 或 api_key"})
 
 @app.get("/api/auth/config")
+@app.get("/api/v1/auth/config")
 async def auth_config():
     """获取认证配置状态。"""
     from core.auth_provider import get_auth_config
     return get_auth_config()
 
 @app.get("/api/auth/verify")
+@app.get("/api/v1/auth/verify")
 async def auth_verify(token: str = ""):
     """验证令牌是否有效。"""
     from core.auth_provider import verify_token
