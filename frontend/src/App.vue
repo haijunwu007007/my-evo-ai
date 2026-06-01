@@ -191,8 +191,8 @@ const extLinkClick = (link: { url: string }) => {
   if (backendPages.includes(link.url)) {
     window.location.href = `http://127.0.0.1:8765${link.url}`
   } else {
-    // 所有 Vue 路由 → 走 API 服务器（支持 SPA 降级）
-    window.location.href = `http://127.0.0.1:8765/app${link.url}`
+    // 所有 Vue 路由 → 留在 Vite dev server（最新代码，实时编译）
+    window.location.href = `/app${link.url}`
   }
 }
 

@@ -25,7 +25,7 @@ _cleanup_tasks: list = []
 def _mount_vue_frontend():
     """挂载 Vue 3 SPA (/app) + 旧版 Dashboard (/dashboard)"""
     from fastapi.staticfiles import StaticFiles
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, JSONResponse
     from pathlib import Path
 
     vue_dist = BASE_DIR / "frontend" / "dist"
@@ -40,6 +40,16 @@ def _mount_vue_frontend():
             target = vue_dist / spa_path
             if target.is_file():
                 return FileResponse(str(target))
+            idx = vue_dist / "index.html"
+            if idx.exists():
+                return FileResponse(str(idx), media_type="text/html")
+            return JSONResponse(status_code=404, content={"error": "SPA not built"})
+
+        # 非 API 路径兜底 → SPA（必须放在最后注册，避免覆盖 API 路由）
+        @app.get("/{path:path}", include_in_schema=False)
+        async def _spa_catchall(path: str):
+            if path.startswith("api/") or path.startswith("app/"):
+                return JSONResponse(status_code=404, content={"error": "not_found"})
             idx = vue_dist / "index.html"
             if idx.exists():
                 return FileResponse(str(idx), media_type="text/html")

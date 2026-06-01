@@ -101,7 +101,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { api } from '../api/index'
+import api from '@/api'
 
 const instruction = ref('')
 const model = ref('gpt-4o')
