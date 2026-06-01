@@ -54,7 +54,7 @@
           </el-menu-item>
         </el-menu-item-group>
         <el-menu-item-group v-if="!collapsed" title="外部工具">
-          <el-menu-item v-for="link in extLinks" :key="link.url" :index="link.url" class="nav-item">
+          <el-menu-item v-for="link in extLinks" :key="link.url" :index="link.url" class="nav-item" @click="extLinkClick(link)">
             <el-icon><component :is="link.icon" /></el-icon>
             <template #title>{{ link.title }}</template>
           </el-menu-item>
@@ -164,9 +164,22 @@ const opsMenu = [
 ]
 
 const extLinks = [
+  { title: '外部工具', url: '/tools',  icon: 'Connection' },
   { title: 'API 文档', url: '/scalar', icon: 'Reading' },
   { title: '知识库',   url: '/rag',    icon: 'Collection' },
+  { title: 'Webhooks', url: '/webhooks', icon: 'Link' },
+  { title: '通知监控', url: '/notify-monitor', icon: 'ChatDotSquare' },
+  { title: 'Agent-S',  url: '/agent-s', icon: 'Monitor' },
 ]
+
+// 后端直接渲染的页面（非 Vue 路由），需要 window.location 跳转
+const backendPages = ['/scalar']
+const extLinkClick = (link: { url: string }) => {
+  if (backendPages.includes(link.url)) {
+    window.location.href = link.url
+  }
+  // 其他 Vue 路由由 el-menu router 处理
+}
 
 const allMenu = [...coreMenu, ...opsMenu]
 

@@ -46,9 +46,15 @@ declare module 'vue' {
     ElTimeline: typeof import('element-plus/es')['ElTimeline']
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    LoadingBox: typeof import('./src/components/LoadingBox.vue')['default']
+    PagePanel: typeof import('./src/components/PagePanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SsoAuthPanel: typeof import('./src/components/SsoAuthPanel.vue')['default']
+    StatCard: typeof import('./src/components/StatCard.vue')['default']
     SystemMonitorDashboard: typeof import('./src/components/SystemMonitorDashboard.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }
