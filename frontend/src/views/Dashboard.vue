@@ -311,12 +311,12 @@ const loadEngineStatus = async () => {
       { name: '事件引擎', active: events.success !== false,   detail: `${events.total_events || 0} 事件` },
       { name: '管线引擎', active: pip.success !== false,      detail: `${pip.count || 0} 管线` },
       { name: '任务队列', active: queue.success !== false,    detail: `${queue.pending || 0} 待处理` },
+    ]
     // LiteLLM AI 网关
     try {
-      const llm = await api.get('/api/litellm/health').then(r => r.data)
-      engineStatus.value.push({ name: 'LiteLLM', active: llm.status === 'healthy', detail: `${llm.providers || 0} providers` })
-    } catch {}
-    ]
+      const llmResp = await api.get('/api/litellm/health').then((r:any) => r.data).catch(() => null)
+      if (llmResp) engineStatus.value.push({ name: 'LiteLLM', active: llmResp.status === 'healthy', detail: `${llmResp.providers || 0} providers` })
+    } catch (e) {}
   } catch {}
 }
 
