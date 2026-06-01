@@ -69,3 +69,4 @@ modules/.backups/
 api_stderr*.txt
 api_stdout*.txt
 test_out.txt
+test-results/
