@@ -10,7 +10,7 @@
       </el-col>
     </el-row>
 
-    <div class="panel">
+    <div class="panel" v-loading="loading" element-loading-text="加载模块中...">
       <!-- 工具栏 -->
       <div class="toolbar">
         <el-input
@@ -141,6 +141,7 @@ const filterGrade = ref('')
 const filterCat = ref('')
 const viewMode = ref('card')
 const rescanning = ref(false)
+const loading = ref(false)
 const drawerVisible = ref(false)
 const selectedMod = ref<any>(null)
 const allModules = ref<any[]>([])
@@ -211,6 +212,7 @@ const selectModule = (m: any) => {
 }
 
 const load = async () => {
+  loading.value = true
   try {
     // 从 /api/modules/list 获取全部模块（limit=500 不打分页）
     const r = await api.get('/modules/list', { params: { limit: 500, offset: 0 } })
@@ -227,6 +229,8 @@ const load = async () => {
     cats.value = grouped
   } catch (e) {
     console.error('加载模块失败', e)
+  } finally {
+    loading.value = false
   }
 }
 
