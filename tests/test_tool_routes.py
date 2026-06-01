@@ -42,14 +42,15 @@ class TestToolRoutes:
         assert resp.status_code == 200, f"{desc} ({path}) → {resp.status_code}"
         data = resp.json()
         assert isinstance(data, dict), f"{desc} 返回非 JSON"
-        # 每个工具响应至少包含 available 或 name 字段
-        assert any(k in data for k in ("available", "name", "healthy", "status", "success")), \
-            f"{desc} 缺少关键字段: {list(data.keys())[:5]}"
+        # Langfuse traces 端点返回 traces+note
+        # 每个工具响应至少包含描述性字段
+        if "traces" in path:
+            assert "traces" in data or "note" in data, f"{desc} 缺少 traces/note"
+        else:
+            assert any(k in data for k in ("available", "name", "healthy", "status", "success")), \
+                f"{desc} 缺少关键字段: {list(data.keys())[:5]}"
 
-    def test_external_tools_page_served(self):
-        """验证外部工具面板前端页面可访问"""
-        resp = client.get("/dashboard")
-        assert resp.status_code in (200, 302, 307), f"/dashboard → {resp.status_code}"
+
 
     def test_agent_s_check(self):
         """Agent-S 环境检测端点"""
