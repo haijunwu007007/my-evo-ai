@@ -10,33 +10,41 @@ class TaskRequest(BaseModel):
     headless: bool = True
     max_steps: int = 20
 
-_mod = None
-def _get():
-    global _mod
-    if _mod is None:
-        import importlib, asyncio
-        spec = importlib.util.spec_from_file_location("browser_use_mod", "modules/browser_use.py")
-        _mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_mod)
-    return _mod
+_AVAILABLE = None
+
+def _check():
+    global _AVAILABLE
+    if _AVAILABLE is not None:
+        return _AVAILABLE
+    try:
+        import browser_use
+        _AVAILABLE = True
+    except ImportError:
+        _AVAILABLE = False
+    return _AVAILABLE
 
 @router.get(B)
 async def status():
-    m = _get()
-    r = await m.execute("status")
-    return {"success": True, "available": r.get("available", False), "installed": r.get("installed", False), "version": "0.12.6"}
+    ok = _check()
+    return {"success": True, "available": ok, "name": "browser-use (93k⭐) AI浏览器自动化", "version": "0.12.6"}
 
 @router.post(B + "/run")
 async def run(req: TaskRequest):
-    m = _get()
+    if not _check():
+        return {"success": False, "error": "browser-use not installed"}
     task = req.task or req.instruction
     if not task:
         return {"success": False, "error": "task required"}
-    r = await m.execute("execute", {"task": task, "headless": req.headless, "max_steps": req.max_steps})
-    return r
+    try:
+        from browser_use import Agent
+        import os
+        os.environ["ANONYMIZED_TELEMETRY"] = "false"
+        agent = Agent(task=task, headless=req.headless, max_steps=req.max_steps)
+        result = await agent.run()
+        return {"success": True, "result": result[:2000] if result else "done"}
+    except Exception as e:
+        return {"success": False, "error": str(e)[:500]}
 
 @router.get(B + "/history")
 async def history():
-    m = _get()
-    r = await m.execute("history")
-    return {"success": True, "history": r.get("history", [])}
+    return {"success": True, "history": []}

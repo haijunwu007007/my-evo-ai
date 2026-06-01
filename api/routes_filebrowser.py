@@ -15,10 +15,10 @@ def _login():
     try:
         data = json.dumps({"username": FB_USER, "password": FB_PASS}).encode()
         req = urllib.request.Request(f"{FB_URL}/api/login", data=data, headers={"Content-Type": "application/json"}, method="POST")
-        resp = urllib.request.urlopen(req, timeout=5)
+        resp = urllib.request.urlopen(req, timeout=3)
         _SESSION = resp.headers.get("Set-Cookie", "")
         return True
-    except Exception as e:
+    except Exception:
         _SESSION = None
         return False
 

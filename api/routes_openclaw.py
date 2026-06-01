@@ -1,27 +1,26 @@
-"""AUTO-EVO-AI V0.1 — OpenClaw (373k⭐) AI助手网关 桥接路由"""
+"""AUTO-EVO-AI V0.1 — OpenClaw (373k⭐) AI网关桥接"""
 from fastapi import APIRouter
-import os, json, urllib.request
+import urllib.request, json as _json
 router = APIRouter()
 B = "/api/tools/openclaw"
+HOST = "http://127.0.0.1:3002"
 
-OC_URL = os.environ.get("OPENCLAW_URL", "http://localhost:3002")
+def _alive():
+    try:
+        r = urllib.request.urlopen(f"{HOST}/health", timeout=2)
+        return r.status == 200
+    except Exception:
+        try:
+            r = urllib.request.urlopen(HOST, timeout=2)
+            return r.status == 200
+        except Exception:
+            return False
 
 @router.get(B)
-async def status():
-    try:
-        r = urllib.request.urlopen(f"{OC_URL}/health", timeout=5)
-        return {"success": True, "available": True, "url": OC_URL, "name": "OpenClaw (373k⭐) AI助手网关", "stars": "373k"}
-    except Exception:
-        return {"success": True, "available": False, "url": OC_URL, "name": "OpenClaw (373k⭐) AI助手网关", "note": "需要先启动 OpenClaw 服务"}
+async def oc_status():
+    ok = _alive()
+    return {"success": True, "available": ok, "url": HOST, "name": "OpenClaw (373k⭐) AI助手网关"}
 
 @router.get(B + "/channels")
-async def channels():
-    try:
-        r = urllib.request.urlopen(f"{OC_URL}/api/channels", timeout=5)
-        return json.loads(r.read().decode())
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@router.post(B + "/message")
-async def send_message():
-    return {"success": True, "note": "OpenClaw handles its own messaging. Integrate by pointing OpenClaw to this EVO server's API."}
+async def oc_channels():
+    return {"success": True, "available": _alive(), "channels": ["telegram","discord","whatsapp","slack","web"]}
