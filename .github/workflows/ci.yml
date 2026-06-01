@@ -36,7 +36,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-      - run: pip install -r requirements.txt -r requirements-core.txt
+      - run: pip install -r requirements.txt
       - name: Run tests
         run: |
           python -m pytest tests/ --ignore=tests/test_unit_core.py -v --tb=short --junitxml=report.xml
@@ -60,7 +60,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - run: pip install -r requirements.txt -r requirements-core.txt pytest-cov
+      - run: pip install -r requirements.txt pytest-cov
       - name: Measure coverage
         run: |
           python -m pytest tests/ --ignore=tests/test_unit_core.py --cov=modules/ --cov=api/ --cov-report=term --cov-report=xml --tb=short
