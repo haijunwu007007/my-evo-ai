@@ -113,6 +113,12 @@ const routes = [
     component: () => import('@/views/RagKnowledge.vue'),
     meta: { title: '知识库', icon: 'Collection' },
   },
+  {
+    path: '/agent-s',
+    name: 'AgentS',
+    component: () => import('@/views/AgentSPanel.vue'),
+    meta: { title: 'Agent-S 桌面自动化', icon: 'Monitor' },
+  },
 ]
 
 const router = createRouter({
