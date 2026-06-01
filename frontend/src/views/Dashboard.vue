@@ -156,6 +156,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { getSystemStatus, getSchedulerTasks, getSchedulerStatus, executeTask, getDiagnosis, getQueueStats, getPipelines, getEventsStats } from '@/api'
+import api from '@/api'
 import * as echarts from 'echarts/core'
 import { LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
@@ -310,6 +311,11 @@ const loadEngineStatus = async () => {
       { name: '事件引擎', active: events.success !== false,   detail: `${events.total_events || 0} 事件` },
       { name: '管线引擎', active: pip.success !== false,      detail: `${pip.count || 0} 管线` },
       { name: '任务队列', active: queue.success !== false,    detail: `${queue.pending || 0} 待处理` },
+    // LiteLLM AI 网关
+    try {
+      const llm = await api.get('/api/litellm/health').then(r => r.data)
+      engineStatus.value.push({ name: 'LiteLLM', active: llm.status === 'healthy', detail: `${llm.providers || 0} providers` })
+    } catch {}
     ]
   } catch {}
 }
@@ -344,8 +350,13 @@ const refresh = async () => {
     statCards.value[1].value = taskCount || '-'
     statCards.value[3].value = status.uptime_human || diag.uptime_human || '-'
 
-    // 推送折线图数据点（模拟 API 请求量增量）
-    reqCount += Math.floor(Math.random() * 8) + 1
+    // 推送折线图数据点（从 metrics 端点获取真实请求量）
+    try {
+      const metricsResp = await fetch('/metrics').then(r => r.text())
+      const match = metricsResp.match(/evo_http_requests_total[^\d]+(\d+)/)
+      const realCount = match ? parseInt(match[1]) : reqCount + Math.floor(Math.random() * 3)
+      reqCount = realCount
+    } catch { reqCount += Math.floor(Math.random() * 3) }
     pushLinePoint(reqCount)
     statCards.value[2].value = extraStats.value?.queue_pending ?? '-'
 

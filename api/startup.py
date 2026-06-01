@@ -61,6 +61,13 @@ async def lifespan(app: FastAPI):
     logger.info("AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)")
     logger.info("=" * 60)
 
+    # 初始化可观测性
+    try:
+        from core.telemetry import init_telemetry
+        init_telemetry()
+    except Exception:
+        pass
+
     t0 = time.time()
     registry.auto_discover("modules")
     lazy_count = len(registry._pending_modules)
