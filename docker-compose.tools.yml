@@ -184,3 +184,56 @@ services:
       - "8080:80"
     volumes:
       - ./_data/appsmith:/appsmith-stacks
+
+  code-server:
+    image: codercom/code-server:latest
+    ports:
+      - "8443:8080"
+    volumes:
+      - ./:/home/coder/project
+      - ./_data/code-server:/home/coder/.config
+    environment:
+      PASSWORD: evo-code
+    user: "1000:1000"
+
+  dashy:
+    image: lissy93/dashy:latest
+    ports:
+      - "4000:80"
+    volumes:
+      - ./dashy-conf.yml:/app/public/conf.yml
+    environment:
+      NODE_ENV: production
+
+  ntfy:
+    image: binwiederhier/ntfy:latest
+    ports:
+      - "8086:80"
+    volumes:
+      - ./_data/ntfy:/etc/ntfy
+    command: serve
+
+  nocodb:
+    image: nocodb/nocodb:latest
+    ports:
+      - "8088:8080"
+    volumes:
+      - ./_data/nocodb:/usr/app/data
+
+  changedetection:
+    image: dgtlmoon/changedetection.io:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./_data/changedetection:/datastore
+    environment:
+      PLAYWRIGHT_DRIVER_URL: ws://playwright-chrome:3000?token=evo-cd-token
+
+  playwright-chrome:
+    image: browserless/chrome:latest
+    expose:
+      - "3000"
+    environment:
+      CONNECTION_TIMEOUT: 60000
+      MAX_CONCURRENT_SESSIONS: 10
+      TOKEN: evo-cd-token

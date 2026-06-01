@@ -1,724 +1,367 @@
-2026-06-01 13:19:03,826 | INFO     | [SCALAR] API 文档已挂载: /scalar
-2026-06-01 13:19:04,251 | INFO     | [Scheduler] 引擎初始化
-2026-06-01 13:19:04,252 | INFO     | [ENGINE] SchedulerEngine 加载成功
-2026-06-01 13:19:04,273 | INFO     | [EventEngine] 初始化 | 规则: 0
-2026-06-01 13:19:04,274 | INFO     | [ENGINE] EventEngine 加载成功
-2026-06-01 13:19:04,276 | WARNING  | [ENGINE] PipelineEngine 不可用: cannot import name 'traceback' from 'core.logging_config' (D:\AUTO-EVO-AI-V0.1\core\logging_config.py)
-INFO:     Started server process [16412]
+2026-06-01 15:15:18,413 | INFO     | [SCALAR] API 文档已挂载: /scalar
+2026-06-01 15:15:19,260 | INFO     | [Scheduler] 引擎初始化
+2026-06-01 15:15:19,261 | INFO     | [ENGINE] SchedulerEngine 加载成功
+2026-06-01 15:15:19,279 | INFO     | [EventEngine] 初始化 | 规则: 0
+2026-06-01 15:15:19,280 | INFO     | [ENGINE] EventEngine 加载成功
+2026-06-01 15:15:19,283 | WARNING  | [ENGINE] PipelineEngine 不可用: cannot import name 'traceback' from 'core.logging_config' (D:\AUTO-EVO-AI-V0.1\core\logging_config.py)
+INFO:     Started server process [12328]
 INFO:     Waiting for application startup.
-2026-06-01 13:19:04,552 | INFO     | ============================================================
-2026-06-01 13:19:04,553 | INFO     | AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)
-2026-06-01 13:19:04,554 | INFO     | ============================================================
-2026-06-01 13:19:05,010 | INFO     | [OTEL] FastAPI 自动仪表化完成
-2026-06-01 13:19:05,011 | INFO     | [OTEL] OpenTelemetry 初始化完成: auto-evo-ai vV0.1
-2026-06-01 13:19:05,019 | INFO     | [LAZY] 注册 460 个模块待按需加载
-2026-06-01 13:19:05,020 | INFO     | 已注册 460 个模块（lazy），已有 0 个已加载模块
-2026-06-01 13:19:05,020 | INFO     | 启动耗时: 0.0s — 首次调用模块时按需加载
-2026-06-01 13:19:05,023 | INFO     | [VUE] SPA 已挂载: D:\AUTO-EVO-AI-V0.1\frontend\dist -> /app
-2026-06-01 13:19:05,026 | INFO     | [VUE] Dashboard 已挂载: D:\AUTO-EVO-AI-V0.1\index.html
-2026-06-01 13:19:05,032 | INFO     | [Scheduler] 调度器已启动 | 活跃任务: 0
-2026-06-01 13:19:05,033 | INFO     | [ENGINES] 调度器/事件引擎/任务队列 已启动
-2026-06-01 13:19:05,034 | WARNING  | [ENGINES] 引擎启动失败: a coroutine was expected, got None
-2026-06-01 13:19:05,043 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:05,048 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:05,050 | INFO     | [FileWatcher] 已启动, 监听 0 个目录
-2026-06-01 13:19:05,061 | INFO     | [EventEngine] 已启动
+2026-06-01 15:15:20,686 | INFO     | ============================================================
+2026-06-01 15:15:20,687 | INFO     | AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)
+2026-06-01 15:15:20,689 | INFO     | ============================================================
+2026-06-01 15:15:20,783 | INFO     | [OTEL] FastAPI 自动仪表化完成
+2026-06-01 15:15:20,784 | INFO     | [OTEL] OpenTelemetry 初始化完成: auto-evo-ai vV0.1
+2026-06-01 15:15:20,800 | INFO     | [LAZY] 注册 457 个模块待按需加载
+2026-06-01 15:15:20,802 | INFO     | 已注册 457 个模块（lazy），已有 0 个已加载模块
+2026-06-01 15:15:20,804 | INFO     | 启动耗时: 0.0s — 首次调用模块时按需加载
+2026-06-01 15:15:20,805 | INFO     | [VUE] SPA 已挂载: D:\AUTO-EVO-AI-V0.1\frontend\dist -> /app
+2026-06-01 15:15:20,807 | INFO     | [VUE] Dashboard 已挂载: D:\AUTO-EVO-AI-V0.1\index.html
+2026-06-01 15:15:20,813 | INFO     | [Scheduler] 调度器已启动 | 活跃任务: 0
+2026-06-01 15:15:20,814 | INFO     | [ENGINES] 调度器/事件引擎/任务队列 已启动
+2026-06-01 15:15:20,815 | WARNING  | [ENGINES] 引擎启动失败: a coroutine was expected, got None
+2026-06-01 15:15:20,820 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:20,826 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:20,827 | INFO     | [FileWatcher] 已启动, 监听 0 个目录
+2026-06-01 15:15:20,840 | INFO     | [EventEngine] 已启动
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
-INFO:     127.0.0.1:49686 - "WebSocket /ws" [accepted]
+INFO:     127.0.0.1:55810 - "WebSocket /ws" [accepted]
 INFO:     connection open
-2026-06-01 13:19:06,640 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:06,742 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:06,744 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:06,745 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:06,752 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:06,753 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:06,754 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:06,765 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:06,770 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:06,778 | INFO     | [WS] 初始化 | heartbeat=30s, history=100
-INFO:     127.0.0.1:49692 - "WebSocket /ws/events" [accepted]
+2026-06-01 15:15:22,570 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:22,688 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:22,690 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:22,691 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:22,699 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:22,701 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:22,702 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:22,719 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:22,725 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:22,732 | INFO     | [WS] 初始化 | heartbeat=30s, history=100
+INFO:     127.0.0.1:55817 - "WebSocket /ws/events" [accepted]
 INFO:     connection open
-INFO:     127.0.0.1:49688 - "WebSocket /ws" [accepted]
-2026-06-01 13:19:06,783 | INFO     | [WS] 连接: 44108cc1 (127.0.0.1) rooms=['events', 'system']
+2026-06-01 15:15:22,738 | INFO     | [WS] 连接: 7edd4b0e (127.0.0.1) rooms=['system', 'events']
+INFO:     127.0.0.1:55837 - "WebSocket /ws" [accepted]
 INFO:     connection open
-2026-06-01 13:19:08,912 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:09,029 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:09,030 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:09,035 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:09,038 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:09,039 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:09,040 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:09,046 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:09,058 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:09,076 | INFO     | [LAZY-LOAD] access_control -> AccessControlEngine
-INFO:     127.0.0.1:49694 - "WebSocket /ws/events" [accepted]
+2026-06-01 15:15:25,706 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:25,795 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:25,796 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:25,797 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:25,799 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:25,800 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:25,800 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:25,827 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:25,831 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:25,847 | INFO     | [LAZY-LOAD] access_control -> AccessControlEngine
+2026-06-01 15:15:27,518 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:27,601 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:27,602 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:27,607 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:27,610 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:27,612 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:27,613 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:27,646 | WARNING  | [WARMUP] 预热失败: access_control: 'AccessControlEngine' object has no attribute 'logger'
+2026-06-01 15:15:27,667 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:27,670 | INFO     | Prometheus指标采集器初始化完成
+2026-06-01 15:15:27,684 | INFO     | 安全治理模块初始化完成，策略数: 3
+2026-06-01 15:15:27,684 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:27,684 | INFO     | [LAZY-LOAD] aegis_governance -> AegisGovernanceManager
+2026-06-01 15:15:27,701 | INFO     | [ConfigCenter] 初始化完成 | 配置项: 33 | 审计: 1条
+2026-06-01 15:15:27,703 | INFO     | 安全治理模块初始化完成，策略数: 3
+2026-06-01 15:15:27,717 | WARNING  | [LAZY-INIT] agency_swarm initialize异常: 'AgentFactory' object has no attribute 'trace'
+2026-06-01 15:15:27,719 | INFO     | [LAZY-LOAD] agency_swarm -> AgentFactory
+2026-06-01 15:15:29,514 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:29,614 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:29,615 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:29,616 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:29,618 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:29,619 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:29,620 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:29,648 | WARNING  | [WARMUP] 预热失败: agency_swarm: 'AgentFactory' object has no attribute 'trace'
+2026-06-01 15:15:29,656 | INFO     | Apollo智能体初始化完成
+2026-06-01 15:15:29,656 | INFO     | [LAZY-LOAD] agent_apollo -> AgentApolloManager
+2026-06-01 15:15:29,662 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:29,670 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:29,672 | INFO     | Apollo智能体初始化完成
+INFO:     127.0.0.1:55878 - "WebSocket /ws" [accepted]
 INFO:     connection open
-INFO:     127.0.0.1:49695 - "WebSocket /ws" [accepted]
-2026-06-01 13:19:09,097 | WARNING  | [WARMUP] 预热失败: access_control: 'AccessControlEngine' object has no attribute 'logger'
-2026-06-01 13:19:09,108 | INFO     | [WS] 连接: 6e013dbd (127.0.0.1) rooms=['events', 'system']
+2026-06-01 15:15:29,688 | INFO     | 生命周期管理器初始化完成，注册组件: 8
+2026-06-01 15:15:29,689 | INFO     | [LAZY-LOAD] agent_athena -> AgentAthenaManager
+2026-06-01 15:15:31,488 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:31,743 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:31,763 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:31,766 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:31,768 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:31,788 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:31,789 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:31,791 | INFO     | 生命周期管理器初始化完成，注册组件: 8
+2026-06-01 15:15:31,801 | WARNING  | [LAZY-INIT] agent_boreas initialize异常: 'AgentBoreas' object has no attribute 'logger'
+2026-06-01 15:15:31,802 | INFO     | [LAZY-LOAD] agent_boreas -> AgentBoreas
+2026-06-01 15:15:31,804 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:31,814 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:31,817 | WARNING  | [WARMUP] 预热失败: agent_boreas: 'AgentBoreas' object has no attribute 'logger'
+INFO:     127.0.0.1:55881 - "WebSocket /ws/events" [accepted]
+2026-06-01 15:15:31,826 | INFO     | [LAZY-LOAD] agent_cronus -> CronusAgent
 INFO:     connection open
-2026-06-01 13:19:09,124 | INFO     | Prometheus指标采集器初始化完成
-2026-06-01 13:19:09,139 | INFO     | 安全治理模块初始化完成，策略数: 3
-2026-06-01 13:19:09,140 | INFO     | [LAZY-LOAD] aegis_governance -> AegisGovernanceManager
-2026-06-01 13:19:09,174 | INFO     | 安全治理模块初始化完成，策略数: 3
-2026-06-01 13:19:09,261 | WARNING  | [LAZY-INIT] agency_swarm initialize异常: 'AgentFactory' object has no attribute 'trace'
-2026-06-01 13:19:09,277 | INFO     | [LAZY-LOAD] agency_swarm -> AgentFactory
-2026-06-01 13:19:11,619 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:11,718 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:11,719 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:11,721 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:11,723 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:11,724 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:11,725 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:15,200 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:15,394 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:15,395 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:15,396 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:15,403 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:15,405 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:15,405 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:15,408 | WARNING  | [WARMUP] 预热失败: agency_swarm: 'AgentFactory' object has no attribute 'trace'
-2026-06-01 13:19:15,423 | INFO     | Apollo智能体初始化完成
-2026-06-01 13:19:15,427 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:15,428 | INFO     | [LAZY-LOAD] agent_apollo -> AgentApolloManager
-2026-06-01 13:19:15,440 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-INFO:     127.0.0.1:49724 - "WebSocket /ws/events" [accepted]
+2026-06-01 15:15:31,831 | INFO     | [WS] 连接: f3b84895 (127.0.0.1) rooms=['system', 'events']
+2026-06-01 15:15:31,833 | WARNING  | [WARMUP] 预热失败: agent_cronus: 'CronusAgent' object has no attribute 'update_status'
+2026-06-01 15:15:31,840 | INFO     | Demeter智能体初始化完成
+2026-06-01 15:15:31,841 | INFO     | [LAZY-LOAD] agent_demeter -> AgentDemeterManager
+2026-06-01 15:15:31,843 | INFO     | Demeter智能体初始化完成
+2026-06-01 15:15:31,849 | INFO     | [LAZY-LOAD] agent_eros -> AgentEros
+2026-06-01 15:15:31,851 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:31,852 | WARNING  | [WARMUP] 预热失败: agent_eros: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:31,857 | INFO     | Hecate智能体初始化完成
+2026-06-01 15:15:31,858 | INFO     | [LAZY-LOAD] agent_hecate -> AgentHecateManager
+2026-06-01 15:15:31,859 | INFO     | Hecate智能体初始化完成
+2026-06-01 15:15:31,871 | INFO     | [LAZY-LOAD] agent_hephaestus -> AgentHephaestus
+2026-06-01 15:15:31,873 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:31,873 | WARNING  | [WARMUP] 预热失败: agent_hephaestus: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:31,882 | INFO     | [LAZY-LOAD] agent_hera -> AgentHera
+2026-06-01 15:15:31,884 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:31,885 | WARNING  | [WARMUP] 预热失败: agent_hera: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:31,891 | INFO     | [LAZY-LOAD] agent_hermes -> AgentHermes
+2026-06-01 15:15:31,892 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:31,893 | WARNING  | [WARMUP] 预热失败: agent_hermes: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:31,903 | INFO     | [LAZY-LOAD] agent_iris -> AgentIris
+2026-06-01 15:15:31,912 | WARNING  | [WARMUP] 预热失败: agent_iris: 'AgentIris' object has no attribute 'stats'
+2026-06-01 15:15:31,923 | INFO     | [LAZY-LOAD] agent_market -> AgentMarket
+2026-06-01 15:15:31,926 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:31,927 | WARNING  | [WARMUP] 预热失败: agent_market: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:31,943 | ERROR    | 市场初始化失败: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
+2026-06-01 15:15:31,944 | WARNING  | [LAZY-INIT] agent_marketplace initialize异常: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
+2026-06-01 15:15:31,946 | INFO     | [LAZY-LOAD] agent_marketplace -> AgentMarketplaceManager
+2026-06-01 15:15:31,947 | ERROR    | 市场初始化失败: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
+2026-06-01 15:15:31,948 | WARNING  | [WARMUP] 预热失败: agent_marketplace: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
+2026-06-01 15:15:31,954 | INFO     | MAS多智能体系统初始化完成
+2026-06-01 15:15:31,955 | INFO     | [LAZY-LOAD] agent_mas -> AgentMASManager
+2026-06-01 15:15:31,957 | INFO     | MAS多智能体系统初始化完成
+2026-06-01 15:15:31,961 | INFO     | Minerva智能体初始化完成
+2026-06-01 15:15:31,965 | INFO     | [LAZY-LOAD] agent_minerva -> AgentMinervaManager
+2026-06-01 15:15:31,967 | INFO     | Minerva智能体初始化完成
+2026-06-01 15:15:31,972 | INFO     | Nemesis智能体初始化完成
+2026-06-01 15:15:31,974 | INFO     | [LAZY-LOAD] agent_nemesis -> AgentNemesisManager
+2026-06-01 15:15:31,979 | INFO     | Nemesis智能体初始化完成
+2026-06-01 15:15:31,992 | INFO     | \U0001f4cb 规则引擎意图分析模式
+2026-06-01 15:15:31,992 | INFO     | AgentOrchestrator initialized
+2026-06-01 15:15:31,993 | INFO     | [LAZY-LOAD] agent_orchestrator -> AgentOrchestrator
+2026-06-01 15:15:31,994 | INFO     | AgentOrchestrator initialized
+2026-06-01 15:15:31,999 | INFO     | Phoebus智能体初始化完成 | 9路由 | 3限流规则
+2026-06-01 15:15:32,000 | INFO     | [LAZY-LOAD] agent_phoebus -> AgentPhoebusManager
+2026-06-01 15:15:32,002 | INFO     | Phoebus智能体初始化完成 | 18路由 | 3限流规则
+2026-06-01 15:15:32,015 | WARNING  | [LAZY-INIT] agent_planner initialize异常: name 'Path' is not defined
+2026-06-01 15:15:32,023 | INFO     | [LAZY-LOAD] agent_planner -> AgentPlanner
+2026-06-01 15:15:32,025 | WARNING  | [WARMUP] 预热失败: agent_planner: name 'Path' is not defined
+2026-06-01 15:15:32,029 | INFO     | Poseidon智能体初始化完成 | 5路由 | 8后端
+2026-06-01 15:15:32,030 | INFO     | [LAZY-LOAD] agent_poseidon -> AgentPoseidonManager
+2026-06-01 15:15:32,032 | INFO     | Poseidon智能体初始化完成 | 5路由 | 8后端
+2026-06-01 15:15:32,232 | INFO     | HardwareMonitor 初始化完成，采样间隔: 1.0s
+2026-06-01 15:15:32,234 | INFO     | ResourceQuotaManager 初始化完成
+2026-06-01 15:15:32,235 | INFO     | LowPerfAdapter 初始化，性能模式: balanced
+2026-06-01 15:15:32,236 | INFO     | LoadBalancer 初始化完成，策略: resource_aware
+2026-06-01 15:15:32,238 | INFO     | AgentPool [轻量任务池] 初始化完成，最大容量: 1000000
+2026-06-01 15:15:32,241 | INFO     | AgentPool [重度开发池] 初始化完成，最大容量: 500000
+2026-06-01 15:15:32,242 | INFO     | AgentPool [运算池] 初始化完成，最大容量: 100000
+2026-06-01 15:15:32,244 | INFO     | 硬件监控已启动
+2026-06-01 15:15:32,246 | INFO     | AgentPool [轻量任务池] 已启动
+2026-06-01 15:15:32,266 | INFO     | AgentPool [重度开发池] 已启动
+2026-06-01 15:15:32,268 | INFO     | AgentPool [运算池] 已启动
+2026-06-01 15:15:32,270 | INFO     | AgentResourceController v6.28.0 初始化完成
+2026-06-01 15:15:32,272 | INFO     | [LAZY-LOAD] agent_resource_control -> AgentResourceController
+2026-06-01 15:15:32,274 | INFO     | [evo.resource.agent] 模块 evo.resource.agent 初始化完成
+2026-06-01 15:15:32,281 | INFO     | Themis智能体初始化完成
+2026-06-01 15:15:32,283 | INFO     | [LAZY-LOAD] agent_themis -> AgentThemisManager
+2026-06-01 15:15:32,284 | INFO     | Themis智能体初始化完成
+2026-06-01 15:15:32,293 | INFO     | [agentguard-sec] 初始化Agent安全防护...
+2026-06-01 15:15:32,296 | INFO     | [agentguard-sec] Agent安全防护就绪
+2026-06-01 15:15:32,299 | INFO     | [LAZY-LOAD] agentguard_sec -> AgentGuardSec
+2026-06-01 15:15:32,301 | INFO     | [agentguard-sec] 初始化Agent安全防护...
+2026-06-01 15:15:32,303 | INFO     | [agentguard-sec] Agent安全防护就绪
+2026-06-01 15:15:32,314 | INFO     | AgentSeek初始化完成
+2026-06-01 15:15:32,314 | INFO     | [LAZY-LOAD] agentseek -> AgentseekManager
+2026-06-01 15:15:32,316 | INFO     | AgentSeek初始化完成
+2026-06-01 15:15:32,318 | INFO     | [LAZY-LOAD] ai_gateway -> AIGateway
+2026-06-01 15:15:32,322 | INFO     | [LAZY-LOAD] aiops_monitor -> AiopsMonitor
+2026-06-01 15:15:32,331 | INFO     | [LAZY-LOAD] alert_manager -> AlertManager
+2026-06-01 15:15:32,338 | INFO     | Ansible执行器初始化完成
+2026-06-01 15:15:32,339 | INFO     | [LAZY-LOAD] ansible_runner -> AnsibleRunnerManager
+2026-06-01 15:15:32,340 | INFO     | Ansible执行器初始化完成
+2026-06-01 15:15:32,345 | ERROR    | API缓存初始化失败: CacheRule() takes no arguments
+2026-06-01 15:15:32,346 | WARNING  | [LAZY-INIT] api_cache initialize异常: CacheRule() takes no arguments
+2026-06-01 15:15:32,379 | WARNING  | 硬件告警: CPU使用率过高: 100.0%
+2026-06-01 15:15:32,380 | INFO     | [LAZY-LOAD] api_cache -> ApiCacheManager
+2026-06-01 15:15:32,381 | ERROR    | API缓存初始化失败: CacheRule() takes no arguments
+2026-06-01 15:15:32,382 | WARNING  | [WARMUP] 预热失败: api_cache: CacheRule() takes no arguments
+2026-06-01 15:15:32,386 | INFO     | API Mock服务初始化完成
+2026-06-01 15:15:32,387 | INFO     | [LAZY-LOAD] api_mock -> ApiMockManager
+2026-06-01 15:15:32,389 | INFO     | API Mock服务初始化完成
+2026-06-01 15:15:32,394 | INFO     | API限流守卫初始化完成 | 8规则 | 3分级客户端
+2026-06-01 15:15:32,395 | INFO     | [LAZY-LOAD] api_rate_guard -> ApiRateGuardManager
+2026-06-01 15:15:32,397 | INFO     | API限流守卫初始化完成 | 16规则 | 3分级客户端
+2026-06-01 15:15:32,403 | INFO     | API测试器初始化完成
+2026-06-01 15:15:32,404 | INFO     | [LAZY-LOAD] api_tester -> ApiTesterManager
+2026-06-01 15:15:32,407 | INFO     | API测试器初始化完成
+2026-06-01 15:15:32,412 | INFO     | API版本管理初始化完成
+2026-06-01 15:15:32,412 | INFO     | [LAZY-LOAD] api_versioning -> ApiVersioningManager
+2026-06-01 15:15:32,414 | INFO     | API版本管理初始化完成
+2026-06-01 15:15:32,419 | INFO     | ArgoCD部署管理初始化完成
+2026-06-01 15:15:32,419 | INFO     | [LAZY-LOAD] argocd_deploy -> ArgocdDeployManager
+2026-06-01 15:15:32,423 | INFO     | ArgoCD部署管理初始化完成
+2026-06-01 15:15:32,431 | INFO     | [LAZY-LOAD] atom_code -> AtomCode
+2026-06-01 15:15:32,433 | INFO     | [atom_code] 模块 atom_code 初始化完成
+2026-06-01 15:15:32,439 | INFO     | [LAZY-LOAD] audio_transcription -> AudioTranscription
+2026-06-01 15:15:32,441 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:32,442 | WARNING  | [WARMUP] 预热失败: audio_transcription: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:32,446 | INFO     | [audit-log] 初始化审计日志...
+2026-06-01 15:15:32,447 | INFO     | [audit-log] 审计日志就绪
+2026-06-01 15:15:32,448 | INFO     | [LAZY-LOAD] audit_log -> AuditLog
+2026-06-01 15:15:32,449 | INFO     | [audit-log] 初始化审计日志...
+2026-06-01 15:15:32,451 | INFO     | [audit-log] 审计日志就绪
+2026-06-01 15:15:32,458 | INFO     | 自动故障转移初始化完成
+2026-06-01 15:15:32,459 | INFO     | [LAZY-LOAD] auto_failover -> AutoFailoverManager
+2026-06-01 15:15:32,461 | INFO     | 自动故障转移初始化完成
+2026-06-01 15:15:32,466 | INFO     | 自动修复初始化完成
+2026-06-01 15:15:32,467 | INFO     | [LAZY-LOAD] auto_healing -> AutoHealingManager
+2026-06-01 15:15:32,468 | INFO     | 自动修复初始化完成
+2026-06-01 15:15:32,472 | INFO     | [auto-restart] 初始化自动重启服务...
+2026-06-01 15:15:32,473 | WARNING  | [LAZY-INIT] auto_restart initialize异常: no running event loop
+2026-06-01 15:15:32,475 | INFO     | [LAZY-LOAD] auto_restart -> AutoRestart
+2026-06-01 15:15:32,476 | INFO     | [auto-restart] 初始化自动重启服务...
+2026-06-01 15:15:32,477 | WARNING  | [WARMUP] 预热失败: auto_restart: a coroutine was expected, got None
+2026-06-01 15:15:32,485 | INFO     | 自动扩缩容初始化完成
+2026-06-01 15:15:32,487 | INFO     | [LAZY-LOAD] auto_scale -> AutoScaleManager
+2026-06-01 15:15:32,490 | INFO     | 自动扩缩容初始化完成
+2026-06-01 15:15:32,495 | INFO     | [LAZY-LOAD] auto_summary -> AutoSummary
+2026-06-01 15:15:32,497 | INFO     | [] 模块  初始化完成
+2026-06-01 15:15:32,498 | WARNING  | [WARMUP] 预热失败: auto_summary: type object 'ModuleStatus' has no attribute 'READY'
+2026-06-01 15:15:32,507 | INFO     | AutoGen Studio 初始化完成: 5 智能体, 4 技能
+2026-06-01 15:15:32,508 | INFO     | [LAZY-LOAD] autogen_studio -> AutoGenStudioManager
+2026-06-01 15:15:32,517 | INFO     | 自动化中心初始化完成，5 个内置模板
+2026-06-01 15:15:32,517 | INFO     | [LAZY-LOAD] automation_hub -> AutomationHub
+2026-06-01 15:15:32,525 | INFO     | 自动化中心初始化完成，5 个内置模板
+2026-06-01 15:15:32,530 | INFO     | [LAZY-LOAD] autonomous_agent -> AutoAgent
+2026-06-01 15:15:32,534 | INFO     | [LAZY-LOAD] autonomous_decision_engine -> AutonomousDecisionEngine
+2026-06-01 15:15:32,536 | INFO     | [WARMUP] 34/50 模块预热完成
+2026-06-01 15:15:32,815 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:32,820 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:35,416 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:35,426 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:37,451 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:37,465 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+INFO:     127.0.0.1:55917 - "WebSocket /ws/events" [accepted]
 INFO:     connection open
-2026-06-01 13:19:15,446 | INFO     | Apollo智能体初始化完成
-2026-06-01 13:19:15,459 | INFO     | 生命周期管理器初始化完成，注册组件: 8
-2026-06-01 13:19:15,451 | INFO     | [WS] 连接: c5dafd8a (127.0.0.1) rooms=['events', 'system']
-2026-06-01 13:19:15,460 | INFO     | [LAZY-LOAD] agent_athena -> AgentAthenaManager
-2026-06-01 13:19:17,891 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:17,994 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:17,995 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:17,996 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:18,002 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:18,004 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:18,005 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:18,039 | INFO     | 生命周期管理器初始化完成，注册组件: 8
-2026-06-01 13:19:18,062 | WARNING  | [LAZY-INIT] agent_boreas initialize异常: 'AgentBoreas' object has no attribute 'logger'
-2026-06-01 13:19:18,062 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:18,063 | INFO     | [LAZY-LOAD] agent_boreas -> AgentBoreas
-2026-06-01 13:19:18,074 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:18,078 | WARNING  | [WARMUP] 预热失败: agent_boreas: 'AgentBoreas' object has no attribute 'logger'
-INFO:     127.0.0.1:49735 - "WebSocket /ws/events" [accepted]
-2026-06-01 13:19:18,106 | INFO     | [LAZY-LOAD] agent_cronus -> CronusAgent
-2026-06-01 13:19:18,174 | ERROR    | [MIDDLEWARE] 未捕获异常: /api/tools/browser-use - [Errno 2] No such file or directory: 'C:\\Users\\吴海军\\WorkBuddy\\20260528160052\\modules/browser_use.py'
-  + Exception Group Traceback (most recent call last):
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
-  |     yield
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 192, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\anyio\_backends\_asyncio.py", line 783, in __aexit__
-  |     raise BaseExceptionGroup(
-  |         "unhandled errors in a TaskGroup", self._exceptions
-  |     ) from None
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "D:\AUTO-EVO-AI-V0.1\api\middleware.py", line 142, in security_middleware
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 168, in call_next
-    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 191, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ~~~~~~~~~~~~~~~~~~^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 162, in __exit__
-    |     self.gen.throw(value)
-    |     ~~~~~~~~~~~~~~^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 85, in c
-INFO:     connection open
-2026-06-01 13:19:18,178 | INFO     | [WS] 连接: 724cd7b7 (127.0.0.1) rooms=['events', 'system']
-2026-06-01 13:19:18,180 | WARNING  | [WARMUP] 预热失败: agent_cronus: 'CronusAgent' object has no attribute 'update_status'
-2026-06-01 13:19:18,211 | INFO     | Demeter智能体初始化完成
-2026-06-01 13:19:18,212 | INFO     | [LAZY-LOAD] agent_demeter -> AgentDemeterManager
-2026-06-01 13:19:22,431 | INFO     | Demeter智能体初始化完成
-2026-06-01 13:19:22,444 | INFO     | [LAZY-LOAD] agent_eros -> AgentEros
-2026-06-01 13:19:22,450 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:22,458 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:22,462 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:22,462 | WARNING  | [WARMUP] 预热失败: agent_eros: type object 'ModuleStatus' has no attribute 'READY'
-INFO:     127.0.0.1:49747 - "WebSocket /ws" [accepted]
-2026-06-01 13:19:22,471 | INFO     | Hecate智能体初始化完成
-2026-06-01 13:19:22,474 | INFO     | [LAZY-LOAD] agent_hecate -> AgentHecateManager
-INFO:     connection open
-2026-06-01 13:19:22,478 | INFO     | Hecate智能体初始化完成
-2026-06-01 13:19:22,501 | INFO     | [LAZY-LOAD] agent_hephaestus -> AgentHephaestus
-2026-06-01 13:19:28,893 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:29,008 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:29,009 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:29,010 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:29,011 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:29,012 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:29,012 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:29,020 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:29,021 | WARNING  | [WARMUP] 预热失败: agent_hephaestus: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:29,042 | INFO     | [LAZY-LOAD] agent_hera -> AgentHera
-2026-06-01 13:19:29,045 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:29,059 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:29,071 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:29,072 | WARNING  | [WARMUP] 预热失败: agent_hera: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:29,078 | INFO     | [LAZY-LOAD] agent_hermes -> AgentHermes
-2026-06-01 13:19:29,089 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:29,090 | WARNING  | [WARMUP] 预热失败: agent_hermes: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:29,107 | INFO     | [LAZY-LOAD] agent_iris -> AgentIris
-INFO:     127.0.0.1:49993 - "WebSocket /ws/events" [accepted]
-INFO:     connection open
-2026-06-01 13:19:33,159 | WARNING  | [WARMUP] 预热失败: agent_iris: 'AgentIris' object has no attribute 'stats'
-2026-06-01 13:19:33,162 | INFO     | [WS] 连接: eb4b9d27 (127.0.0.1) rooms=['events', 'system']
-2026-06-01 13:19:33,173 | INFO     | [LAZY-LOAD] agent_market -> AgentMarket
-2026-06-01 13:19:33,179 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:33,185 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:33,193 | INFO     | [ConfigCenter] 初始化完成 | 配置项: 33 | 审计: 1条
-2026-06-01 13:19:34,432 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:34,506 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:34,508 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:34,509 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:34,510 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:34,511 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:34,511 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:34,532 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:34,533 | WARNING  | [WARMUP] 预热失败: agent_market: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:34,543 | ERROR    | 市场初始化失败: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
-2026-06-01 13:19:34,544 | WARNING  | [LAZY-INIT] agent_marketplace initialize异常: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
-2026-06-01 13:19:34,545 | INFO     | [LAZY-LOAD] agent_marketplace -> AgentMarketplaceManager
-2026-06-01 13:19:34,548 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:34,554 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-INFO:     127.0.0.1:50286 - "WebSocket /ws" [accepted]
-INFO:     connection open
-2026-06-01 13:19:38,625 | ERROR    | 市场初始化失败: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
-2026-06-01 13:19:38,625 | WARNING  | [WARMUP] 预热失败: agent_marketplace: 'AgentMarketplaceManager' object has no attribute '_init_rate_limiter'
-2026-06-01 13:19:38,632 | INFO     | MAS多智能体系统初始化完成
-2026-06-01 13:19:38,633 | INFO     | [LAZY-LOAD] agent_mas -> AgentMASManager
-2026-06-01 13:19:38,640 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:38,645 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:38,651 | INFO     | MAS多智能体系统初始化完成
-2026-06-01 13:19:38,664 | INFO     | Minerva智能体初始化完成
-2026-06-01 13:19:38,667 | INFO     | [LAZY-LOAD] agent_minerva -> AgentMinervaManager
-2026-06-01 13:19:39,958 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:40,032 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:40,033 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:40,034 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:40,035 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:40,037 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:40,038 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:40,044 | INFO     | Minerva智能体初始化完成
-2026-06-01 13:19:40,050 | INFO     | Nemesis智能体初始化完成
-2026-06-01 13:19:40,055 | INFO     | Dify管理器初始化完成，API: https://api.dify.ai/v1
-2026-06-01 13:19:40,051 | INFO     | [LAZY-LOAD] agent_nemesis -> AgentNemesisManager
-2026-06-01 13:19:40,063 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:40,068 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:41,237 | INFO     | Nemesis智能体初始化完成
-2026-06-01 13:19:41,254 | INFO     | \U0001f4cb 规则引擎意图分析模式
-2026-06-01 13:19:41,256 | INFO     | AgentOrchestrator initialized
-2026-06-01 13:19:41,259 | INFO     | [LAZY-LOAD] agent_orchestrator -> AgentOrchestrator
-2026-06-01 13:19:42,358 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:19:42,439 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:19:42,440 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:19:42,441 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:19:42,442 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:19:42,443 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:19:42,443 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:19:42,470 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:42,475 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:42,477 | INFO     | AgentOrchestrator initialized
-2026-06-01 13:19:42,485 | INFO     | Phoebus智能体初始化完成 | 9路由 | 3限流规则
-2026-06-01 13:19:42,486 | INFO     | [LAZY-LOAD] agent_phoebus -> AgentPhoebusManager
-2026-06-01 13:19:42,491 | INFO     | Phoebus智能体初始化完成 | 18路由 | 3限流规则
-2026-06-01 13:19:42,513 | WARNING  | [LAZY-INIT] agent_planner initialize异常: name 'Path' is not defined
-2026-06-01 13:19:42,519 | INFO     | [LAZY-LOAD] agent_planner -> AgentPlanner
-2026-06-01 13:19:42,521 | WARNING  | [WARMUP] 预热失败: agent_planner: name 'Path' is not defined
-2026-06-01 13:19:42,525 | INFO     | Poseidon智能体初始化完成 | 5路由 | 8后端
-2026-06-01 13:19:42,526 | INFO     | [LAZY-LOAD] agent_poseidon -> AgentPoseidonManager
-2026-06-01 13:19:42,528 | INFO     | Poseidon智能体初始化完成 | 5路由 | 8后端
-2026-06-01 13:19:42,673 | INFO     | HardwareMonitor 初始化完成，采样间隔: 1.0s
-2026-06-01 13:19:42,674 | INFO     | ResourceQuotaManager 初始化完成
-2026-06-01 13:19:42,674 | INFO     | LowPerfAdapter 初始化，性能模式: balanced
-2026-06-01 13:19:42,675 | INFO     | LoadBalancer 初始化完成，策略: resource_aware
-2026-06-01 13:19:42,676 | INFO     | AgentPool [轻量任务池] 初始化完成，最大容量: 1000000
-2026-06-01 13:19:42,677 | INFO     | AgentPool [重度开发池] 初始化完成，最大容量: 500000
-2026-06-01 13:19:42,678 | INFO     | AgentPool [运算池] 初始化完成，最大容量: 100000
-2026-06-01 13:19:42,680 | INFO     | 硬件监控已启动
-2026-06-01 13:19:42,681 | INFO     | AgentPool [轻量任务池] 已启动
-2026-06-01 13:19:42,683 | INFO     | AgentPool [重度开发池] 已启动
-2026-06-01 13:19:42,684 | INFO     | AgentPool [运算池] 已启动
-2026-06-01 13:19:42,685 | INFO     | AgentResourceController v6.28.0 初始化完成
-2026-06-01 13:19:42,686 | INFO     | [LAZY-LOAD] agent_resource_control -> AgentResourceController
-2026-06-01 13:19:42,687 | INFO     | [evo.resource.agent] 模块 evo.resource.agent 初始化完成
-2026-06-01 13:19:42,692 | INFO     | Themis智能体初始化完成
-2026-06-01 13:19:42,692 | INFO     | [LAZY-LOAD] agent_themis -> AgentThemisManager
-2026-06-01 13:19:42,694 | INFO     | Themis智能体初始化完成
-2026-06-01 13:19:42,698 | INFO     | [agentguard-sec] 初始化Agent安全防护...
-2026-06-01 13:19:42,699 | INFO     | [agentguard-sec] Agent安全防护就绪
-2026-06-01 13:19:42,700 | INFO     | [LAZY-LOAD] agentguard_sec -> AgentGuardSec
-2026-06-01 13:19:42,701 | INFO     | [agentguard-sec] 初始化Agent安全防护...
-2026-06-01 13:19:42,702 | INFO     | [agentguard-sec] Agent安全防护就绪
-2026-06-01 13:19:42,707 | INFO     | AgentSeek初始化完成
-2026-06-01 13:19:42,708 | INFO     | [LAZY-LOAD] agentseek -> AgentseekManager
-2026-06-01 13:19:42,709 | INFO     | AgentSeek初始化完成
-2026-06-01 13:19:42,711 | INFO     | [LAZY-LOAD] ai_gateway -> AIGateway
-2026-06-01 13:19:42,714 | INFO     | [LAZY-LOAD] aiops_monitor -> AiopsMonitor
-2026-06-01 13:19:42,717 | INFO     | [LAZY-LOAD] alert_manager -> AlertManager
-2026-06-01 13:19:42,722 | INFO     | Ansible执行器初始化完成
-2026-06-01 13:19:42,723 | INFO     | [LAZY-LOAD] ansible_runner -> AnsibleRunnerManager
-2026-06-01 13:19:42,724 | INFO     | Ansible执行器初始化完成
-2026-06-01 13:19:42,727 | ERROR    | API缓存初始化失败: CacheRule() takes no arguments
-2026-06-01 13:19:42,728 | WARNING  | [LAZY-INIT] api_cache initialize异常: CacheRule() takes no arguments
-2026-06-01 13:19:42,729 | INFO     | [LAZY-LOAD] api_cache -> ApiCacheManager
-2026-06-01 13:19:42,730 | ERROR    | API缓存初始化失败: CacheRule() takes no arguments
-2026-06-01 13:19:42,731 | WARNING  | [WARMUP] 预热失败: api_cache: CacheRule() takes no arguments
-2026-06-01 13:19:42,735 | INFO     | API Mock服务初始化完成
-2026-06-01 13:19:42,736 | INFO     | [LAZY-LOAD] api_mock -> ApiMockManager
-2026-06-01 13:19:42,737 | INFO     | API Mock服务初始化完成
-2026-06-01 13:19:42,741 | INFO     | API限流守卫初始化完成 | 8规则 | 3分级客户端
-2026-06-01 13:19:42,741 | INFO     | [LAZY-LOAD] api_rate_guard -> ApiRateGuardManager
-2026-06-01 13:19:42,742 | INFO     | API限流守卫初始化完成 | 16规则 | 3分级客户端
-2026-06-01 13:19:42,749 | INFO     | API测试器初始化完成
-2026-06-01 13:19:42,749 | INFO     | [LAZY-LOAD] api_tester -> ApiTesterManager
-2026-06-01 13:19:42,750 | INFO     | API测试器初始化完成
-2026-06-01 13:19:42,755 | INFO     | API版本管理初始化完成
-2026-06-01 13:19:42,755 | INFO     | [LAZY-LOAD] api_versioning -> ApiVersioningManager
-2026-06-01 13:19:42,756 | INFO     | API版本管理初始化完成
-2026-06-01 13:19:42,760 | INFO     | ArgoCD部署管理初始化完成
-2026-06-01 13:19:42,761 | INFO     | [LAZY-LOAD] argocd_deploy -> ArgocdDeployManager
-2026-06-01 13:19:42,762 | INFO     | ArgoCD部署管理初始化完成
-2026-06-01 13:19:42,769 | INFO     | [LAZY-LOAD] atom_code -> AtomCode
-2026-06-01 13:19:42,771 | INFO     | [atom_code] 模块 atom_code 初始化完成
-2026-06-01 13:19:42,775 | INFO     | [LAZY-LOAD] audio_transcription -> AudioTranscription
-2026-06-01 13:19:42,776 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:42,777 | WARNING  | [WARMUP] 预热失败: audio_transcription: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:42,781 | INFO     | [audit-log] 初始化审计日志...
-2026-06-01 13:19:42,807 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:19:42,808 | INFO     | [audit-log] 审计日志就绪
-2026-06-01 13:19:42,808 | INFO     | [LAZY-LOAD] audit_log -> AuditLog
-2026-06-01 13:19:42,810 | INFO     | [audit-log] 初始化审计日志...
-2026-06-01 13:19:42,811 | INFO     | [audit-log] 审计日志就绪
-2026-06-01 13:19:42,818 | INFO     | 自动故障转移初始化完成
-2026-06-01 13:19:42,819 | INFO     | [LAZY-LOAD] auto_failover -> AutoFailoverManager
-2026-06-01 13:19:42,820 | INFO     | 自动故障转移初始化完成
-2026-06-01 13:19:42,823 | INFO     | 自动修复初始化完成
-2026-06-01 13:19:42,824 | INFO     | [LAZY-LOAD] auto_healing -> AutoHealingManager
-2026-06-01 13:19:42,825 | INFO     | 自动修复初始化完成
-2026-06-01 13:19:42,828 | INFO     | [auto-restart] 初始化自动重启服务...
-2026-06-01 13:19:42,830 | WARNING  | [LAZY-INIT] auto_restart initialize异常: no running event loop
-2026-06-01 13:19:42,831 | INFO     | [LAZY-LOAD] auto_restart -> AutoRestart
-2026-06-01 13:19:42,832 | INFO     | [auto-restart] 初始化自动重启服务...
-2026-06-01 13:19:42,833 | WARNING  | [WARMUP] 预热失败: auto_restart: a coroutine was expected, got None
-2026-06-01 13:19:42,839 | INFO     | 自动扩缩容初始化完成
-2026-06-01 13:19:42,840 | INFO     | [LAZY-LOAD] auto_scale -> AutoScaleManager
-2026-06-01 13:19:42,841 | INFO     | 自动扩缩容初始化完成
-2026-06-01 13:19:42,846 | INFO     | [LAZY-LOAD] auto_summary -> AutoSummary
-2026-06-01 13:19:42,848 | INFO     | [] 模块  初始化完成
-2026-06-01 13:19:42,848 | WARNING  | [WARMUP] 预热失败: auto_summary: type object 'ModuleStatus' has no attribute 'READY'
-2026-06-01 13:19:42,855 | INFO     | AutoGen Studio 初始化完成: 5 智能体, 4 技能
-2026-06-01 13:19:42,856 | INFO     | [LAZY-LOAD] autogen_studio -> AutoGenStudioManager
-2026-06-01 13:19:42,863 | INFO     | 自动化中心初始化完成，5 个内置模板
-2026-06-01 13:19:42,863 | INFO     | [LAZY-LOAD] automation_hub -> AutomationHub
-2026-06-01 13:19:42,867 | INFO     | 自动化中心初始化完成，5 个内置模板
-2026-06-01 13:19:42,869 | INFO     | [LAZY-LOAD] autonomous_agent -> AutoAgent
-2026-06-01 13:19:42,871 | INFO     | [LAZY-LOAD] autonomous_decision_engine -> AutonomousDecisionEngine
-2026-06-01 13:19:42,872 | INFO     | [WARMUP] 34/50 模块预热完成
-2026-06-01 13:19:43,494 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:43,505 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:43,942 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:44,509 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:44,521 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:45,102 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:45,536 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:45,542 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:46,238 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:46,547 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:46,555 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:47,381 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:19:47,561 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:47,570 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:48,523 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:19:48,589 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:48,604 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:49,607 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:49,614 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:49,657 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:50,626 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:50,640 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:50,796 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:19:51,653 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:51,659 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:51,934 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:19:52,679 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:52,689 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:53,121 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:53,705 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:53,711 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:54,342 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.5%
-2026-06-01 13:19:54,724 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:54,735 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:55,486 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:19:55,737 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:55,746 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:56,623 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:19:56,752 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:56,758 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:57,830 | WARNING  | 硬件告警: CPU使用率过高: 93.8%; 内存使用率偏高: 86.5%
-2026-06-01 13:19:57,834 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:57,841 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:58,857 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:58,874 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:58,966 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:19:59,886 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:19:59,904 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:00,100 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:00,917 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:00,924 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:01,238 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:01,954 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:01,959 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:02,430 | WARNING  | 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:02,974 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:02,985 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:03,577 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:03,983 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:03,997 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:04,731 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:20:04,998 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:05,006 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:05,869 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:20:06,014 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:06,023 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:07,037 | WARNING  | 硬件告警: CPU使用率偏高: 84.4%; 内存使用率偏高: 86.5%
-2026-06-01 13:20:07,041 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:07,048 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:08,056 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:08,071 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:08,173 | WARNING  | 硬件告警: CPU使用率偏高: 80.8%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:09,083 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:09,097 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:09,311 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:10,115 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:10,122 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:10,454 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:20:11,127 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:11,133 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:11,592 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:20:12,139 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:12,146 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:12,766 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.5%
-2026-06-01 13:20:13,909 | WARNING  | 硬件告警: CPU使用率偏高: 80.8%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:14,458 | INFO     | [CapabilityGraph] 扫描完成: 460 模块, 25 能力, 5585 方法
-2026-06-01 13:20:14,532 | INFO     | [DecisionEngine] 加载 10 条预置规则
-2026-06-01 13:20:14,533 | INFO     | [DecisionEngine] 初始化完成
-2026-06-01 13:20:14,535 | INFO     | [AutonomousLoop] 决策引擎已集成
-2026-06-01 13:20:14,537 | INFO     | [IntelligentCoordinator] 初始化完成
-2026-06-01 13:20:14,538 | INFO     | [Coordinator v3.1] 智能协调层已加载
-2026-06-01 13:20:14,539 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
-2026-06-01 13:20:14,569 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:14,573 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:14,631 | ERROR    | [MIDDLEWARE] 未捕获异常: /api/tools/browser-use - module 'browser_use_mod' has no attribute 'execute'
-  + Exception Group Traceback (most recent call last):
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
-  |     yield
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 192, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\anyio\_backends\_asyncio.py", line 783, in __aexit__
-  |     raise BaseExceptionGroup(
-  |         "unhandled errors in a TaskGroup", self._exceptions
-  |     ) from None
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "D:\AUTO-EVO-AI-V0.1\api\middleware.py", line 142, in security_middleware
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 168, in call_next
-    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 191, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ~~~~~~~~~~~~~~~~~~^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 162, in __exit__
-    |     self.gen.throw(value)
-    |     ~~~~~~~~~~~~~~^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 85, in c
-2026-06-01 13:20:15,054 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:20:16,189 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:17,338 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:18,552 | WARNING  | 硬件告警: CPU使用率过高: 93.5%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:18,707 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:18,713 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:19,687 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:20:20,826 | WARNING  | 硬件告警: CPU使用率偏高: 84.4%; 内存使用率偏高: 86.3%
-2026-06-01 13:20:21,960 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:20:22,732 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:22,737 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:23,098 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:24,232 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:24,792 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:24,805 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:25,371 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:26,507 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:26,841 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:26,847 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:27,640 | WARNING  | 硬件告警: 内存使用率偏高: 86.4%
-2026-06-01 13:20:28,787 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:28,878 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:28,886 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:29,921 | WARNING  | 硬件告警: CPU使用率偏高: 88.5%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:30,933 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:30,946 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:31,077 | WARNING  | 硬件告警: CPU使用率偏高: 86.7%; 内存使用率偏高: 86.3%
-2026-06-01 13:20:31,950 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:31,961 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:32,352 | WARNING  | 硬件告警: CPU使用率过高: 96.3%; 内存使用率偏高: 86.0%
-2026-06-01 13:20:32,979 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:32,986 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:33,507 | WARNING  | 硬件告警: 内存使用率偏高: 86.1%
-2026-06-01 13:20:34,000 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:34,005 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:34,838 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:35,184 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:35,315 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:36,032 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:36,343 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:36,465 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:37,233 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:37,363 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:37,486 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:38,458 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.6%
-2026-06-01 13:20:38,463 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:38,480 | ERROR    | [MIDDLEWARE] 未捕获异常: /api/tools/browser-use - module 'browser_use_mod' has no attribute 'execute'
-  + Exception Group Traceback (most recent call last):
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
-  |     yield
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 192, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
-  |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\anyio\_backends\_asyncio.py", line 783, in __aexit__
-  |     raise BaseExceptionGroup(
-  |         "unhandled errors in a TaskGroup", self._exceptions
-  |     ) from None
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "D:\AUTO-EVO-AI-V0.1\api\middleware.py", line 142, in security_middleware
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 168, in call_next
-    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 191, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ~~~~~~~~~~~~~~~~~~^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 162, in __exit__
-    |     self.gen.throw(value)
-    |     ~~~~~~~~~~~~~~^^^^^^^
-    |   File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py", line 85, in c
-2026-06-01 13:20:38,504 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:39,472 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:39,518 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:39,614 | WARNING  | 硬件告警: 内存使用率偏高: 86.1%
-2026-06-01 13:20:40,485 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:40,535 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:40,752 | WARNING  | 硬件告警: 内存使用率偏高: 86.3%
-2026-06-01 13:20:41,501 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:41,548 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:41,891 | WARNING  | 硬件告警: 内存使用率偏高: 86.2%
-2026-06-01 13:20:42,517 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:42,559 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:43,060 | WARNING  | 硬件告警: CPU使用率过高: 93.3%; 内存使用率偏高: 86.2%
-2026-06-01 13:20:43,532 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:43,572 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:44,375 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:44,552 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:44,596 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:45,537 | WARNING  | 硬件告警: CPU使用率偏高: 86.2%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:45,566 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:45,606 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:46,649 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:46,655 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:46,785 | WARNING  | 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 86.1%
-2026-06-01 13:20:47,668 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:47,674 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:47,927 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.3%
-2026-06-01 13:20:48,723 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:48,730 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:49,434 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.6%
-2026-06-01 13:20:49,743 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:49,748 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:50,631 | WARNING  | 硬件告警: 内存使用率偏高: 86.9%
-2026-06-01 13:20:50,754 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:50,760 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:51,768 | WARNING  | 硬件告警: 内存使用率偏高: 87.0%
-2026-06-01 13:20:51,772 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:51,780 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:52,784 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:52,796 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:52,913 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:20:53,901 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:53,917 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:54,285 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:54,937 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:54,944 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:55,433 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.4%
-2026-06-01 13:20:55,951 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:55,956 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:56,629 | WARNING  | 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 86.7%
-2026-06-01 13:20:56,973 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:56,984 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:57,767 | WARNING  | 硬件告警: 内存使用率偏高: 86.9%
-2026-06-01 13:20:57,996 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:58,001 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:58,916 | WARNING  | 硬件告警: CPU使用率偏高: 84.0%; 内存使用率偏高: 86.8%
-2026-06-01 13:20:59,014 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:20:59,021 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:00,058 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:00,063 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:00,068 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:01,082 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:01,087 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:01,198 | WARNING  | 硬件告警: CPU使用率偏高: 87.5%; 内存使用率偏高: 86.8%
-2026-06-01 13:21:02,098 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:02,108 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:02,342 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:03,124 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:03,135 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:03,502 | WARNING  | 硬件告警: CPU使用率偏高: 84.6%; 内存使用率偏高: 86.6%
-2026-06-01 13:21:04,140 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:04,147 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:04,646 | WARNING  | 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 86.6%
-2026-06-01 13:21:05,157 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:05,170 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:05,786 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:21:06,177 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:06,182 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:06,929 | WARNING  | 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 86.6%
-2026-06-01 13:21:07,190 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:07,201 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:08,075 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:21:08,218 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:08,227 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:09,216 | WARNING  | 硬件告警: CPU使用率偏高: 82.1%; 内存使用率偏高: 86.5%
-2026-06-01 13:21:09,239 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:09,250 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:10,255 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:10,272 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:10,365 | WARNING  | 硬件告警: 内存使用率偏高: 86.5%
-2026-06-01 13:21:11,290 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:11,302 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:11,511 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:21:12,304 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:12,318 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:12,663 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.6%
-2026-06-01 13:21:13,320 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:13,335 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:13,805 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:21:14,348 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:14,362 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:14,949 | WARNING  | 硬件告警: 内存使用率偏高: 86.6%
-2026-06-01 13:21:15,373 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:15,386 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:16,095 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:16,404 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:16,417 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:17,239 | WARNING  | 硬件告警: CPU使用率偏高: 84.0%; 内存使用率偏高: 86.7%
-2026-06-01 13:21:17,432 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:17,444 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:18,472 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:18,478 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:18,483 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:19,504 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:19,518 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:19,618 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:20,527 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:20,532 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:20,756 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:21,538 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:21,552 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:21,903 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:22,550 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:22,567 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:23,046 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:23,566 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:23,578 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:24,185 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:24,586 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:24,595 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:25,322 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:25,603 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:25,616 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:26,468 | WARNING  | 硬件告警: 内存使用率偏高: 86.7%
-2026-06-01 13:21:26,631 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:26,638 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:27,627 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:27,639 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:27,649 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:28,655 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:28,668 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:28,780 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:29,671 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:29,682 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:29,922 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:30,696 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:30,705 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:31,063 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:31,720 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:31,734 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:32,199 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:32,736 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:32,749 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:33,346 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:33,753 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:33,764 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:34,483 | WARNING  | 硬件告警: CPU使用率偏高: 84.6%; 内存使用率偏高: 86.8%
-2026-06-01 13:21:34,772 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:34,786 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:35,617 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:35,786 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:35,804 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:36,758 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:36,803 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:36,817 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:37,819 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:37,832 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:37,902 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:38,845 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:38,854 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:39,052 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:39,863 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:39,869 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:40,212 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.8%
-2026-06-01 13:21:40,888 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:40,900 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:41,355 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:41,922 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:41,936 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:42,503 | WARNING  | 硬件告警: CPU使用率过高: 90.9%; 内存使用率偏高: 86.8%
-2026-06-01 13:21:42,938 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:42,951 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:43,659 | WARNING  | 硬件告警: 内存使用率偏高: 86.8%
-2026-06-01 13:21:43,959 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:43,970 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:44,800 | WARNING  | 硬件告警: 内存使用率偏高: 87.2%
-2026-06-01 13:21:44,982 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:44,987 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:45,948 | WARNING  | 硬件告警: 内存使用率偏高: 87.3%
-2026-06-01 13:21:46,000 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:46,010 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:47,013 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:47,018 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:47,092 | WARNING  | 硬件告警: 内存使用率偏高: 87.4%
-2026-06-01 13:21:48,061 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:48,083 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:48,237 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.7%
-2026-06-01 13:21:49,085 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:49,092 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:49,458 | WARNING  | 硬件告警: CPU使用率偏高: 86.2%; 内存使用率偏高: 86.9%
-2026-06-01 13:21:50,100 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:50,106 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
-2026-06-01 13:21:50,666 | WARNING  | 硬件告警: CPU使用率偏高: 90.0%; 内存使用率偏高: 87.5%
+2026-06-01 15:15:37,477 | INFO     | [WS] 连接: a8a3c916 (127.0.0.1) rooms=['system', 'events']
+2026-06-01 15:15:39,498 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:39,503 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:40,744 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:40,831 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:40,832 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:40,833 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:40,834 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:40,835 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:40,835 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:40,863 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:40,868 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:41,526 | WARNING  | 硬件告警: CPU使用率偏高: 88.0%
+2026-06-01 15:15:42,892 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:42,898 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:44,002 | WARNING  | 硬件告警: CPU使用率过高: 100.0%
+2026-06-01 15:15:44,921 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:44,929 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:46,958 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:46,963 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:48,990 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:48,996 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:50,928 | WARNING  | 硬件告警: CPU使用率偏高: 88.9%
+2026-06-01 15:15:51,011 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:51,015 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:53,033 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:53,039 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:55,058 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:55,063 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:56,486 | INFO     | [CapabilityGraph] 扫描完成: 457 模块, 25 能力, 5576 方法
+2026-06-01 15:15:56,555 | INFO     | [DecisionEngine] 加载 10 条预置规则
+2026-06-01 15:15:56,556 | INFO     | [DecisionEngine] 初始化完成
+2026-06-01 15:15:56,557 | INFO     | [AutonomousLoop] 决策引擎已集成
+2026-06-01 15:15:56,558 | INFO     | [IntelligentCoordinator] 初始化完成
+2026-06-01 15:15:56,560 | INFO     | [Coordinator v3.1] 智能协调层已加载
+2026-06-01 15:15:56,560 | ERROR    | [v3.0] 协调器初始化失败: cannot import name 'SmartRouter' from 'modules.system_coordinator' (D:\AUTO-EVO-AI-V0.1\modules\system_coordinator.py)
+2026-06-01 15:15:56,615 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:56,620 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:57,643 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:57,652 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:58,663 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:58,693 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:59,703 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:15:59,708 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:00,138 | WARNING  | 硬件告警: CPU使用率过高: 96.7%
+2026-06-01 15:16:00,831 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:00,846 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:01,313 | WARNING  | 硬件告警: CPU使用率过高: 100.0%
+2026-06-01 15:16:02,203 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:02,279 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:02,459 | WARNING  | 硬件告警: CPU使用率过高: 92.6%
+2026-06-01 15:16:03,296 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:03,444 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:03,677 | WARNING  | 硬件告警: CPU使用率过高: 100.0%
+2026-06-01 15:16:04,308 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:04,462 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:05,323 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:05,478 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:05,964 | WARNING  | 硬件告警: CPU使用率偏高: 87.5%
+2026-06-01 15:16:06,337 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:06,493 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:07,363 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:07,516 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:08,382 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:08,677 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:09,470 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:09,831 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:10,524 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:10,849 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:11,549 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:11,864 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:12,565 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:12,878 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:13,593 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:13,930 | WARNING  | 硬件告警: CPU使用率偏高: 88.5%
+2026-06-01 15:16:13,934 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:14,612 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:14,950 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:15,634 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:15,982 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:16,677 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:16,999 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:17,714 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:18,024 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:18,731 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:19,045 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:19,763 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:20,065 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:20,808 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:21,075 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:21,822 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:22,084 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:22,833 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:23,097 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:23,852 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:24,111 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:24,207 | WARNING  | 硬件告警: CPU使用率偏高: 89.7%
+2026-06-01 15:16:24,905 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:25,129 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:25,965 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:26,148 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:26,979 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:27,162 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:27,665 | WARNING  | 硬件告警: CPU使用率偏高: 84.0%
+2026-06-01 15:16:27,993 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:28,176 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:29,002 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:29,191 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:29,965 | WARNING  | 硬件告警: CPU使用率偏高: 84.6%
+2026-06-01 15:16:30,030 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:30,199 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:31,059 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:31,187 | WARNING  | 硬件告警: CPU使用率过高: 100.0%
+2026-06-01 15:16:31,213 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:32,078 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 15:16:32,229 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited

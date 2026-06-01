@@ -79,6 +79,12 @@ export default {
         { name:'Grafana', icon:'📈', status:'Docker 就绪', desc:'开源监控仪表盘 (70k⭐) — Prometheus 数据可视化、告警', url:'http://localhost:3050', bridge:'/api/tools/grafana/health', checkResult:null },
         { name:'Outline', icon:'📝', status:'Docker 就绪', desc:'知识库文档系统 (30k⭐) — 团队文档、项目说明、API 文档', url:'http://localhost:3100', bridge:'/api/tools/outline/health', checkResult:null },
         { name:'Appsmith', icon:'🛠️', status:'Docker 就绪', desc:'低代码内部工具 (35k⭐) — 拖拽构建管理面板、Dashboard', url:'http://localhost:8080', bridge:'/api/tools/appsmith/health', checkResult:null },
+
+        { name:'Code-Server', icon:'💻', status:'Docker 就绪', desc:'Web IDE (70k⭐) — 浏览器里写代码', url:'http://localhost:8443', bridge:'/api/tools/code-server/health', checkResult:null },
+        { name:'Dashy', icon:'🏠', status:'Docker 就绪', desc:'统一启动页 (17k⭐) — 30 个工具一站式入口', url:'http://localhost:4000', bridge:'/api/tools/dashy/health', checkResult:null },
+        { name:'Ntfy', icon:'🔔', status:'Docker 就绪', desc:'推送通知 (30k⭐) — 手机/桌面推送', url:'http://localhost:8086', bridge:'/api/tools/ntfy/health', checkResult:null },
+        { name:'NocoDB', icon:'🗄️', status:'Docker 就绪', desc:'数据库管理 (55k⭐) — SQLite 转电子表格', url:'http://localhost:8088', bridge:'/api/tools/nocodb/health', checkResult:null },
+        { name:'Changedetection', icon:'👁️', status:'Docker 就绪', desc:'网页变更监控 (20k⭐) — 监控文档/竞品更新', url:'http://localhost:5000', bridge:'/api/tools/changedetection/health', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false

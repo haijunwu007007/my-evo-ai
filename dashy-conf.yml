@@ -1,0 +1,138 @@
+# Dashy 配置 — AUTO-EVO-AI 外部工具启动页
+pageInfo:
+  title: AUTO-EVO-AI 工具中心
+  description: 30 个外部工具统一管理入口
+  navLinks:
+    - title: Dashboard
+      path: http://localhost:8765/dashboard
+    - title: GitHub
+      path: https://github.com/haijunwu007007/my-evo-ai
+
+appConfig:
+  theme: material
+  layout: auto
+  iconSize: large
+  language: zh
+
+sections:
+  - name: 🤖 AI & LLM
+    icon: brain
+    items:
+      - title: Dify
+        description: 可视化 LLM 应用构建
+        url: http://localhost:3001
+        icon: https://dify.ai/favicon.ico
+      - title: Flowise
+        description: 低代码 LLM 工作流
+        url: http://localhost:3002
+        icon: https://flowiseai.com/favicon.ico
+      - title: LiteLLM
+        description: AI 统一网关
+        url: http://localhost:4000
+      - title: One-API
+        description: 中国大模型网关
+        url: http://localhost:3000
+
+  - name: 🛠️ 开发工具
+    icon: code
+    items:
+      - title: Code-Server
+        description: Web IDE — 浏览器里写代码 (70k⭐)
+        url: http://localhost:8443
+        icon: https://code.visualstudio.com/favicon.ico
+      - title: Hoppscotch
+        description: API 测试工具 (66k⭐)
+        url: http://localhost:3010
+      - title: Tabby
+        description: AI 代码助手 (30k⭐)
+        url: http://localhost:8089
+      - title: NocoDB
+        description: 数据库管理 (55k⭐)
+        url: http://localhost:8088
+
+  - name: 📊 监控 & 可观测
+    icon: chart
+    items:
+      - title: Grafana
+        description: 监控仪表盘 (70k⭐)
+        url: http://localhost:3050
+      - title: Uptime-Kuma
+        description: 服务监控 (60k⭐)
+        url: http://localhost:3003
+      - title: Langfuse
+        description: LLM 可观测性 (14k⭐)
+        url: http://localhost:3005
+      - title: Superset
+        description: 数据可视化 (65k⭐)
+        url: http://localhost:3088
+
+  - name: 🔄 工作流 & 自动化
+    icon: workflow
+    items:
+      - title: n8n
+        description: 工作流自动化
+        url: http://localhost:5678
+      - title: ActivePieces
+        description: 轻量工作流引擎 (12k⭐)
+        url: http://localhost:3007
+      - title: Agent-S
+        description: 桌面自动化 (93k⭐)
+        url: http://localhost:8765/#/agent-s
+
+  - name: 🔍 搜索 & 知识
+    icon: search
+    items:
+      - title: Meilisearch
+        description: 全文搜索引擎 (50k⭐)
+        url: http://localhost:7700
+      - title: ChromaDB
+        description: 向量数据库
+        url: http://localhost:8001
+      - title: Outline
+        description: 知识库文档 (30k⭐)
+        url: http://localhost:3100
+      - title: Firecrawl
+        description: AI 网页爬虫 (30k⭐)
+        url: http://localhost:3002
+
+  - name: 📁 存储 & 文件
+    icon: storage
+    items:
+      - title: MinIO
+        description: S3 对象存储 (55k⭐)
+        url: http://localhost:9001
+      - title: FileBrowser
+        description: 网页文件管理器 (55k⭐)
+        url: http://localhost:8083
+      - title: Stirling-PDF
+        description: PDF 工具箱 (76k⭐)
+        url: http://localhost:3004
+
+  - name: 🔔 通知 & 通信
+    icon: bell
+    items:
+      - title: Ntfy
+        description: 推送通知 (30k⭐)
+        url: http://localhost:8086
+      - title: OpenClaw
+        description: AI 助手网关 (373k⭐)
+        url: http://localhost:3002
+      - title: NextChat
+        description: 跨平台 LLM 聊天 (70k⭐)
+        url: http://localhost:3099
+
+  - name: 🐳 基础设施
+    icon: server
+    items:
+      - title: Portainer
+        description: Docker 管理 (32k⭐)
+        url: http://localhost:9443
+      - title: Appsmith
+        description: 低代码工具 (35k⭐)
+        url: http://localhost:8080
+      - title: Browser-Use
+        description: AI 浏览器自动化 (93k⭐)
+        url: http://localhost:8765/api/tools/browser-use
+      - title: Changedetection
+        description: 网页变更监控 (20k⭐)
+        url: http://localhost:5000

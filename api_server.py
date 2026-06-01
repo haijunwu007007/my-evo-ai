@@ -109,6 +109,11 @@ from api.routes_portainer import router as portainer_router
 from api.routes_grafana import router as grafana_router
 from api.routes_outline import router as outline_router
 from api.routes_appsmith import router as appsmith_router
+from api.routes_code_server import router as code_server_router
+from api.routes_dashy import router as dashy_router
+from api.routes_ntfy import router as ntfy_router
+from api.routes_nocodb import router as nocodb_router
+from api.routes_changedetection import router as changedetection_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -141,6 +146,11 @@ app.include_router(portainer_router)
 app.include_router(grafana_router)
 app.include_router(outline_router)
 app.include_router(appsmith_router)
+app.include_router(code_server_router)
+app.include_router(dashy_router)
+app.include_router(ntfy_router)
+app.include_router(nocodb_router)
+app.include_router(changedetection_router)
 
 
 # ── 静态文件 ──
