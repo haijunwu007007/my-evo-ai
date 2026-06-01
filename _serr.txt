@@ -2530,3 +2530,126 @@ INFO:     connection closed
 2026-06-01 13:02:56,793 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
 2026-06-01 13:02:56,811 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
 2026-06-01 13:02:57,177 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.0%
+2026-06-01 13:02:57,832 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:02:57,847 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:02:58,332 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.1%
+2026-06-01 13:02:58,849 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:02:58,860 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:02:59,504 | WARNING  | 硬件告警: CPU使用率过高: 93.1%; 内存使用率偏高: 81.4%
+2026-06-01 13:02:59,891 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:02:59,906 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:00,673 | WARNING  | 硬件告警: 内存使用率偏高: 81.6%
+2026-06-01 13:03:00,909 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:00,924 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:01,823 | WARNING  | 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 81.7%
+2026-06-01 13:03:01,930 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:01,939 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:03,026 | WARNING  | 硬件告警: 内存使用率偏高: 82.2%
+2026-06-01 13:03:03,031 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:03,041 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:04,046 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:04,056 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:04,183 | WARNING  | 硬件告警: CPU使用率过高: 93.1%; 内存使用率偏高: 82.7%
+2026-06-01 13:03:05,071 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:05,077 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:05,365 | WARNING  | 硬件告警: CPU使用率偏高: 85.7%; 内存使用率偏高: 83.1%
+2026-06-01 13:03:06,098 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:06,109 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:06,540 | WARNING  | 硬件告警: 内存使用率偏高: 83.7%
+2026-06-01 13:03:07,116 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:07,128 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:07,688 | WARNING  | 硬件告警: 内存使用率偏高: 83.8%
+2026-06-01 13:03:08,166 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:08,179 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:08,862 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.2%
+2026-06-01 13:03:09,197 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:09,209 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:10,045 | WARNING  | 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 84.4%
+2026-06-01 13:03:10,216 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:10,227 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:11,208 | WARNING  | 硬件告警: 内存使用率偏高: 84.7%
+2026-06-01 13:03:11,238 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:11,246 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:12,308 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:12,324 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:12,514 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-01 13:03:13,365 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:13,381 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:13,707 | WARNING  | 硬件告警: CPU使用率过高: 96.9%; 内存使用率偏高: 85.3%
+2026-06-01 13:03:14,383 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:14,392 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:14,865 | WARNING  | 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 85.6%
+2026-06-01 13:03:15,399 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:15,411 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:16,027 | WARNING  | 硬件告警: CPU使用率偏高: 85.7%; 内存使用率偏高: 85.9%
+2026-06-01 13:03:16,414 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:16,427 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:17,181 | WARNING  | 硬件告警: 内存使用率偏高: 86.0%
+2026-06-01 13:03:17,439 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:17,448 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:18,349 | WARNING  | 硬件告警: CPU使用率过高: 96.2%; 内存使用率偏高: 86.0%
+2026-06-01 13:03:18,464 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:18,477 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:19,513 | WARNING  | 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 86.1%
+2026-06-01 13:03:19,518 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:19,525 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:20,531 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:20,546 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:20,695 | WARNING  | 硬件告警: 内存使用率偏高: 86.1%
+2026-06-01 13:03:21,560 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:21,568 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:21,960 | WARNING  | 硬件告警: CPU使用率过高: 97.1%; 内存使用率偏高: 80.9%
+2026-06-01 13:03:22,579 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:22,592 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:23,185 | WARNING  | 硬件告警: 内存使用率偏高: 81.0%
+2026-06-01 13:03:23,608 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:23,620 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:24,349 | WARNING  | 硬件告警: 内存使用率偏高: 81.0%
+2026-06-01 13:03:24,636 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:24,647 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:25,549 | WARNING  | 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 81.3%
+2026-06-01 13:03:25,659 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:25,665 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:26,737 | WARNING  | 硬件告警: 内存使用率偏高: 81.2%
+2026-06-01 13:03:26,744 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:26,756 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:27,764 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:27,782 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:27,913 | WARNING  | 硬件告警: CPU使用率偏高: 85.2%; 内存使用率偏高: 81.1%
+2026-06-01 13:03:28,850 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:28,870 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:29,110 | WARNING  | 硬件告警: CPU使用率偏高: 90.0%; 内存使用率偏高: 80.6%
+2026-06-01 13:03:29,958 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:29,975 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:30,290 | WARNING  | 硬件告警: 内存使用率偏高: 80.8%
+2026-06-01 13:03:30,992 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:31,080 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:31,512 | WARNING  | 硬件告警: 内存使用率偏高: 80.7%
+2026-06-01 13:03:32,074 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:32,127 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:32,677 | WARNING  | 硬件告警: 内存使用率偏高: 80.7%
+2026-06-01 13:03:33,120 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:33,152 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:33,907 | WARNING  | 硬件告警: 内存使用率偏高: 80.7%
+2026-06-01 13:03:34,156 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:34,168 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:35,169 | WARNING  | 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 80.8%
+2026-06-01 13:03:35,175 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:35,181 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:36,232 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:36,244 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:36,326 | WARNING  | 硬件告警: CPU使用率过高: 96.7%; 内存使用率偏高: 80.9%
+2026-06-01 13:03:37,265 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:37,277 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:37,493 | WARNING  | 硬件告警: 内存使用率偏高: 80.8%
+2026-06-01 13:03:38,311 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:38,322 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:38,859 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 80.9%
+2026-06-01 13:03:39,330 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:39,343 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:40,164 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.0%
+2026-06-01 13:03:40,371 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:40,395 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:41,471 | WARNING  | 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.3%
+2026-06-01 13:03:41,479 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
+2026-06-01 13:03:41,489 | ERROR    | [Scheduler] tick异常: 'NoneType' object can't be awaited
