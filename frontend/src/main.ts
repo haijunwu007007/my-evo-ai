@@ -2,13 +2,14 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
-import naive from 'naive-ui'
+
+// Element Plus
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
-app.use(naive)
-
-// Naive UI 消息组件注入
-app.config.globalProperties.$message = (window as any).$message || undefined
+app.use(ElementPlus, { locale: zhCn })
 app.mount('#app')
