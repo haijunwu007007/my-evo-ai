@@ -550,3 +550,8 @@ def execute(action: str = "status", params: dict = None, **kwargs) -> dict:
     except Exception as e:
         logger.exception(f"[CDC] execute({action}) 异常")
         return {"success": False, "error": str(e)}
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+

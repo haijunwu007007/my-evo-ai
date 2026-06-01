@@ -1064,3 +1064,8 @@ class KeyInsights(EnterpriseModule):
             return {"success": False, "error": str(e)}
 
 module_class = KeyInsights
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+

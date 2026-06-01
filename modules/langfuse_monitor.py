@@ -721,3 +721,8 @@ def module_class():
     return LangfuseMonitor
 
 module_class = LangfuseMonitor
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+

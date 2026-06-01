@@ -780,3 +780,8 @@ __all__ = [
 ]
 
 module_class = CrossPlatformAdapterAnalyzer
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+

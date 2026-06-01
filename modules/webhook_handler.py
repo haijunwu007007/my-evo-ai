@@ -743,3 +743,8 @@ class WebhookHandler(EnterpriseModule):
         return {"success": True, "data": {"message": "All logs and dead letters cleared"}}
 
 module_class = WebhookHandler
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+

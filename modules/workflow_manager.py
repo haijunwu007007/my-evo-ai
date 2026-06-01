@@ -700,3 +700,8 @@ class WorkflowManager(EnterpriseModule):
         return {"success": True, "data": {"message": "All executions and approvals cleared"}}
 
 module_class = WorkflowManager
+
+def health_check() -> dict:
+    return {"status": "healthy"}
+
+
