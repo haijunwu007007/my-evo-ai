@@ -66,12 +66,16 @@ class SystemCoordinatorV3(EnterpriseModule):
         except Exception as e:
             logger.warning(f"[Coordinator v3.1] 智能协调层加载失败(降级到基础模式): {e}")
 
-        # v2.0 兼容组件
-        from modules.system_coordinator import SmartRouter, EnhancedPerception, ReflectionEngine
-
-        self.router = SmartRouter(self)
-        self.perception = EnhancedPerception(self)
-        self.reflection = ReflectionEngine(self)
+        # v2.0 兼容组件（system_coordinator.py 已删除，改用内置降级）
+        try:
+            from modules.system_coordinator import SmartRouter, EnhancedPerception, ReflectionEngine
+            self.router = SmartRouter(self)
+            self.perception = EnhancedPerception(self)
+            self.reflection = ReflectionEngine(self)
+        except ImportError:
+            self.router = None
+            self.perception = None
+            self.reflection = None
 
         # 模块健康状态
         self._module_health: dict[str, str] = {}
