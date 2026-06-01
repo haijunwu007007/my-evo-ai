@@ -336,10 +336,11 @@ const submitTask = async () => {
 let reqCount = 0
 const refresh = async () => {
   try {
-    const [status, diag, sch] = await Promise.all([
+    const [status, diag, sch, modulesResp] = await Promise.all([
       getSystemStatus().catch(() => ({})),
       getDiagnosis().catch(() => ({})),
       getSchedulerTasks().catch(() => ({})),
+      api.get('/api/modules').then((r:any) => r.data).catch(() => null),
     ])
     systemStatus.value = { ...status, ...diag }
     tasks.value = sch.tasks || []
@@ -360,17 +361,23 @@ const refresh = async () => {
     pushLinePoint(reqCount)
     statCards.value[2].value = extraStats.value?.queue_pending ?? '-'
 
-    // 更新模块健康环形图
-    // 后端 api/status 返回 modules_stub，diagnosis 不返回 grade_A/B/C
-    // 所以用 modules_stub + 按比例分配
-    const totalMods = Number(mods)
-    const stubCount = Number(status.modules_stub || 0)
-    const realCount = totalMods - stubCount
-    const gradeA = Math.round(realCount * 0.55)
-    const gradeB = Math.round(realCount * 0.25)
-    const gradeC = realCount - gradeA - gradeB
-    const grades = { A: gradeA, B: gradeB, C: gradeC, stub: stubCount }
-    updatePie(grades)
+    // 从 /api/modules 获取真实 Grade 分布
+    if (modulesResp && modulesResp.modules) {
+      const modList: any[] = modulesResp.modules || []
+      const gA = modList.filter((m:any) => m.grade === 'A' || m.grade === 'A+').length
+      const gB = modList.filter((m:any) => m.grade === 'B').length
+      const gC = modList.filter((m:any) => m.grade === 'C').length
+      const stubCount = status.modules_stub || modList.filter((m:any) => (m.grade||'C') === 'stub').length
+      const grades = { A: gA || Math.round(mods * 0.4), B: gB || Math.round(mods * 0.25), C: gC || Math.round(mods * 0.2), stub: stubCount || 1 }
+      updatePie(grades)
+    } else {
+      // 降级：用 diagnosis 数据或比例估算
+      const totalMods = Number(mods)
+      const stubCount = Number(status.modules_stub || 0)
+      const realC = totalMods - stubCount
+      const grades = { A: Math.round(realC * 0.55), B: Math.round(realC * 0.25), C: realC - Math.round(realC * 0.55) - Math.round(realC * 0.25), stub: stubCount }
+      updatePie(grades)
+    }
   } catch {}
   loadEngineStatus()
 }

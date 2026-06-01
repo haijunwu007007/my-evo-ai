@@ -97,6 +97,9 @@ from api.routes_meilisearch import router as meili_router
 from api.routes_stirling_pdf import router as stirling_router
 from api.routes_uptime_kuma import router as uptime_router
 from api.routes_nextchat import router as nextchat_router
+from api.routes_langfuse import router as langfuse_router
+from api.routes_superset import router as superset_router
+from api.routes_activepieces import router as activepieces_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -117,6 +120,9 @@ app.include_router(openclaw_router)
 app.include_router(stirling_router)
 app.include_router(uptime_router)
 app.include_router(nextchat_router)
+app.include_router(langfuse_router)
+app.include_router(superset_router)
+app.include_router(activepieces_router)
 
 
 # ── 静态文件 ──
