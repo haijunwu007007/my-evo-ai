@@ -100,6 +100,10 @@ from api.routes_nextchat import router as nextchat_router
 from api.routes_langfuse import router as langfuse_router
 from api.routes_superset import router as superset_router
 from api.routes_activepieces import router as activepieces_router
+from api.routes_hoppscotch import router as hoppscotch_router
+from api.routes_tabby import router as tabby_router
+from api.routes_firecrawl import router as firecrawl_router
+from api.routes_mcp import router as mcp_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -123,6 +127,10 @@ app.include_router(nextchat_router)
 app.include_router(langfuse_router)
 app.include_router(superset_router)
 app.include_router(activepieces_router)
+app.include_router(hoppscotch_router)
+app.include_router(tabby_router)
+app.include_router(firecrawl_router)
+app.include_router(mcp_router)
 
 
 # ── 静态文件 ──

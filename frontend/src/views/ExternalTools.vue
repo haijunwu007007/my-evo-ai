@@ -70,6 +70,10 @@ export default {
         { name:'Langfuse', icon:'🔍', status:'SDK已安装 v4.7.1', desc:'LLM 可观测性 (14k⭐) — 追踪 AI 调用耗时、Token 成本、质量对比', url:'https://cloud.langfuse.com', bridge:'/api/tools/langfuse/health', checkResult:null },
         { name:'Superset', icon:'📊', status:'Docker 就绪', desc:'数据可视化平台 (65k⭐) — 拖拽式 Dashboard、SQL 查询、实时图表', url:'http://localhost:8088', bridge:'/api/tools/superset/health', checkResult:null },
         { name:'ActivePieces', icon:'🧩', status:'Docker 就绪', desc:'开源工作流引擎 (12k⭐) — TypeScript 原生、200+ 集成、AI 管道', url:'http://localhost:8080', bridge:'/api/tools/activepieces/health', checkResult:null },
+        { name:'Hoppscotch', icon:'🔗', status:'Docker 就绪', desc:'开源 API 测试工具 (66k⭐) — Postman 替代品，HTTP/GraphQL/WebSocket', url:'http://localhost:3010', bridge:'/api/tools/hoppscotch/health', checkResult:null },
+        { name:'Tabby', icon:'✏️', status:'Docker 就绪', desc:'自托管 AI 代码助手 (30k⭐) — 代码补全、内联建议、多模型', url:'http://localhost:8089', bridge:'/api/tools/tabby/health', checkResult:null },
+        { name:'Firecrawl', icon:'🕷️', status:'Docker 就绪', desc:'AI 网页爬虫 (30k⭐) — 为 RAG 知识库抓取网页数据', url:'http://localhost:3002', bridge:'/api/tools/firecrawl/health', checkResult:null },
+        { name:'MCP Hub', icon:'🔌', status:'内置就绪', desc:'MCP 协议网关 (内置) — AI Agent 统一调用外部工具', url:'', bridge:'/api/tools/mcp/health', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false

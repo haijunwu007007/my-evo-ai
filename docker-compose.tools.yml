@@ -78,3 +78,40 @@ services:
     image: redis:7-alpine
     expose:
       - "6379"
+
+  hoppscotch:
+    image: hoppscotch/hoppscotch:latest
+    ports:
+      - "3010:3000"
+    environment:
+      HOPSCOTCH_SELF_HOSTED: "true"
+
+  tabby:
+    image: tabbyml/tabby:latest
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./_data/tabby:/data
+    command: serve --model StarCoder-1B --device cpu
+
+  firecrawl:
+    image: firecrawl/firecrawl:latest
+    ports:
+      - "3002:3002"
+    environment:
+      FIRECRAWL_API_KEY: evo-firecrawl-key-2026
+      REDIS_URL: redis://firecrawl-redis:6379
+    depends_on:
+      - firecrawl-redis
+
+  firecrawl-redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+
+  mcphub:
+    image: mcphub/mcphub:latest
+    ports:
+      - "3011:3000"
+    volumes:
+      - ./_data/mcphub:/app/data
