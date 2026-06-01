@@ -119,6 +119,12 @@ const routes = [
     component: () => import('@/views/AgentSPanel.vue'),
     meta: { title: 'Agent-S 桌面自动化', icon: 'Monitor' },
   },
+  {
+    path: '/tools',
+    name: 'ExternalTools',
+    component: () => import('@/views/ExternalTools.vue'),
+    meta: { title: '外部工具', icon: 'Connection' },
+  },
 ]
 
 const router = createRouter({

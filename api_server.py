@@ -88,6 +88,8 @@ from api.routes_insights import router as insights_router
 from api.routes_modules_browse import router as modules_browse_router
 from api.routes_litellm import router as litellm_router
 from api.routes_agent_s import router as agent_s_router
+from api.routes_dify import router as dify_router
+from api.routes_chroma import router as chroma_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -99,6 +101,9 @@ app.include_router(auth_system_router)
 app.include_router(scheduler_router)
 app.include_router(coordinator_router)
 app.include_router(insights_router)
+app.include_router(dify_router)
+app.include_router(chroma_router)
+
 
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"

@@ -1,0 +1,100 @@
+<template>
+  <el-main class="tools-page" style="padding:20px;background:#f5f7fa;min-height:100vh">
+    <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:600;color:#1a1a2e">🔧 外部工具集成</h2>
+    <p style="margin:0 0 20px 0;color:#666;font-size:14px">一站式管理所有集成的开源工具平台</p>
+
+    <el-row :gutter="20">
+      <el-col :span="8" v-for="t in tools" :key="t.name">
+        <el-card :body-style="{ padding: '20px' }" class="tool-card" shadow="hover">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <span style="font-size:28px">{{ t.icon }}</span>
+            <div>
+              <h3 style="margin:0;font-size:16px;font-weight:600">{{ t.name }}</h3>
+              <span style="font-size:12px;color:#999">{{ t.status }}</span>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 12px 0">{{ t.desc }}</p>
+          <el-row :gutter="8">
+            <el-col :span="12">
+              <el-button size="small" @click="openUrl(t.url)" style="width:100%" v-if="t.url">打开面板</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button size="small" :type="t.bridge ? 'primary' : 'info'" @click="checkTool(t)" style="width:100%">{{ t.bridge ? '连接检测' : '查看文档' }}</el-button>
+            </el-col>
+          </el-row>
+          <div v-if="t.checkResult" style="margin-top:10px;padding:8px;border-radius:6px;font-size:12px" :style="{background:t.checkResult.ok?'#e8f5e9':'#fff3e0',color:t.checkResult.ok?'#2e7d32':'#e65100'}">
+            {{ t.checkResult.msg }}
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- ChromaDB -->
+    <h3 style="margin:24px 0 12px 0;font-size:16px;font-weight:600;color:#1a1a2e">📊 ChromaDB 向量数据库</h3>
+    <el-card shadow="hover">
+      <div v-if="chromaLoading">加载中...</div>
+      <div v-else-if="chromaError" style="color:#999">ChromaDB 未安装或未启动</div>
+      <div v-else>
+        <p>集合数量: <strong>{{ chromaData.count }}</strong></p>
+        <el-table :data="chromaData.collections" stripe size="small" style="width:100%" v-if="chromaData.collections.length">
+          <el-table-column prop="name" label="集合名称" />
+          <el-table-column prop="count" label="文档数" width="120" />
+        </el-table>
+      </div>
+    </el-card>
+  </el-main>
+</template>
+
+<script>
+import axios from 'axios'
+const api = axios.create({baseURL: ''})
+
+export default {
+  name: 'ExternalTools',
+  data() {
+    return {
+      tools: [
+        { name:'Dify', icon:'🤖', status:'模块已安装', desc:'可视化 LLM 应用构建平台 — RAG 知识库、Agent 工作流、对话机器人', url:'http://localhost:3000', bridge:'/api/tools/dify', checkResult:null },
+        { name:'Flowise', icon:'🔀', status:'模块已安装', desc:'低代码 LLM 工作流编排 — 拖拽式构建 AI 管道、知识库检索链', url:'http://localhost:5678', bridge:null, checkResult:null },
+        { name:'n8n', icon:'⚡', status:'模块已安装', desc:'高级工作流自动化平台 — 300+ 集成、可视化编排、定时任务触发', url:'http://localhost:5678', bridge:null, checkResult:null },
+        { name:'One-API', icon:'🌐', status:'Docker 就绪', desc:'统一 LLM API 网关 — 管理 20+ 模型提供商、密钥配额、用量统计', url:'http://localhost:3001', bridge:null, checkResult:null },
+        { name:'LiteLLM', icon:'🧠', status:'模块已安装', desc:'轻量级 AI 网关 — 100+ 模型统一接口、自动故障切换、成本追踪', url:'http://localhost:4000', bridge:'/api/litellm/health', checkResult:null },
+        { name:'Agent-S', icon:'🖥️', status:'模块已安装', desc:'GUI 自动化智能体 — AI 控制桌面、执行操作、屏幕理解', url:'/agent-s', bridge:'/api/agent-s/status', checkResult:null },
+      ],
+      chromaData: { count:0, collections:[] },
+      chromaLoading: true, chromaError: false
+    }
+  },
+  async mounted() {
+    try {
+      const r = await api.get('/api/tools/chroma')
+      if(r.data.available) {
+        const r2 = await api.get('/api/tools/chroma/collections')
+        this.chromaData = { count: r.data.count, collections: r2.data.collections || [] }
+      } else { this.chromaError = true }
+    } catch { this.chromaError = true }
+    this.chromaLoading = false
+  },
+  methods: {
+    openUrl(url) { window.open(url, '_blank') },
+    async checkTool(t) {
+      if(!t.bridge) { this.openDoc(t); return }
+      try {
+        const r = await api.get(t.bridge, { timeout: 5000 })
+        t.checkResult = { ok: true, msg: `✅ 连接正常 — ${JSON.stringify(r.data).slice(0,80)}` }
+      } catch(e) {
+        t.checkResult = { ok: false, msg: `❌ 连接失败 — ${e.message}` }
+      }
+    },
+    openDoc(t) {
+      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api' }
+      window.open(docs[t.name] || '#', '_blank')
+    }
+  }
+}
+</script>
+
+<style scoped>
+.tool-card { border-radius: 12px; transition: transform .2s,margin .2s; margin-bottom:16px; }
+.tool-card:hover { transform: translateY(-2px); }
+</style>
