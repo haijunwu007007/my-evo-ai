@@ -30,8 +30,21 @@ def _mount_vue_frontend():
 
     vue_dist = BASE_DIR / "frontend" / "dist"
     if vue_dist.is_dir():
-        app.mount("/app", StaticFiles(directory=str(vue_dist), html=True), name="vue_spa")
-        logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app")
+        @app.get("/app", include_in_schema=False)
+        async def _spa_root():
+            idx = vue_dist / "index.html"
+            return FileResponse(str(idx), media_type="text/html") if idx.exists() else JSONResponse(status_code=404, content={"error":"SPA not built"})
+
+        @app.get("/app/{spa_path:path}", include_in_schema=False)
+        async def _spa_handler(spa_path: str):
+            target = vue_dist / spa_path
+            if target.is_file():
+                return FileResponse(str(target))
+            idx = vue_dist / "index.html"
+            if idx.exists():
+                return FileResponse(str(idx), media_type="text/html")
+            return JSONResponse(status_code=404, content={"error": "SPA not built"})
+        logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
         logger.warning("[VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build")
 

@@ -1,19 +1,19 @@
 <template>
-  <el-main class="tools-page" style="padding:20px;background:#f5f7fa;min-height:100vh">
-    <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:600;color:#1a1a2e">🔧 外部工具集成</h2>
-    <p style="margin:0 0 20px 0;color:#666;font-size:14px">一站式管理所有集成的开源工具平台</p>
+  <div class="tools-page">
+    <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:600">🔧 外部工具集成</h2>
+    <p style="margin:0 0 20px 0;color:var(--text-muted);font-size:14px">一站式管理所有集成的开源工具平台</p>
 
     <el-row :gutter="20">
-      <el-col :span="8" v-for="t in tools" :key="t.name">
+      <el-col :xs="24" :sm="12" :md="8" v-for="t in tools" :key="t.name">
         <el-card :body-style="{ padding: '20px' }" class="tool-card" shadow="hover">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
             <span style="font-size:28px">{{ t.icon }}</span>
             <div>
               <h3 style="margin:0;font-size:16px;font-weight:600">{{ t.name }}</h3>
-              <span style="font-size:12px;color:#999">{{ t.status }}</span>
+              <span style="font-size:12px;color:var(--text-dim)">{{ t.status }}</span>
             </div>
           </div>
-          <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 12px 0">{{ t.desc }}</p>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0 0 12px 0">{{ t.desc }}</p>
           <el-row :gutter="8">
             <el-col :span="12">
               <el-button size="small" @click="openUrl(t.url)" style="width:100%" v-if="t.url">打开面板</el-button>
@@ -22,7 +22,7 @@
               <el-button size="small" :type="t.bridge ? 'primary' : 'info'" @click="checkTool(t)" style="width:100%">{{ t.bridge ? '连接检测' : '查看文档' }}</el-button>
             </el-col>
           </el-row>
-          <div v-if="t.checkResult" style="margin-top:10px;padding:8px;border-radius:6px;font-size:12px" :style="{background:t.checkResult.ok?'#e8f5e9':'#fff3e0',color:t.checkResult.ok?'#2e7d32':'#e65100'}">
+          <div v-if="t.checkResult" style="margin-top:10px;padding:8px;border-radius:6px;font-size:12px" :style="{background:t.checkResult.ok?'rgba(16,185,129,0.12)':'rgba(245,158,11,0.12)',color:t.checkResult.ok?'#10b981':'#f59e0b'}">
             {{ t.checkResult.msg }}
           </div>
         </el-card>
@@ -30,10 +30,10 @@
     </el-row>
 
     <!-- ChromaDB -->
-    <h3 style="margin:24px 0 12px 0;font-size:16px;font-weight:600;color:#1a1a2e">📊 ChromaDB 向量数据库</h3>
+    <h3 style="margin:24px 0 12px 0;font-size:16px;font-weight:600">📊 ChromaDB 向量数据库</h3>
     <el-card shadow="hover">
       <div v-if="chromaLoading">加载中...</div>
-      <div v-else-if="chromaError" style="color:#999">ChromaDB 未安装或未启动</div>
+      <div v-else-if="chromaError" style="color:var(--text-dim)">ChromaDB 未安装或未启动</div>
       <div v-else>
         <p>集合数量: <strong>{{ chromaData.count }}</strong></p>
         <el-table :data="chromaData.collections" stripe size="small" style="width:100%" v-if="chromaData.collections.length">
@@ -42,7 +42,7 @@
         </el-table>
       </div>
     </el-card>
-  </el-main>
+  </div>
 </template>
 
 <script>
@@ -120,6 +120,7 @@ export default {
 </script>
 
 <style scoped>
+.tools-page { padding-bottom: 32px; }
 .tool-card { border-radius: 12px; transition: transform .2s,margin .2s; margin-bottom:16px; }
 .tool-card:hover { transform: translateY(-2px); }
 </style>

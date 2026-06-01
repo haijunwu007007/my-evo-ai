@@ -26,13 +26,12 @@
       <el-menu
         :default-active="route.path"
         :collapse="collapsed"
-        router
         class="nav-menu"
         text-color="#7b8fa1"
         active-text-color="#818cf8"
       >
         <el-menu-item-group v-if="!collapsed" title="核心功能">
-          <el-menu-item v-for="item in coreMenu" :key="item.path" :index="item.path" class="nav-item">
+          <el-menu-item v-for="item in coreMenu" :key="item.path" :index="item.path" class="nav-item" @click="navTo(item.path)">
             <el-icon><component :is="item.icon" /></el-icon>
             <template #title>
               <span>{{ item.title }}</span>
@@ -41,14 +40,14 @@
           </el-menu-item>
         </el-menu-item-group>
         <template v-else>
-          <el-menu-item v-for="item in allMenu" :key="item.path" :index="item.path" class="nav-item">
+          <el-menu-item v-for="item in allMenu" :key="item.path" :index="item.path" class="nav-item" @click="navTo(item.path)">
             <el-icon><component :is="item.icon" /></el-icon>
             <template #title>{{ item.title }}</template>
           </el-menu-item>
         </template>
 
         <el-menu-item-group v-if="!collapsed" title="运维管理">
-          <el-menu-item v-for="item in opsMenu" :key="item.path" :index="item.path" class="nav-item">
+          <el-menu-item v-for="item in opsMenu" :key="item.path" :index="item.path" class="nav-item" @click="navTo(item.path)">
             <el-icon><component :is="item.icon" /></el-icon>
             <template #title>{{ item.title }}</template>
           </el-menu-item>
@@ -134,13 +133,24 @@ let hTimer: ReturnType<typeof setInterval>|null = null
 // ── 亮暗主题切换 ────────────────────────────────────
 const toggleTheme = () => {
   darkMode.value = !darkMode.value
-  document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
+  applyTheme(darkMode.value)
   localStorage.setItem('evo_theme', darkMode.value ? 'dark' : 'light')
+}
+const applyTheme = (isDark: boolean) => {
+  const theme = isDark ? 'dark' : 'light'
+  document.documentElement.setAttribute('data-theme', theme)
+  // Element Plus 暗色模式需要 dark class
+  if (isDark) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  document.body.style.background = isDark ? '#0d0d1a' : '#f1f5f9'
 }
 onMounted(() => {
   const saved = localStorage.getItem('evo_theme')
   darkMode.value = saved !== 'light'
-  document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light')
+  applyTheme(darkMode.value)
 })
 
 interface NavItem { path: string; title: string; icon: string; badge?: string }
@@ -172,13 +182,18 @@ const extLinks = [
   { title: 'Agent-S',  url: '/agent-s', icon: 'Monitor' },
 ]
 
-// 后端直接渲染的页面（非 Vue 路由），需要 window.location 跳转
+// 手动导航（el-menu 已取消 router prop，避免 base 路径冲突）
+const navTo = (path: string) => router.push(path)
+
+// 后端直接渲染的页面（非 Vue 路由），需要跳转到 API 服务器
 const backendPages = ['/scalar']
 const extLinkClick = (link: { url: string }) => {
   if (backendPages.includes(link.url)) {
-    window.location.href = link.url
+    window.location.href = `http://127.0.0.1:8765${link.url}`
+  } else {
+    // 所有 Vue 路由 → 走 API 服务器（支持 SPA 降级）
+    window.location.href = `http://127.0.0.1:8765/app${link.url}`
   }
-  // 其他 Vue 路由由 el-menu router 处理
 }
 
 const allMenu = [...coreMenu, ...opsMenu]
