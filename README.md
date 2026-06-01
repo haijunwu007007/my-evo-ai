@@ -99,6 +99,46 @@ AUTO-EVO-AI V0.1/
 | CI/CD | GitHub Actions · Git · Docker 集成 |
 | 通知推送 | 企微 · 钉钉 · 飞书 · 短信 · 邮件 · Slack · Telegram · Discord · 共15通道 |
 
+## Kubernetes 部署
+
+项目提供 `k8s/` 目录下的 Kubernetes 部署清单，适用生产环境：
+
+```bash
+# 1. 创建命名空间
+kubectl create ns evo
+
+# 2. 部署核心服务
+kubectl apply -f k8s/ -n evo
+
+# 3. 暴露服务
+kubectl port-forward svc/evo-api 8765:8765 -n evo
+
+# 4. 查看状态
+kubectl get pods -n evo -w
+```
+
+### 外部工具（可选）
+
+30 个外部工具通过 Docker Compose 统一管理：
+
+```bash
+# 一键启动所有工具
+docker compose -f docker-compose.tools.yml up -d
+
+# 访问 Dashy 统一启动页
+open http://localhost:4000
+
+# 停止所有工具
+docker compose -f docker-compose.tools.yml down
+```
+
+### 推荐配置
+
+| 环境 | 最低配置 | 推荐配置 |
+|------|----------|----------|
+| 开发 | 4核 / 8GB RAM | 8核 / 16GB RAM |
+| 生产 | 8核 / 16GB RAM | 16核 / 32GB RAM + SSD |
+
 ## 技术规格
 
 | 指标 | 数值 |

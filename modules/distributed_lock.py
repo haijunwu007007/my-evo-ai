@@ -4,10 +4,11 @@
 文件级分布式锁，支持 TTL、阻塞等待、可重入"""
 __module_meta__ = {"id":"distributed-lock","name":"Distributed Lock","version":"V0.1","group":"infrastructure","grade":"B",
     "tags":["infrastructure","lock","distributed","concurrency"],"description":"File-based distributed lock with TTL"}
-import time, os, uuid, logging, threading, tempfile
+import time, os, uuid, threading, tempfile
 from typing import Any, Dict, Optional
+from core.logging_config import get_logger
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
-logger=logging.getLogger("evo.distributed-lock")
+logger = get_logger("evo.distributed-lock")
 class DistributedLock(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
     MODULE_ID="distributed-lock";MODULE_NAME="分布式锁";VERSION="v1.0";MODULE_LEVEL="A"
     def __init__(self,config=None):
