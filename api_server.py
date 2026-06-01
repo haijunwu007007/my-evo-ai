@@ -90,6 +90,9 @@ from api.routes_litellm import router as litellm_router
 from api.routes_agent_s import router as agent_s_router
 from api.routes_dify import router as dify_router
 from api.routes_chroma import router as chroma_router
+from api.routes_browser_use import router as browser_use_router
+from api.routes_filebrowser import router as filebrowser_router
+from api.routes_openclaw import router as openclaw_router
 from api.routes_meilisearch import router as meili_router
 from api.routes_stirling_pdf import router as stirling_router
 from api.routes_uptime_kuma import router as uptime_router
@@ -108,6 +111,9 @@ app.include_router(insights_router)
 app.include_router(dify_router)
 app.include_router(chroma_router)
 app.include_router(meili_router)
+app.include_router(browser_use_router)
+app.include_router(filebrowser_router)
+app.include_router(openclaw_router)
 app.include_router(stirling_router)
 app.include_router(uptime_router)
 app.include_router(nextchat_router)

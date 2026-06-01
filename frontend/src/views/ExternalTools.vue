@@ -64,6 +64,9 @@ export default {
         { name:'Stirling-PDF', icon:'📄', status:'Docker 就绪', desc:'开源 PDF 工具箱 — 合并/拆分/压缩/OCR/签名 60+ 操作', url:'http://localhost:8081', bridge:'/api/tools/pdf', checkResult:null },
         { name:'Uptime-Kuma', icon:'📡', status:'Docker 就绪', desc:'自托管服务监控 — 实时状态、告警通知、SSL 证书检查', url:'http://localhost:3001', bridge:'/api/tools/uptime', checkResult:null },
         { name:'NextChat', icon:'💬', status:'Docker 就绪', desc:'跨平台 ChatGPT UI — 多模型聊天、Prompt 管理、插件系统', url:'http://localhost:3099', bridge:'/api/tools/nextchat', checkResult:null },
+        { name:'Browser-Use', icon:'🌐', status:'SDK已安装 v0.12.6', desc:'AI 浏览器自动化 (93k⭐) — Agent 像人类一样操作网页', url:'', bridge:'/api/tools/browser-use', checkResult:null },
+        { name:'FileBrowser', icon:'📁', status:'Docker 就绪', desc:'Web 文件管理器 (55k⭐) — 浏览器中管理服务器文件', url:'http://localhost:8083', bridge:'/api/tools/filebrowser', checkResult:null },
+        { name:'OpenClaw', icon:'🦞', status:'Docker 就绪', desc:'AI 个人助手网关 (373k⭐) — 连接 Telegram/Discord/WhatsApp 50+平台', url:'http://localhost:3002', bridge:'/api/tools/openclaw', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false
@@ -91,7 +94,7 @@ export default {
       }
     },
     openDoc(t) {
-      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api', Meilisearch:'https://www.meilisearch.com/docs', 'Stirling-PDF':'https://github.com/Stirling-Tools/Stirling-PDF', 'Uptime-Kuma':'https://github.com/louislam/uptime-kuma', NextChat:'https://github.com/ChatGPTNextWeb/NextChat' }
+      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api', Meilisearch:'https://www.meilisearch.com/docs', 'Stirling-PDF':'https://github.com/Stirling-Tools/Stirling-PDF', 'Uptime-Kuma':'https://github.com/louislam/uptime-kuma', NextChat:'https://github.com/ChatGPTNextWeb/NextChat', 'Browser-Use':'https://github.com/browser-use/browser-use', FileBrowser:'https://github.com/filebrowser/filebrowser', OpenClaw:'https://github.com/openclaw/openclaw' }
       window.open(docs[t.name] || '#', '_blank')
     }
   }
