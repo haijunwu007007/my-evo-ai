@@ -1,0 +1,35 @@
+# AUTO-EVO-AI V0.1 — 外部工具 Docker 服务
+# docker compose -f docker-compose.tools.yml up -d
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./_data/meili:/meili_data
+    environment:
+      MEILI_MASTER_KEY: evo-master-key-2026
+      MEILI_NO_ANALYTICS: "true"
+
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:latest
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./_data/stirling:/usr/share/tessdata
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./_data/uptime:/app/data
+
+  nextchat:
+    image: yidadaa/chatgpt-next-web:latest
+    ports:
+      - "3099:3000"
+    environment:
+      OPENAI_API_KEY: ""
+      BASE_URL: ""

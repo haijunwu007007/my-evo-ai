@@ -90,6 +90,10 @@ from api.routes_litellm import router as litellm_router
 from api.routes_agent_s import router as agent_s_router
 from api.routes_dify import router as dify_router
 from api.routes_chroma import router as chroma_router
+from api.routes_meilisearch import router as meili_router
+from api.routes_stirling_pdf import router as stirling_router
+from api.routes_uptime_kuma import router as uptime_router
+from api.routes_nextchat import router as nextchat_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -103,6 +107,10 @@ app.include_router(coordinator_router)
 app.include_router(insights_router)
 app.include_router(dify_router)
 app.include_router(chroma_router)
+app.include_router(meili_router)
+app.include_router(stirling_router)
+app.include_router(uptime_router)
+app.include_router(nextchat_router)
 
 
 # ── 静态文件 ──

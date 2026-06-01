@@ -60,6 +60,10 @@ export default {
         { name:'One-API', icon:'🌐', status:'Docker 就绪', desc:'统一 LLM API 网关 — 管理 20+ 模型提供商、密钥配额、用量统计', url:'http://localhost:3001', bridge:null, checkResult:null },
         { name:'LiteLLM', icon:'🧠', status:'模块已安装', desc:'轻量级 AI 网关 — 100+ 模型统一接口、自动故障切换、成本追踪', url:'http://localhost:4000', bridge:'/api/litellm/health', checkResult:null },
         { name:'Agent-S', icon:'🖥️', status:'模块已安装', desc:'GUI 自动化智能体 — AI 控制桌面、执行操作、屏幕理解', url:'/agent-s', bridge:'/api/agent-s/status', checkResult:null },
+        { name:'Meilisearch', icon:'🔍', status:'Docker 就绪', desc:'毫秒级全文搜索引擎 — 模块/文档/日志即时搜索，容错拼写', url:'http://localhost:7700', bridge:'/api/tools/meili', checkResult:null },
+        { name:'Stirling-PDF', icon:'📄', status:'Docker 就绪', desc:'开源 PDF 工具箱 — 合并/拆分/压缩/OCR/签名 60+ 操作', url:'http://localhost:8081', bridge:'/api/tools/pdf', checkResult:null },
+        { name:'Uptime-Kuma', icon:'📡', status:'Docker 就绪', desc:'自托管服务监控 — 实时状态、告警通知、SSL 证书检查', url:'http://localhost:3001', bridge:'/api/tools/uptime', checkResult:null },
+        { name:'NextChat', icon:'💬', status:'Docker 就绪', desc:'跨平台 ChatGPT UI — 多模型聊天、Prompt 管理、插件系统', url:'http://localhost:3099', bridge:'/api/tools/nextchat', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false
@@ -87,7 +91,7 @@ export default {
       }
     },
     openDoc(t) {
-      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api' }
+      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api', Meilisearch:'https://www.meilisearch.com/docs', 'Stirling-PDF':'https://github.com/Stirling-Tools/Stirling-PDF', 'Uptime-Kuma':'https://github.com/louislam/uptime-kuma', NextChat:'https://github.com/ChatGPTNextWeb/NextChat' }
       window.open(docs[t.name] || '#', '_blank')
     }
   }
