@@ -9,9 +9,10 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'cd .. && python3 api_server.py',
+    command: 'python3 D:/AUTO-EVO-AI-V0.1/api_server.py',
     url: 'http://127.0.0.1:8765/dashboard',
-    timeout: 30000,
+    timeout: 45000,
     reuseExistingServer: true,
+    cwd: 'D:/AUTO-EVO-AI-V0.1',
   },
 });
