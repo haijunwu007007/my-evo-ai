@@ -1,7 +1,7 @@
 """AUTO-EVO-AI V0.1 — ChromaDB 向量数据库管理路由"""
 from fastapi import APIRouter
 router = APIRouter()
-B = "/api/tools/chroma"
+B = "/api/v1/tools/chroma"
 
 import os, json as _json
 CHROMA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules", ".chroma_data")

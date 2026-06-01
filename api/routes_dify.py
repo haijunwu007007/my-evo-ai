@@ -1,7 +1,7 @@
 """AUTO-EVO-AI V0.1 — Dify LLM应用平台 桥接路由"""
 from fastapi import APIRouter
 router = APIRouter()
-B = "/api/tools/dify"
+B = "/api/v1/tools/dify"
 
 _mod = None
 def _get_mod():

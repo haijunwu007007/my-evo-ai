@@ -4,7 +4,7 @@ import os, json, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_activepieces")
-router = APIRouter(prefix="/api/tools/activepieces", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/activepieces", tags=["tools"])
 
 AP_URL = os.environ.get("ACTIVEPIECES_URL", "http://localhost:8080")
 AP_API_KEY = os.environ.get("ACTIVEPIECES_API_KEY", "")

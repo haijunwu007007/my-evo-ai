@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_nocodb")
-router = APIRouter(prefix="/api/tools/nocodb", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/nocodb", tags=["tools"])
 
 NOCODB_BASE = os.environ.get("NOCODB_BASE", "http://127.0.0.1:8088")
 

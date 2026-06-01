@@ -37,7 +37,7 @@ def _get_gateway():
         return None
 
 
-@router.get("/api/litellm/providers")
+@router.get("/api/v1/litellm/providers")
 async def list_providers():
     """列出已配置的 LLM 提供商"""
     gw = _get_gateway()
@@ -46,7 +46,7 @@ async def list_providers():
     return {"success": True, "providers": gw.get_providers(), "configured": True}
 
 
-@router.get("/api/litellm/models")
+@router.get("/api/v1/litellm/models")
 async def list_models():
     """列出可用模型"""
     gw = _get_gateway()
@@ -55,7 +55,7 @@ async def list_models():
     return {"success": True, "models": gw.get_models(), "configured": True}
 
 
-@router.get("/api/litellm/stats")
+@router.get("/api/v1/litellm/stats")
 async def get_stats():
     """获取使用统计"""
     gw = _get_gateway()
@@ -64,7 +64,7 @@ async def get_stats():
     return {"success": True, "stats": gw.get_stats(), "configured": True}
 
 
-@router.get("/api/litellm/health")
+@router.get("/api/v1/litellm/health")
 async def health():
     """健康检查"""
     gw = _get_gateway()
@@ -73,7 +73,7 @@ async def health():
     return {"success": True, **gw.health_check(), "configured": True}
 
 
-@router.post("/api/litellm/chat")
+@router.post("/api/v1/litellm/chat")
 async def chat(req: LiteLLMChatRequest):
     """LiteLLM 统一对话接口"""
     gw = _get_gateway()
@@ -91,7 +91,7 @@ async def chat(req: LiteLLMChatRequest):
     return result
 
 
-@router.post("/api/litellm/chat/stream")
+@router.post("/api/v1/litellm/chat/stream")
 async def chat_stream(req: LiteLLMChatRequest):
     """LiteLLM SSE 流式对话"""
     gw = _get_gateway()

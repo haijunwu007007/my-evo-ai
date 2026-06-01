@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 router = APIRouter()
 import os, json, urllib.request
-B = "/api/tools/filebrowser"
+B = "/api/v1/tools/filebrowser"
 
 FB_URL = os.environ.get("FILEBROWSER_URL", "http://localhost:8083")
 FB_USER = os.environ.get("FILEBROWSER_USER", "admin")

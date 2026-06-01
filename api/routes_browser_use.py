@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 router = APIRouter()
-B = "/api/tools/browser-use"
+B = "/api/v1/tools/browser-use"
 
 class TaskRequest(BaseModel):
     task: str = ""

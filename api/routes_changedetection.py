@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_changedetection")
-router = APIRouter(prefix="/api/tools/changedetection", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/changedetection", tags=["tools"])
 
 CD_BASE = os.environ.get("CHANGEDETECTION_BASE", "http://127.0.0.1:5000")
 

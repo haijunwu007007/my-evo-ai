@@ -22,23 +22,23 @@ from api._templates import QR_PAGE_HTML, DEPLOY_GUIDE_HTML, GUIDE_PAGE_HTML
 router = APIRouter()
 
 # ─── 内网穿透 ──────────────────────────────────────
-@router.get("/api/tunnel/status")
+@router.get("/api/v1/tunnel/status")
 async def tunnel_status():
     return {"success": True, "tunnel_enabled": False, "public_url": None}
 
-@router.post("/api/tunnel/register")
+@router.post("/api/v1/tunnel/register")
 async def tunnel_register(body: dict = None):
     global _TUNNEL_URL
     if body and "url" in body:
         _TUNNEL_URL = body["url"]
     return {"success": True, "url": _TUNNEL_URL}
 
-@router.get("/api/tunnel/url")
+@router.get("/api/v1/tunnel/url")
 async def tunnel_url():
     return {"success": True, "url": _TUNNEL_URL, "has_tunnel": bool(_TUNNEL_URL)}
 
 # ─── 局域网 & 二维码 ──────────────────────────────
-@router.get("/api/local-url")
+@router.get("/api/v1/local-url")
 async def local_url():
     return {
         "success": True,
@@ -48,7 +48,7 @@ async def local_url():
         "port": 8765,
     }
 
-@router.get("/api/qr")
+@router.get("/api/v1/qr")
 async def qr_page():
     """纯前端 QR 码页面 — 扫码即用"""
     url = f"http://{_LAN_IP}:8765/dashboard"
@@ -57,13 +57,13 @@ async def qr_page():
     return HTMLResponse(html)
 
 # ─── 部署指南 ───────────────────────────────────────
-@router.get("/api/deploy-guide")
+@router.get("/api/v1/deploy-guide")
 async def deploy_guide():
     """云部署指南 — 返回 HTML 部署指引页面"""
     return HTMLResponse(DEPLOY_GUIDE_HTML)
 
 # ─── 使用说明书 ──────────────────────────────────────
-@router.get("/api/guide")
+@router.get("/api/v1/guide")
 async def guide_page():
     """图文并茂的傻瓜式使用说明"""
     return HTMLResponse(GUIDE_PAGE_HTML)
@@ -82,15 +82,15 @@ async def serve_js(file_path: str):
     return Response(base.read_bytes(), media_type=ct)
 
 # ─── 协调中心 ─────────────────────────────────────
-@router.get("/api/coordinator/status")
+@router.get("/api/v1/coordinator/status")
 async def coordinator_status():
     t = len(registry.modules) if hasattr(registry, 'modules') else 0
     return {"success": True, "modules": {"registered": t, "total": t, "loaded": 0}, "automation_score": 100, "execution_stats": {"total": 0}, "version": "V0.1"}
-@router.get("/api/coordinator/capabilities")
+@router.get("/api/v1/coordinator/capabilities")
 async def coordinator_capabilities():
     return {"success": True, "automation_score": 100, "capabilities": {"system":["scheduler","event_bus","config","health"],"ai":["planner","agent","llm"],"data":["analysis","quality","masking"],"security":["jwt","rbac","oauth"],"monitor":["metrics","tracing","audit"]}}
 
-@router.post("/api/coordinator/execute")
+@router.post("/api/v1/coordinator/execute")
 async def coordinator_execute(body: dict = None):
     """AI编排：接收自然语言任务，LLM理解→映射模块→执行→返回结果"""
     task = (body or {}).get("task", "").strip()

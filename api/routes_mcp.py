@@ -11,7 +11,7 @@ import os, json, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_mcp")
-router = APIRouter(prefix="/api/tools/mcp", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/mcp", tags=["tools"])
 
 MCP_HUB_URL = os.environ.get("MCP_HUB_URL", "http://localhost:3011")
 

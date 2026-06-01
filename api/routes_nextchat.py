@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 
 router = APIRouter()
-B = "/api/tools/nextchat"
+B = "/api/v1/tools/nextchat"
 
 NEXTCHAT_URL = "http://127.0.0.1:3099"
 

@@ -4,7 +4,7 @@ import os, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_hoppscotch")
-router = APIRouter(prefix="/api/tools/hoppscotch", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/hoppscotch", tags=["tools"])
 
 HOPSCOTCH_URL = os.environ.get("HOPSCOTCH_URL", "http://localhost:3010")
 

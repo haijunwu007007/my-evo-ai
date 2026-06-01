@@ -4,7 +4,7 @@ import os, json, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_tabby")
-router = APIRouter(prefix="/api/tools/tabby", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/tabby", tags=["tools"])
 
 TABBY_URL = os.environ.get("TABBY_URL", "http://localhost:8089")
 

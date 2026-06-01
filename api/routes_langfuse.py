@@ -4,7 +4,7 @@ import os, json
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_langfuse")
-router = APIRouter(prefix="/api/tools/langfuse", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/langfuse", tags=["tools"])
 
 HAS_LANGFUSE = False
 langfuse_client = None

@@ -16,7 +16,7 @@ router = APIRouter()
 INSIGHTS_DIR = os.path.join(os.path.dirname(__file__), "..", ".evo_data", "insights")
 
 
-@router.get("/api/insights/reports")
+@router.get("/api/v1/insights/reports")
 async def list_reports(limit: int = Query(7, ge=1, le=30)):
     """获取进化报告列表"""
     if not os.path.exists(INSIGHTS_DIR):
@@ -38,7 +38,7 @@ async def list_reports(limit: int = Query(7, ge=1, le=30)):
     return {"success": True, "reports": reports, "count": len(reports)}
 
 
-@router.get("/api/insights/evolution")
+@router.get("/api/v1/insights/evolution")
 async def get_latest_evolution():
     """获取最新进化报告"""
     if not os.path.exists(INSIGHTS_DIR):

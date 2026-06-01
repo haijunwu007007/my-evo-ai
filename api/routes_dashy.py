@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_dashy")
-router = APIRouter(prefix="/api/tools/dashy", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/dashy", tags=["tools"])
 
 DASHY_BASE = os.environ.get("DASHY_BASE", "http://127.0.0.1:4000")
 

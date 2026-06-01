@@ -27,20 +27,20 @@ class ExecuteRequest(BaseModel):
     timeout: int = 120
 
 
-@router.get("/api/agent-s/status")
-@router.get("/api/agent-s/available")
+@router.get("/api/v1/agent-s/status")
+@router.get("/api/v1/agent-s/available")
 async def agent_s_status():
     """Agent-S 模块状态"""
     return await get_status()
 
 
-@router.get("/api/agent-s/check")
+@router.get("/api/v1/agent-s/check")
 async def agent_s_check():
     """环境检测"""
     return await check_available()
 
 
-@router.post("/api/agent-s/execute")
+@router.post("/api/v1/agent-s/execute")
 async def agent_s_execute(req: ExecuteRequest):
     """执行GUI自动化指令"""
     instruction = req.instruction or req.task
@@ -56,19 +56,19 @@ async def agent_s_execute(req: ExecuteRequest):
         return {"success": False, "error": f"执行异常: {e}"}
 
 
-@router.post("/api/agent-s/screenshot")
+@router.post("/api/v1/agent-s/screenshot")
 async def agent_s_screenshot():
     """获取屏幕截图"""
     return await get_screenshot()
 
 
-@router.get("/api/agent-s/mouse")
+@router.get("/api/v1/agent-s/mouse")
 async def agent_s_mouse():
     """获取鼠标位置"""
     return get_mouse()
 
 
-@router.get("/api/agent-s/history")
+@router.get("/api/v1/agent-s/history")
 async def agent_s_history(limit: int = Query(20, ge=1, le=200)):
     """执行历史"""
     from modules.agent_s_bridge import _TASK_HISTORY

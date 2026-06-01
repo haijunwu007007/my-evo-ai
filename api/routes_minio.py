@@ -8,7 +8,7 @@ from core.logging_config import get_logger
 from api._paths import BASE_DIR
 
 logger = get_logger("evo.routes_minio")
-router = APIRouter(prefix="/api/tools/minio", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/minio", tags=["tools"])
 
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://127.0.0.1:9000")
 MINIO_CONSOLE = os.environ.get("MINIO_CONSOLE", "http://127.0.0.1:9001")

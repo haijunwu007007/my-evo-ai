@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_grafana")
-router = APIRouter(prefix="/api/tools/grafana", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/grafana", tags=["tools"])
 
 GRAFANA_URL = os.environ.get("GRAFANA_URL", "http://127.0.0.1:3000")
 GRAFANA_API_KEY = os.environ.get("GRAFANA_API_KEY", "")

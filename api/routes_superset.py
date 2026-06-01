@@ -4,7 +4,7 @@ import os, json, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_superset")
-router = APIRouter(prefix="/api/tools/superset", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/superset", tags=["tools"])
 
 SUPERSET_URL = os.environ.get("SUPERSET_URL", "http://localhost:8088")
 

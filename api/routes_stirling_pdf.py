@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 import urllib.request, json as _json
 router = APIRouter()
-B = "/api/tools/pdf"
+B = "/api/v1/tools/pdf"
 HOST = "http://127.0.0.1:8081"
 
 def _alive():

@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 import urllib.request, json as _json
 router = APIRouter()
-B = "/api/tools/openclaw"
+B = "/api/v1/tools/openclaw"
 HOST = "http://127.0.0.1:3002"
 
 def _alive():

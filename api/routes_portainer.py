@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_portainer")
-router = APIRouter(prefix="/api/tools/portainer", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/portainer", tags=["tools"])
 
 PORTAINER_URL = os.environ.get("PORTAINER_URL", "http://127.0.0.1:9000")
 PORTAINER_KEY = os.environ.get("PORTAINER_KEY", "")

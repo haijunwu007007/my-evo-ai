@@ -91,7 +91,7 @@ def stop_engines() -> None:
 # 调度器 — Scheduler
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/api/scheduler/status")
+@router.get("/api/v1/scheduler/status")
 async def scheduler_status():
     if HAS_SCHEDULER and _scheduler_instance:
         try:
@@ -107,7 +107,7 @@ async def scheduler_status():
             "total_tasks": len(_scheduler_tasks_db), "engine": "dict"}
 
 
-@router.get("/api/scheduler/tasks")
+@router.get("/api/v1/scheduler/tasks")
 async def scheduler_tasks():
     # 优先从引擎SQLite读（有15个持久化任务）
     try:
@@ -135,7 +135,7 @@ async def scheduler_tasks():
     return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "dict"}
 
 
-@router.post("/api/scheduler/tasks")
+@router.post("/api/v1/scheduler/tasks")
 async def scheduler_create(body: dict = None):
     body = body or {}
     tid = _next_id()
@@ -174,7 +174,7 @@ async def scheduler_create(body: dict = None):
     return {"success": True, "task": task, "engine": "dict"}
 
 
-@router.post("/api/scheduler/tasks/{task_id}/toggle")
+@router.post("/api/v1/scheduler/tasks/{task_id}/toggle")
 async def scheduler_toggle(task_id: str):
     if HAS_SCHEDULER and _scheduler_instance:
         try:
@@ -190,7 +190,7 @@ async def scheduler_toggle(task_id: str):
     return {"success": True}
 
 
-@router.post("/api/scheduler/tasks/{task_id}/trigger")
+@router.post("/api/v1/scheduler/tasks/{task_id}/trigger")
 async def scheduler_trigger(task_id: str):
     if HAS_SCHEDULER and _scheduler_instance:
         try:
@@ -205,7 +205,7 @@ async def scheduler_trigger(task_id: str):
     return {"success": True, "triggered": True}
 
 
-@router.delete("/api/scheduler/tasks/{task_id}")
+@router.delete("/api/v1/scheduler/tasks/{task_id}")
 async def scheduler_delete(task_id: str):
     if HAS_SCHEDULER and _scheduler_instance:
         try:
@@ -222,7 +222,7 @@ async def scheduler_delete(task_id: str):
 # 事件引擎 — Events
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/api/events/stats")
+@router.get("/api/v1/events/stats")
 async def events_stats():
     if HAS_EVENTS and _event_engine:
         try:
@@ -247,7 +247,7 @@ async def events_stats():
             "engine": "dict"}
 
 
-@router.get("/api/events/rules")
+@router.get("/api/v1/events/rules")
 async def events_rules():
     if HAS_EVENTS and _event_engine and hasattr(_event_engine, 'list_rules'):
         try:
@@ -260,7 +260,7 @@ async def events_rules():
     return {"success": True, "rules": rules, "count": len(rules), "engine": "dict"}
 
 
-@router.post("/api/events/rules")
+@router.post("/api/v1/events/rules")
 async def events_rule_create(body: dict = None):
     rid = _next_id()
     rule = {"id": rid, "name": (body or {}).get("name", f"规则{rid}"),
@@ -270,7 +270,7 @@ async def events_rule_create(body: dict = None):
     return {"success": True, "rule": rule}
 
 
-@router.delete("/api/events/rules/{rule_id}")
+@router.delete("/api/v1/events/rules/{rule_id}")
 async def events_rule_delete(rule_id: str):
     _rules_db.pop(rule_id, None); _save_all()
     return {"success": True}
@@ -280,7 +280,7 @@ async def events_rule_delete(rule_id: str):
 # 管线引擎 — Pipeline
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/api/pipeline/status")
+@router.get("/api/v1/pipeline/status")
 async def pipeline_status():
     if HAS_PIPELINE and _pipeline_engine and hasattr(_pipeline_engine, 'get_status'):
         try:
@@ -293,7 +293,7 @@ async def pipeline_status():
             "engine": "dict"}
 
 
-@router.get("/api/pipelines")
+@router.get("/api/v1/pipelines")
 async def pipelines_list():
     if HAS_PIPELINE and _pipeline_engine and hasattr(_pipeline_engine, 'list_pipelines'):
         try:
@@ -306,7 +306,7 @@ async def pipelines_list():
     return {"success": True, "pipelines": items, "count": len(items), "engine": "dict"}
 
 
-@router.get("/api/pipelines/stats")
+@router.get("/api/v1/pipelines/stats")
 async def pipelines_stats():
     total = len(_pipelines_db)
     active = sum(1 for p in _pipelines_db.values() if p.get("status") == "running")
@@ -315,7 +315,7 @@ async def pipelines_stats():
     return {"success": True, "total": total, "active": active, "completed": done, "failed": failed, "engine": "dict"}
 
 
-@router.post("/api/pipelines")
+@router.post("/api/v1/pipelines")
 async def pipelines_create(body: dict = None):
     pid = _next_id()
     pipe = {"id": pid, "name": (body or {}).get("name", f"管线{pid}"),
@@ -325,7 +325,7 @@ async def pipelines_create(body: dict = None):
     return {"success": True, "pipeline": pipe, "engine": "dict"}
 
 
-@router.post("/api/pipelines/{pipeline_id}/execute")
+@router.post("/api/v1/pipelines/{pipeline_id}/execute")
 async def pipelines_execute(pipeline_id: str):
     if pipeline_id in _pipelines_db:
         _pipelines_db[pipeline_id]["last_run"] = _ts()
@@ -333,7 +333,7 @@ async def pipelines_execute(pipeline_id: str):
     return {"success": True, "executed": True}
 
 
-@router.delete("/api/pipelines/{pipeline_id}")
+@router.delete("/api/v1/pipelines/{pipeline_id}")
 async def pipelines_delete(pipeline_id: str):
     _pipelines_db.pop(pipeline_id, None); _save_all()
     return {"success": True}
@@ -343,7 +343,7 @@ async def pipelines_delete(pipeline_id: str):
 # 任务队列 — Queue
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/api/queue/stats")
+@router.get("/api/v1/queue/stats")
 async def queue_stats():
     if HAS_QUEUE and _queue_instance and hasattr(_queue_instance, 'get_stats'):
         try:
@@ -363,20 +363,20 @@ async def queue_stats():
             "engine": "dict"}
 
 
-@router.get("/api/queue/tasks")
+@router.get("/api/v1/queue/tasks")
 async def queue_tasks(limit: int = 30):
     items = sorted(_queue_tasks_db.values(), key=lambda t: t.get("created_at", ""), reverse=True)[:limit]
     return {"success": True, "tasks": items, "total": len(items), "engine": "dict"}
 
 
-@router.get("/api/queue/pending")
+@router.get("/api/v1/queue/pending")
 async def queue_pending():
     pending = [t for t in _queue_tasks_db.values() if t.get("status") == "pending"]
     return {"success": True, "tasks": sorted(pending, key=lambda t: t.get("created_at", ""), reverse=True),
             "count": len(pending)}
 
 
-@router.post("/api/queue/tasks")
+@router.post("/api/v1/queue/tasks")
 async def queue_enqueue(body: dict = None):
     qid = _next_id()
     task = {"id": qid, "name": (body or {}).get("name", f"任务{qid}"),
@@ -387,14 +387,14 @@ async def queue_enqueue(body: dict = None):
     return {"success": True, "task": task, "engine": "dict"}
 
 
-@router.post("/api/queue/tasks/{task_id}/cancel")
+@router.post("/api/v1/queue/tasks/{task_id}/cancel")
 async def queue_cancel(task_id: str):
     if task_id in _queue_tasks_db:
         _queue_tasks_db[task_id]["status"] = "cancelled"; _save_all()
     return {"success": True}
 
 
-@router.post("/api/queue/tasks/{task_id}/retry")
+@router.post("/api/v1/queue/tasks/{task_id}/retry")
 async def queue_retry(task_id: str):
     if task_id in _queue_tasks_db:
         _queue_tasks_db[task_id]["status"] = "pending"; _save_all()
@@ -405,13 +405,13 @@ async def queue_retry(task_id: str):
 # 工作流模板 — Templates
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/api/templates")
+@router.get("/api/v1/templates")
 async def templates_list():
     tpls = [{"id": k, **v} for k, v in _TASK_TEMPLATES.items()]
     return {"success": True, "templates": tpls, "count": len(tpls)}
 
 
-@router.post("/api/templates/{template_id}/apply")
+@router.post("/api/v1/templates/{template_id}/apply")
 async def templates_apply(template_id: str):
     tpl = _TASK_TEMPLATES.get(template_id)
     if not tpl:

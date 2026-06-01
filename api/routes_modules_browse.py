@@ -98,7 +98,7 @@ def _scan_modules() -> list[dict[str, Any]]:
     return modules
 
 
-@router.get("/api/modules/list")
+@router.get("/api/v1/modules/list")
 async def modules_list(
     search: str = Query("", description="搜索关键词（名称或描述）"),
     has_execute: bool | None = Query(None, description="是否包含 execute 方法"),
@@ -139,7 +139,7 @@ async def modules_list(
     }
 
 
-@router.get("/api/modules/categories")
+@router.get("/api/v1/modules/categories")
 async def modules_categories():
     """模块分类统计"""
     all_modules = _scan_modules()

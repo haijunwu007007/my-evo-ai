@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_appsmith")
-router = APIRouter(prefix="/api/tools/appsmith", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/appsmith", tags=["tools"])
 
 APPSMITH_URL = os.environ.get("APPSMITH_URL", "http://127.0.0.1:8080")
 APPSMITH_KEY = os.environ.get("APPSMITH_KEY", "")

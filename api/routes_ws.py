@@ -74,7 +74,7 @@ async def websocket_channel_endpoint(websocket: WebSocket, channel: str,
                       rooms=f"system,{channel}")
 
 
-@app.get("/api/ws/stats")
+@app.get("/api/v1/ws/stats")
 async def ws_stats():
     """WebSocket统计"""
     from core.ws_engine import get_ws_engine
@@ -82,14 +82,14 @@ async def ws_stats():
     return {"success": True, **ws.stats()}
 
 
-@app.get("/api/ws/channels")
+@app.get("/api/v1/ws/channels")
 async def ws_channels():
     """可用频道列表"""
     from core.ws_engine import WSEngine
     return {"success": True, "channels": WSEngine.CHANNELS}
 
 
-@app.get("/api/ws/history")
+@app.get("/api/v1/ws/history")
 async def ws_history(channel: str = None, limit: int = 50):
     """消息历史"""
     from core.ws_engine import get_ws_engine
@@ -98,7 +98,7 @@ async def ws_history(channel: str = None, limit: int = 50):
     return {"success": True, "history": history}
 
 
-@app.post("/api/ws/broadcast")
+@app.post("/api/v1/ws/broadcast")
 async def ws_broadcast(body: dict):
     """广播消息 (管理用)"""
     from core.ws_engine import get_ws_engine, WSMessage

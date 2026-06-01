@@ -35,35 +35,35 @@ router = APIRouter()
 from core.cicd_engine import get_cicd_engine
 
 
-@router.get("/api/cicd/github/config")
+@router.get("/api/v1/cicd/github/config")
 async def cicd_github_config():
     """GitHub连接配置状态"""
     cicd = get_cicd_engine()
     return {"success": True, **cicd.github_config()}
 
 
-@router.get("/api/cicd/github/repos")
+@router.get("/api/v1/cicd/github/repos")
 async def cicd_github_repos(org: str = ""):
     """列出GitHub仓库"""
     cicd = get_cicd_engine()
     return {"success": True, "repos": cicd.github_repos(org)}
 
 
-@router.get("/api/cicd/github/branches")
+@router.get("/api/v1/cicd/github/branches")
 async def cicd_github_branches(repo: str = ""):
     """列出仓库分支"""
     cicd = get_cicd_engine()
     return {"success": True, "branches": cicd.github_branches(repo)}
 
 
-@router.get("/api/cicd/github/issues")
+@router.get("/api/v1/cicd/github/issues")
 async def cicd_github_issues(repo: str = "", state: str = "open"):
     """列出Issues"""
     cicd = get_cicd_engine()
     return {"success": True, "issues": cicd.github_issues(repo, state)}
 
 
-@router.post("/api/cicd/github/issues/create")
+@router.post("/api/v1/cicd/github/issues/create")
 async def cicd_github_create_issue(request: Request):
     """创建Issue"""
     body = await request.json()
@@ -71,21 +71,21 @@ async def cicd_github_create_issue(request: Request):
     return cicd.github_create_issue(body.get("repo", ""), body.get("title", ""), body.get("body", ""))
 
 
-@router.get("/api/cicd/github/pulls")
+@router.get("/api/v1/cicd/github/pulls")
 async def cicd_github_prs(repo: str = "", state: str = "open"):
     """列出PR"""
     cicd = get_cicd_engine()
     return {"success": True, "pulls": cicd.github_prs(repo, state)}
 
 
-@router.get("/api/cicd/github/workflows")
+@router.get("/api/v1/cicd/github/workflows")
 async def cicd_github_workflows(repo: str = ""):
     """列出Actions Workflows"""
     cicd = get_cicd_engine()
     return {"success": True, "workflows": cicd.github_workflows(repo)}
 
 
-@router.post("/api/cicd/github/workflows/trigger")
+@router.post("/api/v1/cicd/github/workflows/trigger")
 async def cicd_github_trigger(request: Request):
     """触发Workflow"""
     body = await request.json()
@@ -94,35 +94,35 @@ async def cicd_github_trigger(request: Request):
                                         body.get("ref", "main"), body.get("inputs"))
 
 
-@router.get("/api/cicd/git/status")
+@router.get("/api/v1/cicd/git/status")
 async def cicd_git_status(path: str = ""):
     """Git仓库状态"""
     cicd = get_cicd_engine()
     return cicd.git_status(path or str(BASE_DIR))
 
 
-@router.get("/api/cicd/git/log")
+@router.get("/api/v1/cicd/git/log")
 async def cicd_git_log(path: str = "", n: int = 10):
     """Git提交历史"""
     cicd = get_cicd_engine()
     return cicd.git_log(path or str(BASE_DIR), n)
 
 
-@router.post("/api/cicd/git/pull")
+@router.post("/api/v1/cicd/git/pull")
 async def cicd_git_pull(path: str = ""):
     """Git Pull"""
     cicd = get_cicd_engine()
     return cicd.git_pull(path or str(BASE_DIR))
 
 
-@router.post("/api/cicd/git/push")
+@router.post("/api/v1/cicd/git/push")
 async def cicd_git_push(path: str = ""):
     """Git Push"""
     cicd = get_cicd_engine()
     return cicd.git_push(path or str(BASE_DIR))
 
 
-@router.post("/api/cicd/git/commit")
+@router.post("/api/v1/cicd/git/commit")
 async def cicd_git_commit(request: Request):
     """Git Add+Commit+Push"""
     body = await request.json()
@@ -130,28 +130,28 @@ async def cicd_git_commit(request: Request):
     return cicd.git_commit_push(body.get("path", str(BASE_DIR)), body.get("message", "auto commit"))
 
 
-@router.post("/api/cicd/deploy/build")
+@router.post("/api/v1/cicd/deploy/build")
 async def cicd_deploy_build(path: str = "", tag: str = "latest"):
     """Docker构建"""
     cicd = get_cicd_engine()
     return cicd.deploy_docker_build(path or str(BASE_DIR), tag)
 
 
-@router.post("/api/cicd/deploy/up")
+@router.post("/api/v1/cicd/deploy/up")
 async def cicd_deploy_up(path: str = ""):
     """Docker Compose Up"""
     cicd = get_cicd_engine()
     return cicd.deploy_docker_up(path or str(BASE_DIR))
 
 
-@router.post("/api/cicd/deploy/down")
+@router.post("/api/v1/cicd/deploy/down")
 async def cicd_deploy_down(path: str = ""):
     """Docker Compose Down"""
     cicd = get_cicd_engine()
     return cicd.deploy_docker_down(path or str(BASE_DIR))
 
 
-@router.post("/api/cicd/webhook/{source}")
+@router.post("/api/v1/cicd/webhook/{source}")
 async def cicd_webhook(source: str, request: Request):
     """接收CI/CD Webhook"""
     body = await request.json()
@@ -160,7 +160,7 @@ async def cicd_webhook(source: str, request: Request):
     return cicd.receive_webhook(source, event_type, body)
 
 
-@router.get("/api/cicd/webhooks")
+@router.get("/api/v1/cicd/webhooks")
 async def cicd_list_webhooks(limit: int = 50):
     """列出Webhook事件"""
     cicd = get_cicd_engine()
@@ -179,7 +179,7 @@ class GithubWebhookConfig(BaseModel):
     events: list[str] | None = None
     min_priority: int | None = None
 
-@router.post("/api/webhook/github")
+@router.post("/api/v1/webhook/github")
 async def webhook_github(request: Request):
     """接收 GitHub Webhook (push/pr/workflow/issues/release/ping)"""
     event_type = request.headers.get("X-GitHub-Event", "ping")
@@ -188,7 +188,7 @@ async def webhook_github(request: Request):
     payload = await request.json()
     return await process_webhook(event_type, payload, signature, secret)
 
-@router.get("/api/webhook/github/events")
+@router.get("/api/v1/webhook/github/events")
 async def webhook_events(event_type: str = "", repo: str = "", limit: int = 50, offset: int = 0):
     """查询 GitHub Webhook 事件历史"""
     return {"success": True, "events": list_events(
@@ -198,29 +198,29 @@ async def webhook_events(event_type: str = "", repo: str = "", limit: int = 50, 
         offset=offset,
     )}
 
-@router.get("/api/webhook/github/stats")
+@router.get("/api/v1/webhook/github/stats")
 async def webhook_stats():
     """事件统计"""
     return {"success": True, **get_event_stats()}
 
-@router.post("/api/webhook/github/clear")
+@router.post("/api/v1/webhook/github/clear")
 async def webhook_clear(older_than: int = 0):
     """清理事件历史"""
     n = clear_events(older_than)
     return {"success": True, "deleted": n}
 
-@router.get("/api/webhook/github/config")
+@router.get("/api/v1/webhook/github/config")
 async def webhook_get_config():
     """获取通知配置"""
     return {"success": True, "config": get_config()}
 
-@router.post("/api/webhook/github/config")
+@router.post("/api/v1/webhook/github/config")
 async def webhook_set_config(body: GithubWebhookConfig):
     """更新通知配置"""
     cfg = {k: v for k, v in body.model_dump().items() if v is not None}
     return {"success": True, "config": update_config(cfg)}
 
-@router.get("/api/webhook/github/health")
+@router.get("/api/v1/webhook/github/health")
 async def webhook_health():
     """健康检查"""
     result = gh_health()
@@ -235,7 +235,7 @@ async def webhook_health():
 from core.doc_generator import get_doc_generator
 
 
-@router.post("/api/docs/report")
+@router.post("/api/v1/docs/report")
 async def generate_report(request: Request):
     """生成报告文档 (markdown/html/word)"""
     body = await request.json()
@@ -247,7 +247,7 @@ async def generate_report(request: Request):
     return result
 
 
-@router.post("/api/docs/table-report")
+@router.post("/api/v1/docs/table-report")
 async def generate_table_report(request: Request):
     """生成表格报告"""
     body = await request.json()
@@ -256,7 +256,7 @@ async def generate_table_report(request: Request):
     return result
 
 
-@router.post("/api/docs/presentation")
+@router.post("/api/v1/docs/presentation")
 async def generate_presentation(request: Request):
     """生成PPT演示文稿"""
     body = await request.json()
@@ -265,7 +265,7 @@ async def generate_presentation(request: Request):
     return result
 
 
-@router.post("/api/docs/excel")
+@router.post("/api/v1/docs/excel")
 async def generate_excel(tables: dict = None):
     """生成Excel并下载"""
     gen = get_doc_generator()
@@ -274,7 +274,7 @@ async def generate_excel(tables: dict = None):
                               headers={"Content-Disposition": "attachment; filename=report.xlsx"})
 
 
-@router.post("/api/docs/word")
+@router.post("/api/v1/docs/word")
 async def generate_word(title: str = "文档", sections: list[dict] = []):
     """生成Word并下载"""
     gen = get_doc_generator()
@@ -283,14 +283,14 @@ async def generate_word(title: str = "文档", sections: list[dict] = []):
                               headers={"Content-Disposition": "attachment; filename=report.docx"})
 
 
-@router.get("/api/docs/files")
+@router.get("/api/v1/docs/files")
 async def list_doc_files():
     """列出已生成的文档文件"""
     gen = get_doc_generator()
     return {"success": True, "files": gen.list_output_files()}
 
 
-@router.get("/api/services/external")
+@router.get("/api/v1/services/external")
 async def external_services():
     """外部服务状态"""
     return {
@@ -302,7 +302,7 @@ async def external_services():
     }
 
 
-@router.get("/api/rag/documents")
+@router.get("/api/v1/rag/documents")
 async def rag_documents():
     """RAG 知识库文档列表"""
     from pathlib import Path
@@ -315,7 +315,7 @@ async def rag_documents():
     return {"success": True, "documents": docs, "count": len(docs)}
 
 
-@router.post("/api/rag/upload")
+@router.post("/api/v1/rag/upload")
 async def rag_upload(file: bytes | None = None):
     """上传文档到知识库"""
     if file is None:
@@ -328,7 +328,7 @@ async def rag_upload(file: bytes | None = None):
     return {"success": True, "doc": {"name": fname, "size": f"{len(file) // 1024}KB", "chunks": 0, "status": "ready"}}
 
 
-@router.delete("/api/rag/delete")
+@router.delete("/api/v1/rag/delete")
 async def rag_delete(name: str = ""):
     """删除知识库文档"""
     from pathlib import Path
@@ -345,7 +345,7 @@ async def rag_delete(name: str = ""):
 from core.external_services import get_notification_service
 
 
-@router.get("/api/notify/channels")
+@router.get("/api/v1/notify/channels")
 async def notify_channels():
     """列出所有通知渠道及配置状态"""
     ns = get_notification_service()
@@ -363,7 +363,7 @@ async def notify_channels():
     }
 
 
-@router.post("/api/notify/email/configure")
+@router.post("/api/v1/notify/email/configure")
 async def notify_email_configure(req: EmailConfigRequest):
     """配置SMTP邮箱"""
     ns = get_notification_service()
@@ -371,7 +371,7 @@ async def notify_email_configure(req: EmailConfigRequest):
                                password=req.password, ssl=req.ssl, from_name=req.from_name)
 
 
-@router.post("/api/notify/send")
+@router.post("/api/v1/notify/send")
 async def notify_send(req: NotificationRequest):
     """统一发送通知"""
     ns = get_notification_service()
@@ -387,56 +387,56 @@ async def notify_send(req: NotificationRequest):
     return result
 
 
-@router.post("/api/notify/email")
+@router.post("/api/v1/notify/email")
 async def notify_email(to: str = "", subject: str = "", body: str = "", html: str = ""):
     """发送邮件"""
     ns = get_notification_service()
     return ns.send_email(to=to, subject=subject, body=body, html=html)
 
 
-@router.post("/api/notify/wechat_work")
+@router.post("/api/v1/notify/wechat_work")
 async def notify_wechat_work(webhook_url: str = "", content: str = "", msg_type: str = "text"):
     """企业微信通知"""
     ns = get_notification_service()
     return ns.send_wechat_work(webhook_url, content, msg_type)
 
 
-@router.post("/api/notify/dingtalk")
+@router.post("/api/v1/notify/dingtalk")
 async def notify_dingtalk(webhook_url: str = "", content: str = "", secret: str = "", msg_type: str = "text"):
     """钉钉通知"""
     ns = get_notification_service()
     return ns.send_dingtalk(webhook_url, content, secret, msg_type)
 
 
-@router.post("/api/notify/feishu")
+@router.post("/api/v1/notify/feishu")
 async def notify_feishu(webhook_url: str = "", content: str = "", msg_type: str = "text", title: str = "通知"):
     """飞书通知"""
     ns = get_notification_service()
     return ns.send_feishu(webhook_url, content, msg_type, title)
 
 
-@router.post("/api/notify/serverchan")
+@router.post("/api/v1/notify/serverchan")
 async def notify_serverchan(sendkey: str = "", title: str = "", desp: str = ""):
     """Server酱推送"""
     ns = get_notification_service()
     return ns.send_serverchan(sendkey, title, desp)
 
 
-@router.post("/api/notify/pushplus")
+@router.post("/api/v1/notify/pushplus")
 async def notify_pushplus(token: str = "", title: str = "", content: str = "", template: str = "txt"):
     """PushPlus推送"""
     ns = get_notification_service()
     return ns.send_pushplus(token, title, content, template)
 
 
-@router.post("/api/notify/bark")
+@router.post("/api/v1/notify/bark")
 async def notify_bark(device_key: str = "", title: str = "", body: str = ""):
     """Bark推送"""
     ns = get_notification_service()
     return ns.send_bark(device_key, title, body)
 
 
-@router.post("/api/notify/webhook")
+@router.post("/api/v1/notify/webhook")
 async def notify_webhook(url: str = "", data: str = "", secret: str = "", retries: int = 0):
     """发送Webhook"""
     import json as _json
@@ -448,21 +448,21 @@ async def notify_webhook(url: str = "", data: str = "", secret: str = "", retrie
     return ns.send_webhook(url, parsed_data, secret=secret, retries=retries)
 
 
-@router.get("/api/notify/history")
+@router.get("/api/v1/notify/history")
 async def notify_history(channel: str = "", limit: int = 50):
     """获取通知发送历史"""
     ns = get_notification_service()
     return {"success": True, "history": ns.get_history(channel, limit)}
 
 
-@router.get("/api/notify/stats")
+@router.get("/api/v1/notify/stats")
 async def notify_stats():
     """通知统计"""
     ns = get_notification_service()
     return {"success": True, **ns.get_stats()}
 
 
-@router.get("/api/notify/templates")
+@router.get("/api/v1/notify/templates")
 async def notify_templates():
     """列出通知模板"""
     ns = get_notification_service()
@@ -484,7 +484,7 @@ class AIChatRequest(BaseModel):
     messages: list[AIChatMessage] = []
     temperature: float = 0.7
 
-@router.post("/api/ai/chat")
+@router.post("/api/v1/ai/chat")
 async def ai_chat(req: AIChatRequest):
     """统一AI聊天API：自动选择最优provider，支持负载均衡和故障转移"""
     from modules.ai_gateway import AIGateway
@@ -501,7 +501,7 @@ async def ai_chat(req: AIChatRequest):
     }}
 
 
-@router.get("/api/ai/providers")
+@router.get("/api/v1/ai/providers")
 async def ai_providers():
     """列出可用的AI provider及状态"""
     cfg = {
@@ -511,7 +511,7 @@ async def ai_providers():
     }
     return {"success": True, "providers": cfg}
 
-@router.get("/api/ai/models")
+@router.get("/api/v1/ai/models")
 async def ai_models():
     """列出支持的模型"""
     models = [
@@ -531,35 +531,35 @@ async def ai_models():
 from core.browser_engine import get_browser_engine, close_browser as _close_browser
 
 
-@router.post("/api/browser/launch")
+@router.post("/api/v1/browser/launch")
 async def browser_launch(headless: bool = True, engine_type: str = "auto"):
     """启动浏览器引擎"""
     engine = await get_browser_engine()
     return await engine.launch(engine_type=engine_type, headless=headless)
 
 
-@router.post("/api/browser/close")
+@router.post("/api/v1/browser/close")
 async def browser_close_endpoint():
     """关闭浏览器引擎"""
     await _close_browser()
     return {"success": True}
 
 
-@router.get("/api/browser/status")
+@router.get("/api/v1/browser/status")
 async def browser_status():
     """获取浏览器状态"""
     engine = await get_browser_engine()
     return await engine.get_status()
 
 
-@router.post("/api/browser/goto")
+@router.post("/api/v1/browser/goto")
 async def browser_goto(url: str = "", wait_until: str = "domcontentloaded", timeout: int = 30000):
     """导航到URL"""
     engine = await get_browser_engine()
     return await engine.goto(url, wait_until=wait_until, timeout=timeout)
 
 
-@router.post("/api/browser/screenshot")
+@router.post("/api/v1/browser/screenshot")
 async def browser_screenshot(selector: str = "", full_page: bool = False):
     """页面截图"""
     engine = await get_browser_engine()
@@ -573,7 +573,7 @@ async def browser_screenshot(selector: str = "", full_page: bool = False):
     }
 
 
-@router.post("/api/browser/screenshot/image")
+@router.post("/api/v1/browser/screenshot/image")
 async def browser_screenshot_image(selector: str = "", full_page: bool = False):
     """截图图片直出"""
     import base64 as _b64
@@ -587,70 +587,70 @@ async def browser_screenshot_image(selector: str = "", full_page: bool = False):
     raise HTTPException(status_code=500, detail="截图失败")
 
 
-@router.post("/api/browser/click")
+@router.post("/api/v1/browser/click")
 async def browser_click(selector: str = ""):
     """点击元素"""
     engine = await get_browser_engine()
     return await engine.click(selector)
 
 
-@router.post("/api/browser/fill")
+@router.post("/api/v1/browser/fill")
 async def browser_fill(selector: str = "", value: str = ""):
     """填写输入框"""
     engine = await get_browser_engine()
     return await engine.fill(selector, value)
 
 
-@router.post("/api/browser/type")
+@router.post("/api/v1/browser/type")
 async def browser_type(selector: str = "", text: str = "", delay: int = 50):
     """模拟键盘输入"""
     engine = await get_browser_engine()
     return await engine.type_text(selector, text, delay)
 
 
-@router.post("/api/browser/select")
+@router.post("/api/v1/browser/select")
 async def browser_select(selector: str = "", value: str = "", label: str = ""):
     """选择下拉选项"""
     engine = await get_browser_engine()
     return await engine.select_option(selector, value=value, label=label)
 
 
-@router.post("/api/browser/hover")
+@router.post("/api/v1/browser/hover")
 async def browser_hover(selector: str = ""):
     """悬停"""
     engine = await get_browser_engine()
     return await engine.hover(selector)
 
 
-@router.post("/api/browser/press")
+@router.post("/api/v1/browser/press")
 async def browser_press(key: str = "Enter"):
     """按键"""
     engine = await get_browser_engine()
     return await engine.press_key(key)
 
 
-@router.post("/api/browser/wait")
+@router.post("/api/v1/browser/wait")
 async def browser_wait(selector: str = "", timeout: int = 10000):
     """等待元素出现"""
     engine = await get_browser_engine()
     return await engine.wait_for_selector(selector, timeout)
 
 
-@router.post("/api/browser/evaluate")
+@router.post("/api/v1/browser/evaluate")
 async def browser_evaluate(script: str = ""):
     """执行JavaScript"""
     engine = await get_browser_engine()
     return await engine.evaluate(script)
 
 
-@router.post("/api/browser/scroll")
+@router.post("/api/v1/browser/scroll")
 async def browser_scroll(position: str = "bottom", selector: str = ""):
     """滚动页面"""
     engine = await get_browser_engine()
     return await engine.scroll_to(position, selector)
 
 
-@router.post("/api/browser/extract")
+@router.post("/api/v1/browser/extract")
 async def browser_extract(what: str = "all"):
     """提取页面数据(text/tables/links/images/forms/all)"""
     engine = await get_browser_engine()
@@ -669,7 +669,7 @@ async def browser_extract(what: str = "all"):
     return {"success": True, **result}
 
 
-@router.post("/api/browser/form/auto-fill")
+@router.post("/api/v1/browser/form/auto-fill")
 async def browser_auto_fill(form_index: int = 0, data: dict = None):
     """自动填写表单"""
     import base64 as _b64
@@ -677,7 +677,7 @@ async def browser_auto_fill(form_index: int = 0, data: dict = None):
     return await engine.auto_fill_form(form_index, data or {})
 
 
-@router.get("/api/browser/cookies")
+@router.get("/api/v1/browser/cookies")
 async def browser_cookies():
     """获取Cookie"""
     engine = await get_browser_engine()
@@ -685,14 +685,14 @@ async def browser_cookies():
     return {"success": True, "cookies": cookies}
 
 
-@router.post("/api/browser/cookies/set")
+@router.post("/api/v1/browser/cookies/set")
 async def browser_set_cookies(cookies: list[dict] = None):
     """设置Cookie"""
     engine = await get_browser_engine()
     return await engine.set_cookies(cookies or [])
 
 
-@router.get("/api/browser/network")
+@router.get("/api/v1/browser/network")
 async def browser_network_log():
     """获取网络请求日志"""
     engine = await get_browser_engine()
@@ -700,7 +700,7 @@ async def browser_network_log():
     return {"success": True, "log": log}
 
 
-@router.post("/api/browser/task")
+@router.post("/api/v1/browser/task")
 async def browser_run_task(task: dict):
     """执行自动化任务脚本"""
     from core.browser_engine import BrowserTask
@@ -729,21 +729,21 @@ async def browser_run_task(task: dict):
 from core.llm_gateway import get_llm_pool, reset_llm_pool
 
 
-@router.get("/api/llm/providers")
+@router.get("/api/v1/llm/providers")
 async def llm_providers():
     """列出所有LLM Provider"""
     pool = get_llm_pool()
     return {"success": True, "providers": pool.list_providers()}
 
 
-@router.get("/api/llm/models")
+@router.get("/api/v1/llm/models")
 async def llm_models():
     """列出所有可用模型"""
     pool = get_llm_pool()
     return {"success": True, "models": pool.list_models()}
 
 
-@router.post("/api/llm/providers/add")
+@router.post("/api/v1/llm/providers/add")
 async def llm_add_provider(req: LLMProviderRequest):
     """动态添加LLM Provider"""
     pool = get_llm_pool()
@@ -757,7 +757,7 @@ async def llm_add_provider(req: LLMProviderRequest):
     return {"success": ok}
 
 
-@router.delete("/api/llm/providers/{name}")
+@router.delete("/api/v1/llm/providers/{name}")
 async def llm_remove_provider(name: str):
     """移除LLM Provider"""
     pool = get_llm_pool()
@@ -765,7 +765,7 @@ async def llm_remove_provider(name: str):
     return {"success": ok}
 
 
-@router.post("/api/llm/default")
+@router.post("/api/v1/llm/default")
 async def llm_set_default(provider: str = "", model: str = ""):
     """设置默认Provider和模型"""
     pool = get_llm_pool()
@@ -773,21 +773,21 @@ async def llm_set_default(provider: str = "", model: str = ""):
     return {"success": ok, "default": pool.list_providers()}
 
 
-@router.get("/api/llm/stats")
+@router.get("/api/v1/llm/stats")
 async def llm_stats(hours: int = 24):
     """LLM使用统计"""
     pool = get_llm_pool()
     return {"success": True, **pool.get_stats(), "cost_report": pool.get_cost_report(hours)}
 
 
-@router.get("/api/llm/health")
+@router.get("/api/v1/llm/health")
 async def llm_health():
     """检查所有Provider连通性"""
     pool = get_llm_pool()
     return {"success": True, "providers": pool.health_check()}
 
 
-@router.post("/api/llm/cache/clear")
+@router.post("/api/v1/llm/cache/clear")
 async def llm_cache_clear():
     """清空LLM响应缓存"""
     pool = get_llm_pool()
@@ -795,14 +795,14 @@ async def llm_cache_clear():
     return {"success": True}
 
 
-@router.get("/api/llm/sessions")
+@router.get("/api/v1/llm/sessions")
 async def llm_sessions():
     """列出所有对话会话"""
     pool = get_llm_pool()
     return {"success": True, "sessions": pool.list_sessions()}
 
 
-@router.delete("/api/llm/sessions/{session_id}")
+@router.delete("/api/v1/llm/sessions/{session_id}")
 async def llm_clear_session(session_id: str):
     """清除指定会话"""
     pool = get_llm_pool()
@@ -810,14 +810,14 @@ async def llm_clear_session(session_id: str):
     return {"success": True}
 
 
-@router.get("/api/llm/sessions/{session_id}/history")
+@router.get("/api/v1/llm/sessions/{session_id}/history")
 async def llm_session_history(session_id: str, last_n: int = 20):
     """获取会话历史"""
     pool = get_llm_pool()
     return {"success": True, "messages": pool.get_session_history(session_id, last_n)}
 
 
-@router.post("/api/llm/chat")
+@router.post("/api/v1/llm/chat")
 async def llm_chat(req: LLMChatRequest):
     """LLM对话 — 非流式"""
     pool = get_llm_pool()
@@ -833,7 +833,7 @@ async def llm_chat(req: LLMChatRequest):
     return result
 
 
-@router.post("/api/llm/chat/stream")
+@router.post("/api/v1/llm/chat/stream")
 async def llm_chat_stream(req: LLMChatRequest):
     """LLM对话 — SSE流式"""
     import asyncio
@@ -889,14 +889,14 @@ def _get_gh_scanner():
     return _gh_scanner
 
 
-@router.get("/api/github/stats")
+@router.get("/api/v1/github/stats")
 async def github_stats():
     """GitHub扫描统计"""
     gh = _get_gh_scanner()
     return {"success": True, **gh.get_stats()}
 
 
-@router.get("/api/github/reports")
+@router.get("/api/v1/github/reports")
 async def github_reports(limit: int = 20, scan_type: str = None):
     """扫描报告列表"""
     gh = _get_gh_scanner()
@@ -904,7 +904,7 @@ async def github_reports(limit: int = 20, scan_type: str = None):
     return {"success": True, "reports": reports}
 
 
-@router.get("/api/github/reports/{report_id}")
+@router.get("/api/v1/github/reports/{report_id}")
 async def github_report_detail(report_id: str):
     """扫描报告详情"""
     gh = _get_gh_scanner()
@@ -914,7 +914,7 @@ async def github_report_detail(report_id: str):
     return {"success": True, **report}
 
 
-@router.post("/api/github/scan")
+@router.post("/api/v1/github/scan")
 async def github_scan(body: dict = None):
     """触发扫描 (支持指定模式: full/dependencies/trending/tracked)"""
     gh = _get_gh_scanner()
@@ -923,7 +923,7 @@ async def github_scan(body: dict = None):
     return {"success": True, **report}
 
 
-@router.get("/api/github/tracked")
+@router.get("/api/v1/github/tracked")
 async def github_tracked():
     """关注的仓库"""
     from core.github_scanner import TRACKED_REPOS
@@ -939,21 +939,21 @@ def _get_plugin_manager() -> PluginManager:
     return PluginManager()
 
 
-@router.get("/api/plugins")
+@router.get("/api/v1/plugins")
 async def plugin_list():
     """列出已安装插件"""
     pm = _get_plugin_manager()
     return {"success": True, **pm.get_stats()}
 
 
-@router.get("/api/plugins/repository")
+@router.get("/api/v1/plugins/repository")
 async def plugin_repository(tag: str = "", search: str = ""):
     """浏览插件仓库"""
     pm = _get_plugin_manager()
     return {"success": True, "plugins": pm.browse_repository(tag=tag, search=search)}
 
 
-@router.get("/api/plugins/{name}")
+@router.get("/api/v1/plugins/{name}")
 async def plugin_detail(name: str):
     """插件详情"""
     pm = _get_plugin_manager()
@@ -963,28 +963,28 @@ async def plugin_detail(name: str):
     return {"success": True, **plugin}
 
 
-@router.post("/api/plugins/{name}/install")
+@router.post("/api/v1/plugins/{name}/install")
 async def plugin_install(name: str, source: str = "builtin"):
     """安装插件"""
     pm = _get_plugin_manager()
     return pm.install_plugin(name, source=source)
 
 
-@router.post("/api/plugins/{name}/enable")
+@router.post("/api/v1/plugins/{name}/enable")
 async def plugin_enable(name: str):
     """启用插件"""
     pm = _get_plugin_manager()
     return pm.enable_plugin(name)
 
 
-@router.post("/api/plugins/{name}/disable")
+@router.post("/api/v1/plugins/{name}/disable")
 async def plugin_disable(name: str):
     """禁用插件"""
     pm = _get_plugin_manager()
     return pm.disable_plugin(name)
 
 
-@router.post("/api/plugins/{name}/uninstall")
+@router.post("/api/v1/plugins/{name}/uninstall")
 async def plugin_uninstall(name: str, remove_data: bool = False):
     """卸载插件"""
     pm = _get_plugin_manager()
@@ -997,56 +997,56 @@ async def plugin_uninstall(name: str, remove_data: bool = False):
 from modules.mysql_cdc import execute as cdc_execute
 
 
-@router.get("/api/cdc/status")
+@router.get("/api/v1/cdc/status")
 async def cdc_status():
     """CDC 运行状态"""
     return cdc_execute("status")
 
 
-@router.post("/api/cdc/start")
+@router.post("/api/v1/cdc/start")
 async def cdc_start(config: dict = {}):
     """启动 CDC"""
     return cdc_execute("start", {"config": config})
 
 
-@router.post("/api/cdc/stop")
+@router.post("/api/v1/cdc/stop")
 async def cdc_stop():
     """停止 CDC"""
     return cdc_execute("stop")
 
 
-@router.post("/api/cdc/config")
+@router.post("/api/v1/cdc/config")
 async def cdc_config(config: dict = {}):
     """更新配置"""
     return cdc_execute("config", config)
 
 
-@router.get("/api/cdc/events")
+@router.get("/api/v1/cdc/events")
 async def cdc_events(limit: int = 100):
     """获取变更事件"""
     return cdc_execute("events", {"limit": limit})
 
 
-@router.get("/api/cdc/tables")
+@router.get("/api/v1/cdc/tables")
 async def cdc_tables():
     """获取可监听表清单"""
     return cdc_execute("tables")
 
 
-@router.post("/api/cdc/reset")
+@router.post("/api/v1/cdc/reset")
 async def cdc_reset():
     """重置断点"""
     return cdc_execute("reset")
 
 
-@router.post("/api/plugins/{name}/execute")
+@router.post("/api/v1/plugins/{name}/execute")
 async def plugin_execute(name: str, action: str = "status", params: dict = None):
     """执行插件操作"""
     pm = _get_plugin_manager()
     return await pm.execute_plugin(name, action, params)
 
 
-@router.get("/api/plugins/{name}/compatibility")
+@router.get("/api/v1/plugins/{name}/compatibility")
 async def plugin_compatibility(name: str):
     """检查插件兼容性"""
     pm = _get_plugin_manager()
@@ -1057,18 +1057,18 @@ async def plugin_compatibility(name: str):
 # 进化引擎 API
 # ═══════════════════════════════════════════════════════
 
-@router.get("/api/evo/summary")
+@router.get("/api/v1/evo/summary")
 async def evo_summary():
     """进化引擎概要"""
     evo_engine.start_scoring_loop()
     return {"success": True, "data": evo_engine.summary()}
 
-@router.get("/api/evo/ranking")
+@router.get("/api/v1/evo/ranking")
 async def evo_ranking(top_n: int = Query(5, ge=1, le=50)):
     """模块评分排名"""
     return {"success": True, "data": evo_engine.ranking(top_n)}
 
-@router.get("/api/evo/module/{module}")
+@router.get("/api/v1/evo/module/{module}")
 async def evo_module(module: str):
     """模块进化详情"""
     detail = evo_engine.module_detail(module)
@@ -1076,17 +1076,17 @@ async def evo_module(module: str):
         raise HTTPException(status_code=404, detail="Module not tracked")
     return {"success": True, "data": detail}
 
-@router.get("/api/evo/degraded")
+@router.get("/api/v1/evo/degraded")
 async def evo_degraded():
     """degraded 模块列表"""
     return {"success": True, "data": evo_engine.degraded_modules()}
 
-@router.get("/api/evo/suggestions")
+@router.get("/api/v1/evo/suggestions")
 async def evo_suggestions():
     """优化建议"""
     return {"success": True, "data": evo_engine.suggestions()}
 
-@router.post("/api/evo/record")
+@router.post("/api/v1/evo/record")
 async def evo_record(req: Request):
     """手动记录一次执行"""
     body = await req.json()

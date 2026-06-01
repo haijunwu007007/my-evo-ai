@@ -5,7 +5,7 @@ from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_uptime_kuma")
 router = APIRouter()
-BASE = "/api/tools/uptime"
+BASE = "/api/v1/tools/uptime"
 
 UPTIME_HOST = os.environ.get("UPTIME_HOST", "http://127.0.0.1:3001")
 

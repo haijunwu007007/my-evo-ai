@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_outline")
-router = APIRouter(prefix="/api/tools/outline", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/outline", tags=["tools"])
 
 OUTLINE_URL = os.environ.get("OUTLINE_URL", "http://127.0.0.1:3001")
 OUTLINE_API_KEY = os.environ.get("OUTLINE_API_KEY", "")

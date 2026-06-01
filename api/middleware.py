@@ -46,6 +46,24 @@ async def profiler_middleware(request: Request, call_next):
 
 
 # ═══════════════════════════════════════════════════════
+# API 版本前缀：/api/* → /api/v1/* 向后兼容重写
+# ═══════════════════════════════════════════════════════
+
+_API_LEGACY_PREFIXES = ("/api/",)
+_V1_PREFIX = "/api/v1/"
+
+@app.middleware("http")
+async def api_version_redirect(request: Request, call_next):
+    path = request.url.path
+    if path.startswith(_API_LEGACY_PREFIXES) and not path.startswith(_V1_PREFIX) and not path.startswith("/api/v2/"):
+        new_path = _V1_PREFIX + path[len("/api/"):]
+        request.scope["path"] = new_path
+        request.scope["raw_path"] = new_path.encode()
+    response = await call_next(request)
+    return response
+
+
+# ═══════════════════════════════════════════════════════
 # 请求计数中间件
 # ═══════════════════════════════════════════════════════
 

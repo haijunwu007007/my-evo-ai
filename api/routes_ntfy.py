@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_ntfy")
-router = APIRouter(prefix="/api/tools/ntfy", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/ntfy", tags=["tools"])
 
 NTFY_BASE = os.environ.get("NTFY_BASE", "http://127.0.0.1:8086")
 

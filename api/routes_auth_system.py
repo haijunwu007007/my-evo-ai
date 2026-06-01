@@ -25,10 +25,10 @@ import socket as _socket, uuid as _uuid, random as _random
 
 router = APIRouter()
 
-# ─── 认证 & 安全（api_server.py 中有 /api/auth/login 的真实实现）───
+# ─── 认证 & 安全（api_server.py 中有 /api/v1/auth/login 的真实实现）───
 
 # ─── 系统诊断 ────────────────────────────────────────
-@router.get("/api/diagnosis/system")
+@router.get("/api/v1/diagnosis/system")
 async def system_diagnosis():
     u = time.time() - _START_TIME
     memory_mb = 0
@@ -42,16 +42,16 @@ async def system_diagnosis():
     except Exception:
         pass
     return {"success": True, "uptime_seconds": round(u, 1), "uptime_human": f"{int(u//3600)}h{int(u%3600//60)}m", "memory_mb": memory_mb, "cpu_percent": cpu_percent, "threads": threads, "api_version": "0.1.0"}
-@router.get("/api/diagnosis/modules")
+@router.get("/api/v1/diagnosis/modules")
 async def modules_diagnosis():
     m = registry.list_modules() if hasattr(registry, 'list_modules') else []
     return {"success": True, "modules": m, "count": len(list(m)) if isinstance(m, (list,dict)) else 0}
 
 # ─── 配置中心 ────────────────────────────────────────
-@router.get("/api/config")
+@router.get("/api/v1/config")
 async def config_list():
     cc = get_config_center(); return {"success": True, "configs": cc.get_all()}
-@router.get("/api/config/entries")
+@router.get("/api/v1/config/entries")
 async def config_entries():
     try:
         cc = get_config_center(); all_cfg = cc.get_all()
@@ -61,30 +61,30 @@ async def config_entries():
     except Exception:
         logger.warning("auth/system: config read failed")
     return {"success": True, "entries": [], "count": 0}
-@router.get("/api/config/{key:path}")
+@router.get("/api/v1/config/{key:path}")
 async def config_get(key: str):
     return {"success": True, "key": key, "value": get_config_center().get(key)}
-@router.put("/api/config/{key:path}")
+@router.put("/api/v1/config/{key:path}")
 async def config_set(key: str, body: dict):
     get_config_center().set(key, body.get("value")); return {"success": True, "key": key, "set": True}
-@router.post("/api/config/batch")
+@router.post("/api/v1/config/batch")
 async def config_batch(body: dict):
     items = body.get("configs", body)
     if isinstance(items, dict):
         for k, v in items.items(): get_config_center().set(k, v)
     return {"success": True, "updated": len(items) if isinstance(items, dict) else 0}
-@router.delete("/api/config/{key:path}")
+@router.delete("/api/v1/config/{key:path}")
 async def config_delete(key: str):
     get_config_center().delete(key); return {"success": True, "deleted": key}
-@router.get("/api/config/stats")
+@router.get("/api/v1/config/stats")
 async def config_stats():
     return {"success": True, "groups": {"系统": ["api_host","api_port","log_level"],"通知":["dingtalk","feishu"],"LLM":["provider","model"]}, "total": 20}
-@router.get("/api/config/list")
+@router.get("/api/v1/config/list")
 async def config_list_all(group: str = "", mask: bool = True):
     all_cfg = get_config_center().get_all()
     if group: return {"success": True, "group": group, "configs": {k:v for k,v in all_cfg.items() if k.startswith(group)}}
     return {"success": True, "configs": all_cfg}
-@router.post("/api/config/save")
+@router.post("/api/v1/config/save")
 async def config_save():
     cc = get_config_center()
     if hasattr(cc, 'save'): cc.save()
@@ -94,14 +94,14 @@ async def config_save():
     except Exception:
         pass
     return {"success": True, "saved": True}
-@router.post("/api/config/reload")
+@router.post("/api/v1/config/reload")
 async def config_reload():
     cc = get_config_center()
     if hasattr(cc, 'reload'): cc.reload()
     return {"success": True, "reloaded": True}
 
 # ─── 持久化 ─────────────────────────────────────────
-@router.get("/api/persistence/status")
+@router.get("/api/v1/persistence/status")
 async def persistence_status():
     return {"success": True, "persistence_enabled": True, "db_type": "sqlite"}
 
@@ -144,7 +144,7 @@ def _get_system_metrics() -> dict:
             cpu = 0.0; mem = 0.0; disk = 0.0
     return cpu, mem, disk, net_in, net_out
 
-@router.get("/api/monitor/realtime")
+@router.get("/api/v1/monitor/realtime")
 async def monitor_realtime():
     cpu, mem, disk, net_in, net_out = _get_system_metrics()
     req_count = (_request_counter if isinstance(_request_counter, (int, float)) else sum(_request_counter.values()) if hasattr(_request_counter, 'values') else 0) or 0
@@ -168,16 +168,16 @@ async def monitor_realtime():
         },
     }
 
-@router.get("/api/ws/status")
+@router.get("/api/v1/ws/status")
 async def ws_status():
     try:
         active = len(manager.active_connections) if hasattr(manager, 'active_connections') else 0
     except AttributeError:
         active = 0
     return {"success": True, "active_connections": active, "status": "running"}
-@router.get("/api/system/metrics")
+@router.get("/api/v1/system/metrics")
 async def system_metrics():
     return {"success": True, "uptime": round(time.time()-_START_TIME,1), "requests": _request_counter, "errors": _request_errors, "cache_hits": _cache_hits}
-@router.get("/api/system/rate-limit")
+@router.get("/api/v1/system/rate-limit")
 async def rate_limit_status():
     return {"success": True, "rate_limiting": True, "limits": {}}

@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_code_server")
-router = APIRouter(prefix="/api/tools/code-server", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/code-server", tags=["tools"])
 
 CODE_SERVER_BASE = os.environ.get("CODE_SERVER_BASE", "http://127.0.0.1:8443")
 

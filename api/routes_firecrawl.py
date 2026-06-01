@@ -5,7 +5,7 @@ import os, json, urllib.request
 from core.logging_config import get_logger
 
 logger = get_logger("evo.routes_firecrawl")
-router = APIRouter(prefix="/api/tools/firecrawl", tags=["tools"])
+router = APIRouter(prefix="/api/v1/tools/firecrawl", tags=["tools"])
 
 FIRECRAWL_URL = os.environ.get("FIRECRAWL_URL", "http://localhost:3002")
 FIRECRAWL_KEY = os.environ.get("FIRECRAWL_API_KEY", "")
