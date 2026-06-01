@@ -342,14 +342,6 @@ class ModuleRegistry:
             actions=["status", "tokenize", "extract_entities", "sentiment", "keywords"],
             tags=["nlp", "自然语言", "分词", "实体", "情感", "关键词"],
         ),
-        "embedding_openai": ModuleCapability(
-            "embedding_openai",
-            "EmbeddingOpenAI",
-            "ai_inference",
-            "文本向量化，OpenAI Embedding API",
-            actions=["status", "embed", "batch_embed", "search"],
-            tags=["embedding", "向量", "相似度", "search", "检索"],
-        ),
         # --- 知识库 ---
         "knowledge_base": ModuleCapability(
             "knowledge_base",

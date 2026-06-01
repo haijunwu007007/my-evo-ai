@@ -4,7 +4,7 @@ from pathlib import Path
 BASE = Path(__file__).parent.parent
 sys.path.insert(0, str(BASE))
 
-ALLOWED_FAIL = {"nl_workflow.py", "trending_pipeline.py", "u_001.py", "waf_web防火墙.py"}
+ALLOWED_FAIL = {"nl_workflow.py", "trending_pipeline.py", "u_001.py"}
 MODULES_DIR = BASE / "modules"
 
 @pytest.mark.parametrize("fname", [
