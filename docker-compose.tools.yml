@@ -33,3 +33,21 @@ services:
     environment:
       OPENAI_API_KEY: ""
       BASE_URL: ""
+
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    ports:
+      - "8083:80"
+    volumes:
+      - ./:/srv
+      - ./_data/filebrowser:/database
+    user: "${UID:-0}:${GID:-0}"
+
+  openclaw:
+    image: openclaw/openclaw:latest
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./_data/openclaw:/app/data
+    environment:
+      NODE_ENV: production
