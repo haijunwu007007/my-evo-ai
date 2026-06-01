@@ -74,6 +74,11 @@ export default {
         { name:'Tabby', icon:'✏️', status:'Docker 就绪', desc:'自托管 AI 代码助手 (30k⭐) — 代码补全、内联建议、多模型', url:'http://localhost:8089', bridge:'/api/tools/tabby/health', checkResult:null },
         { name:'Firecrawl', icon:'🕷️', status:'Docker 就绪', desc:'AI 网页爬虫 (30k⭐) — 为 RAG 知识库抓取网页数据', url:'http://localhost:3002', bridge:'/api/tools/firecrawl/health', checkResult:null },
         { name:'MCP Hub', icon:'🔌', status:'内置就绪', desc:'MCP 协议网关 (内置) — AI Agent 统一调用外部工具', url:'', bridge:'/api/tools/mcp/health', checkResult:null },
+        { name:'MinIO', icon:'💾', status:'Docker 就绪', desc:'S3 对象存储 (55k⭐) — 高性能文件存储，备份/上传/模型存储', url:'http://localhost:9001', bridge:'/api/tools/minio/health', checkResult:null },
+        { name:'Portainer', icon:'🐳', status:'Docker 就绪', desc:'Docker 管理面板 (32k⭐) — Web UI 管理容器/镜像/网络/卷', url:'https://localhost:9443', bridge:'/api/tools/portainer/health', checkResult:null },
+        { name:'Grafana', icon:'📈', status:'Docker 就绪', desc:'开源监控仪表盘 (70k⭐) — Prometheus 数据可视化、告警', url:'http://localhost:3050', bridge:'/api/tools/grafana/health', checkResult:null },
+        { name:'Outline', icon:'📝', status:'Docker 就绪', desc:'知识库文档系统 (30k⭐) — 团队文档、项目说明、API 文档', url:'http://localhost:3100', bridge:'/api/tools/outline/health', checkResult:null },
+        { name:'Appsmith', icon:'🛠️', status:'Docker 就绪', desc:'低代码内部工具 (35k⭐) — 拖拽构建管理面板、Dashboard', url:'http://localhost:8080', bridge:'/api/tools/appsmith/health', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false
@@ -101,7 +106,7 @@ export default {
       }
     },
     openDoc(t) {
-      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api', Meilisearch:'https://www.meilisearch.com/docs', 'Stirling-PDF':'https://github.com/Stirling-Tools/Stirling-PDF', 'Uptime-Kuma':'https://github.com/louislam/uptime-kuma', NextChat:'https://github.com/ChatGPTNextWeb/NextChat', 'Browser-Use':'https://github.com/browser-use/browser-use', FileBrowser:'https://github.com/filebrowser/filebrowser', OpenClaw:'https://github.com/openclaw/openclaw', Langfuse:'https://langfuse.com/docs', Superset:'https://superset.apache.org/docs', ActivePieces:'https://www.activepieces.com/docs' }
+      const docs = { Dify:'https://docs.dify.ai', Flowise:'https://docs.flowiseai.com', 'n8n':'https://docs.n8n.io', 'One-API':'https://github.com/songquanpeng/one-api', Meilisearch:'https://www.meilisearch.com/docs', 'Stirling-PDF':'https://github.com/Stirling-Tools/Stirling-PDF', 'Uptime-Kuma':'https://github.com/louislam/uptime-kuma', NextChat:'https://github.com/ChatGPTNextWeb/NextChat', 'Browser-Use':'https://github.com/browser-use/browser-use', FileBrowser:'https://github.com/filebrowser/filebrowser', OpenClaw:'https://github.com/openclaw/openclaw', Langfuse:'https://langfuse.com/docs', Superset:'https://superset.apache.org/docs', ActivePieces:'https://www.activepieces.com/docs', Hoppscotch:'https://github.com/hoppscotch/hoppscotch', Tabby:'https://tabby.tabbyml.com/docs', Firecrawl:'https://docs.firecrawl.dev', 'MCP Hub':'https://github.com/apappascs/mcp-servers-hub', MinIO:'https://min.io/docs', Portainer:'https://docs.portainer.io', Grafana:'https://grafana.com/docs', Outline:'https://docs.outline.com', Appsmith:'https://docs.appsmith.com' }
       window.open(docs[t.name] || '#', '_blank')
     }
   }

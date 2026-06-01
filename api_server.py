@@ -104,6 +104,11 @@ from api.routes_hoppscotch import router as hoppscotch_router
 from api.routes_tabby import router as tabby_router
 from api.routes_firecrawl import router as firecrawl_router
 from api.routes_mcp import router as mcp_router
+from api.routes_minio import router as minio_router
+from api.routes_portainer import router as portainer_router
+from api.routes_grafana import router as grafana_router
+from api.routes_outline import router as outline_router
+from api.routes_appsmith import router as appsmith_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -131,6 +136,11 @@ app.include_router(hoppscotch_router)
 app.include_router(tabby_router)
 app.include_router(firecrawl_router)
 app.include_router(mcp_router)
+app.include_router(minio_router)
+app.include_router(portainer_router)
+app.include_router(grafana_router)
+app.include_router(outline_router)
+app.include_router(appsmith_router)
 
 
 # ── 静态文件 ──
