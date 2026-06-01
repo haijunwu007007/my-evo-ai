@@ -11,12 +11,17 @@ from pathlib import Path
 logger = get_logger("evo.auth")
 
 # 默认密钥（生产环境应通过 EVO_AUTH_SECRET 环境变量覆盖）
-_SECRET = os.environ.get("EVO_AUTH_SECRET", "evo-dev-secret-change-in-production")
+# 未设置时自动生成随机密钥，每次重启令牌失效
+import secrets as _secrets
+_SECRET = os.environ.get("EVO_AUTH_SECRET") or _secrets.token_hex(32)
 _ALGORITHM = "HS256"
 _TOKEN_TTL = int(os.environ.get("EVO_AUTH_TTL", "86400"))  # 默认 24h
 
 # 内置管理员（环境变量覆盖）
-_ADMIN_KEY = os.environ.get("EVO_ADMIN_KEY", "evo-admin-key-2026")
+# 未设置时自动生成 32 字符随机密钥，日志输出前 8 位供首次使用
+_ADMIN_KEY = os.environ.get("EVO_ADMIN_KEY") or _secrets.token_urlsafe(24)
+if not os.environ.get("EVO_ADMIN_KEY"):
+    logger.warning("[SECURITY] EVO_ADMIN_KEY 未设置，已自动生成。前8位: %s", _ADMIN_KEY[:8])
 
 
 def _base64url_encode(data: bytes) -> str:

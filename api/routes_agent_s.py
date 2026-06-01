@@ -46,10 +46,14 @@ async def agent_s_execute(req: ExecuteRequest):
     instruction = req.instruction or req.task
     if not instruction:
         raise HTTPException(400, detail="请提供 instruction 或 task")
-    result = await execute_instruction(
-        instruction, model=req.model, engine_type=req.engine, timeout=req.timeout
-    )
-    return result
+    try:
+        result = await execute_instruction(
+            instruction, model=req.model, engine_type=req.engine, timeout=req.timeout
+        )
+        return result
+    except Exception as e:
+        logger.error("[AgentS] 执行失败: %s", e)
+        return {"success": False, "error": f"执行异常: {e}"}
 
 
 @router.post("/api/agent-s/screenshot")

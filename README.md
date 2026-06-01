@@ -44,14 +44,14 @@ docker compose up -d
 
 ```
 AUTO-EVO-AI V0.1/
-├── api_server.py          # FastAPI 主服务 (345行入口)
+├── api_server.py          # FastAPI 主服务 (440行入口)
 ├── frontend/              # 独立前端 (可独立部署)
 │   ├── dashboard/         # Dashboard 前端 (手机+PC响应式)
 │   └── serve.py           # 独立前端开发服务器
 ├── api/                   # API 层
 │   ├── middleware.py       # 安全/限流/认证中间件
 │   ├── startup.py          # 启动脚本/后台任务
-│   ├── routes_*.py         # 4个路由模块 (模块/服务/WS/认证)
+│   ├── routes_*.py         # 36个路由模块 (含核心+30工具桥接)
 │   └── infra.py            # 基础设施 (注册表/协调器)
 ├── core/                  # 16个核心引擎
 │   ├── data_layer.py       # SQLite 数据层 (事务/迁移/批量)
