@@ -1,18 +1,9 @@
 <template>
   <div class="dashboard">
-    <!-- 顶部核心指标卡片 -->
+    <!-- 顶部核心指标卡片（使用 StatCard 组件） -->
     <el-row :gutter="16" class="stat-row">
       <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.title">
-        <div class="stat-card" :style="{ '--accent': card.color }">
-          <div class="stat-icon">{{ card.icon }}</div>
-          <div class="stat-body">
-            <div class="stat-value" :style="{ color: card.color }">{{ card.value }}</div>
-            <div class="stat-label">{{ card.title }}</div>
-          </div>
-          <div class="stat-trend" :class="card.trend > 0 ? 'up' : card.trend < 0 ? 'down' : 'flat'">
-            {{ card.trend > 0 ? '↑' : card.trend < 0 ? '↓' : '—' }} {{ Math.abs(card.trend) }}%
-          </div>
-        </div>
+        <StatCard :label="card.title" :value="card.value" :color="card.color" :icon="card.icon" :trend="card.trend" />
       </el-col>
     </el-row>
 
@@ -20,28 +11,22 @@
       <!-- 左列：图表 + 协调中心 -->
       <el-col :xs="24" :sm="15">
         <!-- 请求量折线图 -->
-        <div class="panel panel-accent-indigo" style="margin-bottom:16px">
-          <div class="panel-header">
-            <span class="panel-title">📈 实时请求趋势</span>
-            <div class="header-actions">
-              <el-tag size="small" type="success" effect="dark">LIVE</el-tag>
-              <el-button text size="small" @click="clearChart">清空</el-button>
-            </div>
-          </div>
+        <PagePanel title="📈 实时请求趋势">
+          <template #actions>
+            <el-tag size="small" type="success" effect="dark">LIVE</el-tag>
+            <el-button text size="small" @click="clearChart">清空</el-button>
+          </template>
           <div ref="chartRef" class="chart-container"></div>
-        </div>
+        </PagePanel>
 
         <!-- 协调中心 -->
-        <div class="panel panel-accent-purple" style="margin-bottom:16px">
-          <div class="panel-header">
-            <span class="panel-title">🧠 协调中心</span>
+        <PagePanel title="🧠 协调中心">
+          <template #actions>
             <el-button text type="primary" size="small" @click="$router.push('/coordinator')">进入 →</el-button>
-          </div>
+          </template>
           <div class="coordinator-box">
             <el-input
-              v-model="taskInput"
-              type="textarea"
-              :rows="2"
+              v-model="taskInput" type="textarea" :rows="2"
               placeholder="输入任务描述… 例如: 扫描 GitHub 热门 Python 项目"
               class="task-input"
             />
@@ -61,37 +46,34 @@
               </div>
             </transition>
           </div>
-        </div>
+        </PagePanel>
 
         <!-- 引擎状态网格 -->
-        <div class="panel panel-accent-emerald">
-          <div class="panel-header">
-            <span class="panel-title">⚙️ 引擎状态</span>
+        <PagePanel title="⚙️ 引擎状态">
+          <template #actions>
             <el-button text size="small" @click="loadEngineStatus">刷新</el-button>
-          </div>
-          <div class="engine-grid" v-if="engineStatus.length">
-            <div class="engine-item" v-for="eng in engineStatus" :key="eng.name">
-              <div class="engine-dot" :class="eng.active ? 'active' : 'inactive'"></div>
-              <div class="engine-info">
-                <div class="engine-name">{{ eng.name }}</div>
-                <div class="engine-detail">{{ eng.detail }}</div>
+          </template>
+          <LoadingBox :loading="!engineStatus.length" rows="3">
+            <div class="engine-grid">
+              <div class="engine-item" v-for="eng in engineStatus" :key="eng.name">
+                <div class="engine-dot" :class="eng.active ? 'active' : 'inactive'"></div>
+                <div class="engine-info">
+                  <div class="engine-name">{{ eng.name }}</div>
+                  <div class="engine-detail">{{ eng.detail }}</div>
+                </div>
+                <el-tag :type="eng.active ? 'success' : 'warning'" size="small" effect="dark">
+                  {{ eng.active ? 'UP' : 'DOWN' }}
+                </el-tag>
               </div>
-              <el-tag :type="eng.active ? 'success' : 'warning'" size="small" effect="dark">
-                {{ eng.active ? 'UP' : 'DOWN' }}
-              </el-tag>
             </div>
-          </div>
-          <el-empty v-else description="加载中…" :image-size="48" />
-        </div>
+          </LoadingBox>
+        </PagePanel>
       </el-col>
 
       <!-- 右列：模块健康、系统状态、任务、告警 -->
       <el-col :xs="24" :sm="9">
         <!-- 模块健康环形图 -->
-        <div class="panel panel-accent-rose" style="margin-bottom:16px">
-          <div class="panel-header">
-            <span class="panel-title">🔬 模块健康分布</span>
-          </div>
+        <PagePanel title="🔬 模块健康分布" accent="indigo">
           <div ref="pieRef" class="pie-container"></div>
           <div class="grade-legend">
             <div class="grade-item" v-for="g in gradeData" :key="g.name">
@@ -100,54 +82,52 @@
               <span class="grade-val">{{ g.value }}</span>
             </div>
           </div>
-        </div>
+        </PagePanel>
 
         <!-- 系统状态 -->
-        <div class="panel panel-accent-amber" style="margin-bottom:16px">
-          <div class="panel-header">
-            <span class="panel-title">⚡ 系统状态</span>
+        <PagePanel title="⚡ 系统状态">
+          <template #actions>
             <el-button text size="small" @click="refresh">刷新</el-button>
-          </div>
-          <div v-if="systemStatus" class="status-list">
-            <div class="status-item" v-for="(v, k) in filteredStatus" :key="k">
-              <span class="status-key">{{ k }}</span>
-              <span class="status-val">{{ v }}</span>
+          </template>
+          <LoadingBox :loading="!systemStatus" rows="4">
+            <div class="status-list">
+              <div class="status-item" v-for="(v, k) in filteredStatus" :key="k">
+                <span class="status-key">{{ k }}</span>
+                <span class="status-val">{{ v }}</span>
+              </div>
             </div>
-          </div>
-          <el-skeleton v-else :rows="4" animated />
-        </div>
+          </LoadingBox>
+        </PagePanel>
 
         <!-- 活跃任务 -->
-        <div class="panel panel-accent-cyan" style="margin-bottom:16px">
-          <div class="panel-header">
-            <span class="panel-title">📋 活跃任务</span>
+        <PagePanel title="📋 活跃任务">
+          <template #actions>
             <el-button text size="small" @click="$router.push('/scheduler')">管理 →</el-button>
-          </div>
-          <div v-if="tasks.length" class="task-list">
-            <div class="task-item" v-for="t in tasks.slice(0,6)" :key="t.id">
-              <div class="task-dot" :class="t.status"></div>
-              <span class="task-name">{{ t.name }}</span>
-              <el-tag :type="t.status === 'running' ? 'success' : t.status === 'failed' ? 'danger' : 'info'" size="small">
-                {{ t.status }}
-              </el-tag>
+          </template>
+          <LoadingBox :loading="!tasks.length" rows="3">
+            <div class="task-list">
+              <div class="task-item" v-for="t in tasks.slice(0,6)" :key="t.id">
+                <div class="task-dot" :class="t.status"></div>
+                <span class="task-name">{{ t.name }}</span>
+                <el-tag :type="t.status === 'running' ? 'success' : t.status === 'failed' ? 'danger' : 'info'" size="small">
+                  {{ t.status }}
+                </el-tag>
+              </div>
             </div>
-          </div>
-          <el-empty v-else description="无调度任务" :image-size="48" />
-        </div>
+          </LoadingBox>
+        </PagePanel>
 
         <!-- 队列/管线/事件统计 -->
-        <div class="panel panel-accent-orange">
-          <div class="panel-header">
-            <span class="panel-title">📊 基础设施指标</span>
-          </div>
-          <div v-if="extraStats" class="infra-grid">
-            <div class="infra-item" v-for="item in infraItems" :key="item.label">
-              <div class="infra-value" :style="{ color: item.color }">{{ item.value }}</div>
-              <div class="infra-label">{{ item.label }}</div>
+        <PagePanel title="📊 基础设施指标">
+          <LoadingBox :loading="!extraStats" rows="3">
+            <div class="infra-grid">
+              <div class="infra-item" v-for="item in infraItems" :key="item.label">
+                <div class="infra-value" :style="{ color: item.color }">{{ item.value }}</div>
+                <div class="infra-label">{{ item.label }}</div>
+              </div>
             </div>
-          </div>
-          <el-empty v-else description="暂无数据" :image-size="48" />
-        </div>
+          </LoadingBox>
+        </PagePanel>
       </el-col>
     </el-row>
   </div>
