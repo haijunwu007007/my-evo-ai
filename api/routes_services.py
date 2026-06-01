@@ -290,6 +290,55 @@ async def list_doc_files():
     return {"success": True, "files": gen.list_output_files()}
 
 
+@router.get("/api/services/external")
+async def external_services():
+    """外部服务状态"""
+    return {
+        "success": True,
+        "services": [
+            {"name": "one-api LLM 网关", "url": "http://localhost:3000", "status": "external", "desc": "统一大模型管理"},
+            {"name": "Scalar API 文档", "url": "/scalar", "status": "running", "desc": "现代 API 文档"},
+        ],
+    }
+
+
+@router.get("/api/rag/documents")
+async def rag_documents():
+    """RAG 知识库文档列表"""
+    from pathlib import Path
+    docs_dir = Path(__file__).parent.parent / "data" / "rag"
+    docs = []
+    if docs_dir.exists():
+        for f in sorted(docs_dir.iterdir()):
+            if f.is_file() and f.suffix in (".txt", ".md", ".pdf", ".docx"):
+                docs.append({"name": f.name, "size": f"{f.stat().st_size // 1024}KB", "chunks": 0, "status": "ready"})
+    return {"success": True, "documents": docs, "count": len(docs)}
+
+
+@router.post("/api/rag/upload")
+async def rag_upload(file: bytes | None = None):
+    """上传文档到知识库"""
+    if file is None:
+        return {"success": False, "error": "请上传文件"}
+    from pathlib import Path
+    docs_dir = Path(__file__).parent.parent / "data" / "rag"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    fname = f"doc_{len(list(docs_dir.iterdir())) + 1}.txt"
+    (docs_dir / fname).write_bytes(file)
+    return {"success": True, "doc": {"name": fname, "size": f"{len(file) // 1024}KB", "chunks": 0, "status": "ready"}}
+
+
+@router.delete("/api/rag/delete")
+async def rag_delete(name: str = ""):
+    """删除知识库文档"""
+    from pathlib import Path
+    doc_path = Path(__file__).parent.parent / "data" / "rag" / name
+    if doc_path.exists():
+        doc_path.unlink()
+        return {"success": True}
+    return {"success": False, "error": "文件不存在"}
+
+
 # ═══════════════════════════════════════════════════
 # 外部通知服务 — 邮件/IM/Webhook/推送
 # ═══════════════════════════════════════════════════

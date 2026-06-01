@@ -107,6 +107,12 @@ const routes = [
     component: () => import('@/views/SystemConfig.vue'),
     meta: { title: 'API 配置', icon: 'Key' },
   },
+  {
+    path: '/rag',
+    name: 'RagKnowledge',
+    component: () => import('@/views/RagKnowledge.vue'),
+    meta: { title: '知识库', icon: 'Collection' },
+  },
 ]
 
 const router = createRouter({

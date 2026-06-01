@@ -53,6 +53,12 @@
             <template #title>{{ item.title }}</template>
           </el-menu-item>
         </el-menu-item-group>
+        <el-menu-item-group v-if="!collapsed" title="外部工具">
+          <el-menu-item v-for="link in extLinks" :key="link.url" :index="link.url" class="nav-item">
+            <el-icon><component :is="link.icon" /></el-icon>
+            <template #title>{{ link.title }}</template>
+          </el-menu-item>
+        </el-menu-item-group>
       </el-menu>
 
       <!-- 底部折叠按钮 -->
@@ -155,6 +161,11 @@ const opsMenu = [
   { path: '/security', title: '安全中心', icon: 'Lock' },
   { path: '/sso-auth', title: 'SSO 管理', icon: 'User' },
   { path: '/settings', title: '系统设置', icon: 'Setting' },
+]
+
+const extLinks = [
+  { title: 'API 文档', url: '/scalar', icon: 'Reading' },
+  { title: '知识库',   url: '/rag',    icon: 'Collection' },
 ]
 
 const allMenu = [...coreMenu, ...opsMenu]

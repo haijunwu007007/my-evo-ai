@@ -1,0 +1,25 @@
+# AUTO-EVO-AI V0.1 — one-api LLM 网关
+# 使用: docker compose -f docker-compose.yml -f docker-compose.one-api.yml up -d
+# 管理后台: http://localhost:3000 (默认账号 root / 123456)
+services:
+  one-api:
+    image: ghcr.io/songquanpeng/one-api:latest
+    container_name: one-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - one-api-data:/data
+    environment:
+      - SESSION_SECRET=auto-evo-ai-one-api-secret
+      - SQLITE_PATH=/data/one-api.db
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  one-api-data:

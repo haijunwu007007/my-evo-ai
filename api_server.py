@@ -58,6 +58,19 @@ from api.infra import (
 # ── 加载中间件（副作用：注册 @app.middleware）──
 import api.middleware  # noqa: F401
 
+# ── Scalar API 文档（替换 Swagger UI）──
+try:
+    from scalar_fastapi import get_scalar_api_reference
+    @app.get("/scalar", include_in_schema=False)
+    async def scalar_html():
+        return get_scalar_api_reference(
+            openapi_url=app.openapi_url,
+            title="AUTO-EVO-AI V0.1 API 文档",
+        )
+    logger.info("[SCALAR] API 文档已挂载: /scalar")
+except ImportError:
+    logger.warning("[SCALAR] scalar-fastapi 未安装，使用默认 /docs")
+
 # ── Profiler 模块 ──
 from api.profiler import router as profiler_router
 
