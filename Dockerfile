@@ -33,4 +33,6 @@ ENV \
     APP_VERSION=0.1.0
 
 EXPOSE 8765
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD python -c "import urllib.request; exit(0 if urllib.request.urlopen('http://localhost:8765/api/status', timeout=5).status==200 else 1)"
 CMD ["python", "api_server.py"]
