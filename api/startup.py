@@ -51,15 +51,22 @@ def _mount_vue_frontend():
                 return _nocache(FileResponse(str(idx), media_type="text/html"))
             return JSONResponse(status_code=404, content={"error": "SPA not built"})
 
-        # 非 API 路径兜底 → SPA（必须放在最后注册，避免覆盖 API 路由）
+        # 根路径 → 简易聊天界面（普通用户入口）
+        chat_html = BASE_DIR / "frontend" / "chat.html"
+        if chat_html.exists():
+            @app.get("/", include_in_schema=False)
+            async def _chat_root():
+                return _nocache(FileResponse(str(chat_html), media_type="text/html"))
+            logger.info(f"[CHAT] 聊天界面已挂载: /")
+
+        # 非 API/App 路径兜底 → 聊天界面
         @app.get("/{path:path}", include_in_schema=False)
         async def _spa_catchall(path: str):
             if path.startswith("api/") or path.startswith("app/"):
                 return JSONResponse(status_code=404, content={"error": "not_found"})
-            idx = vue_dist / "index.html"
-            if idx.exists():
-                return FileResponse(str(idx), media_type="text/html")
-            return JSONResponse(status_code=404, content={"error": "SPA not built"})
+            if chat_html.exists():
+                return FileResponse(str(chat_html), media_type="text/html")
+            return JSONResponse(status_code=404, content={"error": "chat.html not found"})
         logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
         logger.warning("[VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build")

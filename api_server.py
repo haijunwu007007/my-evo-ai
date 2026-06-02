@@ -119,6 +119,7 @@ from api.routes_ntfy import router as ntfy_router
 from api.routes_nocodb import router as nocodb_router
 from api.routes_changedetection import router as changedetection_router
 from api.routes_setup import router as setup_router
+from api.routes_chat import router as chat_router
 from api.routes_plugins import router as plugins_router
 
 app.include_router(modules_browse_router)
@@ -162,6 +163,7 @@ app.include_router(ntfy_router)
 app.include_router(nocodb_router)
 app.include_router(changedetection_router)
 app.include_router(setup_router)
+app.include_router(chat_router)
 app.include_router(plugins_router)
 
 
