@@ -300,3 +300,150 @@ services:
       - ./_data/homeassistant:/config
     environment:
       TZ: Asia/Shanghai
+
+  # ── 新增 6 个工具 ─────────────────────────────────
+
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:release
+    ports:
+      - "2283:3001"
+    volumes:
+      - ./_data/immich:/usr/src/app/upload
+    environment:
+      DB_HOSTNAME: immich-postgres
+      DB_USERNAME: immich
+      DB_PASSWORD: evo-immich-2026
+      DB_DATABASE_NAME: immich
+      REDIS_HOST: immich-redis
+    depends_on:
+      - immich-postgres
+      - immich-redis
+
+  immich-postgres:
+    image: tensorchord/pgvecto-rs:pg14-v0.2.0
+    environment:
+      POSTGRES_USER: immich
+      POSTGRES_PASSWORD: evo-immich-2026
+      POSTGRES_DB: immich
+    volumes:
+      - ./_data/immich-pg:/var/lib/postgresql/data
+
+  immich-redis:
+    image: redis:7-alpine
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    volumes:
+      - ./_data/immich-ml:/cache
+    environment:
+      TRANSFORMERS_CACHE: /cache
+
+  excalidraw:
+    image: excalidraw/excalidraw:latest
+    ports:
+      - "3080:80"
+
+  miniflux:
+    image: miniflux/miniflux:latest
+    ports:
+      - "3060:8080"
+    depends_on:
+      - miniflux-db
+    environment:
+      DATABASE_URL: postgres://miniflux:evo-mf-2026@miniflux-db/miniflux?sslmode=disable
+      RUN_MIGRATIONS: "1"
+      CREATE_ADMIN: "1"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: evo-admin-2026
+
+  miniflux-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: evo-mf-2026
+      POSTGRES_DB: miniflux
+    volumes:
+      - ./_data/miniflux-pg:/var/lib/postgresql/data
+
+  hoarder:
+    image: ghcr.io/hoarder-app/hoarder:latest
+    ports:
+      - "3070:3000"
+    depends_on:
+      - hoarder-db
+      - hoarder-chrome
+    environment:
+      DATABASE_URL: postgres://hoarder:evo-hd-2026@hoarder-db/hoarder?sslmode=disable
+      MEILI_HTTP_ADDR: http://hoarder-meili:7700
+      MEILI_MASTER_KEY: evo-hd-meili-key
+      BROWSER_WEB_WS_URL: ws://hoarder-chrome:3000
+      NEXTAUTH_SECRET: evo-hoarder-secret-2026
+      NEXTAUTH_URL: http://localhost:3070
+
+  hoarder-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: hoarder
+      POSTGRES_PASSWORD: evo-hd-2026
+      POSTGRES_DB: hoarder
+    volumes:
+      - ./_data/hoarder-pg:/var/lib/postgresql/data
+
+  hoarder-chrome:
+    image: browserless/chrome:latest
+    environment:
+      CONNECTION_TIMEOUT: 60000
+      MAX_CONCURRENT_SESSIONS: 10
+
+  hoarder-meili:
+    image: getmeili/meilisearch:v1.6
+    environment:
+      MEILI_MASTER_KEY: evo-hd-meili-key
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - ./_data/hoarder-meili:/meili_data
+
+  documenso:
+    image: documenso/documenso:latest
+    ports:
+      - "3090:3000"
+    depends_on:
+      - documenso-db
+    environment:
+      NEXTAUTH_SECRET: evo-documenso-secret
+      NEXTAUTH_URL: http://localhost:3090
+      DATABASE_URL: postgres://documenso:evo-dc-2026@documenso-db/documenso?sslmode=disable
+
+  documenso-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: documenso
+      POSTGRES_PASSWORD: evo-dc-2026
+      POSTGRES_DB: documenso
+    volumes:
+      - ./_data/documenso-pg:/var/lib/postgresql/data
+
+  docmost:
+    image: docmost/docmost:latest
+    ports:
+      - "3085:3000"
+    depends_on:
+      - docmost-db
+      - docmost-redis
+    environment:
+      APP_URL: http://localhost:3085
+      APP_SECRET: evo-docmost-secret
+      DATABASE_URL: postgres://docmost:evo-dm-2026@docmost-db/docmost?sslmode=disable
+      REDIS_URL: redis://docmost-redis:6379
+
+  docmost-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: evo-dm-2026
+      POSTGRES_DB: docmost
+    volumes:
+      - ./_data/docmost-pg:/var/lib/postgresql/data
+
+  docmost-redis:
+    image: redis:7-alpine

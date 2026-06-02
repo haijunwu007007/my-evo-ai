@@ -91,6 +91,12 @@ export default {
         { name:'Plane', icon:'📋', status:'Docker 就绪', desc:'项目管理 (30k⭐) — Issue/Kanban/Sprint (Jira替代)', url:'http://localhost:3780', bridge:'/api/tools/plane/health', checkResult:null },
         { name:'Vaultwarden', icon:'🔐', status:'Docker 就绪', desc:'密码管理器 (40k⭐) — Bitwarden兼容/自托管凭证库', url:'http://localhost:8180', bridge:'/api/tools/vaultwarden/health', checkResult:null },
         { name:'Home Assistant', icon:'🏠', status:'Docker 就绪', desc:'智能家居平台 (80k⭐) — IoT控制/自动化场景/传感器', url:'http://localhost:8123', bridge:'/api/tools/homeassistant/health', checkResult:null },
+        { name:'Immich', icon:'📸', status:'Docker 就绪', desc:'照片管理 (55k⭐) — Google Photos替代/AI人脸识别', url:'http://localhost:2283', bridge:'/api/tools/immich/health', checkResult:null },
+        { name:'Excalidraw', icon:'✏️', status:'Docker 就绪', desc:'在线白板 (90k⭐) — 架构图/流程图/手绘风格', url:'http://localhost:3080', bridge:'/api/tools/excalidraw/health', checkResult:null },
+        { name:'Miniflux', icon:'📡', status:'Docker 就绪', desc:'RSS阅读器 (7k⭐) — 技术博客订阅/内容聚合', url:'http://localhost:3060', bridge:'/api/tools/miniflux/health', checkResult:null },
+        { name:'Hoarder', icon:'🔖', status:'Docker 就绪', desc:'书签管理 (3k⭐) — 链接收藏/标签/搜索', url:'http://localhost:3070', bridge:'/api/tools/hoarder/health', checkResult:null },
+        { name:'Docmost', icon:'📝', status:'Docker 就绪', desc:'协作Wiki (5k⭐) — 团队文档/知识库', url:'http://localhost:3085', bridge:'/api/tools/docmost/health', checkResult:null },
+        { name:'Documenso', icon:'✍️', status:'Docker 就绪', desc:'电子签名 (8k⭐) — DocuSign替代/合同签署', url:'http://localhost:3090', bridge:'/api/tools/documenso/health', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false
