@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
@@ -10,10 +10,10 @@ export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [NaiveUiResolver()],
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [NaiveUiResolver()],
     }),
   ],
   resolve: {
@@ -33,5 +33,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'naive-ui': ['naive-ui'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'echarts-vendor': ['echarts'],
+        },
+      },
+    },
   },
 })
