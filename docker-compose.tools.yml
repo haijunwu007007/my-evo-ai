@@ -447,3 +447,163 @@ services:
 
   docmost-redis:
     image: redis:7-alpine
+
+  # ── 新增 9 个行业工具 ─────────────────────────────────
+
+  twenty-crm:
+    image: twentycrm/twenty:latest
+    ports:
+      - "3100:3000"
+    depends_on:
+      - twenty-crm-db
+      - twenty-crm-redis
+    environment:
+      APP_SECRET: evo-twenty-secret-2026
+      PG_DATABASE_URL: postgres://twenty:evo-tw-2026@twenty-crm-db/default?sslmode=disable
+      REDIS_URL: redis://twenty-crm-redis:6379
+      SIGNUP_ENABLED: "true"
+
+  twenty-crm-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: twenty
+      POSTGRES_PASSWORD: evo-tw-2026
+      POSTGRES_DB: default
+    volumes:
+      - ./_data/twenty-pg:/var/lib/postgresql/data
+
+  twenty-crm-redis:
+    image: redis:7-alpine
+
+  invoiceninja:
+    image: invoiceninja/invoiceninja:latest
+    ports:
+      - "3110:9000"
+    volumes:
+      - ./_data/invoiceninja:/var/www/app/storage
+    environment:
+      APP_URL: http://localhost:3110
+      APP_KEY: base64:ev0-inv-ninj4-key-2026==
+      DB_HOST: invoiceninja-db
+      DB_DATABASE: invoiceninja
+      DB_USERNAME: invoiceninja
+      DB_PASSWORD: evo-in-2026
+    depends_on:
+      - invoiceninja-db
+
+  invoiceninja-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: invoiceninja
+      POSTGRES_PASSWORD: evo-in-2026
+      POSTGRES_DB: invoiceninja
+    volumes:
+      - ./_data/invoiceninja-pg:/var/lib/postgresql/data
+
+  chatwoot:
+    image: chatwoot/chatwoot:latest
+    ports:
+      - "3120:3000"
+    depends_on:
+      - chatwoot-db
+      - chatwoot-redis
+    environment:
+      SECRET_KEY_BASE: evo-chatwoot-secret-2026
+      DATABASE_URL: postgres://chatwoot:evo-cw-2026@chatwoot-db/chatwoot?sslmode=disable
+      REDIS_URL: redis://chatwoot-redis:6379
+      RAILS_ENV: production
+      INSTALLATION_ENV: docker
+
+  chatwoot-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: evo-cw-2026
+      POSTGRES_DB: chatwoot
+    volumes:
+      - ./_data/chatwoot-pg:/var/lib/postgresql/data
+
+  chatwoot-redis:
+    image: redis:7-alpine
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    ports:
+      - "3130:8096"
+    volumes:
+      - ./_data/jellyfin:/config
+      - ./_data/jellyfin-cache:/cache
+      # 挂载媒体目录: - /path/to/media:/media:ro
+
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    ports:
+      - "3140:8083"
+    volumes:
+      - ./_data/calibre-web:/config
+      - ./_data/calibre-web-books:/books
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Shanghai
+
+  mattermost:
+    image: mattermost/mattermost-team-edition:latest
+    ports:
+      - "3150:8065"
+    volumes:
+      - ./_data/mattermost/config:/mattermost/config
+      - ./_data/mattermost/data:/mattermost/data
+      - ./_data/mattermost/logs:/mattermost/logs
+      - ./_data/mattermost/plugins:/mattermost/client/plugins
+    environment:
+      MM_USERNAME: mmuser
+      MM_PASSWORD: evo-mm-2026
+      MM_DBNAME: mattermost
+      MM_SQLSETTINGS_DATASOURCE: postgres://mmuser:evo-mm-2026@mattermost-db:5432/mattermost?sslmode=disable
+    depends_on:
+      - mattermost-db
+
+  mattermost-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: mmuser
+      POSTGRES_PASSWORD: evo-mm-2026
+      POSTGRES_DB: mattermost
+    volumes:
+      - ./_data/mattermost-db:/var/lib/postgresql/data
+
+  focalboard:
+    image: mattermost/focalboard:latest
+    ports:
+      - "3160:8000"
+    volumes:
+      - ./_data/focalboard:/data
+
+  it-tools:
+    image: corentinth/it-tools:latest
+    ports:
+      - "3170:80"
+
+  osticket:
+    image: osticket/osticket:latest
+    ports:
+      - "3180:80"
+    volumes:
+      - ./_data/osticket:/var/www/html/upload
+      - ./_data/osticket-config:/etc/osticket
+    environment:
+      DB_HOST: osticket-db
+      DB_NAME: osticket
+      DB_USER: osticket
+      DB_PASSWORD: evo-os-2026
+
+  osticket-db:
+    image: mariadb:10
+    environment:
+      MYSQL_ROOT_PASSWORD: evo-os-root-2026
+      MYSQL_DATABASE: osticket
+      MYSQL_USER: osticket
+      MYSQL_PASSWORD: evo-os-2026
+    volumes:
+      - ./_data/osticket-db:/var/lib/mysql
