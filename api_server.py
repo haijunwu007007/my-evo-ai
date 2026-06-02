@@ -121,6 +121,7 @@ from api.routes_changedetection import router as changedetection_router
 from api.routes_setup import router as setup_router
 from api.routes_chat import router as chat_router
 from api.routes_plugins import router as plugins_router
+from api.routes_agents import router as agents_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -165,6 +166,7 @@ app.include_router(changedetection_router)
 app.include_router(setup_router)
 app.include_router(chat_router)
 app.include_router(plugins_router)
+app.include_router(agents_router)
 
 
 # ── 静态文件 ──
@@ -221,6 +223,12 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 
 @app.get("/")
 async def root():
+    from fastapi.responses import FileResponse
+    from api.infra import BASE_DIR
+    chat_path = BASE_DIR / "frontend" / "chat.html"
+    if chat_path.exists():
+        return FileResponse(str(chat_path))
+    # fallback: 返回 JSON 状态
     return {
         "success": True,
         "system": "AUTO-EVO-AI V0.1",

@@ -45,6 +45,10 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
 .example-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
 .example-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-tabs{display:flex;gap:4px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.nav-tabs .tab{padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text2);text-decoration:none;transition:all .2s;background:var(--ai-msg);border:1px solid var(--border)}
+.nav-tabs .tab:hover{color:var(--accent);border-color:var(--accent)}
+.nav-tabs .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -52,6 +56,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
   <div class="header">
     <h1>🤖 AUTO-EVO-AI</h1>
     <p>输入你想做的事，我来执行</p>
+    <div class="nav-tabs">
+      <a href="/" class="tab active">💬 对话</a>
+      <a href="/app/login" class="tab">🏢 企业管理</a>
+      <a href="/dashboard" class="tab">📊 系统后台</a>
+    </div>
   </div>
 
   <div class="messages" id="messages">

@@ -16,6 +16,15 @@ async def chat(req: ChatRequest):
         raise HTTPException(400, detail="请输入内容")
     t = req.message.lower().strip()
 
+    # 0. Billion Group OS / 企业管理
+    if any(k in t for k in ["billion", "集团", "企业", "公司", "组织", "部门", "部门管理", "员工", "department"]):
+        return {"success": True, "result":
+            "🏢 **BILLION GROUP OS — 企业管理**\n\n"
+            "以下功能在「企业管理」页面:\n"
+            "• 创建/管理部门\n• 创建/管理智能体\n• 员工管理\n"
+            "• 组织架构树\n• 权限角色分配\n\n"
+            "👉 点击顶部「🏢 企业管理」按钮进入"}
+
     # 1. 系统状态
     if any(k in t for k in ["状态", "健康", "运行", "情况", "怎么样", "status", "health"]):
         try:
