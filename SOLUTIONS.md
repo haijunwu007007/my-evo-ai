@@ -304,3 +304,69 @@ python deploy.py --industry 制造业
 | 38 | 💅 **美容** | Twenty CRM + Invoice Ninja | 会员/预约/消费 |
 | 39 | ⛪ **社区** | Twenty CRM + Paperless | 成员/捐赠/活动 |
 | 40 | 🌍 **跨境电商** | Medusa + Invoice Ninja | 跨境/报关/多币种 |
+
+
+### 行业 41-100（新增）
+
+| # | 行业 | 核心工具 | 解决什么问题 |
+|---|------|---------|-------------|
+| 41 | 📎 **文具办公** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 42 | 🧸 **玩具** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 43 | 🐾 **宠物** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 44 | 👶 **母婴** | Medusa + Metabase | 行业管理/运营/分析 |
+| 45 | 💎 **珠宝** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 46 | 🪑 **家具** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 47 | 💡 **灯具** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 48 | 🧱 **建材** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 49 | 🔧 **五金** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 50 | ⚡ **电子元件** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 51 | 📐 **仪器仪表** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 52 | 📦 **包装** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 53 | 🖨️ **印刷** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 54 | 🧵 **纺织** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 55 | 👔 **服装** | Medusa + Metabase | 行业管理/运营/分析 |
+| 56 | 👟 **鞋帽** | Medusa + Metabase | 行业管理/运营/分析 |
+| 57 | 👜 **皮革** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 58 | 🧪 **化工** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 59 | 🧊 **塑料** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 60 | 🔘 **橡胶** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 61 | 📄 **造纸** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 62 | 🪟 **玻璃** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 63 | 🏺 **陶瓷** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 64 | 🔩 **钢铁** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 65 | ⚙️ **有色金属** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 66 | ♻️ **回收** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 67 | 🌱 **环保设备** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 68 | 🔥 **消防** | Snipe-IT + Metabase | 行业管理/运营/分析 |
+| 69 | 📹 **安防** | Snipe-IT + Metabase | 行业管理/运营/分析 |
+| 70 | 🛗 **电梯** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 71 | ❄️ **空调暖通** | Snipe-IT + Metabase | 行业管理/运营/分析 |
+| 72 | 💧 **水处理** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 73 | 🌳 **园林** | ERPNext + Metabase | 行业管理/运营/分析 |
+| 74 | 🧹 **保洁** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 75 | 🏠 **家政** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 76 | 💒 **婚庆** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 77 | 📷 **摄影** | Immich + Metabase | 行业管理/运营/分析 |
+| 78 | 💪 **健身** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 79 | 👴 **养老** | OpenEMR + Metabase | 行业管理/运营/分析 |
+| 80 | 🕊️ **殡葬** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 81 | ✈️ **旅游** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 82 | 🎪 **会展** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 83 | 🌐 **翻译** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 84 | 🎨 **设计** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 85 | 🎵 **音乐** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 86 | 💃 **舞蹈** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 87 | 🚗 **驾校** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 88 | 🌍 **留学** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 89 | 🛂 **移民** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 90 | 👷 **劳务派遣** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 91 | 🎯 **猎头** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 92 | 🔬 **检测认证** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 93 | 📜 **认证** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 94 | 🔍 **检验** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 95 | ©️ **知识产权** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 96 | 📋 **专利** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 97 | 🏪 **便利店** | Medusa + Metabase | 行业管理/运营/分析 |
+| 98 | 🍵 **茶馆** | Twenty CRM + Metabase | 行业管理/运营/分析 |
+| 99 | 📚 **书店** | Calibre-Web + Metabase | 行业管理/运营/分析 |
+| 100 | 🎮 **游戏** | Jellyfin + Metabase | 行业管理/运营/分析 |
