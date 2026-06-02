@@ -168,6 +168,7 @@ app.include_router(setup_router)
 app.include_router(chat_router)
 app.include_router(plugins_router)
 app.include_router(agents_router)
+app.include_router(llm_chat_router)
 
 
 # ── 静态文件 ──
