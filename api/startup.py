@@ -59,6 +59,14 @@ def _mount_vue_frontend():
                 return _nocache(FileResponse(str(chat_html), media_type="text/html"))
             logger.info(f"[CHAT] 聊天界面已挂载: /")
 
+        # Dashboard（旧版）— 放在 catch-all 之前
+        html_path = BASE_DIR / "index.html"
+        if html_path.exists():
+            @app.get("/dashboard", include_in_schema=False)
+            async def serve_dashboard():
+                return FileResponse(str(html_path), media_type="text/html")
+            logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
+
         # 非 API/App 路径兜底 → 聊天界面
         @app.get("/{path:path}", include_in_schema=False)
         async def _spa_catchall(path: str):
@@ -70,13 +78,6 @@ def _mount_vue_frontend():
         logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
         logger.warning("[VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build")
-
-    html_path = BASE_DIR / "index.html"
-    if html_path.exists():
-        @app.get("/dashboard", include_in_schema=False)
-        async def serve_dashboard():
-            return FileResponse(str(html_path), media_type="text/html")
-        logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
 
 
 def _cleanup_sqlite():
