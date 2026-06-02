@@ -41,6 +41,16 @@ $p = Start-Process -NoNewWindow -FilePath $pyPath -ArgumentList "-m uvicorn api_
     Write-Host "[服务] ✅ 服务已启动 (PID: $($p.Id))" -ForegroundColor Green
 }
 
+# 3.5 启动 Docker 工具容器
+Write-Host ""
+Write-Host "[Docker] 正在启动工具容器..." -ForegroundColor Yellow
+docker compose -f docker-compose.tools.yml up -d gitea nextcloud metabase vaultwarden homeassistant 2>&1 | Out-Null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[Docker] ✅ 5 个工具容器已启动" -ForegroundColor Green
+} else {
+    Write-Host "[Docker] ⚠️ 部分容器启动失败（可手动运行 docker compose up -d）" -ForegroundColor Yellow
+}
+
 # 4. 显示访问地址
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor Cyan

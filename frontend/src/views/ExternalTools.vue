@@ -16,10 +16,10 @@
           <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0 0 12px 0">{{ t.desc }}</p>
           <el-row :gutter="8">
             <el-col :span="12">
-              <el-button size="small" @click="openUrl(t.url)" style="width:100%" v-if="t.url">打开面板</el-button>
+              <el-button size="small" @click="openUrl(t.url)" style="width:100%" v-if="t.url" :disabled="t.status==='独立部署'">{{ t.status==='独立部署' ? '需单独部署' : '打开面板' }}</el-button>
             </el-col>
             <el-col :span="12">
-              <el-button size="small" :type="t.bridge ? 'primary' : 'info'" @click="checkTool(t)" style="width:100%">{{ t.bridge ? '连接检测' : '查看文档' }}</el-button>
+              <el-button size="small" @click="checkTool(t)" style="width:100%" :type="t.bridge ? 'primary' : 'info'">{{ t.bridge ? '连接检测' : '查看文档' }}</el-button>
             </el-col>
           </el-row>
           <div v-if="t.checkResult" style="margin-top:10px;padding:8px;border-radius:6px;font-size:12px" :style="{background:t.checkResult.ok?'rgba(16,185,129,0.12)':'rgba(245,158,11,0.12)',color:t.checkResult.ok?'#10b981':'#f59e0b'}">
@@ -130,13 +130,36 @@ export default {
   },
   methods: {
     openUrl(url) { window.open(url, '_blank') },
+    async checkAll() {
+      const r = await api.get('/api/v1/tools/health', { timeout: 10000 })
+      const health = r.data?.tools || {}
+      for (const t of this.tools) {
+        const h = health[t.name]
+        if (h) {
+          t.checkResult = h.alive ? { ok: true, msg: `✅ 运行中 (:${h.port})` } : { ok: false, msg: '⚠️ 容器未运行' }
+        }
+      }
+    },
     async checkTool(t) {
       if(!t.bridge) { this.openDoc(t); return }
       try {
-        const r = await api.get(t.bridge, { timeout: 5000 })
-        t.checkResult = { ok: true, msg: `✅ 连接正常 — ${JSON.stringify(r.data).slice(0,80)}` }
+        const r = await api.get('/api/v1/tools/health', { timeout: 8000 })
+        const health = r.data?.tools?.[t.name] || {}
+        if(health.alive) {
+          t.checkResult = { ok: true, msg: `✅ 运行中 (端口 :${health.port})` }
+        } else {
+          t.checkResult = { ok: false, msg: `⚠️ 容器未运行 — 执行: docker compose -f docker-compose.tools.yml up -d` }
+        }
+      } catch {
+        t.checkResult = { ok: false, msg: '⚠️ 状态未知 — 请先启动 API 服务' }
+      }
+    },
+        } else {
+          const status = r.data.status || r.data.container || 'ok'
+          t.checkResult = { ok: true, msg: `✅ ${status}` }
+        }
       } catch(e) {
-        t.checkResult = { ok: false, msg: `❌ 连接失败 — ${e.message}` }
+        t.checkResult = { ok: false, msg: `⚠️ 状态未知 — 需要启动 Docker 容器才能使用` }
       }
     },
     openDoc(t) {

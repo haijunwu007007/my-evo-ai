@@ -88,6 +88,7 @@ from api.routes_insights import router as insights_router
 from api.routes_modules_browse import router as modules_browse_router
 from api.routes_litellm import router as litellm_router
 from api.routes_agent_s import router as agent_s_router
+from api.routes_tools_health import router as tools_health_router
 from api.routes_gitea_sync import router as gitea_sync_router
 from api.routes_metabase_bridge import router as metabase_bridge_router
 from api.routes_workflows import router as workflows_router
@@ -123,6 +124,7 @@ from api.routes_plugins import router as plugins_router
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
 app.include_router(agent_s_router)
+app.include_router(tools_health_router)
 app.include_router(gitea_sync_router)
 app.include_router(metabase_bridge_router)
 app.include_router(workflows_router)

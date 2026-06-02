@@ -44,12 +44,10 @@ export default {
     const errMsg = ref('')
 
     // 首次运行检测：如果系统未配置则跳设置向导
-    import('axios').then(({ default: ax }) => {
-      ax.get('/api/setup/status').then(r => {
-        const d = r.data || r
-        if (d.setup_required) router.replace('/setup')
-      }).catch(() => {})
-    })
+    http.get('/setup/status').then(r => {
+      const d = r?.data || r
+      if (d?.setup_required) router.replace('/setup')
+    }).catch(() => {})
 
     async function localLogin() {
       errMsg.value = ''
