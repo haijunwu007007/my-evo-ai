@@ -13,13 +13,16 @@
     <div class="panel" v-loading="loading" element-loading-text="加载模块中...">
       <!-- 工具栏 -->
       <div class="toolbar">
-        <el-input
-          v-model="search"
-          placeholder="🔍 搜索模块名 / 分类…"
-          clearable
-          class="search-input"
-          size="default"
-        />
+        <div style="display:flex;gap:4px;align-items:center">
+          <el-input
+            v-model="search"
+            placeholder="🔍 搜索模块名 / 分类…"
+            clearable
+            class="search-input"
+            size="default"
+          />
+          <VoiceInput @result="(t:string)=>search=t" />
+        </div>
         <div class="toolbar-right">
           <el-select v-model="filterGrade" placeholder="等级" clearable size="default" style="width:100px">
             <el-option label="Grade A" value="A" />

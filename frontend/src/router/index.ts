@@ -125,6 +125,12 @@ const routes = [
     component: () => import('@/views/ExternalTools.vue'),
     meta: { title: '外部工具', icon: 'Connection' },
   },
+  {
+    path: '/setup',
+    name: 'SetupWizard',
+    component: () => import('@/views/SetupWizard.vue'),
+    meta: { title: '系统配置', public: true },
+  },
 ]
 
 const router = createRouter({

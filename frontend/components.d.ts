@@ -58,6 +58,7 @@ declare module 'vue' {
     SsoAuthPanel: typeof import('./src/components/SsoAuthPanel.vue')['default']
     StatCard: typeof import('./src/components/StatCard.vue')['default']
     SystemMonitorDashboard: typeof import('./src/components/SystemMonitorDashboard.vue')['default']
+    VoiceInput: typeof import('./src/components/VoiceInput.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

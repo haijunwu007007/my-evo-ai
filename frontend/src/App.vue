@@ -111,6 +111,16 @@
           </transition>
         </router-view>
       </el-main>
+
+      <!-- 全局浮动语音输入按钮 -->
+      <div class="global-voice-fab" :class="{ listening: voiceListening }" @click="toggleGlobalVoice" :title="voiceListening ? '点击停止' : '全局语音输入'">
+        {{ voiceListening ? '🔴' : '🎤' }}
+      </div>
+      <div v-if="voiceListening" class="voice-indicator-bar">
+        <div class="voice-pulse"></div>
+        <span>正在聆听…</span>
+        <span class="voice-text" v-if="voiceTranscript">「{{ voiceTranscript }}」</span>
+      </div>
     </el-container>
   </el-container>
 </template>
@@ -119,6 +129,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getSystemStatus } from '@/api'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -216,6 +227,26 @@ const refreshAll = async () => {
     isOnline.value = false
   }
   refreshing.value = false
+}
+
+let voiceRec: any = null
+const voiceListening = ref(false)
+const voiceTranscript = ref('')
+function toggleGlobalVoice() {
+  const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  if (!SR) { ElMessage.warning('浏览器不支持语音输入'); return }
+  if (voiceRec) { voiceRec.abort(); voiceRec = null; voiceListening.value = false; voiceTranscript.value = ''; return }
+  const r = new SR()
+  r.lang = 'zh-CN'; r.continuous = false; r.interimResults = false
+  r.onresult = (e: any) => {
+    const t = e.results[0][0].transcript
+    voiceTranscript.value = t
+    ElMessage.success(`识别结果: ${t}`)
+    voiceListening.value = false; voiceRec = null
+  }
+  r.onerror = (e: any) => { ElMessage.error('语音识别失败'); voiceListening.value = false; voiceRec = null }
+  r.onend = () => { voiceListening.value = false; voiceRec = null }
+  try { r.start(); voiceRec = r; voiceListening.value = true } catch { ElMessage.error('启动麦克风失败') }
 }
 
 const openGithub = () => window.open('https://github.com/haijunwu007007/my-evo-ai', '_blank')
@@ -466,6 +497,36 @@ html, body, #app { height: 100%; }
 /* ── Logo 动画 ─────────────────────────────────────── */
 .logo-fade-enter-active, .logo-fade-leave-active { transition: opacity 0.2s; }
 .logo-fade-enter-from, .logo-fade-leave-to { opacity: 0; }
+
+/* ── 全局语音输入浮动按钮 ─────────────────────────── */
+.global-voice-fab {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+  transition: all 0.3s; user-select: none;
+}
+.global-voice-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(99,102,241,0.6); }
+.global-voice-fab.listening { background: linear-gradient(135deg, #ef4444, #dc2626); animation: fab-pulse 1s infinite; }
+@keyframes fab-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 4px 32px rgba(239,68,68,0.7); }
+}
+.voice-indicator-bar {
+  position: fixed; bottom: 80px; right: 24px; z-index: 9999;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 12px; padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 200px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  color: var(--text-primary); font-size: 13px;
+}
+.voice-pulse {
+  width: 8px; height: 8px; border-radius: 50%; background: #ef4444;
+  animation: pulse 1.5s infinite; display: inline-block; margin-right: 8px;
+}
+.voice-text { color: #818cf8; font-weight: 500; font-size: 14px; word-break: break-all; }
 
 /* ── Element Plus 全局覆盖 ────────────────────────── */
 .el-card { background: var(--bg-card) !important; border-color: var(--border-subtle) !important; }

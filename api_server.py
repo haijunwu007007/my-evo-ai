@@ -114,6 +114,7 @@ from api.routes_dashy import router as dashy_router
 from api.routes_ntfy import router as ntfy_router
 from api.routes_nocodb import router as nocodb_router
 from api.routes_changedetection import router as changedetection_router
+from api.routes_setup import router as setup_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -151,6 +152,7 @@ app.include_router(dashy_router)
 app.include_router(ntfy_router)
 app.include_router(nocodb_router)
 app.include_router(changedetection_router)
+app.include_router(setup_router)
 
 
 # ── 静态文件 ──

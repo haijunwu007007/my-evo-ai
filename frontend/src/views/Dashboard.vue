@@ -25,11 +25,17 @@
             <el-button text type="primary" size="small" @click="$router.push('/coordinator')">进入 →</el-button>
           </template>
           <div class="coordinator-box">
-            <el-input
-              v-model="taskInput" type="textarea" :rows="2"
-              placeholder="输入任务描述… 例如: 扫描 GitHub 热门 Python 项目"
-              class="task-input"
-            />
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <el-input
+                v-model="taskInput" type="textarea" :rows="2"
+                placeholder="输入任务描述… 例如: 扫描 GitHub 热门 Python 项目"
+                class="task-input" style="flex:1"
+              />
+              <button id="voice-btn" @click="startVoice"
+                :disabled="!hasVoiceInput"
+                :title="hasVoiceInput ? '点击语音输入' : '浏览器不支持语音'"
+                style="width:32px;height:32px;border:1px solid #2d2d44;border-radius:8px;background:#111127;cursor:pointer;font-size:16px;flex-shrink:0">{{ voiceText }}</button>
+            </div>
             <el-button type="primary" :loading="taskLoading" @click="submitTask" class="submit-btn">
               <span v-if="!taskLoading">🚀 执行任务</span>
               <span v-else>⚙️ 执行中…</span>
@@ -149,6 +155,25 @@ const taskInput = ref('')
 const taskLoading = ref(false)
 const taskResult = ref<any>(null)
 const systemStatus = ref<any>(null)
+
+// ── 语音输入 ─────────────────────────────────────────
+const hasVoiceInput = !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+const voiceText = ref('🎤')
+let voiceRec: any = null
+function startVoice() {
+  if (voiceRec) { voiceRec.abort(); voiceRec = null; voiceText.value = '🎤'; return }
+  const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  if (!SR) return
+  voiceRec = new SR()
+  voiceRec.lang = 'zh-CN'
+  voiceRec.continuous = false
+  voiceRec.interimResults = false
+  voiceRec.onresult = (e: any) => { taskInput.value = e.results[0][0].transcript; voiceText.value = '🎤'; voiceRec = null }
+  voiceRec.onerror = () => { voiceText.value = '🎤'; voiceRec = null }
+  voiceRec.onend = () => { voiceText.value = '🎤'; voiceRec = null }
+  voiceText.value = '🔴'
+  try { voiceRec.start() } catch { voiceText.value = '🎤'; voiceRec = null }
+}
 const tasks = ref<any[]>([])
 const engineStatus = ref<any[]>([])
 const extraStats = ref<any>(null)

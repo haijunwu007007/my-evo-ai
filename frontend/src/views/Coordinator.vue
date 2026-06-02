@@ -8,13 +8,16 @@
         </div>
       </template>
 
-      <el-input
-        v-model="taskDesc"
-        type="textarea"
-        :rows="3"
-        placeholder="用自然语言描述任务…"
-        style="margin-bottom:12px"
-      />
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:12px">
+        <el-input
+          v-model="taskDesc"
+          type="textarea"
+          :rows="3"
+          placeholder="用自然语言描述任务…"
+          style="flex:1"
+        />
+        <span class="mic-btn" @click="startVoice('taskDesc')" title="语音输入" style="cursor:pointer;font-size:20px;padding:4px;margin-top:2px">🎤</span>
+      </div>
       <el-row :gutter="12">
         <el-col :span="12">
           <el-button type="primary" :loading="loading" @click="execute" style="width:100%">
@@ -61,6 +64,18 @@ const status = ref<any>(null)
 const capabilities = ref<any>(null)
 const templates = ref<any[]>([])
 const templateId = ref('')
+
+let voiceRec: any = null
+function startVoice(field: string) {
+  const SR = window.SpeechRecognition || (window as any).webkitSpeechRecognition
+  if (!SR) { alert('浏览器不支持语音输入'); return }
+  if (voiceRec) { voiceRec.abort(); voiceRec = null; return }
+  const r = new SR()
+  r.lang = 'zh-CN'; r.continuous = false; r.interimResults = false
+  r.onresult = (e: any) => { const t = e.results[0][0].transcript; if (field === 'taskDesc') taskDesc.value = t; voiceRec = null }
+  r.onerror = () => { voiceRec = null }; r.onend = () => { voiceRec = null }
+  try { r.start(); voiceRec = r } catch {}
+}
 
 const execute = async () => {
   if (!taskDesc.value.trim()) return

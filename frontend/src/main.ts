@@ -14,11 +14,13 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import StatCard from './components/StatCard.vue'
 import PagePanel from './components/PagePanel.vue'
 import LoadingBox from './components/LoadingBox.vue'
+import VoiceInput from './components/VoiceInput.vue'
 
 const app = createApp(App)
 app.component('StatCard', StatCard)
 app.component('PagePanel', PagePanel)
 app.component('LoadingBox', LoadingBox)
+app.component('VoiceInput', VoiceInput)
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })

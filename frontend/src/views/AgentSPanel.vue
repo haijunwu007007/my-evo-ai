@@ -103,6 +103,10 @@
 import { ref, onMounted } from 'vue'
 import api from '@/api'
 
+
+
+
+
 const instruction = ref('')
 const model = ref('gpt-4o')
 const running = ref(false)
@@ -120,7 +124,7 @@ async function doExecute() {
   running.value = true
   execResult.value = null
   try {
-    const r = await api.post('/api/agent-s/execute', { instruction: instruction.value, model: model.value })
+    const r = await api.post('/agent-s/execute', { instruction: instruction.value, model: model.value })
     execResult.value = r.data || r
     if (r.data?.success) loadHistory()
   } catch (e) { execResult.value = { success: false, error: String(e) } }
@@ -130,7 +134,7 @@ async function doExecute() {
 async function takeScreenshot() {
   loadingSS.value = true
   try {
-    const r = await api.post('/api/agent-s/screenshot')
+    const r = await api.post('/agent-s/screenshot')
     if (r.data?.success) screenshot.value = r.data.screenshot
   } catch (e) { console.error(e) }
   loadingSS.value = false
@@ -138,7 +142,7 @@ async function takeScreenshot() {
 
 async function getMousePos() {
   try {
-    const r = await api.get('/api/agent-s/mouse')
+    const r = await api.get('/agent-s/mouse')
     if (r.data?.success) mousePos.value = r.data
   } catch (e) { console.error(e) }
 }
@@ -146,23 +150,23 @@ async function getMousePos() {
 async function checkEnv() {
   checking.value = true
   try {
-    const r = await api.get('/api/agent-s/check')
+    const r = await api.get('/agent-s/check')
     envChecks.value = r.data?.checks || r.data
   } catch (e) { console.error(e) }
   checking.value = false
 }
 
 async function loadHistory() {
-  try { const r = await api.get('/api/agent-s/history?limit=20'); history.value = r.data?.history || [] }
+  try { const r = await api.get('/agent-s/history?limit=20'); history.value = r.data?.history || [] }
   catch (e) { /* ignore */ }
 }
 
 function loadStatus() {
-  api.get('/api/agent-s/status').then(r => {
-    if (r.data) {
-      sdkOk.value = !!r.data.sdk_available
-      activeTask.value = !!r.data.active_task
-    }
+  api.get('/agent-s/status').then(r => {
+    // api 拦截器已解包 r.data，r 就是响应 body
+    const data = r && r.data ? r.data : r
+    sdkOk.value = !!(data.sdk_available ?? data.success)
+    activeTask.value = !!(data.active_task ?? data.active)
   }).catch(() => {})
 }
 

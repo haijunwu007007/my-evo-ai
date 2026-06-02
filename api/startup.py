@@ -30,19 +30,25 @@ def _mount_vue_frontend():
 
     vue_dist = BASE_DIR / "frontend" / "dist"
     if vue_dist.is_dir():
+        def _nocache(resp: FileResponse) -> FileResponse:
+            resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            resp.headers["Pragma"] = "no-cache"
+            resp.headers["Expires"] = "0"
+            return resp
+
         @app.get("/app", include_in_schema=False)
         async def _spa_root():
             idx = vue_dist / "index.html"
-            return FileResponse(str(idx), media_type="text/html") if idx.exists() else JSONResponse(status_code=404, content={"error":"SPA not built"})
+            return _nocache(FileResponse(str(idx), media_type="text/html")) if idx.exists() else JSONResponse(status_code=404, content={"error":"SPA not built"})
 
         @app.get("/app/{spa_path:path}", include_in_schema=False)
         async def _spa_handler(spa_path: str):
             target = vue_dist / spa_path
             if target.is_file():
-                return FileResponse(str(target))
+                return _nocache(FileResponse(str(target)))
             idx = vue_dist / "index.html"
             if idx.exists():
-                return FileResponse(str(idx), media_type="text/html")
+                return _nocache(FileResponse(str(idx), media_type="text/html"))
             return JSONResponse(status_code=404, content={"error": "SPA not built"})
 
         # 非 API 路径兜底 → SPA（必须放在最后注册，避免覆盖 API 路由）
