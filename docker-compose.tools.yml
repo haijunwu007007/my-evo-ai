@@ -448,6 +448,151 @@ services:
   docmost-redis:
     image: redis:7-alpine
 
+  # ── 7 个行业级系统 ────────────────────────────
+
+  # 🟢 Paperless-ngx (25k⭐) — 文档管理/OCR/合同归档
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    ports:
+      - "3190:8000"
+    volumes:
+      - ./_data/paperless/data:/usr/src/paperless/data
+      - ./_data/paperless/media:/usr/src/paperless/media
+      - ./_data/paperless/export:/usr/src/paperless/export
+      - ./_data/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_SECRET_KEY: evo-paperless-secret-2026
+      PAPERLESS_URL: http://localhost:3190
+      PAPERLESS_TIME_ZONE: Asia/Shanghai
+      PAPERLESS_OCR_LANGUAGE: chs+eng
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
+    depends_on:
+      - paperless-db
+      - paperless-tika
+
+  paperless-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: evo-pl-2026
+    volumes:
+      - ./_data/paperless/pg:/var/lib/postgresql/data
+
+  paperless-tika:
+    image: ghcr.io/paperless-ngx/tika:latest
+
+  # 🟢 Snipe-IT (10k⭐) — IT 资产跟踪管理
+  snipeit:
+    image: snipe/snipe-it:latest
+    ports:
+      - "3200:80"
+    volumes:
+      - ./_data/snipeit:/data
+    environment:
+      APP_URL: http://localhost:3200
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: base64:evosnipeit2026keyforsnipeitapp
+      DB_CONNECTION: mysql
+      DB_HOST: snipeit-db
+      DB_PORT: "3306"
+      DB_DATABASE: snipeit
+      DB_USERNAME: snipeit
+      DB_PASSWORD: evo-si-2026
+      MAIL_DRIVER: log
+    depends_on:
+      - snipeit-db
+
+  snipeit-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: snipeit
+      MYSQL_USER: snipeit
+      MYSQL_PASSWORD: evo-si-2026
+      MYSQL_ROOT_PASSWORD: evo-si-root-2026
+    volumes:
+      - ./_data/snipeit-db:/var/lib/mysql
+
+  # 🟡 Medusa (27k⭐) — 电商平台
+  medusa:
+    image: medusajs/medusa:latest
+    ports:
+      - "3210:9000"
+    depends_on:
+      - medusa-db
+      - medusa-redis
+    environment:
+      DATABASE_URL: postgres://medusa:evo-md-2026@medusa-db/medusa?sslmode=disable
+      REDIS_URL: redis://medusa-redis:6379
+      JWT_SECRET: evo-medusa-jwt-secret
+      COOKIE_SECRET: evo-medusa-cookie-secret
+      NODE_ENV: production
+
+  medusa-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: medusa
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: evo-md-2026
+    volumes:
+      - ./_data/medusa-pg:/var/lib/postgresql/data
+
+  medusa-redis:
+    image: redis:7-alpine
+
+  # 🟡 OpenEMR (3k⭐) — 医疗诊所管理
+  openemr:
+    image: openemr/openemr:latest
+    ports:
+      - "3220:80"
+      - "3221:443"
+    volumes:
+      - ./_data/openemr:/var/www/localhost/htdocs/openemr
+    environment:
+      MYSQL_HOST: openemr-db
+      MYSQL_ROOT_PASS: evo-oe-root-2026
+      MYSQL_USER: openemr
+      MYSQL_PASS: evo-oe-2026
+      OE_USER: admin
+      OE_PASS: evo-admin-2026
+    depends_on:
+      - openemr-db
+
+  openemr-db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: evo-oe-root-2026
+    volumes:
+      - ./_data/openemr-db:/var/lib/mysql
+
+  # 🔴 ERPNext (25k⭐) — 全业务 ERP 系统
+  # 注意：ERPNext 需要 Frappe Framework + MariaDB + Redis + Nginx + Sockets
+  # 建议单独 docker-compose.erpnext.yml 部署，详见 docs/erpnext-setup.md
+  # 当前仅作信息占位，不自动启动
+  erpnext-info:
+    image: alpine:latest
+    command: echo "ERPNext requires separate setup - see docs/erpnext-setup.md"
+    profiles:
+      - info
+
+  # 🔴 Frappe HR (15k⭐) — 人力资源管理
+  # 注意：依赖 Frappe Framework，建议与 ERPNext 共用部署
+  frappehr-info:
+    image: alpine:latest
+    command: echo "Frappe HR requires Frappe Framework - see docs/frappe-setup.md"
+    profiles:
+      - info
+
+  # 🔴 Open edX (12k⭐) — 在线学习平台
+  # 注意：推荐使用 tutor 部署套件，见 docs/openedx-setup.md
+  openedx-info:
+    image: alpine:latest
+    command: echo "Open edX requires Tutor deployment - see docs/openedx-setup.md"
+    profiles:
+      - info
+
   # ── 新增 9 个行业工具 ─────────────────────────────────
 
   twenty-crm:
