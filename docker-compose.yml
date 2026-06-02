@@ -1,35 +1,39 @@
-version: "3.8"
-# AUTO-EVO-AI V0.1 (535模块)
+# AUTO-EVO-AI V0.1 — 一键部署
+# 运行: docker compose up -d
+# 访问: http://localhost:8765/app/login
 
 services:
-  auto-evo-ai:
+  # ========== 核心系统 ==========
+  evo-core:
     build: .
-    container_name: auto-evo-ai
+    image: auto-evo-ai:v0.1
+    container_name: evo-core
     ports:
       - "8765:8765"
     volumes:
-      - ./data:/app/data
-      - ./.api_key:/app/.api_key:ro
-    env_file:
-      - .env
+      - ./_data:/app/_data
+      - ./core:/app/core
     environment:
-      - PYTHONIOENCODING=utf-8
-      - PYTHONUNBUFFERED=1
-    restart: unless-stopped
+      EVO_ADMIN_KEY: ""
+      TZ: Asia/Shanghai
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8765/api/status', timeout=5)"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8765/"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 40s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 256M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    restart: unless-stopped
+    networks:
+      - evo-net
+
+  # ========== 外部工具 ==========
+  tools:
+    profiles: ["tools"]
+    extends:
+      file: docker-compose.tools.yml
+      service: placeholder
+    # 启动所有工具: docker compose --profile tools up -d
+    # 启动单个工具: docker compose -f docker-compose.tools.yml up -d <name>
+
+networks:
+  evo-net:
+    driver: bridge

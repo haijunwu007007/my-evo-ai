@@ -154,19 +154,28 @@ async def lifespan(app: FastAPI):
 # ═══════════════════════════════════════════════════════
 
 async def warmup_modules():
-    """启动后预热核心模块（基于注册表中实际存在的模块）"""
-    await asyncio.sleep(3)
-    candidate_names = list(registry.classes.keys())[:50]
+    """快速预热核心模块（优化版：数量减半、超时缩短、可跳过）"""
+    fast = os.environ.get("EVO_FAST_START", "").lower() in ("1", "true", "yes")
+    if fast:
+        logger.info("[WARMUP] 快速模式，跳过预热")
+        return
+
+    await asyncio.sleep(0.5)  # 等 API 先就绪
+    candidate_names = list(registry.classes.keys())[:20]
     if not candidate_names:
-        candidate_names = list(registry._pending_modules.keys())[:50]
+        candidate_names = list(registry._pending_modules.keys())[:20]
     if not candidate_names:
         logger.info("[WARMUP] 无待加载模块，跳过预热")
         return
 
     ok = 0
-    for name in candidate_names:
+    start = 0
+    for i, name in enumerate(candidate_names):
+        if i >= 12:  # 最多预热 12 个
+            break
         try:
-            mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=15)
+            await asyncio.sleep(0)  # 不阻塞事件循环
+            mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
             if mod is None:
                 continue
             init = getattr(mod, "initialize", None)
@@ -176,11 +185,10 @@ async def warmup_modules():
                 else:
                     init()
             ok += 1
-        except TimeoutError:
-            logger.warning(f"[WARMUP] 预热超时: {name}")
-        except Exception as e:
-            logger.warning(f"[WARMUP] 预热失败: {name}: {e}")
-    logger.info(f"[WARMUP] {ok}/{len(candidate_names)} 模块预热完成")
+        except (TimeoutError, Exception):
+            pass
+    if ok:
+        logger.info(f"[WARMUP] {ok}/{len(candidate_names)} 模块预热完成 ({time.time()-start:.1f}s)" if start else f"[WARMUP] {ok} 模块预热完成")
 
 
 # ═══════════════════════════════════════════════════════

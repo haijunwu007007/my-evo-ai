@@ -517,7 +517,7 @@ class SchedulerEngine:
                 logger.error("[Scheduler] tick异常: %s", e)
             await asyncio.sleep(1)
 
-    def _check_and_dispatch(self) -> Any:
+    async def _check_and_dispatch(self) -> Any:
         """检查到时任务并分发执行"""
         now = datetime.now()
         active_tasks = self._store.list_tasks(status="active")

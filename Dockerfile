@@ -1,38 +1,40 @@
-# ═══════════════════════════════════════════════════════
-# AUTO-EVO-AI V0.1 — Production Dockerfile (~200MB)
-# ═══════════════════════════════════════════════════════
+# AUTO-EVO-AI V0.1 — Docker 镜像
+# 构建: docker build -t auto-evo-ai:v0.1 .
+# 运行: docker run -d -p 8765:8765 --name evo auto-evo-ai:v0.1
 
-# ── Stage 1: Python Dependencies ──
-FROM python:3.11-slim AS builder
-WORKDIR /build
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt && \
-    find /root/.local -name "*.pyc" -delete && \
-    find /root/.local -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+FROM python:3.13-slim AS builder
 
-# ── Stage 2: Runtime ──
-FROM python:3.11-alpine
 WORKDIR /app
 
-# ca-certificates 仅用于 HTTPS healthcheck
-RUN apk add --no-cache ca-certificates && \
-    rm -rf /var/cache/apk/*
+# 系统依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+# 复制项目文件
+COPY . .
 
-COPY api_server.py config.yaml .env.example ./
-COPY api/ api/
-COPY core/ core/
-COPY modules/ modules/
+# 安装 Python 依赖
+RUN pip install --no-cache-dir -r requirements.txt 2>/dev/null || \
+    pip install --no-cache-dir fastapi uvicorn jinja2 python-multipart aiofiles httpx pyyaml prometheus-client
 
-ENV \
-    PYTHONIOENCODING=utf-8 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    APP_VERSION=0.1.0
+# ========== 运行时镜像 ==========
+FROM python:3.13-slim
 
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app /app
+
+# 服务端口
 EXPOSE 8765
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD python -c "import urllib.request; exit(0 if urllib.request.urlopen('http://localhost:8765/api/status', timeout=5).status==200 else 1)"
-CMD ["python", "api_server.py"]
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD curl -sf http://localhost:8765/ || exit 1
+
+# 启动
+CMD ["uvicorn", "api_server:app", "--host", "0.0.0.0", "--port", "8765"]

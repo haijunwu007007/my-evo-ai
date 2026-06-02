@@ -35,7 +35,8 @@ $proc = Get-Process -Name python -ErrorAction SilentlyContinue | Where-Object { 
 if ($proc) {
     Write-Host "[服务] ⚠️ 已有服务运行中，PID: $($proc.Id)" -ForegroundColor Yellow
 } else {
-    $p = Start-Process -NoNewWindow -FilePath $pyPath -ArgumentList "-m uvicorn api_server:app --host 0.0.0.0 --port 8765" -PassThru
+    $env:EVO_FAST_START = "1"
+$p = Start-Process -NoNewWindow -FilePath $pyPath -ArgumentList "-m uvicorn api_server:app --host 0.0.0.0 --port 8765" -PassThru
     Start-Sleep -Seconds 15
     Write-Host "[服务] ✅ 服务已启动 (PID: $($p.Id))" -ForegroundColor Green
 }
