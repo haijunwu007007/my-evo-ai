@@ -14,6 +14,10 @@ AUTO-EVO-AI CLI — 命令行使用全部系统功能
 
 import sys, json, os, subprocess, time, textwrap
 
+# Windows 编码兼容
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 API = "http://127.0.0.1:8765/api/v1"
 BASE = os.path.dirname(os.path.abspath(__file__))
 
