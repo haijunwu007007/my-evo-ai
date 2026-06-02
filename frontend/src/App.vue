@@ -180,6 +180,7 @@ const opsMenu = [
   { path: '/pipeline', title: '管线引擎', icon: 'Link' },
   { path: '/queue',    title: '任务队列', icon: 'List' },
   { path: '/security', title: '安全中心', icon: 'Lock' },
+  { path: '/plugins',  title: '插件管理', icon: 'Grid' },
   { path: '/sso-auth', title: 'SSO 管理', icon: 'User' },
   { path: '/settings', title: '系统设置', icon: 'Setting' },
 ]

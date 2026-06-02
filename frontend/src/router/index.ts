@@ -126,6 +126,12 @@ const routes = [
     meta: { title: '外部工具', icon: 'Connection' },
   },
   {
+    path: '/plugins',
+    name: 'Plugins',
+    component: () => import('@/views/Plugins.vue'),
+    meta: { title: '插件管理', icon: 'Grid' },
+  },
+  {
     path: '/setup',
     name: 'SetupWizard',
     component: () => import('@/views/SetupWizard.vue'),

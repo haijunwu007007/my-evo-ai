@@ -89,7 +89,7 @@ engine = create_engine()
 
 def get_db():
     """获取数据库引擎实例（PostgreSQL自动检测，不可用则降级SQLite）"""
-    global engine
+    global engine, DB_URL
     if DB_URL.startswith("postgresql"):
         try:
             import asyncpg
@@ -97,7 +97,6 @@ def get_db():
         except ImportError:
             logger.warning("[DB] asyncpg 未安装，自动降级为 SQLite")
             os.environ["EVO_DB_URL"] = "sqlite:///data/evo.db"
-            global DB_URL
             DB_URL = "sqlite:///data/evo.db"
             engine = SqliteEngine()
             return engine
