@@ -237,3 +237,66 @@ services:
       CONNECTION_TIMEOUT: 60000
       MAX_CONCURRENT_SESSIONS: 10
       TOKEN: evo-cd-token
+
+  gitea:
+    image: gitea/gitea:latest
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - ./_data/gitea:/data
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      GITEA__server__DOMAIN: localhost
+      GITEA__server__HTTP_PORT: 3000
+      GITEA__server__ROOT_URL: http://localhost:3000
+      GITEA__server__DISABLE_SSH: "false"
+      GITEA__server__START_SSH_SERVER: "true"
+      GITEA__server__SSH_PORT: 22
+
+  nextcloud:
+    image: nextcloud:latest
+    ports:
+      - "8090:80"
+    volumes:
+      - ./_data/nextcloud:/var/www/html
+    environment:
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: evo-nextcloud-2026
+      SQLITE_DATABASE: nextcloud.db
+
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3030:3000"
+    volumes:
+      - ./_data/metabase:/metabase.db
+    environment:
+      MB_DB_FILE: /metabase.db/metabase.db
+
+  plane:
+    image: makeplane/plane:latest
+    ports:
+      - "3780:80"
+    volumes:
+      - ./_data/plane:/data
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    ports:
+      - "8180:80"
+    volumes:
+      - ./_data/vaultwarden:/data
+    environment:
+      SIGNUPS_ALLOWED: "false"
+      ADMIN_TOKEN: evo-vw-admin-2026
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:latest
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./_data/homeassistant:/config
+    environment:
+      TZ: Asia/Shanghai

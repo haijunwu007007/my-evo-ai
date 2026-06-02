@@ -85,6 +85,12 @@ export default {
         { name:'Ntfy', icon:'🔔', status:'Docker 就绪', desc:'推送通知 (30k⭐) — 手机/桌面推送', url:'http://localhost:8086', bridge:'/api/tools/ntfy/health', checkResult:null },
         { name:'NocoDB', icon:'🗄️', status:'Docker 就绪', desc:'数据库管理 (55k⭐) — SQLite 转电子表格', url:'http://localhost:8088', bridge:'/api/tools/nocodb/health', checkResult:null },
         { name:'Changedetection', icon:'👁️', status:'Docker 就绪', desc:'网页变更监控 (20k⭐) — 监控文档/竞品更新', url:'http://localhost:5000', bridge:'/api/tools/changedetection/health', checkResult:null },
+        { name:'Gitea', icon:'🐱', status:'Docker 就绪', desc:'自托管 Git 服务 (50k⭐) — 代码托管、PR审查、CI/CD', url:'http://localhost:3000', bridge:'/api/tools/gitea/health', checkResult:null },
+        { name:'Nextcloud', icon:'☁️', status:'Docker 就绪', desc:'企业网盘 (30k⭐) — 文件同步/共享/协作', url:'http://localhost:8090', bridge:'/api/tools/nextcloud/health', checkResult:null },
+        { name:'Metabase', icon:'📊', status:'Docker 就绪', desc:'BI 分析工具 (45k⭐) — SQL查询/可视化/Dashboard', url:'http://localhost:3030', bridge:'/api/tools/metabase/health', checkResult:null },
+        { name:'Plane', icon:'📋', status:'Docker 就绪', desc:'项目管理 (30k⭐) — Issue/Kanban/Sprint (Jira替代)', url:'http://localhost:3780', bridge:'/api/tools/plane/health', checkResult:null },
+        { name:'Vaultwarden', icon:'🔐', status:'Docker 就绪', desc:'密码管理器 (40k⭐) — Bitwarden兼容/自托管凭证库', url:'http://localhost:8180', bridge:'/api/tools/vaultwarden/health', checkResult:null },
+        { name:'Home Assistant', icon:'🏠', status:'Docker 就绪', desc:'智能家居平台 (80k⭐) — IoT控制/自动化场景/传感器', url:'http://localhost:8123', bridge:'/api/tools/homeassistant/health', checkResult:null },
       ],
       chromaData: { count:0, collections:[] },
       chromaLoading: true, chromaError: false
