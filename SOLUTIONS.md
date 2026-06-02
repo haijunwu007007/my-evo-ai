@@ -277,3 +277,30 @@ python deploy.py --industry 制造业
 
 > 每个行业方案都已集成到侧边栏 → 外部工具页面。
 > 启动对应容器后，打开工具即可开始使用。
+
+---
+
+### 行业 21-40（新增）
+
+| # | 行业 | 核心工具 | 解决什么问题 |
+|---|------|---------|-------------|
+| 21 | 🌾 **农业** | ERPNext + Metabase | 种植计划/农资/产量分析 |
+| 22 | 🏗️ **建筑业** | ERPNext + Focalboard | 项目预算/材料/进度 |
+| 23 | 🚚 **运输业** | ERPNext + Snipe-IT | 车队管理/调度/维修 |
+| 24 | 🛡️ **保险业** | Twenty CRM + Paperless | 客户/保单/理赔 |
+| 25 | 📡 **电信** | Grafana + osTicket | 网络监控/客服/计费 |
+| 26 | 🚗 **汽车** | ERPNext + Snipe-IT | 配件/维修/库存 |
+| 27 | ✈️ **航空** | Grafana + Metabase | 安全/调度/维护 |
+| 28 | 🚢 **航运** | ERPNext + Paperless | 船舶/货运/报关 |
+| 29 | ⛏️ **矿业** | ERPNext + Grafana | 开采/设备/安全 |
+| 30 | 🍔 **食品饮料** | ERPNext + Paperless | 配方/质检/追溯 |
+| 31 | 🏀 **体育** | Twenty CRM + Immich | 会员/赛事/训练 |
+| 32 | 🎭 **娱乐** | Jellyfin + Immich | 内容/版权/票务 |
+| 33 | 📺 **广告** | Twenty CRM + Excalidraw | 客户/创意/投放 |
+| 34 | 📖 **出版** | Calibre-Web + Docmost | 稿件/编审/发行 |
+| 35 | 🔬 **科研** | Docmost + Metabase | 实验/数据/论文 |
+| 36 | 🌿 **环保** | Grafana + Miniflux | 监测/报告/政策 |
+| 37 | 🚔 **安保** | Vaultwarden + osTicket | 门禁/巡逻/出勤 |
+| 38 | 💅 **美容** | Twenty CRM + Invoice Ninja | 会员/预约/消费 |
+| 39 | ⛪ **社区** | Twenty CRM + Paperless | 成员/捐赠/活动 |
+| 40 | 🌍 **跨境电商** | Medusa + Invoice Ninja | 跨境/报关/多币种 |
