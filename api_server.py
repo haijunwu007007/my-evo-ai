@@ -122,6 +122,7 @@ from api.routes_setup import router as setup_router
 from api.routes_chat import router as chat_router
 from api.routes_plugins import router as plugins_router
 from api.routes_agents import router as agents_router
+from api.routes_llm_chat import router as llm_chat_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
