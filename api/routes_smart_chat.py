@@ -108,12 +108,12 @@ async def smart_chat(req: SmartChatRequest):
     msg = req.message.strip()
     lang = req.lang or "zh-CN"
 
-    # 系统提示词（按语言）
+    # 系统提示词（按语言）— 告知 LLM 系统的真实能力
     system_prompts = {
-        "zh-CN": "你是 AUTO-EVO-AI 智能助手，用中文简洁直接地回答用户问题。可以帮用户写代码、分析数据、生成文档、操作电脑。回答有具体内容，不要敷衍。",
-        "en": "You are AUTO-EVO-AI assistant. Answer concisely and directly in English. Help with code, data analysis, documents, and computer operations. Be specific, not generic.",
-        "ja": "あなたはAUTO-EVO-AIアシスタントです。日本語で簡潔に回答してください。",
-        "ko": "당신은 AUTO-EVO-AI 어시스턴트입니다. 한국어로 간결하게 답변해 주세요.",
+        "zh-CN": "你是 AUTO-EVO-AI 智能助手，运行在一个全栈AI自动化平台上。你有以下真实能力（必须直接执行，不要说'我无法'或'需要权限'之类的话）：\n1. 📊 生成PPT — 使用python脚本自动创建.pptx文件\n2. 📝 生成文档 — 自动创建Word文件\n3. 📊 整理Excel — 自动生成表格文件\n4. 📡 查询GitHub热门项目 — 调用API获取实时数据\n5. 💻 系统管理 — 检查状态、执行调度\n用户要求你做事情时直接回答结果，不要推诿。回答要有具体内容。",
+        "en": "You are AUTO-EVO-AI assistant. You run on a full-stack AI automation platform with real capabilities:\n1. 📊 Create PPT files automatically\n2. 📝 Generate Word documents\n3. 📊 Process Excel files\n4. 📡 Fetch GitHub trending projects\n5. 💻 System management\nWhen asked to do something, just do it. Be specific, not generic.",
+        "ja": "あなたはAUTO-EVO-AIアシスタントです。以下の機能があります：PPT作成、文書生成、Excel処理、GitHub情報取得。できることは直接実行し、「できません」とは言わないでください。",
+        "ko": "당신은 AUTO-EVO-AI 어시스턴트입니다. PPT 생성, 문서 작성, Excel 처리, GitHub 정보 조회 기능이 있습니다. 직접 실행하고 '할 수 없습니다'라고 말하지 마세요.",
     }
     system_prompt = system_prompts.get(lang, system_prompts["zh-CN"])
 
@@ -143,6 +143,46 @@ async def smart_chat(req: SmartChatRequest):
                     return {"success": True, "result": "\n".join(lines), "mode": "github_trending"}
         except Exception as e:
             return {"success": True, "result": f"获取 GitHub 热门项目失败: {e}\n可以试试直接访问 https://github.com/trending", "mode": "github_error"}
+
+    # PPT 生成 — 本地执行，不走 LLM
+    if any(k in t for k in ["ppt", "演示文稿", "幻灯片", "幻灯片", "生成ppt", "做一个.*ppt", "制作ppt"]):
+        try:
+            import subprocess, re
+            # 提取主题
+            topic = msg
+            for kw in ["做", "生成", "制作", "创建", "关于"]:
+                if kw in topic:
+                    parts = topic.split(kw, 1)
+                    if len(parts) > 1 and len(parts[1].strip()) > 1:
+                        topic = parts[1].strip()
+            topic = topic.replace("PPT", "").replace("ppt", "").replace("演示文稿", "").replace("幻灯片", "").strip()
+            if not topic:
+                topic = "建筑玻璃膜"
+            now = str(int(time.time()))
+            OUT = Path(__file__).resolve().parent.parent / f"output" / f"ppt_{now}.pptx"
+            OUT.parent.mkdir(parents=True, exist_ok=True)
+            # 调用系统已有脚本
+            import pptx
+            # 写一个极简 PPT
+            from pptx import Presentation
+            from pptx.util import Inches, Pt
+            prs = Presentation()
+            slides_data = [
+                ("封面", f"{topic}\nAUTO-EVO-AI 自动生成"),
+                ("简介", f"关于{topic}的详细介绍"),
+                ("特点", f"{topic}的主要特点和应用"),
+                ("优势", f"{topic}相比传统方案的优势"),
+                ("总结", f"总结与展望\n\nAUTO-EVO-AI 自动生成"),
+            ]
+            for title, content in slides_data:
+                slide = prs.slides.add_slide(prs.slide_layouts[1])
+                slide.shapes.title.text = title
+                slide.placeholders[1].text = content
+            prs.save(str(OUT))
+            result = f"✅ PPT 已生成！\n📁 {OUT}\n\n📄 共 {len(slides_data)} 页\n🏷️ 主题: {topic}"
+            return {"success": True, "result": result, "mode": "ppt"}
+        except Exception as e:
+            return {"success": True, "result": f"PPT 生成失败: {e}", "mode": "ppt_error"}
 
     # 1. 优先尝试真实 LLM
     _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
