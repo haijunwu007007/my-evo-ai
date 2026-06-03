@@ -157,7 +157,7 @@ async def smart_chat(req: SmartChatRequest):
 
     if any(k in t for k in ["状态", "怎么样", "status", "health"]):
         return {"success": True, "result": r["status"], "mode": "rule"}
-    if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做"]):
+    if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
     if any(k in t for k in ["写", "合同", "文档", "write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
