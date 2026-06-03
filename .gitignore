@@ -70,3 +70,9 @@ api_stderr*.txt
 api_stdout*.txt
 test_out.txt
 test-results/
+
+# ── 运行时输出文件 ──
+output/*.docx
+output/*.pptx
+output/*.xlsx
+output/*.txt
