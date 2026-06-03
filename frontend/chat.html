@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AUTO-EVO-AI</title>
-<script src="/i18n.js"></script>
+<script src="/i18n.js" onerror="this.remove()"></script>
+<script>if(typeof getLocale!=='function'){window.getLocale=function(){return 'zh-CN'};window.__=function(k){return{k}['zh-CN'][k]||k};window.setLocale=function(){};window.getLanguages=function(){return[{code:'zh-CN',name:'中文'},{code:'en',name:'English'}]};window.renderLangSwitcher=function(){};console.warn('i18n.js fallback');}</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#1a1a2e;--card:#16213e;--text:#e0e0e0;--text2:#8892b0;--input-bg:#0f3460;--accent:#4361ee;--user-msg:#4361ee;--ai-msg:#16213e;--border:#2d3561}
@@ -84,6 +85,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="header">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h1>🤖 AUTO-EVO-AI</h1>
+        <span id="newChatBtn" style="font-size:12px;color:var(--text2);cursor:pointer;margin-right:8px" onclick="clearHistory()">🔄 新对话</span>
+        <span style="font-size:12px;color:var(--text2);cursor:pointer;margin-right:8px" onclick="showArchives()">📋 历史</span>
         <span id="logoutBtn" style="font-size:12px;color:var(--text2);cursor:pointer" onclick="logout()">退出</span>
       </div>
       <p id="greeting"></p>
@@ -181,7 +184,13 @@ function showLoading() {
 function hideLoading() { document.getElementById('loading')?.remove() }
 
 function clearHistory() {
-  if (!confirm('清除所有对话历史？')) return
+  // 先存档当前对话
+  if (history.length > 0) {
+    const archives = JSON.parse(localStorage.getItem('evo_chat_archives') || '[]')
+    archives.unshift({id: Date.now(), time: new Date().toLocaleString(), messages: [...history]})
+    if (archives.length > 20) archives.length = 20
+    localStorage.setItem('evo_chat_archives', JSON.stringify(archives))
+  }
   history = []; context = []
   localStorage.removeItem('evo_chat_history')
   document.getElementById('messages').innerHTML = ''
@@ -198,9 +207,30 @@ async function send() {
   showLoading()
 
   try {
+    // 优先使用智能聊天引擎（LLM → 本地 → 规则）
+    const apiKey = localStorage.getItem('evo_api_key') || ''
+    const lang = getLocale() || 'zh-CN'
+    const sr = await fetch(API + '/smart', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: text,
+        api_key: apiKey,
+        lang: lang,
+        context: context.slice(-6)
+      })
+    })
+    const sd = await sr.json()
+    if (sd.success) {
+      hideLoading()
+      addMsg(sd.result, 'bot')
+      context.push({role:'assistant', content:sd.result})
+      document.getElementById('sendBtn').disabled = false
+      document.getElementById('input').focus()
+      return
+    }
+
     // 团队协作关键词 → 创建智能体房间
-    const lower = text.toLowerCase()
-    if (lower.includes('团队') || lower.includes('讨论') || (lower.includes('协作'))) {
       const cr = await fetch(API + '/agents/rooms', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({task: text})
@@ -320,6 +350,23 @@ function renderLangSwitcher() {
 // 初始化语言切换器
 translateUI()
 renderLangSwitcher()
+// 绑定新对话按钮
+document.getElementById('newChatBtn')?.addEventListener('click', function(){ clearHistory() })
+
+// 历史存档查看
+function showArchives() {
+  const archives = JSON.parse(localStorage.getItem('evo_chat_archives') || '[]')
+  if (archives.length === 0) { alert('暂无历史对话'); return }
+  let list = archives.map((a, i) => `${i+1}. ${a.time} (${a.messages.length}条)`).join('\n')
+  const idx = prompt('选择要恢复的对话 (输入编号):\n\n' + list)
+  if (idx === null) return
+  const n = parseInt(idx) - 1
+  if (n >= 0 && n < archives.length) {
+    history = archives[n].messages
+    localStorage.setItem('evo_chat_history', JSON.stringify(history))
+    restoreHistory()
+  }
+}
 </script>
 </body>
 </html>

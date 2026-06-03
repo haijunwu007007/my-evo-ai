@@ -124,6 +124,7 @@ from api.routes_plugins import router as plugins_router
 from api.routes_agents import router as agents_router
 from api.routes_llm_chat import router as llm_chat_router
 from api.routes_i18n import router as i18n_router
+from api.routes_smart_chat import router as smart_chat_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -171,6 +172,7 @@ app.include_router(plugins_router)
 app.include_router(agents_router)
 app.include_router(llm_chat_router)
 app.include_router(i18n_router)
+app.include_router(smart_chat_router)
 
 
 # ── 静态文件 ──
