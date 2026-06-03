@@ -84,13 +84,14 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="header">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h1>🤖 AUTO-EVO-AI</h1>
-        <span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="logout()">🔓 退出</span>
+        <span id="logoutBtn" style="font-size:12px;color:var(--text2);cursor:pointer" onclick="logout()">退出</span>
       </div>
       <p id="greeting"></p>
+      <div class="lang-switcher" id="langSwitcher2" style="margin-bottom:8px"></div>
       <div class="nav-tabs">
-        <span class="tab active">💬 对话</span>
-        <a href="/app/dashboard" class="tab">📊 仪表盘</a>
-        <a href="/dashboard" class="tab">🏢 企业管理</a>
+        <span id="tabChat" class="tab active">💬 对话</span>
+        <a id="tabDashboard" href="/app/dashboard" class="tab">📊 仪表盘</a>
+        <a id="tabBusiness" href="/dashboard" class="tab">🏢 企业管理</a>
       </div>
     </div>
     <div class="messages" id="messages"></div>
@@ -261,40 +262,63 @@ document.getElementById('input')?.addEventListener('input', function() {
 })
 
 // ── i18n 多语言 ──
+// 完整翻译界面函数
 function translateUI() {
-  document.querySelector('.header h1').textContent = __('title')
-  document.querySelector('.header p').textContent = __('subtitle')
-  // 在线的元素后期通过 observer 或 getText 处理
+  const lang = getLocale()
+  // 注册卡片
+  const authH = document.getElementById('authCard')?.querySelector('h2')
+  if (authH) authH.textContent = __('auth_heading')
+  const ru = document.getElementById('regUser')
+  if (ru) ru.placeholder = __('auth_user_placeholder')
+  const rp = document.getElementById('regPass')
+  if (rp) rp.placeholder = __('auth_pass_placeholder')
+  const rk = document.getElementById('regKey')
+  if (rk) rk.placeholder = __('auth_key_placeholder')
+  const rb = document.getElementById('regBtn')
+  if (rb) rb.textContent = __('auth_btn')
+  // 聊天标题
+  document.querySelectorAll('.header h1').forEach(el => el.textContent = __('title'))
+  document.querySelectorAll('.header p').forEach(el => {
+    if (!el.id || el.id !== 'greeting') el.textContent = __('subtitle')
+  })
+  // 登录后的问候
+  const g = document.getElementById('greeting')
+  if (g) {
+    const user = localStorage.getItem('evo_user') || ''
+    g.textContent = __('greeting', user)
+  }
+  // 输入框
+  const inp = document.getElementById('input')
+  if (inp) inp.placeholder = __('input_placeholder')
+  // 导航按钮
+  const tc = document.getElementById('tabChat')
+  const td = document.getElementById('tabDashboard')
+  const tb = document.getElementById('tabBusiness')
+  if (tc) tc.textContent = __('tab_chat')
+  if (td) { td.textContent = __('tab_dashboard'); td.href = '/app/dashboard?lang=' + getLocale() }
+  if (tb) { tb.textContent = __('tab_business'); tb.href = '/dashboard?lang=' + getLocale() }
+  // 退出按钮
+  const lb = document.getElementById('logoutBtn')
+  if (lb) lb.textContent = '🔓 ' + __('logout')
+  // 语言切换器刷新
+  renderLangSwitcher()
 }
 
 function renderLangSwitcher() {
-  const container = document.getElementById('langSwitcher')
-  if (!container) return
+  const cur = getLocale()
   const langs = getLanguages()
-  container.innerHTML = langs.map(l =>
-    `<span class="${l.code === getLocale() ? 'active' : ''}"
-           onclick="setLocale('${l.code}')">${l.name}</span>`
-  ).join('')
-}
-
-// 语言切换后刷新界面文字
-const _origSetLocale = setLocale
-setLocale = function(locale) {
-  _origSetLocale(locale)
-  renderLangSwitcher()
-  // 刷新注册按钮文字
-  document.querySelector('#authCard h2').textContent = __('auth_heading')
-  document.querySelector('#regUser').placeholder = __('auth_user_placeholder')
-  document.querySelector('label[for="regUser"]').textContent = __('auth_user')
-  document.querySelector('#regBtn').textContent = __('auth_btn')
-  document.querySelector('.header h1').textContent = __('title')
-  document.querySelector('.header p').textContent = __('subtitle')
-  if (document.getElementById('mainContent').classList.contains('show')) {
-    document.getElementById('greeting').textContent = __('greeting', localStorage.getItem('evo_user') || '')
-  }
+  const opts = langs.map(l => `<option value="${l.code}" ${l.code===cur?'selected':''}>${l.emoji||''} ${l.name}</option>`).join('')
+  const sel = `<select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;cursor:pointer;outline:none">${opts}</select>`
+  ;['langSwitcher','langSwitcher2'].forEach(id => {
+    const c = document.getElementById(id)
+    if (c) c.innerHTML = sel
+  })
 }
 
 // 初始化语言切换器
+
+// 初始化语言切换器
+translateUI()
 renderLangSwitcher()
 </script>
 </body>

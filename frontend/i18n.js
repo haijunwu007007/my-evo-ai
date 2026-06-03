@@ -1,11 +1,12 @@
 /**
  * AUTO-EVO-AI 国际化 (i18n) — 前端多语言引擎
- * 支持: 中文 / English / 日本語 / 한국어
+ * 支持: 中文 / English / 日本語 / 한국어 / Français / Español / Português / Русский / العربية
  */
 
 const I18N = {
   'zh-CN': {
     name: '中文',
+    emoji: '🇨🇳',
     title: '⚡ AUTO-EVO-AI',
     subtitle: '生产力级 AI 自动化编排系统',
     auth_heading: '🔐 开始使用',
@@ -51,6 +52,7 @@ const I18N = {
 
   en: {
     name: 'English',
+    emoji: '🇬🇧',
     title: '⚡ AUTO-EVO-AI',
     subtitle: 'Enterprise AI Automation Platform',
     auth_heading: '🔐 Get Started',
@@ -93,6 +95,7 @@ const I18N = {
 
   ja: {
     name: '日本語',
+    emoji: '🇯🇵',
     title: '⚡ AUTO-EVO-AI',
     subtitle: 'エンタープライズAI自動化プラットフォーム',
     auth_heading: '🔐 はじめる',
@@ -133,6 +136,7 @@ const I18N = {
 
   ko: {
     name: '한국어',
+    emoji: '🇰🇷',
     title: '⚡ AUTO-EVO-AI',
     subtitle: '엔터프라이즈 AI 자동화 플랫폼',
     auth_heading: '🔐 시작하기',
@@ -169,7 +173,82 @@ const I18N = {
     team_discussion: '👥 팀 토론',
     system_team: '시스템',
     team_lead: '나',
-  }
+  },
+
+  fr: {
+    name: 'Français', emoji: '🇫🇷',
+    title: '⚡ AUTO-EVO-AI', subtitle: 'Plateforme IA d\'automatisation',
+    auth_heading: '🔐 Commencer', auth_user: 'Utilisateur', auth_user_placeholder: 'Votre nom',
+    auth_pass: 'Mot de passe', auth_pass_placeholder: 'Optionnel',
+    auth_key: 'API Key', auth_key_placeholder: 'OpenAI / autre LLM',
+    auth_btn: '🚀 Entrer', greeting: 'Bonjour {name} ! Que puis-je faire ?',
+    tab_chat: '💬 Discuter', tab_dashboard: '📊 Tableau', tab_business: '🏢 Entreprise',
+    input_placeholder: 'Dites ce que vous voulez...', logout: '🔓 Déconnexion',
+    what_can_do: ['📊 **Statut** — "statut"\n🤖 **Discussion IA**\n🖥️ **Bureau**\n⏰ **Planification**\n\nOn essaie quoi ?'],
+    status_ok: ['✅ Tout fonctionne\n• Version {version}\n• {sdk}\n• {key}'],
+    status_sdk_ready: 'Prêt', status_sdk_missing: 'Non installé',
+    status_key_ready: 'Configuré', status_key_missing: 'Non configuré',
+  },
+
+  es: {
+    name: 'Español', emoji: '🇪🇸',
+    title: '⚡ AUTO-EVO-AI', subtitle: 'Plataforma IA de automatización',
+    auth_heading: '🔐 Comenzar', auth_user: 'Usuario', auth_user_placeholder: 'Tu nombre',
+    auth_pass: 'Contraseña', auth_pass_placeholder: 'Opcional',
+    auth_key: 'API Key', auth_key_placeholder: 'OpenAI / otro LLM',
+    auth_btn: '🚀 Entrar', greeting: '¡Hola {name}! ¿Qué necesitas?',
+    tab_chat: '💬 Chat', tab_dashboard: '📊 Panel', tab_business: '🏢 Empresa',
+    input_placeholder: 'Escribe lo que quieras...', logout: '🔓 Salir',
+    what_can_do: ['📊 **Estado** — "estado"\n🤖 **Discusión IA**\n🖥️ **Escritorio**\n⏰ **Tareas**\n\n¿Qué probamos?'],
+    status_ok: ['✅ Todo funciona\n• Versión {version}\n• {sdk}\n• {key}'],
+    status_sdk_ready: 'Listo', status_sdk_missing: 'No instalado',
+    status_key_ready: 'Configurado', status_key_missing: 'No configurado',
+  },
+
+  pt: {
+    name: 'Português', emoji: '🇧🇷',
+    title: '⚡ AUTO-EVO-AI', subtitle: 'Plataforma IA de Automação',
+    auth_heading: '🔐 Começar', auth_user: 'Usuário', auth_user_placeholder: 'Seu nome',
+    auth_pass: 'Senha', auth_pass_placeholder: 'Opcional',
+    auth_key: 'API Key', auth_key_placeholder: 'OpenAI / outro LLM',
+    auth_btn: '🚀 Entrar', greeting: 'Olá {name}! O que deseja?',
+    tab_chat: '💬 Conversar', tab_dashboard: '📊 Painel', tab_business: '🏢 Empresa',
+    input_placeholder: 'Digite o que quer...', logout: '🔓 Sair',
+    what_can_do: ['📊 **Status** — "status"\n🤖 **Equipe IA**\n🖥️ **Área de trabalho**\n⏰ **Tarefas**\n\nVamos tentar?'],
+    status_ok: ['✅ Tudo funcionando\n• Versão {version}\n• {sdk}\n• {key}'],
+    status_sdk_ready: 'Pronto', status_sdk_missing: 'Não instalado',
+    status_key_ready: 'Configurado', status_key_missing: 'Não configurado',
+  },
+
+  ru: {
+    name: 'Русский', emoji: '🇷🇺',
+    title: '⚡ AUTO-EVO-AI', subtitle: 'Платформа ИИ-автоматизации',
+    auth_heading: '🔐 Начать', auth_user: 'Пользователь', auth_user_placeholder: 'Ваше имя',
+    auth_pass: 'Пароль', auth_pass_placeholder: 'Опционально',
+    auth_key: 'API Key', auth_key_placeholder: 'OpenAI / другой LLM',
+    auth_btn: '🚀 Войти', greeting: 'Здравствуйте, {name}! Чем помочь?',
+    tab_chat: '💬 Чат', tab_dashboard: '📊 Панель', tab_business: '🏢 Управление',
+    input_placeholder: 'Введите запрос...', logout: '🔓 Выйти',
+    what_can_do: ['📊 **Статус** — "статус"\n🤖 **Обсуждение**\n🖥️ **Рабочий стол**\n⏰ **Задачи**\n\nЧто попробуем?'],
+    status_ok: ['✅ Всё работает\n• Версия {version}\n• {sdk}\n• {key}'],
+    status_sdk_ready: 'Готов', status_sdk_missing: 'Не установлен',
+    status_key_ready: 'Настроен', status_key_missing: 'Не настроен',
+  },
+
+  ar: {
+    name: 'العربية', emoji: '🇸🇦',
+    title: '⚡ AUTO-EVO-AI', subtitle: 'منصة أتمتة الذكاء الاصطناعي',
+    auth_heading: '🔐 ابدأ', auth_user: 'المستخدم', auth_user_placeholder: 'اسمك',
+    auth_pass: 'كلمة المرور', auth_pass_placeholder: 'اختياري',
+    auth_key: 'مفتاح API', auth_key_placeholder: 'OpenAI / LLM آخر',
+    auth_btn: '🚀 دخول', greeting: '{name}! مرحباً كيف يمكنني المساعدة؟',
+    tab_chat: '💬 محادثة', tab_dashboard: '📊 لوحة', tab_business: '🏢 إدارة',
+    input_placeholder: 'اكتب ما تريد...', logout: '🔓 خروج',
+    what_can_do: ['📊 **الحالة** — "الحالة"\n🤖 **نقاش AI**\n🖥️ **سطح المكتب**\n⏰ **مهام**\n\nماذا نجرب أولاً؟'],
+    status_ok: ['✅ كل شيء يعمل\n• الإصدار {version}\n• {sdk}\n• {key}'],
+    status_sdk_ready: 'جاهز', status_sdk_missing: 'غير مثبت',
+    status_key_ready: 'تم التكوين', status_key_missing: 'لم يتم التكوين',
+  },
 }
 
 // 当前语言
@@ -182,6 +261,11 @@ function detectLocale() {
   if (browser.startsWith('zh')) return 'zh-CN'
   if (browser.startsWith('ja')) return 'ja'
   if (browser.startsWith('ko')) return 'ko'
+  if (browser.startsWith('fr')) return 'fr'
+  if (browser.startsWith('es')) return 'es'
+  if (browser.startsWith('pt')) return 'pt'
+  if (browser.startsWith('ru')) return 'ru'
+  if (browser.startsWith('ar')) return 'ar'
   return 'en'
 }
 
