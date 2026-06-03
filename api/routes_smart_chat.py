@@ -118,16 +118,26 @@ async def smart_chat(req: SmartChatRequest):
     system_prompt = system_prompts.get(lang, system_prompts["zh-CN"])
 
     # 1. 优先尝试真实 LLM
-    if req.api_key:
+    _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+    _provider = req.provider
+    if not _api_key and _provider == "openai":
+        # 尝试各厂商环境变量
+        for p, env_key in [("glm", "ZHIPU_API_KEY"), ("openai", "OPENAI_API_KEY"), ("deepseek", "DEEPSEEK_API_KEY"), ("qwen", "DASHSCOPE_API_KEY")]:
+            ek = os.environ.get(env_key)
+            if ek:
+                _api_key, _provider = ek, p
+                break
+
+    if _api_key:
         messages = [{"role": "system", "content": system_prompt}]
         for ctx in (req.context or [])[-6:]:
             if isinstance(ctx, dict) and ctx.get("content"):
                 messages.append({"role": ctx.get("role", "user"), "content": str(ctx["content"])})
         messages.append({"role": "user", "content": msg})
 
-        result = await _call_llm(messages, req.provider, req.api_key)
+        result = await _call_llm(messages, _provider, _api_key)
         if result:
-            return {"success": True, "result": result, "mode": "llm", "provider": req.provider}
+            return {"success": True, "result": result, "mode": "llm", "provider": _provider}
 
     # 2. 尝试本地 Ollama
     result = await _call_llm(
@@ -162,7 +172,34 @@ async def smart_chat(req: SmartChatRequest):
     if any(k in t for k in ["写", "合同", "文档", "write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
 
-    # 4. 文件操作（Excel/Word）
+    # 5. GitHub 热门项目
+    if any(k in t for k in ["github", "trending", "热门", "流行", "开源项目", "趋势"]):
+        try:
+            async with httpx.AsyncClient(timeout=15) as c:
+                ghr = await c.get("https://api.github.com/search/repositories?q=created:>2026-06-01&sort=stars&order=desc&per_page=10")
+                if ghr.status_code == 200:
+                    data = ghr.json()
+                    items = data.get("items", [])
+                    lines = ["🔥 **GitHub 今日热门项目 TOP 10**\n"]
+                    for j, repo in enumerate(items[:10], 1):
+                        n = repo.get("name", "?")
+                        owner = repo.get("owner", {}).get("login", "?")
+                        desc = repo.get("description", "无描述") or "无描述"
+                        stars = repo.get("stargazers_count", 0)
+                        lang = repo.get("language", "未知")
+                        url = repo.get("html_url", "")
+                        lines.append(f"{j}. **{n}** ⭐{stars} | 🗣️{lang}")
+                        lines.append(f"   作者: {owner}")
+                        lines.append(f"   {desc}")
+                        lines.append(f"   🔗 {url}")
+                    lines.append("\n💡 数据来源: GitHub API")
+                    return {"success": True, "result": "\n".join(lines), "mode": "github_trending"}
+                else:
+                    return {"success": True, "result": f"GitHub API 请求失败 (HTTP {ghr.status})，稍后再试。", "mode": "github_error"}
+        except Exception as e:
+            return {"success": True, "result": f"获取 GitHub 热门项目失败: {e}", "mode": "github_error"}
+
+    # 6. 文件操作（Excel/Word）
     file_result = await _handle_file_ops(msg, lang)
     if file_result:
         return {"success": True, "result": file_result, "mode": "file_ops"}

@@ -248,7 +248,8 @@ async function send(){
     input.value=''
     addMsg(text,'user')
     showLoading()
-    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE})})
+    var ak=localStorage.getItem('evo_api_key')||''
+    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'glm'})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()
     hideLoading()
