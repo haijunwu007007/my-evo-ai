@@ -241,26 +241,19 @@ function restoreHistory(){
 }
 
 async function send(){
-  var input=document.getElementById('input')
-  var text=input.value.trim()
-  if(!text)return
-  input.value='';document.getElementById('sendBtn').disabled=true
-  addMsg(text,'user')
-  showLoading()
   try{
-    var body={message:text,lang:_LOCALE}
-    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    var input=document.getElementById('input')
+    var text=input.value.trim()
+    if(!text)return
+    input.value=''
+    addMsg(text,'user')
+    showLoading()
+    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE})})
+    if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()
     hideLoading()
-    if(sd&&sd.success){
-      addMsg(sd.result||'(空回复)','bot')
-    }else{
-      addMsg('系统返回: '+(sd&&sd.detail||'未知错误'),'bot')
-    }
-  }catch(e){
-    hideLoading()
-    addMsg('请求失败: '+e.message,'bot')
-  }
+    if(sd&&sd.success){addMsg(sd.result||'(空)','bot')}else{addMsg('系统: '+(sd&&sd.detail||'未知错误'),'bot')}
+  }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}
   document.getElementById('sendBtn').disabled=false;input.focus()
 }
 
