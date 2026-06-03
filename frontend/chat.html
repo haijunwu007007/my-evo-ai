@@ -184,9 +184,9 @@ function translateUI(){
 
 // ===== 核心功能 =====
 var API='/api/v1'
-var history=[]
-try{history=JSON.parse(localStorage.getItem('evo_chat_history')||'[]')}catch(e){history=[]}
-var context=[]
+var CHAT=[] // 对话历史
+try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array.isArray(_tmp))CHAT=_tmp}catch(e){CHAT=[]}
+var CTX=[] // 上下文
 
 function doRegister(){
   var user=document.getElementById('regUser').value.trim()||'admin'
@@ -214,9 +214,9 @@ function addMsg(t,r){
   var b=document.createElement('div');b.className='msg-bubble';b.textContent=t
   d.appendChild(l);d.appendChild(b);m.appendChild(d)
   m.scrollTop=m.scrollHeight
-  history.push({role:r,text:t,time:new Date().toISOString()})
-  if(history.length>100)history=history.slice(-100)
-  localStorage.setItem('evo_chat_history',JSON.stringify(history))
+  CHAT.push({role:r,text:t,time:new Date().toISOString()})
+  if(CHAT.length>100)CHAT=CHAT.slice(-100)
+  localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
 }
 
 function showLoading(){
@@ -230,8 +230,8 @@ function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 
 function restoreHistory(){
   var m=document.getElementById('messages');m.innerHTML=''
-  for(var i=0;i<history.length;i++){
-    var h=history[i]
+  for(var i=0;i<CHAT.length;i++){
+    var h=CHAT[i]
     var d=document.createElement('div');d.className='msg '+h.role
     var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI'
     var b=document.createElement('div');b.className='msg-bubble';b.textContent=h.text
@@ -258,13 +258,13 @@ async function send(){
 }
 
 function clearHistory(){
-  if(history.length>0){
+  if(CHAT.length>0){
     var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]')
-    a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(history)})
+    a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)})
     if(a.length>20)a.length=20
     localStorage.setItem('evo_chat_archives',JSON.stringify(a))
   }
-  history=[];context=[];localStorage.removeItem('evo_chat_history');document.getElementById('messages').innerHTML=''
+  CHAT=[];CTX=[];localStorage.removeItem('evo_chat_history');document.getElementById('messages').innerHTML=''
 }
 
 function showArchives(){
@@ -275,7 +275,7 @@ function showArchives(){
   var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list)
   if(idx===null)return
   var n=parseInt(idx)-1
-  if(n>=0&&n<a.length){history=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(history));restoreHistory()}
+  if(n>=0&&n<a.length){CHAT=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));restoreHistory()}
 }
 
 function showDashboard(){window.location.href='/app/dashboard?lang='+_LOCALE}
