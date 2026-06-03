@@ -262,7 +262,15 @@ async def smart_chat(req: SmartChatRequest):
         except Exception as _e:
             return {"success": True, "result": f"生成合同失败: {_e}", "mode": "file_ops_error"}
 
-    # 2. 优先尝试真实 LLM
+    # 定时任务
+    if any(k in t_file for k in ["定时", "每天", "每小时", "每周", "备份", "设置任务", "schedule", "cron"]):
+        return {"success": True, "result": "⏰ **定时任务** — 你可以通过网页后台设置定时任务。\n\n当前支持：\n• 定时备份\n• 定时扫描\n• 定时通知\n\n打开 📊 仪表盘 → 定时任务 页面配置。", "mode": "scheduler"}
+
+    # 团队讨论 / 智能体对话
+    if any(k in t_file for k in ["团队讨论", "智能体", "讨论", "组队", "agents", "team discuss"]):
+        return {"success": True, "result": "🤖 **智能体团队讨论**\n\n你可以说：\n• 「团队讨论如何优化代码」— 6个AI角色各抒己见\n• 「团队讨论安全方案」— 安全专家带队\n\n💡 更详细的结果请在聊天中直接说「团队讨论xxx」。", "mode": "agents"}
+
+    # 3. 优先尝试真实 LLM
     _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
     _provider = req.provider
     if not _api_key and _provider == "openai":
@@ -310,7 +318,7 @@ async def smart_chat(req: SmartChatRequest):
     }
     r = rules.get(lang, rules["en"])
 
-    if any(k in t for k in ["状态", "怎么样", "status", "health"]):
+    if any(k in t for k in ["状态", "怎么样", "status", "health", "健康"]):
         return {"success": True, "result": r["status"], "mode": "rule"}
     if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
