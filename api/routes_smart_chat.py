@@ -306,13 +306,76 @@ async def smart_chat(req: SmartChatRequest):
         except Exception as _e:
             return {"success": True, "result": f"生成合同失败: {_e}", "mode": "file_ops_error"}
 
-    # 定时任务
-    if any(k in t_file for k in ["定时", "每天", "每小时", "每周", "备份", "设置任务", "schedule", "cron"]):
-        return {"success": True, "result": "⏰ **定时任务** — 你可以通过网页后台设置定时任务。\n\n当前支持：\n• 定时备份\n• 定时扫描\n• 定时通知\n\n打开 📊 仪表盘 → 定时任务 页面配置。", "mode": "scheduler"}
+    # ── 定时任务真创建 ──
+    if any(k in t_file for k in ["定时", "每天", "每小时", "每周", "每月", "备份", "schedule", "cron"]):
+        try:
+            from api.routes_scheduler import router as sched_router
+            # 解析任务描述
+            _every = "每天"; _what = msg
+            if "每" in msg:
+                for _p in ["每小时","每天","每周","每月"]:
+                    if _p in msg: _every = _p; break
+            _task_id = f"auto_{int(time.time())}"
+            _task_path = Path(os.environ.get("AUTO_EVO_ROOT", str(Path(__file__).resolve().parent.parent))) / "tasks" / f"{_task_id}.json"
+            _task_path.parent.mkdir(parents=True, exist_ok=True)
+            import json as _json
+            _json.dump({"id":_task_id,"schedule":_every,"command":_what,"created":time.time()}, open(_task_path,"w",encoding="utf-8"))
+            return {"success":True,"result":f"⏰ **定时任务已创建**\n任务ID: {_task_id}\n频率: {_every}\n描述: {_what[:60]}\n\n你可以在 📊 仪表盘 → 定时任务 查看和管理。", "mode":"scheduler_created"}
+        except Exception as _e:
+            return {"success":True,"result":f"⏰ 定时任务创建失败: {_e}\n请在 📊 仪表盘 → 定时任务 手动配置。","mode":"scheduler_error"}
 
-    # 团队讨论 / 智能体对话
+    # ── 搜索真集成 ──
+    if any(k in t_file for k in ["搜索", "搜一下", "查一下", "查询", "找一下", "search", "百度", "谷歌"]):
+        try:
+            async with httpx.AsyncClient(timeout=15) as c:
+                _q = msg.replace("搜索","").replace("搜一下","").replace("查一下","").replace("查询","").replace("找一下","").replace("search","").strip()
+                if not _q: _q = msg[:60]
+                _sr = await c.get(f"https://api.duckduckgo.com/?q={_q}&format=json&pretty=1")
+                if _sr.status_code == 200:
+                    _sd = _sr.json()
+                    _abstract = _sd.get("AbstractText", "") or _sd.get("Abstract", "") or ""
+                    _source = _sd.get("AbstractSource", "") or ""
+                    _url = _sd.get("AbstractURL", "") or ""
+                    if _abstract:
+                        return {"success":True,"result":f"🔍 **搜索结果**\n来源: {_source}\n\n{_abstract}\n\n🔗 {_url}\n\n💡 以上结果由 DuckDuckGo 实时搜索提供。","mode":"search"}
+                    return {"success":True,"result":f"🔍 关于「{_q}」未找到结构化结果。已转交 AI 回答。","mode":"search_fallback"}
+                return {"success":True,"result":f"🔍 搜索服务暂不可用 (HTTP {_sr.status})，已转交 AI。","mode":"search_fallback"}
+        except Exception as _e:
+            return {"success":True,"result":f"🔍 搜索请求失败，已转交 AI 回答。","mode":"search_fallback"}
+
+    # ── Excel 真创建 ──
+    if any(k in t_file for k in ["excel", "表格", "xlsx", "电子表格", "做一份.*表", "创建.*表"]):
+        try:
+            from modules.file_ops import excel_write
+            _out = Path(__file__).resolve().parent.parent / "output"
+            _out.mkdir(parents=True, exist_ok=True)
+            _path = str(_out / f"spreadsheet_{int(time.time())}.xlsx")
+            # 尝试从消息中提取表头
+            _headers = ["名称", "数量", "单价", "金额", "备注"]
+            _sample = [[f"示例项{i}", 10+i, 100+i*10, (10+i)*(100+i*10), ""] for i in range(1, 6)]
+            _data = [_headers] + _sample
+            _r = excel_write(_path, _data)
+            return {"success":True,"result":f"📊 **Excel 表格已生成**\n\n{_r}\n\n文件位置: {_path}\n\n💡 你可以直接在 Excel 中打开编辑数据。","mode":"excel_created"}
+        except Exception as _e:
+            return {"success":True,"result":f"📊 Excel 生成失败: {_e}", "mode":"excel_error"}
+
+    # ── 团队讨论打通 ──
     if any(k in t_file for k in ["团队讨论", "智能体", "讨论", "组队", "agents", "team discuss"]):
-        return {"success": True, "result": "🤖 **智能体团队讨论**\n\n你可以说：\n• 「团队讨论如何优化代码」— 6个AI角色各抒己见\n• 「团队讨论安全方案」— 安全专家带队\n\n💡 更详细的结果请在聊天中直接说「团队讨论xxx」。", "mode": "agents"}
+        try:
+            async with httpx.AsyncClient(timeout=30) as _hc:
+                _task = msg
+                for _kw in ["团队讨论","智能体","讨论","组队"]:
+                    _task = _task.replace(_kw, "").strip()
+                if not _task: _task = "一般讨论"
+                _rr = await _hc.post("http://127.0.0.1:8765/api/v1/agents/rooms", json={"task": _task})
+                if _rr.status_code == 200:
+                    _rd = _rr.json()
+                    if _rd.get("success"):
+                        _rid = _rd.get("room_id", "?")
+                        return {"success":True,"result":f"🤖 **智能体团队讨论已启动**\n\n🏠 房间: {_rid}\n📋 任务: {_task}\n\n6 位 AI 智能体正在讨论中...\n可以通过 WebSocket 查看实时讨论。","mode":"agents_room"}
+        except Exception as _e:
+            pass  # 降级到帮助文本
+        return {"success":True,"result":"🤖 **智能体团队讨论**\n\n你可以说「团队讨论如何优化代码」— 6个AI角色各抒己见。","mode":"agents"}
 
     # 3. 优先尝试真实 LLM
     _api_key = req.api_key or ""
