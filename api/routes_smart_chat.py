@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from core.logging_config import get_logger
-import httpx, json, os, sys, time
+import httpx, json, os, sys, time, re
 from pathlib import Path
 
 logger = get_logger("evo.api.smart_chat")
@@ -26,14 +26,68 @@ async def _handle_file_ops(msg: str, lang: str) -> str | None:
     """处理文件/Excel/Word 操作请求"""
     t = msg.lower()
     try:
-        # Word 文档
+        # Word 文档 / 合同
         if any(k in t for k in ["写合同", "写文档", "生成word", "写一份", "write a contract", "write a document", "create word"]):
-            line = msg.split("\n")[0][:80]
-            from modules.file_ops import word_create
-            path = str(_OUTPUT_DIR / f"{lang}-AUTO-EVO-AI-Document.docx")
-            title = "AUTO-EVO-AI Generated Document"
-            r = word_create(path, title, f"Generated content based on: {msg}")
-            return f"📝 **文档已生成**\n\n{r}\n\n文件位置: {path}"
+            try:
+                from modules.file_ops import word_create
+            except ImportError:
+                # 无 python-docx 时用纯文本代替
+                path = str(_OUTPUT_DIR / f"contract_{int(time.time())}.txt")
+                content = msg
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(content)
+                return f"📝 **合同已生成（纯文本）**\n\n文件位置: {path}"
+            path = str(_OUTPUT_DIR / f"contract_{int(time.time())}.docx")
+            # 尝试提取合同要素
+            item = "合同标的"
+            unit_price = ""
+            total = ""
+            m_item = re.search(r'(?:合同|购买|采购|销售)(?:\s*)(.+?)(?:\s*(?:单价|价格|元))', msg)
+            if m_item: item = m_item.group(1).strip()
+            m_price = re.search(r'单价\s*[:：]?\s*(\d+\.?\d*)', msg)
+            if m_price: unit_price = m_price.group(1)
+            m_total = re.search(r'总价\s*[:：]?\s*(\d+\.?\d*)', msg)
+            if m_total: total = m_total.group(1)
+            # 生成合同内容
+            content_lines = []
+            content_lines.append("购 销 合 同")
+            content_lines.append("")
+            content_lines.append(f"合同编号: AUTO-{int(time.time())}")
+            content_lines.append(f"签订日期: {time.strftime('%Y年%m月%d日')}")
+            content_lines.append("")
+            content_lines.append("甲方（购买方）：________________________")
+            content_lines.append("乙方（销售方）：________________________")
+            content_lines.append("")
+            content_lines.append("第一条 产品信息")
+            content_lines.append(f"产品名称：{item}")
+            if unit_price: content_lines.append(f"单价：¥{unit_price}")
+            if total: content_lines.append(f"总价：¥{total}")
+            content_lines.append("数量：________________")
+            content_lines.append("")
+            content_lines.append("第二条 质量标准")
+            content_lines.append("产品符合国家相关质量标准及行业标准。")
+            content_lines.append("")
+            content_lines.append("第三条 交货方式")
+            content_lines.append("交货地点：________________________")
+            content_lines.append("交货日期：________________________")
+            content_lines.append("")
+            content_lines.append("第四条 付款方式")
+            content_lines.append("合同签订后___日内支付___%预付款，余款在验收合格后___日内付清。")
+            content_lines.append("")
+            content_lines.append("第五条 违约责任")
+            content_lines.append("任何一方违约，应向守约方支付合同总价___%的违约金。")
+            content_lines.append("")
+            content_lines.append("第六条 争议解决")
+            content_lines.append("因本合同引起的争议，双方协商解决；协商不成的，提交甲方所在地人民法院诉讼解决。")
+            content_lines.append("")
+            content_lines.append("第七条 其他")
+            content_lines.append("本合同一式两份，甲乙双方各执一份，具有同等法律效力。")
+            content_lines.append("")
+            content_lines.append("甲方（盖章）：________    乙方（盖章）：________")
+            content_lines.append("代表签字：________        代表签字：________")
+            content_lines.append("日期：________________    日期：________________")
+            r = word_create(path, f"购销合同 - {item}", "\n".join(content_lines))
+            return f"📝 **合同已生成**\n\n{r}\n\n文件位置: {path}"
 
         # Excel 读写
         if any(k in t for k in ["excel", "表格", "xlsx", "电子表格", "spreadsheet"]):
@@ -184,7 +238,31 @@ async def smart_chat(req: SmartChatRequest):
         except Exception as e:
             return {"success": True, "result": f"PPT 生成失败: {e}", "mode": "ppt_error"}
 
-    # 1. 优先尝试真实 LLM
+    # 1. 文件操作（Word/Excel — 在 LLM 之前拦截）
+    t_file = msg.lower()
+    if any(k in t_file for k in ["写合同", "写文档", "生成word", "写一份", "write a contract", "write a document", "create word"]):
+        try:
+            from modules.file_ops import word_create
+            import re as _re
+            _item = "合同标的"; _price = ""; _total = ""
+            _ma = _re.search(r'(?:合同|购买|采购|销售)(?:\s*)(.+?)(?:\s*(?:单价|价格|元))', msg)
+            if _ma: _item = _ma.group(1).strip()
+            _mp = _re.search(r'单价\s*[:：]?\s*(\d+\.?\d*)', msg)
+            if _mp: _price = _mp.group(1)
+            _mt = _re.search(r'总价\s*[:：]?\s*(\d+\.?\d*)', msg)
+            if _mt: _total = _mt.group(1)
+            _out = Path(__file__).resolve().parent.parent / "output"
+            _out.mkdir(parents=True, exist_ok=True)
+            _path = str(_out / f"contract_{int(time.time())}.docx")
+            _lines = [f"产品名称：{_item}"]
+            if _price: _lines.append(f"单价：¥{_price}")
+            if _total: _lines.append(f"总价：¥{_total}")
+            _r = word_create(_path, f"购销合同 - {_item}", "\n".join(_lines))
+            return {"success": True, "result": f"📝 **合同已生成**\n\n{_r}\n\n文件位置: {_path}", "mode": "file_ops"}
+        except Exception as _e:
+            return {"success": True, "result": f"生成合同失败: {_e}", "mode": "file_ops_error"}
+
+    # 2. 优先尝试真实 LLM
     _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
     _provider = req.provider
     if not _api_key and _provider == "openai":
@@ -236,7 +314,7 @@ async def smart_chat(req: SmartChatRequest):
         return {"success": True, "result": r["status"], "mode": "rule"}
     if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
-    if any(k in t for k in ["写", "合同", "文档", "write", "contract", "document"]):
+    if any(k in t for k in ["write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
 
     # 6. 文件操作（Excel/Word）
