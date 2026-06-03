@@ -6,6 +6,12 @@ from typing import Optional
 from core.logging_config import get_logger
 import httpx, json, os, sys, time, re
 from pathlib import Path
+# 尝试导入 AI 爬虫
+try:
+    from crawl4ai import AsyncWebCrawler
+    _HAS_CRAWLER = True
+except ImportError:
+    _HAS_CRAWLER = False
 
 # ── 简单数学计算引擎 ─────────────────────
 _MATH_WORDS = ["多少", "计算", "总共", "平均", "每", "比", "率", "利润", "成本", "费用", "收入", "产出", "ROI", "收益率", "毛利率", "及格率", "合格率", "使用率", "准确率", "占比", "增长率"]
@@ -241,6 +247,32 @@ async def smart_chat(req: SmartChatRequest):
                     return {"success": True, "result": "\n".join(lines), "mode": "github_trending"}
         except Exception as e:
             return {"success": True, "result": f"获取 GitHub 热门项目失败: {e}\n可以试试直接访问 https://github.com/trending", "mode": "github_error"}
+
+    # ── AI 网页爬虫 ──
+    if any(k in t for k in ["爬取", "爬虫", "抓取", "crawl", "scrape", "提取网页", "分析网页", "web scrape"]):
+        _url = ""
+        _url_match = re.search(r'https?://[^\s,，。；;]+', msg)
+        if _url_match:
+            _url = _url_match.group(0)
+        elif any(k in t for k in ["github", "trending"]):
+            _url = "https://github.com/trending"
+        if _url and _HAS_CRAWLER:
+            try:
+                async def _do_crawl():
+                    async with AsyncWebCrawler(verbose=False) as _c:
+                        _r = await _c.arun(url=_url, bypass_cache=True, word_count_threshold=50)
+                        if _r and _r.markdown:
+                            _title = _r.metadata.get("title", _url) if _r.metadata else _url
+                            return f"🔍 **{_title}**\n\n{_r.markdown[:2000]}"
+                        return f"⚠️ 无法提取 {_url} 的内容"
+                import asyncio
+                _cr = asyncio.run(_do_crawl())
+                return {"success": True, "result": _cr, "mode": "crawler"}
+            except Exception as _e:
+                return {"success": True, "result": f"⚠️ 爬取失败: {_e}", "mode": "crawler_error"}
+        if _url:
+            return {"success": True, "result": f"🔍 需要安装 crawl4ai:\npip install crawl4ai newspaper4k playwright\nplaywright install\n\n目标: {_url}", "mode": "crawler_missing"}
+        return {"success": True, "result": "🔍 **AI 网页爬虫**\n\n说「爬取 https://xxx.com」即可提取网页内容！\n\n支持的网站类型:\n• 新闻文章\n• GitHub 项目\n• 技术文档\n• 博客文章", "mode": "crawler_help"}
 
     # PPT 生成 — 本地执行，不走 LLM
     if any(k in t for k in ["ppt", "演示文稿", "幻灯片", "幻灯片", "生成ppt", "做一个.*ppt", "制作ppt"]):
