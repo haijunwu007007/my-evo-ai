@@ -427,6 +427,56 @@ async def smart_chat(req: SmartChatRequest):
         except Exception as _e:
             return {"success":True,"result":f"🧠 查询失败: {_e}","mode":"memory_error"}
 
+    # ── 桌面自动化（Agent-S 轻量版，用 pyautogui） ──
+    _DESKTOP_KEYWORDS = ["截图", "截屏", "screenshot", "打开计算器", "打开记事本", "打开浏览器",
+                         "鼠标", "点击", "打字", "桌面操作", "屏幕", "帮我打开"]
+    if any(k in t_file for k in _DESKTOP_KEYWORDS):
+        try:
+            import pyautogui as _pa
+            _pa.FAILSAFE = True
+            _result_lines = []
+            # 截图
+            if any(k in t_file for k in ["截图", "截屏", "screenshot"]):
+                _img = _pa.screenshot()
+                _shot_path = str(Path(__file__).resolve().parent.parent / "output" / f"screenshot_{int(time.time())}.png")
+                _img.save(_shot_path)
+                _result_lines.append(f"📸 截图已保存: {_shot_path}")
+            # 打开应用
+            if any(k in t_file for k in ["打开计算器", "calculator"]):
+                import subprocess as _sp
+                _sp.Popen("calc.exe")
+                _result_lines.append("🧮 计算器已启动")
+            if any(k in t_file for k in ["打开记事本", "记事本", "notepad"]):
+                import subprocess as _sp
+                _sp.Popen("notepad.exe")
+                _result_lines.append("📝 记事本已启动")
+            if any(k in t_file for k in ["打开浏览器", "浏览器", "chrome", "edge"]):
+                import subprocess as _sp, webbrowser as _wb
+                _wb.open("https://www.baidu.com")
+                _result_lines.append("🌐 浏览器已打开")
+            if not _result_lines:
+                _result_lines.append("🖥️ 桌面自动化已就绪。支持命令：截图、打开计算器、打开记事本、打开浏览器")
+            return {"success": True, "result": "\n".join(_result_lines), "mode": "desktop"}
+        except Exception as _e:
+            return {"success": True, "result": f"🖥️ 桌面操作失败: {_e}\n提示: 需要管理员权限运行才能控制桌面。", "mode": "desktop_error"}
+
+    # ── 视频生成（Pixelle 本地模式） ──
+    if any(k in t_file for k in ["生成视频", "做视频", "创建视频", "视频生成", "make video"]):
+        _pixelle_dir = Path(__file__).resolve().parent.parent / "pixelle_videos"
+        if _pixelle_dir.exists():
+            _videos = list(_pixelle_dir.glob("*.mp4")) + list(_pixelle_dir.glob("*.webm"))
+            if _videos:
+                _vlist = "\n".join(f"  {i+1}. {v.name}" for i,v in enumerate(_videos[:10]))
+                return {"success":True,"result":f"🎬 **已有视频**\n{_vlist}\n\nPixelle 视频生成工具已就绪。具体生成视频需要 Pixelle 服务运行。","mode":"video_list"}
+        return {"success":True,"result":"🎬 **视频生成**\n\n系统可通过 Pixelle 生成视频。运行 pixelle 服务后即可使用。\n\n目前提供：视频脚本撰写、剪辑建议、特效推荐。","mode":"video_help"}
+
+    # ── Docker 部署集成 ──
+    if any(k in t_file for k in ["docker", "容器", "部署", "启动服务", "docker-compose"]):
+        _deploy_script = Path(__file__).resolve().parent.parent / "deploy-industry.bat"
+        if _deploy_script.exists():
+            return {"success":True,"result":f"🐳 **Docker 部署**\n\n一键部署脚本: {_deploy_script}\n\n运行方式：\n```\ndeploy-industry.bat\n```\n然后输入行业编号 1-100 启动对应工具组合。\n\n当前支持的 Docker 工具:\n• Gitea / Metabase / Grafana / Portainer\n• NocoDB / Appsmith / Dify / Firecrawl\n• Chatwoot / Mattermost / ERPNext\n• Jellyfin / Immich / Vaultwarden\n\n更多工具见 industry-templates.ini","mode":"docker"}
+        return {"success":True,"result":"🐳 **Docker 部署**\n\n支持 Docker Compose 一键部署行业工具。\n配置文件: industry-templates.ini\n\n运行 `docker-compose up -d` 即可启动。","mode":"docker"}
+
     # 3. 优先尝试真实 LLM
     _api_key = req.api_key or ""
     _provider = req.provider  # 前端可能传 "glm"
