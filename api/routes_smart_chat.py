@@ -664,6 +664,26 @@ async def smart_chat(req: SmartChatRequest):
 准备好数据后说「帮我分析一下」即可。"""
         return {"success":True,"result":_bi_help,"mode":"bi"}
 
+    # ── 5. 📧 邮件发送 ──
+    if any(k in t_file for k in ["发邮件", "发送邮件", "发个邮件", "send email", "邮件通知"]):
+        return {"success":True,"result":f"📧 **邮件功能**\n\n要发邮件需要先配置 SMTP 信息。\n\n你可以：\n• POST `/api/v1/email/send` 直接调用\n• 代码发送 `from api.routes_new_features import send_email`\n• 配置环境变量 `SMTP_HOST/USER/PWD` 后自动支持\n\n当前配置: {os.environ.get('SMTP_USER','未配置')}","mode":"email_help"}
+
+    # ── 5. 💾 文件上传 ──
+    if any(k in t_file for k in ["上传文件", "上传", "upload", "附件", "拖拽"]):
+        return {"success":True,"result":"📁 **文件上传**\n\n上传文件到系统：\n• POST `/api/v1/upload` (multipart/form-data)\n• 查看已上传文件: GET `/api/v1/files`\n\n支持任意文件格式，上传后自动保存到 output 目录。","mode":"upload_help"}
+
+    # ── 5. 📋 待办看板 ──
+    if any(k in t_file for k in ["待办", "todo", "任务", "记下", "提醒我", "做啥", "还有什么事"]):
+        return {"success":True,"result":"📋 **待办看板**\n\n你可以：\n• 「记下明天下午3点开会」— 创建待办\n• 「我有哪些待办」— 查看未完成\n• 「完成第1项」— 标记完成\n\nAPI:\n• GET `/api/v1/todos` — 查看待办\n• POST `/api/v1/todos` — 创建待办\n  {\"title\":\"明天下午3点开会\",\"priority\":\"高\"}","mode":"todo_help"}
+
+    # ── 5. 📊 SQL 查询 ──
+    if any(k in t_file for k in ["查数据库", "执行sql", "查询sql", "sql查询", "查表", "select", "数据库查询"]):
+        return {"success":True,"result":"📊 **SQL 查询**\n\n直接查询系统数据库：\n• POST `/api/v1/sql/query`\n  {\"sql\": \"SELECT * FROM todos LIMIT 10\"}\n\n支持 SELECT / PRAGMA，自动返回 JSON。","mode":"sql_help"}
+
+    # ── 5. 🔌 API 网关 ──
+    if any(k in t_file for k in ["调api", "调用api", "api请求", "api调用", "gateway", "天气api", "调用接口"]):
+        return {"success":True,"result":"🔌 **API 网关**\n\n通过系统调用外部 API：\n• POST `/api/v1/gateway`\n  {\"url\": \"https://api.github.com/repos/haijunwu007007/my-evo-ai\", \"method\": \"GET\"}\n\n支持域名白名单: GitHub, BigModel, DeepSeek, DuckDuckGo 等。","mode":"gateway_help"}
+
     # 3. 优先尝试真实 LLM
     _api_key = req.api_key or ""
     _provider = req.provider  # 前端可能传 "glm"
