@@ -377,6 +377,56 @@ async def smart_chat(req: SmartChatRequest):
             pass  # 降级到帮助文本
         return {"success":True,"result":"🤖 **智能体团队讨论**\n\n你可以说「团队讨论如何优化代码」— 6个AI角色各抒己见。","mode":"agents"}
 
+    # ── 本地文件读取 ──
+    if any(k in t_file for k in ["读取文件", "打开文件", "读文件", "查看文件", "read file"]):
+        import glob as _glob
+        _safe_dirs = [str(Path.home() / "Desktop"), str(Path.home() / "Documents"), str(Path.home() / "Downloads"), str(Path(__file__).resolve().parent.parent)]
+        _found = []
+        for _d in _safe_dirs:
+            if os.path.isdir(_d):
+                _found.extend(_glob.glob(os.path.join(_d, "*.txt"))[:3])
+                _found.extend(_glob.glob(os.path.join(_d, "*.md"))[:3])
+        if _found:
+            _list = "\n".join(f"  {i+1}. {os.path.basename(f)}" for i,f in enumerate(_found[:6]))
+            return {"success":True,"result":f"📁 **可读取的文件**\n{_list}\n\n请明确告诉我要读哪个文件（如「读文件 1」）。","mode":"file_list"}
+        return {"success":True,"result":"📁 桌面/文档/下载目录未找到可读的 .txt/.md 文件。","mode":"file_list"}
+
+    # ── 持久记忆 ──
+    if any(k in t_file for k in ["记住", "保存", "记得", "不要忘记", "记住我说", "save"]):
+        try:
+            import sqlite3 as _sql
+            _mem_db = Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"
+            _mem_conn = _sql.connect(str(_mem_db))
+            _mem_conn.execute("CREATE TABLE IF NOT EXISTS chat_memory (id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT UNIQUE, value TEXT, updated_at REAL)")
+            _mem_key = f"memory_{int(time.time())}"
+            _mem_val = msg.replace("记住","").replace("保存","").replace("不要忘记","").strip()
+            if _mem_val:
+                _mem_conn.execute("INSERT OR REPLACE INTO chat_memory (key, value, updated_at) VALUES (?,?,?)", (_mem_key, _mem_val, time.time()))
+                _mem_conn.commit()
+            _mem_cursor = _mem_conn.execute("SELECT value FROM chat_memory ORDER BY updated_at DESC LIMIT 5")
+            _mem_items = [row[0] for row in _mem_cursor.fetchall()]
+            _mem_conn.close()
+            _mem_list = "\n".join(f"  {i+1}. {m[:50]}" for i,m in enumerate(_mem_items))
+            return {"success":True,"result":f"🧠 **已记住**\n\n最新记忆:\n{_mem_list}\n\n你可以通过聊天随时查询这些记忆。","mode":"memory_saved"}
+        except Exception as _e:
+            return {"success":True,"result":f"🧠 记忆保存失败: {_e}","mode":"memory_error"}
+
+    # ── 查询记忆 ──
+    if any(k in t_file for k in ["我记得", "回忆", "之前说的", "刚才", "还记得", "recall"]):
+        try:
+            import sqlite3 as _sql
+            _mem_db = Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"
+            _mem_conn = _sql.connect(str(_mem_db))
+            _mem_cursor = _mem_conn.execute("SELECT value FROM chat_memory ORDER BY updated_at DESC LIMIT 10")
+            _mem_items = [row[0] for row in _mem_cursor.fetchall()]
+            _mem_conn.close()
+            if _mem_items:
+                _mem_list = "\n".join(f"  {i+1}. {m[:80]}" for i,m in enumerate(_mem_items))
+                return {"success":True,"result":f"🧠 **我记得这些**\n{_mem_list}","mode":"memory_recall"}
+            return {"success":True,"result":"🧠 目前还没有保存的记忆。你可以说「记住xxx」来让我保存。","mode":"memory_empty"}
+        except Exception as _e:
+            return {"success":True,"result":f"🧠 查询失败: {_e}","mode":"memory_error"}
+
     # 3. 优先尝试真实 LLM
     _api_key = req.api_key or ""
     _provider = req.provider  # 前端可能传 "glm"
