@@ -1,9 +1,10 @@
-"""5 项新功能: 邮件/文件上传/待办/SQL查询/API网关"""
+"""5 项新功能 + 6 项基础设施: 邮件/文件/待办/SQL/API网关/认证/对话/PWA/支付/Webhook/插件"""
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Optional
 from core.logging_config import get_logger
-import os, time, json, sqlite3, httpx, asyncio
+import os, time, json, sqlite3, httpx, asyncio, hashlib, secrets
 from pathlib import Path
 
 logger = get_logger("evo.api.new_features")
