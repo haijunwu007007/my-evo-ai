@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AUTO-EVO-AI</title>
-<script src="/i18n.js" onerror="this.remove()"></script>
-<script>if(typeof getLocale!=='function'){window.getLocale=function(){return 'zh-CN'};window.__=function(k){return{k}['zh-CN'][k]||k};window.setLocale=function(){};window.getLanguages=function(){return[{code:'zh-CN',name:'中文'},{code:'en',name:'English'}]};window.renderLangSwitcher=function(){};console.warn('i18n.js fallback');}</script>
+<script src="/i18n.js?v=20260603" onerror="console.warn('i18n.js failed')"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#1a1a2e;--card:#16213e;--text:#e0e0e0;--text2:#8892b0;--input-bg:#0f3460;--accent:#4361ee;--user-msg:#4361ee;--ai-msg:#16213e;--border:#2d3561}
@@ -75,7 +74,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="field"><label>用户名</label><input id="regUser" placeholder="给你的名字" value="admin"></div>
     <div class="field"><label>密码（可选）</label><input id="regPass" type="password" placeholder="留空即可"></div>
     <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
-    <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
+    <button class="btn" id="regBtn" onclick="doRegister();return false">🚀 进入系统</button>
     <div class="error" id="authError"></div>
     <div class="lang-switcher" id="langSwitcher"></div>
   </div>
@@ -112,7 +111,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 <script>
 const API = '/api/v1'
 let listening = false, recognition = null
-let history = JSON.parse(localStorage.getItem('evo_chat_history') || '[]')
+let history = []
+try { history = JSON.parse(localStorage.getItem('evo_chat_history') || '[]') } catch(e) { history = [] }
 let context = []
 
 function doRegister() {
@@ -134,6 +134,7 @@ function logout() {
 }
 
 // 检查是否已登录
+try { history = JSON.parse(localStorage.getItem('evo_chat_history') || '[]') } catch(e) { history = [] }
 if (localStorage.getItem('evo_logged_in')) {
   document.getElementById('authCard').style.display = 'none'
   document.getElementById('mainContent').classList.add('show')

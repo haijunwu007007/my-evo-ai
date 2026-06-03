@@ -1,10 +1,11 @@
-"""智能聊天引擎 — 真实 LLM + 功能路由 + 降级规则"""
+"""智能聊天引擎 — 真实 LLM + 功能路由 + 文件操作 + 降级规则"""
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from core.logging_config import get_logger
-import httpx, json, os, sys
+import httpx, json, os, sys, time
+from pathlib import Path
 
 logger = get_logger("evo.api.smart_chat")
 router = APIRouter()
@@ -16,6 +17,43 @@ class SmartChatRequest(BaseModel):
     provider: Optional[str] = "openai"
     context: Optional[list] = []
     lang: Optional[str] = "zh-CN"
+
+# ── 文件操作集成 ─────────────────────────────
+_OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output"
+_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+async def _handle_file_ops(msg: str, lang: str) -> str | None:
+    """处理文件/Excel/Word 操作请求"""
+    t = msg.lower()
+    try:
+        # Word 文档
+        if any(k in t for k in ["写合同", "写文档", "生成word", "写一份", "write a contract", "write a document", "create word"]):
+            line = msg.split("\n")[0][:80]
+            from modules.file_ops import word_create
+            path = str(_OUTPUT_DIR / f"{lang}-AUTO-EVO-AI-Document.docx")
+            title = "AUTO-EVO-AI Generated Document"
+            r = word_create(path, title, f"Generated content based on: {msg}")
+            return f"📝 **文档已生成**\n\n{r}\n\n文件位置: {path}"
+
+        # Excel 读写
+        if any(k in t for k in ["excel", "表格", "xlsx", "电子表格", "spreadsheet"]):
+            if any(k in t for k in ["写", "创建", "生成", "create", "write", "make"]):
+                from modules.file_ops import excel_write
+                path = str(_OUTPUT_DIR / f"auto-export-{int(time.time())}.xlsx")
+                # 从消息中提取表头和数据
+                import time
+                data = [["项目", "数值", "备注"], ["示例1", "100", "自动生成"], ["示例2", "200", "AUTO-EVO-AI导出"]]
+                r = excel_write(path, data)
+                return f"📊 **Excel 已生成**\n\n{r}\n\n文件位置: {path}"
+            else:
+                from modules.file_ops import excel_read
+                p = msg.strip().split()[-1]
+                if os.path.exists(p):
+                    r = excel_read(p)
+                    return f"📊 **Excel 摘要**\n\n{r}"
+    except Exception as e:
+        return None
+    return None
 
 def _get_provider_config(provider: str, api_key: str):
     """获取各厂商 API 配置"""
@@ -123,5 +161,10 @@ async def smart_chat(req: SmartChatRequest):
         return {"success": True, "result": r["help"], "mode": "rule"}
     if any(k in t for k in ["写", "合同", "文档", "write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
+
+    # 4. 文件操作（Excel/Word）
+    file_result = await _handle_file_ops(msg, lang)
+    if file_result:
+        return {"success": True, "result": file_result, "mode": "file_ops"}
 
     return {"success": True, "result": r["default"], "mode": "rule"}

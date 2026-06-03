@@ -1,6 +1,6 @@
-"""多智能体协作 API — 房间/讨论/团队协作"""
+"""多智能体协作 API — 房间/讨论/团队协作（带 LLM 支持）"""
 
-import uuid, json, time
+import uuid, json, time, os, httpx, asyncio
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -9,6 +9,31 @@ from core.logging_config import get_logger
 logger = get_logger("evo.api.agents")
 
 router = APIRouter()
+
+# ── 内置 LLM 调用 ─────────────────────────────
+_LLM_ENDPOINT = "https://api.openai.com/v1/chat/completions"
+_LLM_KEY = os.getenv("OPENAI_API_KEY") or ""
+
+async def _try_llm(prompt: str, agent_name: str, role: str) -> str | None:
+    """尝试 LLM 生成回复，失败返回 None"""
+    if not _LLM_KEY:
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=15) as cl:
+            resp = await cl.post(_LLM_ENDPOINT, json={
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": f"你是 {agent_name}，角色：{role}。请基于任务给出简洁专业的回答（不超过150字）。"},
+                    {"role": "user", "content": prompt},
+                ],
+                "max_tokens": 300,
+                "temperature": 0.7,
+            }, headers={"Authorization": f"Bearer {_LLM_KEY}"})
+        if resp.status_code == 200:
+            return resp.json()["choices"][0]["message"]["content"].strip()
+    except Exception:
+        pass
+    return None
 
 # ── 智能体团队 ─────────────────────────────────
 AGENT_TEAM = [
@@ -30,8 +55,14 @@ class MessagePost(BaseModel):
     sender: str
     content: str
 
-def _agent_response(agent: dict, task: str, context: list) -> str:
-    """根据智能体角色生成响应"""
+async def _agent_response(agent: dict, task: str, context: list) -> str:
+    """根据智能体角色生成响应 — 优先 LLM，失败降级规则"""
+    # 先试 LLM
+    llm_resp = await _try_llm(task, agent["name"], agent["role"])
+    if llm_resp:
+        return f"(LLM) {llm_resp}"
+
+    # 降级 — 规则匹配
     t = task.lower()
     if "安全" in t or "权限" in t or "风险" in t:
         if agent["id"] == "hecate":
@@ -48,7 +79,6 @@ def _agent_response(agent: dict, task: str, context: list) -> str:
     if "方案" in t or "研究" in t or "调研" in t or "对比" in t:
         if agent["id"] == "minerva":
             return f"收到。我来做技术调研。\n• 对比了 3 种方案\n• 推荐方案 A\n• 理由是性价比最高"
-    # 默认 — 每个智能体都参与
     r = {
         "athena": f"好的，我来协调这个任务。\n• 明确了任务目标\n• 分配了各成员职责\n• 预计完成时间: 即时",
         "hermes": f"收到！我来收集相关信息。\n• 检索了系统日志\n• 查询了模块状态\n• 已整理关键数据",
@@ -116,7 +146,7 @@ async def start_discussion(room_id: str):
 
     # 逐个智能体响应
     for agent in r["agents"]:
-        response = _agent_response(agent, r["task"], r["messages"])
+        response = await _agent_response(agent, r["task"], r["messages"])
         r["messages"].append({
             "sender": agent["id"],
             "name": agent["name"],
