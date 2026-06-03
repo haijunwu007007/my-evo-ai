@@ -315,14 +315,20 @@ async def smart_chat(req: SmartChatRequest):
         return {"success": True, "result": "🤖 **智能体团队讨论**\n\n你可以说：\n• 「团队讨论如何优化代码」— 6个AI角色各抒己见\n• 「团队讨论安全方案」— 安全专家带队\n\n💡 更详细的结果请在聊天中直接说「团队讨论xxx」。", "mode": "agents"}
 
     # 3. 优先尝试真实 LLM
-    _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
-    _provider = req.provider
-    if not _api_key and _provider == "openai":
-        # 尝试各厂商环境变量
+    _api_key = req.api_key or ""
+    _provider = req.provider  # 前端可能传 "glm"
+    if not _api_key:
+        # 尝试各厂商环境变量 — 同时确定 provider
         for p, env_key in [("glm", "ZHIPU_API_KEY"), ("openai", "OPENAI_API_KEY"), ("deepseek", "DEEPSEEK_API_KEY"), ("qwen", "DASHSCOPE_API_KEY")]:
             ek = os.environ.get(env_key)
             if ek:
                 _api_key, _provider = ek, p
+                break
+    # 如果没指定 provider 但有 Key，根据环境变量推断
+    if _api_key and _provider == "openai" and not req.api_key:
+        for p, env_key in [("glm", "ZHIPU_API_KEY"), ("deepseek", "DEEPSEEK_API_KEY"), ("qwen", "DASHSCOPE_API_KEY")]:
+            if os.environ.get(env_key) == _api_key:
+                _provider = p
                 break
 
     if _api_key:
