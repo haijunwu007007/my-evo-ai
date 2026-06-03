@@ -51,8 +51,17 @@ def _mount_vue_frontend():
                 return _nocache(FileResponse(str(idx), media_type="text/html"))
             return JSONResponse(status_code=404, content={"error": "SPA not built"})
 
+        # 前端静态文件（i18n.js 等）
+        frontend_dir = BASE_DIR / "frontend"
+        js_path = frontend_dir / "i18n.js"
+        if js_path.exists():
+            @app.get("/i18n.js", include_in_schema=False)
+            async def _serve_i18n():
+                return FileResponse(str(js_path), media_type="application/javascript")
+            logger.info(f"[STATIC] i18n.js 已挂载")
+
         # 根路径 → 简易聊天界面（普通用户入口）
-        chat_html = BASE_DIR / "frontend" / "chat.html"
+        chat_html = frontend_dir / "chat.html"
         if chat_html.exists():
             @app.get("/", include_in_schema=False)
             async def _chat_root():

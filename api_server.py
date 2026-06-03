@@ -305,7 +305,7 @@ async def service_worker():
 @app.get("/i18n.js")
 async def i18n_js():
     """返回国际化 JS 配置"""
-    i18n_path = BASE_DIR / "i18n-patch.js"
+    i18n_path = BASE_DIR / "frontend" / "i18n.js"
     if i18n_path.exists():
         return FileResponse(str(i18n_path), media_type="application/javascript")
     return {"error": "i18n file not found"}

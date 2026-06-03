@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AUTO-EVO-AI</title>
+<script src="/i18n.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#1a1a2e;--card:#16213e;--text:#e0e0e0;--text2:#8892b0;--input-bg:#0f3460;--accent:#4361ee;--user-msg:#4361ee;--ai-msg:#16213e;--border:#2d3561}
@@ -58,6 +59,10 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .loading-dots span:nth-child(1){animation-delay:-.32s}
 .loading-dots span:nth-child(2){animation-delay:-.16s}
 @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.lang-switcher{display:flex;gap:4px;justify-content:center;margin-top:10px}
+.lang-switcher span{padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;color:var(--text2);border:1px solid transparent}
+.lang-switcher span:hover{border-color:var(--accent);color:var(--accent)}
+.lang-switcher span.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -71,12 +76,16 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
     <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
     <div class="error" id="authError"></div>
+    <div class="lang-switcher" id="langSwitcher"></div>
   </div>
 
   <!-- 已登录后的聊天界面 -->
   <div class="main-content" id="mainContent">
     <div class="header">
-      <h1>🤖 AUTO-EVO-AI</h1>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h1>🤖 AUTO-EVO-AI</h1>
+        <span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="logout()">🔓 退出</span>
+      </div>
       <p id="greeting"></p>
       <div class="nav-tabs">
         <span class="tab active">💬 对话</span>
@@ -250,6 +259,43 @@ function toggleMic() {
 document.getElementById('input')?.addEventListener('input', function() {
   document.getElementById('sendBtn').disabled = !this.value.trim()
 })
+
+// ── i18n 多语言 ──
+function translateUI() {
+  document.querySelector('.header h1').textContent = __('title')
+  document.querySelector('.header p').textContent = __('subtitle')
+  // 在线的元素后期通过 observer 或 getText 处理
+}
+
+function renderLangSwitcher() {
+  const container = document.getElementById('langSwitcher')
+  if (!container) return
+  const langs = getLanguages()
+  container.innerHTML = langs.map(l =>
+    `<span class="${l.code === getLocale() ? 'active' : ''}"
+           onclick="setLocale('${l.code}')">${l.name}</span>`
+  ).join('')
+}
+
+// 语言切换后刷新界面文字
+const _origSetLocale = setLocale
+setLocale = function(locale) {
+  _origSetLocale(locale)
+  renderLangSwitcher()
+  // 刷新注册按钮文字
+  document.querySelector('#authCard h2').textContent = __('auth_heading')
+  document.querySelector('#regUser').placeholder = __('auth_user_placeholder')
+  document.querySelector('label[for="regUser"]').textContent = __('auth_user')
+  document.querySelector('#regBtn').textContent = __('auth_btn')
+  document.querySelector('.header h1').textContent = __('title')
+  document.querySelector('.header p').textContent = __('subtitle')
+  if (document.getElementById('mainContent').classList.contains('show')) {
+    document.getElementById('greeting').textContent = __('greeting', localStorage.getItem('evo_user') || '')
+  }
+}
+
+// 初始化语言切换器
+renderLangSwitcher()
 </script>
 </body>
 </html>
