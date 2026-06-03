@@ -188,12 +188,21 @@ var CHAT=[] // 对话历史
 try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array.isArray(_tmp))CHAT=_tmp}catch(e){CHAT=[]}
 var CTX=[] // 上下文
 
-function doRegister(){
+async function doRegister(){
   var user=document.getElementById('regUser').value.trim()||'admin'
   var key=document.getElementById('regKey').value.trim()
-  localStorage.setItem('evo_user',user)
+  try{
+    var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
+    var d=await r.json()
+    if(!d.success){
+      var r2=await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
+      await r2.json()
+    }
+  }catch(e){}
+  if(!localStorage.getItem('evo_logged_in')){
+    localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1')
+  }
   if(key)localStorage.setItem('evo_api_key',key)
-  localStorage.setItem('evo_logged_in','1')
   document.getElementById('authCard').style.display='none'
   document.getElementById('mainContent').classList.add('show')
   document.getElementById('greeting').textContent=__('greeting').replace('{name}',user)
@@ -217,6 +226,9 @@ function addMsg(t,r){
   CHAT.push({role:r,text:t,time:new Date().toISOString()})
   if(CHAT.length>100)CHAT=CHAT.slice(-100)
   localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
+  // 也保存到服务端
+  var u=localStorage.getItem('evo_user')||'admin'
+  try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}
 }
 
 function showLoading(){

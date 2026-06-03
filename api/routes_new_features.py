@@ -1,4 +1,4 @@
-"""5 项新功能 + 6 项基础设施: 邮件/文件/待办/SQL/API网关/认证/对话/PWA/支付/Webhook/插件"""
+"""11 项新功能: 邮件/文件/待办/SQL/API网关/用户/聊天/PWA/支付/Webhook/插件"""
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -169,3 +169,58 @@ async def api_gateway(req: APIRequest):
             return {"success": True, "status": resp.status_code, "data": data}
     except Exception as e:
         return {"success": False, "detail": str(e)}
+
+# ─── 6. 🔐 用户注册/登录 ─────────────────────
+def _init_users_table():
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, role TEXT DEFAULT 'user', created_at REAL)")
+    conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
+    conn.commit(); conn.close()
+_init_users_table()
+
+class UserReq(BaseModel):
+    username: str
+    password: Optional[str] = ""
+
+@router.post("/api/v1/user/register")
+async def user_register(req: UserReq):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    try:
+        pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
+        conn.execute("INSERT INTO users (username, password, created_at) VALUES (?,?,?)", (req.username, pw, time.time()))
+        conn.commit()
+        return {"success": True, "user": req.username}
+    except sqlite3.IntegrityError:
+        return {"success": False, "detail": "用户名已存在"}
+    finally: conn.close()
+
+@router.post("/api/v1/user/login")
+async def user_login(req: UserReq):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
+    row = conn.execute("SELECT username FROM users WHERE username=? AND password=?", (req.username, pw)).fetchone()
+    conn.close()
+    if row: return {"success": True, "user": req.username}
+    return {"success": False, "detail": "用户名或密码错误"}
+
+# ─── 7. 💬 聊天记录持久化 ─────────────────────
+class ChatSaveReq(BaseModel):
+    username: str = "admin"
+    role: str = "user"
+    content: str = ""
+
+@router.post("/api/v1/chat/save")
+async def chat_save(req: ChatSaveReq):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
+    conn.execute("INSERT INTO chat_history (username, role, content, created_at) VALUES (?,?,?,?)", (req.username, req.role, req.content, time.time()))
+    conn.commit(); conn.close()
+    return {"success": True}
+
+@router.get("/api/v1/chat/history")
+async def chat_history(username: str = "admin", limit: int = 50):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
+    rows = conn.execute("SELECT role, content, created_at FROM chat_history WHERE username=? ORDER BY created_at DESC LIMIT ?", (username, limit)).fetchall()
+    conn.close()
+    return {"success": True, "messages": [{"role":r[0],"content":r[1]} for r in reversed(rows)]}
