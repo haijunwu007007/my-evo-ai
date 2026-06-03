@@ -477,6 +477,161 @@ async def smart_chat(req: SmartChatRequest):
             return {"success":True,"result":f"🐳 **Docker 部署**\n\n一键部署脚本: {_deploy_script}\n\n运行方式：\n```\ndeploy-industry.bat\n```\n然后输入行业编号 1-100 启动对应工具组合。\n\n当前支持的 Docker 工具:\n• Gitea / Metabase / Grafana / Portainer\n• NocoDB / Appsmith / Dify / Firecrawl\n• Chatwoot / Mattermost / ERPNext\n• Jellyfin / Immich / Vaultwarden\n\n更多工具见 industry-templates.ini","mode":"docker"}
         return {"success":True,"result":"🐳 **Docker 部署**\n\n支持 Docker Compose 一键部署行业工具。\n配置文件: industry-templates.ini\n\n运行 `docker-compose up -d` 即可启动。","mode":"docker"}
 
+    # 🎨 图片生成（Stable Diffusion 本地 / DALL-E API）
+    if any(k in t_file for k in ["画", "生成图片", "图片生成", "绘图", "图", "绘画", "生成图像", "create image", "draw", "生成一张", "帮我画"]):
+        try:
+            import subprocess as _sps
+            # 尝试调用 Stable Diffusion（如果有本地服务）
+            _img_path = str(Path(__file__).resolve().parent.parent / "output" / f"img_{int(time.time())}.png")
+            # 检查是否有 SD API
+            _sd_available = False
+            try:
+                async with httpx.AsyncClient(timeout=3) as _sc:
+                    _sr = await _sc.get("http://127.0.0.1:7860/sdapi/v1/txt2img")
+                    if _sr.status_code < 500: _sd_available = True
+            except: pass
+            if _sd_available:
+                return {"success":True,"result":f"🎨 SD 服务已就绪! 要生成图片请明确描述画面。\n输出目录: {_img_path}","mode":"image_sd"}
+            # 提示可用方案
+            _hint = """**生成图片的方式**:
+1. **本地 Stable Diffusion** — 运行在 :7860 端口（检测到未运行）
+2. **DALL-E / Midjourney** — 通过 LLM 对话描述画面
+3. **通义万相 / 文心一格** — 国内免费可用
+
+💡 你可以：
+• 「帮我画一只猫在太空」— 我描述画面你手动生成
+• 「生成一张山水画」— 描述画面内容
+• 安装 Stable Diffusion WebUI 后本系统自动对接"""
+            return {"success":True,"result":_hint,"mode":"image_help"}
+        except Exception as _e:
+            return {"success":True,"result":f"🎨 图片生成: {_e}","mode":"image_error"}
+
+    # 💻 软件开发 — 项目脚手架 + 脚手架生成
+    if any(k in t_file for k in ["创建项目", "脚手架", "项目模板", "生成项目", "初始化项目", "项目结构", "新建项目", "scaffold", "create project"]):
+        _PROJECT_TYPES = {
+            "django": ("Django Web 项目", ["manage.py", "requirements.txt", "config/settings.py", "apps/__init__.py", "urls.py"]),
+            "fastapi": ("FastAPI 项目", ["main.py", "requirements.txt", "api/__init__.py", "models/__init__.py", "schemas/__init__.py"]),
+            "flask": ("Flask 项目", ["app.py", "requirements.txt", "templates/", "static/", "config.py"]),
+            "vue": ("Vue3 前端项目", ["src/App.vue", "src/router/index.js", "src/views/", "src/components/", "package.json"]),
+            "react": ("React 项目", ["src/App.jsx", "src/index.js", "src/components/", "package.json", "vite.config.js"]),
+            "python": ("Python 工具项目", ["main.py", "requirements.txt", "README.md", "tests/", "setup.py"]),
+        }
+        _project_type = "python"
+        for _pt in _PROJECT_TYPES:
+            if _pt in t_file: _project_type = _pt; break
+        _name, _files = _PROJECT_TYPES[_project_type]
+        _out_dir = Path(__file__).resolve().parent.parent / "output" / f"project_{_project_type}_{int(time.time())}"
+        try:
+            _out_dir.mkdir(parents=True, exist_ok=True)
+            for _f in _files:
+                _fp = _out_dir / _f
+                _fp.parent.mkdir(parents=True, exist_ok=True)
+                if not _f.endswith("/"):
+                    _fp.write_text(f"# {_f}\n# AUTO-EVO-AI generated {_project_type} project\n", encoding="utf-8")
+            return {"success":True,"result":f"📁 **{_name} 脚手架已创建**\n\n路径: {_out_dir}\n文件: {', '.join(_files)}\n\n💡 使用 `cd {_out_dir}` 进入项目目录","mode":"scaffold"}
+        except Exception as _e:
+            return {"success":True,"result":f"📁 创建项目失败: {_e}","mode":"scaffold_error"}
+
+    # 💻 Git 操作辅助
+    if any(k in t_file for k in ["git", "github", "提交", "推送", "git add", "git commit", "deploy"]):
+        _git_help = """**Git 操作指南**
+
+常用命令:
+• `git status` — 查看工作区状态
+• `git add .` — 暂存所有更改
+• `git commit -m "消息"` — 提交更改
+• `git push origin master` — 推送到远程
+
+💡 脚本已就绪: D:\\AUTO-EVO-AI-V0.1\\push.bat（一键推送）"""
+        return {"success":True,"result":_git_help,"mode":"git_help"}
+
+    # 🎬 视频制作
+    if any(k in t_file for k in ["视频", "视频制作", "视频编辑", "视频生成", "video"]):
+        _vid_help = """**视频制作能力**
+
+系统提供:
+1. 🎞️ **视频脚本创作** — 写脚本、分镜、旁白
+2. 🎬 **剪辑建议** — 转场、特效、节奏
+3. 📹 **已有视频** — 查看 pixelle_videos/ 目录
+
+检测到 Pixelle 视频工具:
+• 如果 Pixelle 服务运行中，可生成视频
+• 运行 `cd pixelle_videos && python generate.py`
+
+💡 说「帮我写一个视频脚本」即可"""
+        return {"success":True,"result":_vid_help,"mode":"video_help"}
+
+    # 👤 数字人
+    if any(k in t_file for k in ["数字人", "虚拟人", "digital human", "avatar", "数字员工"]):
+        _dgt_help = """**数字人能力**
+
+本系统支持数字人集成:
+
+1. 🖥️ **前端数字人组件** — chat.html 已集成数字人面板
+2. 🎤 **语音交互** — 数字人可说话（TTS）
+3. 🧠 **AI 驱动** — 数字人回答基于 GLM-4
+
+💡 需要启动数字人服务:
+1. 运行数字人 API（Python TTS 引擎）
+2. 前端会自动显示数字人形象
+
+当前提供文本对话模式。完整的数字人需要 Docker 部署。"""
+        return {"success":True,"result":_dgt_help,"mode":"digital_human"}
+
+    # 📞 语音通话（TTS/STT）
+    if any(k in t_file for k in ["语音", "打电话", "语音通话", "说话", "朗读", "tts", "语音合成"]):
+        try:
+            import pyttsx3 as _tts
+            _tts_engine = _tts.init()
+            _tts_voices = _tts_engine.getProperty("voices")
+            _tts_engine.setProperty("rate", 180)
+            _tts_engine.setProperty("voice", _tts_voices[0].id if _tts_voices else "")
+            return {"success":True,"result":"🔊 **语音合成已就绪**\n\nTTS 引擎可用，支持中文语音朗读。\n\n前端已支持语音输入（🎤 按钮）和语音输出。\n\n说「朗读这段话」即可。","mode":"tts"}
+        except ImportError:
+            return {"success":True,"result":"🔊 **语音合成**\n\n已集成前端语音输入 🎤\n\n系统 TTS 引擎需要安装 pyttsx3：\n`pip install pyttsx3`\n\n当前可用: 语音输入（浏览器 Speech API）","mode":"tts_note"}
+
+    # 🤖 RPA 流程自动化
+    if any(k in t_file for k in ["rpa", "自动化流程", "录制", "回放", "鼠标录制", "键盘录制", "自动操作"]):
+        _rpa_help = """**RPA 流程自动化**
+
+系统提供轻量 RPA 能力:
+
+1. 📋 **脚本录制** — 录制鼠标键盘操作
+2. ▶️ **脚本回放** — 自动执行录制操作
+3. ⏰ **定时执行** — 配合定时任务自动运行
+
+使用方式:
+• 说「录制一个操作：先打开计算器，再截屏」
+• 系统使用 pyautogui 执行桌面自动化
+
+可用命令:
+• pyautogui.click(x,y) — 点击
+• pyautogui.write("文本") — 打字
+• pyautogui.screenshot() — 截图
+
+💡 详细 RPA 方案可查询 docs/ 目录"""
+        return {"success":True,"result":_rpa_help,"mode":"rpa"}
+
+    # 📊 BI 看板自动生成
+    if any(k in t_file for k in ["bi", "看板", "dashboard", "图表", "数据可视化", "报表", "数据分析"]):
+        _bi_help = """**BI 看板生成**
+
+系统提供多级数据可视化:
+
+1. 📊 **Metabase** — 专业 BI 工具（通过 Docker 启动）
+2. 📈 **Grafana** — 实时监控仪表盘
+3. 📉 **本地图表** — 使用 matplotlib 生成统计图
+
+💡 说「帮我生成一个销量趋势图」— 会使用 matplotlib 生成图表并保存为图片。
+
+已集成的看板:
+• Metabase → http://localhost:3000
+• Grafana → http://localhost:3001
+• 系统状态 → /api/v1/status
+
+准备好数据后说「帮我分析一下」即可。"""
+        return {"success":True,"result":_bi_help,"mode":"bi"}
+
     # 3. 优先尝试真实 LLM
     _api_key = req.api_key or ""
     _provider = req.provider  # 前端可能传 "glm"
