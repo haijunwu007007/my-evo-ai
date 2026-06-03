@@ -3,16 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>AUTO-EVO-AI</title>
-<script>/* 内联 i18n 后备 — 确保登录不依赖外部加载 */
-if(typeof getLocale!=='function'){
-  window.getLocale=function(){return localStorage.getItem('evo_locale')||'zh-CN'}
-  window.setLocale=function(c){localStorage.setItem('evo_locale',c);translateUI();renderLangSwitcher()}
-  window.__=function(k){var _={'zh-CN':{'auth_heading':'🔐 开始使用','auth_user':'用户名','auth_user_placeholder':'你的名字','auth_pass':'密码（可选）','auth_pass_placeholder':'留空即可','auth_key':'API Key（可选）','auth_key_placeholder':'OpenAI / 其他 LLM Key','auth_btn':'🚀 进入系统','title':'⚡ AUTO-EVO-AI','subtitle':'生产力级 AI 自动化编排系统','greeting':'你好，{name}！输入你想做的事','tab_chat':'💬 对话','tab_dashboard':'📊 仪表盘','tab_business':'🏢 企业管理','input_placeholder':'输入你想做的事...','logout':'🔓 退出','what_can_do':'我能干的事还挺多的…','status_ok':'一切正常 ✅'}};var m=_['zh-CN'];return m[k]||k}
-  window.getLanguages=function(){return[{code:'zh-CN',name:'中文'},{code:'en',name:'English'}]}
-  window.renderLangSwitcher=function(){['langSwitcher','langSwitcher2'].forEach(function(id){var c=document.getElementById(id);if(!c)return;c.innerHTML=getLanguages().map(function(l){return'<span class=\"'+(l.code===getLocale()?'active':'')+'\" onclick=\"setLocale(\\''+l.code+'\\')\">'+l.name+'</span>'}).join('')})}
-}
-</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#1a1a2e;--card:#16213e;--text:#e0e0e0;--text2:#8892b0;--input-bg:#0f3460;--accent:#4361ee;--user-msg:#4361ee;--ai-msg:#16213e;--border:#2d3561}
@@ -22,7 +14,6 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .header{text-align:center;padding:16px 0 8px;flex-shrink:0}
 .header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header p{font-size:13px;color:var(--text2);margin:4px 0 8px}
-/* ── 注册/登录表单 ── */
 .auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;margin:20px auto;width:100%;flex-shrink:0}
 .auth-card h2{text-align:center;font-size:18px;margin-bottom:16px}
 .auth-card .field{margin-bottom:12px}
@@ -31,21 +22,13 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .auth-card .field input:focus{border-color:var(--accent)}
 .auth-card .btn{width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;cursor:pointer;font-weight:600}
 .auth-card .btn:hover{opacity:.9}
-.auth-card .tip{text-align:center;font-size:12px;color:var(--text2);margin-top:10px;cursor:pointer}
-.auth-card .tip:hover{color:var(--accent)}
-.auth-card .error{color:#f44336;font-size:12px;text-align:center;margin-top:8px;display:none}
-/* ── 导航按钮 ── */
 .nav-tabs{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;flex-shrink:0}
 .nav-tabs .tab{padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text2);text-decoration:none;background:var(--ai-msg);border:1px solid var(--border);cursor:pointer}
 .nav-tabs .tab:hover{color:var(--accent);border-color:var(--accent)}
-.nav-tabs .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-/* ── 已登录后 ── */
-.main-content{display:none;flex:1;flex-direction:column}
-.show{display:flex}
-.messages{flex:1;overflow-y:auto;padding:12px 0;scroll-behavior:smooth}
-.messages::-webkit-scrollbar{width:4px}
-.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.msg{margin-bottom:12px;display:flex;flex-direction:column}
+.main-content{display:none;flex-direction:column;flex:1}
+.main-content.show{display:flex}
+.messages{flex:1;overflow-y:auto;padding:12px 0;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;flex-direction:column}
 .msg.user{align-items:flex-end}
 .msg.bot{align-items:flex-start}
 .msg-bubble{max-width:85%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
@@ -60,322 +43,249 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .input-row button{width:40px;height:40px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
 .input-row button:disabled{opacity:.4;cursor:not-allowed}
 .input-row button.mic{background:transparent;color:var(--text2)}
-.input-row button.mic.listening{color:var(--danger);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .loading-dots{display:inline-flex;gap:4px;padding:4px 0}
 .loading-dots span{width:6px;height:6px;border-radius:50%;background:var(--text2);animation:bounce 1.4s infinite ease-in-out both}
 .loading-dots span:nth-child(1){animation-delay:-.32s}
 .loading-dots span:nth-child(2){animation-delay:-.16s}
 @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-.lang-switcher{display:flex;gap:4px;justify-content:center;margin-top:10px}
-.lang-switcher span{padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;color:var(--text2);border:1px solid transparent}
-.lang-switcher span:hover{border-color:var(--accent);color:var(--accent)}
-.lang-switcher span.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lang-bar{display:flex;gap:4px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.lang-bar select:focus{outline:none;border-color:var(--accent)}
+.header-actions{display:flex;justify-content:space-between;align-items:center}
+.header-actions span{font-size:12px;color:var(--text2);cursor:pointer}
+.header-actions span:hover{color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="container">
-
-  <!-- 注册/登录卡片（未登录时显示） -->
+  <!-- 注册卡片 -->
   <div class="auth-card" id="authCard">
-    <div class="header" style="padding:0 0 12px"><h1>⚡ AUTO-EVO-AI</h1><p>生产力级 AI 自动化编排系统</p></div>
-    <div class="field"><label>用户名</label><input id="regUser" placeholder="给你的名字" value="admin"></div>
+    <div class="header" style="padding:0 0 12px"><h1>⚡ AUTO-EVO-AI</h1><p>生产力级 AI 自动化编排系统</p>
+      <div class="lang-bar" id="langBarAuth">
+<select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer">
+<option value="zh-CN">🇨🇳 中文</option>
+<option value="en">🇬🇧 English</option>
+<option value="ja">🇯🇵 日本語</option>
+<option value="ko">🇰🇷 한국어</option>
+<option value="fr">🇫🇷 Français</option>
+<option value="es">🇪🇸 Español</option>
+<option value="pt">🇧🇷 Português</option>
+<option value="ru">🇷🇺 Русский</option>
+<option value="ar">🇸🇦 العربية</option>
+</select>
+      </div>
+    </div>
+    <div class="field"><label>用户名</label><input id="regUser" placeholder="你的名字" value="admin"></div>
     <div class="field"><label>密码（可选）</label><input id="regPass" type="password" placeholder="留空即可"></div>
     <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
-    <button class="btn" id="regBtn" onclick="doRegister();return false">🚀 进入系统</button>
-    <div class="error" id="authError"></div>
-    <div class="lang-switcher" id="langSwitcher"></div>
+    <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
   </div>
-
-  <!-- 已登录后的聊天界面 -->
+  <!-- 聊天界面 -->
   <div class="main-content" id="mainContent">
     <div class="header">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="header-actions">
         <h1>🤖 AUTO-EVO-AI</h1>
-        <span id="newChatBtn" style="font-size:12px;color:var(--text2);cursor:pointer;margin-right:8px" onclick="clearHistory()">🔄 新对话</span>
-        <span style="font-size:12px;color:var(--text2);cursor:pointer;margin-right:8px" onclick="showArchives()">📋 历史</span>
-        <span id="logoutBtn" style="font-size:12px;color:var(--text2);cursor:pointer" onclick="logout()">退出</span>
+        <div>
+          <span onclick="clearHistory()" style="margin-right:8px">🔄 新对话</span>
+          <span onclick="showArchives()" style="margin-right:8px">📋 历史</span>
+          <span onclick="doLogout()">🔓 退出</span>
+        </div>
       </div>
       <p id="greeting"></p>
-      <div class="lang-switcher" id="langSwitcher2" style="margin-bottom:8px"></div>
-      <div class="nav-tabs">
-        <span id="tabChat" class="tab active">💬 对话</span>
-        <a id="tabDashboard" href="/app/dashboard" class="tab">📊 仪表盘</a>
-        <a id="tabBusiness" href="/dashboard" class="tab">🏢 企业管理</a>
+      <div class="nav-tabs" id="navTabs">
+        <span class="tab active" id="tabChatBtn">💬 对话</span>
+        <span class="tab" onclick="showDashboard()">📊 仪表盘</span>
+        <span class="tab" onclick="showEnterprise()">🏢 企业管理</span>
+      </div>
+      <div class="lang-bar" id="langBarTop">
+<select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer">
+<option value="zh-CN">🇨🇳 中文</option>
+<option value="en">🇬🇧 English</option>
+<option value="ja">🇯🇵 日本語</option>
+<option value="ko">🇰🇷 한국어</option>
+<option value="fr">🇫🇷 Français</option>
+<option value="es">🇪🇸 Español</option>
+<option value="pt">🇧🇷 Português</option>
+<option value="ru">🇷🇺 Русский</option>
+<option value="ar">🇸🇦 العربية</option>
+</select>
       </div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
       <div class="input-row">
-        <button class="mic" id="micBtn" onclick="toggleMic()" title="语音输入">🎤</button>
         <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
-        <button id="sendBtn" onclick="send()" disabled>➤</button>
+        <button id="micBtn" class="mic" onclick="startVoice()" style="background:transparent;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:0 4px">🎤</button>
+        <button id="sendBtn" onclick="send()" style="width:40px;height:40px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:18px">➤</button>
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
-const API = '/api/v1'
-let listening = false, recognition = null
-let history = []
-try { history = JSON.parse(localStorage.getItem('evo_chat_history') || '[]') } catch(e) { history = [] }
-let context = []
+// ===== 内联 i18n =====
+var _LOCALE = localStorage.getItem('evo_locale') || 'zh-CN'
+var _TR = {
+  'zh-CN': {title:'⚡ AUTO-EVO-AI', subtitle:'生产力级 AI 自动化编排系统', auth_heading:'🔐 开始使用', auth_user:'用户名', auth_pass:'密码（可选）', auth_key:'API Key（可选）', auth_btn:'🚀 进入系统', greeting:'你好，{name}！输入你想做的事', tab_chat:'💬 对话', tab_dashboard:'📊 仪表盘', tab_business:'🏢 企业管理', input_placeholder:'输入你想做的事...', logout:'🔓 退出'},
+  'en': {title:'⚡ AUTO-EVO-AI', subtitle:'Enterprise AI Automation Platform', auth_heading:'🔐 Get Started', auth_user:'Username', auth_pass:'Password (optional)', auth_key:'API Key (optional)', auth_btn:'🚀 Enter', greeting:'Hello {name}! What can I do?', tab_chat:'💬 Chat', tab_dashboard:'📊 Dashboard', tab_business:'🏢 Enterprise', input_placeholder:'What do you want to do...', logout:'🔓 Logout'},
+  'ja': {title:'⚡ AUTO-EVO-AI', subtitle:'AI自動化プラットフォーム', auth_heading:'🔐 開始', auth_user:'ユーザー名', auth_pass:'パスワード', auth_key:'API Key', auth_btn:'🚀 入る', greeting:'{name}さん！何をしますか？', tab_chat:'💬 チャット', tab_dashboard:'📊 ダッシュボード', tab_business:'🏢 企業管理', input_placeholder:'何をしたいですか...', logout:'🔓 ログアウト'},
+  'ko': {title:'⚡ AUTO-EVO-AI', subtitle:'AI 자동화 플랫폼', auth_heading:'🔐 시작', auth_user:'사용자명', auth_pass:'비밀번호', auth_key:'API Key', auth_btn:'🚀 입장', greeting:'{name}님! 무엇을 할까요?', tab_chat:'💬 채팅', tab_dashboard:'📊 대시보드', tab_business:'🏢 기업관리', input_placeholder:'원하는 것을 입력하세요...', logout:'🔓 로그아웃'},
+  'fr': {title:'⚡ AUTO-EVO-AI', subtitle:'Plateforme IA', auth_heading:'🔐 Commencer', auth_user:'Utilisateur', auth_pass:'Mot de passe', auth_key:'API Key', auth_btn:'🚀 Entrer', greeting:'Bonjour {name}!', tab_chat:'💬 Discuter', tab_dashboard:'📊 Tableau', tab_business:'🏢 Entreprise', input_placeholder:'Dites...', logout:'🔓 Déconnexion'},
+  'es': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Comenzar', auth_user:'Usuario', auth_pass:'Contraseña', auth_key:'API Key', auth_btn:'🚀 Entrar', greeting:'¡Hola {name}!', tab_chat:'💬 Chat', tab_dashboard:'📊 Panel', tab_business:'🏢 Empresa', input_placeholder:'Escribe...', logout:'🔓 Salir'},
+  'pt': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Começar', auth_user:'Usuário', auth_pass:'Senha', auth_key:'API Key', auth_btn:'🚀 Entrar', greeting:'Olá {name}!', tab_chat:'💬 Conversar', tab_dashboard:'📊 Painel', tab_business:'🏢 Empresa', input_placeholder:'Digite...', logout:'🔓 Sair'},
+  'ru': {title:'⚡ AUTO-EVO-AI', subtitle:'Платформа ИИ', auth_heading:'🔐 Начать', auth_user:'Пользователь', auth_pass:'Пароль', auth_key:'API Key', auth_btn:'🚀 Войти', greeting:'Здравствуйте, {name}!', tab_chat:'💬 Чат', tab_dashboard:'📊 Панель', tab_business:'🏢 Управление', input_placeholder:'Введите...', logout:'🔓 Выйти'},
+  'ar': {title:'⚡ AUTO-EVO-AI', subtitle:'منصة الذكاء', auth_heading:'🔐 ابدأ', auth_user:'المستخدم', auth_pass:'كلمة المرور', auth_key:'مفتاح API', auth_btn:'🚀 دخول', greeting:'{name}! مرحباً', tab_chat:'💬 محادثة', tab_dashboard:'📊 لوحة', tab_business:'🏢 إدارة', input_placeholder:'اكتب...', logout:'🔓 خروج'}
+}
+function __(k){var t=_TR[_LOCALE]||_TR['zh-CN']; return t[k]||k}
+function setLocale(c){_LOCALE=c; localStorage.setItem('evo_locale',c); renderLang(); translateUI()}
+function renderLang(){
+  var ids=['langBarTop','langBarAuth']
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i]); if(!el)continue
+    var sel=el.querySelector('select'); if(!sel)continue
+    sel.value=_LOCALE
+  }
+}
+function translateUI(){
+  document.querySelectorAll('.header h1').forEach(function(e){e.textContent=__('title')})
+  document.querySelector('.auth-card .header p').textContent=__('subtitle')
+  document.querySelector('.auth-card .field:nth-child(1) label').textContent=__('auth_user')
+  document.querySelector('.auth-card .field:nth-child(2) label').textContent=__('auth_pass')
+  document.querySelector('.auth-card .field:nth-child(3) label').textContent=__('auth_key')
+  var rb=document.getElementById('regBtn'); if(rb)rb.textContent=__('auth_btn')
+  var g=document.getElementById('greeting'); if(g)g.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')
+  var tabs=document.querySelectorAll('#navTabs .tab, #navTabs a.tab')
+  if(tabs.length>=3){tabs[0].textContent=__('tab_chat');tabs[1].textContent=__('tab_dashboard');tabs[2].textContent=__('tab_business')}
+  var inp=document.getElementById('input'); if(inp)inp.placeholder=__('input_placeholder')
+  renderLang()
+}
 
-function doRegister() {
-  const user = document.getElementById('regUser').value.trim() || 'admin'
-  const pass = document.getElementById('regPass').value
-  const key = document.getElementById('regKey').value.trim()
-  localStorage.setItem('evo_user', user)
-  if (key) localStorage.setItem('evo_api_key', key)
-  localStorage.setItem('evo_logged_in', '1')
-  document.getElementById('authCard').style.display = 'none'
+// ===== 核心功能 =====
+var API='/api/v1'
+var history=[]
+try{history=JSON.parse(localStorage.getItem('evo_chat_history')||'[]')}catch(e){history=[]}
+var context=[]
+
+function doRegister(){
+  var user=document.getElementById('regUser').value.trim()||'admin'
+  var key=document.getElementById('regKey').value.trim()
+  localStorage.setItem('evo_user',user)
+  if(key)localStorage.setItem('evo_api_key',key)
+  localStorage.setItem('evo_logged_in','1')
+  document.getElementById('authCard').style.display='none'
   document.getElementById('mainContent').classList.add('show')
+  document.getElementById('greeting').textContent=__('greeting').replace('{name}',user)
   translateUI()
   restoreHistory()
 }
-function logout() {
+
+function doLogout(){
   localStorage.removeItem('evo_logged_in')
-  document.getElementById('authCard').style.display = 'block'
+  document.getElementById('authCard').style.display='block'
   document.getElementById('mainContent').classList.remove('show')
 }
 
-// 检查是否已登录
-try { history = JSON.parse(localStorage.getItem('evo_chat_history') || '[]') } catch(e) { history = [] }
-if (localStorage.getItem('evo_logged_in')) {
-  document.getElementById('authCard').style.display = 'none'
+function addMsg(t,r){
+  var m=document.getElementById('messages')
+  var d=document.createElement('div');d.className='msg '+r
+  var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI'
+  var b=document.createElement('div');b.className='msg-bubble';b.textContent=t
+  d.appendChild(l);d.appendChild(b);m.appendChild(d)
+  m.scrollTop=m.scrollHeight
+  history.push({role:r,text:t,time:new Date().toISOString()})
+  if(history.length>100)history=history.slice(-100)
+  localStorage.setItem('evo_chat_history',JSON.stringify(history))
+}
+
+function showLoading(){
+  var m=document.getElementById('messages')
+  var d=document.createElement('div');d.className='msg bot';d.id='loading'
+  var b=document.createElement('div');b.className='msg-bubble'
+  b.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>'
+  d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight
+}
+function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
+
+function restoreHistory(){
+  var m=document.getElementById('messages');m.innerHTML=''
+  for(var i=0;i<history.length;i++){
+    var h=history[i]
+    var d=document.createElement('div');d.className='msg '+h.role
+    var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI'
+    var b=document.createElement('div');b.className='msg-bubble';b.textContent=h.text
+    d.appendChild(l);d.appendChild(b);m.appendChild(d)
+  }
+  m.scrollTop=m.scrollHeight
+}
+
+async function send(){
+  var input=document.getElementById('input')
+  var text=input.value.trim()
+  if(!text)return
+  input.value='';document.getElementById('sendBtn').disabled=true
+  addMsg(text,'user')
+  context.push({role:'user',content:text})
+  if(context.length>10)context=context.slice(-10)
+  showLoading()
+  try{
+    var ak=localStorage.getItem('evo_api_key')||''
+    var sr=await fetch(API+'/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,api_key:ak,lang:_LOCALE,context:context.slice(-6)})})
+    var sd=await sr.json()
+    if(sd.success){hideLoading();addMsg(sd.result,'bot');context.push({role:'assistant',content:sd.result});document.getElementById('sendBtn').disabled=false;input.focus();return}
+    // 团队讨论
+    if(/\u56e2\u961f|\u8ba8\u8bba|team|discuss/i.test(text)){
+      var cr=await fetch(API+'/agents/rooms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
+      var rm=await cr.json()
+      hideLoading()
+      if(rm.success){addMsg('🏠 房间已创建: '+rm.room_id,'bot');context.push({role:'assistant',content:'房间: '+rm.room_id})}else{addMsg('❌ '+rm.detail,'bot')}
+      document.getElementById('sendBtn').disabled=false;input.focus();return
+    }
+    // 降级
+    hideLoading();addMsg('收到: '+text+'\n\n💡 试试: "系统怎么样"、"团队讨论xxx"、"帮我写合同"','bot');context.push({role:'assistant',content:'收到'})
+  }catch(e){hideLoading();addMsg('请求失败: '+e.message,'bot')}
+  document.getElementById('sendBtn').disabled=false;input.focus()
+}
+
+function clearHistory(){
+  if(history.length>0){
+    var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]')
+    a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(history)})
+    if(a.length>20)a.length=20
+    localStorage.setItem('evo_chat_archives',JSON.stringify(a))
+  }
+  history=[];context=[];localStorage.removeItem('evo_chat_history');document.getElementById('messages').innerHTML=''
+}
+
+function showArchives(){
+  var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]')
+  if(a.length===0){alert('暂无历史对话');return}
+  var list=''
+  for(var i=0;i<a.length;i++){list+=(i+1)+'. '+a[i].time+' ('+a[i].messages.length+'条)\n'}
+  var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list)
+  if(idx===null)return
+  var n=parseInt(idx)-1
+  if(n>=0&&n<a.length){history=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(history));restoreHistory()}
+}
+
+function showDashboard(){window.location.href='/app/dashboard?lang='+_LOCALE}
+function showEnterprise(){window.location.href='/dashboard?lang='+_LOCALE}
+
+function startVoice(){
+  var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
+  if(!SpeechRecognition){alert('您的浏览器不支持语音输入');return}
+  var r=new SpeechRecognition();r.lang=_LOCALE;r.continuous=false;r.interimResults=false
+  r.onresult=function(e){document.getElementById('input').value=e.results[0][0].transcript;send()}
+  r.start()
+}
+
+// ===== 初始化 =====
+if(localStorage.getItem('evo_logged_in')){
+  document.getElementById('authCard').style.display='none'
   document.getElementById('mainContent').classList.add('show')
-  document.getElementById('greeting').textContent = '你好，' + (localStorage.getItem('evo_user') || '') + '！输入你想做的事'
+  document.getElementById('greeting').textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')
+  translateUI()
   restoreHistory()
 }
-
-function addMsg(text, role) {
-  const m = document.getElementById('messages')
-  const d = document.createElement('div')
-  d.className = 'msg ' + role
-  const label = document.createElement('div')
-  label.className = 'msg-label'
-  label.textContent = role === 'user' ? '你' : 'AUTO-EVO-AI'
-  const b = document.createElement('div')
-  b.className = 'msg-bubble'
-  b.textContent = text
-  d.appendChild(label); d.appendChild(b); m.appendChild(d)
-  m.scrollTop = m.scrollHeight
-  history.push({role, text, time: new Date().toISOString()})
-  if (history.length > 100) history = history.slice(-100)
-  localStorage.setItem('evo_chat_history', JSON.stringify(history))
-}
-
-function restoreHistory() {
-  const m = document.getElementById('messages'); m.innerHTML = ''
-  for (const h of history) {
-    const d = document.createElement('div')
-    d.className = 'msg ' + h.role
-    const label = document.createElement('div')
-    label.className = 'msg-label'
-    label.textContent = h.role === 'user' ? '你' : 'AUTO-EVO-AI'
-    const b = document.createElement('div')
-    b.className = 'msg-bubble'; b.textContent = h.text
-    d.appendChild(label); d.appendChild(b); m.appendChild(d)
-  }
-  m.scrollTop = m.scrollHeight
-}
-
-function showLoading() {
-  const m = document.getElementById('messages')
-  const d = document.createElement('div'); d.className = 'msg bot'; d.id = 'loading'
-  const b = document.createElement('div'); b.className = 'msg-bubble'
-  b.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>'
-  d.appendChild(b); m.appendChild(d); m.scrollTop = m.scrollHeight
-}
-
-function hideLoading() { document.getElementById('loading')?.remove() }
-
-function clearHistory() {
-  // 先存档当前对话
-  if (history.length > 0) {
-    const archives = JSON.parse(localStorage.getItem('evo_chat_archives') || '[]')
-    archives.unshift({id: Date.now(), time: new Date().toLocaleString(), messages: [...history]})
-    if (archives.length > 20) archives.length = 20
-    localStorage.setItem('evo_chat_archives', JSON.stringify(archives))
-  }
-  history = []; context = []
-  localStorage.removeItem('evo_chat_history')
-  document.getElementById('messages').innerHTML = ''
-}
-
-async function send() {
-  const input = document.getElementById('input')
-  const text = input.value.trim()
-  if (!text) return
-  input.value = ''; document.getElementById('sendBtn').disabled = true
-  addMsg(text, 'user')
-  context.push({role:'user', content:text})
-  if (context.length > 10) context = context.slice(-10)
-  showLoading()
-
-  try {
-    // 优先使用智能聊天引擎（LLM → 本地 → 规则）
-    const apiKey = localStorage.getItem('evo_api_key') || ''
-    const lang = getLocale() || 'zh-CN'
-    const sr = await fetch(API + '/smart', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        message: text,
-        api_key: apiKey,
-        lang: lang,
-        context: context.slice(-6)
-      })
-    })
-    const sd = await sr.json()
-    if (sd.success) {
-      hideLoading()
-      addMsg(sd.result, 'bot')
-      context.push({role:'assistant', content:sd.result})
-      document.getElementById('sendBtn').disabled = false
-      document.getElementById('input').focus()
-      return
-    }
-
-    // 团队协作关键词 → 创建智能体房间
-      const cr = await fetch(API + '/agents/rooms', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({task: text})
-      })
-      const room = await cr.json()
-      if (room.success) {
-        const sr = await fetch(API + '/agents/rooms/' + room.room_id + '/start', {method:'POST'})
-        const disc = await sr.json()
-        hideLoading()
-        if (disc.success) {
-          const rr = await fetch(API + '/agents/rooms/' + room.room_id)
-          const rd = await rr.json()
-          if (rd.success) {
-            for (const msg of rd.room.messages) {
-              addMsg('[' + msg.emoji + ' ' + msg.name + '] ' + msg.content, 'bot')
-            }
-          }
-          context.push({role:'assistant', content:'[团队讨论完成]'})
-          return
-        }
-      }
-    }
-
-    // 普通聊天
-    const r = await fetch(API + '/chat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({message: text, context: context.slice(-6), lang: getLocale()})
-    })
-    const data = await r.json()
-    hideLoading()
-    let result = ''
-    if (typeof data === 'string') result = data
-    else if (data.result) result = typeof data.result === 'string' ? data.result : JSON.stringify(data.result, null, 2)
-    else result = JSON.stringify(data, null, 2)
-    addMsg(result, 'bot')
-    context.push({role:'assistant', content:result})
-  } catch(e) {
-    hideLoading()
-    addMsg('处理失败: ' + (e.message || e), 'bot')
-  }
-  document.getElementById('sendBtn').disabled = false
-  document.getElementById('input').focus()
-}
-
-function toggleMic() {
-  const btn = document.getElementById('micBtn')
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { alert('请使用 Chrome/Edge 浏览器'); return }
-  if (listening) { recognition?.stop(); listening = false; btn.classList.remove('listening'); btn.textContent = '🎤'; return }
-  const r = new SR(); r.lang = 'zh-CN'; r.continuous = false; r.interimResults = false
-  r.onresult = function(e) { document.getElementById('input').value = e.results[0][0].transcript; send() }
-  r.onerror = r.onend = function() { listening = false; btn.classList.remove('listening'); btn.textContent = '🎤' }
-  try { r.start(); listening = true; recognition = r; btn.classList.add('listening'); btn.textContent = '🔴' }
-  catch(e) { alert('启动失败') }
-}
-
-document.getElementById('input')?.addEventListener('input', function() {
-  document.getElementById('sendBtn').disabled = !this.value.trim()
-})
-
-// ── i18n 多语言 ──
-// 完整翻译界面函数
-function translateUI() {
-  const lang = getLocale()
-  // 注册卡片
-  const authH = document.getElementById('authCard')?.querySelector('h2')
-  if (authH) authH.textContent = __('auth_heading')
-  const ru = document.getElementById('regUser')
-  if (ru) ru.placeholder = __('auth_user_placeholder')
-  const rp = document.getElementById('regPass')
-  if (rp) rp.placeholder = __('auth_pass_placeholder')
-  const rk = document.getElementById('regKey')
-  if (rk) rk.placeholder = __('auth_key_placeholder')
-  const rb = document.getElementById('regBtn')
-  if (rb) rb.textContent = __('auth_btn')
-  // 聊天标题
-  document.querySelectorAll('.header h1').forEach(el => el.textContent = __('title'))
-  document.querySelectorAll('.header p').forEach(el => {
-    if (!el.id || el.id !== 'greeting') el.textContent = __('subtitle')
-  })
-  // 登录后的问候
-  const g = document.getElementById('greeting')
-  if (g) {
-    const user = localStorage.getItem('evo_user') || ''
-    g.textContent = __('greeting', user)
-  }
-  // 输入框
-  const inp = document.getElementById('input')
-  if (inp) inp.placeholder = __('input_placeholder')
-  // 导航按钮
-  const tc = document.getElementById('tabChat')
-  const td = document.getElementById('tabDashboard')
-  const tb = document.getElementById('tabBusiness')
-  if (tc) tc.textContent = __('tab_chat')
-  if (td) { td.textContent = __('tab_dashboard'); td.href = '/app/dashboard?lang=' + getLocale() }
-  if (tb) { tb.textContent = __('tab_business'); tb.href = '/dashboard?lang=' + getLocale() }
-  // 退出按钮
-  const lb = document.getElementById('logoutBtn')
-  if (lb) lb.textContent = __('logout')
-  // 语言切换器刷新
-  renderLangSwitcher()
-}
-
-function renderLangSwitcher() {
-  const cur = getLocale()
-  const langs = getLanguages()
-  const opts = langs.map(l => `<option value="${l.code}" ${l.code===cur?'selected':''}>${l.emoji||''} ${l.name}</option>`).join('')
-  const sel = `<select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;cursor:pointer;outline:none">${opts}</select>`
-  ;['langSwitcher','langSwitcher2'].forEach(id => {
-    const c = document.getElementById(id)
-    if (c) c.innerHTML = sel
-  })
-}
-
-// 初始化语言切换器
-
-// 初始化语言切换器
 translateUI()
-renderLangSwitcher()
-// 绑定新对话按钮
-document.getElementById('newChatBtn')?.addEventListener('click', function(){ clearHistory() })
-
-// 历史存档查看
-function showArchives() {
-  const archives = JSON.parse(localStorage.getItem('evo_chat_archives') || '[]')
-  if (archives.length === 0) { alert('暂无历史对话'); return }
-  let list = archives.map((a, i) => `${i+1}. ${a.time} (${a.messages.length}条)`).join('\n')
-  const idx = prompt('选择要恢复的对话 (输入编号):\n\n' + list)
-  if (idx === null) return
-  const n = parseInt(idx) - 1
-  if (n >= 0 && n < archives.length) {
-    history = archives[n].messages
-    localStorage.setItem('evo_chat_history', JSON.stringify(history))
-    restoreHistory()
-  }
-}
 </script>
 </body>
 </html>

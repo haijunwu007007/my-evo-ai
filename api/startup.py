@@ -82,7 +82,11 @@ def _mount_vue_frontend():
             if path.startswith("api/") or path.startswith("app/"):
                 return JSONResponse(status_code=404, content={"error": "not_found"})
             if chat_html.exists():
-                return FileResponse(str(chat_html), media_type="text/html")
+                resp = FileResponse(str(chat_html), media_type="text/html")
+                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                resp.headers["Pragma"] = "no-cache"
+                resp.headers["Expires"] = "0"
+                return resp
             return JSONResponse(status_code=404, content={"error": "chat.html not found"})
         logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
