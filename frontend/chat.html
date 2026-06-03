@@ -247,13 +247,20 @@ async function send(){
     if(!text)return
     input.value=''
     addMsg(text,'user')
+    CTX.push({role:'user',content:text})
+    if(CTX.length>10)CTX=CTX.slice(-10)
     showLoading()
     var ak=localStorage.getItem('evo_api_key')||''
-    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'glm'})})
+    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'glm',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()
     hideLoading()
-    if(sd&&sd.success){addMsg(sd.result||'(空)','bot')}else{addMsg('系统: '+(sd&&sd.detail||'未知错误'),'bot')}
+    if(sd&&sd.success){
+      addMsg(sd.result||'(空)','bot')
+      CTX.push({role:'assistant',content:sd.result})
+    }else{
+      addMsg('系统: '+(sd&&sd.detail||'未知错误'),'bot')
+    }
   }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}
   document.getElementById('sendBtn').disabled=false;input.focus()
 }
