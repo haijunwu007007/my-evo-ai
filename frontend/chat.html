@@ -121,7 +121,7 @@ function doRegister() {
   localStorage.setItem('evo_logged_in', '1')
   document.getElementById('authCard').style.display = 'none'
   document.getElementById('mainContent').classList.add('show')
-  document.getElementById('greeting').textContent = '你好，' + user + '！输入你想做的事'
+  translateUI()
   restoreHistory()
 }
 function logout() {
@@ -227,7 +227,7 @@ async function send() {
     // 普通聊天
     const r = await fetch(API + '/chat', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({message: text, context: context.slice(-6)})
+      body: JSON.stringify({message: text, context: context.slice(-6), lang: getLocale()})
     })
     const data = await r.json()
     hideLoading()
@@ -299,7 +299,7 @@ function translateUI() {
   if (tb) { tb.textContent = __('tab_business'); tb.href = '/dashboard?lang=' + getLocale() }
   // 退出按钮
   const lb = document.getElementById('logoutBtn')
-  if (lb) lb.textContent = '🔓 ' + __('logout')
+  if (lb) lb.textContent = __('logout')
   // 语言切换器刷新
   renderLangSwitcher()
 }
