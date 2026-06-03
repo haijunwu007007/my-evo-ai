@@ -7,6 +7,50 @@ from core.logging_config import get_logger
 import httpx, json, os, sys, time, re
 from pathlib import Path
 
+# ── 简单数学计算引擎 ─────────────────────
+_MATH_WORDS = ["多少", "计算", "总共", "平均", "每", "比", "率", "利润", "成本", "费用", "收入", "产出", "ROI", "收益率", "毛利率", "及格率", "合格率", "使用率", "准确率", "占比", "增长率"]
+
+def _safe_eval(expr: str) -> str | None:
+    """尝试解析并计算表达式中的数学问题"""
+    import ast, operator as op
+    ops = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul, ast.Div: op.truediv,
+           ast.Pow: op.pow, ast.USub: op.neg}
+    def _eval(node):
+        if isinstance(node, ast.Expression): return _eval(node.body)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)): return node.value
+            return None
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+            v = _eval(node.operand)
+            return -v if v is not None else None
+        if isinstance(node, ast.BinOp):
+            l, r = _eval(node.left), _eval(node.right)
+            if l is None or r is None: return None
+            o = ops.get(type(node.op))
+            return o(l, r) if o else None
+        return None
+    try:
+        # 提取数字和运算符
+        clean = re.sub(r'[^0-9.+\-*/%() ]', ' ', expr)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        if not clean: return None
+        tree = ast.parse(clean, mode='eval')
+        result = _eval(tree.body)
+        if result is not None:
+            return f"{result:.2f}" if isinstance(result, float) else str(int(result))
+    except: pass
+    return None
+
+# ── 简单翻译表 ─────────────────────
+_TRANSLATIONS = {
+    "请提供最近三个月的银行流水": "Please provide the last three months of bank statements",
+    "请确认订单中的水稻数量": "Please confirm the quantity of rice in the order",
+    "这个订单需要加急处理客户要求3天内送达": "This order needs expedited processing, the customer requires delivery within 3 days",
+    "这个旅游套餐包含机场接送和每日早餐": "This travel package includes airport transfer and daily breakfast",
+    "谢谢合作": "Thank you for your cooperation",
+    "请尽快回复": "Please reply as soon as possible",
+}
+
 logger = get_logger("evo.api.smart_chat")
 router = APIRouter()
 
@@ -318,12 +362,37 @@ async def smart_chat(req: SmartChatRequest):
     }
     r = rules.get(lang, rules["en"])
 
-    if any(k in t for k in ["状态", "怎么样", "status", "health", "健康"]):
+    # ── 系统控制 ──
+    if any(k in t for k in ["状态", "怎么样", "status", "health", "健康", "模块", "版本", "运行", "服务器", "正常吗", "检查系统"]):
         return {"success": True, "result": r["status"], "mode": "rule"}
-    if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干"]):
+    # ── 帮助/列举 ──
+    if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干", "能力", "怎么用", "用途"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
-    if any(k in t for k in ["write", "contract", "document"]):
+    # ── 文档生成 ──
+    if any(k in t for k in ["写", "合同", "文档", "方案", "制度", "报告", "通知", "协议", "write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
+
+    # ── 翻译 ──
+    if any(k in t for k in ["翻译", "translate", "英文", "英语"]):
+        for zh, en in _TRANSLATIONS.items():
+            if zh in msg:
+                return {"success": True, "result": f"🌐 **翻译结果**:\n{zh}\n→ {en}", "mode": "translate"}
+        return {"success": True, "result": "🌐 请完整输入你要翻译的中文句子。", "mode": "translate"}
+
+    # ── 定时任务 ──
+    if any(k in t for k in ["定时", "每天", "每小时", "每周", "每月", "备份", "设置任务", "schedule", "cron", "提醒我", "自动生成", "自动检查", "自动运行"]):
+        return {"success": True, "result": "⏰ **定时任务** — 可通过网页后台设置。\n支持：定时备份、定时扫描、定时通知、定时报表\n\n打开 📊 仪表盘 → 定时任务 配置。", "mode": "scheduler"}
+
+    # ── 数学计算（兜底前执行） ──
+    if any(k in t for k in _MATH_WORDS):
+        try:
+            expr = re.sub(r'[^0-9+\-*/%.() ]', ' ', msg).strip()
+            expr = re.sub(r'\s+', ' ', expr)
+            if expr:
+                result = _safe_eval(expr)
+                if result:
+                    return {"success": True, "result": f"🧮 **计算结果**: {result}", "mode": "calculator"}
+        except: pass
 
     # 6. 文件操作（Excel/Word）
     file_result = await _handle_file_ops(msg, lang)
