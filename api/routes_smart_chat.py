@@ -117,6 +117,33 @@ async def smart_chat(req: SmartChatRequest):
     }
     system_prompt = system_prompts.get(lang, system_prompts["zh-CN"])
 
+    # 0. 本地功能路由（优先于 LLM，避免 AI 说"我无法访问互联网"）
+    t = msg.lower()
+    # GitHub 热门
+    if any(k in t for k in ["github", "trending", "热门", "流行", "开源项目", "趋势", "github热门"]):
+        try:
+            async with httpx.AsyncClient(timeout=15) as c:
+                ghr = await c.get("https://api.github.com/search/repositories?q=created:>2026-06-01&sort=stars&order=desc&per_page=10")
+                if ghr.status_code == 200:
+                    data = ghr.json()
+                    items = data.get("items", [])
+                    lines = ["🔥 **GitHub 今日热门项目 TOP 10**\n"]
+                    for j, repo in enumerate(items[:10], 1):
+                        n = repo.get("name", "?")
+                        owner = repo.get("owner", {}).get("login", "?")
+                        desc = repo.get("description", "无描述") or "无描述"
+                        stars = repo.get("stargazers_count", 0)
+                        lang2 = repo.get("language", "未知") or "未知"
+                        url = repo.get("html_url", "")
+                        lines.append(f"{j}. **{n}** ⭐{stars} | 🗣️{lang2}")
+                        lines.append(f"   作者: {owner}")
+                        lines.append(f"   {desc[:80]}")
+                        lines.append(f"   🔗 {url}")
+                    lines.append("\n💡 数据来源: GitHub API")
+                    return {"success": True, "result": "\n".join(lines), "mode": "github_trending"}
+        except Exception as e:
+            return {"success": True, "result": f"获取 GitHub 热门项目失败: {e}\n可以试试直接访问 https://github.com/trending", "mode": "github_error"}
+
     # 1. 优先尝试真实 LLM
     _api_key = req.api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
     _provider = req.provider
@@ -171,33 +198,6 @@ async def smart_chat(req: SmartChatRequest):
         return {"success": True, "result": r["help"], "mode": "rule"}
     if any(k in t for k in ["写", "合同", "文档", "write", "contract", "document"]):
         return {"success": True, "result": r["write"], "mode": "rule"}
-
-    # 5. GitHub 热门项目
-    if any(k in t for k in ["github", "trending", "热门", "流行", "开源项目", "趋势"]):
-        try:
-            async with httpx.AsyncClient(timeout=15) as c:
-                ghr = await c.get("https://api.github.com/search/repositories?q=created:>2026-06-01&sort=stars&order=desc&per_page=10")
-                if ghr.status_code == 200:
-                    data = ghr.json()
-                    items = data.get("items", [])
-                    lines = ["🔥 **GitHub 今日热门项目 TOP 10**\n"]
-                    for j, repo in enumerate(items[:10], 1):
-                        n = repo.get("name", "?")
-                        owner = repo.get("owner", {}).get("login", "?")
-                        desc = repo.get("description", "无描述") or "无描述"
-                        stars = repo.get("stargazers_count", 0)
-                        lang = repo.get("language", "未知")
-                        url = repo.get("html_url", "")
-                        lines.append(f"{j}. **{n}** ⭐{stars} | 🗣️{lang}")
-                        lines.append(f"   作者: {owner}")
-                        lines.append(f"   {desc}")
-                        lines.append(f"   🔗 {url}")
-                    lines.append("\n💡 数据来源: GitHub API")
-                    return {"success": True, "result": "\n".join(lines), "mode": "github_trending"}
-                else:
-                    return {"success": True, "result": f"GitHub API 请求失败 (HTTP {ghr.status})，稍后再试。", "mode": "github_error"}
-        except Exception as e:
-            return {"success": True, "result": f"获取 GitHub 热门项目失败: {e}", "mode": "github_error"}
 
     # 6. 文件操作（Excel/Word）
     file_result = await _handle_file_ops(msg, lang)
