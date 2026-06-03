@@ -76,6 +76,14 @@ def _mount_vue_frontend():
                 return FileResponse(str(html_path), media_type="text/html")
             logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
 
+        # 商业版管理后台
+        _admin_html = BASE_DIR / "frontend" / "admin.html"
+        if _admin_html.exists():
+            @app.get("/admin", include_in_schema=False)
+            async def serve_admin():
+                return FileResponse(str(_admin_html), media_type="text/html")
+            logger.info(f"[ADMIN] 管理后台已挂载: {_admin_html}")
+
         # 非 API/App 路径兜底 → 聊天界面
         @app.get("/{path:path}", include_in_schema=False)
         async def _spa_catchall(path: str):
