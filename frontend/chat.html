@@ -59,7 +59,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 <div class="container">
   <!-- 注册卡片 -->
   <div class="auth-card" id="authCard">
-    <div class="header" style="padding:0 0 12px"><h1>⚡ AUTO-EVO-AI</h1><p>生产力级 AI 自动化编排系统</p>
+    <div class="header" style="padding:0 0 12px"><h1 id="authTitle">⚡ AUTO-EVO-AI</h1><p id="authSub">生产力级 AI 自动化编排系统</p>
       <div class="lang-bar" id="langBarAuth">
 <select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer">
 <option value="zh-CN">🇨🇳 中文</option>
@@ -74,7 +74,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 </select>
       </div>
     </div>
-    <div class="field"><label>用户名</label><input id="regUser" placeholder="你的名字" value="admin"></div>
+      <div class="field"><label>用户名</label><input id="regUser" placeholder="你的名字" value="admin"></div>
     <div class="field"><label>密码（可选）</label><input id="regPass" type="password" placeholder="留空即可"></div>
     <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
     <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
@@ -83,18 +83,18 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
   <div class="main-content" id="mainContent">
     <div class="header">
       <div class="header-actions">
-        <h1>🤖 AUTO-EVO-AI</h1>
+        <h1 id="mainTitle">🤖 AUTO-EVO-AI</h1>
         <div>
-          <span onclick="clearHistory()" style="margin-right:8px">🔄 新对话</span>
-          <span onclick="showArchives()" style="margin-right:8px">📋 历史</span>
-          <span onclick="doLogout()">🔓 退出</span>
+          <span id="newChatBtn" onclick="clearHistory()" style="margin-right:8px">🔄 新对话</span>
+          <span id="archivesBtn" onclick="showArchives()" style="margin-right:8px">📋 历史</span>
+          <span id="logoutBtn" onclick="doLogout()">🔓 退出</span>
         </div>
       </div>
       <p id="greeting"></p>
       <div class="nav-tabs" id="navTabs">
-        <span class="tab active" id="tabChatBtn">💬 对话</span>
-        <span class="tab" onclick="showDashboard()">📊 仪表盘</span>
-        <span class="tab" onclick="showEnterprise()">🏢 企业管理</span>
+        <span id="tabChat" class="tab active">💬 对话</span>
+        <span id="tabDash" class="tab" onclick="showDashboard()">📊 仪表盘</span>
+        <span id="tabBiz" class="tab" onclick="showEnterprise()">🏢 企业管理</span>
       </div>
       <div class="lang-bar" id="langBarTop">
 <select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer">
@@ -113,7 +113,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="messages" id="messages"></div>
     <div class="input-area">
       <div class="input-row">
-        <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
+        <input id="input" data-i18n="input_placeholder" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
         <button id="micBtn" class="mic" onclick="startVoice()" style="background:transparent;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:0 4px">🎤</button>
         <button id="sendBtn" onclick="send()" style="width:40px;height:40px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:18px">➤</button>
       </div>
@@ -125,18 +125,21 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 // ===== 内联 i18n =====
 var _LOCALE = localStorage.getItem('evo_locale') || 'zh-CN'
 var _TR = {
-  'zh-CN': {title:'⚡ AUTO-EVO-AI', subtitle:'生产力级 AI 自动化编排系统', auth_heading:'🔐 开始使用', auth_user:'用户名', auth_pass:'密码（可选）', auth_key:'API Key（可选）', auth_btn:'🚀 进入系统', greeting:'你好，{name}！输入你想做的事', tab_chat:'💬 对话', tab_dashboard:'📊 仪表盘', tab_business:'🏢 企业管理', input_placeholder:'输入你想做的事...', logout:'🔓 退出'},
-  'en': {title:'⚡ AUTO-EVO-AI', subtitle:'Enterprise AI Automation Platform', auth_heading:'🔐 Get Started', auth_user:'Username', auth_pass:'Password (optional)', auth_key:'API Key (optional)', auth_btn:'🚀 Enter', greeting:'Hello {name}! What can I do?', tab_chat:'💬 Chat', tab_dashboard:'📊 Dashboard', tab_business:'🏢 Enterprise', input_placeholder:'What do you want to do...', logout:'🔓 Logout'},
-  'ja': {title:'⚡ AUTO-EVO-AI', subtitle:'AI自動化プラットフォーム', auth_heading:'🔐 開始', auth_user:'ユーザー名', auth_pass:'パスワード', auth_key:'API Key', auth_btn:'🚀 入る', greeting:'{name}さん！何をしますか？', tab_chat:'💬 チャット', tab_dashboard:'📊 ダッシュボード', tab_business:'🏢 企業管理', input_placeholder:'何をしたいですか...', logout:'🔓 ログアウト'},
-  'ko': {title:'⚡ AUTO-EVO-AI', subtitle:'AI 자동화 플랫폼', auth_heading:'🔐 시작', auth_user:'사용자명', auth_pass:'비밀번호', auth_key:'API Key', auth_btn:'🚀 입장', greeting:'{name}님! 무엇을 할까요?', tab_chat:'💬 채팅', tab_dashboard:'📊 대시보드', tab_business:'🏢 기업관리', input_placeholder:'원하는 것을 입력하세요...', logout:'🔓 로그아웃'},
-  'fr': {title:'⚡ AUTO-EVO-AI', subtitle:'Plateforme IA', auth_heading:'🔐 Commencer', auth_user:'Utilisateur', auth_pass:'Mot de passe', auth_key:'API Key', auth_btn:'🚀 Entrer', greeting:'Bonjour {name}!', tab_chat:'💬 Discuter', tab_dashboard:'📊 Tableau', tab_business:'🏢 Entreprise', input_placeholder:'Dites...', logout:'🔓 Déconnexion'},
-  'es': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Comenzar', auth_user:'Usuario', auth_pass:'Contraseña', auth_key:'API Key', auth_btn:'🚀 Entrar', greeting:'¡Hola {name}!', tab_chat:'💬 Chat', tab_dashboard:'📊 Panel', tab_business:'🏢 Empresa', input_placeholder:'Escribe...', logout:'🔓 Salir'},
-  'pt': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Começar', auth_user:'Usuário', auth_pass:'Senha', auth_key:'API Key', auth_btn:'🚀 Entrar', greeting:'Olá {name}!', tab_chat:'💬 Conversar', tab_dashboard:'📊 Painel', tab_business:'🏢 Empresa', input_placeholder:'Digite...', logout:'🔓 Sair'},
-  'ru': {title:'⚡ AUTO-EVO-AI', subtitle:'Платформа ИИ', auth_heading:'🔐 Начать', auth_user:'Пользователь', auth_pass:'Пароль', auth_key:'API Key', auth_btn:'🚀 Войти', greeting:'Здравствуйте, {name}!', tab_chat:'💬 Чат', tab_dashboard:'📊 Панель', tab_business:'🏢 Управление', input_placeholder:'Введите...', logout:'🔓 Выйти'},
-  'ar': {title:'⚡ AUTO-EVO-AI', subtitle:'منصة الذكاء', auth_heading:'🔐 ابدأ', auth_user:'المستخدم', auth_pass:'كلمة المرور', auth_key:'مفتاح API', auth_btn:'🚀 دخول', greeting:'{name}! مرحباً', tab_chat:'💬 محادثة', tab_dashboard:'📊 لوحة', tab_business:'🏢 إدارة', input_placeholder:'اكتب...', logout:'🔓 خروج'}
+  'zh-CN': {title:'⚡ AUTO-EVO-AI', subtitle:'生产力级 AI 自动化编排系统', auth_heading:'🔐 开始使用', auth_user:'用户名', auth_user_placeholder:'你的名字', auth_pass:'密码（可选）', auth_pass_placeholder:'留空即可', auth_key:'API Key（可选）', auth_key_placeholder:'OpenAI / 其他 LLM Key', auth_btn:'🚀 进入系统', greeting:'你好，{name}！输入你想做的事', tab_chat:'💬 对话', tab_dashboard:'📊 仪表盘', tab_business:'🏢 企业管理', input_placeholder:'输入你想做的事...', logout:'🔓 退出', new_chat:'🔄 新对话', archives:'📋 历史'},
+  'en': {title:'⚡ AUTO-EVO-AI', subtitle:'Enterprise AI Automation Platform', auth_heading:'🔐 Get Started', auth_user:'Username', auth_user_placeholder:'Your name', auth_pass:'Password (optional)', auth_pass_placeholder:'Leave empty', auth_key:'API Key (optional)', auth_key_placeholder:'OpenAI / other LLM Key', auth_btn:'🚀 Enter', greeting:'Hello {name}! What can I do?', tab_chat:'💬 Chat', tab_dashboard:'📊 Dashboard', tab_business:'🏢 Enterprise', input_placeholder:'What do you want to do...', logout:'🔓 Logout', new_chat:'🔄 New Chat', archives:'📋 History'},
+  'ja': {title:'⚡ AUTO-EVO-AI', subtitle:'AI自動化プラットフォーム', auth_heading:'🔐 開始', auth_user:'ユーザー名', auth_user_placeholder:'あなたの名前', auth_pass:'パスワード', auth_pass_placeholder:'空のまま', auth_key:'API Key', auth_key_placeholder:'OpenAI / 他のLLM', auth_btn:'🚀 入る', greeting:'{name}さん！何をしますか？', tab_chat:'💬 チャット', tab_dashboard:'📊 ダッシュボード', tab_business:'🏢 企業管理', input_placeholder:'何をしたいですか...', logout:'🔓 ログアウト', new_chat:'🔄 新規', archives:'📋 履歴'},
+  'ko': {title:'⚡ AUTO-EVO-AI', subtitle:'AI 자동화 플랫폼', auth_heading:'🔐 시작', auth_user:'사용자명', auth_user_placeholder:'당신의 이름', auth_pass:'비밀번호', auth_pass_placeholder:'비워두기', auth_key:'API Key', auth_key_placeholder:'OpenAI / 다른 LLM', auth_btn:'🚀 입장', greeting:'{name}님! 무엇을 할까요?', tab_chat:'💬 채팅', tab_dashboard:'📊 대시보드', tab_business:'🏢 기업관리', input_placeholder:'원하는 것을 입력하세요...', logout:'🔓 로그아웃', new_chat:'🔄 새 채팅', archives:'📋 기록'},
+  'fr': {title:'⚡ AUTO-EVO-AI', subtitle:'Plateforme IA', auth_heading:'🔐 Commencer', auth_user:'Utilisateur', auth_user_placeholder:'Votre nom', auth_pass:'Mot de passe', auth_pass_placeholder:'Optionnel', auth_key:'API Key', auth_key_placeholder:'OpenAI / autre LLM', auth_btn:'🚀 Entrer', greeting:'Bonjour {name}!', tab_chat:'💬 Discuter', tab_dashboard:'📊 Tableau', tab_business:'🏢 Entreprise', input_placeholder:'Dites...', logout:'🔓 Déconnexion', new_chat:'🔄 Nouveau', archives:'📋 Historique'},
+  'es': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Comenzar', auth_user:'Usuario', auth_user_placeholder:'Tu nombre', auth_pass:'Contraseña', auth_pass_placeholder:'Opcional', auth_key:'API Key', auth_key_placeholder:'OpenAI / otro LLM', auth_btn:'🚀 Entrar', greeting:'¡Hola {name}!', tab_chat:'💬 Chat', tab_dashboard:'📊 Panel', tab_business:'🏢 Empresa', input_placeholder:'Escribe...', logout:'🔓 Salir', new_chat:'🔄 Nuevo', archives:'📋 Historial'},
+  'pt': {title:'⚡ AUTO-EVO-AI', subtitle:'Plataforma IA', auth_heading:'🔐 Começar', auth_user:'Usuário', auth_user_placeholder:'Seu nome', auth_pass:'Senha', auth_pass_placeholder:'Opcional', auth_key:'API Key', auth_key_placeholder:'OpenAI / outro LLM', auth_btn:'🚀 Entrar', greeting:'Olá {name}!', tab_chat:'💬 Conversar', tab_dashboard:'📊 Painel', tab_business:'🏢 Empresa', input_placeholder:'Digite...', logout:'🔓 Sair', new_chat:'🔄 Novo', archives:'📋 Histórico'},
+  'ru': {title:'⚡ AUTO-EVO-AI', subtitle:'Платформа ИИ', auth_heading:'🔐 Начать', auth_user:'Пользователь', auth_user_placeholder:'Ваше имя', auth_pass:'Пароль', auth_pass_placeholder:'Опционально', auth_key:'API Key', auth_key_placeholder:'OpenAI / другой LLM', auth_btn:'🚀 Войти', greeting:'Здравствуйте, {name}!', tab_chat:'💬 Чат', tab_dashboard:'📊 Панель', tab_business:'🏢 Управление', input_placeholder:'Введите...', logout:'🔓 Выйти', new_chat:'🔄 Новый', archives:'📋 История'},
+  'ar': {title:'⚡ AUTO-EVO-AI', subtitle:'منصة الذكاء', auth_heading:'🔐 ابدأ', auth_user:'المستخدم', auth_user_placeholder:'اسمك', auth_pass:'كلمة المرور', auth_pass_placeholder:'اختياري', auth_key:'مفتاح API', auth_key_placeholder:'OpenAI / LLM آخر', auth_btn:'🚀 دخول', greeting:'{name}! مرحباً', tab_chat:'💬 محادثة', tab_dashboard:'📊 لوحة', tab_business:'🏢 إدارة', input_placeholder:'اكتب...', logout:'🔓 خروج', new_chat:'🔄 جديد', archives:'📋 سجل'}
 }
 function __(k){var t=_TR[_LOCALE]||_TR['zh-CN']; return t[k]||k}
-function setLocale(c){_LOCALE=c; localStorage.setItem('evo_locale',c); renderLang(); translateUI()}
+function setLocale(c){
+  localStorage.setItem('evo_locale',c)
+  window.location.reload()
+}
 function renderLang(){
   var ids=['langBarTop','langBarAuth']
   for(var i=0;i<ids.length;i++){
@@ -146,16 +149,36 @@ function renderLang(){
   }
 }
 function translateUI(){
-  document.querySelectorAll('.header h1').forEach(function(e){e.textContent=__('title')})
-  document.querySelector('.auth-card .header p').textContent=__('subtitle')
-  document.querySelector('.auth-card .field:nth-child(1) label').textContent=__('auth_user')
-  document.querySelector('.auth-card .field:nth-child(2) label').textContent=__('auth_pass')
-  document.querySelector('.auth-card .field:nth-child(3) label').textContent=__('auth_key')
-  var rb=document.getElementById('regBtn'); if(rb)rb.textContent=__('auth_btn')
-  var g=document.getElementById('greeting'); if(g)g.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')
-  var tabs=document.querySelectorAll('#navTabs .tab, #navTabs a.tab')
-  if(tabs.length>=3){tabs[0].textContent=__('tab_chat');tabs[1].textContent=__('tab_dashboard');tabs[2].textContent=__('tab_business')}
-  var inp=document.getElementById('input'); if(inp)inp.placeholder=__('input_placeholder')
+  var usr=localStorage.getItem('evo_user')||''
+  // 标题
+  var h1=document.getElementById('mainTitle');if(h1)h1.textContent=__('title')
+  var h1a=document.getElementById('authTitle');if(h1a)h1a.textContent=__('title')
+  // 副标题
+  var sp=document.getElementById('authSub');if(sp)sp.textContent=__('subtitle')
+  // 注册标签（用 label 元素的 for 属性定位）
+  var lab=document.querySelectorAll('#authCard label')
+  if(lab.length>=1)lab[0].textContent=__('auth_user')
+  if(lab.length>=2)lab[1].textContent=__('auth_pass')
+  if(lab.length>=3)lab[2].textContent=__('auth_key')
+  // 注册输入框
+  var ru=document.getElementById('regUser');if(ru)ru.placeholder=__('auth_user_placeholder')
+  var rp=document.getElementById('regPass');if(rp)rp.placeholder=__('auth_pass_placeholder')
+  var rk=document.getElementById('regKey');if(rk)rk.placeholder=__('auth_key_placeholder')
+  // 注册按钮
+  var rb=document.getElementById('regBtn');if(rb)rb.textContent=__('auth_btn')
+  // 问候
+  var g=document.getElementById('greeting');if(g)g.textContent=__('greeting').replace('{name}',usr)
+  // 退出按钮
+  var lb=document.getElementById('logoutBtn');if(lb)lb.textContent=__('logout')
+  var nc=document.getElementById('newChatBtn');if(nc)nc.textContent=__('new_chat')
+  var ab=document.getElementById('archivesBtn');if(ab)ab.textContent=__('archives')
+  // 导航
+  var t0=document.getElementById('tabChat');if(t0)t0.textContent=__('tab_chat')
+  var t1=document.getElementById('tabDash');if(t1)t1.textContent=__('tab_dashboard')
+  var t2=document.getElementById('tabBiz');if(t2)t2.textContent=__('tab_business')
+  // 输入框
+  var inp=document.getElementById('input');if(inp)inp.placeholder=__('input_placeholder')
+  // 语言下拉选中
   renderLang()
 }
 
@@ -223,25 +246,21 @@ async function send(){
   if(!text)return
   input.value='';document.getElementById('sendBtn').disabled=true
   addMsg(text,'user')
-  context.push({role:'user',content:text})
-  if(context.length>10)context=context.slice(-10)
   showLoading()
   try{
-    var ak=localStorage.getItem('evo_api_key')||''
-    var sr=await fetch(API+'/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,api_key:ak,lang:_LOCALE,context:context.slice(-6)})})
+    var body={message:text,lang:_LOCALE}
+    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
     var sd=await sr.json()
-    if(sd.success){hideLoading();addMsg(sd.result,'bot');context.push({role:'assistant',content:sd.result});document.getElementById('sendBtn').disabled=false;input.focus();return}
-    // 团队讨论
-    if(/\u56e2\u961f|\u8ba8\u8bba|team|discuss/i.test(text)){
-      var cr=await fetch(API+'/agents/rooms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
-      var rm=await cr.json()
-      hideLoading()
-      if(rm.success){addMsg('🏠 房间已创建: '+rm.room_id,'bot');context.push({role:'assistant',content:'房间: '+rm.room_id})}else{addMsg('❌ '+rm.detail,'bot')}
-      document.getElementById('sendBtn').disabled=false;input.focus();return
+    hideLoading()
+    if(sd&&sd.success){
+      addMsg(sd.result||'(空回复)','bot')
+    }else{
+      addMsg('系统返回: '+(sd&&sd.detail||'未知错误'),'bot')
     }
-    // 降级
-    hideLoading();addMsg('收到: '+text+'\n\n💡 试试: "系统怎么样"、"团队讨论xxx"、"帮我写合同"','bot');context.push({role:'assistant',content:'收到'})
-  }catch(e){hideLoading();addMsg('请求失败: '+e.message,'bot')}
+  }catch(e){
+    hideLoading()
+    addMsg('请求失败: '+e.message,'bot')
+  }
   document.getElementById('sendBtn').disabled=false;input.focus()
 }
 
