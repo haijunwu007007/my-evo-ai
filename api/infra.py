@@ -170,7 +170,7 @@ class RateLimiter:
             del self._blocked_ips[client_ip]
 
 
-rate_limiter = RateLimiter(max_requests=1000, window_seconds=60)
+rate_limiter = RateLimiter(max_requests=30, window_seconds=60)
 
 
 # ════════════════════════════════════════════════════════════
@@ -510,7 +510,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-_cors_origins = os.environ.get("EVO_CORS_ORIGINS", "*").split(",")
+_cors_origins = os.environ.get("EVO_CORS_ORIGINS", "http://localhost:8765,http://127.0.0.1:8765,http://122.51.144.227:8765").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
