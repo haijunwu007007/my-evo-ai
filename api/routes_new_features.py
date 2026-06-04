@@ -234,6 +234,22 @@ async def payment_config():
         "stripe": bool(os.environ.get("STRIPE_KEY"))
     }, "note": "配置环境变量后启用对应支付方式"}
 
+@router.get("/api/v1/payment/revenue")
+async def payment_revenue():
+    """收入看板（模拟数据，接入支付后变为真实数据）"""
+    import sqlite3, time
+    try:
+        conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+        conn.execute("CREATE TABLE IF NOT EXISTS payment_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, plan TEXT, amount REAL, status TEXT, created_at REAL)")
+        # 模拟数据
+        conn.execute("INSERT OR IGNORE INTO payment_orders (id, plan, amount, status, created_at) VALUES (1,'free',0.0,'active',?)", (time.time()-86400*30,))
+        total = conn.execute("SELECT COUNT(*), COALESCE(SUM(amount),0) FROM payment_orders WHERE status='active'").fetchone()
+        recent = conn.execute("SELECT plan, amount, created_at FROM payment_orders ORDER BY id DESC LIMIT 10").fetchall()
+        conn.close()
+        return {"success": True, "total_orders": total[0], "total_revenue": round(total[1],2), "recent_orders": [{"plan":r[0],"amount":r[1],"time":r[2]} for r in recent], "pricing": {"free": {"api_calls":1000,"price":0}, "cloud": {"api_calls":5000,"price":9.9}, "enterprise": {"api_calls":-1,"price":"custom"}}}
+    except Exception as e:
+        return {"success": True, "total_orders": 0, "total_revenue": 0, "error": str(e)}
+
 # ─── 9. 🔄 Webhook 接收 ──────────────────
 class WebhookEvent(BaseModel):
     event: str
