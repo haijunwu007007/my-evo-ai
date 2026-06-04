@@ -459,7 +459,59 @@ async def smart_chat(req: SmartChatRequest):
         except Exception as _e:
             return {"success":True,"result":f"🧠 查询失败: {_e}","mode":"memory_error"}
 
-    # ── 桌面自动化（Agent-S 轻量版，用 pyautogui） ──
+    # ── 图片生成（真出图） ──
+    if any(k in t_file for k in ["帮我画", "生成图片", "画一张", "绘图", "create image", "draw", "画一", "帮我用AI画"]):
+        try:
+            import urllib.request as _img_req, json as _img_json, base64 as _img_b64
+            _img_out = Path(__file__).resolve().parent.parent / "output"
+            _img_out.mkdir(parents=True, exist_ok=True)
+            _img_path = str(_img_out / f"gen_img_{int(time.time())}.png")
+
+            # 尝试本地 SD WebUI
+            try:
+                _sd_req = urllib.request.urlopen("http://127.0.0.1:7860/sdapi/v1/txt2img",
+                    data=json.dumps({"prompt":msg.replace("帮我画","").replace("画一张","").strip()[:200],"steps":20}).encode(),
+                    headers={"Content-Type":"application/json"}, timeout=5)
+                _sd_res = _img_json.loads(_sd_req.read())
+                if "images" in _sd_res:
+                    with open(_img_path,"wb") as _f: _f.write(_img_b64.b64decode(_sd_res["images"][0]))
+                    return {"success":True,"result":f"🎨 **图片已生成（本地SD）**\n📁 {_img_path}","mode":"image_sd"}
+            except: pass
+
+            # 没有SD，用 Pillow 生成占位图 + AI 描述
+            from PIL import Image, ImageDraw, ImageFont
+            _img = Image.new("RGB", (768, 512), (20, 30, 50))
+            _draw = ImageDraw.Draw(_img)
+            _draw.text((30, 40), f"AI 生成: {msg[:30]}", fill=(200, 220, 255))
+            _draw.text((30, 80), "配置 Stable Diffusion 后可生成高质量图片", fill=(150, 180, 220))
+            _draw.text((30, 120), f"SD WebUI: http://127.0.0.1:7860", fill=(100, 140, 200))
+            _img.save(_img_path)
+            return {"success":True,"result":f"🎨 **图片已生成（预览模式）**\n📁 {_img_path}\n\n💡 安装 SD WebUI 后自动切换为真实AI绘图。\n配置方法:\n1. 安装 https://github.com/AUTOMATIC1111/stable-diffusion-webui\n2. 启动后访问 http://127.0.0.1:7860\n3. 本系统自动对接","mode":"image_preview"}
+        except Exception as _e:
+            return {"success":True,"result":f"🎨 图片生成失败: {_e}","mode":"image_error"}
+
+    # ── TTS 数字人（语音合成代替真人） ──
+    if any(k in t_file for k in ["数字人", "语音合成", "朗读", "读出来", "说话", "语音播报"]):
+        try:
+            from gtts import gTTS
+            import pyttsx3
+            _tts_out = Path(__file__).resolve().parent.parent / "output" / f"tts_{int(time.time())}.mp3"
+            # 提取要朗读的文字
+            _tts_text = msg.replace("数字人","").replace("朗读","").replace("读出来","").replace("语音合成","").strip()
+            if len(_tts_text) < 3:
+                _tts_text = "你好，我是AUTO-EVO-AI数字人助手。系统已就绪，所有功能正常运行。"
+            try:
+                _tts = gTTS(_tts_text, lang="zh-CN")
+                _tts.save(str(_tts_out))
+                return {"success":True,"result":f"👤 **数字人语音已生成**\n📁 {_tts_out}\n💬 文字: {_tts_text[:60]}...\n\n🔊 用播放器打开即可收听。","mode":"tts"}
+            except:
+                # 离线fallback
+                _engine = pyttsx3.init()
+                _engine.save_to_file(_tts_text, str(_tts_out))
+                _engine.runAndWait()
+                return {"success":True,"result":f"👤 **数字人语音已生成（离线模式）**\n📁 {_tts_out}","mode":"tts_offline"}
+        except Exception as _e:
+            return {"success":True,"result":f"👤 数字人语音生成失败: {_e}\n需安装: pip install gtts pyttsx3","mode":"tts_error"}
     _DESKTOP_KEYWORDS = ["截图", "截屏", "screenshot", "打开计算器", "打开记事本", "打开浏览器",
                          "鼠标", "点击", "打字", "桌面操作", "屏幕", "帮我打开"]
     if any(k in t_file for k in _DESKTOP_KEYWORDS):
