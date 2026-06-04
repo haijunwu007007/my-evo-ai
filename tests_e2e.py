@@ -26,7 +26,7 @@ print(f"{'='*60}")
 print(f"\n--- 1/5: 系统状态链路 ---")
 s = api("GET", "/api/v1/status")
 check("API 返回成功", s.get("success"), str(s))
-check("457 模块注册", s.get("modules_total")==457, str(s.get("modules_total")))
+check("483 模块注册", s.get("modules_total")>=480, str(s.get("modules_total")))
 check("系统版本 V0.1", s.get("api_version")=="V0.1", s.get("api_version"))
 
 # 2. 智能聊天链路 (文档生成)

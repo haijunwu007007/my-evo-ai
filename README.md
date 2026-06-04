@@ -1,6 +1,6 @@
 # AUTO-EVO-AI V0.1
 
-> 生产级 AI Agent 自动化平台 — **457 模块** · **185+ API** · **4 核心引擎** · **822+ 测试通过**
+> 生产级 AI Agent 自动化平台 — **483 模块** · **185+ API** · **4 核心引擎** · **822+ 测试通过**
 
 > ⚠️ **Python 版本要求**: Python >=3.11（推荐 3.11 或 3.12）。不兼容 Python 3.10 及以下版本。
 
@@ -70,7 +70,7 @@ AUTO-EVO-AI V0.1/
 │   ├── scheduler_engine.py # 定时调度器
 │   ├── task_queue_engine.py # 持久化任务队列
 │   └── ws_engine.py        # WebSocket 实时推送
-├── modules/               # 457个功能模块 (0空壳)
+├── modules/               # 483个功能模块 (0空壳)
 │   └── _base/             # 企业级模块基类 (熔断/限流/审计/追踪)
 ├── config/                # 配置系统
 │   ├── defaults.yaml       # 默认配置
@@ -144,7 +144,7 @@ docker compose -f docker-compose.tools.yml down
 | 指标 | 数值 |
 |------|------|
 | **Python 代码** | 722+ 文件 / 13.9 MB |
-| **功能模块** | 457 个（0 空壳，全部有真实 dispatch 逻辑） |
+| **功能模块** | 483 个（0 空壳，全部有真实 dispatch 逻辑） |
 | **API 端点** | 185 路由 |
 | **测试覆盖** | 34 个测试文件 / 822+ 用例，真实 HTTP 请求，零 Stub / Mock |
 | **Git 提交** | 125 commits |

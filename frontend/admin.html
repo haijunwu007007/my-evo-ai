@@ -47,7 +47,16 @@ body{background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100
   <div class="stats" id="stats"></div>
   <div class="grid" id="moduleGrid"></div>
 </div>
-<div id="tab-modules" class="tab-content" style="display:none"><h2>🧩 模块管理</h2><p>457 模块已注册（lazy 模式），功能请求时自动加载。</p><button onclick="location.reload()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer">刷新状态</button></div>
+<div id="tab-modules" class="tab-content" style="display:none"><h2>🧩 模块管理</h2><p id="moduleCountText">查询模块数量...</p><button onclick="loadModuleCount()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;margin-right:8px">刷新状态</button><button onclick="location.reload()" style="padding:8px 16px;background:var(--border);color:var(--text);border:none;border-radius:8px;cursor:pointer">刷新页面</button></div>
+<script>
+async function loadModuleCount(){
+  try{
+    var r=await fetch('/api/v1/status');var d=await r.json();
+    document.getElementById('moduleCountText').textContent=(d.modules_total||'?')+' 模块已注册（lazy 模式），功能请求时自动加载。';
+  }catch(e){document.getElementById('moduleCountText').textContent='获取失败: '+e.message}
+}
+loadModuleCount();
+</script>
 <div id="tab-llm" class="tab-content" style="display:none"><h2>🤖 LLM 配置</h2><div id="llmStatus"></div></div>
 <div id="tab-docker" class="tab-content" style="display:none"><h2>🐳 Docker 部署</h2><p>一键启动行业工具容器：</p><pre style="background:#0a0a1a;padding:16px;border-radius:8px;font-size:12px">docker-compose --profile core up -d   # 启动核心服务
 docker-compose --profile ai up -d     # 启动AI工具

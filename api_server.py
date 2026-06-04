@@ -282,15 +282,18 @@ async def system_status():
 @app.get("/api/v1/version")
 async def get_version():
     """系统版本信息"""
-    coord = get_coordinator_v3()
-    modules_count = 0
-    if coord:
-        try:
-            st = coord.get_status()
-            modules_count = st.get("modules", {}).get("registered", 0)
-        except Exception:
-            modules_count = 0
-    return {"success": True, "version": "V0.1", "build": "20260604", "modules": modules_count}
+    _mod_count = 0
+    try:
+        _reg = getattr(app.state, "module_registry", None) or getattr(app, "module_registry", None)
+        if _reg:
+            _mod_count = len(_reg.classes) + len(getattr(_reg, "_pending_modules", []))
+        if not _mod_count:
+            _mod_dir = Path(__file__).resolve().parent / "modules"
+            if _mod_dir.exists():
+                _mod_count = len(list(_mod_dir.glob("*.py")))
+    except Exception:
+        _mod_count = 0
+    return {"success": True, "version": "V0.1", "build": "20260604", "modules": _mod_count}
 
 
 # ═══════════════════════════════════════════════════════

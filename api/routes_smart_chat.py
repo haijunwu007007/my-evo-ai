@@ -792,13 +792,13 @@ async def smart_chat(req: SmartChatRequest):
     t = msg.lower()
     rules = {
         "zh-CN": {
-            "status": "📊 **系统状态**\n• 457 模块就绪\n• 9 种语言\n• 57 个外部工具\n• 100 行业方案\n\n说「系统怎么样」获取实时状态。",
+            "status": "📊 **系统状态**\n• {count} 模块就绪\n• 9 种语言\n• 57 个外部工具\n• 100 行业方案\n\n说「系统怎么样」获取实时状态。",
             "help": "**我能帮你做什么？**\n\n📊 查状态 — 「系统怎么样」\n🤖 AI讨论 — 「团队讨论xxx」\n💻 桌面操作 — 「帮我打开计算器」\n📝 生成文档 — 「帮我写一份合同」\n📊 处理Excel — 「帮我整理这个表格」\n⏰ 定时任务 — 「每天5点备份」\n🎤 语音输入 — 点 🎤 按钮",
             "write": "好的，我来帮你写。你可以说具体一点，比如「帮我写一份技术合同，甲方是XX公司」或者「帮我写一个Python脚本」。",
             "default": f"你说「{msg[:50]}」...\n我不太确定你想干嘛。试试：\n• 「你会什么」— 看我能干啥\n• 「系统怎么样」— 查状态\n• 「团队讨论xxx」— 叫AI团队讨论",
         },
         "en": {
-            "status": "📊 **System Status**\n• 457 modules ready\n• 9 languages\n• 57 external tools\n• 100 industry solutions\n\nSay \"check status\" for real-time info.",
+            "status": "📊 **System Status**\n• {count} modules ready\n• 9 languages\n• 57 external tools\n• 100 industry solutions\n\nSay \"check status\" for real-time info.",
             "help": "**What can I do?**\n\n📊 Status — \"check status\"\n🤖 AI discuss — \"team discuss xxx\"\n💻 Desktop — \"open calculator\"\n📝 Write — \"write a contract\"\n📊 Excel — \"process this spreadsheet\"\n⏰ Schedule — \"backup at 5pm\"\n🎤 Voice — click 🎤",
             "write": "Sure, I can help you write that. Be more specific about what you need.",
             "default": f"You said \"{msg[:50]}\"...\nNot sure what you mean. Try:\n• \"what can you do\"\n• \"check status\"\n• \"team discuss xxx\"",
@@ -808,7 +808,13 @@ async def smart_chat(req: SmartChatRequest):
 
     # ── 系统控制 ──
     if any(k in t for k in ["状态", "怎么样", "status", "health", "健康", "模块", "版本", "运行", "服务器", "正常吗", "检查系统"]):
-        return {"success": True, "result": r["status"], "mode": "rule"}
+        _count = 0
+        try:
+            _mod_dir = Path(__file__).resolve().parent.parent / "modules"
+            if _mod_dir.exists():
+                _count = len([_f for _f in _mod_dir.iterdir() if _f.suffix == ".py" and _f.name != "__init__.py"])
+        except: pass
+        return {"success": True, "result": r["status"].format(count=_count or "?"), "mode": "rule"}
     # ── 帮助/列举 ──
     if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干", "能力", "怎么用", "用途"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
