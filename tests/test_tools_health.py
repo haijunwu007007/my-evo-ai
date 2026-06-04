@@ -73,7 +73,7 @@ TOOLS = {
     "hoarder":         ("http://localhost:3070",       "Hoarder"),
 }
 
-@pytest.mark.parametrize("name,url,label", sorted(TOOLS.items(), key=lambda x: x[1][1]))
+@pytest.mark.parametrize("name,url,label", [(n, u, l) for n, (u, l) in sorted(TOOLS.items(), key=lambda x: x[1][1])])
 def test_tool_container(name, url, label):
     """检查工具是否可访问"""
     try:

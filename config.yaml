@@ -1,4 +1,4 @@
-- created_at: '2026-06-02T13:17:52.820524'
+- created_at: '2026-06-04T16:19:48.005944'
   default_value: ''
   description: Docker Hub访问令牌
   env_var: DOCKER_HUB_TOKEN
@@ -7,11 +7,11 @@
   is_secret: true
   key: docker_hub_token
   label: Docker Hub Token
-  updated_at: '2026-06-02T13:17:52.820524'
+  updated_at: '2026-06-04T16:19:48.005944'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820521'
+- created_at: '2026-06-04T16:19:48.005941'
   default_value: ''
   description: Docker Hub登录用户名
   env_var: DOCKER_HUB_USER
@@ -20,11 +20,11 @@
   is_secret: false
   key: docker_hub_user
   label: Docker Hub用户名
-  updated_at: '2026-06-02T13:17:52.820521'
+  updated_at: '2026-06-04T16:19:48.005941'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820514'
+- created_at: '2026-06-04T16:19:48.005933'
   default_value: ''
   description: 默认操作的仓库 owner/repo
   env_var: GITHUB_DEFAULT_REPO
@@ -33,11 +33,11 @@
   is_secret: false
   key: github_default_repo
   label: 默认仓库
-  updated_at: '2026-06-02T13:17:52.820514'
+  updated_at: '2026-06-04T16:19:48.005933'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820508'
+- created_at: '2026-06-04T16:19:48.005925'
   default_value: ''
   description: GitHub API访问令牌(repo/workflow权限)
   env_var: GITHUB_TOKEN
@@ -46,11 +46,11 @@
   is_secret: true
   key: github_token
   label: GitHub Personal Token
-  updated_at: '2026-06-02T13:17:52.820508'
+  updated_at: '2026-06-04T16:19:48.005925'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820511'
+- created_at: '2026-06-04T16:19:48.005929'
   default_value: ''
   description: GitHub用户名
   env_var: GITHUB_USERNAME
@@ -59,11 +59,11 @@
   is_secret: false
   key: github_username
   label: GitHub用户名
-  updated_at: '2026-06-02T13:17:52.820511'
+  updated_at: '2026-06-04T16:19:48.005929'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820518'
+- created_at: '2026-06-04T16:19:48.005937'
   default_value: ''
   description: GitLab API访问令牌
   env_var: GITLAB_TOKEN
@@ -72,11 +72,11 @@
   is_secret: true
   key: gitlab_token
   label: GitLab Token
-  updated_at: '2026-06-02T13:17:52.820518'
+  updated_at: '2026-06-04T16:19:48.005937'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820533'
+- created_at: '2026-06-04T16:19:48.005954'
   default_value: ''
   description: MongoDB连接字符串
   env_var: MONGO_URL
@@ -85,11 +85,11 @@
   is_secret: true
   key: mongo_url
   label: MongoDB URL
-  updated_at: '2026-06-02T13:17:52.820533'
+  updated_at: '2026-06-04T16:19:48.005954'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820530'
+- created_at: '2026-06-04T16:19:48.005951'
   default_value: ''
   description: PostgreSQL连接字符串
   env_var: DATABASE_URL
@@ -98,11 +98,11 @@
   is_secret: true
   key: postgres_url
   label: PostgreSQL URL
-  updated_at: '2026-06-02T13:17:52.820530'
+  updated_at: '2026-06-04T16:19:48.005951'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820527'
+- created_at: '2026-06-04T16:19:48.005947'
   default_value: redis://localhost:6379/0
   description: Redis连接地址
   env_var: REDIS_URL
@@ -111,11 +111,11 @@
   is_secret: false
   key: redis_url
   label: Redis URL
-  updated_at: '2026-06-02T13:17:52.820527'
+  updated_at: '2026-06-04T16:19:48.005947'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820444'
+- created_at: '2026-06-04T16:19:48.005849'
   default_value: ''
   description: Claude系列接口密钥
   env_var: ANTHROPIC_API_KEY
@@ -124,11 +124,11 @@
   is_secret: true
   key: anthropic_api_key
   label: Anthropic API Key
-  updated_at: '2026-06-02T13:17:52.820444'
+  updated_at: '2026-06-04T16:19:48.005849'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820436'
+- created_at: '2026-06-04T16:19:48.005788'
   default_value: ''
   description: DeepSeek接口密钥
   env_var: DEEPSEEK_API_KEY
@@ -137,11 +137,11 @@
   is_secret: true
   key: deepseek_api_key
   label: DeepSeek API Key
-  updated_at: '2026-06-02T13:17:52.820436'
+  updated_at: '2026-06-04T16:19:48.005788'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820440'
+- created_at: '2026-06-04T16:19:48.005840'
   default_value: https://api.deepseek.com/v1
   description: DeepSeek接口地址
   env_var: DEEPSEEK_BASE_URL
@@ -150,11 +150,11 @@
   is_secret: false
   key: deepseek_base_url
   label: DeepSeek Base URL
-  updated_at: '2026-06-02T13:17:52.820440'
+  updated_at: '2026-06-04T16:19:48.005840'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820448'
+- created_at: '2026-06-04T16:19:48.005855'
   default_value: ''
   description: Gemini接口密钥
   env_var: GEMINI_API_KEY
@@ -163,11 +163,11 @@
   is_secret: true
   key: gemini_api_key
   label: Google Gemini API Key
-  updated_at: '2026-06-02T13:17:52.820448'
+  updated_at: '2026-06-04T16:19:48.005855'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820458'
+- created_at: '2026-06-04T16:19:48.005867'
   default_value: '4096'
   description: LLM单次请求最大token
   env_var: LLM_MAX_TOKENS
@@ -176,11 +176,11 @@
   is_secret: false
   key: llm_max_tokens
   label: 最大Token数
-  updated_at: '2026-06-02T13:17:52.820458'
+  updated_at: '2026-06-04T16:19:48.005867'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820466'
+- created_at: '2026-06-04T16:19:48.005877'
   default_value: '0.7'
   description: LLM生成温度(0-2)
   env_var: LLM_TEMPERATURE
@@ -189,11 +189,11 @@
   is_secret: false
   key: llm_temperature
   label: Temperature
-  updated_at: '2026-06-02T13:17:52.820466'
+  updated_at: '2026-06-04T16:19:48.005877'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820462'
+- created_at: '2026-06-04T16:19:48.005872'
   default_value: '60'
   description: LLM请求超时时间
   env_var: LLM_TIMEOUT
@@ -202,11 +202,11 @@
   is_secret: false
   key: llm_timeout
   label: 请求超时(秒)
-  updated_at: '2026-06-02T13:17:52.820462'
+  updated_at: '2026-06-04T16:19:48.005872'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820455'
+- created_at: '2026-06-04T16:19:48.005863'
   default_value: http://localhost:11434
   description: 本地Ollama服务地址
   env_var: OLLAMA_BASE_URL
@@ -215,11 +215,11 @@
   is_secret: false
   key: ollama_base_url
   label: Ollama Base URL
-  updated_at: '2026-06-02T13:17:52.820455'
+  updated_at: '2026-06-04T16:19:48.005863'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820407'
+- created_at: '2026-06-04T16:19:48.005553'
   default_value: ''
   description: OpenAI GPT系列接口密钥
   env_var: OPENAI_API_KEY
@@ -228,11 +228,11 @@
   is_secret: true
   key: openai_api_key
   label: OpenAI API Key
-  updated_at: '2026-06-02T13:17:52.820407'
+  updated_at: '2026-06-04T16:19:48.005553'
   updated_by: system
   validation_pattern: ^sk-[a-zA-Z0-9]{20,}$
   value: '****'
-- created_at: '2026-06-02T13:17:52.820425'
+- created_at: '2026-06-04T16:19:48.005597'
   default_value: https://api.openai.com/v1
   description: OpenAI接口地址(可改为代理)
   env_var: OPENAI_BASE_URL
@@ -241,11 +241,11 @@
   is_secret: false
   key: openai_base_url
   label: OpenAI Base URL
-  updated_at: '2026-06-02T13:17:52.820425'
+  updated_at: '2026-06-04T16:19:48.005597'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820431'
+- created_at: '2026-06-04T16:19:48.005754'
   default_value: gpt-4o
   description: 默认使用的GPT模型
   env_var: OPENAI_DEFAULT_MODEL
@@ -254,11 +254,11 @@
   is_secret: false
   key: openai_default_model
   label: OpenAI 默认模型
-  updated_at: '2026-06-02T13:17:52.820431'
+  updated_at: '2026-06-04T16:19:48.005754'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820451'
+- created_at: '2026-06-04T16:19:48.005859'
   default_value: ''
   description: 智谱GLM系列接口密钥
   env_var: ZHIPU_API_KEY
@@ -267,11 +267,11 @@
   is_secret: true
   key: zhipu_api_key
   label: 智谱 API Key
-  updated_at: '2026-06-02T13:33:39.370110'
+  updated_at: '2026-06-04T16:20:03.708746'
   updated_by: env_inject
   validation_pattern: ''
   value: 9350****0qOm
-- created_at: '2026-06-02T13:17:52.820501'
+- created_at: '2026-06-04T16:19:48.005918'
   default_value: ''
   description: iOS Bark推送设备Key
   env_var: BARK_DEVICE_KEY
@@ -280,11 +280,11 @@
   is_secret: true
   key: notify_bark_device_key
   label: Bark设备Key
-  updated_at: '2026-06-02T13:17:52.820501'
+  updated_at: '2026-06-04T16:19:48.005918'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820504'
+- created_at: '2026-06-04T16:19:48.005921'
   default_value: https://api.day.app
   description: Bark自建服务器地址
   env_var: BARK_SERVER
@@ -293,11 +293,11 @@
   is_secret: false
   key: notify_bark_server
   label: Bark服务器
-  updated_at: '2026-06-02T13:17:52.820504'
+  updated_at: '2026-06-04T16:19:48.005921'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820489'
+- created_at: '2026-06-04T16:19:48.005904'
   default_value: ''
   description: 钉钉机器人签名Secret
   env_var: DINGTALK_SECRET
@@ -306,11 +306,11 @@
   is_secret: true
   key: notify_dingtalk_secret
   label: 钉钉签名密钥
-  updated_at: '2026-06-02T13:17:52.820489'
+  updated_at: '2026-06-04T16:19:48.005904'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820486'
+- created_at: '2026-06-04T16:19:48.005900'
   default_value: ''
   description: 钉钉机器人Webhook URL + Secret
   env_var: DINGTALK_WEBHOOK_URL
@@ -319,11 +319,11 @@
   is_secret: true
   key: notify_dingtalk_webhook
   label: 钉钉Webhook
-  updated_at: '2026-06-02T13:17:52.820486'
+  updated_at: '2026-06-04T16:19:48.005900'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820480'
+- created_at: '2026-06-04T16:19:48.005893'
   default_value: ''
   description: 发件邮箱密码/授权码
   env_var: SMTP_PASSWORD
@@ -332,11 +332,11 @@
   is_secret: true
   key: notify_email_password
   label: 邮箱密码
-  updated_at: '2026-06-02T13:17:52.820480'
+  updated_at: '2026-06-04T16:19:48.005893'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820470'
+- created_at: '2026-06-04T16:19:48.005882'
   default_value: ''
   description: 邮件发送SMTP地址
   env_var: SMTP_HOST
@@ -345,11 +345,11 @@
   is_secret: false
   key: notify_email_smtp_host
   label: SMTP服务器
-  updated_at: '2026-06-02T13:17:52.820470'
+  updated_at: '2026-06-04T16:19:48.005882'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820474'
+- created_at: '2026-06-04T16:19:48.005886'
   default_value: '465'
   description: SMTP端口
   env_var: SMTP_PORT
@@ -358,11 +358,11 @@
   is_secret: false
   key: notify_email_smtp_port
   label: SMTP端口
-  updated_at: '2026-06-02T13:17:52.820474'
+  updated_at: '2026-06-04T16:19:48.005886'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820477'
+- created_at: '2026-06-04T16:19:48.005889'
   default_value: ''
   description: 发件邮箱地址
   env_var: SMTP_USER
@@ -371,11 +371,11 @@
   is_secret: false
   key: notify_email_user
   label: 邮箱用户名
-  updated_at: '2026-06-02T13:17:52.820477'
+  updated_at: '2026-06-04T16:19:48.005889'
   updated_by: system
   validation_pattern: ''
   value: ''
-- created_at: '2026-06-02T13:17:52.820492'
+- created_at: '2026-06-04T16:19:48.005907'
   default_value: ''
   description: 飞书机器人Webhook URL
   env_var: FEISHU_WEBHOOK_URL
@@ -384,11 +384,11 @@
   is_secret: true
   key: notify_feishu_webhook
   label: 飞书Webhook
-  updated_at: '2026-06-02T13:17:52.820492'
+  updated_at: '2026-06-04T16:19:48.005907'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820498'
+- created_at: '2026-06-04T16:19:48.005914'
   default_value: ''
   description: PushPlus推送Token
   env_var: PUSHPLUS_TOKEN
@@ -397,11 +397,11 @@
   is_secret: true
   key: notify_pushplus_token
   label: PushPlus Token
-  updated_at: '2026-06-02T13:17:52.820498'
+  updated_at: '2026-06-04T16:19:48.005914'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820495'
+- created_at: '2026-06-04T16:19:48.005911'
   default_value: ''
   description: Server酱SendKey
   env_var: SERVERCHAN_KEY
@@ -410,11 +410,11 @@
   is_secret: true
   key: notify_serverchan_key
   label: Server酱Key
-  updated_at: '2026-06-02T13:17:52.820495'
+  updated_at: '2026-06-04T16:19:48.005911'
   updated_by: system
   validation_pattern: ''
   value: '****'
-- created_at: '2026-06-02T13:17:52.820483'
+- created_at: '2026-06-04T16:19:48.005897'
   default_value: ''
   description: 企业微信机器人Webhook URL
   env_var: WECHAT_WEBHOOK_URL
@@ -423,7 +423,7 @@
   is_secret: true
   key: notify_wechat_webhook
   label: 企业微信Webhook
-  updated_at: '2026-06-02T13:17:52.820483'
+  updated_at: '2026-06-04T16:19:48.005897'
   updated_by: system
   validation_pattern: ''
   value: '****'
