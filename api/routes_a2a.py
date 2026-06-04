@@ -70,7 +70,7 @@ async def send_message(msg: A2AMessage):
 @router.post("/api/v1/a2a/create-room")
 async def create_room(agents: str = "", task: str = ""):
     """创建 Agent 协作房间"""
-    room_id = f"room-{uuid.uuid4()[:8]}"
+    room_id = f"room-{str(uuid.uuid4())[:8]}"
     agent_list = [a.strip() for a in agents.split(",") if a.strip()] if agents else []
     
     # 验证 agent 存在
