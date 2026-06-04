@@ -347,6 +347,21 @@ async def rag_query(req: RAGQuery):
 # ============================================================
 # API: 简单的 RAG 聊天（端到端）
 # ============================================================
+@router.post("/api/v1/rag/analyze")
+async def rag_analyze(payload: dict):
+    """简版 RAG 分析——同 chat 但返回更简"""
+    query = payload.get("query", "")
+    if not query:
+        return {"success": False, "detail": "请提供问题"}
+    import httpx
+    async with httpx.AsyncClient(timeout=60) as c:
+        resp = await c.post("http://127.0.0.1:8765/api/v1/rag/query",
+                           json={"query": query, "top_k": payload.get("top_k", 3), "use_llm": True})
+        data = resp.json()
+    if data.get("success") and data.get("llm_answer"):
+        return {"success": True, "answer": data["llm_answer"], "mode": "rag"}
+    return {"success": False, "detail": "RAG 分析失败"}
+
 @router.post("/api/v1/rag/chat")
 async def rag_chat(payload: dict):
     """

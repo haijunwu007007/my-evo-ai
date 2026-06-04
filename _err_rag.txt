@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\t_seed_rag.py", line 32, in <module>
+    conn.execute("INSERT INTO rag_chunks (doc_id, kb_name, text, created_at) VALUES (?,?,?,?)",
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (doc_id, "default", ck, time.time()))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: table rag_chunks has no column named text

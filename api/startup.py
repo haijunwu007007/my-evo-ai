@@ -139,9 +139,9 @@ async def lifespan(app: FastAPI):
     ]
     for _env_name, _env_desc in _env_checks:
         if os.environ.get(_env_name):
-            logger.info(f"  ✅ {_env_desc} — 已配置")
+            logger.info(f"  [OK] {_env_desc} — 已配置")
         else:
-            logger.info(f"  ⏳ {_env_desc} — 未配置（不影响核心功能）")
+            logger.info(f"  [WAIT] {_env_desc} — 未配置（不影响核心功能）")
 
     # 初始化可观测性
     try:

@@ -216,7 +216,7 @@ def _bridge_mcp_tools_as_skills():
                 _SKILL_REGISTRY[name] = skill
                 count += 1
         if count:
-            logger.info(f"  🔗 MCP 工具桥接为 Skill: {count} 个")
+            logger.info(f"  [BRIDGE] MCP 工具桥接为 Skill: {count} 个")
     except Exception as e:
         logger.warning(f"  ⚠️  MCP 桥接失败: {e}")
 

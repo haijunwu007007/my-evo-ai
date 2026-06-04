@@ -67,11 +67,11 @@ except Exception as e:
     logger.warning(f"[ENGINE] TaskQueue 不可用: {e}")
 
 
-def start_engines() -> None:
+async def start_engines() -> None:
     """启动所有已加载引擎的后台循环"""
     global _engine_tasks
     if HAS_SCHEDULER and hasattr(_scheduler_instance, 'start'):
-        _scheduler_instance.start()  # start() 是同步函数，直接调用
+        _scheduler_instance.start()
         _engine_tasks.append(asyncio.create_task(_scheduler_instance._tick_loop(), name="scheduler-engine"))
     if HAS_EVENTS and hasattr(_event_engine, 'start'):
         _engine_tasks.append(asyncio.create_task(_event_engine.start(), name="event-engine"))
