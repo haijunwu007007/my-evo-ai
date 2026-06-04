@@ -136,6 +136,8 @@ from api.routes_public_api import router as public_api_router
 from api.routes_gateway import router as gateway_router
 from api.routes_rest2mcp import router as rest2mcp_router
 from api.routes_a2a import router as a2a_router
+from api.routes_multitenant import router as tenant_router
+from api.routes_analytics import router as analytics_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -194,6 +196,8 @@ app.include_router(public_api_router)
 app.include_router(gateway_router)
 app.include_router(rest2mcp_router)
 app.include_router(a2a_router)
+app.include_router(tenant_router)
+app.include_router(analytics_router)
 app.include_router(mcp_router)
 
 
