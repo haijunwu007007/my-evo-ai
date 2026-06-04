@@ -224,3 +224,44 @@ async def chat_history(username: str = "admin", limit: int = 50):
     rows = conn.execute("SELECT role, content, created_at FROM chat_history WHERE username=? ORDER BY created_at DESC LIMIT ?", (username, limit)).fetchall()
     conn.close()
     return {"success": True, "messages": [{"role":r[0],"content":r[1]} for r in reversed(rows)]}
+
+# ─── 8. 💰 支付配置 ─────────────────────────
+@router.get("/api/v1/payment/config")
+async def payment_config():
+    return {"success": True, "providers": {
+        "alipay": bool(os.environ.get("ALIPAY_APP_ID")),
+        "wechat": bool(os.environ.get("WECHAT_MCH_ID")),
+        "stripe": bool(os.environ.get("STRIPE_KEY"))
+    }, "note": "配置环境变量后启用对应支付方式"}
+
+# ─── 9. 🔄 Webhook 接收 ──────────────────
+class WebhookEvent(BaseModel):
+    event: str
+    payload: Optional[dict] = {}
+
+@router.post("/api/v1/webhook")
+async def receive_webhook(req: WebhookEvent):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn.execute("CREATE TABLE IF NOT EXISTS webhook_events (id INTEGER PRIMARY KEY AUTOINCREMENT, event TEXT, payload TEXT, received_at REAL)")
+    conn.execute("INSERT INTO webhook_events (event, payload, received_at) VALUES (?,?,?)", (req.event, json.dumps(req.payload), time.time()))
+    conn.commit(); conn.close()
+    return {"success": True, "result": f"Webhook 已接收: {req.event}"}
+
+@router.get("/api/v1/webhook/events")
+async def list_webhook_events(limit: int = 20):
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    rows = conn.execute("SELECT id, event, payload, received_at FROM webhook_events ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+    conn.close()
+    return {"success": True, "events": [{"id":r[0],"event":r[1],"payload":r[2],"time":r[3]} for r in rows]}
+
+# ─── 10. 📦 插件商店 ──────────────────────
+@router.get("/api/v1/plugins")
+async def list_plugins():
+    _installed = []
+    _plugins_dir = Path(__file__).resolve().parent.parent / "plugins"
+    if _plugins_dir.exists():
+        for _p in _plugins_dir.iterdir():
+            if _p.is_dir() and (_p / "plugin.json").exists():
+                try: _installed.append(json.load(open(_p/"plugin.json")))
+                except: pass
+    return {"success": True, "plugins": _installed, "count": len(_installed)}
