@@ -84,6 +84,17 @@ def _mount_vue_frontend():
                 return FileResponse(str(_admin_html), media_type="text/html")
             logger.info(f"[ADMIN] 管理后台已挂载: {_admin_html}")
 
+        # Workflow 画布 — 从 routes_new_features 模块获取内联 HTML
+        try:
+            from api.routes_new_features import _WORKFLOW_HTML
+            @app.get("/workflow", include_in_schema=False)
+            async def serve_workflow():
+                from fastapi.responses import HTMLResponse
+                return HTMLResponse(_WORKFLOW_HTML)
+            logger.info("[WORKFLOW] 可视化画布已挂载: /workflow")
+        except ImportError:
+            logger.warning("[WORKFLOW] 未找到 workflow HTML (routes_new_features 未加载)")
+
         # 非 API/App 路径兜底 → 聊天界面
         @app.get("/{path:path}", include_in_schema=False)
         async def _spa_catchall(path: str):
