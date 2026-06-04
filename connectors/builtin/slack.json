@@ -1,0 +1,16 @@
+{
+  "name": "Slack",
+  "version": "2.0.0",
+  "icon": "fa:slack",
+  "category": "通信",
+  "type": "webhook",
+  "description": "Slack 消息发送/通知/频道管理",
+  "operations": [
+    "send_message",
+    "list_channels",
+    "create_channel"
+  ],
+  "auth_type": "webhook",
+  "properties": {},
+  "documentation_url": "https://api.slack.com/"
+}

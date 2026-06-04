@@ -1,0 +1,19 @@
+{
+  "name": "Notion",
+  "version": "1.0.0",
+  "icon": "fa:book",
+  "category": "生产力",
+  "type": "api",
+  "description": "页面/数据库/块操作",
+  "operations": [
+    "query_database",
+    "create_page",
+    "update_page",
+    "append_block"
+  ],
+  "auth_type": "oauth2",
+  "properties": {
+    "api_base": "https://api.notion.com/v1"
+  },
+  "documentation_url": "https://developers.notion.com/"
+}

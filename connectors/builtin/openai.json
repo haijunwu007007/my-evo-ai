@@ -1,0 +1,19 @@
+{
+  "name": "OpenAI API",
+  "version": "2.0.0",
+  "icon": "fa:brain",
+  "category": "AI",
+  "type": "api",
+  "description": "GPT/Embedding/TTS/图片生成",
+  "operations": [
+    "chat",
+    "embedding",
+    "transcribe",
+    "generate_image"
+  ],
+  "auth_type": "api_key",
+  "properties": {
+    "api_base": "https://api.openai.com/v1"
+  },
+  "documentation_url": "https://platform.openai.com/docs"
+}

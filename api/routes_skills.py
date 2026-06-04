@@ -221,6 +221,23 @@ def _bridge_mcp_tools_as_skills():
         logger.warning(f"  ⚠️  MCP 桥接失败: {e}")
 
 
+def _bridge_connectors_as_skills():
+    """将连接器注册表桥接为技能"""
+    try:
+        from api.routes_connectors import get_connector_skills
+        connector_skills = get_connector_skills()
+        count = 0
+        for skill_dict in connector_skills:
+            name = skill_dict.get("name", "")
+            if name and name not in _SKILL_REGISTRY:
+                _SKILL_REGISTRY[name] = SkillDefinition(**skill_dict)
+                count += 1
+        if count:
+            logger.info(f"  🔗 连接器桥接: {count} 个技能")
+    except Exception as e:
+        logger.warning(f"  ⚠️ 连接器桥接失败: {e}")
+
+
 # ============================================================
 # 4. 初始化
 # ============================================================
@@ -230,8 +247,9 @@ def init_skills():
     _load_custom_skills()
     _scan_external_skills()
     _bridge_mcp_tools_as_skills()
+    _bridge_connectors_as_skills()
     count = len(_SKILL_REGISTRY)
-    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP 桥接）")
+    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP 桥接 + 连接器桥接）")
     return count
 
 init_skills()

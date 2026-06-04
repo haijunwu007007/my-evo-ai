@@ -1,0 +1,16 @@
+{
+  "name": "Notion 数据库",
+  "version": "1.0.0",
+  "icon": "fa:table",
+  "category": "数据库",
+  "type": "api",
+  "description": "Notion 数据库查询/创建/更新",
+  "operations": [
+    "query",
+    "create",
+    "update"
+  ],
+  "auth_type": "oauth2",
+  "properties": {},
+  "documentation_url": "https://developers.notion.com/"
+}

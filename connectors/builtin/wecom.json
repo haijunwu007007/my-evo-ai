@@ -1,0 +1,18 @@
+{
+  "name": "企业微信",
+  "version": "1.0.0",
+  "icon": "fa:weixin",
+  "category": "通信",
+  "type": "api",
+  "description": "企业微信消息/通讯录/群机器人",
+  "operations": [
+    "send_message",
+    "get_token",
+    "list_departments"
+  ],
+  "auth_type": "api_key",
+  "properties": {
+    "api_base": "https://qyapi.weixin.qq.com/cgi-bin"
+  },
+  "documentation_url": "https://developer.work.weixin.qq.com/"
+}

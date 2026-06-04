@@ -1,0 +1,19 @@
+{
+  "name": "Stripe 支付",
+  "version": "2.0.0",
+  "icon": "fa:credit-card",
+  "category": "支付",
+  "type": "api",
+  "description": "支付/退款/订阅/发票管理",
+  "operations": [
+    "create_payment",
+    "refund",
+    "list_invoices",
+    "create_subscription"
+  ],
+  "auth_type": "api_key",
+  "properties": {
+    "api_base": "https://api.stripe.com/v1"
+  },
+  "documentation_url": "https://docs.stripe.com/api"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "SMTP 邮件",
+  "version": "1.0.0",
+  "icon": "fa:envelope",
+  "category": "通信",
+  "type": "api",
+  "description": "通过 SMTP 发送邮件",
+  "operations": [
+    "send_email"
+  ],
+  "auth_type": "basic",
+  "properties": {},
+  "documentation_url": ""
+}

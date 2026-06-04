@@ -1,0 +1,19 @@
+{
+  "name": "PostgreSQL",
+  "version": "1.0.0",
+  "icon": "fa:database",
+  "category": "数据库",
+  "type": "database",
+  "description": "PostgreSQL 查询/写入/管理",
+  "operations": [
+    "execute_query",
+    "insert_rows",
+    "update_rows",
+    "list_tables"
+  ],
+  "auth_type": "basic",
+  "properties": {
+    "default_port": 5432
+  },
+  "documentation_url": "https://www.postgresql.org/docs/"
+}

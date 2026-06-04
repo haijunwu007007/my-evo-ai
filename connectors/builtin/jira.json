@@ -1,0 +1,17 @@
+{
+  "name": "Jira",
+  "version": "1.0.0",
+  "icon": "fa:ticket",
+  "category": "项目管理",
+  "type": "api",
+  "description": "Issue/Sprint/看板/项目操作",
+  "operations": [
+    "create_issue",
+    "list_sprints",
+    "transition_issue",
+    "search_issues"
+  ],
+  "auth_type": "basic",
+  "properties": {},
+  "documentation_url": "https://developer.atlassian.com/cloud/jira/platform/"
+}

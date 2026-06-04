@@ -1,0 +1,19 @@
+{
+  "name": "MySQL 数据库",
+  "version": "1.0.0",
+  "icon": "fa:database",
+  "category": "数据库",
+  "type": "database",
+  "description": "MySQL 查询/插入/更新/删除",
+  "operations": [
+    "execute_query",
+    "insert_rows",
+    "update_rows",
+    "delete_rows"
+  ],
+  "auth_type": "basic",
+  "properties": {
+    "default_port": 3306
+  },
+  "documentation_url": "https://dev.mysql.com/doc/"
+}

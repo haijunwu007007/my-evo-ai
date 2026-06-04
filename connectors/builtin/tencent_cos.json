@@ -1,0 +1,16 @@
+{
+  "name": "腾讯云 COS",
+  "version": "1.0.0",
+  "icon": "fa:cloud",
+  "category": "存储",
+  "type": "api",
+  "description": "腾讯云对象存储上传/下载/管理",
+  "operations": [
+    "upload",
+    "download",
+    "list_objects"
+  ],
+  "auth_type": "access_key",
+  "properties": {},
+  "documentation_url": "https://cloud.tencent.com/product/cos"
+}

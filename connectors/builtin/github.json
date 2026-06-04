@@ -1,0 +1,20 @@
+{
+  "name": "GitHub API",
+  "version": "2.0.0",
+  "icon": "fa:github",
+  "category": "开发工具",
+  "type": "api",
+  "description": "GitHub 仓库/Issue/PR/Release 操作",
+  "operations": [
+    "create_issue",
+    "list_prs",
+    "get_repo",
+    "search_code",
+    "list_releases"
+  ],
+  "auth_type": "oauth2",
+  "properties": {
+    "base_url": "https://api.github.com"
+  },
+  "documentation_url": "https://docs.github.com/en/rest"
+}

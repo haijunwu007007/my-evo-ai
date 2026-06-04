@@ -1,0 +1,15 @@
+{
+  "name": "Discord Webhook",
+  "version": "1.0.0",
+  "icon": "fa:discord",
+  "category": "通信",
+  "type": "webhook",
+  "description": "Discord 消息/通知",
+  "operations": [
+    "send_message",
+    "send_embed"
+  ],
+  "auth_type": "webhook",
+  "properties": {},
+  "documentation_url": "https://discord.com/developers/docs"
+}

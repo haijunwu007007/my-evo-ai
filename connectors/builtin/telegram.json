@@ -1,0 +1,19 @@
+{
+  "name": "Telegram Bot",
+  "version": "1.0.0",
+  "icon": "fa:telegram",
+  "category": "通信",
+  "type": "api",
+  "description": "Telegram 消息收发/群组管理",
+  "operations": [
+    "send_message",
+    "send_photo",
+    "get_updates",
+    "set_webhook"
+  ],
+  "auth_type": "api_key",
+  "properties": {
+    "api_base": "https://api.telegram.org/bot"
+  },
+  "documentation_url": "https://core.telegram.org/bots/api"
+}

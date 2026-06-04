@@ -1,0 +1,16 @@
+{
+  "name": "钉钉机器人",
+  "version": "1.0.0",
+  "icon": "fa:comment",
+  "category": "通信",
+  "type": "webhook",
+  "description": "钉钉群消息推送",
+  "operations": [
+    "send_text",
+    "send_markdown",
+    "send_link"
+  ],
+  "auth_type": "webhook",
+  "properties": {},
+  "documentation_url": "https://open.dingtalk.com/document/"
+}
