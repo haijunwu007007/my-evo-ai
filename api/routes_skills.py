@@ -238,6 +238,23 @@ def _bridge_connectors_as_skills():
         logger.warning(f"  ⚠️ 连接器桥接失败: {e}")
 
 
+def _bridge_mcpize_as_skills():
+    """将 MCPize 万能集成桥的工具桥接为技能"""
+    try:
+        from api.routes_mcpize import get_mcpize_skills
+        skills = get_mcpize_skills()
+        count = 0
+        for sd in skills:
+            name = sd.get("name", "")
+            if name and name not in _SKILL_REGISTRY:
+                _SKILL_REGISTRY[name] = SkillDefinition(**sd)
+                count += 1
+        if count:
+            logger.info(f"  🧩 MCPize 桥接: {count} 个技能")
+    except Exception as e:
+        logger.warning(f"  ⚠️ MCPize 桥接失败: {e}")
+
+
 # ============================================================
 # 4. 初始化
 # ============================================================
@@ -248,8 +265,9 @@ def init_skills():
     _scan_external_skills()
     _bridge_mcp_tools_as_skills()
     _bridge_connectors_as_skills()
+    _bridge_mcpize_as_skills()
     count = len(_SKILL_REGISTRY)
-    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP 桥接 + 连接器桥接）")
+    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize）")
     return count
 
 init_skills()

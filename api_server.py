@@ -130,6 +130,7 @@ from api.routes_skills import router as skills_router
 from api.routes_mcp import router as mcp_router
 from api.routes_rag import router as rag_router
 from api.routes_connectors import router as connectors_router
+from api.routes_mcpize import router as mcpize_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -182,6 +183,7 @@ app.include_router(smart_chat_router)
 app.include_router(skills_router)
 app.include_router(rag_router)
 app.include_router(connectors_router)
+app.include_router(mcpize_router)
 app.include_router(mcp_router)
 
 

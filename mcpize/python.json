@@ -1,0 +1,27 @@
+{
+  "type": "cli",
+  "source": "python --version",
+  "name": "python",
+  "created_at": 1780550444.130254,
+  "tools": [
+    {
+      "name": "python_run",
+      "description": "执行命令: python --version",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "命令行参数"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "超时秒数",
+            "default": 30
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 1
+}

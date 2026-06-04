@@ -1,0 +1,35 @@
+{
+  "type": "website",
+  "source": "https://github.com",
+  "name": "github",
+  "created_at": 1780550443.9994678,
+  "tools": [
+    {
+      "name": "github_scrape",
+      "description": "抓取 https://github.com 的页面内容",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "页面路径"
+          }
+        }
+      }
+    },
+    {
+      "name": "github_search",
+      "description": "在 https://github.com 上搜索关键词",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "搜索词"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 2
+}

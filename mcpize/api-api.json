@@ -1,0 +1,28 @@
+{
+  "type": "api",
+  "source": "https://api.github.com",
+  "name": "api-api",
+  "method": "GET",
+  "headers": {},
+  "created_at": 1780550390.31825,
+  "tools": [
+    {
+      "name": "api-api_call",
+      "description": "GitHub API",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "type": "object",
+            "description": "请求参数"
+          },
+          "headers": {
+            "type": "object",
+            "description": "额外请求头"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 1
+}
