@@ -131,6 +131,8 @@ from api.routes_mcp import router as mcp_router
 from api.routes_rag import router as rag_router
 from api.routes_connectors import router as connectors_router
 from api.routes_mcpize import router as mcpize_router
+from api.routes_agent_engine import router as agent_engine_router
+from api.routes_public_api import router as public_api_router
 from api.routes_gateway import router as gateway_router
 from api.routes_rest2mcp import router as rest2mcp_router
 from api.routes_a2a import router as a2a_router
@@ -187,6 +189,8 @@ app.include_router(skills_router)
 app.include_router(rag_router)
 app.include_router(connectors_router)
 app.include_router(mcpize_router)
+app.include_router(agent_engine_router)
+app.include_router(public_api_router)
 app.include_router(gateway_router)
 app.include_router(rest2mcp_router)
 app.include_router(a2a_router)
