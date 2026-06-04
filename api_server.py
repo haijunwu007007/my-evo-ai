@@ -127,6 +127,7 @@ from api.routes_new_features import router as new_features_router
 from api.routes_i18n import router as i18n_router
 from api.routes_smart_chat import router as smart_chat_router
 from api.routes_skills import router as skills_router
+from api.routes_mcp import router as mcp_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -177,6 +178,7 @@ app.include_router(new_features_router)
 app.include_router(i18n_router)
 app.include_router(smart_chat_router)
 app.include_router(skills_router)
+app.include_router(mcp_router)
 
 
 # ── 静态文件 ──
