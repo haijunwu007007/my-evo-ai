@@ -1,0 +1,200 @@
+[
+  {
+    "name": "text-generator",
+    "version": "1.0.0",
+    "description": "文章/报告/创意写作/改写",
+    "author": "AUTO-EVO-AI",
+    "category": "文本生成",
+    "icon": "✍️",
+    "tags": ["写作", "文章", "报告", "创意", "改写"],
+    "input_schema": {"type": "object", "properties": {"prompt": {"type": "string"}, "style": {"type": "string", "enum": ["正式", "创意", "简洁"]}}},
+    "output_schema": {"type": "object", "properties": {"text": {"type": "string"}}}
+  },
+  {
+    "name": "document-generator",
+    "version": "1.0.0",
+    "description": "生成 Word 合同/方案/报告",
+    "author": "AUTO-EVO-AI",
+    "category": "文件生成",
+    "icon": "📝",
+    "tags": ["文档", "合同", "方案", "报告", "Word"],
+    "input_schema": {"type": "object", "properties": {"content": {"type": "string"}, "format": {"type": "string", "enum": ["docx", "md", "txt"]}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "code-generator",
+    "version": "1.0.0",
+    "description": "Python/JS/SQL/Java 代码生成与解释",
+    "author": "AUTO-EVO-AI",
+    "category": "代码",
+    "icon": "💻",
+    "tags": ["代码", "Python", "JS", "SQL", "Java"],
+    "input_schema": {"type": "object", "properties": {"language": {"type": "string"}, "task": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"code": {"type": "string"}, "explanation": {"type": "string"}}}
+  },
+  {
+    "name": "image-generator",
+    "version": "1.0.0",
+    "description": "AI 绘图（SD/Stability AI）",
+    "author": "AUTO-EVO-AI",
+    "category": "多模态",
+    "icon": "🎨",
+    "tags": ["图片", "绘图", "AI画图"],
+    "input_schema": {"type": "object", "properties": {"prompt": {"type": "string"}, "style": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "search-web",
+    "version": "1.0.0",
+    "description": "DuckDuckGo 实时网页搜索",
+    "author": "AUTO-EVO-AI",
+    "category": "搜索",
+    "icon": "🔍",
+    "tags": ["搜索", "网页", "新闻", "查询"],
+    "input_schema": {"type": "object", "properties": {"query": {"type": "string"}, "count": {"type": "integer", "default": 5}}},
+    "output_schema": {"type": "object", "properties": {"results": {"type": "array"}}}
+  },
+  {
+    "name": "web-crawler",
+    "version": "1.0.0",
+    "description": "crawl4ai AI 网页爬虫",
+    "author": "AUTO-EVO-AI",
+    "category": "搜索",
+    "icon": "🕷️",
+    "tags": ["爬虫", "抓取", "网页"],
+    "input_schema": {"type": "object", "properties": {"url": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"title": {"type": "string"}, "content": {"type": "string"}}}
+  },
+  {
+    "name": "translate",
+    "version": "1.0.0",
+    "description": "9 种语言互译",
+    "author": "AUTO-EVO-AI",
+    "category": "文本生成",
+    "icon": "🌐",
+    "tags": ["翻译", "英文", "多语言"],
+    "input_schema": {"type": "object", "properties": {"text": {"type": "string"}, "target_lang": {"type": "string", "enum": ["zh-CN", "en", "ja", "ko", "fr", "es", "pt", "ru", "ar"]}}},
+    "output_schema": {"type": "object", "properties": {"translated": {"type": "string"}}}
+  },
+  {
+    "name": "math-calculator",
+    "version": "1.0.0",
+    "description": "数学表达式计算",
+    "author": "AUTO-EVO-AI",
+    "category": "工具",
+    "icon": "🧮",
+    "tags": ["数学", "计算", "表达式"],
+    "input_schema": {"type": "object", "properties": {"expression": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"result": {"type": "number"}, "formula": {"type": "string"}}}
+  },
+  {
+    "name": "github-trending",
+    "version": "1.0.0",
+    "description": "GitHub 今日热门项目 TOP 10",
+    "author": "AUTO-EVO-AI",
+    "category": "搜索",
+    "icon": "🔥",
+    "tags": ["GitHub", "热门", "趋势", "开源"],
+    "input_schema": {"type": "object", "properties": {"language": {"type": "string", "default": ""}, "limit": {"type": "integer", "default": 10}}},
+    "output_schema": {"type": "object", "properties": {"projects": {"type": "array"}}}
+  },
+  {
+    "name": "memory-save",
+    "version": "1.0.0",
+    "description": "保存和查询持久记忆",
+    "author": "AUTO-EVO-AI",
+    "category": "系统",
+    "icon": "🧠",
+    "tags": ["记忆", "记住", "回忆"],
+    "input_schema": {"type": "object", "properties": {"action": {"type": "string", "enum": ["save", "recall"]}, "content": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"memories": {"type": "array"}}}
+  },
+  {
+    "name": "todo-manager",
+    "version": "1.0.0",
+    "description": "待办创建/查询/完成/删除",
+    "author": "AUTO-EVO-AI",
+    "category": "工具",
+    "icon": "📋",
+    "tags": ["待办", "任务", "提醒"],
+    "input_schema": {"type": "object", "properties": {"action": {"type": "string", "enum": ["create", "list", "complete", "delete"]}, "title": {"type": "string"}, "priority": {"type": "string", "enum": ["高", "中", "低"]}}},
+    "output_schema": {"type": "object", "properties": {"todos": {"type": "array"}}}
+  },
+  {
+    "name": "ppt-generator",
+    "version": "1.0.0",
+    "description": "PPT 演示文稿生成",
+    "author": "AUTO-EVO-AI",
+    "category": "文件生成",
+    "icon": "📊",
+    "tags": ["PPT", "演示", "幻灯片"],
+    "input_schema": {"type": "object", "properties": {"topic": {"type": "string"}, "pages": {"type": "integer", "default": 5}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "excel-generator",
+    "version": "1.0.0",
+    "description": "Excel 表格生成",
+    "author": "AUTO-EVO-AI",
+    "category": "文件生成",
+    "icon": "📗",
+    "tags": ["Excel", "表格", "数据"],
+    "input_schema": {"type": "object", "properties": {"title": {"type": "string"}, "headers": {"type": "array"}, "data": {"type": "array"}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "voice-tts",
+    "version": "1.0.0",
+    "description": "文本转语音 mp3",
+    "author": "AUTO-EVO-AI",
+    "category": "多模态",
+    "icon": "🔊",
+    "tags": ["语音", "朗读", "TTS"],
+    "input_schema": {"type": "object", "properties": {"text": {"type": "string"}, "lang": {"type": "string", "default": "zh-CN"}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "desktop-screenshot",
+    "version": "1.0.0",
+    "description": "桌面截图",
+    "author": "AUTO-EVO-AI",
+    "category": "桌面自动化",
+    "icon": "🖥️",
+    "tags": ["截图", "桌面", "屏幕"],
+    "input_schema": {"type": "object", "properties": {"region": {"type": "string", "enum": ["full", "window"]}}},
+    "output_schema": {"type": "object", "properties": {"file_path": {"type": "string"}}}
+  },
+  {
+    "name": "project-scaffold",
+    "version": "1.0.0",
+    "description": "快速创建项目脚手架（Django/FastAPI/Vue/React）",
+    "author": "AUTO-EVO-AI",
+    "category": "代码",
+    "icon": "🏗️",
+    "tags": ["脚手架", "Django", "FastAPI", "Vue", "React"],
+    "input_schema": {"type": "object", "properties": {"framework": {"type": "string", "enum": ["django", "fastapi", "vue", "react"]}, "name": {"type": "string"}}},
+    "output_schema": {"type": "object", "properties": {"path": {"type": "string"}, "files": {"type": "array"}}}
+  },
+  {
+    "name": "docker-deploy",
+    "version": "1.0.0",
+    "description": "Docker Compose 容器部署",
+    "author": "AUTO-EVO-AI",
+    "category": "系统",
+    "icon": "🐳",
+    "tags": ["Docker", "容器", "部署"],
+    "input_schema": {"type": "object", "properties": {"service": {"type": "string", "enum": ["portainer", "gitea", "metabase", "nocodb", "dify", "jellyfin"]}}},
+    "output_schema": {"type": "object", "properties": {"status": {"type": "string"}, "container_id": {"type": "string"}}}
+  },
+  {
+    "name": "app-opener",
+    "version": "1.0.0",
+    "description": "打开系统应用（计算器/记事本/浏览器）",
+    "author": "AUTO-EVO-AI",
+    "category": "桌面自动化",
+    "icon": "🖥️",
+    "tags": ["打开", "计算器", "记事本", "浏览器"],
+    "input_schema": {"type": "object", "properties": {"app": {"type": "string", "enum": ["calculator", "notepad", "browser", "explorer"]}}},
+    "output_schema": {"type": "object", "properties": {"status": {"type": "string"}}}
+  }
+]

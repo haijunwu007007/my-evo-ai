@@ -793,13 +793,13 @@ async def smart_chat(req: SmartChatRequest):
     rules = {
         "zh-CN": {
             "status": "📊 **系统状态**\n• {count} 模块就绪\n• 9 种语言\n• 57 个外部工具\n• 100 行业方案\n\n说「系统怎么样」获取实时状态。",
-            "help": "**我能帮你做什么？**\n\n📊 查状态 — 「系统怎么样」\n🤖 AI讨论 — 「团队讨论xxx」\n💻 桌面操作 — 「帮我打开计算器」\n📝 生成文档 — 「帮我写一份合同」\n📊 处理Excel — 「帮我整理这个表格」\n⏰ 定时任务 — 「每天5点备份」\n🎤 语音输入 — 点 🎤 按钮",
+            "help": "**我能帮你做什么？**\n\n🎯 技能列表 — 「有哪些技能」或「技能列表」\n📊 查状态 — 「系统怎么样」\n🤖 AI讨论 — 「团队讨论xxx」\n💻 桌面操作 — 「帮我打开计算器」\n📝 生成文档 — 「帮我写一份合同」\n📊 处理Excel — 「帮我整理这个表格」\n⏰ 定时任务 — 「每天5点备份」\n🎤 语音输入 — 点 🎤 按钮",
             "write": "好的，我来帮你写。你可以说具体一点，比如「帮我写一份技术合同，甲方是XX公司」或者「帮我写一个Python脚本」。",
             "default": f"你说「{msg[:50]}」...\n我不太确定你想干嘛。试试：\n• 「你会什么」— 看我能干啥\n• 「系统怎么样」— 查状态\n• 「团队讨论xxx」— 叫AI团队讨论",
         },
         "en": {
             "status": "📊 **System Status**\n• {count} modules ready\n• 9 languages\n• 57 external tools\n• 100 industry solutions\n\nSay \"check status\" for real-time info.",
-            "help": "**What can I do?**\n\n📊 Status — \"check status\"\n🤖 AI discuss — \"team discuss xxx\"\n💻 Desktop — \"open calculator\"\n📝 Write — \"write a contract\"\n📊 Excel — \"process this spreadsheet\"\n⏰ Schedule — \"backup at 5pm\"\n🎤 Voice — click 🎤",
+            "help": "**What can I do?**\n\n🎯 Skills — \"skill list\" or \"list skills\"\n📊 Status — \"check status\"\n🤖 AI discuss — \"team discuss xxx\"\n💻 Desktop — \"open calculator\"\n📝 Write — \"write a contract\"\n📊 Excel — \"process this spreadsheet\"\n⏰ Schedule — \"backup at 5pm\"\n🎤 Voice — click 🎤",
             "write": "Sure, I can help you write that. Be more specific about what you need.",
             "default": f"You said \"{msg[:50]}\"...\nNot sure what you mean. Try:\n• \"what can you do\"\n• \"check status\"\n• \"team discuss xxx\"",
         }
@@ -816,6 +816,28 @@ async def smart_chat(req: SmartChatRequest):
         except: pass
         return {"success": True, "result": r["status"].format(count=_count or "?"), "mode": "rule"}
     # ── 帮助/列举 ──
+    # ── 技能系统 ──
+    if any(k in t for k in ["技能", "skill", "技能列表", "有哪些技能", "skill list"]):
+        try:
+            import httpx as _httpx_skill
+            _sr = _httpx_skill.get("http://127.0.0.1:8765/api/v1/skills", timeout=3)
+            if _sr.status_code == 200:
+                _sd = _sr.json()
+                _skills = _sd.get("skills", [])
+                _lines = ["🎯 **AUTO-EVO-AI 技能列表**\\n"]
+                _cats = {}
+                for _s in _skills:
+                    _c = _s.get("category", "通用")
+                    if _c not in _cats: _cats[_c] = []
+                    _cats[_c].append(f"  {_s.get('icon','🔧')} **{_s.get('name','?')}** — {_s.get('description','')}")
+                for _cat, _items in _cats.items():
+                    _lines.append(f"\\n**{_cat}**")
+                    _lines.extend(_items[:8])
+                _lines.append(f"\\n💡 共 {len(_skills)} 项技能。说「帮我xxx」自动匹配技能。")
+                return {"success":True,"result":"\\n".join(_lines),"mode":"skill_list"}
+        except: pass
+        return {"success":True,"result":"🎯 技能系统已就绪。可直接说需求（如「帮我写合同」），系统自动匹配技能。","mode":"skill_list"}
+
     if any(k in t for k in ["帮助", "会什么", "功能", "help", "what can", "能做", "能做什么", "事情", "列举", "能干", "能力", "怎么用", "用途"]):
         return {"success": True, "result": r["help"], "mode": "rule"}
     # ── 文档生成 ──
