@@ -1,97 +1,108 @@
-"""后端国际化 — 根据 Accept-Language 返回对应语言的响应"""
-
+"""
+AUTO-EVO-AI V0.1 — i18n 多语言引擎
+提供 /api/v1/i18n?lang=zh-CN 端点，支持 Accept-Language
+"""
 from fastapi import APIRouter, Request
 from typing import Optional
+import json, os
+from pathlib import Path
 
 router = APIRouter()
 
-I18N_BACKEND = {
+BASE = Path(__file__).resolve().parent.parent
+I18N_DIR = BASE / "i18n"
+
+# 内置翻译（覆盖前端所有页面文本）
+_TRANSLATIONS = {
     "zh-CN": {
-        "status_ok": "✅ 一切正常 • 版本 {version} • {sdk} • {key}",
-        "sdk_ready": "桌面自动化就绪",
-        "sdk_missing": "桌面自动化未安装",
-        "key_ready": "API Key 已配置",
-        "key_missing": "API Key 未配置",
-        "what_can_do": "我能干这些事：\n📊 系统状态 — 「系统怎么样」\n🤖 AI团队讨论 — 「团队讨论xxx」\n🖥️ 桌面操作 — 「帮我截图」\n⏰ 定时任务 — 「每天下午5点备份」\n🏢 企业管理 — 点右上角「企业管理」\n🎤 语音输入 — 点 🎤 按钮\n\n你想先试哪个？",
-        "help": "我能干的：\n📊 状态\n🤖 AI讨论\n🖥️ 操作\n⏰ 定时\n🏢 企业\n🎤 语音",
-        "team_created": "✅ 团队已组建：{count} 个智能体正在讨论「{task}」",
-        "unknown": "没太明白，试试说「你会什么」",
-        "greeting": "在呢！说「你会什么」看看我能干啥",
-        "biz_guide": "企业功能在右上角「企业管理」页面",
-        "notify_guide": "通知支持钉钉/飞书/邮件，先配一下",
-        "schedule_guide": "定时任务可以设，比如「每天下午5点备份」",
+        "lang_name": "中文", "title": "AUTO-EVO-AI",
+        "subtitle": "生产力级 AI 自动化编排系统",
+        "login_heading": "开始使用", "login_btn": "进入系统",
+        "tab_chat": "对话", "tab_dashboard": "仪表盘", "tab_enterprise": "企业管理",
+        "input_placeholder": "输入你想做的事...",
+        "new_chat": "新对话", "history": "历史", "logout": "退出",
+        "greeting": "你好，{name}！有什么可以帮你？",
+        "loading": "加载中...", "error": "出错了", "retry": "重试",
+        "save": "保存", "cancel": "取消", "delete": "删除", "edit": "编辑",
+        "search": "搜索", "filter": "筛选", "sort": "排序",
+        "status_running": "运行中", "status_stopped": "已停止", "status_error": "异常",
+        "modules": "模块", "skills": "技能", "integrations": "集成",
+        "settings": "设置", "help": "帮助", "about": "关于",
+        "theme_light": "亮色", "theme_dark": "暗色", "theme_system": "跟随系统",
+        "api_docs": "API 文档", "workflow": "工作流",
+        "no_data": "暂无数据", "confirm_delete": "确认删除？",
+        "upload": "上传", "download": "下载", "copy": "复制",
+        "success": "成功", "fail": "失败", "pending": "待处理",
     },
     "en": {
-        "status_ok": "✅ All good • Version {version} • {sdk} • {key}",
-        "sdk_ready": "Desktop automation ready",
-        "sdk_missing": "Desktop automation not installed",
-        "key_ready": "API Key configured",
-        "key_missing": "API Key not configured",
-        "what_can_do": "Here's what I can do:\n📊 System status — \"check status\"\n🤖 AI team discuss — \"team discuss xxx\"\n🖥️ Desktop — \"screenshot\"\n⏰ Schedule — \"daily backup at 5pm\"\n🏢 Enterprise — click \"Enterprise\" top right\n🎤 Voice — click 🎤\n\nWhat first?",
-        "help": "I can:\n📊 Status\n🤖 AI discuss\n🖥️ Desktop\n⏰ Schedule\n🏢 Enterprise\n🎤 Voice",
-        "team_created": "✅ Team created: {count} agents discussing \"{task}\"",
-        "unknown": "Not sure what you mean. Try \"what can you do\"",
-        "greeting": "Hi! Say \"what can you do\" to see my skills",
-        "biz_guide": "Enterprise features in top right \"Enterprise\" page",
-        "notify_guide": "Notifications support DingTalk/Feishu/Email, configure first",
-        "schedule_guide": "Scheduled tasks available, e.g. \"backup at 5pm daily\"",
+        "lang_name": "English", "title": "AUTO-EVO-AI",
+        "subtitle": "Enterprise AI Automation Platform",
+        "login_heading": "Get Started", "login_btn": "Enter",
+        "tab_chat": "Chat", "tab_dashboard": "Dashboard", "tab_enterprise": "Enterprise",
+        "input_placeholder": "What can I do for you...",
+        "new_chat": "New Chat", "history": "History", "logout": "Logout",
+        "greeting": "Hello {name}! How can I help?",
+        "loading": "Loading...", "error": "Error", "retry": "Retry",
+        "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit",
+        "search": "Search", "filter": "Filter", "sort": "Sort",
+        "status_running": "Running", "status_stopped": "Stopped", "status_error": "Error",
+        "modules": "Modules", "skills": "Skills", "integrations": "Integrations",
+        "settings": "Settings", "help": "Help", "about": "About",
+        "theme_light": "Light", "theme_dark": "Dark", "theme_system": "System",
+        "api_docs": "API Docs", "workflow": "Workflow",
+        "no_data": "No data", "confirm_delete": "Confirm delete?",
+        "upload": "Upload", "download": "Download", "copy": "Copy",
+        "success": "Success", "fail": "Failed", "pending": "Pending",
     },
     "ja": {
-        "status_ok": "✅ 正常稼働 • バージョン {version} • {sdk} • {key}",
-        "sdk_ready": "デスクトップ自動化利用可能",
-        "sdk_missing": "デスクトップ自動化未インストール",
-        "key_ready": "API Key 設定済み",
-        "key_missing": "API Key 未設定",
-        "what_can_do": "できること：\n📊 状態確認\n🤖 AIチーム討論\n🖥️ デスクトップ操作\n⏰ 定期タスク\n🏢 企業管理\n🎤 音声入力\n\n何を試しますか？",
-        "help": "対応機能：\n📊 状態\n🤖 AI討論\n🖥️ 操作\n⏰ 定期\n🏢 企業\n🎤 音声",
-        "team_created": "✅ チーム編成：{count} 体のAIが「{task}」を討論中",
-        "unknown": "意味がわかりません。「できること」と試してください",
-        "greeting": "こんにちは！「できること」で機能一覧を表示します",
-        "biz_guide": "企業機能は右上の「企業管理」ページ",
-        "notify_guide": "通知はDingTalk/Feishu/メール対応。先に設定",
-        "schedule_guide": "定期タスク可能。「毎日17時にバックアップ」",
-    },
-    "ko": {
-        "status_ok": "✅ 정상 작동 • 버전 {version} • {sdk} • {key}",
-        "sdk_ready": "데스크톱 자동화 준비됨",
-        "sdk_missing": "데스크톱 자동화 미설치",
-        "key_ready": "API Key 설정됨",
-        "key_missing": "API Key 미설정",
-        "what_can_do": "할 수 있는 일:\n📊 상태 확인\n🤖 AI 팀 토론\n🖥️ 데스크톱 작업\n⏰ 예약 작업\n🏢 기업 관리\n🎤 음성 입력\n\n무엇을 먼저 할까요?",
-        "help": "가능한 기능:\n📊 상태\n🤖 AI 토론\n🖥️ 작업\n⏰ 예약\n🏢 기업\n🎤 음성",
-        "team_created": "✅ 팀 구성: {count}개 AI가 「{task}」토론 중",
-        "unknown": "이해하지 못했습니다. 「할 수 있는 일」을 입력해보세요",
-        "greeting": "안녕하세요! 「할 수 있는 일」로 기능을 확인하세요",
-        "biz_guide": "기업 기능은 우측 상단 「기업관리」페이지",
-        "notify_guide": "알림은 DingTalk/Feishu/메일 지원. 먼저 설정",
-        "schedule_guide": "예약 작업 가능. 「매일 오후5시 백업」",
+        "lang_name": "日本語", "title": "AUTO-EVO-AI",
+        "subtitle": "AI自動化プラットフォーム",
+        "login_heading": "開始", "login_btn": "入る",
+        "tab_chat": "チャット", "tab_dashboard": "ダッシュボード", "tab_enterprise": "企業管理",
+        "input_placeholder": "何をしますか...",
+        "new_chat": "新規", "history": "履歴", "logout": "ログアウト",
+        "greeting": "{name}さん！何をしますか？",
+        "loading": "読み込み中...", "error": "エラー", "retry": "再試行",
+        "save": "保存", "cancel": "キャンセル", "delete": "削除", "edit": "編集",
+        "search": "検索", "filter": "フィルター", "sort": "並び替え",
+        "status_running": "実行中", "status_stopped": "停止", "status_error": "異常",
+        "modules": "モジュール", "skills": "スキル", "integrations": "連携",
+        "settings": "設定", "help": "ヘルプ", "about": "について",
+        "theme_light": "ライト", "theme_dark": "ダーク", "theme_system": "システム",
+        "api_docs": "API文書", "workflow": "ワークフロー",
+        "no_data": "データなし", "confirm_delete": "削除しますか？",
+        "upload": "アップロード", "download": "ダウンロード", "copy": "コピー",
+        "success": "成功", "fail": "失敗", "pending": "待機中",
     },
 }
 
-def detect_lang(request: Request) -> str:
-    """从请求中检测语言"""
-    # 1. URL 参数
-    lang = request.query_params.get("lang", "")
-    if lang in I18N_BACKEND:
-        return lang
-    # 2. Accept-Language 头
-    accept = request.headers.get("accept-language", "")
-    for supported in ["zh-CN", "en", "ja", "ko"]:
-        if supported in accept:
-            return supported
-    # 3. 默认
-    return "zh-CN"
+# 加载文件系统中的 i18n JSON
+for f in sorted(I18N_DIR.glob("*.json")):
+    try:
+        lang = f.stem
+        data = json.loads(f.read_text(encoding="utf-8"))
+        if lang in _TRANSLATIONS:
+            _TRANSLATIONS[lang].update(data)
+        else:
+            _TRANSLATIONS[lang] = data
+    except: pass
+
 
 @router.get("/api/v1/i18n")
-async def get_i18n(request: Request, lang: Optional[str] = None):
-    """获取指定语言或浏览器语言的翻译"""
-    locale = detect_lang(request)
-    return {"success": True, "locale": locale, "translations": I18N_BACKEND.get(locale, I18N_BACKEND["zh-CN"])}
+async def get_i18n(lang: str = "zh-CN", request: Request = None):
+    """获取翻译 JSON"""
+    # 支持 Accept-Language
+    if request and request.headers.get("accept-language"):
+        accept = request.headers["accept-language"].split(",")[0].split("-")[0]
+        for code in _TRANSLATIONS:
+            if code.startswith(accept):
+                lang = code
+                break
+    
+    data = _TRANSLATIONS.get(lang) or _TRANSLATIONS.get("zh-CN", {})
+    return {"success": True, "lang": lang, "data": data, "available": list(_TRANSLATIONS.keys())}
 
-@router.get("/api/v1/i18n/{key}")
-async def get_translation(key: str, request: Request, lang: Optional[str] = None):
-    """获取单个翻译键值"""
-    locale = detect_lang(request)
-    trans = I18N_BACKEND.get(locale, I18N_BACKEND["zh-CN"])
-    value = trans.get(key, I18N_BACKEND["zh-CN"].get(key, key))
-    return {"success": True, "locale": locale, "key": key, "value": value}
+
+@router.get("/api/v1/i18n/langs")
+async def list_langs():
+    return {"success": True, "languages": list(_TRANSLATIONS.keys()), "names": {k: v.get("lang_name", k) for k, v in _TRANSLATIONS.items()}}
