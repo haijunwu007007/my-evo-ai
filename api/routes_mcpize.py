@@ -158,12 +158,16 @@ async def mcpize_python(spec: PythonSpec):
 # ============================================================
 class MCPizeExec(BaseModel):
     params: dict = {}
+    args: Optional[dict] = None  # 兼容直接传 args
 
 @router.post("/api/v1/mcpize/execute/{name}/{tool}")
 async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
     """执行已集成的 MCPize 工具"""
     if name not in _INTEGRATED:
         return {"success": False, "detail": f"未找到集成: {name}"}
+    
+    # 统一参数来源：params > args > {}
+    call_params = req.params if req.params else (req.args if req.args else {})
     
     entry = _INTEGRATED[name]
     entry_type = entry["type"]
@@ -172,12 +176,12 @@ async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
         if entry_type == "website":
             base_url = entry["source"]
             if "scrape" in tool:
-                path = req.params.get("path", "")
+                path = call_params.get("path", "")
                 async with httpx.AsyncClient(timeout=15) as c:
                     r = await c.get(base_url + path, follow_redirects=True)
                     return {"success": True, "content": r.text[:2000]}
             elif "search" in tool:
-                q = req.params.get("q", "")
+                q = call_params.get("q", "")
                 async with httpx.AsyncClient(timeout=15) as c:
                     r = await c.get(f"{base_url}/search?q={urllib.parse.quote(q)}", follow_redirects=True)
                     return {"success": True, "content": r.text[:2000]}
@@ -188,15 +192,15 @@ async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
             url = entry["source"]
             async with httpx.AsyncClient(timeout=30) as c:
                 if method == "GET":
-                    r = await c.get(url, params=req.params, headers=headers)
+                    r = await c.get(url, params=call_params, headers=headers)
                 else:
-                    r = await c.request(method, url, json=req.params, headers=headers)
+                    r = await c.request(method, url, json=call_params, headers=headers)
                 return {"success": True, "status": r.status_code, "content": r.text[:2000]}
         
         elif entry_type == "cli":
             cmd = entry["source"]
-            args = req.params.get("args", "")
-            timeout = int(req.params.get("timeout", 30))
+            args = call_params.get("args", "")
+            timeout = int(call_params.get("timeout", 30))
             full_cmd = f"{cmd} {args}" if args else cmd
             result = subprocess.run(full_cmd, shell=True, capture_output=True, text=True, timeout=timeout)
             return {"success": result.returncode == 0, "content": result.stdout[:2000], "stderr": result.stderr[:500]}
@@ -208,11 +212,11 @@ async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
                 func_name = tool.replace(f"{name}_", "")
                 if hasattr(mod, func_name):
                     func = getattr(mod, func_name)
-                    call_args = req.params.get("args", req.params)
-                    if isinstance(call_args, dict):
-                        result = func(**call_args)
+                    py_args = call_params.get("args", call_params)
+                    if isinstance(py_args, dict):
+                        result = func(**py_args)
                     else:
-                        result = func(call_args)
+                        result = func(py_args)
                     return {"success": True, "content": str(result)[:2000]}
                 return {"success": False, "content": f"函数 {func_name} 不在模块 {mod_name} 中"}
             except Exception as e:

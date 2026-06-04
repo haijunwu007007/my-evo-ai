@@ -223,6 +223,12 @@ class GatewayCall(BaseModel):
 @router.post("/api/v1/gateway/call")
 async def gateway_call(req: GatewayCall):
     """通过 Gateway 代理调用外部服务 API"""
+    # 自动补全 URL 协议前缀
+    ep = req.endpoint.strip()
+    if not ep.startswith("http://") and not ep.startswith("https://"):
+        ep = "https://" + ep
+    req.endpoint = ep
+    
     # 检查凭据
     conn = sqlite3.connect(str(_CRED_DB))
     row = conn.execute(f"SELECT auth_type, credentials FROM {_CRED_TABLE} WHERE service=?", (req.service,)).fetchone()
