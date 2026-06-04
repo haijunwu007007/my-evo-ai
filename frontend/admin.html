@@ -3,7 +3,14 @@
 <title>AUTO-EVO-AI 管理后台</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
 :root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee}
-body{background:var(--bg);color:var(--text);padding:20px}
+body{background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:16px;flex-shrink:0}
+.sidebar h2{font-size:14px;margin-bottom:16px;text-align:center}
+.sidebar a{display:block;padding:10px 12px;border-radius:8px;font-size:13px;color:var(--text2);text-decoration:none;margin-bottom:4px}
+.sidebar a:hover,.sidebar a.active{background:var(--accent);color:#fff}
+.main{flex:1;padding:20px;overflow-y:auto}
+.header{text-align:center;padding:0 0 20px 0}
+.header h1{font-size:22px}
 .header{text-align:center;padding:20px 0}
 .header h1{font-size:24px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1200px;margin:0 auto}
@@ -23,10 +30,30 @@ body{background:var(--bg);color:var(--text);padding:20px}
 .stat .num{font-size:28px;font-weight:700;color:var(--accent)}
 .stat .label{font-size:12px;color:var(--text2);margin-top:4px}
 </style></head><body>
-<div class="header"><h1>⚡ AUTO-EVO-AI 商业版管理后台</h1><p style="color:var(--text2);font-size:13px;margin-top:4px">生产力级 AI 自动化编排系统 V0.1</p></div>
+<div class="sidebar">
+  <h2>⚡ EVO-AI</h2>
+  <a class="active" onclick="showTab('dashboard')">📊 仪表盘</a>
+  <a onclick="showTab('modules')">🧩 模块管理</a>
+  <a onclick="showTab('llm')">🤖 LLM 配置</a>
+  <a onclick="showTab('docker')">🐳 Docker 部署</a>
+  <a onclick="showTab('plugins')">📦 插件商店</a>
+  <a onclick="showTab('payment')">💰 支付设置</a>
+  <a href="/">← 返回聊天</a>
+</div>
+<div class="main">
+<div class="header"><h1>⚡ AUTO-EVO-AI 商业版</h1><p style="color:var(--text2);font-size:13px;margin-top:4px">生产力级 AI 自动化编排系统 V0.1</p></div>
 
-<div class="stats" id="stats"></div>
-<div class="grid" id="moduleGrid"></div>
+<div id="tab-dashboard" class="tab-content">
+  <div class="stats" id="stats"></div>
+  <div class="grid" id="moduleGrid"></div>
+</div>
+<div id="tab-modules" class="tab-content" style="display:none"><h2>🧩 模块管理</h2><p>457 模块已注册（lazy 模式），功能请求时自动加载。</p><button onclick="location.reload()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer">刷新状态</button></div>
+<div id="tab-llm" class="tab-content" style="display:none"><h2>🤖 LLM 配置</h2><div id="llmStatus"></div></div>
+<div id="tab-docker" class="tab-content" style="display:none"><h2>🐳 Docker 部署</h2><p>一键启动行业工具容器：</p><pre style="background:#0a0a1a;padding:16px;border-radius:8px;font-size:12px">docker-compose --profile core up -d   # 启动核心服务
+docker-compose --profile ai up -d     # 启动AI工具
+docker-compose --profile analytics up -d # 启动分析工具</pre></div>
+<div id="tab-plugins" class="tab-content" style="display:none"><h2>📦 插件商店</h2><p>POST /api/v1/plugins/register 注册插件</p></div>
+<div id="tab-payment" class="tab-content" style="display:none"><h2>💰 支付设置</h2><div id="paymentStatus">加载中...</div></div>
 
 <script>
 const API='/api/v1'
@@ -78,5 +105,28 @@ function renderModules(){
   `).join('')
 }
 
-loadStats();renderModules()
+loadStats();renderModules();loadLLMStatus();loadPaymentStatus()
+
+function showTab(name){
+  document.querySelectorAll('.tab-content').forEach(function(el){el.style.display='none'})
+  document.getElementById('tab-'+name).style.display='block'
+  document.querySelectorAll('.sidebar a').forEach(function(el){el.classList.remove('active')})
+  var a=document.querySelector('.sidebar a[onclick*="'+name+'"]');if(a)a.classList.add('active')
+}
+
+async function loadLLMStatus(){
+  var el=document.getElementById('llmStatus');var h=[]
+  for(var k of ['ZHIPU_API_KEY','OPENAI_API_KEY','STABILITY_API_KEY']){
+    var s=localStorage.getItem(k)?'✅ 已配置(本地)':'⏳ 未配置'
+    h.push('<div style="padding:8px 12px;background:var(--card);border-radius:8px;margin-bottom:8px;border:1px solid var(--border)"><strong>'+k+'</strong> <span style="float:right">'+s+'</span></div>')
+  }
+  el.innerHTML=h.join('')
+}
+
+async function loadPaymentStatus(){
+  try{
+    var r=await fetch('/api/v1/payment/config');var d=await r.json()
+    document.getElementById('paymentStatus').innerHTML=Object.entries(d.providers||{}).map(function(e){return '<div style="padding:8px 12px;background:var(--card);border-radius:8px;margin-bottom:8px;border:1px solid var(--border)">'+e[0]+': '+(e[1]?'✅ 已配置':'⏳ 未配置')+'</div>'}).join('')+'<br><span style="color:var(--text2);font-size:12px">配置环境变量后生效</span>'
+  }catch(e){document.getElementById('paymentStatus').textContent='加载失败'}
+}
 </script></body></html>

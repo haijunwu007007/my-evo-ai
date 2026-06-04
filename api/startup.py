@@ -118,6 +118,19 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)")
     logger.info("=" * 60)
+    # 环境变量检查
+    _env_checks = [
+        ("ZHIPU_API_KEY", "智谱 GLM-4 (LLM 对话)"),
+        ("OPENAI_API_KEY", "OpenAI (备用 LLM)"),
+        ("STABILITY_API_KEY", "Stability AI (图片生成)"),
+        ("SMTP_HOST", "邮件发送"),
+        ("ALIPAY_APP_ID", "支付宝支付"),
+    ]
+    for _env_name, _env_desc in _env_checks:
+        if os.environ.get(_env_name):
+            logger.info(f"  ✅ {_env_desc} — 已配置")
+        else:
+            logger.info(f"  ⏳ {_env_desc} — 未配置（不影响核心功能）")
 
     # 初始化可观测性
     try:

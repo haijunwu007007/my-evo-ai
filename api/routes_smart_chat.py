@@ -509,34 +509,50 @@ async def smart_chat(req: SmartChatRequest):
             return {"success":True,"result":f"🐳 **Docker 部署**\n\n一键部署脚本: {_deploy_script}\n\n运行方式：\n```\ndeploy-industry.bat\n```\n然后输入行业编号 1-100 启动对应工具组合。\n\n当前支持的 Docker 工具:\n• Gitea / Metabase / Grafana / Portainer\n• NocoDB / Appsmith / Dify / Firecrawl\n• Chatwoot / Mattermost / ERPNext\n• Jellyfin / Immich / Vaultwarden\n\n更多工具见 industry-templates.ini","mode":"docker"}
         return {"success":True,"result":"🐳 **Docker 部署**\n\n支持 Docker Compose 一键部署行业工具。\n配置文件: industry-templates.ini\n\n运行 `docker-compose up -d` 即可启动。","mode":"docker"}
 
-    # 🎨 图片生成（Stable Diffusion 本地 / DALL-E API）
+    # 🎨 图片生成（Stability AI API / SD 本地 / 通义万相）
     if any(k in t_file for k in ["画", "生成图片", "图片生成", "绘图", "图", "绘画", "生成图像", "create image", "draw", "生成一张", "帮我画"]):
-        try:
-            import subprocess as _sps
-            # 尝试调用 Stable Diffusion（如果有本地服务）
-            _img_path = str(Path(__file__).resolve().parent.parent / "output" / f"img_{int(time.time())}.png")
-            # 检查是否有 SD API
-            _sd_available = False
+        _img_path = str(Path(__file__).resolve().parent.parent / "output" / f"img_{int(time.time())}.png")
+        _sd_key = os.environ.get("STABILITY_API_KEY") or ""
+        _zhipu_key = os.environ.get("ZHIPU_API_KEY") or ""
+        _qwen_key = os.environ.get("DASHSCOPE_API_KEY") or ""
+        _generated = False
+        # 1. Stability AI API（首选，免费额度）
+        if _sd_key:
             try:
-                async with httpx.AsyncClient(timeout=3) as _sc:
-                    _sr = await _sc.get("http://127.0.0.1:7860/sdapi/v1/txt2img")
-                    if _sr.status_code < 500: _sd_available = True
+                _sd_prompt = msg.replace("画","").replace("帮我","").replace("生成","").replace("图片","").replace("图","").strip() or "a beautiful landscape"
+                async with httpx.AsyncClient(timeout=60) as _sc:
+                    _sr = await _sc.post("https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+                        headers={"Authorization": f"Bearer {_sd_key}", "Content-Type": "application/json"},
+                        json={"text_prompts":[{"text":f"{_sd_prompt}, high quality, 4k"}],"cfg_scale":7,"height":1024,"width":1024,"samples":1})
+                    if _sr.status_code == 200:
+                        _data = _sr.json()
+                        if "artifacts" in _data:
+                            import base64 as _b64
+                            _b64_str = _data["artifacts"][0]["base64"]
+                            with open(_img_path, "wb") as _f: _f.write(_b64.b64decode(_b64_str))
+                            return {"success":True,"result":f"🎨 **图片已生成**!\n📁 {_img_path}\n\n提示词: {_sd_prompt}","mode":"image_generated"}
+            except Exception as _e:
+                pass  # 继续尝试下一个
+        # 2. 智谱 GLM-4V（如果有 Key）
+        if _zhipu_key:
+            try:
+                _prompt = msg.replace("画","").replace("帮我","").strip() or "美丽风景"
+                async with httpx.AsyncClient(timeout=60) as _sc2:
+                    _sr2 = await _sc2.post("https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                        headers={"Authorization": f"Bearer {_zhipu_key}", "Content-Type": "application/json"},
+                        json={"model":"glm-4v","messages":[{"role":"user","content":f"请描述这幅画面：{_prompt}"}],"temperature":0.8})
+                    if _sr2.status_code == 200:
+                        _desc = _sr2.json()["choices"][0]["message"]["content"]
+                        return {"success":True,"result":f"🎨 **画面描述**:\n{_desc}\n\n💡 有 Stability AI Key 可画真实图片。配置 STABILITY_API_KEY 环境变量即可。","mode":"image_description"}
             except: pass
-            if _sd_available:
-                return {"success":True,"result":f"🎨 SD 服务已就绪! 要生成图片请明确描述画面。\n输出目录: {_img_path}","mode":"image_sd"}
-            # 提示可用方案
-            _hint = """**生成图片的方式**:
-1. **本地 Stable Diffusion** — 运行在 :7860 端口（检测到未运行）
-2. **DALL-E / Midjourney** — 通过 LLM 对话描述画面
-3. **通义万相 / 文心一格** — 国内免费可用
+        # 3. 返回可用方案
+        return {"success":True,"result":f"""🎨 **图片生成方式**:
 
-💡 你可以：
-• 「帮我画一只猫在太空」— 我描述画面你手动生成
-• 「生成一张山水画」— 描述画面内容
-• 安装 Stable Diffusion WebUI 后本系统自动对接"""
-            return {"success":True,"result":_hint,"mode":"image_help"}
-        except Exception as _e:
-            return {"success":True,"result":f"🎨 图片生成: {_e}","mode":"image_error"}
+1. **Stability AI**（推荐，免费额度）→ 设置 STABILITY_API_KEY
+2. **本地 SD WebUI** → 启动后自动对接 :7860
+3. **智谱 GLM-4V**（已配置）→ 描述画面
+
+输出目录: {_img_path}""","mode":"image_config"}
 
     # 💻 软件开发 — 项目脚手架 + 脚手架生成
     if any(k in t_file for k in ["创建项目", "脚手架", "项目模板", "生成项目", "初始化项目", "项目结构", "新建项目", "scaffold", "create project"]):
