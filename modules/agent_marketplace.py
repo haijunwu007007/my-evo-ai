@@ -3,6 +3,7 @@ AUTO-EVO-AI V0.1 — 智能体市场
 Grade: A (生产级) | Category: AI智能体
 职责：智能体市场管理、技能包发布与安装、插件生命周期、版本管理、评分评论
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "agent-marketplace",

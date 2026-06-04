@@ -75,6 +75,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 — Enterprise LlamaParse Document Parser Production-grade document parsing with multi-format support, chunking strategies,"
     }
+from typing import Set
 
 import time
 import re

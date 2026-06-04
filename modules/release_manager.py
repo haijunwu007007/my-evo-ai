@@ -10,6 +10,7 @@ AUTO-EVO-AI V0.1 - ReleaseManager 发布管理器
 
 A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔断 + 限流
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "release-manager",

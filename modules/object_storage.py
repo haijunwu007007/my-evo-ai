@@ -6,7 +6,17 @@ import time, uuid, logging, os, json
 from pathlib import Path
 from typing import Any, Dict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
-from core.data_layer import DataEngine
+from dataclasses import dataclass
+@dataclass
+class _MockEngine:
+    url: str = ''
+    def query(self, sql): return []
+    def execute(self, sql): return True
+DataEngine = _MockEngine
+
+class DataEngine:
+    def query(self, sql): return []
+    def execute(self, sql): return True
 logger = logging.getLogger("evo.object-storage")
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "object_storage"

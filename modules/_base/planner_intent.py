@@ -1,4 +1,5 @@
 """Agent Planner - 意图解析器"""
+from __future__ import annotations
 import os, time, json, logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple

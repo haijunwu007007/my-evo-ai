@@ -79,6 +79,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 - GitOps GitOps部署引擎 ========================================"
     }
+from modules._base import Result
 import time
 import asyncio
 import json

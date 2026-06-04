@@ -1,6 +1,7 @@
 """
 AUTO-EVO-AI V0.1 — Table Engine
 """
+from __future__ import annotations
 # Grade: A
 
 """

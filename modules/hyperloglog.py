@@ -1,3 +1,4 @@
+from __future__ import annotations
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.enterprise_module import ModuleStats
 

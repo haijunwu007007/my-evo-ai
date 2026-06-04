@@ -3,6 +3,7 @@ AUTO-EVO-AI V0.1 — 位图操作模块
 Grade: A (生产级) | Category: 数据结构
 职责：高效位图数据结构操作，支持位运算、统计、压缩、布隆过滤器集成
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "bitmap-operations",

@@ -92,6 +92,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 | Kafka生产者引擎 企业级消息生产者 - 分区策略、消息保证、批量发送"
     }
+from modules._base import ModuleStats
 
 import os
 import sys

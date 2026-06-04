@@ -8,6 +8,7 @@ AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎)
 继承: EnterpriseModule
 依赖: subprocess, hashlib (标准库)
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "agent-hephaestus",

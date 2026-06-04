@@ -87,6 +87,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 - KubernetesOrchestrator K8s集群编排 ====================================================="
     }
+from modules._base import Result
 
 import time
 import asyncio

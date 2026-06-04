@@ -86,6 +86,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 — Agent Market (智能体市场) ============================================"
     }
+from typing import Tuple
 
 import time
 import json

@@ -1,6 +1,7 @@
 """
 AUTO-EVO-AI V0.1 — Second Brain — 第二大脑知识管理
 """
+from __future__ import annotations
 import time
 
 """

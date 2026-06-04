@@ -9,6 +9,7 @@ AUTO-EVO-AI V0.1 - RuleEngine 规则引擎
 
 A级生产标准：EnterpriseModule + 链路追踪 + Prometheus + 审计 + 熔断 + 限流
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "rule-engine",

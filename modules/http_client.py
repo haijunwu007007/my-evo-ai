@@ -94,6 +94,8 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 | HTTP客户端引擎 企业级HTTP客户端 - 连接池、重试、熔断、限流、拦截器"
     }
+from modules._base import ModuleStats
+from modules._base import HealthReport
 
 import os
 import sys

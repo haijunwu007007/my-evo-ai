@@ -11,6 +11,7 @@ Bucket Policy Manager - 对象存储桶策略管理
 - 访问日志与审计追踪
 - 策略冲突检测与自动修复
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "bucket-policy",

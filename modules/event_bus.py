@@ -4,6 +4,7 @@ AUTO-EVO-AI - 事件总线 / 数据流引擎
 版本: V0.1
 功能: 模块间事件发布订阅、消息队列、数据流DAG编排、状态传递
 """
+from __future__ import annotations
 
 __module_meta__ = {
     "id": "event-bus",

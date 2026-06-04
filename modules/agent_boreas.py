@@ -5,6 +5,7 @@
 
         上市公司生产级实现 - 完整业务逻辑
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "agent-boreas",
@@ -83,6 +84,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 - Boreas智能体模块 北风之神 - 自动化运维助手，负责系统健康监控、异常检测与自愈操作"
     }
+from modules._base import Result, HealthReport
 
 import time
 import json

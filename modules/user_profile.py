@@ -83,6 +83,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 - UserProfile 用户画像服务 ============================================"
     }
+from modules._base import Result
 
 import time
 import asyncio

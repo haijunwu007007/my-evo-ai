@@ -91,6 +91,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 | 多云服务连接器引擎 企业级云服务统一适配层 - 支持AWS/Azure/GCP/阿里云/腾讯云多云管理"
     }
+from modules._base import ModuleStats
 
 import os
 import sys

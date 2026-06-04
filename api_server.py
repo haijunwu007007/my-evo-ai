@@ -279,6 +279,20 @@ async def system_status():
     }
 
 
+@app.get("/api/v1/version")
+async def get_version():
+    """系统版本信息"""
+    coord = get_coordinator_v3()
+    modules_count = 0
+    if coord:
+        try:
+            st = coord.get_status()
+            modules_count = st.get("modules", {}).get("registered", 0)
+        except Exception:
+            modules_count = 0
+    return {"success": True, "version": "V0.1", "build": "20260604", "modules": modules_count}
+
+
 # ═══════════════════════════════════════════════════════
 # i18n 及 PWA 静态资源（由 api/startup.py 中 _mount_vue_frontend()
 # 挂载 Vue SPA 前端 + /assets 静态文件 + 路由兜底）

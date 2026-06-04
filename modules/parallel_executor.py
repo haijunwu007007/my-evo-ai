@@ -74,6 +74,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 | Enterprise Module parallel_executor — 企业级并行执行引擎"
     }
+from typing import Dict, Any, Callable
 
 import threading
 import time

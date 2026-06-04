@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 # Grade: A
 AUTO-EVO-AI V0.1 - 访问控制引擎 (Access Control Engine)

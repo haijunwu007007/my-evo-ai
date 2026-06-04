@@ -17,6 +17,7 @@ AUTO-EVO-AI V0.1 | 地理位置搜索引擎
 
 生产级标准: 链路追踪 | 指标采集 | 审计日志 | 熔断限流 | 健康检查
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "geo-search",

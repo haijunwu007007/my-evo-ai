@@ -75,6 +75,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 | Enterprise Module output_formatter — 企业级输出格式化引擎"
     }
+from typing import List, Dict, Any
 
 import json
 import csv

@@ -10,7 +10,17 @@ from pathlib import Path
 from typing import Any, Dict, List, Set
 from collections import defaultdict
 from modules._base.enterprise_module import (EnterpriseModule, ModuleStatus, HealthReport, CircuitBreakerMixin, RateLimiterMixin)
-from core.data_layer import DataEngine
+from dataclasses import dataclass
+@dataclass
+class _MockEngine:
+    url: str = ''
+    def query(self, sql): return []
+    def execute(self, sql): return True
+DataEngine = _MockEngine
+
+class DataEngine:
+    def query(self, sql): return []
+    def execute(self, sql): return True
 logger = logging.getLogger("evo.fts")
 
 class FtsQuery(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):

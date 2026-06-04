@@ -3,6 +3,7 @@
 自我修复机制 - AUTO-EVO-AI V0.1
 异常捕获、自动恢复、熔断保护
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "self-healing",

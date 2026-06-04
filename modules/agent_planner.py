@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.planner_types import TaskType, PlanStatus, ModuleCapability, ExecutionStep, ExecutionPlan
-from modules._base.planner_registry import ModuleRegistry
+from modules._base.registry import ModuleRegistry
 from modules._base.planner_intent import IntentParser
 from modules._base.metrics import prometheus_timer, metrics_collector
 
@@ -19,6 +19,7 @@ __module_meta__ = {
     "grade": "A",
     "real_logic": True,
 }
+from modules._base import ModuleRegistry
 
 try:
     from core.auth_provider import check_role

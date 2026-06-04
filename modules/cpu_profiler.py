@@ -3,6 +3,7 @@ AUTO-EVO-AI V0.1 — CPU性能分析器
 Grade: A (生产级) | Category: 性能监控
 职责：CPU采样分析、热点函数检测、调用链追踪、火焰图数据生成、性能报告
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "cpu-profiler",

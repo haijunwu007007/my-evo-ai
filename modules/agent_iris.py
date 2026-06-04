@@ -84,6 +84,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 — Agent Iris (视觉感知引擎) ==============================================="
     }
+from modules._base import Result
 
 import time
 import json

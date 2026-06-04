@@ -1,3 +1,4 @@
+from __future__ import annotations
 from contextlib import contextmanager
 
 #!/usr/bin/env python3

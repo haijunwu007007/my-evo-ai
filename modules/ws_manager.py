@@ -38,6 +38,7 @@ __module_meta__ = {
     "grade": "A",
     "description": "AUTO-EVO-AI V0.1 - WebSocketManager WebSocket连接管理器 ========================================================",
 }
+from modules._base import Result
 import time
 import asyncio
 import json

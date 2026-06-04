@@ -1,6 +1,7 @@
 """
 AUTO-EVO-AI V0.1 — Project Mgmt
 """
+from __future__ import annotations
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.metrics import prometheus_timer, metrics_collector
 

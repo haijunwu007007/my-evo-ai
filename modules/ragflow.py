@@ -14,6 +14,7 @@ Enterprise features:
 - Document lifecycle management (ingest → parse → chunk → index → retrieve → answer)
 - Full audit trail, metrics, circuit breaker, rate limiting
 """
+from __future__ import annotations
 
 __module_meta__ = {
         "id": "ragflow",

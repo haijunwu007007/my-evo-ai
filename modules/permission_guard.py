@@ -88,6 +88,7 @@ __module_meta__ = {
         "grade": "A",
         "description": "AUTO-EVO-AI V0.1 - Permission Guard Module 基于 Mercury Agent 的权限加固系统"
     }
+from typing import Callable
 
 import os
 import re
