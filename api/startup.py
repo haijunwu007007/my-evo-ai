@@ -178,6 +178,20 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(hot_reload_task())
     asyncio.create_task(warmup_modules())
 
+    # 扫描外部 MCP 服务器（异步，不阻塞启动）
+    try:
+        from api.routes_mcp import scan_external_mcp_servers as _mcp_scan
+        asyncio.create_task(_mcp_scan())
+    except Exception as _e:
+        logger.warning(f"[MCP] 外部扫描启动异常: {_e}")
+
+    # 重新初始化技能（MCP 桥接需等 MCP 扫描完成后）
+    try:
+        from api.routes_skills import init_skills as _reinit_skills
+        asyncio.create_task(asyncio.to_thread(_reinit_skills))
+    except Exception as _e:
+        logger.warning(f"[SKILL] 重初始化异常: {_e}")
+
     if sys.platform == 'win32':
         import threading
         import webbrowser

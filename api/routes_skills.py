@@ -1,21 +1,20 @@
 """
 AUTO-EVO-AI V0.1 — Skill 标准化接口
-标准化可执行能力单元：注册/发现/执行/管理
+全量外部集成：WorkBuddy 技能目录 + MCP 工具桥接 + 项目级技能 + 手动注册
 """
-
-r"""AUTO-EVO-AI Standardized Skill Interface."""
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional, Any
+from typing import Optional
 from core.logging_config import get_logger
-import os, json, time, importlib, inspect, hashlib
+import os, json, time, importlib, inspect, hashlib, httpx, re
 from pathlib import Path
 
-logger = get_logger(__name__)
+logger = get_logger("evo.api.skills")
 router = APIRouter()
 
-# ─── 数据模型 ──────────────────────────
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ─── 数据模型 ──────────────────────────
 class SkillDefinition(BaseModel):
     name: str
     version: str = "1.0.0"
@@ -23,34 +22,31 @@ class SkillDefinition(BaseModel):
     author: str = "auto-evo-ai"
     category: str = "通用"
     icon: str = "🔧"
-    tags: list[str] = []
+    tags: list = []
     input_schema: dict = {}
     output_schema: dict = {}
-    handler: str = ""  # "module.function" or Python path
-    endpoint: str = ""  # API endpoint if external
+    handler: str = ""   # module.function 路径
+    endpoint: str = ""  # API 端点或 MCP 桥接
 
 class SkillExecuteRequest(BaseModel):
     params: dict = {}
     context: Optional[dict] = {}
 
-class SkillExecuteResponse(BaseModel):
-    success: bool
-    result: Any = None
-    output: dict = {}
-    execution_time: float = 0.0
-
 # ─── 注册表 ──────────────────────────
-
 _SKILL_REGISTRY: dict[str, SkillDefinition] = {}
 _SKILL_HANDLERS: dict[str, callable] = {}
-_SKILL_EXECUTION_LOG: list[dict] = []
+_SKILL_EXECUTION_LOG: list = []
 
+
+# ============================================================
+# 1. 内置技能
+# ============================================================
 def _load_builtin_skills():
     """从 skills/builtin/ 目录加载内置技能"""
-    builtin_dir = Path(__file__).resolve().parent.parent / "skills" / "builtin"
-    if not builtin_dir.exists():
-        builtin_dir.mkdir(parents=True, exist_ok=True)
-        return
+    builtin_dir = BASE_DIR / "skills" / "builtin"
+    builtin_dir.mkdir(parents=True, exist_ok=True)
+
+    # Python 模块
     for f in sorted(builtin_dir.glob("*.py")):
         if f.name.startswith("_"):
             continue
@@ -64,30 +60,34 @@ def _load_builtin_skills():
                     _SKILL_REGISTRY[skill.name] = skill
                     if hasattr(mod, "execute"):
                         _SKILL_HANDLERS[skill.name] = getattr(mod, "execute")
-                        logger.info(f"  ✅ Skill loaded: {skill.name} v{skill.version} [{skill.category}]")
+                        logger.info(f"  ✅ Skill loaded: {skill.name} v{skill.version}")
         except Exception as e:
-            logger.warning(f"  ⚠️  Skill load failed: {f.name}: {e}")
+            logger.warning(f"  ⚠️  Skill: {f.name}: {e}")
 
-    # 也从 skill 描述 json 加载
+    # JSON 定义
     for f in sorted(builtin_dir.glob("*.json")):
         try:
             data = json.load(open(f, encoding="utf-8"))
-            if isinstance(data, list):
-                for item in data:
-                    skill = SkillDefinition(**item)
-                    _SKILL_REGISTRY[skill.name] = skill
-            else:
-                skill = SkillDefinition(**data)
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                skill = SkillDefinition(**item)
                 _SKILL_REGISTRY[skill.name] = skill
         except Exception as e:
-            logger.warning(f"  ⚠️  Skill json load failed: {f.name}: {e}")
+            logger.warning(f"  ⚠️  Skill json: {f.name}: {e}")
 
-    # 自定义 skill 从 skills/custom/ 加载
-    custom_dir = Path(__file__).resolve().parent.parent / "skills" / "custom"
-    if custom_dir.exists():
-        for f in sorted(custom_dir.glob("*.py")):
-            if f.name.startswith("_"):
-                continue
+
+def _load_custom_skills():
+    """从 skills/custom/ 加载自定义技能"""
+    custom_dir = BASE_DIR / "skills" / "custom"
+    if not custom_dir.exists():
+        return
+    for f in sorted(custom_dir.glob("*")):
+        if f.is_dir():
+            # 子目录: 尝试读取 SKILL.md
+            smd = f / "SKILL.md"
+            if smd.exists():
+                _register_from_skill_md(smd, f.name, "custom", f"skills/custom/{f.name}")
+        elif f.suffix == ".py" and not f.name.startswith("_"):
             mod_name = f"skills.custom.{f.stem}"
             try:
                 mod = importlib.import_module(mod_name)
@@ -99,100 +99,151 @@ def _load_builtin_skills():
                         if hasattr(mod, "execute"):
                             _SKILL_HANDLERS[skill.name] = getattr(mod, "execute")
             except Exception as e:
-                logger.warning(f"  ⚠️  Custom skill load failed: {f.name}: {e}")
+                logger.warning(f"  ⚠️  Custom skill: {f.name}: {e}")
 
-# 加载内置技能
-_load_builtin_skills()
 
-# 扫描 WorkBuddy 外部技能目录
+# ============================================================
+# 2. 外部技能 — 全量发现（WorkBuddy 所有技能目录）
+# ============================================================
+def _register_from_skill_md(skill_md: Path, name: str, source: str, handler_path: str = ""):
+    """从 SKILL.md 解析并注册技能"""
+    try:
+        text = skill_md.read_text(encoding="utf-8", errors="replace")
+        lines = text.split("\n")
+
+        skill_name = ""
+        desc = ""
+        tags = []
+        gh_url = ""
+
+        for line in lines:
+            if line.startswith("# ") and not skill_name:
+                skill_name = line[2:].strip()
+            elif line.startswith("- GitHub:"):
+                gh_url = line.split(": ", 1)[-1].strip() if ": " in line else ""
+
+        if not skill_name:
+            skill_name = name
+
+        # 提取 tags
+        in_capabilities = False
+        for line in lines:
+            if line.startswith("## 核心能力") or line.startswith("能力"):
+                in_capabilities = True
+                continue
+            if in_capabilities:
+                if line.startswith("## ") or line.strip() == "---":
+                    in_capabilities = False
+                    continue
+                if line.startswith("- "):
+                    tags.append(line[2:].strip())
+
+        slug = skill_name.lower().replace(" ", "-").replace("/", "-")
+
+        skill = SkillDefinition(
+            name=slug,
+            version="1.0.0",
+            description=desc or f"WorkBuddy 外部技能: {skill_name}",
+            author="WorkBuddy",
+            category="外部集成",
+            icon="🔌",
+            tags=tags[:10] if tags else [skill_name],
+            input_schema={"type": "object", "properties": {"query": {"type": "string"}}},
+            output_schema={"type": "object", "properties": {"result": {"type": "string"}}},
+            handler=handler_path,
+            endpoint=gh_url or "",
+        )
+        if skill.name not in _SKILL_REGISTRY:
+            _SKILL_REGISTRY[skill.name] = skill
+            return True
+    except Exception as e:
+        logger.warning(f"  ⚠️  SKILL.md parse: {skill_md.name}: {e}")
+    return False
+
+
 def _scan_external_skills():
-    """扫描 ~/.workbuddy/skills/ 目录下的外部 SKILL.md，桥接到 SkillDefinition"""
+    """扫描 ALL WorkBuddy 技能目录 → 自动发现标准技能"""
+    # 扫描目录列表（覆盖所有可能的技能来源）
     ext_dirs = [
         Path.home() / ".workbuddy" / "skills" / "auto-discovered",
         Path.home() / ".workbuddy" / "skills",
     ]
+
+    # 也扫描当前工作区的 .workbuddy/skills/
+    try:
+        ws_path = Path.cwd() / ".workbuddy" / "skills"
+        if ws_path.exists():
+            ext_dirs.append(ws_path)
+        # 尝试 D 盘项目
+        d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
+        if d_ws.exists():
+            ext_dirs.append(d_ws)
+    except:
+        pass
+
     found = 0
     for ext_dir in ext_dirs:
         if not ext_dir.exists():
             continue
-        for skill_dir in sorted(ext_dir.iterdir()):
-            if not skill_dir.is_dir():
-                continue
-            skill_md = skill_dir / "SKILL.md"
-            if not skill_md.exists():
-                continue
-            try:
-                text = skill_md.read_text(encoding="utf-8", errors="replace")
-                lines = text.split("\n")
-                # 提取名称（# 标题第一行）
-                name = ""
-                desc = ""
-                tags = []
-                gh_url = ""
-                stars = ""
-                lang = ""
-                for line in lines:
-                    if line.startswith("# ") and not name:
-                        name = line[2:].strip()
-                    elif line.startswith("## 描述"):
-                        pass
-                    elif line.startswith("## 来源"):
-                        pass
-                    elif line.startswith("## 核心能力"):
-                        pass
-                    elif line.startswith("- GitHub:"):
-                        gh_url = line.split(": ", 1)[-1].strip() if ": " in line else ""
-                    elif line.startswith("- Stars:"):
-                        stars = line.split(": ", 1)[-1].strip() if ": " in line else ""
-                    elif line.startswith("- 语言:"):
-                        lang = line.split(": ", 1)[-1].strip() if ": " in line else ""
+        for item in sorted(ext_dir.iterdir()):
+            if item.is_dir():
+                skill_md = item / "SKILL.md"
+                if skill_md.exists():
+                    if _register_from_skill_md(skill_md, item.name, "workbuddy"):
+                        found += 1
+            elif item.suffix == ".md" and item.name.upper() == "SKILL.MD":
+                dir_name = item.parent.name
+                if _register_from_skill_md(item, dir_name, "workbuddy"):
+                    found += 1
 
-                if not name:
-                    name = skill_dir.name
-                slug = name.lower().replace(" ", "-").replace("/", "-")
-
-                # 从核心能力标签构建 tags
-                in_capabilities = False
-                for line in lines:
-                    if line.startswith("## 核心能力"):
-                        in_capabilities = True
-                        continue
-                    if in_capabilities:
-                        if line.startswith("## ") or line.strip() == "---":
-                            in_capabilities = False
-                            continue
-                        if line.startswith("- "):
-                            tag = line[2:].strip()
-                            tags.append(tag)
-
-                skill = SkillDefinition(
-                    name=slug,
-                    version="1.0.0",
-                    description=desc or f"WorkBuddy 外部技能: {name}",
-                    author="WorkBuddy",
-                    category="外部集成",
-                    icon="🔌",
-                    tags=tags[:10] if tags else [name],
-                    input_schema={"type":"object","properties":{"query":{"type":"string"}}},
-                    output_schema={"type":"object","properties":{"result":{"type":"string"}}},
-                    handler="",
-                    endpoint=gh_url or "",
-                )
-                _SKILL_REGISTRY[skill.name] = skill
-                found += 1
-            except Exception as e:
-                logger.warning(f"  ⚠️  External skill parse failed: {skill_dir.name}: {e}")
     if found:
-        logger.info(f"  🔌 扫描到 {found} 个外部 Skill（WorkBuddy）")
-
-_scan_external_skills()
+        logger.info(f"  🔌 扫描到 {found} 个外部 Skill")
 
 
-# ─── API 端点 ──────────────────────────
+# ============================================================
+# 3. MCP 工具桥接为技能
+# ============================================================
+def _bridge_mcp_tools_as_skills():
+    """将 MCP 注册表中的所有工具桥接为技能"""
+    try:
+        from api.routes_mcp import get_mcp_tools_as_skills
+        mcp_skills = get_mcp_tools_as_skills()
+        count = 0
+        for skill_dict in mcp_skills:
+            name = skill_dict["name"]
+            if name not in _SKILL_REGISTRY:
+                skill = SkillDefinition(**skill_dict)
+                _SKILL_REGISTRY[name] = skill
+                count += 1
+        if count:
+            logger.info(f"  🔗 MCP 工具桥接为 Skill: {count} 个")
+    except Exception as e:
+        logger.warning(f"  ⚠️  MCP 桥接失败: {e}")
+
+
+# ============================================================
+# 4. 初始化
+# ============================================================
+def init_skills():
+    """初始化所有技能（内置 + 外部 + MCP 桥接）"""
+    _load_builtin_skills()
+    _load_custom_skills()
+    _scan_external_skills()
+    _bridge_mcp_tools_as_skills()
+    count = len(_SKILL_REGISTRY)
+    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP 桥接）")
+    return count
+
+init_skills()
+
+
+# ============================================================
+# 5. API 端点
+# ============================================================
 
 @router.get("/api/v1/skills")
 async def list_skills(category: str = ""):
-    """列出所有 Skill，可按分类过滤"""
+    """列出所有技能，可按分类过滤"""
     skills = list(_SKILL_REGISTRY.values())
     if category:
         skills = [s for s in skills if s.category == category]
@@ -201,7 +252,7 @@ async def list_skills(category: str = ""):
 
 @router.get("/api/v1/skills/search")
 async def search_skills(q: str = ""):
-    """搜索 Skill（按名称/描述/标签）"""
+    """搜索技能（名称/描述/标签）"""
     if not q:
         return await list_skills()
     ql = q.lower()
@@ -216,7 +267,7 @@ async def search_skills(q: str = ""):
 
 @router.get("/api/v1/skills/{name}")
 async def get_skill(name: str):
-    """获取单个 Skill 详情"""
+    """获取单个技能详情"""
     if name not in _SKILL_REGISTRY:
         raise HTTPException(status_code=404, detail=f"Skill not found: {name}")
     return {"success": True, "skill": _SKILL_REGISTRY[name].model_dump()}
@@ -224,7 +275,7 @@ async def get_skill(name: str):
 
 @router.post("/api/v1/skills/register")
 async def register_skill(skill: SkillDefinition):
-    """注册自定义 Skill"""
+    """注册自定义技能"""
     if skill.name in _SKILL_REGISTRY:
         return {"success": False, "detail": f"Skill already exists: {skill.name}"}
     _SKILL_REGISTRY[skill.name] = skill
@@ -234,7 +285,7 @@ async def register_skill(skill: SkillDefinition):
 
 @router.post("/api/v1/skills/{name}/execute")
 async def execute_skill(name: str, req: SkillExecuteRequest):
-    """执行 Skill"""
+    """执行技能"""
     if name not in _SKILL_REGISTRY:
         raise HTTPException(status_code=404, detail=f"Skill not found: {name}")
 
@@ -242,29 +293,46 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
     start = time.time()
 
     try:
-        # 有 Python handler 优先
+        # 1) 有 Python handler
         if name in _SKILL_HANDLERS:
-            handler = _SKILL_HANDLERS[name]
-            result = handler(req.params, req.context)
+            result = _SKILL_HANDLERS[name](req.params, req.context)
             elapsed = time.time() - start
             _log_execution(name, True, elapsed)
             return {"success": True, "result": result, "execution_time": round(elapsed, 3)}
 
-        # 有 endpoint 则调用外部接口
-        if skill.endpoint:
-            import httpx
-            with httpx.Client(timeout=30) as client:
-                resp = client.post(skill.endpoint, json=req.params)
-                elapsed = time.time() - start
-                _log_execution(name, resp.is_success, elapsed)
-                return {"success": resp.is_success, "result": resp.json(), "execution_time": round(elapsed, 3)}
+        # 2) MCP 工具桥接
+        if skill.name.startswith("mcp:"):
+            mcp_path = skill.name[4:]  # "server_name/tool_name"
+            if "/" in mcp_path:
+                srv_name, tool_name = mcp_path.split("/", 1)
+                try:
+                    from api.routes_mcp import _execute_external_mcp_tool
+                    result = await _execute_external_mcp_tool(srv_name, tool_name, req.params)
+                    elapsed = time.time() - start
+                    _log_execution(name, result.get("success", False), elapsed)
+                    return {"success": result.get("success", False), "result": result.get("content", ""), "execution_time": round(elapsed, 3)}
+                except:
+                    pass
 
-        # 降级：返回 skill 描述（帮助模式）
+        # 3) 有 endpoint → HTTP 调用
+        if skill.endpoint and not skill.endpoint.startswith("mcp://"):
+            if skill.endpoint.startswith("http"):
+                async with httpx.AsyncClient(timeout=30) as client:
+                    resp = await client.post(skill.endpoint, json=req.params)
+                    elapsed = time.time() - start
+                    _log_execution(name, resp.is_success, elapsed)
+                    try:
+                        return {"success": True, "result": resp.json(), "execution_time": round(elapsed, 3)}
+                    except:
+                        return {"success": True, "result": resp.text, "execution_time": round(elapsed, 3)}
+
+        # 4) 降级：描述模式
         elapsed = time.time() - start
         return {"success": True, "result": {
             "message": f"Skill '{name}' 已就绪，但没有注册执行器。",
-            "help": f"描述: {skill.description}",
-            "input_schema": skill.input_schema
+            "description": skill.description,
+            "input_schema": skill.input_schema,
+            "mcp_endpoint": f"/api/v1/mcp/{mcp_path}" if skill.name.startswith("mcp:") else ""
         }, "execution_time": round(elapsed, 3)}
 
     except Exception as e:
@@ -275,48 +343,100 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
 
 @router.get("/api/v1/skills/stats/log")
 async def skill_execution_log(limit: int = 20):
-    """获取最近 Skill 执行日志"""
+    """获取最近执行日志"""
     return {"success": True, "logs": _SKILL_EXECUTION_LOG[-limit:]}
 
 
 @router.post("/api/v1/skills/import")
 async def import_skill_from_workbuddy(name: str):
-    """从 WorkBuddy 外部技能导入为自定义技能"""
-    ext_dir = Path.home() / ".workbuddy" / "skills" / "auto-discovered" / name
-    if not ext_dir.exists():
-        # 再查一级
-        ext_dir = Path.home() / ".workbuddy" / "skills" / "auto-discovered"
-        found = None
+    """从外部技能目录导入为自定义技能"""
+    # 搜索所有外部目录
+    ext_dirs = [
+        Path.home() / ".workbuddy" / "skills" / "auto-discovered",
+        Path.home() / ".workbuddy" / "skills",
+    ]
+    try:
+        ws = Path.cwd() / ".workbuddy" / "skills"
+        if ws.exists():
+            ext_dirs.append(ws)
+        d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
+        if d_ws.exists():
+            ext_dirs.append(d_ws)
+    except:
+        pass
+
+    found_dir = None
+    for ext_dir in ext_dirs:
+        if not ext_dir.exists():
+            continue
+        target = ext_dir / name
+        if target.is_dir():
+            found_dir = target
+            break
+        # 大小写不敏感匹配
         for d in ext_dir.iterdir():
             if d.is_dir() and d.name.lower() == name.lower():
-                found = d
+                found_dir = d
                 break
-        if not found:
-            return {"success": False, "detail": f"WorkBuddy skill not found: {name}"}
-        ext_dir = found
-    custom_dir = Path(__file__).resolve().parent.parent / "skills" / "custom" / ext_dir.name
+        if found_dir:
+            break
+
+    if not found_dir:
+        return {"success": False, "detail": f"外部技能 '{name}' 未找到"}
+
+    custom_dir = BASE_DIR / "skills" / "custom" / found_dir.name
     custom_dir.mkdir(parents=True, exist_ok=True)
-    # 复制 SKILL.md
-    src_md = ext_dir / "SKILL.md"
+
+    src_md = found_dir / "SKILL.md"
     if src_md.exists():
         dst_md = custom_dir / "SKILL.md"
         dst_md.write_text(src_md.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
-    # 注册到内存
-    skill_text = src_md.read_text(encoding="utf-8", errors="replace") if src_md.exists() else ""
-    skill = SkillDefinition(
-        name=ext_dir.name,
-        version="1.0.0",
-        description=f"从 WorkBuddy 导入: {ext_dir.name}",
-        author="WorkBuddy (imported)",
-        category="外部集成",
-        icon="🔌",
-        tags=[ext_dir.name],
-    )
-    _SKILL_REGISTRY[skill.name] = skill
-    logger.info(f"  📥 Skill imported: {skill.name}")
-    return {"success": True, "result": f"Skill '{ext_dir.name}' 已导入到 skills/custom/{ext_dir.name}/"}
+
+    # 注册
+    _register_from_skill_md(src_md, found_dir.name, "imported")
+    logger.info(f"  📥 Skill 已导入: {found_dir.name}")
+    return {"success": True, "result": f"Skill '{found_dir.name}' 已导入到 skills/custom/{found_dir.name}/"}
 
 
+@router.post("/api/v1/skills/install-github")
+async def install_skill_from_github(repo_url: str):
+    """从 GitHub 安装技能"""
+    try:
+        # 提取用户名/仓库名
+        m = re.match(r'(?:https?://github\.com/)?([^/]+)/([^/]+?)(?:\.git)?$', repo_url.strip())
+        if not m:
+            return {"success": False, "detail": "无效的 GitHub 仓库 URL"}
+        user, repo = m.group(1), m.group(2)
+
+        # 从 GitHub API 获取仓库信息
+        async with httpx.AsyncClient(timeout=15) as client:
+            api_url = f"https://api.github.com/repos/{user}/{repo}"
+            r = await client.get(api_url)
+            if r.status_code != 200:
+                return {"success": False, "detail": f"GitHub API 返回 {r.status_code}"}
+            data = r.json()
+
+        # 注册为技能
+        skill = SkillDefinition(
+            name=repo.lower(),
+            version="1.0.0",
+            description= data.get("description", f"来自 GitHub 的外部技能: {user}/{repo}"),
+            author=user,
+            category="外部集成",
+            icon="📦",
+            tags=[repo, user, "github"],
+            input_schema={"type": "object", "properties": {"query": {"type": "string"}}},
+            output_schema={"type": "object", "properties": {"result": {"type": "string"}}},
+            endpoint=repo_url,
+        )
+        _SKILL_REGISTRY[skill.name] = skill
+        logger.info(f"  📥 GitHub Skill 已安装: {skill.name}")
+        return {"success": True, "result": f"Skill '{skill.name}' 已从 GitHub 安装", "stars": data.get("stargazers_count", 0)}
+    except Exception as e:
+        return {"success": False, "detail": f"安装失败: {e}"}
+
+
+# ─── 内部帮助函数 ─────────────────────
 def _log_execution(name: str, ok: bool, elapsed: float):
     _SKILL_EXECUTION_LOG.append({
         "skill": name,
@@ -329,19 +449,4 @@ def _log_execution(name: str, ok: bool, elapsed: float):
 
 
 def get_skill_by_name(name: str) -> Optional[SkillDefinition]:
-    """供外部模块使用的查找方法"""
     return _SKILL_REGISTRY.get(name)
-
-
-def execute_skill_internal(name: str, params: dict = None, context: dict = None) -> dict:
-    """供外部模块（如 Workflow）直接调用的执行方法"""
-    if name not in _SKILL_REGISTRY:
-        return {"success": False, "detail": f"Unknown skill: {name}"}
-    handler = _SKILL_HANDLERS.get(name)
-    if not handler:
-        return {"success": False, "detail": f"No handler for skill: {name}"}
-    try:
-        result = handler(params or {}, context or {})
-        return {"success": True, "result": result}
-    except Exception as e:
-        return {"success": False, "detail": str(e)}
