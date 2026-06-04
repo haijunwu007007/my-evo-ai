@@ -122,3 +122,30 @@ POST /api/v1/skills/register
 ```
 
 系统会自动检测目录变化并注册。
+
+## 🌉 WorkBuddy 桥接（外部技能集成）
+
+内置技能可以自动发现并桥接 WorkBuddy 生态的 28+ 外部技能：
+
+### 自动发现
+
+系统启动时自动扫描 `~/.workbuddy/skills/auto-discovered/` 目录，
+将每个包含 `SKILL.md` 的子目录注册为一个外部 Skill。
+
+**无需手动导入，开机即用。**
+
+### 手动导入
+
+```bash
+POST /api/v1/skills/import?name=dify
+```
+
+将外部技能复制到 `skills/custom/` 目录，变成可自定义的本地技能。
+
+### 外部技能来源
+
+| 来源 | 数量 | 示例 |
+|------|------|------|
+| GitHub Trending 自动发现 | 28 | Dify, n8n, Ollama, Flowise, RAGFlow |
+| 用户手动安装 | 自定义 | 通过 WorkBuddy 安装的任何技能 |
+| 第三方 MCP | 可扩展 | 支持 MCP 协议的技能 |

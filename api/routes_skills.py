@@ -104,6 +104,89 @@ def _load_builtin_skills():
 # 加载内置技能
 _load_builtin_skills()
 
+# 扫描 WorkBuddy 外部技能目录
+def _scan_external_skills():
+    """扫描 ~/.workbuddy/skills/ 目录下的外部 SKILL.md，桥接到 SkillDefinition"""
+    ext_dirs = [
+        Path.home() / ".workbuddy" / "skills" / "auto-discovered",
+        Path.home() / ".workbuddy" / "skills",
+    ]
+    found = 0
+    for ext_dir in ext_dirs:
+        if not ext_dir.exists():
+            continue
+        for skill_dir in sorted(ext_dir.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+            skill_md = skill_dir / "SKILL.md"
+            if not skill_md.exists():
+                continue
+            try:
+                text = skill_md.read_text(encoding="utf-8", errors="replace")
+                lines = text.split("\n")
+                # 提取名称（# 标题第一行）
+                name = ""
+                desc = ""
+                tags = []
+                gh_url = ""
+                stars = ""
+                lang = ""
+                for line in lines:
+                    if line.startswith("# ") and not name:
+                        name = line[2:].strip()
+                    elif line.startswith("## 描述"):
+                        pass
+                    elif line.startswith("## 来源"):
+                        pass
+                    elif line.startswith("## 核心能力"):
+                        pass
+                    elif line.startswith("- GitHub:"):
+                        gh_url = line.split(": ", 1)[-1].strip() if ": " in line else ""
+                    elif line.startswith("- Stars:"):
+                        stars = line.split(": ", 1)[-1].strip() if ": " in line else ""
+                    elif line.startswith("- 语言:"):
+                        lang = line.split(": ", 1)[-1].strip() if ": " in line else ""
+
+                if not name:
+                    name = skill_dir.name
+                slug = name.lower().replace(" ", "-").replace("/", "-")
+
+                # 从核心能力标签构建 tags
+                in_capabilities = False
+                for line in lines:
+                    if line.startswith("## 核心能力"):
+                        in_capabilities = True
+                        continue
+                    if in_capabilities:
+                        if line.startswith("## ") or line.strip() == "---":
+                            in_capabilities = False
+                            continue
+                        if line.startswith("- "):
+                            tag = line[2:].strip()
+                            tags.append(tag)
+
+                skill = SkillDefinition(
+                    name=slug,
+                    version="1.0.0",
+                    description=desc or f"WorkBuddy 外部技能: {name}",
+                    author="WorkBuddy",
+                    category="外部集成",
+                    icon="🔌",
+                    tags=tags[:10] if tags else [name],
+                    input_schema={"type":"object","properties":{"query":{"type":"string"}}},
+                    output_schema={"type":"object","properties":{"result":{"type":"string"}}},
+                    handler="",
+                    endpoint=gh_url or "",
+                )
+                _SKILL_REGISTRY[skill.name] = skill
+                found += 1
+            except Exception as e:
+                logger.warning(f"  ⚠️  External skill parse failed: {skill_dir.name}: {e}")
+    if found:
+        logger.info(f"  🔌 扫描到 {found} 个外部 Skill（WorkBuddy）")
+
+_scan_external_skills()
+
 
 # ─── API 端点 ──────────────────────────
 
@@ -194,6 +277,44 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
 async def skill_execution_log(limit: int = 20):
     """获取最近 Skill 执行日志"""
     return {"success": True, "logs": _SKILL_EXECUTION_LOG[-limit:]}
+
+
+@router.post("/api/v1/skills/import")
+async def import_skill_from_workbuddy(name: str):
+    """从 WorkBuddy 外部技能导入为自定义技能"""
+    ext_dir = Path.home() / ".workbuddy" / "skills" / "auto-discovered" / name
+    if not ext_dir.exists():
+        # 再查一级
+        ext_dir = Path.home() / ".workbuddy" / "skills" / "auto-discovered"
+        found = None
+        for d in ext_dir.iterdir():
+            if d.is_dir() and d.name.lower() == name.lower():
+                found = d
+                break
+        if not found:
+            return {"success": False, "detail": f"WorkBuddy skill not found: {name}"}
+        ext_dir = found
+    custom_dir = Path(__file__).resolve().parent.parent / "skills" / "custom" / ext_dir.name
+    custom_dir.mkdir(parents=True, exist_ok=True)
+    # 复制 SKILL.md
+    src_md = ext_dir / "SKILL.md"
+    if src_md.exists():
+        dst_md = custom_dir / "SKILL.md"
+        dst_md.write_text(src_md.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+    # 注册到内存
+    skill_text = src_md.read_text(encoding="utf-8", errors="replace") if src_md.exists() else ""
+    skill = SkillDefinition(
+        name=ext_dir.name,
+        version="1.0.0",
+        description=f"从 WorkBuddy 导入: {ext_dir.name}",
+        author="WorkBuddy (imported)",
+        category="外部集成",
+        icon="🔌",
+        tags=[ext_dir.name],
+    )
+    _SKILL_REGISTRY[skill.name] = skill
+    logger.info(f"  📥 Skill imported: {skill.name}")
+    return {"success": True, "result": f"Skill '{ext_dir.name}' 已导入到 skills/custom/{ext_dir.name}/"}
 
 
 def _log_execution(name: str, ok: bool, elapsed: float):
