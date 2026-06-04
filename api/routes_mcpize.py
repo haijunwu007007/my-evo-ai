@@ -164,13 +164,19 @@ class MCPizeExec(BaseModel):
 async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
     """执行已集成的 MCPize 工具"""
     if name not in _INTEGRATED:
-        return {"success": False, "detail": f"未找到集成: {name}"}
+        return {"success": False, "detail": f"未找到集成: {name}. 已集成: {list(_INTEGRATED.keys())}"}
     
     # 统一参数来源：params > args > {}
-    call_params = req.params if req.params else (req.args if req.args else {})
+    call_params = {}
+    try:
+        call_params = req.params if req.params else (req.args if req.args else {})
+    except:
+        call_params = req.model_dump().get("params") or req.model_dump().get("args") or {}
     
     entry = _INTEGRATED[name]
-    entry_type = entry["type"]
+    if not isinstance(entry, dict):
+        return {"success": False, "detail": f"集成数据异常: {type(entry).__name__}"}
+    entry_type = entry.get("type", "unknown")
     
     try:
         if entry_type == "website":
@@ -202,7 +208,7 @@ async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
             args = call_params.get("args", "")
             timeout = int(call_params.get("timeout", 30))
             full_cmd = f"{cmd} {args}" if args else cmd
-            result = subprocess.run(full_cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+            result = subprocess.run(full_cmd, shell=True, capture_output=True, text=True, timeout=timeout, encoding='utf-8', errors='replace')
             return {"success": result.returncode == 0, "content": result.stdout[:2000], "stderr": result.stderr[:500]}
         
         elif entry_type == "python":

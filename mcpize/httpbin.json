@@ -1,0 +1,35 @@
+{
+  "type": "website",
+  "source": "https://httpbin.org/get",
+  "name": "httpbin",
+  "created_at": 1780553714.9086657,
+  "tools": [
+    {
+      "name": "httpbin_scrape",
+      "description": "抓取 https://httpbin.org/get 的页面内容",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "页面路径"
+          }
+        }
+      }
+    },
+    {
+      "name": "httpbin_search",
+      "description": "在 https://httpbin.org/get 上搜索关键词",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "搜索词"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 2
+}

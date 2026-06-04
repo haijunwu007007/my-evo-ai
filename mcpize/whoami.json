@@ -1,0 +1,27 @@
+{
+  "type": "cli",
+  "source": "whoami",
+  "name": "whoami",
+  "created_at": 1780553715.2661302,
+  "tools": [
+    {
+      "name": "whoami_run",
+      "description": "执行命令: whoami",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "命令行参数"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "超时秒数",
+            "default": 30
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 1
+}

@@ -4,11 +4,11 @@
   "name": "api-api",
   "method": "GET",
   "headers": {},
-  "created_at": 1780550390.31825,
+  "created_at": 1780553715.1659997,
   "tools": [
     {
       "name": "api-api_call",
-      "description": "GitHub API",
+      "description": "调用 GET https://api.github.com",
       "inputSchema": {
         "type": "object",
         "properties": {
