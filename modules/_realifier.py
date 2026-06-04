@@ -113,4 +113,9 @@ def realify(name: str, original_result: dict, params: dict = None) -> dict:
     return original_result
 
 _register_strategies()
+# 审计清单
+_HIGH_RISK_MODULES = [k for k,v in STRATEGIES.items() if v.get("type") in ("exec","sql","http")]
 logger.info(f"[REALIFY] {len(STRATEGIES)} 个模块已注册真实化策略")
+logger.info(f"[REALIFY] 审计: {len(_HIGH_RISK_MODULES)} 个高风险模块会执行外部调用")
+if _HIGH_RISK_MODULES:
+    logger.info(f"[REALIFY] 高风险模块列表: {', '.join(_HIGH_RISK_MODULES[:20])}{'...' if len(_HIGH_RISK_MODULES)>20 else ''}")

@@ -9,7 +9,7 @@
             <el-form-item label="用户名"><el-input v-model="regForm.username" /></el-form-item>
             <el-form-item label="密码"><el-input v-model="regForm.password" type="password" show-password /></el-form-item>
             <el-form-item label="角色"><el-select v-model="regForm.roles" multiple style="width:100%">
-              <el-option label="admin" value="admin" /><el-option label="user" value="user" /><el-option label="viewer" value="viewer" />
+              <el-option label="admin" value="admin" disabled /><el-option label="user" value="user" /><el-option label="viewer" value="viewer" />
             </el-select></el-form-item>
             <el-form-item><el-button type="primary" @click="register" :loading="store.loading">注册</el-button></el-form-item>
           </el-form>
