@@ -245,13 +245,21 @@ async def gateway_call(req: GatewayCall):
         headers["Authorization"] = f"AccessKey {creds.get('access_key','')}"
         headers["X-Secret-Key"] = creds.get('secret_key','')
     
+    # 构造完整 URL — 从服务配置中取 base_url
+    full_url = req.endpoint
+    svc_config = _GATEWAY_TOOLS.get(req.service, {}).get("properties", {})
+    api_base = svc_config.get("api_base") or svc_config.get("base_url", "")
+    if api_base and not req.endpoint.startswith("http"):
+        full_url = api_base.rstrip("/") + "/" + req.endpoint.lstrip("/")
+    
     # 执行请求
     try:
+        method = req.method.upper()
         async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.request(req.method, req.endpoint, json=req.body or None, headers=headers)
-            return {"success": resp.is_success, "status": resp.status_code, "data": resp.text[:5000]}
+            resp = await client.request(method, full_url, json=req.body or None, headers=headers)
+            return {"success": resp.is_success, "status": resp.status_code, "service": req.service, "data": resp.text[:5000]}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": str(e), "detail": f"无法访问 {full_url}"}
 
 
 # ============================================================

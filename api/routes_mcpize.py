@@ -208,7 +208,11 @@ async def mcpize_execute(name: str, tool: str, req: MCPizeExec):
                 func_name = tool.replace(f"{name}_", "")
                 if hasattr(mod, func_name):
                     func = getattr(mod, func_name)
-                    result = func(**req.params)
+                    call_args = req.params.get("args", req.params)
+                    if isinstance(call_args, dict):
+                        result = func(**call_args)
+                    else:
+                        result = func(call_args)
                     return {"success": True, "content": str(result)[:2000]}
                 return {"success": False, "content": f"函数 {func_name} 不在模块 {mod_name} 中"}
             except Exception as e:
