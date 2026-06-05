@@ -38,7 +38,7 @@ export default defineConfig({
         manualChunks: {
           'naive-ui': ['naive-ui'],
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'echarts-vendor': ['echarts'],
+          'echarts-vendor': ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers'],
         },
       },
     },

@@ -313,6 +313,30 @@ html[data-theme="light"] .cat-title { color: #1e293b !important; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, #app { height: 100%; }
 
+/* ── 移动端响应式 ────────────────────────────── */
+@media (max-width: 768px) {
+  .app-aside { width: 100% !important; position: fixed; z-index: 1000; height: auto !important; bottom: 0; top: auto; flex-direction: row !important; border-right: none; border-top: 1px solid var(--border-color); padding: 0 4px; }
+  .app-aside::before { display: none; }
+  .logo, .sys-pulse, .collapse-btn { display: none !important; }
+  .nav-menu .el-menu-item-group__title { display: none; }
+  .nav-menu { display: flex !important; flex-direction: row !important; overflow-x: auto !important; padding: 0 !important; }
+  .nav-menu .el-menu-item { margin: 2px 4px !important; padding: 0 8px !important; white-space: nowrap; font-size: 11px; height: 36px; line-height: 36px; }
+  .nav-menu .el-menu-item .el-icon { font-size: 14px; }
+  .app-main { padding: 12px 8px; padding-bottom: 60px; }
+  .app-header { height: 44px; padding: 0 12px; }
+  .header-tags .el-tag:not(:first-child) { display: none; }
+  .dashboard { padding: 0 !important; }
+  .stat-row .el-col { margin-bottom: 8px; }
+  .el-table { font-size: 12px; }
+  .el-dialog { width: 95% !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-menu .el-menu-item { font-size: 10px; padding: 0 6px !important; }
+  .breadcrumb-title { font-size: 13px; }
+  .header-tags { display: none !important; }
+}
+
 .app-container { height: 100vh; background: var(--bg-body); }
 
 /* ── 侧边栏 ────────────────────────────────────────── */

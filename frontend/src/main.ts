@@ -24,4 +24,23 @@ app.component('VoiceInput', VoiceInput)
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
+
+// ── 全局错误处理 ──
+app.config.errorHandler = (err, instance, info) => {
+  console.error('[GLOBAL ERROR]', err, info)
+  // 展示给用户
+  import('element-plus').then(({ ElNotification }) => {
+    ElNotification({
+      title: '系统异常',
+      message: `发生了一个意外错误: ${(err as Error)?.message || '未知错误'}`,
+      type: 'error',
+      duration: 6000,
+    })
+  })
+}
+// 未捕获的 Promise 错误
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[UNHANDLED REJECTION]', event.reason)
+})
+
 app.mount('#app')
