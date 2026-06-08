@@ -115,3 +115,17 @@ def handle_file_cmd(args: list[str]) -> str:
             return send_email(parts[0], int(parts[1]), parts[2], parts[3], t, s, b)
         return "⚠️ SMTP 配置格式错误"
     return "用法见: file help"
+
+
+class FileOps:
+    """文件操作模块 — Excel/Word/邮件"""
+    def __init__(self): pass
+    def execute(self, action: str = "", params: dict = None) -> dict:
+        p = params or {}
+        if action in ("read", "excel_read"): return {"success": True, "result": excel_read(p.get("path",""))}
+        if action in ("write", "excel_write"): return {"success": True, "result": excel_write(p.get("path","out.xlsx"), p.get("data",[["A","B"]]))}
+        if action in ("word", "word_create"): return {"success": True, "result": word_create(p.get("path","out.docx"), p.get("title","文档"), p.get("content",""))}
+        if action in ("mail", "send_email"): return {"success": True, "result": send_email(p.get("host",""),int(p.get("port",587)),p.get("user",""),p.get("pwd",""),p.get("to",""),p.get("subject",""),p.get("body",""),p.get("attach",""))}
+        return {"success": True, "status": "ready", "version": "1.0"}
+
+module_class = FileOps

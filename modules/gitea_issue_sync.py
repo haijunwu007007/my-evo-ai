@@ -91,3 +91,19 @@ async def get_sync_status() -> dict:
         "gitea_url": GITEA_URL,
         "configured": bool(GITEA_TOKEN),
     }
+
+
+class GiteaIssueSync:
+    """Gitea Issue同步模块"""
+    def __init__(self): pass
+    def execute(self, action: str = "", params: dict = None) -> dict:
+        if action == "status": return get_sync_status()
+        p = params or {}
+        repo = p.get("repo", "owner/repo")
+        if action in ("sync", "sync_issues"):
+            import asyncio; loop = asyncio.new_event_loop()
+            r = loop.run_until_complete(sync_gitea_issues(repo))
+            loop.close(); return r
+        return {"success": True, "status": "ready", "version": "0.1"}
+
+module_class = GiteaIssueSync

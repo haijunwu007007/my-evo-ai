@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>老婆跳井</title><style>*{margin:0;padding:0;box-sizing:border-box;user-select:none}body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,sans-serif;padding:16px}.game{width:100%;max-width:400px;background:#16213e;border-radius:20px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,0.4)}.title{text-align:center;font-size:22px;color:#e2e8f0;font-weight:700;margin-bottom:4px}.sub{text-align:center;font-size:12px;color:#8892b0;margin-bottom:16px}.info{display:flex;justify-content:space-between;margin-bottom:12px;color:#e2e8f0;font-size:14px}.board{position:relative;width:100%;aspect-ratio:1;background:#0f3460;border-radius:16px;margin-bottom:12px;touch-action:none}.board canvas{width:100%;height:100%;border-radius:16px;touch-action:none}.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{padding:10px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .1s}.btn:active{transform:scale(.95)}.btn-primary{background:#4361ee;color:#fff}.btn-danger{background:#ef4444;color:#fff}.status{text-align:center;color:#f59e0b;font-size:14px;margin-top:8px;min-height:20px}a{color:#4361ee;text-decoration:none;font-size:12px;display:block;text-align:center;margin-top:8px}</style></head><body><div class="game"><div class="title">👩 老婆跳井</div><div class="sub">点击己方棋子→点击空位移动·先无法移动者输</div><div class="info"><span id="turn">👨 红方走</span><span id="score">红:0 蓝:0</span></div><div class="board"><canvas id="gc"></canvas></div><div class="status" id="status">红方走</div><div class="btns"><button class="btn btn-primary" onclick="restart()">🔄 重开</button><button class="btn btn-danger" onclick="window.location.href='/'">← 返回</button></div></div><script>var C=document.getElementById('gc'),ctx=C.getContext('2d');var W=400,H=400;ctx.canvas.width=W;ctx.canvas.height=H;var R=17,winR=0,winB=0;var board=[
+  [0,0,0,0,0],
+  [0,0,1,0,0],
+  [0,1,2,1,0],
+  [0,0,1,0,0],
+  [0,0,0,0,0]
+];var turn=1;var selected=null;var gameOver=false;var moves=0;var lastMove=null;
+var pieces=[{x:2,y:2},{x:1,y:2},{x:3,y:2},{x:2,y:1},{x:2,y:3}];var pos=[[3,1],[3,3],[2,0],[1,1],[1,3],[1,5],[1,1]];
+var WELL=4,WELL_Y=4,redPieces=[],bluePieces=[];
+function initGame(){
+  board=[ [0,0,0,0,0],[0,0,1,0,0],[0,1,2,1,0],[0,0,1,0,0],[0,0,0,0,0] ];
+  pieces=[{x:2,y:2,c:1},{x:1,y:2,c:1},{x:3,y:2,c:1},{x:2,y:1,c:1},{x:2,y:3,c:2}];
+  redPieces=pieces.filter(p=>p.c===1);bluePieces=pieces.filter(p=>p.c===2);
+  turn=1;selected=null;gameOver=false;moves=0;lastMove=null;
+  board[0][4]=3;redPieces[0].x=2;redPieces[0].y=2;
+  document.getElementById('turn').textContent='👨 红方走';
+  document.getElementById('status').textContent='红方走';draw()
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  var cx=[50,150,250,350];var cy=[50,150,250,350];
+  board.forEach((row,y)=>{row.forEach((v,x)=>{
+    var px=x*80+50,py=y*80+50;
+    if(v===3){ctx.fillStyle='#4361ee';ctx.beginPath();ctx.arc(px,py,28,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('井',px,py);return}
+    ctx.fillStyle='#1e2a4a';ctx.beginPath();ctx.arc(px,py,R,0,Math.PI*2);ctx.fill();
+    if(v===1){ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(px,py,R-3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('👨',px,py)}
+    if(v===2){ctx.fillStyle='#4361ee';ctx.beginPath();ctx.arc(px,py,R-3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('👩',px,py)}
+    if(v===1||v===2){if(selected&&selected.x===x&&selected.y===y){ctx.strokeStyle='#f59e0b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(px,py,R+4,0,Math.PI*2);ctx.stroke()}}
+    if(v===0){ctx.fillStyle='rgba(255,255,255,0.05)';ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill()}
+  })})
+  // Lines
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(50,130);ctx.lineTo(350,130);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(130,50);ctx.lineTo(130,350);ctx.stroke();
+}
+function getNeighbors(x,y){
+  var n=[];var dirs=[[0,-2],[0,2],[-2,0],[2,0]];
+  dirs.forEach(d=>{var nx=x+d[0],ny=y+d[1];if(nx>=0&&nx<5&&ny>=0&&ny<5&&!(nx===0&&ny===4))n.push({x:nx,y:ny})});
+  // Diagonals
+  var diag=[[-2,-2],[-2,2],[2,-2],[2,2]];
+  diag.forEach(d=>{var nx=x+d[0],ny=y+d[1];if(nx>=0&&nx<5&&ny>=0&&ny<5&&!(nx===0&&ny===4))n.push({x:nx,y:ny})});
+  return n
+}
+function handleClick(e){
+  if(gameOver)return;
+  var rect=C.getBoundingClientRect();var scaleX=W/rect.width,scaleY=H/rect.height;
+  var mx=(e.clientX||e.touches[0].clientX)-rect.left;var my=(e.clientY||e.touches[0].clientY)-rect.top;
+  var gx=Math.round((mx*scaleX-50)/80);var gy=Math.round((my*scaleY-50)/80);
+  if(gx<0||gx>4||gy<0||gy>4)return;
+  board.forEach((row,y)=>{row.forEach((v,x)=>{
+    if(v===(turn===1?1:2)&&x===gx&&y===gy&&!(gx===0&&gy===4)){
+      selected={x:gx,y:gy};draw()
+    }
+  })})
+  if(selected){
+    var v=board[gy][gx];
+    if(v===0&&!(gx===0&&gy===4)){
+      var valid=false;
+      getNeighbors(selected.x,selected.y).forEach(n=>{if(n.x===gx&&n.y===gy)valid=true});
+      if(valid){
+        board[selected.y][selected.x]=0;board[gy][gx]=(turn===1?1:2);
+        // Check win: opponent can't move
+        var opp=turn===1?2:1;var canMove=false;
+        board.forEach((row,y)=>{row.forEach((v,x)=>{
+          if(v===opp){getNeighbors(x,y).forEach(n=>{if(board[n.y][n.x]===0&&!(n.x===0&&n.y===4))canMove=true})}
+        })});
+        if(!canMove){
+          gameOver=true;
+          if(turn===1){winR++;document.getElementById('status').textContent='🎉 红方胜！';board.forEach((r,y)=>r.forEach((v,x)=>{if(v===2)board[y][x]=0}))}
+          else{winB++;document.getElementById('status').textContent='🎉 蓝方胜！';board.forEach((r,y)=>r.forEach((v,x)=>{if(v===1)board[y][x]=0}))}
+          document.getElementById('score').textContent='红:'+winR+' 蓝:'+winB;
+          document.getElementById('turn').textContent='🏆 游戏结束'
+        }else{
+          turn=turn===1?2:1;moves++;
+          document.getElementById('turn').textContent=(turn===1?'👨 红方走':'👩 蓝方走');
+          document.getElementById('status').textContent=(turn===1?'红方走':'蓝方走')
+        }
+        selected=null;draw()
+      }
+    }
+    if(v===(turn===1?1:2))selected={x:gx,y:gy};draw()
+  }
+}
+C.addEventListener('click',handleClick);C.addEventListener('touchstart',function(e){e.preventDefault();handleClick(e)},{passive:false});
+function restart(){initGame();document.getElementById('score').textContent='红:'+winR+' 蓝:'+winB}
+initGame()</script></body></html>

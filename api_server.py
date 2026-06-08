@@ -202,6 +202,16 @@ app.include_router(tenant_router)
 app.include_router(analytics_router)
 app.include_router(mcp_router)
 
+# ── 动态路由加载（LLM创建的新API自动挂载） ──
+_apidir = Path(__file__).parent / "output" / "api"
+_apidir.mkdir(parents=True, exist_ok=True)
+for _f in sorted(_apidir.glob("*.py")):
+    try:
+        _mod = importlib.import_module(f"output.api.{_f.stem}")
+        if hasattr(_mod, 'router'):
+            app.include_router(_mod.router, prefix="/api/ext")
+    except: pass
+
 
 # ── 静态文件 ──
 static_dir = BASE_DIR / "static"
@@ -211,6 +221,14 @@ if static_dir.exists():
 frontend_static = BASE_DIR / "frontend" / "static"
 if frontend_static.exists():
     app.mount("/frontend/static", StaticFiles(directory=str(frontend_static)), name="frontend_static")
+
+output_dir = BASE_DIR / "output"
+if output_dir.exists():
+    app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
+
+frontend_dir = BASE_DIR / "frontend"
+if frontend_dir.exists():
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir)), name="frontend")
 
 
 # ═══════════════════════════════════════════════════════
@@ -254,6 +272,36 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 # ═══════════════════════════════════════════════════════
 # 根端点
 # ═══════════════════════════════════════════════════════
+
+# ── 前端静态文件路由（每文件单独注册，不干扰API路由）──
+FRONTEND_FILES = {
+    "/gomoku.html": BASE_DIR / "frontend" / "gomoku.html",
+    "/wife_well.html": BASE_DIR / "frontend" / "wife_well.html",
+    "/app_calc.html": BASE_DIR / "frontend" / "app_calc.html",
+    "/wolf": BASE_DIR / "frontend" / "wolf.html",
+    "/snake": BASE_DIR / "frontend" / "snake.html",
+    "/shooter": BASE_DIR / "frontend" / "shooter.html",
+    "/game": BASE_DIR / "frontend" / "game.html",
+}
+for _r, _p in FRONTEND_FILES.items():
+    if _p.exists():
+        app.get(_r, include_in_schema=False)(lambda p=_p: FileResponse(str(p)))
+
+@app.get("/apps")
+async def apps_list():
+    from fastapi.responses import HTMLResponse
+    from api.infra import BASE_DIR
+    from pathlib import Path
+    apps_dir = BASE_DIR / "output" / "apps"
+    apps = []
+    if apps_dir.exists():
+        for f in sorted(apps_dir.glob("*.html"), reverse=True)[:50]:
+            apps.append({"name":f.stem[:40], "url":f"/output/apps/{f.name}", "size":f"{f.stat().st_size/1024:.1f}KB", "date":__import__('time').ctime(f.stat().st_mtime)})
+    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}h1{font-size:24px}.app{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}.app a{color:#818cf8;text-decoration:none;font-size:16px}.meta{color:#64748b;font-size:12px;margin-top:4px}.size{color:#22c55e}.empty{text-align:center;padding:60px;color:#64748b}</style></head><body><h1>📂 已生成APP</h1>'
+    if not apps: html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
+    for a in apps: html += f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a><div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
+    html += '</body></html>'
+    return HTMLResponse(html)
 
 @app.get("/")
 async def root():

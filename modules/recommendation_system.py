@@ -18,9 +18,10 @@ class RecommendationSystem(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,Ent
     async def execute(self,action,params=None):return await self._safe_execute(action,params,handler=self._dispatch)
     def _dispatch(self,p):
         a=p.get("action","status")
-        if a=="recommend":uid=p.get("user_id","");k=int(p.get("top_k",5));cold_start=p.get("cold_start",False)
-        if cold_start or uid not in self._users:items=sorted(self._items.values(),key=lambda x:x["rating"],reverse=True)[:k];return{"success":True,"user_id":uid,"type":"popular","recommendations":[{"item_id":f"item_{i}","name":item["name"],"score":item["rating"]}for i,item in enumerate(items)]}
-        user=self._users.get(uid,{"history":[],"prefs":{"tech":0.8,"book":0.2}});scored=[]
+        if a=="recommend":
+            uid=p.get("user_id","");k=int(p.get("top_k",5));cold_start=p.get("cold_start",False)
+            if cold_start or uid not in self._users:items=sorted(self._items.values(),key=lambda x:x["rating"],reverse=True)[:k];return{"success":True,"user_id":uid,"type":"popular","recommendations":[{"item_id":f"item_{i}","name":item["name"],"score":item["rating"]}for i,item in enumerate(items)]}
+            user=self._users.get(uid,{"history":[],"prefs":{"tech":0.8,"book":0.2}});scored=[]
         for iid,item in self._items.items():score=user.get("prefs",{}).get(item["category"],0)*item["rating"];scored.append({"item_id":iid,"name":item["name"],"score":round(score,2)})
         scored.sort(key=lambda x:x["score"],reverse=True)
         return{"success":True,"user_id":uid,"type":"personalized","recommendations":scored[:k]}

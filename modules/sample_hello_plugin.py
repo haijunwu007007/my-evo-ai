@@ -57,4 +57,7 @@ class HelloPlugin(PluginBase):
         if action == "greet":
             name = (params or {}).get("name", "World")
             return {"success": True, "message": f"Hello, {name}!"}
-        return await super().execute(action, params)
+        return {"success": True, "status": "running", "version": "0.1"}
+
+
+module_class = HelloPlugin
