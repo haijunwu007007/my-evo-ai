@@ -1,0 +1,892 @@
+{
+  "AI与机器学习/chat_completion": {
+    "name": "chat_completion",
+    "category": "AI与机器学习",
+    "description": "对话补全",
+    "url": "https://api.openai.com/v1/chat/completions",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/chat/completions",
+    "added_at": 1780921348.9564195
+  },
+  "AI与机器学习/text_embedding": {
+    "name": "text_embedding",
+    "category": "AI与机器学习",
+    "description": "文本向量化",
+    "url": "https://api.openai.com/v1/embeddings",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/embeddings",
+    "added_at": 1780921348.9564304
+  },
+  "AI与机器学习/image_generation": {
+    "name": "image_generation",
+    "category": "AI与机器学习",
+    "description": "AI画图",
+    "url": "https://api.openai.com/v1/images/generations",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/images/generations",
+    "added_at": 1780921348.956434
+  },
+  "AI与机器学习/speech_to_text": {
+    "name": "speech_to_text",
+    "category": "AI与机器学习",
+    "description": "语音转文字",
+    "url": "https://api.openai.com/v1/audio/transcriptions",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/audio/transcriptions",
+    "added_at": 1780921348.956436
+  },
+  "AI与机器学习/text_to_speech": {
+    "name": "text_to_speech",
+    "category": "AI与机器学习",
+    "description": "文字转语音",
+    "url": "https://api.openai.com/v1/audio/speech",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/audio/speech",
+    "added_at": 1780921348.956438
+  },
+  "AI与机器学习/moderation": {
+    "name": "moderation",
+    "category": "AI与机器学习",
+    "description": "内容审核",
+    "url": "https://api.openai.com/v1/moderations",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.openai.com/v1/moderations",
+    "added_at": 1780921348.95644
+  },
+  "AI与机器学习/translate": {
+    "name": "translate",
+    "category": "AI与机器学习",
+    "description": "翻译（DeepL）",
+    "url": "https://api-free.deepl.com/v2/translate",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api-free.deepl.com/v2/translate",
+    "added_at": 1780921348.9564424
+  },
+  "代码与开发/github_list_repos": {
+    "name": "github_list_repos",
+    "category": "代码与开发",
+    "description": "列出用户仓库",
+    "url": "https://api.github.com/user/repos",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.github.com/user/repos",
+    "added_at": 1780921348.9564452
+  },
+  "代码与开发/github_create_issue": {
+    "name": "github_create_issue",
+    "category": "代码与开发",
+    "description": "创建Issue",
+    "url": "https://api.github.com/repos/{owner}/{repo}/issues",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.github.com/repos/{owner}/{repo}/issues",
+    "added_at": 1780921348.9564505
+  },
+  "代码与开发/github_search_code": {
+    "name": "github_search_code",
+    "category": "代码与开发",
+    "description": "搜索代码",
+    "url": "https://api.github.com/search/code",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.github.com/search/code",
+    "added_at": 1780921348.9564524
+  },
+  "代码与开发/github_create_pr": {
+    "name": "github_create_pr",
+    "category": "代码与开发",
+    "description": "创建Pull Request",
+    "url": "https://api.github.com/repos/{owner}/{repo}/pulls",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.github.com/repos/{owner}/{repo}/pulls",
+    "added_at": 1780921348.956454
+  },
+  "代码与开发/gitlab_list_projects": {
+    "name": "gitlab_list_projects",
+    "category": "代码与开发",
+    "description": "列出GitLab项目",
+    "url": "https://gitlab.com/api/v4/projects",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://gitlab.com/api/v4/projects",
+    "added_at": 1780921348.9564567
+  },
+  "代码与开发/gitlab_create_merge_request": {
+    "name": "gitlab_create_merge_request",
+    "category": "代码与开发",
+    "description": "创建Merge Request",
+    "url": "https://gitlab.com/api/v4/projects/{id}/merge_requests",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://gitlab.com/api/v4/projects/{id}/merge_requests",
+    "added_at": 1780921348.956458
+  },
+  "代码与开发/pypi_search": {
+    "name": "pypi_search",
+    "category": "代码与开发",
+    "description": "搜索PyPI包",
+    "url": "https://pypi.org/simple/",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://pypi.org/simple/",
+    "added_at": 1780921348.9564598
+  },
+  "代码与开发/npm_search": {
+    "name": "npm_search",
+    "category": "代码与开发",
+    "description": "搜索NPM包",
+    "url": "https://registry.npmjs.org/-/v1/search",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://registry.npmjs.org/-/v1/search",
+    "added_at": 1780921348.9564614
+  },
+  "社交媒体/twitter_search": {
+    "name": "twitter_search",
+    "category": "社交媒体",
+    "description": "搜索推特",
+    "url": "https://api.twitter.com/2/tweets/search/recent",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.twitter.com/2/tweets/search/recent",
+    "added_at": 1780921348.956463
+  },
+  "社交媒体/twitter_post": {
+    "name": "twitter_post",
+    "category": "社交媒体",
+    "description": "发推",
+    "url": "https://api.twitter.com/2/tweets",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.twitter.com/2/tweets",
+    "added_at": 1780921348.956465
+  },
+  "社交媒体/reddit_search": {
+    "name": "reddit_search",
+    "category": "社交媒体",
+    "description": "搜索Reddit",
+    "url": "https://www.reddit.com/search.json",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://www.reddit.com/search.json",
+    "added_at": 1780921348.9564662
+  },
+  "社交媒体/linkedin_search": {
+    "name": "linkedin_search",
+    "category": "社交媒体",
+    "description": "搜索LinkedIn",
+    "url": "https://api.linkedin.com/v2/search",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.linkedin.com/v2/search",
+    "added_at": 1780921348.9564674
+  },
+  "社交媒体/telegram_send_message": {
+    "name": "telegram_send_message",
+    "category": "社交媒体",
+    "description": "发送Telegram消息",
+    "url": "https://api.telegram.org/bot{token}/sendMessage",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://api.telegram.org/bot{token}/sendMessage",
+    "added_at": 1780921348.9564693
+  },
+  "社交媒体/slack_post_message": {
+    "name": "slack_post_message",
+    "category": "社交媒体",
+    "description": "发送Slack消息",
+    "url": "https://slack.com/api/chat.postMessage",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://slack.com/api/chat.postMessage",
+    "added_at": 1780921348.956471
+  },
+  "社交媒体/discord_send_message": {
+    "name": "discord_send_message",
+    "category": "社交媒体",
+    "description": "发送Discord消息",
+    "url": "https://discord.com/api/channels/{id}/messages",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://discord.com/api/channels/{id}/messages",
+    "added_at": 1780921348.9564729
+  },
+  "消息与通信/sendgrid_send_email": {
+    "name": "sendgrid_send_email",
+    "category": "消息与通信",
+    "description": "发送邮件（SendGrid）",
+    "url": "https://api.sendgrid.com/v3/mail/send",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.sendgrid.com/v3/mail/send",
+    "added_at": 1780921348.9564772
+  },
+  "消息与通信/send_sms": {
+    "name": "send_sms",
+    "category": "消息与通信",
+    "description": "发送短信（Twilio）",
+    "url": "https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
+    "method": "POST",
+    "auth_type": "basic",
+    "signature": "POST https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
+    "added_at": 1780921348.956478
+  },
+  "消息与通信/wechat_work_push": {
+    "name": "wechat_work_push",
+    "category": "消息与通信",
+    "description": "企业微信推送",
+    "url": "https://qyapi.weixin.qq.com/cgi-bin/message/send",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://qyapi.weixin.qq.com/cgi-bin/message/send",
+    "added_at": 1780921348.9564795
+  },
+  "消息与通信/dingtalk_push": {
+    "name": "dingtalk_push",
+    "category": "消息与通信",
+    "description": "钉钉推送",
+    "url": "https://oapi.dingtalk.com/robot/send",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://oapi.dingtalk.com/robot/send",
+    "added_at": 1780921348.9564807
+  },
+  "搜索与知识/google_search": {
+    "name": "google_search",
+    "category": "搜索与知识",
+    "description": "Google搜索",
+    "url": "https://www.googleapis.com/customsearch/v1",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://www.googleapis.com/customsearch/v1",
+    "added_at": 1780921348.9564824
+  },
+  "搜索与知识/bing_search": {
+    "name": "bing_search",
+    "category": "搜索与知识",
+    "description": "Bing搜索",
+    "url": "https://api.bing.microsoft.com/v7.0/search",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.bing.microsoft.com/v7.0/search",
+    "added_at": 1780921348.9564834
+  },
+  "搜索与知识/duckduckgo_search": {
+    "name": "duckduckgo_search",
+    "category": "搜索与知识",
+    "description": "DuckDuckGo搜索",
+    "url": "https://api.duckduckgo.com/",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://api.duckduckgo.com/",
+    "added_at": 1780921348.9564881
+  },
+  "搜索与知识/wikipedia_search": {
+    "name": "wikipedia_search",
+    "category": "搜索与知识",
+    "description": "维基百科搜索",
+    "url": "https://en.wikipedia.org/w/api.php",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://en.wikipedia.org/w/api.php",
+    "added_at": 1780921348.9564896
+  },
+  "搜索与知识/arxiv_search": {
+    "name": "arxiv_search",
+    "category": "搜索与知识",
+    "description": "学术论文搜索",
+    "url": "http://export.arxiv.org/api/query",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET http://export.arxiv.org/api/query",
+    "added_at": 1780921348.956491
+  },
+  "搜索与知识/pubmed_search": {
+    "name": "pubmed_search",
+    "category": "搜索与知识",
+    "description": "PubMed医学文献搜索",
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
+    "added_at": 1780921348.9564922
+  },
+  "搜索与知识/wolfram_alpha": {
+    "name": "wolfram_alpha",
+    "category": "搜索与知识",
+    "description": "Wolfram Alpha计算知识引擎",
+    "url": "https://api.wolframalpha.com/v2/query",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.wolframalpha.com/v2/query",
+    "added_at": 1780921348.9564936
+  },
+  "数据与存储/supabase_query": {
+    "name": "supabase_query",
+    "category": "数据与存储",
+    "description": "Supabase数据库查询",
+    "url": "https://{ref}.supabase.co/rest/v1/{table}",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://{ref}.supabase.co/rest/v1/{table}",
+    "added_at": 1780921348.9564946
+  },
+  "数据与存储/firebase_read": {
+    "name": "firebase_read",
+    "category": "数据与存储",
+    "description": "Firebase读数据",
+    "url": "https://{project}.firebaseio.com/{path}.json",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://{project}.firebaseio.com/{path}.json",
+    "added_at": 1780921348.9564958
+  },
+  "数据与存储/airtable_list": {
+    "name": "airtable_list",
+    "category": "数据与存储",
+    "description": "Airtable列表",
+    "url": "https://api.airtable.com/v0/{base}/{table}",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.airtable.com/v0/{base}/{table}",
+    "added_at": 1780921348.956497
+  },
+  "数据与存储/mongodb_atlas": {
+    "name": "mongodb_atlas",
+    "category": "数据与存储",
+    "description": "MongoDB Atlas API",
+    "url": "https://cloud.mongodb.com/api/atlas/v1.0/groups",
+    "method": "GET",
+    "auth_type": "digest",
+    "signature": "GET https://cloud.mongodb.com/api/atlas/v1.0/groups",
+    "added_at": 1780921348.956498
+  },
+  "云服务/aws_s3_list": {
+    "name": "aws_s3_list",
+    "category": "云服务",
+    "description": "列出S3存储桶",
+    "url": "https://s3.amazonaws.com/",
+    "method": "GET",
+    "auth_type": "aws",
+    "signature": "GET https://s3.amazonaws.com/",
+    "added_at": 1780921348.9564998
+  },
+  "云服务/gcp_storage_list": {
+    "name": "gcp_storage_list",
+    "category": "云服务",
+    "description": "列出GCS存储桶",
+    "url": "https://storage.googleapis.com/storage/v1/b",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://storage.googleapis.com/storage/v1/b",
+    "added_at": 1780921348.956501
+  },
+  "云服务/azure_blob_list": {
+    "name": "azure_blob_list",
+    "category": "云服务",
+    "description": "列出Azure Blob容器",
+    "url": "https://{account}.blob.core.windows.net/?comp=list",
+    "method": "GET",
+    "auth_type": "key",
+    "signature": "GET https://{account}.blob.core.windows.net/?comp=list",
+    "added_at": 1780921348.9565022
+  },
+  "云服务/docker_hub_search": {
+    "name": "docker_hub_search",
+    "category": "云服务",
+    "description": "Docker Hub搜索镜像",
+    "url": "https://hub.docker.com/v2/repositories/{namespace}/",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://hub.docker.com/v2/repositories/{namespace}/",
+    "added_at": 1780921348.9565034
+  },
+  "云服务/kubernetes_pods": {
+    "name": "kubernetes_pods",
+    "category": "云服务",
+    "description": "K8s列出Pod",
+    "url": "https://{server}/api/v1/namespaces/{ns}/pods",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://{server}/api/v1/namespaces/{ns}/pods",
+    "added_at": 1780921348.9565046
+  },
+  "金融与支付/stripe_charges": {
+    "name": "stripe_charges",
+    "category": "金融与支付",
+    "description": "Stripe支付查询",
+    "url": "https://api.stripe.com/v1/charges",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.stripe.com/v1/charges",
+    "added_at": 1780921348.956506
+  },
+  "金融与支付/stripe_create_payment": {
+    "name": "stripe_create_payment",
+    "category": "金融与支付",
+    "description": "Stripe创建支付",
+    "url": "https://api.stripe.com/v1/payment_intents",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.stripe.com/v1/payment_intents",
+    "added_at": 1780921348.9565096
+  },
+  "金融与支付/paypal_create_order": {
+    "name": "paypal_create_order",
+    "category": "金融与支付",
+    "description": "PayPal创建订单",
+    "url": "https://api-m.paypal.com/v2/checkout/orders",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api-m.paypal.com/v2/checkout/orders",
+    "added_at": 1780921348.956511
+  },
+  "金融与支付/alipay_query": {
+    "name": "alipay_query",
+    "category": "金融与支付",
+    "description": "支付宝交易查询",
+    "url": "https://openapi.alipay.com/gateway.do",
+    "method": "POST",
+    "auth_type": "key",
+    "signature": "POST https://openapi.alipay.com/gateway.do",
+    "added_at": 1780921348.9565125
+  },
+  "金融与支付/coinbase_balance": {
+    "name": "coinbase_balance",
+    "category": "金融与支付",
+    "description": "查询加密货币余额",
+    "url": "https://api.coinbase.com/v2/accounts",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.coinbase.com/v2/accounts",
+    "added_at": 1780921348.9565136
+  },
+  "金融与支付/binance_ticker": {
+    "name": "binance_ticker",
+    "category": "金融与支付",
+    "description": "币安实时行情",
+    "url": "https://api.binance.com/api/v3/ticker/24hr",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://api.binance.com/api/v3/ticker/24hr",
+    "added_at": 1780921348.9565148
+  },
+  "金融与支付/yahoo_finance": {
+    "name": "yahoo_finance",
+    "category": "金融与支付",
+    "description": "Yahoo Finance股票数据",
+    "url": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+    "added_at": 1780921348.9565194
+  },
+  "项目管理/jira_create_issue": {
+    "name": "jira_create_issue",
+    "category": "项目管理",
+    "description": "Jira创建任务",
+    "url": "https://{domain}.atlassian.net/rest/api/3/issue",
+    "method": "POST",
+    "auth_type": "basic",
+    "signature": "POST https://{domain}.atlassian.net/rest/api/3/issue",
+    "added_at": 1780921348.9565208
+  },
+  "项目管理/jira_search_issues": {
+    "name": "jira_search_issues",
+    "category": "项目管理",
+    "description": "Jira搜索任务",
+    "url": "https://{domain}.atlassian.net/rest/api/3/search",
+    "method": "GET",
+    "auth_type": "basic",
+    "signature": "GET https://{domain}.atlassian.net/rest/api/3/search",
+    "added_at": 1780921348.956522
+  },
+  "项目管理/linear_create_issue": {
+    "name": "linear_create_issue",
+    "category": "项目管理",
+    "description": "Linear创建任务",
+    "url": "https://api.linear.app/graphql",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.linear.app/graphql",
+    "added_at": 1780921348.9565232
+  },
+  "项目管理/notion_query_db": {
+    "name": "notion_query_db",
+    "category": "项目管理",
+    "description": "Notion查询数据库",
+    "url": "https://api.notion.com/v1/databases/{id}/query",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://api.notion.com/v1/databases/{id}/query",
+    "added_at": 1780921348.9565248
+  },
+  "项目管理/notion_create_page": {
+    "name": "notion_create_page",
+    "category": "项目管理",
+    "description": "Notion创建页面",
+    "url": "https://api.notion.com/v1/pages",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://api.notion.com/v1/pages",
+    "added_at": 1780921348.9565256
+  },
+  "项目管理/trello_create_card": {
+    "name": "trello_create_card",
+    "category": "项目管理",
+    "description": "Trello创建卡片",
+    "url": "https://api.trello.com/1/cards",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.trello.com/1/cards",
+    "added_at": 1780921348.9565265
+  },
+  "项目管理/asana_create_task": {
+    "name": "asana_create_task",
+    "category": "项目管理",
+    "description": "Asana创建任务",
+    "url": "https://app.asana.com/api/1.0/tasks",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://app.asana.com/api/1.0/tasks",
+    "added_at": 1780921348.9565277
+  },
+  "设计与创意/figma_get_file": {
+    "name": "figma_get_file",
+    "category": "设计与创意",
+    "description": "获取Figma文件",
+    "url": "https://api.figma.com/v1/files/{key}",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://api.figma.com/v1/files/{key}",
+    "added_at": 1780921348.9565287
+  },
+  "设计与创意/canva_create_design": {
+    "name": "canva_create_design",
+    "category": "设计与创意",
+    "description": "Canva创建设计",
+    "url": "https://api.canva.com/rest/v1/designs",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.canva.com/rest/v1/designs",
+    "added_at": 1780921348.9565299
+  },
+  "设计与创意/unsplash_search": {
+    "name": "unsplash_search",
+    "category": "设计与创意",
+    "description": "搜索免费图片",
+    "url": "https://api.unsplash.com/search/photos",
+    "method": "GET",
+    "auth_type": "client_id",
+    "signature": "GET https://api.unsplash.com/search/photos",
+    "added_at": 1780921348.9565313
+  },
+  "设计与创意/pexels_search": {
+    "name": "pexels_search",
+    "category": "设计与创意",
+    "description": "Pexels搜索视频/图片",
+    "url": "https://api.pexels.com/v1/search",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.pexels.com/v1/search",
+    "added_at": 1780921348.9565322
+  },
+  "设计与创意/grammarly_check": {
+    "name": "grammarly_check",
+    "category": "设计与创意",
+    "description": "文本检查（需要授权）",
+    "url": "https://api.grammarly.com/v1/check",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.grammarly.com/v1/check",
+    "added_at": 1780921348.9565332
+  },
+  "地图与位置/google_maps_geocode": {
+    "name": "google_maps_geocode",
+    "category": "地图与位置",
+    "description": "地址转坐标",
+    "url": "https://maps.googleapis.com/maps/api/geocode/json",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://maps.googleapis.com/maps/api/geocode/json",
+    "added_at": 1780921348.9565344
+  },
+  "地图与位置/google_maps_places": {
+    "name": "google_maps_places",
+    "category": "地图与位置",
+    "description": "搜索周边地点",
+    "url": "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+    "added_at": 1780921348.9565353
+  },
+  "地图与位置/amap_weather": {
+    "name": "amap_weather",
+    "category": "地图与位置",
+    "description": "高德天气查询",
+    "url": "https://restapi.amap.com/v3/weather/weatherInfo",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://restapi.amap.com/v3/weather/weatherInfo",
+    "added_at": 1780921348.9565365
+  },
+  "地图与位置/openweather": {
+    "name": "openweather",
+    "category": "地图与位置",
+    "description": "OpenWeather天气",
+    "url": "https://api.openweathermap.org/data/2.5/weather",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.openweathermap.org/data/2.5/weather",
+    "added_at": 1780921348.9565375
+  },
+  "电子商务/shopify_products": {
+    "name": "shopify_products",
+    "category": "电子商务",
+    "description": "Shopify商品列表",
+    "url": "https://{shop}.myshopify.com/admin/api/2024-01/products.json",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://{shop}.myshopify.com/admin/api/2024-01/products.json",
+    "added_at": 1780921348.956539
+  },
+  "电子商务/shopify_create_product": {
+    "name": "shopify_create_product",
+    "category": "电子商务",
+    "description": "Shopify创建商品",
+    "url": "https://{shop}.myshopify.com/admin/api/2024-01/products.json",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://{shop}.myshopify.com/admin/api/2024-01/products.json",
+    "added_at": 1780921348.9565399
+  },
+  "电子商务/woocommerce_products": {
+    "name": "woocommerce_products",
+    "category": "电子商务",
+    "description": "WooCommerce商品列表",
+    "url": "https://{site}/wp-json/wc/v3/products",
+    "method": "GET",
+    "auth_type": "basic",
+    "signature": "GET https://{site}/wp-json/wc/v3/products",
+    "added_at": 1780921348.9565437
+  },
+  "电子商务/etsy_listings": {
+    "name": "etsy_listings",
+    "category": "电子商务",
+    "description": "Etsy列出商品",
+    "url": "https://openapi.etsy.com/v3/application/listings",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://openapi.etsy.com/v3/application/listings",
+    "added_at": 1780921348.956545
+  },
+  "认证与安全/auth0_create_user": {
+    "name": "auth0_create_user",
+    "category": "认证与安全",
+    "description": "Auth0创建用户",
+    "url": "https://{tenant}.auth0.com/api/v2/users",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://{tenant}.auth0.com/api/v2/users",
+    "added_at": 1780921348.9565463
+  },
+  "认证与安全/auth0_list_users": {
+    "name": "auth0_list_users",
+    "category": "认证与安全",
+    "description": "Auth0列出用户",
+    "url": "https://{tenant}.auth0.com/api/v2/users",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://{tenant}.auth0.com/api/v2/users",
+    "added_at": 1780921348.9565473
+  },
+  "认证与安全/clerk_list_users": {
+    "name": "clerk_list_users",
+    "category": "认证与安全",
+    "description": "Clerk列出用户",
+    "url": "https://api.clerk.com/v1/users",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.clerk.com/v1/users",
+    "added_at": 1780921348.9565487
+  },
+  "认证与安全/recaptcha_verify": {
+    "name": "recaptcha_verify",
+    "category": "认证与安全",
+    "description": "验证reCAPTCHA",
+    "url": "https://www.google.com/recaptcha/api/siteverify",
+    "method": "POST",
+    "auth_type": "key",
+    "signature": "POST https://www.google.com/recaptcha/api/siteverify",
+    "added_at": 1780921348.95655
+  },
+  "文档与办公/google_docs_create": {
+    "name": "google_docs_create",
+    "category": "文档与办公",
+    "description": "创建Google文档",
+    "url": "https://docs.googleapis.com/v1/documents",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://docs.googleapis.com/v1/documents",
+    "added_at": 1780921348.9565508
+  },
+  "文档与办公/google_sheets_read": {
+    "name": "google_sheets_read",
+    "category": "文档与办公",
+    "description": "读取Google表格",
+    "url": "https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range}",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range}",
+    "added_at": 1780921348.9565523
+  },
+  "文档与办公/google_sheets_write": {
+    "name": "google_sheets_write",
+    "category": "文档与办公",
+    "description": "写入Google表格",
+    "url": "https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range}:append",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range}:append",
+    "added_at": 1780921348.9565535
+  },
+  "文档与办公/dropbox_list_files": {
+    "name": "dropbox_list_files",
+    "category": "文档与办公",
+    "description": "Dropbox列出文件",
+    "url": "https://api.dropboxapi.com/2/files/list_folder",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.dropboxapi.com/2/files/list_folder",
+    "added_at": 1780921348.9565544
+  },
+  "文档与办公/onedrive_list": {
+    "name": "onedrive_list",
+    "category": "文档与办公",
+    "description": "OneDrive列出文件",
+    "url": "https://graph.microsoft.com/v1.0/me/drive/root/children",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://graph.microsoft.com/v1.0/me/drive/root/children",
+    "added_at": 1780921348.9565558
+  },
+  "音视频/youtube_search": {
+    "name": "youtube_search",
+    "category": "音视频",
+    "description": "搜索YouTube视频",
+    "url": "https://www.googleapis.com/youtube/v3/search",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://www.googleapis.com/youtube/v3/search",
+    "added_at": 1780921348.956557
+  },
+  "音视频/youtube_upload": {
+    "name": "youtube_upload",
+    "category": "音视频",
+    "description": "上传YouTube视频（需要OAuth）",
+    "url": "https://www.googleapis.com/upload/youtube/v3/videos",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://www.googleapis.com/upload/youtube/v3/videos",
+    "added_at": 1780921348.956558
+  },
+  "音视频/vimeo_upload": {
+    "name": "vimeo_upload",
+    "category": "音视频",
+    "description": "Vimeo上传视频",
+    "url": "https://api.vimeo.com/me/videos",
+    "method": "POST",
+    "auth_type": "oauth",
+    "signature": "POST https://api.vimeo.com/me/videos",
+    "added_at": 1780921348.9565594
+  },
+  "音视频/twitch_search": {
+    "name": "twitch_search",
+    "category": "音视频",
+    "description": "搜索Twitch直播",
+    "url": "https://api.twitch.tv/helix/search/channels",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.twitch.tv/helix/search/channels",
+    "added_at": 1780921348.9565604
+  },
+  "音视频/spotify_search": {
+    "name": "spotify_search",
+    "category": "音视频",
+    "description": "搜索Spotify音乐",
+    "url": "https://api.spotify.com/v1/search",
+    "method": "GET",
+    "auth_type": "oauth",
+    "signature": "GET https://api.spotify.com/v1/search",
+    "added_at": 1780921348.9565616
+  },
+  "系统与监控/datadog_events": {
+    "name": "datadog_events",
+    "category": "系统与监控",
+    "description": "Datadog事件",
+    "url": "https://api.datadoghq.com/api/v1/events",
+    "method": "GET",
+    "auth_type": "api_key",
+    "signature": "GET https://api.datadoghq.com/api/v1/events",
+    "added_at": 1780921348.956563
+  },
+  "系统与监控/pagerduty_incidents": {
+    "name": "pagerduty_incidents",
+    "category": "系统与监控",
+    "description": "PagerDuty告警",
+    "url": "https://api.pagerduty.com/incidents",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://api.pagerduty.com/incidents",
+    "added_at": 1780921348.956564
+  },
+  "系统与监控/sentry_issues": {
+    "name": "sentry_issues",
+    "category": "系统与监控",
+    "description": "Sentry错误列表",
+    "url": "https://sentry.io/api/0/organizations/{org}/issues/",
+    "method": "GET",
+    "auth_type": "token",
+    "signature": "GET https://sentry.io/api/0/organizations/{org}/issues/",
+    "added_at": 1780921348.956565
+  },
+  "系统与监控/grafana_query": {
+    "name": "grafana_query",
+    "category": "系统与监控",
+    "description": "Grafana查询指标",
+    "url": "https://{host}/api/ds/query",
+    "method": "POST",
+    "auth_type": "token",
+    "signature": "POST https://{host}/api/ds/query",
+    "added_at": 1780921348.9565737
+  },
+  "系统与监控/prometheus_query": {
+    "name": "prometheus_query",
+    "category": "系统与监控",
+    "description": "Prometheus查询",
+    "url": "https://{host}/api/v1/query",
+    "method": "GET",
+    "auth_type": "none",
+    "signature": "GET https://{host}/api/v1/query",
+    "added_at": 1780921348.9565787
+  },
+  "系统与监控/newrelic_query": {
+    "name": "newrelic_query",
+    "category": "系统与监控",
+    "description": "NewRelic NRQL查询",
+    "url": "https://api.newrelic.com/graphql",
+    "method": "POST",
+    "auth_type": "api_key",
+    "signature": "POST https://api.newrelic.com/graphql",
+    "added_at": 1780921348.95658
+  }
+}

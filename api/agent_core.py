@@ -1,8 +1,13 @@
 """智能体 — 核心引擎（记忆+工具+并发+规格+记忆系统）"""
 import os, json, time, re, sqlite3, threading, importlib
 from pathlib import Path
-from api.agent_llm import call_llm
-from api.agent_tools import exec_tool
+try:
+    from api.agent_llm import call_llm
+    from api.agent_tools import exec_tool
+except ImportError:
+    import sys; sys.path.insert(0, '.')
+    from agent_llm import call_llm
+    from agent_tools import exec_tool
 
 # ===== MemOS 记忆系统（开机即用）=====
 try:
@@ -101,6 +106,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             {"type":"function","function":{"name":"self_evolving_analyze","description":"🧬 自进化分析：分析代码库，找出潜在改进点（bug/优化/重构/功能）。参数repo_path可选，默认当前目录。","parameters":{"type":"object","properties":{"repo_path":{"type":"string"}}}}},
             {"type":"function","function":{"name":"moltron_learn","description":"📚 Moltron技能学习：学习新技能并写入Skills.md。参数skill_name传技能名，skill_description传描述。","parameters":{"type":"object","properties":{"skill_name":{"type":"string"},"skill_description":{"type":"string"}},"required":["skill_name","skill_description"]}}},
             {"type":"function","function":{"name":"accomplish_desktop","description":"🖥️ 桌面自动化：执行桌面自动化工作流（键鼠操作/截图/应用启动）。参数workflow传入步骤列表。","parameters":{"type":"object","properties":{"workflow":{"type":"string"}}}}},
+            {"type":"function","function":{"name":"toolbench_discover","description":"🔌 ToolBench API发现：从12万+API注册表中发现可以调用的外部API。参数query搜索关键词，category过滤类别，action可选search/register/stats/detail。","parameters":{"type":"object","properties":{"query":{"type":"string"},"category":{"type":"string"},"action":{"type":"string"},"api_name":{"type":"string"}}}}},
         ]
         for tname in _GENERATED_TOOLS:
             bt.append({"type":"function","function":{"name":f"tool_{tname}","description":f"自定义工具: {tname}","parameters":{"type":"object","properties":{"params":{"type":"string"}}}}})
@@ -275,6 +281,9 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
    示例: moltron_learn(skill_name="Browser Automation", skill_description="使用Browser-Use自动化浏览器操作")
 8. 🖥️ accomplish_desktop - 桌面自动化：执行桌面自动化工作流（键鼠操作/截图/应用启动）
    示例: accomplish_desktop(workflow=[{{"action":"type","text":"Hello"}},{{"action":"screenshot"}}])
+9. 🔌 toolbench_discover - ToolBench API发现：从12万+API注册表中搜索可调用的外部API
+   示例: toolbench_discover(query="搜索", category="社交媒体")  # 搜索社交媒体类API
+   示例: toolbench_discover(action="stats")  # 查看API注册表统计
 
 【原有能力】
 - 💻 开发网页/系统 (说"开发xxx")
@@ -296,6 +305,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 - 需要深度研究时使用 gpt_research
 - 需要记忆管理时使用 letta_message
 - 需要外部工具时使用 composio_execute
+- 需要发现API时使用 toolbench_discover
 - 分析代码时使用 self_evolving_analyze
 - 学习新技能时使用 moltron_learn
 - 桌面自动化时使用 accomplish_desktop

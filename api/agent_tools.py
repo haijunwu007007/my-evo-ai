@@ -241,5 +241,17 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                 return {"ok":result.get("success",False),"data":str(result)}
             except Exception as e:
                 return {"ok":False,"data":f"桌面自动化失败: {e}"}
+        # ===== ToolBench API发现（09/12）=====
+        if name == "toolbench_discover":
+            try:
+                from api.agent_toolbench import toolbench_discover as _tb_discover
+                query = args.get("query","")
+                category = args.get("category","")
+                action = args.get("action","search")
+                api_name = args.get("api_name","")
+                result = _tb_discover(query=query, category=category, action=action, api_name=api_name)
+                return {"ok":result.get("success",False),"data":str(result)}
+            except Exception as e:
+                return {"ok":False,"data":f"ToolBench API发现失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}

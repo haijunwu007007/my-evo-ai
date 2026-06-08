@@ -85,3 +85,10 @@ def run_with_experience(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS):
         mem.add_experience(msg[:50], f"成功生成：{_LAST.get('url','')}", success=True)
     
     return result
+
+# 兼容类名导入
+ConcurrentAgent = type('ConcurrentAgent', (), {
+    'run_concurrent': staticmethod(run_concurrent_agents),
+    'run_with_experience': staticmethod(run_with_experience),
+    '__doc__': '并发多Agent兼容包装'
+})

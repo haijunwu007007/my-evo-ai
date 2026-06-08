@@ -1,10 +1,10 @@
-"""智能体 — 路由（80行，只做转发）"""
+"""智能体 — 路由（流式+工具完整支持）"""
 from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from pathlib import Path
-import os, random, json
+import os, random, json, asyncio
 from core.logging_config import get_logger
 logger = get_logger("evo.api.smart")
 router = APIRouter()
@@ -25,8 +25,23 @@ DIRECT_ROUTES = {
     "打飞机": ("app", "✅ **打飞机**\n[📄 打开](/shooter)"),
 }
 
+# 需要工具调用的关键词（匹配到这些词走完整agent_core管道）
+_TOOL_KEYWORDS = [
+    "浏览器", "自动化", "研究", "全栈", "生成项目", "记忆", "composio",
+    "外部工具", "分析代码", "进化", "学习技能", "桌面", "API发现",
+    "toolbench", "browser", "research", "openhands", "letta",
+    "self_evolving", "moltron", "accomplish", "抓取", "爬取",
+    "操控浏览器", "搜索API", "发现API", "画", "搜索", "开发",
+    "创建", "写一个", "做一个", "生成", "设计", "实现", "模块",
+]
+
 class Req(BaseModel):
     message: str; api_key: Optional[str] = ""; lang: Optional[str] = "zh-CN"; context: Optional[list] = []
+
+def _needs_tools(msg: str) -> bool:
+    """判断消息是否需要工具调用"""
+    lower = msg.lower()
+    return any(kw.lower() in lower for kw in _TOOL_KEYWORDS)
 
 @router.post("/api/v1/smart")
 async def smart_chat(req: Req):
@@ -42,7 +57,6 @@ async def smart_chat(req: Req):
         except: pass
     from .agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
-    import asyncio
     result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)
     return result
 
@@ -54,16 +68,56 @@ setup_smart_chat_routes = register_routes  # 别名
 
 @router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
-    """流式输出 — 边生成边返回"""
-    from .agent_llm import call_llm_stream
+    """流式输出 — 支持工具调用的完整管道"""
     msg = req.message or ""
+    
+    # 1. 直达路由检查
+    for keyword, (mode, result) in DIRECT_ROUTES.items():
+        if keyword in msg:
+            async def direct_gen():
+                yield json.dumps({"type":"start"}, ensure_ascii=False) + "\n"
+                yield json.dumps({"type":"chunk","text":result}, ensure_ascii=False) + "\n"
+                yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
+            return StreamingResponse(direct_gen(), media_type="application/x-ndjson")
+    
+    # 2. 判断是否需要工具调用
+    if _needs_tools(msg):
+        # 走完整 agent_core 管道（支持工具），结果流式返回
+        from .agent_core import create_engine
+        engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
+        
+        async def tool_gen():
+            yield json.dumps({"type":"start"}, ensure_ascii=False) + "\n"
+            try:
+                result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)
+                if isinstance(result, dict) and result.get("success"):
+                    text = result.get("result", "")
+                    # 分块流式输出（模拟流式体验）
+                    chunk_size = 20
+                    for i in range(0, len(text), chunk_size):
+                        yield json.dumps({"type":"chunk","text":text[i:i+chunk_size]}, ensure_ascii=False) + "\n"
+                    yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
+                else:
+                    err_text = result.get("detail", result.get("result", "处理失败")) if isinstance(result, dict) else str(result)
+                    yield json.dumps({"type":"chunk","text":str(err_text)}, ensure_ascii=False) + "\n"
+                    yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
+            except Exception as e:
+                yield json.dumps({"type":"chunk","text":f"处理出错: {e}"}, ensure_ascii=False) + "\n"
+                yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
+        return StreamingResponse(tool_gen(), media_type="application/x-ndjson")
+    
+    # 3. 简单聊天 — 纯流式LLM输出
+    from .agent_llm import call_llm_stream
     is_dev = any(k in msg for k in ["开发","创建","写一个","做一个","生成","设计","实现"])
     sp = f"你是AUTO-EVO-AI。{f'直接生成完整HTML代码，只输出```html```代码块，不要加解释。' if is_dev else '简洁回答。'}"
     async def generate():
-        yield '{"type":"start"}\n'
+        yield json.dumps({"type":"start"}, ensure_ascii=False) + "\n"
         for chunk in call_llm_stream([{"role":"user","content":req.message}], req.api_key, sp):
             if chunk == "__DONE__":
-                yield '{"type":"done"}\n'
+                yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
                 return
+            if chunk == "local":
+                continue
             yield json.dumps({"type":"chunk","text":chunk}, ensure_ascii=False) + "\n"
+        yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
     return StreamingResponse(generate(), media_type="application/x-ndjson")

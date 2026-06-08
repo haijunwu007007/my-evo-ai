@@ -59,6 +59,10 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
 .header-actions{display:flex;justify-content:space-between;align-items:center}
 .header-actions span{font-size:12px;color:var(--text2);cursor:pointer}
 .header-actions span:hover{color:var(--accent)}
+.quick-actions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;flex-shrink:0}
+.quick-actions .qa{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;background:var(--ai-msg);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.quick-actions .qa:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.quick-actions .qa:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -117,6 +121,18 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       </div>
     </div>
     <div class="messages" id="messages"></div>
+    <!-- 快捷操作：9个新集成工具 -->
+    <div class="quick-actions" id="quickActions">
+      <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器自动化</span>
+      <span class="qa" onclick="quickTool('gpt_research')">📊 自主研究</span>
+      <span class="qa" onclick="quickTool('openhands_generate')">🏗️ 全栈项目</span>
+      <span class="qa" onclick="quickTool('letta_message')">🧠 记忆管理</span>
+      <span class="qa" onclick="quickTool('composio_execute')">🔧 外部工具</span>
+      <span class="qa" onclick="quickTool('self_evolving_analyze')">🧬 代码分析</span>
+      <span class="qa" onclick="quickTool('moltron_learn')">📚 技能学习</span>
+      <span class="qa" onclick="quickTool('accomplish_desktop')">🖥️ 桌面自动化</span>
+      <span class="qa" onclick="quickTool('toolbench_discover')">🔌 API发现</span>
+    </div>
     <div class="input-area">
       <div class="input-row">
         <input id="input" data-i18n="input_placeholder" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
@@ -186,6 +202,35 @@ function translateUI(){
   var inp=document.getElementById('input');if(inp)inp.placeholder=__('input_placeholder')
   // 语言下拉选中
   renderLang()
+}
+
+// ===== 快捷工具 =====
+var _TOOL_HINTS = {
+  browser_use_task: "帮我用浏览器自动化完成一个任务：",
+  gpt_research: "请帮我做一个深度研究：",
+  openhands_generate: "帮我生成一个全栈项目：",
+  letta_message: "记住以下信息到长期记忆：",
+  composio_execute: "使用外部工具执行：",
+  self_evolving_analyze: "帮我分析当前代码库的改进点",
+  moltron_learn: "学习一个新技能：",
+  accomplish_desktop: "执行桌面自动化工作流：",
+  toolbench_discover: "帮我发现可用的外部API："
+}
+// 需要工具调用（走非流式）的关键词
+var _TOOL_KEYWORDS = ["浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API"]
+
+function quickTool(name){
+  var hint = _TOOL_HINTS[name] || ""
+  document.getElementById('input').value = hint
+  document.getElementById('input').focus()
+}
+
+function needsTool(msg){
+  var lower = msg.toLowerCase()
+  for(var i=0;i<_TOOL_KEYWORDS.length;i++){
+    if(lower.indexOf(_TOOL_KEYWORDS[i].toLowerCase())>=0) return true
+  }
+  return false
 }
 
 // ===== 核心功能 =====
@@ -273,34 +318,40 @@ async function send(){
     if(CTX.length>10)CTX=CTX.slice(-10)
     showLoading()
     var ak=localStorage.getItem('evo_api_key')||''
-    // 流式输出
-    try{
-      var ssr=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
-      if(ssr.ok){
-        var d=document.getElementById('msgs');var msgDiv=document.createElement('div');msgDiv.className='msg bot'
-        var lb=document.createElement('div');lb.className='msg-label';lb.textContent='AUTO-EVO-AI'
-        var bb=document.createElement('div');bb.className='msg-bubble';bb.textContent=''
-        msgDiv.appendChild(lb);msgDiv.appendChild(bb);d.appendChild(msgDiv)
-        hideLoading()
-        var full='';var reader=ssr.body.getReader();var decoder=new TextDecoder()
-        while(true){
-          var {done,value}=await reader.read()
-          if(done)break
-          var lines=decoder.decode(value).split('\n')
-          for(var l of lines){
-            if(!l.trim())continue
-            try{var j=JSON.parse(l);if(j.type==='chunk'){full+=j.text;bb.textContent=full.replace(/</g,'&lt');d.scrollTop=d.scrollHeight}else if(j.type==='done'){bb.textContent=full.replace(/</g,'&lt');d.scrollTop=d.scrollHeight}}catch(e){}
+    var useTools=needsTool(text)
+    // 工具类消息直接走非流式（有完整工具链），其他走流式
+    if(!useTools){
+      try{
+        var ssr=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
+        if(ssr.ok){
+          var d=document.getElementById('messages');var msgDiv=document.createElement('div');msgDiv.className='msg bot'
+          var lb=document.createElement('div');lb.className='msg-label';lb.textContent='AUTO-EVO-AI'
+          var bb=document.createElement('div');bb.className='msg-bubble';bb.textContent=''
+          msgDiv.appendChild(lb);msgDiv.appendChild(bb);d.appendChild(msgDiv)
+          hideLoading()
+          var full='';var reader=ssr.body.getReader();var decoder=new TextDecoder()
+          while(true){
+            var {done,value}=await reader.read()
+            if(done)break
+            var lines=decoder.decode(value).split('\n')
+            for(var l of lines){
+              if(!l.trim())continue
+              try{var j=JSON.parse(l);if(j.type==='chunk'){full+=j.text;bb.innerHTML=full.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:4px 0">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');d.scrollTop=d.scrollHeight}else if(j.type==='done'){d.scrollTop=d.scrollHeight}}catch(e){}
+            }
           }
+          // 渲染模块调用信息
+          if(full.includes('【模块调用】')||full.includes('execute_module')||full.includes('引擎:')){
+            bb.innerHTML=full.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/\|/g,' | ').replace(/【模块调用】/g,'<span style="color:#4361ee;font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:#7209b7">引擎:</span>')
+          }
+          CTX.push({role:'assistant',content:full})
+          CHAT.push({role:'bot',text:full,time:new Date().toISOString()})
+          if(CHAT.length>100)CHAT=CHAT.slice(-100)
+          localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
+          return
         }
-        // 渲染模块调用信息
-        if(full.includes('【模块调用】')||full.includes('execute_module')||full.includes('引擎:')){
-          bb.innerHTML=full.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/\|/g,' | ').replace(/【模块调用】/g,'<span style="color:#4361ee;font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:#7209b7">引擎:</span>')
-        }
-        CTX.push({role:'assistant',content:full})
-        return
-      }
-    }catch(e){}
-    // 降级到普通请求
+      }catch(e){}
+    }
+    // 非流式请求（工具调用/流式失败降级）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()
