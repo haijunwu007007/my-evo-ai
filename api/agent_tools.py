@@ -648,5 +648,145 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                 return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
             except Exception as e:
                 return {"ok": False, "data": f"projectsend_files执行失败: {e}"}
+        if name == "odoo_manage":
+            try:
+                from api.agent_odoo import odoo_manage
+                r = odoo_manage(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"odoo_manage执行失败: {e}"}
+        if name == "erpclaw_manage":
+            try:
+                from api.agent_erpclaw import erpclaw_manage
+                r = erpclaw_manage(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"erpclaw_manage执行失败: {e}"}
+        if name == "coolify_deploy":
+            try:
+                from api.agent_coolify import coolify_deploy
+                r = coolify_deploy(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"coolify_deploy执行失败: {e}"}
+        if name == "rustdesk_connect":
+            try:
+                from api.agent_rustdesk import rustdesk_connect
+                r = rustdesk_connect(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"rustdesk_connect执行失败: {e}"}
+        if name == "docuseal_sign":
+            try:
+                from api.agent_docuseal import docuseal_sign
+                r = docuseal_sign(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"docuseal_sign执行失败: {e}"}
+        if name == "homeassistant_control":
+            try:
+                from api.agent_homeassistant import homeassistant_control
+                r = homeassistant_control(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"homeassistant_control执行失败: {e}"}
+        if name == "vaultwarden_manage":
+            try:
+                from api.agent_vaultwarden import vaultwarden_manage
+                r = vaultwarden_manage(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"vaultwarden_manage执行失败: {e}"}
+        if name == "nocodb_manage":
+            try:
+                from api.agent_nocodb import nocodb_manage
+                r = nocodb_manage(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"nocodb_manage执行失败: {e}"}
+        if name == "appsmith_build":
+            try:
+                from api.agent_appsmith import appsmith_build
+                r = appsmith_build(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"appsmith_build执行失败: {e}"}
+        if name == "airbyte_sync":
+            try:
+                from api.agent_airbyte import airbyte_sync
+                r = airbyte_sync(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"airbyte_sync执行失败: {e}"}
+        if name == "mlflow_track":
+            try:
+                from api.agent_mlflow import mlflow_track
+                r = mlflow_track(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"mlflow_track执行失败: {e}"}
+        if name == "langfuse_observe":
+            try:
+                from api.agent_langfuse import langfuse_observe
+                r = langfuse_observe(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"langfuse_observe执行失败: {e}"}
+        if name == "hoppscotch_test":
+            try:
+                from api.agent_hoppscotch import hoppscotch_test
+                r = hoppscotch_test(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"hoppscotch_test执行失败: {e}"}
+        if name == "grist_analyze":
+            try:
+                from api.agent_grist import grist_analyze
+                r = grist_analyze(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"grist_analyze执行失败: {e}"}
+        if name == "freshrss_read":
+            try:
+                from api.agent_freshrss import freshrss_read
+                r = freshrss_read(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"freshrss_read执行失败: {e}"}
+        if name == "listmonk_send":
+            try:
+                from api.agent_listmonk import listmonk_send
+                r = listmonk_send(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"listmonk_send执行失败: {e}"}
+        if name == "mermaid_chart":
+            try:
+                from api.agent_mermaid import mermaid_chart
+                r = mermaid_chart(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"mermaid_chart执行失败: {e}"}
+        if name == "nocobase_build":
+            try:
+                from api.agent_nocobase import nocobase_build
+                r = nocobase_build(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"nocobase_build执行失败: {e}"}
+        if name == "scriberr_transcribe":
+            try:
+                from api.agent_scriberr import scriberr_transcribe
+                r = scriberr_transcribe(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"scriberr_transcribe执行失败: {e}"}
+        if name == "keploy_test":
+            try:
+                from api.agent_keploy import keploy_test
+                r = keploy_test(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"keploy_test执行失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}

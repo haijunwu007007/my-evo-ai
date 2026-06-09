@@ -180,6 +180,27 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
         ]
         for tname in _GENERATED_TOOLS:
             bt.append({"type":"function","function":{"name":f"tool_{tname}","description":f"自定义工具: {tname}","parameters":{"type":"object","properties":{"params":{"type":"string"}}}}})
+            # ===== 第5轮新增20个集成工具 =====
+            {"type": "function", "function": {"name": "odoo_manage", "description": "🏢 Odoo ERP：管理会计/库存/采购/销售/制造/HR模块", "parameters": {"type": "object", "properties": {"module": {"type": "string", "description": "操作模块"}, "action": {"type": "string", "description": "操作类型"}}, "required": ["module"]}}},
+            {"type": "function", "function": {"name": "erpclaw_manage", "description": "🏭 ERPClaw AI-ERP：14行业46模块AI原生ERP", "parameters": {"type": "object", "properties": {"module": {"type": "string", "description": "模块"}, "industry": {"type": "string", "description": "行业"}}, "required": ["module", "industry"]}}},
+            {"type": "function", "function": {"name": "coolify_deploy", "description": "🚀 Coolify PaaS：自托管部署应用和数据库", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "deploy/status"}}, "required": ["app_name"]}}},
+            {"type": "function", "function": {"name": "rustdesk_connect", "description": "🖥️ RustDesk远程桌面：远程控制电脑", "parameters": {"type": "object", "properties": {"target": {"type": "string", "description": "目标机器"}, "action": {"type": "string", "description": "connect/status"}}, "required": ["target"]}}},
+            {"type": "function", "function": {"name": "docuseal_sign", "description": "✍️ DocuSeal电子签名：在线文档签署", "parameters": {"type": "object", "properties": {"document": {"type": "string", "description": "文档"}, "signers": {"type": "string", "description": "签署人"}}, "required": ["document", "signers"]}}},
+            {"type": "function", "function": {"name": "homeassistant_control", "description": "🏠 智能家居：控制IoT设备/灯光/传感器/自动化场景", "parameters": {"type": "object", "properties": {"device": {"type": "string", "description": "设备"}, "action": {"type": "string", "description": "操作"}, "state": {"type": "string", "description": "状态"}}, "required": ["device"]}}},
+            {"type": "function", "function": {"name": "vaultwarden_manage", "description": "🔐 密码管理：安全存储和检索密码凭证", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "list/create/get"}, "site": {"type": "string", "description": "网站"}}, "required": ["site"]}}},
+            {"type": "function", "function": {"name": "nocodb_manage", "description": "📊 NocoDB数据表：数据库→电子表格可视化管理", "parameters": {"type": "object", "properties": {"table": {"type": "string", "description": "表名"}, "action": {"type": "string", "description": "list/create/query"}}, "required": ["table"]}}},
+            {"type": "function", "function": {"name": "appsmith_build", "description": "🛠️ Appsmith低代码：拖拽式构建内部管理工具", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "create/edit"}}, "required": ["app_name"]}}},
+            {"type": "function", "function": {"name": "airbyte_sync", "description": "🔄 Airbyte ETL：数据采集/清洗/同步管道", "parameters": {"type": "object", "properties": {"source": {"type": "string", "description": "数据源"}, "destination": {"type": "string", "description": "目标"}, "action": {"type": "string", "description": "sync/status"}}, "required": ["source", "destination"]}}},
+            {"type": "function", "function": {"name": "mlflow_track", "description": "📈 MLflow MLOps：AI模型训练/部署/追踪", "parameters": {"type": "object", "properties": {"experiment": {"type": "string", "description": "实验名"}, "action": {"type": "string", "description": "log/list/compare"}}, "required": ["experiment"]}}},
+            {"type": "function", "function": {"name": "langfuse_observe", "description": "👁️ Langfuse LLM可观测：Prompt管理/评估/追踪", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "trace/score/prompt"}, "project": {"type": "string", "description": "项目"}}, "required": ["project"]}}},
+            {"type": "function", "function": {"name": "hoppscotch_test", "description": "🧪 Hoppscotch API测试：API调试/Mock/回归测试", "parameters": {"type": "object", "properties": {"endpoint": {"type": "string", "description": "API地址"}, "method": {"type": "string", "description": "HTTP方法"}, "body": {"type": "string", "description": "请求体"}}, "required": ["endpoint", "method"]}}},
+            {"type": "function", "function": {"name": "grist_analyze", "description": "📋 Grist电子表格：关系型数据分析/Python公式", "parameters": {"type": "object", "properties": {"table": {"type": "string", "description": "表名"}, "action": {"type": "string", "description": "analyze/query/formula"}}, "required": ["table"]}}},
+            {"type": "function", "function": {"name": "freshrss_read", "description": "📰 FreshRSS聚合：RSS订阅/信息采集/资讯监控", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "read/search/subscribe"}, "feed": {"type": "string", "description": "RSS源"}}, "required": ["feed"]}}},
+            {"type": "function", "function": {"name": "listmonk_send", "description": "📧 Listmonk邮件：邮件列表/Newsletter/营销邮件", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "send/list/create"}, "list_id": {"type": "string", "description": "列表ID"}}, "required": ["list_id"]}}},
+            {"type": "function", "function": {"name": "mermaid_chart", "description": "🗺️ Mermaid图表：文本→流程图/架构图/时序图", "parameters": {"type": "object", "properties": {"chart_type": {"type": "string", "description": "flow/sequence/class/er"}, "description": {"type": "string", "description": "描述"}}, "required": ["chart_type"]}}},
+            {"type": "function", "function": {"name": "nocobase_build", "description": "🏗️ NocoBase低代码：AI+低代码快速构建业务应用", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "create/schema/query"}}, "required": ["app_name"]}}},
+            {"type": "function", "function": {"name": "scriberr_transcribe", "description": "🎤 音频转录：AI将音频/会议转录为文字", "parameters": {"type": "object", "properties": {"audio_path": {"type": "string", "description": "音频路径"}, "action": {"type": "string", "description": "transcribe/list"}}, "required": ["audio_path"]}}},
+            {"type": "function", "function": {"name": "keploy_test", "description": "🧪 Keploy AI测试：自动生成API回归测试", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "record/test/report"}, "endpoint": {"type": "string", "description": "API地址"}}, "required": ["endpoint"]}}},
         return bt
 
     def _generate_page(msg, title):
@@ -488,6 +509,48 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
     示例: bookstack_wiki(action="create_book", name="技术手册")
 73. 📁 projectsend_files - 安全文件共享
     示例: projectsend_files(action="upload", file_path="/path/to/file")
+
+【2026-06-09 第5轮 20个企业纵深自动化工具】
+74. 🏢 odoo_manage - Odoo ERP：管理会计/库存/采购/销售/制造/HR
+    示例: odoo_manage(module="accounting", action="list")
+75. 🏭 erpclaw_manage - ERPClaw AI原生ERP：14行业46模块
+    示例: erpclaw_manage(industry="manufacturing", module="inventory")
+76. 🚀 coolify_deploy - Coolify PaaS：自托管部署应用和数据库
+    示例: coolify_deploy(app_name="my-app", action="deploy")
+77. 🖥️ rustdesk_connect - RustDesk远程桌面：远程控制电脑
+    示例: rustdesk_connect(target="server-01", action="connect")
+78. ✍️ docuseal_sign - DocuSeal电子签名：在线文档签署
+    示例: docuseal_sign(document="contract.pdf", signers="张三,李四")
+79. 🏠 homeassistant_control - 智能家居：控制IoT设备/灯光/传感器
+    示例: homeassistant_control(device="living_room_light", action="turn_on")
+80. 🔐 vaultwarden_manage - 密码管理：安全存储和检索密码凭证
+    示例: vaultwarden_manage(action="list", site="github.com")
+81. 📊 nocodb_manage - NocoDB数据表：数据库→电子表格可视化管理
+    示例: nocodb_manage(table="customers", action="list")
+82. 🛠️ appsmith_build - Appsmith低代码：拖拽式构建内部管理工具
+    示例: appsmith_build(app_name="CRM", action="create")
+83. 🔄 airbyte_sync - Airbyte ETL：数据采集/清洗/同步管道
+    示例: airbyte_sync(source="postgres", destination="snowflake", action="sync")
+84. 📈 mlflow_track - MLflow MLOps：AI模型训练/部署/追踪
+    示例: mlflow_track(experiment="bert-finetune", action="log")
+85. 👁️ langfuse_observe - Langfuse LLM可观测：Prompt管理/评估/追踪
+    示例: langfuse_observe(action="trace", project="chatbot")
+86. 🧪 hoppscotch_test - Hoppscotch API测试：API调试/Mock/回归
+    示例: hoppscotch_test(endpoint="/api/users", method="GET")
+87. 📋 grist_analyze - Grist电子表格：关系型数据分析/Python公式
+    示例: grist_analyze(table="sales", action="analyze")
+88. 📰 freshrss_read - FreshRSS聚合：RSS订阅/信息采集/资讯监控
+    示例: freshrss_read(action="read", feed="tech_news")
+89. 📧 listmonk_send - Listmonk邮件：邮件列表/Newsletter/营销
+    示例: listmonk_send(action="send", list_id="1")
+90. 🗺️ mermaid_chart - Mermaid图表：文本→流程图/架构图/时序图
+    示例: mermaid_chart(chart_type="flow", description="用户登录流程")
+91. 🏗️ nocobase_build - NocoBase低代码：AI+低代码构建业务应用
+    示例: nocobase_build(app_name="订单管理", action="create")
+92. 🎤 scriberr_transcribe - 音频转录：AI将音频/会议转录为文字
+    示例: scriberr_transcribe(audio_path="meeting.mp3", action="transcribe")
+93. 🧪 keploy_test - Keploy AI测试：自动生成API回归测试
+    示例: keploy_test(action="record", endpoint="/api/orders")
 
 【原有能力】
 - 💻 开发网页/系统 (说"开发xxx")

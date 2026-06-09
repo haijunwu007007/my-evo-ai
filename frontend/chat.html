@@ -192,6 +192,26 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       <span class="qa" onclick="quickTool('wikijs_wiki')">📚 Wiki知识</span>
       <span class="qa" onclick="quickTool('bookstack_wiki')">📚 文档系统</span>
       <span class="qa" onclick="quickTool('projectsend_files')">📁 文件共享</span>
+      <span class="qa" onclick="quickTool('odoo_manage')">🏢 ERP</span>
+      <span class="qa" onclick="quickTool('erpclaw_manage')">🏭 AI-ERP</span>
+      <span class="qa" onclick="quickTool('coolify_deploy')">🚀 PaaS部署</span>
+      <span class="qa" onclick="quickTool('rustdesk_connect')">🖥️ 远程桌面</span>
+      <span class="qa" onclick="quickTool('docuseal_sign')">✍️ 电子签名</span>
+      <span class="qa" onclick="quickTool('homeassistant_control')">🏠 智能家居</span>
+      <span class="qa" onclick="quickTool('vaultwarden_manage')">🔐 密码管理</span>
+      <span class="qa" onclick="quickTool('nocodb_manage')">📊 数据表格</span>
+      <span class="qa" onclick="quickTool('appsmith_build')">🛠️ 低代码</span>
+      <span class="qa" onclick="quickTool('airbyte_sync')">🔄 ETL管道</span>
+      <span class="qa" onclick="quickTool('mlflow_track')">📈 MLOps</span>
+      <span class="qa" onclick="quickTool('langfuse_observe')">👁️ LLM观测</span>
+      <span class="qa" onclick="quickTool('hoppscotch_test')">🧪 API测试</span>
+      <span class="qa" onclick="quickTool('grist_analyze')">📋 电子表格</span>
+      <span class="qa" onclick="quickTool('freshrss_read')">📰 RSS聚合</span>
+      <span class="qa" onclick="quickTool('listmonk_send')">📧 邮件</span>
+      <span class="qa" onclick="quickTool('mermaid_chart')">🗺️ 流程图</span>
+      <span class="qa" onclick="quickTool('nocobase_build')">🏗️ 低代码平台</span>
+      <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 音频转录</span>
+      <span class="qa" onclick="quickTool('keploy_test')">🧪 AI测试</span>
     </div>
     <div class="input-area">
       <div class="input-row">
@@ -326,9 +346,29 @@ var _TOOL_HINTS = {
 }
 // 需要工具调用（走非流式）的关键词
 var _TOOL_KEYWORDS = ["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", "浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",
+  odoo_manage: "帮我管理ERP（会计/库存/采购）：",
+  erpclaw_manage: "帮我用AI-ERP管理业务：",
+  coolify_deploy: "帮我在PaaS上部署应用：",
+  rustdesk_connect: "帮我远程连接电脑：",
+  docuseal_sign: "帮我发送电子签名：",
+  homeassistant_control: "帮我控制智能家居设备：",
+  vaultwarden_manage: "帮我管理密码/凭证：",
+  nocodb_manage: "帮我管理数据表格：",
+  appsmith_build: "帮我用低代码构建管理工具：",
+  airbyte_sync: "帮我同步数据管道：",
+  mlflow_track: "帮我追踪AI模型训练：",
+  langfuse_observe: "帮我监控LLM应用：",
+  hoppscotch_test: "帮我测试API：",
+  grist_analyze: "帮我分析电子表格数据：",
+  freshrss_read: "帮我读取RSS资讯：",
+  listmonk_send: "帮我发送邮件/Newsletter：",
+  mermaid_chart: "帮我生成流程图/架构图：",
+  nocobase_build: "帮我用低代码构建业务应用：",
+  scriberr_transcribe: "帮我转录音频/会议：",
+  keploy_test: "帮我自动生成API测试：",
   "markdown","转markdown","文档转换","爬虫","爬取数据","计算机","控制电脑","截图","设计转代码","PR","审查","代码审查","测试","单元测试","编辑代码","改代码","telegram","whatsapp","slack","discord","消息平台","语音","tts","播报","朗读","多智能体","智能体团队","自主","autogpt","评测","agent评估","benchmark","issue修复","github issue","生成项目","全栈","数据库","查库","sql查询","查询数据库","deploy","部署","k8s","kubernetes",
   // 第3轮22个
-  "视频脚本","视频制作","openmontage","数据可视化","图表","数据分析","ocr","识别图片","识别文字","识别pdf","安全扫描","漏洞扫描","渗透","代码审计","semgrep","漏洞","合同","合规","法律","crm","联系人","交易","hr","员工","请假","发票","开票","费用","工单","客服","ticket","社交媒体","发帖","营销邮件","superset","bi","仪表盘","dataease","问卷调查","heyform","表单","etl","docetl","文档提取","法律协议","合同模板","claude code","代码生成"]
+  "视频脚本","视频制作","openmontage","数据可视化","图表","数据分析","ocr","识别图片","识别文字","识别pdf","安全扫描","漏洞扫描","渗透","代码审计","semgrep","漏洞","合同","合规","法律","crm","联系人","交易","hr","员工","请假","发票","开票","费用","工单","客服","ticket","社交媒体","发帖","营销邮件","superset","bi","仪表盘","dataease","问卷调查","heyform","表单","etl","docetl","文档提取","法律协议","合同模板","claude code","代码生成""odoo_manage", "erpclaw_manage", "coolify_deploy", "rustdesk_connect", "docuseal_sign", "homeassistant_control", "vaultwarden_manage", "nocodb_manage", "appsmith_build", "airbyte_sync", "mlflow_track", "langfuse_observe", "hoppscotch_test", "grist_analyze", "freshrss_read", "listmonk_send", "mermaid_chart", "nocobase_build", "scriberr_transcribe", "keploy_test", ]
 
 function quickTool(name){
   var hint = _TOOL_HINTS[name] || ""
