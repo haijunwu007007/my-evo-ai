@@ -1,5 +1,9 @@
 """Invoice Ninja — 开源发票+报价+费用追踪（自托管账单自动化）"""
 import os, json, time
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def invoice_create(client: str = "", amount: float = 0.0, items: list = None,
                    due_date: str = "", notes: str = "") -> dict:

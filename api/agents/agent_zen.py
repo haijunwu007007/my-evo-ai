@@ -1,6 +1,10 @@
 """Zen-AI-Pentest — AI自动渗透测试（侦察→扫描→利用→报告全流程）"""
 import os, json, time
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def zen_recon(target: str = "") -> dict:
     """侦察阶段：收集目标信息"""

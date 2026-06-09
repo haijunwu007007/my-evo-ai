@@ -1,6 +1,10 @@
 """MarkItDown — 微软通用文档转 Markdown（PDF/Office/图片→LLM可读）"""
 import os, json
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def convert_to_markdown(file_path: str = "", text: str = "", file_type: str = "auto") -> dict:
     """将任意文档转为Markdown

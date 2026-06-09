@@ -1,6 +1,10 @@
 """Qwen3-TTS — 阿里开源语音合成（文本→语音，97ms流式延迟，情绪控制）"""
 import os, json, base64
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def text_to_speech(text: str = "", voice: str = "default", 
                    speed: float = 1.0, emotion: str = "neutral",

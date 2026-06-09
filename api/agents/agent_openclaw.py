@@ -1,6 +1,10 @@
 """OpenClaw — 多平台个人AI助手桥接（WhatsApp/Telegram/Slack/Discord/iMessage 20+平台）"""
 import os, json, time
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 # OpenClaw 配置存储
 CLAW_CONFIG_DIR = Path("~/.openclaw").expanduser()

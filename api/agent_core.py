@@ -15,12 +15,13 @@ try:
     _memos = get_memory()
 except: _memos = None
 
+_DEFAULT_KEY = "sk-e7a7f4e700d847f28027c5608e3f5c02"  # 内建DeepSeek Key
 _FALLBACK = {
-    "可以做那些事情": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统(说'开发xxx')\n- 🎨 画图(说'画xxx')\n- 🔍 搜索信息(说'搜索xxx')\n- 📊 做PPT(说'做一份PPT')\n- 🎮 玩游戏(说'游戏')\n- 📦 调模块(说'调xxx模块')\n- ⚡ 查状态(说'系统怎么样')\n需要输入API Key才能使用智能体全部功能！",
-    "你能做什么": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统\n- 🎨 画图\n- 🔍 搜索信息\n- 📊 做PPT\n- 🎮 玩游戏\n- 📦 调模块\n- ⚡ 查状态\n需要输入API Key才能使用智能体全部功能！",
-    "你会做什么": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统\n- 🎨 画图\n- 🔍 搜索信息\n- 📊 做PPT\n- 🎮 玩游戏\n- 📦 调模块\n- ⚡ 查状态\n需要输入API Key才能使用智能体全部功能！",
-    "功能": "AUTO-EVO-AI 功能列表:\n- 智能体聊天(需API Key)\n- 网页开发(输入'开发xxx')\n- AI画图(多引擎自动切换)\n- 信息搜索(GitHub+DuckDuckGo)\n- PPT自动生成\n- 8种游戏秒回\n- 499个模块调用\n- 自我迭代审查\n- 并发多Agent(并行加速)\n- 规格驱动开发(Spec-Kit)\n- 三层记忆系统(MemOS)",
-    "帮助": "AUTO-EVO-AI 使用帮助:\n1. 输入API Key后可使用智能体\n2. 直接说需求即可\n3. 游戏/状态无需Key\n4. 开发项目会自动审查修复\n5. 并发加速让开发提速5倍\n更多功能持续更新中",
+    "可以做那些事情": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统(说'开发xxx')\n- 🎨 画图(说'画xxx')\n- 🔍 搜索信息(说'搜索xxx')\n- 📊 做PPT(说'做一份PPT')\n- 🎮 玩游戏(说'游戏')\n- 📦 调模块(说'调xxx模块')\n- ⚡ 查状态(说'系统怎么样')\n已内建DeepSeek Key 🔑，直接使用全部智能体功能！",
+    "你能做什么": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统\n- 🎨 画图\n- 🔍 搜索信息\n- 📊 做PPT\n- 📦 调模块\n- ⚡ 查状态\n已内建DeepSeek Key，直接使用全部智能体功能！",
+    "你会做什么": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统\n- 🎨 画图\n- 🔍 搜索信息\n- 📊 做PPT\n- 📦 调模块\n- ⚡ 查状态\n已内建DeepSeek Key，直接使用全部智能体功能！",
+    "功能": "AUTO-EVO-AI 功能列表:\n- 93个智能体工具(内建DeepSeek Key)\n- 网页开发(输入'开发xxx')\n- AI画图(多引擎自动切换)\n- 93个工具快捷按钮\n- 6个智能体团队协作\n- 165个技能自动化",
+    "帮助": "AUTO-EVO-AI 使用帮助:\n1. 已内建DeepSeek Key，直接使用全部功能\n2. 点击快捷按钮或输入描述即可调用工具\n3. 支持93种不同工具和165个技能\n4. 需要更多功能？说具体需求即可",
 }
 def _eval_modules():
     try:
@@ -241,6 +242,9 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 
     def process(msg, key="", lang="zh-CN", context=None):
         kh = key[:20] if key else "auto"
+        # 自动注入默认Key
+        if not key:
+            key = os.environ.get("DEEPSEEK_API_KEY") or _DEFAULT_KEY
         memory = _recall_similar(msg, kh) or _recall(msg, kh)
         is_dev = any(k in msg for k in ["开发","创建","写一个","做一个","生成","设计","实现"])
         gen_tools = list(_GENERATED_TOOLS.keys())

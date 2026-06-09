@@ -1,6 +1,10 @@
 """Aider — AI配对编程（文件级代码修改）"""
 import os, json, subprocess, tempfile
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def aider_edit(file_path: str = "", instruction: str = "", output_dir: str = "") -> dict:
     """用AI修改代码文件

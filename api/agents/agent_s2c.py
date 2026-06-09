@@ -1,6 +1,10 @@
 """Screenshot-to-Code — 截图→前端代码（Vue/React/HTML/Tailwind）"""
 import os, json, base64, time
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def screenshot_to_code(image_path: str = "", image_url: str = "", stack: str = "html_css", output_dir: str = "") -> dict:
     """截图/设计稿 → 生成前端代码

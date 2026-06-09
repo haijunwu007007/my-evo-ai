@@ -1,6 +1,10 @@
 """Chat2DB / Text-to-SQL — 自然语言查数据库"""
 import os, json
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 # 数据库配置存储
 DB_CONFIG_DIR = Path("~/.evo-db-configs").expanduser()

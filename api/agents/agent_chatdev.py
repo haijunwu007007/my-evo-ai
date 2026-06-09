@@ -1,6 +1,10 @@
 """ChatDev 2.0 — 零代码多智能体编排平台桥接"""
 import os, json
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def chatdev_run(task: str = "", agent_count: int = 3, 
                 workflow: str = "auto", output_dir: str = "") -> dict:

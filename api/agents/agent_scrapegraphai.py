@@ -1,5 +1,9 @@
 """ScrapeGraphAI — AI驱动智能爬虫（一句话爬取结构化数据）"""
 import os, json
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def ai_scrape(url: str = "", prompt: str = "", source_type: str = "url") -> dict:
     """AI智能爬取网页/文档

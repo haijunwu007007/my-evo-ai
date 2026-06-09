@@ -1,6 +1,10 @@
 """PaddleOCR — 百度开源高精度OCR工具包（45K⭐），支持中英文文字识别/表格提取"""
 import os, json, tempfile
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def paddleocr_image(image_path: str = "", lang: str = "ch") -> dict:
     """识别图片中的文字"""

@@ -10,29 +10,36 @@ logger = get_logger("evo.api.agents")
 
 router = APIRouter()
 
-# ── 内置 LLM 调用 ─────────────────────────────
-_LLM_ENDPOINT = "https://api.openai.com/v1/chat/completions"
-_LLM_KEY = os.getenv("OPENAI_API_KEY") or ""
+# ── 内置 LLM 调用 — 多Key/多端点降级 ──────────
+_LLM_ENDPOINTS = [
+    {"url": "https://api.deepseek.com/v1/chat/completions", "model": "deepseek-chat", "key_env": "DEEPSEEK_API_KEY"},
+    {"url": "https://api.openai.com/v1/chat/completions", "model": "gpt-4o-mini", "key_env": "OPENAI_API_KEY"},
+]
+_LLM_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
+if not _LLM_KEY:
+    _LLM_KEY = "sk-e7a7f4e700d847f28027c5608e3f5c02"  # 内建DeepSeek Key
 
 async def _try_llm(prompt: str, agent_name: str, role: str) -> str | None:
-    """尝试 LLM 生成回复，失败返回 None"""
+    """尝试 LLM 生成回复 — 多端点降级"""
     if not _LLM_KEY:
         return None
-    try:
-        async with httpx.AsyncClient(timeout=15) as cl:
-            resp = await cl.post(_LLM_ENDPOINT, json={
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": f"你是 {agent_name}，角色：{role}。请基于任务给出简洁专业的回答（不超过150字）。"},
-                    {"role": "user", "content": prompt},
-                ],
-                "max_tokens": 300,
-                "temperature": 0.7,
-            }, headers={"Authorization": f"Bearer {_LLM_KEY}"})
-        if resp.status_code == 200:
-            return resp.json()["choices"][0]["message"]["content"].strip()
-    except Exception:
-        pass
+    for ep in _LLM_ENDPOINTS:
+        key = os.getenv(ep["key_env"]) or _LLM_KEY
+        try:
+            async with httpx.AsyncClient(timeout=20) as cl:
+                resp = await cl.post(ep["url"], json={
+                    "model": ep["model"],
+                    "messages": [
+                        {"role": "system", "content": f"你是 {agent_name}，角色：{role}。请基于任务给出简洁专业的回答（不超过150字）。"},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "max_tokens": 300,
+                    "temperature": 0.7,
+                }, headers={"Authorization": f"Bearer {key}"})
+            if resp.status_code == 200:
+                return f"(LLM-{ep['model']}) {resp.json()['choices'][0]['message']['content'].strip()}"
+        except Exception:
+            continue
     return None
 
 # ── 智能体团队 ─────────────────────────────────

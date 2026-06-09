@@ -1,5 +1,9 @@
 """Shannon — AI白盒Web应用安全测试（KeygraphHQ开源，自动代码审计）"""
 import os, json
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def shannon_audit(source_path: str = "", language: str = "auto") -> dict:
     """代码安全审计"""

@@ -14,6 +14,10 @@ def _save_twenty_config(cfg: dict):
     with open(TWENTY_CONFIG_FILE, 'w', encoding='utf-8') as f: json.dump(cfg, f, ensure_ascii=False, indent=2)
 
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def twenty_connect(api_url: str = "", api_key: str = "") -> dict:
     """连接Twenty CRM"""

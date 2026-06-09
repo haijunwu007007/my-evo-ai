@@ -1,5 +1,9 @@
 """SWE-agent — 自动修复GitHub Issues（分析+修复+提交PR）"""
 import os, json
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def swe_fix_issue(repo: str = "", issue_number: int = 0, 
                   github_token: str = "", auto_pr: bool = False) -> dict:

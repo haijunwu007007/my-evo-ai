@@ -1,6 +1,10 @@
 """AgentEval — Agent性能评估与基准测试"""
 import os, json, time
 from pathlib import Path
+import os
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+_LLM_MODEL = "deepseek-chat"
 
 def agenteval_benchmark(agent_type: str = "chat", test_cases: list = None,
                         metrics: list = None) -> dict:
