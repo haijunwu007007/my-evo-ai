@@ -107,6 +107,26 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             {"type":"function","function":{"name":"moltron_learn","description":"📚 Moltron技能学习：学习新技能并写入Skills.md。参数skill_name传技能名，skill_description传描述。","parameters":{"type":"object","properties":{"skill_name":{"type":"string"},"skill_description":{"type":"string"}},"required":["skill_name","skill_description"]}}},
             {"type":"function","function":{"name":"accomplish_desktop","description":"🖥️ 桌面自动化：执行桌面自动化工作流（键鼠操作/截图/应用启动）。参数workflow传入步骤列表。","parameters":{"type":"object","properties":{"workflow":{"type":"string"}}}}},
             {"type":"function","function":{"name":"toolbench_discover","description":"🔌 ToolBench API发现：从12万+API注册表中发现可以调用的外部API。参数query搜索关键词，category过滤类别，action可选search/register/stats/detail。","parameters":{"type":"object","properties":{"query":{"type":"string"},"category":{"type":"string"},"action":{"type":"string"},"api_name":{"type":"string"}}}}},
+            # ===== 2026-06-09 新增16个集成工具 =====
+            {"type":"function","function":{"name":"markitdown_convert","description":"📄 文档转Markdown：将PDF/Word/Excel/PPT/图片转为Markdown格式，供LLM读取。参数file_path传文件路径。","parameters":{"type":"object","properties":{"file_path":{"type":"string"},"text":{"type":"string"},"file_type":{"type":"string"}}}}},
+            {"type":"function","function":{"name":"scrapegraphai_scrape","description":"🕷️ AI智能爬虫：一句话描述让AI自动爬取网页结构化数据。参数url传网址，prompt传提取内容描述。","parameters":{"type":"object","properties":{"url":{"type":"string"},"prompt":{"type":"string"}},"required":["url"]}}},
+            {"type":"function","function":{"name":"interpreter_execute","description":"💻 电脑控制：用自然语言控制电脑（读写文件/运行代码/操作系统）。参数command传描述。","parameters":{"type":"object","properties":{"command":{"type":"string"},"language":{"type":"string"}},"required":["command"]}}},
+            {"type":"function","function":{"name":"s2c_generate","description":"🎨 截图转代码：上传截图/设计稿直接生成前端代码（Vue/React/HTML）。参数image_path传图片路径，stack选技术栈。","parameters":{"type":"object","properties":{"image_path":{"type":"string"},"image_url":{"type":"string"},"stack":{"type":"string"}}}}},
+            {"type":"function","function":{"name":"pra_review","description":"🔍 PR代码审查：AI自动审查GitHub PR，提供行级反馈和修复建议。参数pr_url传PR链接，repo传仓库，pr_number传编号。","parameters":{"type":"object","properties":{"pr_url":{"type":"string"},"repo":{"type":"string"},"pr_number":{"type":"integer"}}}}},
+            {"type":"function","function":{"name":"qodo_testgen","description":"🧪 自动生成测试：给源码自动生成单元测试。参数source_path传文件路径，framework选pytest/unittest/jest。","parameters":{"type":"object","properties":{"source_path":{"type":"string"},"source_code":{"type":"string"},"framework":{"type":"string"}}}}},
+            {"type":"function","function":{"name":"aider_edit","description":"✏️ AI代码编辑：用自然语言描述修改意见，AI自动修改代码文件。参数file_path传文件，instruction传修改描述。","parameters":{"type":"object","properties":{"file_path":{"type":"string"},"instruction":{"type":"string"}},"required":["file_path","instruction"]}}},
+            {"type":"function","function":{"name":"openclaw_connect","description":"📱 消息平台桥接：连接OpenClaw到Telegram/WhatsApp/Slack/Discord等20+平台。参数platform平台名，bot_token传Token。","parameters":{"type":"object","properties":{"platform":{"type":"string"},"bot_token":{"type":"string"}},"required":["platform"]}}},
+            {"type":"function","function":{"name":"openclaw_send","description":"📤 发送消息：通过已桥接的OpenClaw平台发送消息。参数platform平台，recipient接收者，message内容。","parameters":{"type":"object","properties":{"platform":{"type":"string"},"recipient":{"type":"string"},"message":{"type":"string"}},"required":["platform","recipient","message"]}}},
+            {"type":"function","function":{"name":"tts_speak","description":"🔊 语音合成：文本转语音。参数text传文字，voice选音色，emotion选情绪。","parameters":{"type":"object","properties":{"text":{"type":"string"},"voice":{"type":"string"},"emotion":{"type":"string"}},"required":["text"]}}},
+            {"type":"function","function":{"name":"chatdev_run","description":"🤖 ChatDev多智能体：自动组建智能体团队完成任务。参数task传任务描述。","parameters":{"type":"object","properties":{"task":{"type":"string"}},"required":["task"]}}},
+            {"type":"function","function":{"name":"openmanus_run","description":"🦾 OpenManus通用Agent：运行通用AI Agent任务。参数task传任务描述。","parameters":{"type":"object","properties":{"task":{"type":"string"}},"required":["task"]}}},
+            {"type":"function","function":{"name":"autogpt_run","description":"🧠 AutoGPT自主Agent：长期自主执行任务（计划→执行→评估循环）。参数goal传目标。","parameters":{"type":"object","properties":{"goal":{"type":"string"},"max_steps":{"type":"integer"}},"required":["goal"]}}},
+            {"type":"function","function":{"name":"agenteval_benchmark","description":"📊 Agent评测：自动评测Agent性能（准确率/响应时间/通过率）。无参数自动运行。","parameters":{"type":"object","properties":{}}}},
+            {"type":"function","function":{"name":"swe_fix","description":"🛠️ SWE-agent：自动分析和修复GitHub Issue。参数repo传仓库，issue_number传Issue编号。","parameters":{"type":"object","properties":{"repo":{"type":"string"},"issue_number":{"type":"integer"}},"required":["repo","issue_number"]}}},
+            {"type":"function","function":{"name":"gptpilot_build","description":"🏗️ GPT-Pilot：从需求生成完整项目（多个代码文件）。参数description传项目描述。","parameters":{"type":"object","properties":{"description":{"type":"string"}},"required":["description"]}}},
+            {"type":"function","function":{"name":"text2sql_query","description":"🗃️ 自然语言查数据库：用中文描述直接查数据库出结果。参数question传问题，connection传连接名。","parameters":{"type":"object","properties":{"question":{"type":"string"},"connection":{"type":"string"}},"required":["question"]}}},
+            {"type":"function","function":{"name":"bolt_generate","description":"⚡ Bolt.new：一句话生成完整Web应用。参数prompt传应用描述，framework选框架。","parameters":{"type":"object","properties":{"prompt":{"type":"string"},"framework":{"type":"string"}},"required":["prompt"]}}},
+            {"type":"function","function":{"name":"agentk8s_deploy","description":"☸️ K8s部署：生成Agent的Kubernetes部署清单。参数agent_name传名称。","parameters":{"type":"object","properties":{"agent_name":{"type":"string"}}}}},
         ]
         for tname in _GENERATED_TOOLS:
             bt.append({"type":"function","function":{"name":f"tool_{tname}","description":f"自定义工具: {tname}","parameters":{"type":"object","properties":{"params":{"type":"string"}}}}})
@@ -284,6 +304,44 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 9. 🔌 toolbench_discover - ToolBench API发现：从12万+API注册表中搜索可调用的外部API
    示例: toolbench_discover(query="搜索", category="社交媒体")  # 搜索社交媒体类API
    示例: toolbench_discover(action="stats")  # 查看API注册表统计
+
+【2026-06-09 新增16个集成工具】
+10. 📄 markitdown_convert - 文档转Markdown：PDF/Word/Excel/PPT/图片→Markdown格式
+    示例: markitdown_convert(file_path="report.pdf")
+11. 🕷️ scrapegraphai_scrape - AI智能爬虫：一句话爬取网页结构化数据
+    示例: scrapegraphai_scrape(url="https://example.com", prompt="提取所有产品名称和价格")
+12. 💻 interpreter_execute - 电脑控制：自然语言控制电脑（读写文件/运行代码）
+    示例: interpreter_execute(command="帮我分析这个CSV文件")
+13. 🎨 s2c_generate - 截图转代码：上传截图直接生成前端代码
+    示例: s2c_generate(image_path="screenshot.png", stack="html_tailwind")
+14. 🔍 pra_review - PR代码审查：AI自动审查GitHub PR
+    示例: pra_review(pr_url="https://github.com/user/repo/pull/1")
+15. 🧪 qodo_testgen - 自动生成测试：给源码自动生成单元测试
+    示例: qodo_testgen(source_path="app.py", framework="pytest")
+16. ✏️ aider_edit - AI代码编辑：自然语言描述→自动修改代码文件
+    示例: aider_edit(file_path="main.py", instruction="添加错误处理")
+17. 📱 openclaw_connect - 连接OpenClaw到消息平台
+    示例: openclaw_connect(platform="telegram", bot_token="xxx")
+18. 🔊 tts_speak - 语音合成：文本转语音
+    示例: tts_speak(text="你好，世界", voice="female")
+19. 🤖 chatdev_run - ChatDev多智能体团队协作
+    示例: chatdev_run(task="开发一个博客系统")
+20. 🦾 openmanus_run - OpenManus通用Agent
+    示例: openmanus_run(task="搜索最新AI新闻并总结")
+21. 🧠 autogpt_run - AutoGPT长期自主任务
+    示例: autogpt_run(goal="创建并部署一个网站", max_steps=10)
+22. 📊 agenteval_benchmark - Agent性能评测
+    示例: agenteval_benchmark()
+23. 🛠️ swe_fix - 自动分析修复GitHub Issue
+    示例: swe_fix(repo="user/repo", issue_number=42)
+24. 🏗️ gptpilot_build - 从需求生成完整项目
+    示例: gptpilot_build(description="一个电商网站后端")
+25. 🗃️ text2sql_query - 自然语言查数据库
+    示例: text2sql_query(question="哪个用户消费最多")
+26. ⚡ bolt_generate - 一句话生成Web应用
+    示例: bolt_generate(prompt="一个待办事项管理应用")
+27. ☸️ agentk8s_deploy - 生成K8s部署清单
+    示例: agentk8s_deploy(agent_name="my-agent")
 
 【原有能力】
 - 💻 开发网页/系统 (说"开发xxx")

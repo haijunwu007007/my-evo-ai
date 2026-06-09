@@ -132,6 +132,23 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       <span class="qa" onclick="quickTool('moltron_learn')">📚 技能学习</span>
       <span class="qa" onclick="quickTool('accomplish_desktop')">🖥️ 桌面自动化</span>
       <span class="qa" onclick="quickTool('toolbench_discover')">🔌 API发现</span>
+      <!-- 2026-06-09 新增16个 -->
+      <span class="qa" onclick="quickTool('markitdown_convert')">📄 文档转Markdown</span>
+      <span class="qa" onclick="quickTool('scrapegraphai_scrape')">🕷️ AI智能爬虫</span>
+      <span class="qa" onclick="quickTool('interpreter_execute')">💻 电脑控制</span>
+      <span class="qa" onclick="quickTool('s2c_generate')">🎨 截图转代码</span>
+      <span class="qa" onclick="quickTool('pra_review')">🔍 PR审查</span>
+      <span class="qa" onclick="quickTool('qodo_testgen')">🧪 生成测试</span>
+      <span class="qa" onclick="quickTool('aider_edit')">✏️ AI编辑代码</span>
+      <span class="qa" onclick="quickTool('openclaw_connect')">📱 消息平台</span>
+      <span class="qa" onclick="quickTool('tts_speak')">🔊 语音合成</span>
+      <span class="qa" onclick="quickTool('chatdev_run')">🤖 多智能体</span>
+      <span class="qa" onclick="quickTool('autogpt_run')">🧠 自主任务</span>
+      <span class="qa" onclick="quickTool('swe_fix')">🛠️ 修复Issue</span>
+      <span class="qa" onclick="quickTool('gptpilot_build')">🏗️ 生成项目</span>
+      <span class="qa" onclick="quickTool('text2sql_query')">🗃️ 自然语言查库</span>
+      <span class="qa" onclick="quickTool('bolt_generate')">⚡ 生成Web应用</span>
+      <span class="qa" onclick="quickTool('agenteval_benchmark')">📊 Agent评测</span>
     </div>
     <div class="input-area">
       <div class="input-row">
@@ -214,10 +231,30 @@ var _TOOL_HINTS = {
   self_evolving_analyze: "帮我分析当前代码库的改进点",
   moltron_learn: "学习一个新技能：",
   accomplish_desktop: "执行桌面自动化工作流：",
-  toolbench_discover: "帮我发现可用的外部API："
+  toolbench_discover: "帮我发现可用的外部API：",
+  markitdown_convert: "帮我转换这个文档为Markdown：",
+  scrapegraphai_scrape: "帮我爬取这个网站的数据：",
+  interpreter_execute: "帮我执行这个电脑操作：",
+  s2c_generate: "帮我从截图生成代码：",
+  pra_review: "帮我审查这个PR：",
+  qodo_testgen: "帮我给这个文件生成测试：",
+  aider_edit: "帮我修改这个代码文件：",
+  openclaw_connect: "帮我连接消息平台：",
+  openclaw_send: "帮我发送消息：",
+  tts_speak: "帮我转换成语音：",
+  chatdev_run: "帮我用多智能体团队完成任务：",
+  openmanus_run: "帮我运行通用Agent：",
+  autogpt_run: "帮我自主执行这个目标：",
+  agenteval_benchmark: "帮我评测Agent性能：",
+  swe_fix: "帮我分析修复这个Issue：",
+  gptpilot_build: "帮我从需求生成项目：",
+  text2sql_query: "帮我查询数据库：",
+  bolt_generate: "帮我生成Web应用：",
+  agentk8s_deploy: "帮我生成K8s部署清单："
 }
 // 需要工具调用（走非流式）的关键词
-var _TOOL_KEYWORDS = ["浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API"]
+var _TOOL_KEYWORDS = ["浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",
+  "markdown","转markdown","文档转换","爬虫","爬取数据","计算机","控制电脑","截图","设计转代码","PR","审查","代码审查","测试","单元测试","编辑代码","改代码","telegram","whatsapp","slack","discord","消息平台","语音","tts","播报","朗读","多智能体","智能体团队","自主","autogpt","评测","agent评估","benchmark","issue修复","github issue","生成项目","全栈","数据库","查库","sql查询","查询数据库","deploy","部署","k8s","kubernetes"]
 
 function quickTool(name){
   var hint = _TOOL_HINTS[name] || ""

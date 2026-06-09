@@ -86,13 +86,11 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
             for f in mdir.rglob("*.py"):
                 if mod in f.stem or mod in str(f.relative_to(mdir)):
                     content = f.read_text(encoding='utf-8',errors='replace')
-                    # 自动生成调用示例
                     classes = re.findall(r'class (\w+)', content)
                     funcs = re.findall(r'def (\w+)\(', content)
                     has_execute = "def execute(" in content or "async def execute(" in content
                     params_hint = ""
                     if has_execute:
-                        # 提取 execute 方法的参数
                         exec_match = re.search(r'(async )?def execute\([^)]*\)', content)
                         if exec_match: params_hint = exec_match.group()
                     demo_lines = [
@@ -123,7 +121,6 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
             return {"ok":True,"data":f"✅ 任务 {n2} 已创建: {sch} 执行 {act}"}
         if name == "draw_image":
             p=args.get("prompt","");fn=f"img_{int(time.time())}.png";fp=str(OUT/fn)
-            # CogView-3
             try:
                 k=os.environ.get("ZHIPU_API_KEY","")
                 if k:
@@ -132,7 +129,6 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                         urllib.request.urlretrieve(r.json()["data"][0]["url"],fp)
                         return {"ok":True,"data":f"![图](/output/{fn})","type":"image"}
             except: pass
-            # Stability备选
             try:
                 k=os.environ.get("STABILITY_API_KEY","")
                 if k:
@@ -142,7 +138,6 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
             return {"ok":False,"data":"画图失败：需要配置ZHIPU_API_KEY或STABILITY_API_KEY"}
         if name == "web_search":
             q=args.get("query","")
-            # DuckDuckGo
             try:
                 r=httpx.get(f"https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(q)}",timeout=15)
                 if r.status_code==200:
@@ -150,7 +145,6 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                     results=[f"- {t.strip()}: {u}" for u,t in links if not u.startswith("http")][:5]
                     if results: return {"ok":True,"data":"搜索结果:\n"+("\n".join(results))}
             except: pass
-            # GitHub备选
             try:
                 r=httpx.get(f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=5",timeout=15)
                 if r.status_code==200:
@@ -158,100 +152,185 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                     return {"ok":True,"data":"\n".join(lines)}
             except: pass
             return {"ok":True,"data":"搜索暂时不可用"}
-        # ========== 新集成工具 ==========
+        # ========== 9个原有集成工具 ==========
         if name == "browser_use_task":
             try:
                 from api.agent_browser_use import run_browser_task
-                task = args.get("task","")
-                if not task: return {"ok":False,"data":"缺少task参数"}
-                result = run_browser_task(task)
+                result = run_browser_task(args.get("task",""))
                 return {"ok":result.get("success",False),"data":str(result)}
-            except Exception as e:
-                return {"ok":False,"data":f"浏览器自动化失败: {e}"}
+            except Exception as e: return {"ok":False,"data":f"浏览器失败: {e}"}
         if name == "gpt_research":
             try:
                 from api.agent_gpt_researcher import quick_research
-                query = args.get("query","")
-                if not query: return {"ok":False,"data":"缺少query参数"}
-                result = quick_research(query)
+                result = quick_research(args.get("query",""))
                 return {"ok":result.get("success",False),"data":result.get("report",result.get("error","未知错误"))}
-            except Exception as e:
-                return {"ok":False,"data":f"自主研究失败: {e}"}
+            except Exception as e: return {"ok":False,"data":f"研究失败: {e}"}
         if name == "openhands_generate":
             try:
                 from api.agent_openhands import generate_project
-                description = args.get("description","")
-                project_type = args.get("project_type","fullstack")
-                if not description: return {"ok":False,"data":"缺少description参数"}
-                result = generate_project(description, project_type)
+                result = generate_project(args.get("description",""), args.get("project_type","fullstack"))
                 return {"ok":result.get("success",False),"data":str(result)}
-            except Exception as e:
-                return {"ok":False,"data":f"项目生成失败: {e}"}
+            except Exception as e: return {"ok":False,"data":f"项目失败: {e}"}
         if name == "letta_message":
             try:
                 from api.agent_letta import send_message_to_letta
-                message = args.get("message","")
-                if not message: return {"ok":False,"data":"缺少message参数"}
-                result = send_message_to_letta(message)
-                return {"ok":result.get("success",False),"data":result.get("response",result.get("error","未知错误"))}
-            except Exception as e:
-                return {"ok":False,"data":f"Letta记忆系统失败: {e}"}
+                result = send_message_to_letta(args.get("message",""))
+                return {"ok":result.get("success",False),"data":result.get("response",result.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"Letta失败: {e}"}
         if name == "composio_execute":
             try:
                 from api.agent_composio import execute_composio_action, init_composio
-                app_name = args.get("app_name","")
-                action_name = args.get("action_name","")
-                params = args.get("params",{})
-                if not app_name or not action_name: return {"ok":False,"data":"缺少app_name或action_name参数"}
-                # 初始化（如果未初始化）
                 init_composio()
-                result = execute_composio_action(app_name, action_name, params)
+                result = execute_composio_action(args.get("app_name",""), args.get("action_name",""), args.get("params",{}))
                 return {"ok":result.get("success",False),"data":str(result)}
-            except Exception as e:
-                return {"ok":False,"data":f"Composio工具执行失败: {e}"}
+            except Exception as e: return {"ok":False,"data":f"Composio失败: {e}"}
         if name == "self_evolving_analyze":
             try:
                 from api.agent_self_evolving import analyze_codebase
-                repo_path = args.get("repo_path",".")
-                result = analyze_codebase(repo_path)
-                return {"ok":result.get("success",False),"data":result.get("summary",result.get("error","未知错误"))}
-            except Exception as e:
-                return {"ok":False,"data":f"代码分析失败: {e}"}
+                result = analyze_codebase(args.get("repo_path","."))
+                return {"ok":result.get("success",False),"data":result.get("summary",result.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"分析失败: {e}"}
         if name == "moltron_learn":
             try:
                 from api.agent_moltron import learn_skill
-                skill_name = args.get("skill_name","")
-                skill_description = args.get("skill_description","")
-                if not skill_name or not skill_description: return {"ok":False,"data":"缺少skill_name或skill_description参数"}
-                result = learn_skill(skill_name, skill_description)
-                return {"ok":result.get("success",False),"data":result.get("message",result.get("error","未知错误"))}
-            except Exception as e:
-                return {"ok":False,"data":f"技能学习失败: {e}"}
+                result = learn_skill(args.get("skill_name",""), args.get("skill_description",""))
+                return {"ok":result.get("success",False),"data":result.get("message",result.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"Moltron失败: {e}"}
         if name == "accomplish_desktop":
             try:
                 from api.agent_accomplish import execute_workflow
-                workflow_raw = args.get("workflow","[]")
-                if isinstance(workflow_raw, str):
-                    import json as _json
-                    workflow = _json.loads(workflow_raw)
-                else:
-                    workflow = workflow_raw
-                if not workflow: return {"ok":False,"data":"缺少workflow参数"}
-                result = execute_workflow(workflow)
+                wf = args.get("workflow","[]")
+                if isinstance(wf, str): import json as _j; wf = _j.loads(wf)
+                if not wf: return {"ok":False,"data":"缺少workflow"}
+                result = execute_workflow(wf)
                 return {"ok":result.get("success",False),"data":str(result)}
-            except Exception as e:
-                return {"ok":False,"data":f"桌面自动化失败: {e}"}
-        # ===== ToolBench API发现（09/12）=====
+            except Exception as e: return {"ok":False,"data":f"桌面失败: {e}"}
         if name == "toolbench_discover":
             try:
-                from api.agent_toolbench import toolbench_discover as _tb_discover
-                query = args.get("query","")
-                category = args.get("category","")
-                action = args.get("action","search")
-                api_name = args.get("api_name","")
-                result = _tb_discover(query=query, category=category, action=action, api_name=api_name)
+                from api.agent_toolbench import toolbench_discover as _tb
+                result = _tb(query=args.get("query",""), category=args.get("category",""), action=args.get("action","search"), api_name=args.get("api_name",""))
                 return {"ok":result.get("success",False),"data":str(result)}
-            except Exception as e:
-                return {"ok":False,"data":f"ToolBench API发现失败: {e}"}
+            except Exception as e: return {"ok":False,"data":f"ToolBench失败: {e}"}
+        # ========== 2026-06-09 新增16个集成工具 ==========
+        if name == "markitdown_convert":
+            try:
+                from api.agent_markitdown import convert_to_markdown
+                r = convert_to_markdown(file_path=args.get("file_path",""), text=args.get("text",""), file_type=args.get("file_type","auto"))
+                return {"ok":r.get("success",False),"data":r.get("markdown",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"文档转换失败: {e}"}
+        if name == "scrapegraphai_scrape":
+            try:
+                from api.agent_scrapegraphai import ai_scrape
+                r = ai_scrape(url=args.get("url",""), prompt=args.get("prompt","提取页面上所有有用信息"))
+                return {"ok":r.get("success",False),"data":json.dumps(r.get("data",r.get("error","")),ensure_ascii=False)[:3000]}
+            except Exception as e: return {"ok":False,"data":f"智能爬虫失败: {e}"}
+        if name == "interpreter_execute":
+            try:
+                from api.agent_interpreter import interpreter_execute
+                r = interpreter_execute(command=args.get("command",""), language=args.get("language","python"))
+                return {"ok":r.get("success",False),"data":r.get("output",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"电脑控制失败: {e}"}
+        if name == "s2c_generate":
+            try:
+                from api.agent_s2c import screenshot_to_code
+                r = screenshot_to_code(image_path=args.get("image_path",""), image_url=args.get("image_url",""), stack=args.get("stack","html_tailwind"))
+                s = r.get("summary",r.get("error",""))
+                if r.get("preview_url"): s += "\n预览: " + r["preview_url"]
+                return {"ok":r.get("success",False),"data":s}
+            except Exception as e: return {"ok":False,"data":f"截图转代码失败: {e}"}
+        if name == "pra_review":
+            try:
+                from api.agent_pra import review_pull_request
+                r = review_pull_request(pr_url=args.get("pr_url",""), repo=args.get("repo",""), pr_number=args.get("pr_number",0))
+                return {"ok":r.get("success",False),"data":json.dumps({"summary":r.get("summary",""),"issues":len(r.get("issues",[])),"suggestions":len(r.get("suggestions",[]))},ensure_ascii=False)}
+            except Exception as e: return {"ok":False,"data":f"PR审查失败: {e}"}
+        if name == "qodo_testgen":
+            try:
+                from api.agent_qodo import generate_tests
+                r = generate_tests(source_path=args.get("source_path",""), source_code=args.get("source_code",""), framework=args.get("framework","pytest"))
+                return {"ok":r.get("success",False),"data":r.get("summary",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"测试生成失败: {e}"}
+        if name == "aider_edit":
+            try:
+                from api.agent_aider import aider_edit
+                r = aider_edit(file_path=args.get("file_path",""), instruction=args.get("instruction",""))
+                return {"ok":r.get("success",False),"data":r.get("diff",r.get("error",""))[:2000]}
+            except Exception as e: return {"ok":False,"data":f"Aider编辑失败: {e}"}
+        if name == "openclaw_connect":
+            try:
+                from api.agent_openclaw import openclaw_connect
+                r = openclaw_connect(platform=args.get("platform",""), bot_token=args.get("bot_token",""))
+                return {"ok":r.get("success",False),"data":r.get("message",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"OpenClaw连接失败: {e}"}
+        if name == "openclaw_send":
+            try:
+                from api.agent_openclaw import openclaw_send
+                r = openclaw_send(platform=args.get("platform",""), recipient=args.get("recipient",""), message=args.get("message",""))
+                return {"ok":r.get("success",False),"data":r.get("message_id",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"OpenClaw发送失败: {e}"}
+        if name == "tts_speak":
+            try:
+                from api.agent_tts import text_to_speech
+                r = text_to_speech(text=args.get("text",""), voice=args.get("voice","default"), emotion=args.get("emotion","neutral"))
+                fn = r.get("audio_file","")
+                return {"ok":r.get("success",False),"data":f"音频: {fn}" if fn else r.get("error","")}
+            except Exception as e: return {"ok":False,"data":f"语音合成失败: {e}"}
+        if name == "chatdev_run":
+            try:
+                from api.agent_chatdev import chatdev_run
+                r = chatdev_run(task=args.get("task",""))
+                return {"ok":r.get("success",False),"data":r.get("summary",r.get("result",r.get("error","")))}
+            except Exception as e: return {"ok":False,"data":f"ChatDev失败: {e}"}
+        if name == "openmanus_run":
+            try:
+                from api.agent_openmanus import openmanus_run
+                r = openmanus_run(task=args.get("task",""))
+                return {"ok":r.get("success",False),"data":str(r.get("result",r.get("error","")))[:2000]}
+            except Exception as e: return {"ok":False,"data":f"OpenManus失败: {e}"}
+        if name == "autogpt_run":
+            try:
+                from api.agent_autogpt import autogpt_run
+                r = autogpt_run(goal=args.get("goal",""), max_steps=args.get("max_steps",10))
+                return {"ok":r.get("success",False),"data":r.get("summary",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"AutoGPT失败: {e}"}
+        if name == "agenteval_benchmark":
+            try:
+                from api.agent_agenteval import agenteval_benchmark
+                r = agenteval_benchmark()
+                return {"ok":r.get("success",False),"data":json.dumps(r.get("summary",{}),ensure_ascii=False)}
+            except Exception as e: return {"ok":False,"data":f"Agent评测失败: {e}"}
+        if name == "swe_fix":
+            try:
+                from api.agent_swe import swe_fix_issue
+                r = swe_fix_issue(repo=args.get("repo",""), issue_number=args.get("issue_number",0))
+                return {"ok":r.get("success",False),"data":r.get("analysis",r.get("error",""))[:1000]}
+            except Exception as e: return {"ok":False,"data":f"SWE修复失败: {e}"}
+        if name == "gptpilot_build":
+            try:
+                from api.agent_gptpilot import gptpilot_build
+                r = gptpilot_build(description=args.get("description",""))
+                return {"ok":r.get("success",False),"data":r.get("summary",r.get("error",""))}
+            except Exception as e: return {"ok":False,"data":f"GPT-Pilot失败: {e}"}
+        if name == "text2sql_query":
+            try:
+                from api.agent_chat2db import text2sql_query
+                r = text2sql_query(question=args.get("question",""), connection=args.get("connection",""))
+                s = f"SQL: {r.get('sql','')}\n结果: {json.dumps(r.get('result',[]),ensure_ascii=False)[:2000]}"
+                return {"ok":r.get("success",False),"data":s}
+            except Exception as e: return {"ok":False,"data":f"数据库查询失败: {e}"}
+        if name == "bolt_generate":
+            try:
+                from api.agent_bolt import bolt_generate
+                r = bolt_generate(prompt=args.get("prompt",""), framework=args.get("framework","vue"))
+                s = r.get("summary","")
+                if r.get("preview_url"): s += "\n预览: " + r["preview_url"]
+                return {"ok":r.get("success",False),"data":s}
+            except Exception as e: return {"ok":False,"data":f"Bolt生成失败: {e}"}
+        if name == "agentk8s_deploy":
+            try:
+                from api.agent_agentk8s import agentk8s_deploy
+                r = agentk8s_deploy(agent_name=args.get("agent_name","evo-agent"))
+                return {"ok":r.get("success",False),"data":f"YAML: {r.get('yaml_path','')}\n部署: {r.get('next_step','')}"}
+            except Exception as e: return {"ok":False,"data":f"K8s部署失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}
