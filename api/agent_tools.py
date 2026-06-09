@@ -332,5 +332,321 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                 r = agentk8s_deploy(agent_name=args.get("agent_name","evo-agent"))
                 return {"ok":r.get("success",False),"data":f"YAML: {r.get('yaml_path','')}\n部署: {r.get('next_step','')}"}
             except Exception as e: return {"ok":False,"data":f"K8s部署失败: {e}"}
+        # ===== 2026-06-09 第3轮22个新工具 =====
+        if name == "openmontage_generate_script":
+            try:
+                from api.agent_openmontage import openmontage_generate_script
+                r = openmontage_generate_script(topic=args.get("topic",""), style=args.get("style","documentary"), duration=args.get("duration",60))
+                return {"ok":r.get("success",False),"data":json.dumps(r.get("data",{}),ensure_ascii=False)}
+            except Exception as e: return {"ok":False,"data":f"视频脚本生成失败: {e}"}
+        if name == "openmontage_search_materials":
+            try:
+                from api.agent_openmontage import openmontage_search_materials
+                r = openmontage_search_materials(keywords=args.get("keywords",""))
+                return {"ok":r.get("success",False),"data":json.dumps(r.get("data",{}),ensure_ascii=False)}
+            except Exception as e: return {"ok":False,"data":f"素材搜索失败: {e}"}
+        if name == "lida_visualize":
+            try:
+                from api.agent_lida import lida_visualize
+                r = lida_visualize(data_description=args.get("data_description",""), goal=args.get("goal",""), chart_type=args.get("chart_type",""))
+                return {"ok":r.get("success",False),"data":f"生成了{r.get('total',0)}个图表"}
+            except Exception as e: return {"ok":False,"data":f"可视化失败: {e}"}
+        if name == "lida_explore":
+            try:
+                from api.agent_lida import lida_explore
+                r = lida_explore(data_file_path=args.get("data_file_path",""))
+                return {"ok":r.get("success",False),"data":f"探索完成: {r.get('charts_count',0)}个图表"}
+            except Exception as e: return {"ok":False,"data":f"探索失败: {e}"}
+        if name == "paddleocr_image":
+            try:
+                from api.agent_paddleocr import paddleocr_image
+                r = paddleocr_image(image_path=args.get("image_path",""), lang=args.get("lang","ch"))
+                return {"ok":r.get("success",False),"data":r.get("text",r.get("error",""))[:2000]}
+            except Exception as e: return {"ok":False,"data":f"OCR失败: {e}"}
+        if name == "paddleocr_pdf":
+            try:
+                from api.agent_paddleocr import paddleocr_pdf
+                r = paddleocr_pdf(pdf_path=args.get("pdf_path",""))
+                return {"ok":r.get("success",False),"data":f"识别了{r.get('total_pages',0)}页"}
+            except Exception as e: return {"ok":False,"data":f"PDF OCR失败: {e}"}
+        if name == "zen_scan":
+            try:
+                from api.agent_zen import zen_scan
+                r = zen_scan(target=args.get("target",""), scan_type=args.get("scan_type","quick"))
+                return {"ok":r.get("success",False),"data":f"发现{r.get('data',{}).get('total',0)}个风险"}
+            except Exception as e: return {"ok":False,"data":f"安全扫描失败: {e}"}
+        if name == "zen_report":
+            try:
+                from api.agent_zen import zen_report
+                r = zen_report(target=args.get("target",""))
+                return {"ok":r.get("success",False),"data":r.get('data',{}).get('summary','')}
+            except Exception as e: return {"ok":False,"data":f"安全报告失败: {e}"}
+        if name == "shannon_audit":
+            try:
+                from api.agent_shannon import shannon_audit
+                r = shannon_audit(source_path=args.get("source_path",""))
+                return {"ok":r.get("success",False),"data":f"发现{r.get('total',0)}个问题"}
+            except Exception as e: return {"ok":False,"data":f"代码审计失败: {e}"}
+        if name == "openant_scan":
+            try:
+                from api.agent_openant import openant_scan
+                r = openant_scan(target=args.get("target",""))
+                return {"ok":r.get("success",False),"data":f"发现{r.get('total',0)}个漏洞"}
+            except Exception as e: return {"ok":False,"data":f"漏洞扫描失败: {e}"}
+        if name == "legal_review_contract":
+            try:
+                from api.agent_legal import legal_review_contract
+                r = legal_review_contract(contract_text=args.get("contract_text",""))
+                return {"ok":r.get("success",False),"data":f"发现{r.get('data',{}).get('total_issues',0)}个关注点"}
+            except Exception as e: return {"ok":False,"data":f"合同审查失败: {e}"}
+        if name == "legal_analyze_compliance":
+            try:
+                from api.agent_legal import legal_analyze_compliance
+                r = legal_analyze_compliance(document_text=args.get("document_text",""))
+                return {"ok":r.get("success",False),"data":f"合规度:{'合规' if r.get('data',{}).get('compliant') else '不合规'}, 缺口:{r.get('data',{}).get('total_gaps',0)}"}
+            except Exception as e: return {"ok":False,"data":f"合规分析失败: {e}"}
+        if name == "twenty_create_contact":
+            try:
+                from api.agent_twenty import twenty_create_contact
+                r = twenty_create_contact(name=args.get("name",""), email=args.get("email",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"创建联系人失败: {e}"}
+        if name == "twenty_create_deal":
+            try:
+                from api.agent_twenty import twenty_create_deal
+                r = twenty_create_deal(name=args.get("name",""), amount=args.get("amount",0))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"创建交易失败: {e}"}
+        if name == "frappe_hr_employee":
+            try:
+                from api.agent_frappehr import frappe_hr_employee_info
+                r = frappe_hr_employee_info(employee_id=args.get("employee_id",""))
+                return {"ok":r.get("success",False),"data":json.dumps(r.get("data",{}),ensure_ascii=False)}
+            except Exception as e: return {"ok":False,"data":f"HR查询失败: {e}"}
+        if name == "frappe_hr_leave":
+            try:
+                from api.agent_frappehr import frappe_hr_leave_request
+                r = frappe_hr_leave_request(employee_id=args.get("employee_id",""), start_date=args.get("start_date",""), end_date=args.get("end_date",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"请假提交失败: {e}"}
+        if name == "invoice_create":
+            try:
+                from api.agent_invoice import invoice_create
+                r = invoice_create(client=args.get("client",""), amount=args.get("amount",0))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"发票创建失败: {e}"}
+        if name == "invoice_track_expense":
+            try:
+                from api.agent_invoice import invoice_track_expense
+                r = invoice_track_expense(description=args.get("description",""), amount=args.get("amount",0))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"费用记录失败: {e}"}
+        if name == "chatwoot_create_ticket":
+            try:
+                from api.agent_chatwoot import chatwoot_create_ticket
+                r = chatwoot_create_ticket(subject=args.get("subject",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"工单创建失败: {e}"}
+        if name == "chatwoot_reply_ticket":
+            try:
+                from api.agent_chatwoot import chatwoot_reply_ticket
+                r = chatwoot_reply_ticket(ticket_id=args.get("ticket_id",""), message=args.get("message",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"工单回复失败: {e}"}
+        if name == "postiz_create_post":
+            try:
+                from api.agent_postiz import postiz_create_post
+                r = postiz_create_post(content=args.get("content",""), platforms=args.get("platforms",["twitter"]))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"发帖失败: {e}"}
+        if name == "mautic_send_email":
+            try:
+                from api.agent_mautic import mautic_send_email
+                r = mautic_send_email(subject=args.get("subject",""), content=args.get("content",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"邮件发送失败: {e}"}
+        if name == "superset_create_chart":
+            try:
+                from api.agent_superset import superset_create_chart
+                r = superset_create_chart(dataset=args.get("dataset",""), chart_type=args.get("chart_type","bar"))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"图表创建失败: {e}"}
+        if name == "dataease_create_dashboard":
+            try:
+                from api.agent_dataease import dataease_create_dashboard
+                r = dataease_create_dashboard(name=args.get("name",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"仪表盘创建失败: {e}"}
+        if name == "heyform_create_survey":
+            try:
+                from api.agent_heyform import heyform_create_survey
+                r = heyform_create_survey(title=args.get("title",""))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"问卷创建失败: {e}"}
+        if name == "docetl_extract":
+            try:
+                from api.agent_docetl import docetl_extract_documents
+                r = docetl_extract_documents(file_paths=args.get("file_paths",[]))
+                return {"ok":r.get("success",False),"data":f"处理{r.get('total',0)}个文件"}
+            except Exception as e: return {"ok":False,"data":f"文档提取失败: {e}"}
+        if name == "accord_create_contract":
+            try:
+                from api.agent_accord import accord_create_contract
+                r = accord_create_contract(template=args.get("template","generic"))
+                return {"ok":r.get("success",False),"data":r.get("message","")}
+            except Exception as e: return {"ok":False,"data":f"合同创建失败: {e}"}
+        if name == "claude_code_generate":
+            try:
+                from api.agent_claude import claude_code_generate
+                r = claude_code_generate(prompt=args.get("prompt",""), language=args.get("language","python"))
+                return {"ok":r.get("success",False),"data":f"生成了{r.get('length',0)}字符代码"}
+            except Exception as e: return {"ok":False,"data":f"代码生成失败: {e}"}
+        if name == "plane_project":
+            try:
+                from api.agent_plane import plane_project
+                r = plane_project(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"plane_project执行失败: {e}"}
+        if name == "openproject_mgmt":
+            try:
+                from api.agent_openproject import openproject_mgmt
+                r = openproject_mgmt(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"openproject_mgmt执行失败: {e}"}
+        if name == "cal_schedule":
+            try:
+                from api.agent_cal import cal_schedule
+                r = cal_schedule(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"cal_schedule执行失败: {e}"}
+        if name == "novu_notify":
+            try:
+                from api.agent_novu import novu_notify
+                r = novu_notify(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"novu_notify执行失败: {e}"}
+        if name == "keycloak_auth":
+            try:
+                from api.agent_keycloak import keycloak_auth
+                r = keycloak_auth(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"keycloak_auth执行失败: {e}"}
+        if name == "meilisearch_search":
+            try:
+                from api.agent_meilisearch import meilisearch_search
+                r = meilisearch_search(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"meilisearch_search执行失败: {e}"}
+        if name == "minio_storage":
+            try:
+                from api.agent_minio import minio_storage
+                r = minio_storage(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"minio_storage执行失败: {e}"}
+        if name == "opentofu_apply":
+            try:
+                from api.agent_opentofu import opentofu_apply
+                r = opentofu_apply(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"opentofu_apply执行失败: {e}"}
+        if name == "ansible_run":
+            try:
+                from api.agent_ansible import ansible_run
+                r = ansible_run(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"ansible_run执行失败: {e}"}
+        if name == "strapi_cms":
+            try:
+                from api.agent_strapi import strapi_cms
+                r = strapi_cms(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"strapi_cms执行失败: {e}"}
+        if name == "directus_api":
+            try:
+                from api.agent_directus import directus_api
+                r = directus_api(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"directus_api执行失败: {e}"}
+        if name == "uptime_kuma":
+            try:
+                from api.agent_uptime import uptime_kuma
+                r = uptime_kuma(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"uptime_kuma执行失败: {e}"}
+        if name == "oneuptime_monitor":
+            try:
+                from api.agent_oneuptime import oneuptime_monitor
+                r = oneuptime_monitor(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"oneuptime_monitor执行失败: {e}"}
+        if name == "signoz_apm":
+            try:
+                from api.agent_signoz import signoz_apm
+                r = signoz_apm(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"signoz_apm执行失败: {e}"}
+        if name == "wazuh_siem":
+            try:
+                from api.agent_wazuh import wazuh_siem
+                r = wazuh_siem(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"wazuh_siem执行失败: {e}"}
+        if name == "nats_mq":
+            try:
+                from api.agent_nats import nats_mq
+                r = nats_mq(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"nats_mq执行失败: {e}"}
+        if name == "rabbitmq_broker":
+            try:
+                from api.agent_rabbitmq import rabbitmq_broker
+                r = rabbitmq_broker(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"rabbitmq_broker执行失败: {e}"}
+        if name == "gitea_git":
+            try:
+                from api.agent_gitea import gitea_git
+                r = gitea_git(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"gitea_git执行失败: {e}"}
+        if name == "wikijs_wiki":
+            try:
+                from api.agent_wikijs import wikijs_wiki
+                r = wikijs_wiki(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"wikijs_wiki执行失败: {e}"}
+        if name == "bookstack_wiki":
+            try:
+                from api.agent_bookstack import bookstack_wiki
+                r = bookstack_wiki(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"bookstack_wiki执行失败: {e}"}
+        if name == "projectsend_files":
+            try:
+                from api.agent_projectsend import projectsend_files
+                r = projectsend_files(**args)
+                return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+            except Exception as e:
+                return {"ok": False, "data": f"projectsend_files执行失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}
