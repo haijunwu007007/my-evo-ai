@@ -141,6 +141,8 @@ from api.routes_rest2mcp import router as rest2mcp_router
 from api.routes_a2a import router as a2a_router
 from api.routes_multitenant import router as tenant_router
 from api.routes_analytics import router as analytics_router
+from api.routes_events import router as events_router
+from api.routes_diagnosis import router as diagnosis_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -201,6 +203,8 @@ app.include_router(rest2mcp_router)
 app.include_router(a2a_router)
 app.include_router(tenant_router)
 app.include_router(analytics_router)
+app.include_router(events_router)
+app.include_router(diagnosis_router)
 
 # ── 动态路由加载（LLM创建的新API自动挂载） ──
 _apidir = Path(__file__).parent / "output" / "api"
@@ -469,6 +473,7 @@ async def auth_verify(token: str = ""):
 # ═══════════════════════════════════════════════════════
 
 @app.get("/metrics", include_in_schema=False)
+@app.get("/api/v1/metrics", include_in_schema=False)
 async def prometheus_metrics():
     now = time.time()
     uptime = now - _START_TIME
