@@ -51,7 +51,7 @@ def _load_ext_skill_names():
     global _EXT_SKILL_NAMES
     # 直接从 Agent Engine 的目录获取
     try:
-        from api.routes_agent_engine import _SKILL_CATALOG
+        from api.routes.routes_agent_engine import _SKILL_CATALOG
         _EXT_SKILL_NAMES = [s["name"] for s in _SKILL_CATALOG]
     except: pass
 
@@ -88,7 +88,7 @@ async def smart_chat(req: Req):
             return {"success": True, "result": result, "mode": mode}
     if ("PPT" in msg or "做一份" in msg) and "app_" not in msg:
         try:
-            from api.routes_pptx import generate_presentation
+            from api.routes.routes_pptx import generate_presentation  # if exists
             r = generate_presentation(msg.replace("做一份","").replace("PPT","").strip() or "主题")
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
         except: pass

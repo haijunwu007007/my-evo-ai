@@ -11,7 +11,7 @@ except ImportError:
 
 # ===== MemOS 记忆系统（开机即用）=====
 try:
-    from api.agent_memos import MemOSMemory, get_memory
+    from api.agents.agent_memos import MemOSMemory, get_memory
     _memos = get_memory()
 except: _memos = None
 
@@ -263,7 +263,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                 # 步骤1: 用 Spec-Kit 生成规格（新版call_llm直接调用）
                 spec_md = ""
                 try:
-                    from api.agent_spec import run_spec_driven
+                    from api.agents.agent_spec import run_spec_driven
                     spec_r = run_spec_driven(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS)
                     if spec_r and isinstance(spec_r, dict) and spec_r.get("spec"):
                         spec_md = f"| 规格: {spec_r.get('spec','')} |"

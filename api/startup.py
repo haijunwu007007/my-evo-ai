@@ -83,7 +83,7 @@ def _mount_vue_frontend():
 
         # Workflow 画布 — 从 routes_new_features 模块获取内联 HTML
         try:
-            from api.routes_new_features import _WORKFLOW_HTML
+            from api.routes.routes_new_features import _WORKFLOW_HTML
             @app.get("/workflow", include_in_schema=False)
             async def serve_workflow():
                 from fastapi.responses import HTMLResponse
@@ -161,7 +161,7 @@ async def lifespan(app: FastAPI):
 
     # 启动核心引擎
     try:
-        from api.routes_scheduler import start_engines
+        from api.routes.routes_scheduler import start_engines
         asyncio.create_task(start_engines())
         logger.info("[ENGINES] 调度器/事件引擎/任务队列 已启动")
     except Exception as e:
@@ -177,14 +177,14 @@ async def lifespan(app: FastAPI):
 
     # 扫描外部 MCP 服务器（异步，不阻塞启动）
     try:
-        from api.routes_mcp import scan_external_mcp_servers as _mcp_scan
+        from api.routes.routes_mcp import scan_external_mcp_servers as _mcp_scan
         asyncio.create_task(_mcp_scan())
     except Exception as _e:
         logger.warning(f"[MCP] 外部扫描启动异常: {_e}")
 
     # 重新初始化技能（MCP 桥接需等 MCP 扫描完成后）
     try:
-        from api.routes_skills import init_skills as _reinit_skills
+        from api.routes.routes_skills import init_skills as _reinit_skills
         asyncio.create_task(asyncio.to_thread(_reinit_skills))
     except Exception as _e:
         logger.warning(f"[SKILL] 重初始化异常: {_e}")
@@ -202,7 +202,7 @@ async def lifespan(app: FastAPI):
     # ═══════════ SHUTDOWN ═══════════
     logger.info("[SHUTDOWN] 正在关闭核心引擎...")
     try:
-        from api.routes_scheduler import stop_engines
+        from api.routes.routes_scheduler import stop_engines
         await stop_engines()
         logger.info("[SHUTDOWN] 所有引擎已停止")
     except Exception as e:

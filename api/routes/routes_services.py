@@ -4,7 +4,7 @@ AUTO-EVO-AI V0.1 — 服务类路由
 从 api_server.py 提取：文档生成、通知服务、浏览器自动化、LLM 网关、CI/CD、GitHub 扫描、插件市场
 
 用法:
-    from api.routes_services import router
+    from api.routes.routes_services import router
     app.include_router(router)
 """
 

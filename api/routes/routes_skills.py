@@ -206,7 +206,7 @@ def _scan_external_skills():
 def _bridge_mcp_tools_as_skills():
     """将 MCP 注册表中的所有工具桥接为技能"""
     try:
-        from api.routes_mcp import get_mcp_tools_as_skills
+        from api.routes.routes_mcp import get_mcp_tools_as_skills
         mcp_skills = get_mcp_tools_as_skills()
         count = 0
         for skill_dict in mcp_skills:
@@ -224,7 +224,7 @@ def _bridge_mcp_tools_as_skills():
 def _bridge_connectors_as_skills():
     """将连接器注册表桥接为技能"""
     try:
-        from api.routes_connectors import get_connector_skills
+        from api.routes.routes_connectors import get_connector_skills
         connector_skills = get_connector_skills()
         count = 0
         for skill_dict in connector_skills:
@@ -241,7 +241,7 @@ def _bridge_connectors_as_skills():
 def _bridge_mcpize_as_skills():
     """将 MCPize 万能集成桥的工具桥接为技能"""
     try:
-        from api.routes_mcpize import get_mcpize_skills
+        from api.routes.routes_mcpize import get_mcpize_skills
         skills = get_mcpize_skills()
         count = 0
         for sd in skills:
@@ -258,7 +258,7 @@ def _bridge_mcpize_as_skills():
 def _bridge_gateway_as_skills():
     """将 Gateway 集成模板桥接为技能"""
     try:
-        from api.routes_gateway import list_gateway_as_skills
+        from api.routes.routes_gateway import list_gateway_as_skills
         skills = list_gateway_as_skills()
         count = 0
         for sd in skills:
@@ -360,7 +360,7 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
             if "/" in mcp_path:
                 srv_name, tool_name = mcp_path.split("/", 1)
                 try:
-                    from api.routes_mcp import _execute_external_mcp_tool
+                    from api.routes.routes_mcp import _execute_external_mcp_tool
                     result = await _execute_external_mcp_tool(srv_name, tool_name, req.params)
                     elapsed = time.time() - start
                     _log_execution(name, result.get("success", False), elapsed)

@@ -342,17 +342,7 @@ var _TOOL_HINTS = {
   heyform_create_survey: "帮我创建一个问卷调查：",
   docetl_extract: "帮我提取文档内容：",
   accord_create_contract: "帮我创建一份协议：",
-  claude_code_generate: "帮我用Claude Code生成代码："
-}
-// 需要工具调用（走非流式）的关键词
-var _TOOL_KEYWORDS = ["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", "浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",
-  // 外部Skill关键词（触发Agent Engine）
-  "openclaw","browser-use","crewai","langgraph","mem0","autogen","autogpt","openhands",
-  "langchain","dify","flowise","n8n","ragflow","ollama","firecrawl","metagpt",
-  "mastra","headroom","odysseus","paseo","claude-mem","context7","goose",
-  "ai-hedge-fund","量化交易","股票分析","套利","金融",
-  "网络安全","渗透","cyber","hack","网络安全",
-  "视频生成","文生视频","图生视频","多模态",
+  claude_code_generate: "帮我用Claude Code生成代码：",
   odoo_manage: "帮我管理ERP（会计/库存/采购）：",
   erpclaw_manage: "帮我用AI-ERP管理业务：",
   coolify_deploy: "帮我在PaaS上部署应用：",
@@ -372,10 +362,25 @@ var _TOOL_KEYWORDS = ["plane_project", "openproject_mgmt", "cal_schedule", "novu
   mermaid_chart: "帮我生成流程图/架构图：",
   nocobase_build: "帮我用低代码构建业务应用：",
   scriberr_transcribe: "帮我转录音频/会议：",
-  keploy_test: "帮我自动生成API测试：",
+  keploy_test: "帮我自动生成API测试："
+}
+// 需要工具调用（走非流式）的关键词
+var _TOOL_KEYWORDS = ["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", "浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",
+  // 外部Skill关键词（触发Agent Engine）
+  "openclaw","browser-use","crewai","langgraph","mem0","autogen","autogpt","openhands",
+  "langchain","dify","flowise","n8n","ragflow","ollama","firecrawl","metagpt",
+  "mastra","headroom","odysseus","paseo","claude-mem","context7","goose",
+  "ai-hedge-fund","量化交易","股票分析","套利","金融",
+  "网络安全","渗透","cyber","hack","网络安全",
+  "视频生成","文生视频","图生视频","多模态",
+  "odoo_manage", "erpclaw_manage", "coolify_deploy", "rustdesk_connect",
+  "docuseal_sign", "homeassistant_control", "vaultwarden_manage", "nocodb_manage",
+  "appsmith_build", "airbyte_sync", "mlflow_track", "langfuse_observe",
+  "hoppscotch_test", "grist_analyze", "freshrss_read", "listmonk_send",
+  "mermaid_chart", "nocobase_build", "scriberr_transcribe", "keploy_test",
   "markdown","转markdown","文档转换","爬虫","爬取数据","计算机","控制电脑","截图","设计转代码","PR","审查","代码审查","测试","单元测试","编辑代码","改代码","telegram","whatsapp","slack","discord","消息平台","语音","tts","播报","朗读","多智能体","智能体团队","自主","autogpt","评测","agent评估","benchmark","issue修复","github issue","生成项目","全栈","数据库","查库","sql查询","查询数据库","deploy","部署","k8s","kubernetes",
   // 第3轮22个
-  "视频脚本","视频制作","openmontage","数据可视化","图表","数据分析","ocr","识别图片","识别文字","识别pdf","安全扫描","漏洞扫描","渗透","代码审计","semgrep","漏洞","合同","合规","法律","crm","联系人","交易","hr","员工","请假","发票","开票","费用","工单","客服","ticket","社交媒体","发帖","营销邮件","superset","bi","仪表盘","dataease","问卷调查","heyform","表单","etl","docetl","文档提取","法律协议","合同模板","claude code","代码生成""odoo_manage", "erpclaw_manage", "coolify_deploy", "rustdesk_connect", "docuseal_sign", "homeassistant_control", "vaultwarden_manage", "nocodb_manage", "appsmith_build", "airbyte_sync", "mlflow_track", "langfuse_observe", "hoppscotch_test", "grist_analyze", "freshrss_read", "listmonk_send", "mermaid_chart", "nocobase_build", "scriberr_transcribe", "keploy_test", ]
+  "视频脚本","视频制作","openmontage","数据可视化","图表","数据分析","ocr","识别图片","识别文字","识别pdf","安全扫描","漏洞扫描","渗透","代码审计","semgrep","漏洞","合同","合规","法律","crm","联系人","交易","hr","员工","请假","发票","开票","费用","工单","客服","ticket","社交媒体","发帖","营销邮件","superset","bi","仪表盘","dataease","问卷调查","heyform","表单","etl","docetl","文档提取","法律协议","合同模板","claude code","代码生成","odoo_manage", "erpclaw_manage", "coolify_deploy", "rustdesk_connect", "docuseal_sign", "homeassistant_control", "vaultwarden_manage", "nocodb_manage", "appsmith_build", "airbyte_sync", "mlflow_track", "langfuse_observe", "hoppscotch_test", "grist_analyze", "freshrss_read", "listmonk_send", "mermaid_chart", "nocobase_build", "scriberr_transcribe", "keploy_test" ]
 
 function quickTool(name){
   var hint = _TOOL_HINTS[name] || ""

@@ -842,7 +842,7 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
 from core.auth_engine import AuthEngine, init_auth, get_auth, is_auth_enabled, set_auth_enabled, JWTError
 
 _auth_secret = os.environ.get("EVO_AUTH_SECRET", secrets.token_hex(32))
-_auth_enabled_env = os.environ.get("EVO_AUTH_ENABLED", "false").lower() == "true"
+_auth_enabled_env = os.environ.get("EVO_AUTH_ENABLED", "true").lower() == "true"
 _auth_engine = init_auth(secret=_auth_secret, enabled=_auth_enabled_env)
 
 _AUTH_WHITELIST = {

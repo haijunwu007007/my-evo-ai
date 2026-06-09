@@ -96,8 +96,8 @@ def check_role(payload: dict, required_role: str) -> bool:
 def get_auth_config() -> dict:
     """获取认证配置（给 API 返回用）。"""
     return {
-        "enabled": os.environ.get("EVO_AUTH_ENABLED", "false").lower() == "true",
-        "mode": "jwt+apikey" if os.environ.get("EVO_AUTH_ENABLED", "false").lower() == "true" else "none",
+        "enabled": os.environ.get("EVO_AUTH_ENABLED", "true").lower() == "true",
+        "mode": "jwt+apikey" if os.environ.get("EVO_AUTH_ENABLED", "true").lower() == "true" else "none",
         "token_ttl": _TOKEN_TTL,
         "has_admin_key": bool(_ADMIN_KEY),
     }

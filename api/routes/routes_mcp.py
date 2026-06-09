@@ -570,7 +570,7 @@ async def _execute_builtin_tool(tool_name: str, args: dict):
         
         elif tool_name == "web_search":
             query = args.get("query", "")
-            from api.routes_smart_chat import _duckduckgo_search
+            from api.routes.routes_smart_chat import _duckduckgo_search
             results = await _duckduckgo_search(query)
             return {"success": True, "content": json.dumps(results, ensure_ascii=False)}
         

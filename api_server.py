@@ -82,67 +82,67 @@ app.include_router(profiler_router)
 import api.startup  # noqa: F401
 
 # ── 注册路由模块 ──
-from api.routes_modules import router as modules_router
-from api.routes_services import router as services_router
-from api.routes_ws import router as ws_router
-from api.routes_auth_system import router as auth_system_router
-from api.routes_scheduler import router as scheduler_router
-from api.routes_coordinator import router as coordinator_router
-from api.routes_insights import router as insights_router
-from api.routes_modules_browse import router as modules_browse_router
-from api.routes_litellm import router as litellm_router
-from api.routes_agent_s import router as agent_s_router
-from api.routes_tools_health import router as tools_health_router
-from api.routes_gitea_sync import router as gitea_sync_router
-from api.routes_metabase_bridge import router as metabase_bridge_router
-from api.routes_workflows import router as workflows_router
-from api.routes_dify import router as dify_router
-from api.routes_chroma import router as chroma_router
-from api.routes_browser_use import router as browser_use_router
-from api.routes_filebrowser import router as filebrowser_router
-from api.routes_openclaw import router as openclaw_router
-from api.routes_meilisearch import router as meili_router
-from api.routes_stirling_pdf import router as stirling_router
-from api.routes_uptime_kuma import router as uptime_router
-from api.routes_nextchat import router as nextchat_router
-from api.routes_langfuse import router as langfuse_router
-from api.routes_superset import router as superset_router
-from api.routes_activepieces import router as activepieces_router
-from api.routes_hoppscotch import router as hoppscotch_router
-from api.routes_tabby import router as tabby_router
-from api.routes_firecrawl import router as firecrawl_router
-from api.routes_mcp import router as mcp_router
-from api.routes_minio import router as minio_router
-from api.routes_portainer import router as portainer_router
-from api.routes_grafana import router as grafana_router
-from api.routes_outline import router as outline_router
-from api.routes_appsmith import router as appsmith_router
-from api.routes_code_server import router as code_server_router
-from api.routes_dashy import router as dashy_router
-from api.routes_ntfy import router as ntfy_router
-from api.routes_nocodb import router as nocodb_router
-from api.routes_changedetection import router as changedetection_router
-from api.routes_setup import router as setup_router
-from api.routes_chat import router as chat_router
-from api.routes_plugins import router as plugins_router
-from api.routes_agents import router as agents_router
-from api.routes_llm_chat import router as llm_chat_router
-from api.routes_new_features import router as new_features_router
-from api.routes_i18n import router as i18n_router
-from api.routes_smart_chat import router as smart_chat_router
-from api.routes_skills import router as skills_router
-from api.routes_rag import router as rag_router
-from api.routes_connectors import router as connectors_router
-from api.routes_mcpize import router as mcpize_router
-from api.routes_agent_engine import router as agent_engine_router
-from api.routes_public_api import router as public_api_router
-from api.routes_gateway import router as gateway_router
-from api.routes_rest2mcp import router as rest2mcp_router
-from api.routes_a2a import router as a2a_router
-from api.routes_multitenant import router as tenant_router
-from api.routes_analytics import router as analytics_router
-from api.routes_events import router as events_router
-from api.routes_diagnosis import router as diagnosis_router
+from api.routes.routes_modules import router as modules_router
+from api.routes.routes_services import router as services_router
+from api.routes.routes_ws import router as ws_router
+from api.routes.routes_auth_system import router as auth_system_router
+from api.routes.routes_scheduler import router as scheduler_router
+from api.routes.routes_coordinator import router as coordinator_router
+from api.routes.routes_insights import router as insights_router
+from api.routes.routes_modules_browse import router as modules_browse_router
+from api.routes.routes_litellm import router as litellm_router
+from api.routes.routes_agent_s import router as agent_s_router
+from api.routes.routes_tools_health import router as tools_health_router
+from api.routes.routes_gitea_sync import router as gitea_sync_router
+from api.routes.routes_metabase_bridge import router as metabase_bridge_router
+from api.routes.routes_workflows import router as workflows_router
+from api.routes.routes_dify import router as dify_router
+from api.routes.routes_chroma import router as chroma_router
+from api.routes.routes_browser_use import router as browser_use_router
+from api.routes.routes_filebrowser import router as filebrowser_router
+from api.routes.routes_openclaw import router as openclaw_router
+from api.routes.routes_meilisearch import router as meili_router
+from api.routes.routes_stirling_pdf import router as stirling_router
+from api.routes.routes_uptime_kuma import router as uptime_router
+from api.routes.routes_nextchat import router as nextchat_router
+from api.routes.routes_langfuse import router as langfuse_router
+from api.routes.routes_superset import router as superset_router
+from api.routes.routes_activepieces import router as activepieces_router
+from api.routes.routes_hoppscotch import router as hoppscotch_router
+from api.routes.routes_tabby import router as tabby_router
+from api.routes.routes_firecrawl import router as firecrawl_router
+from api.routes.routes_mcp import router as mcp_router
+from api.routes.routes_minio import router as minio_router
+from api.routes.routes_portainer import router as portainer_router
+from api.routes.routes_grafana import router as grafana_router
+from api.routes.routes_outline import router as outline_router
+from api.routes.routes_appsmith import router as appsmith_router
+from api.routes.routes_code_server import router as code_server_router
+from api.routes.routes_dashy import router as dashy_router
+from api.routes.routes_ntfy import router as ntfy_router
+from api.routes.routes_nocodb import router as nocodb_router
+from api.routes.routes_changedetection import router as changedetection_router
+from api.routes.routes_setup import router as setup_router
+from api.routes.routes_chat import router as chat_router
+from api.routes.routes_plugins import router as plugins_router
+from api.routes.routes_agents import router as agents_router
+from api.routes.routes_llm_chat import router as llm_chat_router
+from api.routes.routes_new_features import router as new_features_router
+from api.routes.routes_i18n import router as i18n_router
+from api.routes.routes_smart_chat import router as smart_chat_router
+from api.routes.routes_skills import router as skills_router
+from api.routes.routes_rag import router as rag_router
+from api.routes.routes_connectors import router as connectors_router
+from api.routes.routes_mcpize import router as mcpize_router
+from api.routes.routes_agent_engine import router as agent_engine_router
+from api.routes.routes_public_api import router as public_api_router
+from api.routes.routes_gateway import router as gateway_router
+from api.routes.routes_rest2mcp import router as rest2mcp_router
+from api.routes.routes_a2a import router as a2a_router
+from api.routes.routes_multitenant import router as tenant_router
+from api.routes.routes_analytics import router as analytics_router
+from api.routes.routes_events import router as events_router
+from api.routes.routes_diagnosis import router as diagnosis_router
 
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
@@ -517,7 +517,7 @@ async def prometheus_metrics():
 
     # 引擎指标
     try:
-        from api.routes_scheduler import HAS_SCHEDULER, HAS_EVENTS, HAS_PIPELINE, HAS_QUEUE
+        from api.routes.routes_scheduler import HAS_SCHEDULER, HAS_EVENTS, HAS_PIPELINE, HAS_QUEUE
         lines.append(f'evo_engine_active{{engine="scheduler"}} {1 if HAS_SCHEDULER else 0}')
         lines.append(f'evo_engine_active{{engine="events"}} {1 if HAS_EVENTS else 0}')
         lines.append(f'evo_engine_active{{engine="pipeline"}} {1 if HAS_PIPELINE else 0}')
@@ -548,7 +548,7 @@ if __name__ == "__main__":
         pass
 
     auth_status = "已启用" if _API_KEY_ENABLED else "未启用"
-    if os.environ.get("EVO_AUTH_ENABLED","false").lower()=="true":
+    if os.environ.get("EVO_AUTH_ENABLED","true").lower()=="true":
         auth_status = "JWT+APIKey"
     print(f"""
 ┌──────────────────────────────────────────────────────┐

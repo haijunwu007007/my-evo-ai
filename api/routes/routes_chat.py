@@ -10,7 +10,7 @@ router = APIRouter()
 
 # ── 导入后端翻译 ──
 try:
-    from api.routes_i18n import I18N_BACKEND
+    from api.routes.routes_i18n import I18N_BACKEND
 except:
     I18N_BACKEND = {}
 

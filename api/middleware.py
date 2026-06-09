@@ -119,7 +119,7 @@ async def security_middleware(request: Request, call_next):
                 )
 
         # JWT 认证（环境变量 EVO_AUTH_ENABLED=true 时启用）
-        auth_enabled = os.environ.get("EVO_AUTH_ENABLED", "false").lower() == "true"
+        auth_enabled = os.environ.get("EVO_AUTH_ENABLED", "true").lower() == "true"
         if auth_enabled and not is_public:
             auth_header = request.headers.get("Authorization", "")
             token = ""

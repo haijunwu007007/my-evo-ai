@@ -47,7 +47,7 @@ def run_concurrent_agents(msg, analysis, key, BASE, OUT, _LAST, _GENERATED_TOOLS
         code_result = results.get("alt") or code_result
     
     # 4. 沙箱验证 + 保存
-    from api.agent_sandbox import sandbox
+    from api.agents.agent_sandbox import sandbox
     issues = sandbox.validate_html(code_result or "")
     
     if len((code_result or "").strip()) > 200:
@@ -66,7 +66,7 @@ def run_concurrent_agents(msg, analysis, key, BASE, OUT, _LAST, _GENERATED_TOOLS
 
 def run_with_experience(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS):
     """带经验记忆的执行（MemOS风格）"""
-    from api.agent_memory import AgentMemory
+    from api.agents.agent_memory import AgentMemory
     mem = AgentMemory(BASE / "data" / "agent_memory.db")
     
     # 查找相似历史经验

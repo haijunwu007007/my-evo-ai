@@ -328,7 +328,7 @@ async def rag_query(req: RAGQuery):
     if req.use_llm and results:
         context = "\n\n".join([f"[片段 {r['chunk_index']}]: {r['content'][:300]}" for r in results[:3]])
         try:
-            from api.routes_smart_chat import _call_llm
+            from api.routes.routes_smart_chat import _call_llm
             llm_answer = await _call_llm(f"基于以下知识回答问题。\n\n知识:\n{context}\n\n问题: {req.query}\n\n请用中文回答:", provider="glm")
         except:
             llm_answer = "(LLM 不可用，仅返回检索结果)"
@@ -385,7 +385,7 @@ async def rag_chat(payload: dict):
     
     # 降级：直接 LLM
     try:
-        from api.routes_smart_chat import _call_llm
+        from api.routes.routes_smart_chat import _call_llm
         answer = await _call_llm(query, provider="glm")
         return {"success": True, "answer": answer, "mode": "direct_llm"}
     except:
