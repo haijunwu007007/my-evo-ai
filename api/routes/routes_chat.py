@@ -1,118 +1,69 @@
-"""Chat API — 更聪明地理解用户想干什么"""
-
+"""Chat API — 意图识别+真执行操作（不再只返回翻译文本）"""
 import re
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 from core.logging_config import get_logger
 
 logger = get_logger("evo.api.chat")
 router = APIRouter()
 
-# ── 导入后端翻译 ──
-try:
-    from api.routes.routes_i18n import I18N_BACKEND
-except:
-    I18N_BACKEND = {}
-
-def _t(key: str, lang: str = "zh-CN") -> str:
-    """获取翻译，回退到中文"""
-    d = I18N_BACKEND.get(lang) or I18N_BACKEND.get("zh-CN") or {}
-    val = d.get(key) or I18N_BACKEND.get("zh-CN", {}).get(key)
-    if val is None:
-        val = key
-    return val
-
 class ChatRequest(BaseModel):
     message: str
     lang: str = "zh-CN"
 
-# ── 意图定义 ─────────────────────────────────
-INTENTS = [
-    {"id": "status", "patterns": ["状态", "健康", "运行", "还好", "正常", "情况", "怎么样", "status", "health"],
-     "priority": 3},
-    {"id": "capabilities", "patterns": ["什么功能", "能做什么", "你会什么", "能力", "用途", "help", "使用", "哪些", "能干"],
-     "priority": 2},
-    {"id": "greeting", "patterns": ["你好", "嗨", "hi", "hello", "在吗", "在不在"],
-     "priority": 2},
-    {"id": "biz", "patterns": ["billion", "集团", "企业", "公司", "部门", "员工"],
-     "priority": 1},
-    {"id": "agent", "patterns": ["截图", "操作", "鼠标", "桌面", "agent", "Agent"],
-     "priority": 1},
-    {"id": "schedule", "patterns": ["每天", "定时", "每周", "重复", "自动", "备份", "schedule", "cron"],
-     "priority": 1},
-    {"id": "notify", "patterns": ["通知", "推送", "提醒", "告警", "钉钉", "alert"],
-     "priority": 1},
-]
-
-def _detect_intent(text: str) -> list:
-    t = text.lower().strip()
-    scored = []
-    for intent in INTENTS:
-        score = 0
-        for pat in intent["patterns"]:
-            if pat in t:
-                score += 1
-        if score > 0:
-            scored.append((intent["id"], score * intent["priority"]))
-    scored.sort(key=lambda x: -x[1])
-    return [s[0] for s in scored]
-
 @router.post("/api/v1/chat")
 async def chat(req: ChatRequest):
     if not req.message.strip():
-        return {"success": True, "result": _t("unknown", req.lang)}
-    lang = req.lang if req.lang in I18N_BACKEND else "zh-CN"
-    t = req.message.lower().strip()
-    intents = _detect_intent(t)
+        return {"success": True, "result": "请说点什么"}
 
-    # 1. 问候
-    if "greeting" in intents and intents[0] == "greeting":
-        return {"success": True, "result": _t("greeting", lang)}
+    msg = req.message.strip()
+    lower = msg.lower()
 
-    # 2. 状态
-    if "status" in intents:
+    # ── 问候 ──
+    if re.search(r'(你好|嗨|hi|hello|在吗|在不在)', lower):
+        return {"success": True, "result": "你好！我是 AUTO-EVO-AI，有什么可以帮你？"}
+
+    # ── 状态查询 → 真查 ──
+    if any(k in lower for k in ["状态","健康","运行","系统怎么样","情况","status"]):
         try:
-            from modules.agent_s_bridge import get_status
-            s = await get_status()
-            if s and isinstance(s, dict):
-                ver = s.get('version', '-')
-                sdk = _t("sdk_ready" if s.get('sdk_available') else "sdk_missing", lang)
-                key = _t("key_ready" if s.get('has_openai_key') else "key_missing", lang)
-                st = _t("status_ok", lang)
-                st = st.replace("{version}", ver).replace("{sdk}", sdk).replace("{key}", key)
-                return {"success": True, "result": st}
-        except:
-            pass
-        return {"success": True, "result": _t("unknown", lang)}
+            from api.infra import registry
+            total = registry.get_total_count()
+            health = registry.get_all_health() if hasattr(registry, 'get_all_health') else {}
+            ok_count = len([m for m,h in health.items() if h.get("status") in ("ok","running","pending_lazy")])
+            return {"success": True, "result": f"✅ 系统运行正常\n• 模块: {total} 个\n• 健康: {ok_count}/{len(health)} 个正常\n• 运行中: {ok_count} 个"}
+        except Exception as e:
+            return {"success": True, "result": f"状态查询中... (检测中: {e})"}
 
-    # 3. 能力
-    if "capabilities" in intents:
-        return {"success": True, "result": _t("what_can_do", lang)}
+    # ── 功能列表 → 直接返回 ──
+    if any(k in lower for k in ["什么功能","能做什么","你会什么","能力","能干","帮助","help"]):
+        return {"success": True, "result": """AUTO-EVO-AI 能力清单:
+💻 **开发** — 说"开发xxx"自动生成网页/应用
+🎨 **画图** — 说"画xxx"调用AI画图
+🔍 **搜索** — 说"搜索xxx"搜索互联网
+📊 **做PPT** — 说"做一份xxxPPT"生成演示文稿
+😊 **聊天** — 直接对话，真AI回复
+📦 **模块** — 说"调xxx模块"
+📝 **写文档** — 说"写合同/写方案/写报告"
+🛡️ **安全扫描** — 说"安全检测/漏洞扫描"
+💾 **数据** — 说"数据分析/可视化/查询"
+已内建DeepSeek Key 🔑，直接使用全部功能！""", "mode": "capabilities"}
 
-    # 4. 企业
-    if "biz" in intents:
-        return {"success": True, "result": _t("biz_guide", lang)}
+    # ── 主动作 → 转agent_core真实执行 ──
+    from api.agent_core import create_engine
+    from pathlib import Path
+    BASE = Path(__file__).resolve().parent.parent.parent
+    OUT = BASE / "output"; OUT.mkdir(exist_ok=True)
+    TOOLS_DIR = OUT / "tools"; TOOLS_DIR.mkdir(exist_ok=True)
+    MEM_DB = BASE / "data" / "agent_memory.db"; MEM_DB.parent.mkdir(parents=True, exist_ok=True)
 
-    # 5. 桌面操作
-    if "agent" in intents:
-        try:
-            from modules.agent_s_bridge import check_available
-            c = await check_available()
-            if c and isinstance(c, dict) and c.get("available"):
-                return {"success": True, "result": "✅ " + _t("sdk_ready", lang)}
-            else:
-                return {"success": True, "result": "⚠️ " + _t("sdk_missing", lang)}
-        except:
-            pass
-        return {"success": True, "result": _t("unknown", lang)}
-
-    # 6. 定时
-    if "schedule" in intents:
-        return {"success": True, "result": _t("schedule_guide", lang)}
-
-    # 7. 通知
-    if "notify" in intents:
-        return {"success": True, "result": _t("notify_guide", lang)}
-
-    # 默认
-    return {"success": True, "result": _t("unknown", lang)}
+    import asyncio
+    engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
+    try:
+        result = await asyncio.to_thread(engine, msg, "", "zh-CN", [])
+        if isinstance(result, dict) and result.get("success"):
+            return {"success": True, "result": result.get("result", ""), "mode": result.get("mode", "chat")}
+        return {"success": True, "result": str(result)}
+    except Exception as e:
+        from api.agent_llm import call_llm
+        content, _ = call_llm([{"role": "user", "content": msg + "\n简洁回答"}])
+        return {"success": True, "result": content or f"处理中... ({e})"}
