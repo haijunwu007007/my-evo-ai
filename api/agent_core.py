@@ -594,6 +594,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 - 学习新技能时使用 moltron_learn
 - 桌面自动化时使用 accomplish_desktop
 """
+        # 检查精确匹配的fallback（仅在无key且匹配特定问题时）
         if not key:
             for q, a in _FALLBACK.items():
                 if q in msg: return {"success":True,"result":a,"mode":"direct"}
@@ -623,9 +624,15 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                     try: _memos.save_experience(msg[:50], f"工具执行成功:{_LAST.get('url','')}")
                     except Exception:
                         pass
+                _remember(msg, final, kh=kh)
                 return {"success":True,"result":final,"mode":"agent"}
             if content and '/output/' in content:
+                _remember(msg, content, kh=kh)
                 return {"success":True,"result":content,"mode":"bot"}
+            # LLM纯文本响应（非文件生成），直接返回实际内容
+            if content:
+                _remember(msg, content, kh=kh)
+                return {"success":True,"result":content,"mode":"chat"}
             return {"success":True,"result":_FALLBACK.get("可以做那些事情","AUTO-EVO-AI已就绪"),"mode":"direct"}
-        return {"success":True,"result":_FALLBACK.get("可以做那些事情","AUTO-EVO-AI已就绪"),"mode":"timeout"}
+        return {"success":True,"result":"请求超时，请重试","mode":"timeout"}
     return process
