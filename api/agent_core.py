@@ -499,11 +499,11 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 59. 💾 minio_storage - 对象存储：S3文件管理
     示例: minio_storage(action="upload", bucket="my-bucket", file_path="file.pdf")
 60. 🏗️ opentofu_apply - IaC基础设施：声明式云资源管理
-    示例: opentofu_apply(config='{"provider":"aws","resources":[]}')
+    示例: opentofu_apply(config='{{"provider":"aws","resources":[]}}')
 61. ⚙️ ansible_run - 配置管理：Playbook自动化运维
     示例: ansible_run(playbook="安装nginx", inventory="web-servers")
 62. 📄 strapi_cms - CMS内容管理：Headless CMS
-    示例: strapi_cms(content_type="article", data='{"title":"新文章"}')
+    示例: strapi_cms(content_type="article", data='{{"title":"新文章"}}')
 63. 🗄️ directus_api - 数据平台：SQL数据库自动生成API
     示例: directus_api(collection="products")
 64. 📊 uptime_kuma - 站点监控：80+协议监控

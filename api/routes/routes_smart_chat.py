@@ -95,7 +95,7 @@ async def smart_chat(req: Req):
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
         except Exception:
             pass
-    from .agent_core import create_engine
+    from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
     result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)
     return result
@@ -123,7 +123,7 @@ async def smart_stream(req: Req):
     # 2. 判断是否需要工具调用
     if _needs_tools(msg):
         # 走完整 agent_core 管道（支持工具），结果流式返回
-        from .agent_core import create_engine
+        from api.agent_core import create_engine
         engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
         
         async def tool_gen():
@@ -147,7 +147,7 @@ async def smart_stream(req: Req):
         return StreamingResponse(tool_gen(), media_type="application/x-ndjson")
     
     # 3. 简单聊天 — 纯流式LLM输出
-    from .agent_llm import call_llm_stream
+    from api.agent_llm import call_llm_stream
     is_dev = any(k in msg for k in ["开发","创建","写一个","做一个","生成","设计","实现"])
     sp = f"你是AUTO-EVO-AI。{f'直接生成完整HTML代码，只输出```html```代码块，不要加解释。' if is_dev else '简洁回答。'}"
     async def generate():
