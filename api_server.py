@@ -354,6 +354,11 @@ async def system_status():
     }
 
 
+@app.get("/api/v1/health")
+async def health_check():
+    """系统健康检查端点"""
+    return {"success": True, "status": "healthy", "version": VERSION, "timestamp": __import__('time').time()}
+
 @app.get("/api/v1/version")
 async def get_version():
     """系统版本信息"""
