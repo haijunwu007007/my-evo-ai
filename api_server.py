@@ -1,5 +1,4 @@
-"""
-AUTO-EVO-AI V0.1 — API服务器（入口文件）
+"""AUTO-EVO-AI V0.1 — API服务器（入口文件）
 ====================================
 路由已拆分到 api/routes_*.py
 中间件已拆分到 api/middleware.py
@@ -8,8 +7,8 @@ AUTO-EVO-AI V0.1 — API服务器（入口文件）
 """
 
 from __future__ import annotations
-import os, sys, json, time, asyncio, hashlib
-from typing import Any, Dict, List, Optional
+import os, sys, json, time, asyncio, importlib
+from typing import Any
 from datetime import datetime
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,12 +22,12 @@ except Exception:
     pass
 
 # ── 统一路径（从共享模块计算 BASE_DIR + sys.path.insert）──
-from api._paths import BASE_DIR, _ORIGINAL_BASE
+from api._paths import BASE_DIR
 
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -44,6 +43,11 @@ if get_config_value(_EVO_CONFIG, "logging.json_format", False):
     os.environ["EVO_LOG_JSON"] = "true"
 
 logger = get_logger("evo.api")
+
+# ── 版本常量（集中管理，升级只需改此处）──
+VERSION = "V0.1"
+VERSION_BUILD = "20260609"
+BUILD_TAG = f"AUTO-EVO-AI {VERSION}"
 
 # ── 导入共享基础设施 ──
 from api.infra import (
@@ -65,7 +69,7 @@ try:
     async def scalar_html():
         return get_scalar_api_reference(
             openapi_url=app.openapi_url,
-            title="AUTO-EVO-AI V0.1 API 文档",
+            title=f"{BUILD_TAG} API 文档",
         )
     logger.info("[SCALAR] API 文档已挂载: /scalar")
 except ImportError:
@@ -127,7 +131,6 @@ from api.routes_new_features import router as new_features_router
 from api.routes_i18n import router as i18n_router
 from api.routes_smart_chat import router as smart_chat_router
 from api.routes_skills import router as skills_router
-from api.routes_mcp import router as mcp_router
 from api.routes_rag import router as rag_router
 from api.routes_connectors import router as connectors_router
 from api.routes_mcpize import router as mcpize_router
@@ -136,7 +139,6 @@ from api.routes_public_api import router as public_api_router
 from api.routes_gateway import router as gateway_router
 from api.routes_rest2mcp import router as rest2mcp_router
 from api.routes_a2a import router as a2a_router
-from api.routes_i18n import router as i18n_router
 from api.routes_multitenant import router as tenant_router
 from api.routes_analytics import router as analytics_router
 
@@ -197,10 +199,8 @@ app.include_router(public_api_router)
 app.include_router(gateway_router)
 app.include_router(rest2mcp_router)
 app.include_router(a2a_router)
-app.include_router(i18n_router)
 app.include_router(tenant_router)
 app.include_router(analytics_router)
-app.include_router(mcp_router)
 
 # ── 动态路由加载（LLM创建的新API自动挂载） ──
 _apidir = Path(__file__).parent / "output" / "api"
@@ -210,7 +210,8 @@ for _f in sorted(_apidir.glob("*.py")):
         _mod = importlib.import_module(f"output.api.{_f.stem}")
         if hasattr(_mod, 'router'):
             app.include_router(_mod.router, prefix="/api/ext")
-    except: pass
+    except Exception:
+        pass
 
 
 # ── 静态文件 ──
@@ -313,10 +314,8 @@ async def root():
     # fallback: 返回 JSON 状态
     return {
         "success": True,
-        "system": "AUTO-EVO-AI V0.1",
+        "system": BUILD_TAG,
         "status": "running",
-        "modules_loaded": len(registry.modules),
-        "modules_total": len(registry.classes) + len(registry._pending_modules),
         "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_stub": registry.get_stub_count(),
         "timestamp": datetime.now().isoformat(),
@@ -332,7 +331,7 @@ async def system_status():
         try:
             st = coord.get_status()
             coord_data = {
-                "version": "V0.1",
+                "version": VERSION,
                 "coordinator_version": "3.0.0",
                 "status": st.get("status", "ready"),
                 "automation_score": coord.get_automation_score(),
@@ -343,7 +342,7 @@ async def system_status():
             coord_data = {"status": "initializing"}
     return {
         "success": True,
-        "system": "AUTO-EVO-AI V0.1",
+        "system": BUILD_TAG,
         "status": "running",
         "uptime": datetime.now().isoformat(),
         "modules_loaded": len(registry.modules),
@@ -351,7 +350,7 @@ async def system_status():
         "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_stub": registry.get_stub_count(),
         "coordinator": coord_data,
-        "api_version": "V0.1",
+        "api_version": VERSION,
     }
 
 
@@ -369,7 +368,7 @@ async def get_version():
                 _mod_count = len(list(_mod_dir.glob("*.py")))
     except Exception:
         _mod_count = 0
-    return {"success": True, "version": "V0.1", "build": "20260604", "modules": _mod_count}
+    return {"success": True, "version": VERSION, "build": VERSION_BUILD, "modules": _mod_count}
 
 
 # ═══════════════════════════════════════════════════════
@@ -469,7 +468,7 @@ async def prometheus_metrics():
     now = time.time()
     uptime = now - _START_TIME
     lines: list = []
-    lines.append("# AUTO-EVO-AI V0.1 Prometheus Metrics Export")
+    lines.append(f"# {BUILD_TAG} Prometheus Metrics Export")
 
     # 模块级 Prometheus 指标（由 _prometheus 模块收集）
     try:
@@ -517,7 +516,7 @@ async def prometheus_metrics():
         pass
 
     text = "\n".join(lines)
-    return JSONResponse(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")
+    return Response(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")
 
 
 # ═══════════════════════════════════════════════════════
@@ -543,7 +542,7 @@ if __name__ == "__main__":
         auth_status = "JWT+APIKey"
     print(f"""
 ┌──────────────────────────────────────────────────────┐
-│  AUTO-EVO-AI V0.1 API Server  {'[EXE]' if _frozen else '[Python]'}
+│  {BUILD_TAG} API Server  {'[EXE]' if _frozen else '[Python]'}
 ├──────────────────────────────────────────────────────┤
 │  本地: http://{host}:{port:<5}                        │
 │  文档: http://{host}:{port}/docs                     │
@@ -552,7 +551,7 @@ if __name__ == "__main__":
 │  限流: {rate_limiter.max_requests}req/{rate_limiter.window_seconds}s per IP
 ├──────────────────────────────────────────────────────┤
 │  架构: api_server(入口) + api/middleware(中间件)      │
-│        + api/startup(后台) + api/routes_*(4个路由)   │
+│        + api/startup(后台) + api/routes_*(65个路由文件)   │
 └──────────────────────────────────────────────────────┘
 """)
 

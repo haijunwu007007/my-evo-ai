@@ -9,7 +9,6 @@ import os
 import sys
 import time
 import asyncio
-import atexit
 from core.logging_config import get_logger
 from datetime import datetime
 from contextlib import asynccontextmanager
@@ -18,8 +17,6 @@ from fastapi import FastAPI
 from api.infra import app, registry, manager, _module_activity, _START_TIME, BASE_DIR
 
 logger = get_logger("evo.api")
-
-_cleanup_tasks: list = []
 
 
 def _mount_vue_frontend():
@@ -326,5 +323,4 @@ async def hot_reload_task():
 
 
 # 挂载 lifespan 到 app
-import starlette.routing
 app.router.lifespan_context = lifespan

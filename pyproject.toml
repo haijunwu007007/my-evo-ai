@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "auto-evo-ai"
 version = "0.1.0"
-description = "上市公司级 AI 自动化编排系统 — 535模块"
+description = "上市公司级 AI 自动化编排系统"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -70,9 +70,9 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/auto-evo-ai/v0.1"
-Repository = "https://github.com/auto-evo-ai/v0.1"
-Documentation = "https://github.com/auto-evo-ai/v0.1"
+Homepage = "https://github.com/haijunwu007007/my-evo-ai"
+Repository = "https://github.com/haijunwu007007/my-evo-ai"
+Documentation = "https://github.com/haijunwu007007/my-evo-ai"
 
 [tool.setuptools.packages.find]
 include = ["api*", "core*", "modules*"]
