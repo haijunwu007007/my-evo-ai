@@ -366,7 +366,7 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
                     _log_execution(name, result.get("success", False), elapsed)
                     return {"success": result.get("success", False), "result": result.get("content", ""), "execution_time": round(elapsed, 3)}
                 except Exception:
-            pass
+                    pass
 
         # 3) 有 endpoint → HTTP 调用
         if skill.endpoint and not skill.endpoint.startswith("mcp://"):

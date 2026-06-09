@@ -84,7 +84,7 @@ async def smart_chat(req: Req):
                             return {"success": True, "result": ad.get("result", ""),
                                     "mode": "agent_engine", "details": ad.get("details", [])}
                 except Exception:
-            pass
+                    pass
     for keyword, (mode, result) in DIRECT_ROUTES.items():
         if keyword in msg:
             return {"success": True, "result": result, "mode": mode}

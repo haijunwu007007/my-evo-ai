@@ -280,7 +280,7 @@ async def list_plugins():
             if _p.is_dir() and (_p / "plugin.json").exists():
                 try: _installed.append(json.load(open(_p/"plugin.json")))
                 except Exception:
-            pass
+                    pass
     return {"success": True, "plugins": _installed, "count": len(_installed)}
 
 # ─── 11. 🎨 可视化 Workflow ─────────────────

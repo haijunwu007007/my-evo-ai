@@ -72,7 +72,7 @@ def run_spec_driven(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS):
             args = {}
             try: args = json.loads(func.get("arguments", "{}"))
             except Exception:
-            pass
+                pass
             result = exec_tool(func.get("name", ""), args, BASE, OUT, _LAST, _GENERATED_TOOLS)
             if result.get("ok") and result.get("data"):
                 return {"success": True, "result": result['data'], "mode": "spec", "spec": str(spec_path)}

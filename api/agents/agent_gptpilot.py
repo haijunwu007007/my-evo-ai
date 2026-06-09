@@ -83,7 +83,7 @@ def gptpilot_build(description: str = "", tech_stack: str = "fastapi+vue",
                         r = f.result()
                         if r: gen_files.append(r)
                     except Exception:
-            pass
+                        pass
 
             return {
                 "success": True,

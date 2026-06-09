@@ -72,7 +72,7 @@ def bolt_generate(prompt: str = "", framework: str = "vue",
                 preview_path.write_text(code, encoding='utf-8')
                 deploy_url = f"/output/apps/{fn}"
             except Exception:
-            pass
+                pass
 
         return {
             "success": True,

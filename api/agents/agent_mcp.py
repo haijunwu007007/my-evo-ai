@@ -19,7 +19,7 @@ class MCPClient:
                 cfg = json.loads(Path(config_path).read_text())
                 self.servers = cfg.get("mcp_servers", {})
             except Exception:
-            pass
+                pass
 
     def register_server(self, name, url, api_key=""):
         self.servers[name] = {"url": url, "api_key": api_key}
@@ -36,7 +36,7 @@ class MCPClient:
                         t["server"] = sname
                     all_tools.extend(tools)
             except Exception:
-            pass
+                pass
         return all_tools
 
     def call_tool(self, server_name, tool_name, args):

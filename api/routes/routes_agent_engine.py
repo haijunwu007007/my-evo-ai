@@ -49,7 +49,7 @@ def _scan_external_skills():
                     stars = meta.get("stars", 0)
                     category = meta.get("category", "")
                 except Exception:
-            pass
+                    pass
 
             catalog.append({
                 "name": skill_dir.name,
@@ -133,7 +133,7 @@ search/翻译/计算/文档生成/PPT/Excel/代码生成/系统状态/待办/记
                 if arr_match:
                     steps = json.loads(arr_match.group())
             except Exception:
-            pass
+                pass
 
         if not steps:
             steps = [{"step": 1, "tool": "search", "action": f"搜索关于'{task}'的信息"},
@@ -199,7 +199,7 @@ async def _execute_step(tool: str, action: str, original_task: str) -> str:
                                 return await _llm_guided_skill_exec(skill, action, original_task)
                             return str(result)[:500] if result else f"Skill {tool} 执行完毕"
             except Exception:
-            pass
+                pass
 
             # API 失败 → 注入 SKILL.md
             return await _llm_guided_skill_exec(skill, action, original_task)
