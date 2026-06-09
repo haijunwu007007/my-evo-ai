@@ -14,8 +14,10 @@ def auto_evolve(BASE, memos=None):
         issues = []
         if len(source) > 5000:
             issues.append(f"文件过大({len(source)}字符)，建议拆分")
-        if "try:" in source and "except: pass" in source:
-            count = source.count("except: pass")
+        if "try:" in source and "except Exception:
+            pass" in source:
+            count = source.count("except Exception:
+            pass")
             if count > 5:
                 issues.append(f"有{count}处空except，建议记录错误日志")
         

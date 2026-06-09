@@ -2,7 +2,7 @@
 import os, json, time
 from pathlib import Path
 import os
-_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
 _LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
 _LLM_MODEL = "deepseek-chat"
 
@@ -15,7 +15,7 @@ def _get_claw_config() -> dict:
     if CLAW_CONFIG_FILE.exists():
         try:
             return json.loads(CLAW_CONFIG_FILE.read_text(encoding='utf-8'))
-        except:
+        except Exception:
             pass
     return {}
 
@@ -132,7 +132,7 @@ def openclaw_send(platform: str = "", recipient: str = "", message: str = "",
                 "time": time.time()
             })
             msg_log.write_text(json.dumps(outbox, ensure_ascii=False))
-        except:
+        except Exception:
             pass
         return {"success": True, "message_id": f"queued_{int(time.time())}", "sent_to": recipient,
                 "note": f"服务不可达，已加入队列: {e}"}

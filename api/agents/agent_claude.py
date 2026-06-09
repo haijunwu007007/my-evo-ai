@@ -1,7 +1,7 @@
 """Claude Code/Codex — 顶级编码Agent后端API桥接（113K⭐）"""
 import os, json, subprocess, tempfile
 import os
-_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
 _LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
 _LLM_MODEL = "deepseek-chat"
 

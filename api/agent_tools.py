@@ -128,13 +128,15 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                     if r.status_code==200 and r.json().get("data",[{}])[0].get("url",""):
                         urllib.request.urlretrieve(r.json()["data"][0]["url"],fp)
                         return {"ok":True,"data":f"![图](/output/{fn})","type":"image"}
-            except: pass
+            except Exception:
+                pass
             try:
                 k=os.environ.get("STABILITY_API_KEY","")
                 if k:
                     r=httpx.post(f"https://api.stability.ai/v2beta/stable-image/generate/core",headers={"authorization":f"Bearer {k}","accept":"image/*"},data={"prompt":p,"output_format":"png"},timeout=60)
                     if r.status_code==200: Path(fp).write_bytes(r.content);return {"ok":True,"data":f"![图](/output/{fn})","type":"image"}
-            except: pass
+            except Exception:
+                    pass
             return {"ok":False,"data":"画图失败：需要配置ZHIPU_API_KEY或STABILITY_API_KEY"}
         if name == "web_search":
             q=args.get("query","")
@@ -144,13 +146,15 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                     links=re.findall(r'<a[^>]+href="(https?://[^"]+)"[^>]*>([^<]+)</a>',r.text)[:8]
                     results=[f"- {t.strip()}: {u}" for u,t in links if not u.startswith("http")][:5]
                     if results: return {"ok":True,"data":"搜索结果:\n"+("\n".join(results))}
-            except: pass
+            except Exception:
+                    pass
             try:
                 r=httpx.get(f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=5",timeout=15)
                 if r.status_code==200:
                     items=r.json().get("items",[]);lines=["GitHub搜索结果:"]+[f"- {i['name']}: {(i.get('description','') or '')[:80]}" for i in items[:5]]
                     return {"ok":True,"data":"\n".join(lines)}
-            except: pass
+            except Exception:
+                    pass
             return {"ok":True,"data":"搜索暂时不可用"}
         # ========== 9个原有集成工具 ==========
         if name == "browser_use_task":

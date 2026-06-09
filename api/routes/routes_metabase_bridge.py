@@ -75,7 +75,8 @@ async def take_snapshot():
                 "INSERT INTO modules_snapshot (snapshot_date, total_modules, loaded_modules, stub_modules) VALUES (?,?,?,?)",
                 (now, data.get("modules_total", 0), data.get("modules_loaded", 0), data.get("modules_stub", 0))
             )
-    except: pass
+    except Exception:
+            pass
     
     conn.commit()
     conn.close()

@@ -119,7 +119,8 @@ def _compute_embedding(text: str) -> list[float]:
             if resp.status_code == 200:
                 data = resp.json()
                 return data.get("data", [{}])[0].get("embedding", [])
-        except: pass
+        except Exception:
+            pass
     # 降级：词袋向量
     import math
     words = re.findall(r'\w+', text.lower())
@@ -312,7 +313,8 @@ async def rag_query(req: RAGQuery):
                     top = [(r.get("score", 0), top[i][1], top[i][2], top[i][3], top[i][4])
                            for i, r in enumerate(reranked) if i < len(top)]
                     top.sort(key=lambda x: x[0], reverse=True)
-        except: pass
+        except Exception:
+            pass
     
     results = [{
         "score": round(r[0], 4),

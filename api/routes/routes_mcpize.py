@@ -249,14 +249,16 @@ async def mcpize_status():
 def _save_entry(slug: str, entry: dict):
     try:
         (MCPIZE_DIR / f"{slug}.json").write_text(json.dumps(entry, ensure_ascii=False, indent=2), encoding="utf-8")
-    except: pass
+    except Exception:
+            pass
 
 def _load_all():
     for f in MCPIZE_DIR.glob("*.json"):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             _INTEGRATED[f.stem] = data
-        except: pass
+        except Exception:
+            pass
 
 _load_all()
 

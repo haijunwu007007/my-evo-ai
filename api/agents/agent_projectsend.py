@@ -1,10 +1,15 @@
 """
 projectsend_files - ProjectSend安全文件共享 - 客户端上传/下载/权限
 """
-import json
+import os, json, httpx
+from pathlib import Path
+
+_API_BASE = os.environ.get("PROJECTSEND_API_KEY_URL", "") or "http://localhost:8080"
+_API_KEY = os.environ.get("PROJECTSEND_API_KEY_KEY", "") or os.environ.get("PROJECTSEND_API_KEY", "")
+_TIMEOUT = 15
 
 def projectsend_files(**kwargs):
-    """ProjectSend安全文件共享 - 客户端上传/下载/权限
+    """ProjectSend文件共享 - 通过ProjectSend API管理文件共享
     
     Args:
         **kwargs: 工具参数
@@ -12,16 +17,25 @@ def projectsend_files(**kwargs):
         dict: {"ok": bool, "data": ..., "message": ...}
     """
     try:
-        # TODO: 连接ProjectSend安全文件共享 API
-        # 当前为本地mock, 后续替换为真实API调用
-        result = {
-            "ok": True,
-            "data": "{{}",
-            "message": f"{tool_name} - 请配置{tool_name.split('_')[0]}API后使用"
-        }
-        if kwargs:
-            result["data"] = f"收到参数: {json.dumps(kwargs, ensure_ascii=False)}"
-        return result
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 PROJECTSEND_API_KEY_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
     except Exception as e:
-        return {"ok": False, "data": f"{tool_name}失败: {e}", "message": str(e)}
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}
 
+
+def projectsend_files_helper(**kwargs):
+    """ProjectSend文件共享 - 通过ProjectSend API管理文件共享 - 辅助操作"""
+    return projectsend_files(**kwargs)

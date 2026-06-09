@@ -178,8 +178,8 @@ def _scan_external_skills():
         d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
-    except:
-        pass
+    except Exception:
+            pass
 
     found = 0
     for ext_dir in ext_dirs:
@@ -365,8 +365,8 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
                     elapsed = time.time() - start
                     _log_execution(name, result.get("success", False), elapsed)
                     return {"success": result.get("success", False), "result": result.get("content", ""), "execution_time": round(elapsed, 3)}
-                except:
-                    pass
+                except Exception:
+            pass
 
         # 3) 有 endpoint → HTTP 调用
         if skill.endpoint and not skill.endpoint.startswith("mcp://"):
@@ -416,8 +416,8 @@ async def import_skill_from_workbuddy(name: str):
         d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
-    except:
-        pass
+    except Exception:
+            pass
 
     found_dir = None
     for ext_dir in ext_dirs:

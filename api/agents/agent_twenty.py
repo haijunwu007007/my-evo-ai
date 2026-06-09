@@ -7,7 +7,8 @@ def _get_twenty_config() -> dict:
     try:
         if os.path.exists(TWENTY_CONFIG_FILE):
             return json.loads(Path(TWENTY_CONFIG_FILE).read_text(encoding='utf-8'))
-    except: pass
+    except Exception:
+            pass
     return {}
 def _save_twenty_config(cfg: dict):
     os.makedirs(os.path.dirname(TWENTY_CONFIG_FILE), exist_ok=True)
@@ -15,7 +16,7 @@ def _save_twenty_config(cfg: dict):
 
 from pathlib import Path
 import os
-_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
 _LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
 _LLM_MODEL = "deepseek-chat"
 

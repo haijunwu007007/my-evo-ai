@@ -248,7 +248,8 @@ async def _probe_mcp_server_tools(srv_name: str, srv_info: dict) -> dict:
                     await asyncio.wait_for(proc.wait(), timeout=3)
                 except:
                     try: proc.kill()
-                    except: pass
+                    except Exception:
+            pass
                     
             except asyncio.TimeoutError:
                 logger.warning(f"  [MCP] {srv_name}: 工具探测超时")
@@ -378,7 +379,8 @@ async def _execute_external_mcp_tool(server_name: str, tool_name: str, args: dic
             )
             
             try: proc.terminate()
-            except: pass
+            except Exception:
+            pass
             
             if stdout_data:
                 response = json.loads(stdout_data.decode("utf-8", errors="replace"))

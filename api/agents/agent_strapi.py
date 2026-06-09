@@ -1,10 +1,16 @@
 """
-strapi_cms - Strapi Headless CMS - 自动创建内容模型+API+内容生成
+Strapi Headless CMS - 通过Strapi API管理内容和媒体
 """
-import json
+import os, json, httpx
+from pathlib import Path
+
+_API_BASE = os.environ.get("STRAPI_API_URL", "") or "http://localhost:1337"
+_API_KEY = os.environ.get("STRAPI_API_KEY", "") or os.environ.get("STRAPI_TOKEN", "")
+_TIMEOUT = 15
+
 
 def strapi_cms(**kwargs):
-    """Strapi Headless CMS - 自动创建内容模型+API+内容生成
+    """Strapi Headless CMS - 通过Strapi API管理内容和媒体
     
     Args:
         **kwargs: 工具参数
@@ -12,23 +18,74 @@ def strapi_cms(**kwargs):
         dict: {"ok": bool, "data": ..., "message": ...}
     """
     try:
-        # TODO: 连接Strapi Headless CMS API
-        # 当前为本地mock, 后续替换为真实API调用
-        result = {
-            "ok": True,
-            "data": "{{}",
-            "message": f"{tool_name} - 请配置{tool_name.split('_')[0]}API后使用"
-        }
-        if kwargs:
-            result["data"] = f"收到参数: {json.dumps(kwargs, ensure_ascii=False)}"
-        return result
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 STRAPI_API_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
     except Exception as e:
-        return {"ok": False, "data": f"{tool_name}失败: {e}", "message": str(e)}
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}
 
-
-def strapi_create_content(**kwargs):
-    """Strapi Headless CMS - strapi_create_content"""
+def strapi_content(**kwargs):
+    """Strapi Headless CMS - 通过Strapi API管理内容和媒体
+    
+    Args:
+        **kwargs: 工具参数
+    Returns:
+        dict: {"ok": bool, "data": ..., "message": ...}
+    """
     try:
-        return {{ "ok": True, "data": f"{t} - 请配置API后使用" }}
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 STRAPI_API_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
     except Exception as e:
-        return {{ "ok": False, "data": f"{t}失败: {e}" }}
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}
+
+def strapi_media(**kwargs):
+    """Strapi Headless CMS - 通过Strapi API管理内容和媒体
+    
+    Args:
+        **kwargs: 工具参数
+    Returns:
+        dict: {"ok": bool, "data": ..., "message": ...}
+    """
+    try:
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 STRAPI_API_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
+    except Exception as e:
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}

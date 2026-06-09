@@ -38,7 +38,8 @@ class AgentMemory:
                 (input_text[:200], str(output_text)[:500], 1 if success else 0, category, tags, model, time.time(), duration)
             )
             conn.commit(); conn.close()
-        except: pass
+        except Exception:
+            pass
 
     def recall(self, query, limit=5):
         """基于关键词的记忆检索"""
@@ -64,7 +65,8 @@ class AgentMemory:
             else:
                 conn.execute("INSERT INTO experience (pattern, solution, count, last_used) VALUES (?,?,1,?)", (pattern, solution[:200], time.time()))
             conn.commit(); conn.close()
-        except: pass
+        except Exception:
+            pass
 
     def recall_experience(self, query):
         """回忆经验"""

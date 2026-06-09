@@ -1,10 +1,16 @@
 """
-wikijs_wiki - Wiki.js知识管理 - Markdown+可视化+API+权限
+Wiki.js知识管理 - 通过Wiki.js API管理文档和搜索
 """
-import json
+import os, json, httpx
+from pathlib import Path
 
-def wikijs_wiki(**kwargs):
-    """Wiki.js知识管理 - Markdown+可视化+API+权限
+_API_BASE = os.environ.get("WIKIJS_API_URL", "") or "http://localhost:3000"
+_API_KEY = os.environ.get("WIKIJS_API_KEY", "") or os.environ.get("WIKIJS_TOKEN", "")
+_TIMEOUT = 15
+
+
+def wikijs_page(**kwargs):
+    """Wiki.js知识管理 - 通过Wiki.js API管理文档和搜索
     
     Args:
         **kwargs: 工具参数
@@ -12,23 +18,47 @@ def wikijs_wiki(**kwargs):
         dict: {"ok": bool, "data": ..., "message": ...}
     """
     try:
-        # TODO: 连接Wiki.js知识管理 API
-        # 当前为本地mock, 后续替换为真实API调用
-        result = {
-            "ok": True,
-            "data": "{{}",
-            "message": f"{tool_name} - 请配置{tool_name.split('_')[0]}API后使用"
-        }
-        if kwargs:
-            result["data"] = f"收到参数: {json.dumps(kwargs, ensure_ascii=False)}"
-        return result
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 WIKIJS_API_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
     except Exception as e:
-        return {"ok": False, "data": f"{tool_name}失败: {e}", "message": str(e)}
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}
 
-
-def wikijs_create_page(**kwargs):
-    """Wiki.js知识管理 - wikijs_create_page"""
+def wikijs_search(**kwargs):
+    """Wiki.js知识管理 - 通过Wiki.js API管理文档和搜索
+    
+    Args:
+        **kwargs: 工具参数
+    Returns:
+        dict: {"ok": bool, "data": ..., "message": ...}
+    """
     try:
-        return {{ "ok": True, "data": f"{t} - 请配置API后使用" }}
+        if not _API_BASE:
+            return {"ok": False, "data": "请设置环境变量 WIKIJS_API_URL", "message": "未配置"}
+        
+        headers = {"Content-Type": "application/json"}
+        if _API_KEY:
+            headers["Authorization"] = f"Bearer {_API_KEY}"
+        
+        action = kwargs.pop("action", "status")
+        params = kwargs.get("params", kwargs)
+        
+        with httpx.Client(timeout=_TIMEOUT) as client:
+            resp = client.get(f"{_API_BASE}/api/{action}", headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            return {"ok": True, "data": data, "message": f"{action}成功"}
     except Exception as e:
-        return {{ "ok": False, "data": f"{t}失败: {e}" }}
+        return {"ok": False, "data": f"{action}失败: {e}", "message": str(e)}

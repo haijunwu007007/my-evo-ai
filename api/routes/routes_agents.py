@@ -17,7 +17,7 @@ _LLM_ENDPOINTS = [
 ]
 _LLM_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
 if not _LLM_KEY:
-    _LLM_KEY = "sk-e7a7f4e700d847f28027c5608e3f5c02"  # 内建DeepSeek Key
+    _LLM_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""  # 内建DeepSeek Key
 
 async def _try_llm(prompt: str, agent_name: str, role: str) -> str | None:
     """尝试 LLM 生成回复 — 多端点降级"""

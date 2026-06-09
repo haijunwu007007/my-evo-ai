@@ -73,7 +73,8 @@ def call_llm_stream(messages, key="", system_prompt=""):
                                 if content:
                                     full += content
                                     yield content
-                            except: pass
+                            except Exception:
+                                pass
                     yield "__DONE__"
                     return
         except: continue

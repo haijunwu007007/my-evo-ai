@@ -2,7 +2,8 @@
 import os, json, time
 from pathlib import Path
 import os
-_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
+# ⚠️ 安全提醒：优先通过环境变量 DEEPSEEK_API_KEY 传入 API Key
+_DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or "sk-e7a7f4e700d847f28027c5608e3f5c02"
 _LLM_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
 _LLM_MODEL = "deepseek-chat"
 
@@ -70,8 +71,8 @@ def bolt_generate(prompt: str = "", framework: str = "vue",
                 preview_path = out_dir / "index.html"
                 preview_path.write_text(code, encoding='utf-8')
                 deploy_url = f"/output/apps/{fn}"
-            except:
-                pass
+            except Exception:
+            pass
 
         return {
             "success": True,

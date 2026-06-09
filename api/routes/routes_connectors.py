@@ -248,8 +248,8 @@ def _scan_n8n_nodes():
                         "documentation_url": f"https://www.npmjs.com/package/{name}"
                     }
                     found += 1
-    except:
-        pass
+    except Exception:
+            pass
     if found:
         logger.info(f"[CONN] 发现 {found} 个 n8n 节点")
 
@@ -375,7 +375,8 @@ async def execute_connector(name: str, req: ConnectorExec):
             resp = httpx.get(f"{api_base.replace('/v1','').replace('/v2','').replace('/v3','')}", timeout=5)
             if resp.status_code in (200, 401, 403):
                 return {"success": True, "result": f"已连接到 {conn.get('name','')} API (HTTP {resp.status_code})"}
-    except: pass
+    except Exception:
+            pass
     
     return {"success": True, "result": {
         "note": f"连接器 '{conn.get('name','')}' 已就绪。配置认证后即可使用。",

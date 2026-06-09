@@ -53,7 +53,8 @@ def _load_ext_skill_names():
     try:
         from api.routes.routes_agent_engine import _SKILL_CATALOG
         _EXT_SKILL_NAMES = [s["name"] for s in _SKILL_CATALOG]
-    except: pass
+    except Exception:
+            pass
 
 _load_ext_skill_names()
 
@@ -82,7 +83,8 @@ async def smart_chat(req: Req):
                         if ad.get("success"):
                             return {"success": True, "result": ad.get("result", ""),
                                     "mode": "agent_engine", "details": ad.get("details", [])}
-                except: pass
+                except Exception:
+            pass
     for keyword, (mode, result) in DIRECT_ROUTES.items():
         if keyword in msg:
             return {"success": True, "result": result, "mode": mode}
@@ -91,7 +93,8 @@ async def smart_chat(req: Req):
             from api.routes.routes_pptx import generate_presentation  # if exists
             r = generate_presentation(msg.replace("做一份","").replace("PPT","").strip() or "主题")
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
-        except: pass
+        except Exception:
+            pass
     from .agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
     result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)
