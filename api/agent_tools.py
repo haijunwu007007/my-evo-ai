@@ -140,22 +140,36 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
             return {"ok":False,"data":"画图失败：需要配置ZHIPU_API_KEY或STABILITY_API_KEY"}
         if name == "web_search":
             q=args.get("query","")
+            # 搜索多源兜底：Bing(中国可用) → GitHub → 简单WebFetch
             try:
-                r=httpx.get(f"https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(q)}",timeout=15)
+                # 源1: Bing HTML搜索（中国可用）
+                headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                r=httpx.get(f"https://www.bing.com/search?q={urllib.parse.quote_plus(q)}", headers=headers, timeout=10)
                 if r.status_code==200:
-                    links=re.findall(r'<a[^>]+href="(https?://[^"]+)"[^>]*>([^<]+)</a>',r.text)[:8]
-                    results=[f"- {t.strip()}: {u}" for u,t in links if not u.startswith("http")][:5]
-                    if results: return {"ok":True,"data":"搜索结果:\n"+("\n".join(results))}
+                    items=re.findall(r'<h2[^>]*><a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>', r.text, re.DOTALL)[:5]
+                    if items:
+                        results=[f"- {re.sub(r'<[^>]+>','',t).strip()}: {u}" for u,t in items if u.startswith("http")]
+                        if results: return {"ok":True,"data":"搜索结果:\n"+"\n".join(results)}
             except Exception:
                     pass
             try:
-                r=httpx.get(f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=5",timeout=15)
+                # 源2: GitHub API
+                r=httpx.get(f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=5",timeout=10)
                 if r.status_code==200:
                     items=r.json().get("items",[]);lines=["GitHub搜索结果:"]+[f"- {i['name']}: {(i.get('description','') or '')[:80]}" for i in items[:5]]
                     return {"ok":True,"data":"\n".join(lines)}
             except Exception:
                     pass
-            return {"ok":True,"data":"搜索暂时不可用"}
+            try:
+                # 源3: 简单请求获取（兜底）
+                r=httpx.get(f"https://api.bing.microsoft.com/v7.0/search?q={urllib.parse.quote(q)}&count=5&mkt=zh-CN",
+                    headers={"Ocp-Apim-Subscription-Key": os.environ.get("BING_API_KEY","")}, timeout=10)
+                if r.status_code==200:
+                    items=r.json().get("webPages",{}).get("value",[])
+                    if items: return {"ok":True,"data":"搜索结果:\n"+("\n".join(f"- {i['name']}: {i['url']}" for i in items))}
+            except Exception:
+                    pass
+            return {"ok":True,"data":f"关于「{q}」的实时搜索结果暂时不可用，请直接提问或稍后重试"}
         # ========== 9个原有集成工具 ==========
         if name == "browser_use_task":
             try:

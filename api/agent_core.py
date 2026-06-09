@@ -605,16 +605,34 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
         messages.append({"role":"system","content":SP})
         messages.append({"role":"user","content":msg})
 
+        tool_rounds = 0
         for rd in range(8):
             content, tc = call_llm(messages, get_tools(), key)
             if content is None and tc is None: continue
             if tc:
+                tool_rounds += 1
+                # 执行工具
+                tool_results = []
                 for t in tc:
                     func = t.get("function",{}); nm = func.get("name",""); a = {}
                     try: a = json.loads(func.get("arguments","{}"))
                     except Exception:
                         pass
                     result = exec_tool(nm, a, BASE, OUT, _LAST, _GENERATED_TOOLS)
+                    tool_results.append((t, result))
+                # 最多3轮工具调用，之后强制LLM总结
+                if tool_rounds >= 3:
+                    # 先添加所有工具结果，再强制总结
+                    for t, result in tool_results:
+                        messages.append({"role":"assistant","content":None,"tool_calls":[t]})
+                        messages.append({"role":"tool","tool_call_id":t.get("id",""),"content":json.dumps(result,ensure_ascii=False)})
+                    messages.append({"role":"user","content":"请基于已有结果直接回答用户问题，不要再调用任何工具。用中文简洁回答。"})
+                    content2, tc2 = call_llm(messages, [], key)
+                    if content2:
+                        _remember(msg, content2, kh=kh)
+                        return {"success":True,"result":content2,"mode":"chat"}
+                    break
+                for t, result in tool_results:
                     messages.append({"role":"assistant","content":None,"tool_calls":[t]})
                     messages.append({"role":"tool","tool_call_id":t.get("id",""),"content":json.dumps(result,ensure_ascii=False)})
                 continue

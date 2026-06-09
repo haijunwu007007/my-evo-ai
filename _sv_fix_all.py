@@ -40,6 +40,13 @@ with sftp.open('/home/ubuntu/my-evo-ai/api/routes/routes_chat.py', 'wb') as f:
     f.write(rc)
 print("SCP routes_chat.py OK -", len(rc), "bytes")
 
+# SCP agent_llm.py (新优先级: DeepSeek优先, 非Ollama)
+with open(r'D:\AUTO-EVO-AI-V0.1\api\agent_llm.py', 'rb') as f:
+    alm = f.read()
+with sftp.open('/home/ubuntu/my-evo-ai/api/agent_llm.py', 'wb') as f:
+    f.write(alm)
+print("SCP agent_llm.py OK -", len(alm), "bytes")
+
 sftp.close()
 
 # ============ Restart ============
