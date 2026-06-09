@@ -6,7 +6,7 @@ _db_path = None
 def _get_conn():
     global _db_path
     if not _db_path:
-        _db_path = Path(__file__).resolve().parent.parent / "data" / "a2a.db"
+        _db_path = Path(__file__).resolve().parent.parent.parent / "data" / "a2a.db"
         _db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(_db_path))
     conn.execute("""CREATE TABLE IF NOT EXISTS agents (

@@ -9,7 +9,7 @@ from core.logging_config import get_logger
 logger = get_logger("evo.api.smart")
 router = APIRouter()
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = Path(__file__).resolve().parent.parent.parent
 OUT = BASE / "output"; OUT.mkdir(exist_ok=True)
 TOOLS_DIR = OUT / "tools"; TOOLS_DIR.mkdir(exist_ok=True)
 MEM_DB = BASE / "data" / "agent_memory.db"; MEM_DB.parent.mkdir(parents=True, exist_ok=True)

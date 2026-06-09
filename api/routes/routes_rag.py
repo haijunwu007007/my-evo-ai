@@ -12,7 +12,7 @@ from pathlib import Path
 logger = get_logger("evo.api.rag")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RAG_DIR = BASE_DIR / "rag_kb"
 RAG_DIR.mkdir(exist_ok=True)
 (RAG_DIR / "documents").mkdir(exist_ok=True)

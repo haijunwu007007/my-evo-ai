@@ -12,7 +12,7 @@ from pathlib import Path
 logger = get_logger("evo.api.mcp")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MCP_DIR = BASE_DIR / "mcp"
 MCP_DIR.mkdir(exist_ok=True)
 (MCP_DIR / "builtin").mkdir(exist_ok=True)

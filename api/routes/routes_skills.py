@@ -12,7 +12,7 @@ from pathlib import Path
 logger = get_logger("evo.api.skills")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # ─── 数据模型 ──────────────────────────
 class SkillDefinition(BaseModel):

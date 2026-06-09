@@ -17,7 +17,7 @@ logger = get_logger("evo.api.modules_browse")
 
 router = APIRouter()
 
-MODULES_DIR = Path(__file__).resolve().parent.parent / "modules"
+MODULES_DIR = Path(__file__).resolve().parent.parent.parent / "modules"
 
 
 def _scan_modules() -> list[dict[str, Any]]:

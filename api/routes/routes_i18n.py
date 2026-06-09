@@ -10,7 +10,7 @@ from pathlib import Path
 
 router = APIRouter()
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = Path(__file__).resolve().parent.parent.parent
 I18N_DIR = BASE / "i18n"
 
 # 从文件系统加载所有翻译

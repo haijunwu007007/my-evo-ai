@@ -7,7 +7,7 @@ from pathlib import Path
 logger = get_logger("evo.api.events")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 @router.get("/api/v1/events")
 async def list_events(limit: int = 50):

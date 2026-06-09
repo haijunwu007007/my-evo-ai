@@ -10,7 +10,7 @@ from pathlib import Path
 logger = get_logger("evo.api.public")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 _PUB_DB = BASE_DIR / "core" / "adaptive_engine.db"
 
 def _init_pub():

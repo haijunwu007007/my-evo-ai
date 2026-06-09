@@ -12,7 +12,7 @@ from pathlib import Path
 logger = get_logger("evo.api.rest2mcp")
 router = APIRouter()
 
-REST2MCP_DIR = Path(__file__).resolve().parent.parent / "rest2mcp"
+REST2MCP_DIR = Path(__file__).resolve().parent.parent.parent / "rest2mcp"
 REST2MCP_DIR.mkdir(exist_ok=True)
 
 # 内存注册表

@@ -19,7 +19,7 @@ def _get_db_path() -> Path:
     global _API_DB_PATH
     if _API_DB_PATH:
         return _API_DB_PATH
-    base = Path(__file__).resolve().parent.parent / "data"
+    base = Path(__file__).resolve().parent.parent.parent / "data"
     base.mkdir(exist_ok=True)
     _API_DB_PATH = base / "toolbench_registry.json"
     return _API_DB_PATH

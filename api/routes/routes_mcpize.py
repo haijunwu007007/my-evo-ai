@@ -13,7 +13,7 @@ import importlib.util, inspect, httpx
 logger = get_logger("evo.api.mcpize")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MCPIZE_DIR = BASE_DIR / "mcpize"
 MCPIZE_DIR.mkdir(exist_ok=True)
 

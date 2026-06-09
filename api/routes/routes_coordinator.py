@@ -9,7 +9,7 @@ import time, json, logging, os, traceback, sys
 from core.logging_config import get_logger
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 logger = get_logger("evo.api.coordinator")
 
 from api.infra import registry, _START_TIME, manager

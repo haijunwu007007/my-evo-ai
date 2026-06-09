@@ -9,7 +9,7 @@ from pathlib import Path
 logger = get_logger("evo.api.tenant")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 _TENANT_DB = BASE_DIR / "core" / "adaptive_engine.db"
 
 def _init_tenant():

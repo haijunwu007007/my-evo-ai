@@ -114,7 +114,7 @@ async def install_plugin(req: PluginInstallRequest):
 async def scan_plugins():
     """扫描 modules/ 目录发现新 Plugin"""
     from pathlib import Path
-    mod_dir = Path(__file__).parent.parent / "modules"
+    mod_dir = Path(__file__).parent.parent.parent / "modules"
     count = plugin_manager.scan_directory(str(mod_dir))
     return {"success": True, "discovered": count, "total": plugin_manager.count}
 

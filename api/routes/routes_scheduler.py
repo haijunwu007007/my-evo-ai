@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 logger = get_logger("evo.api.scheduler")
 
 from api._data_store import (

@@ -89,6 +89,6 @@ def get_memory():
     """单例模式"""
     if not hasattr(get_memory, "_instance"):
         get_memory._instance = MemOSMemory(
-            Path(__file__).resolve().parent.parent / "data" / "memos_memory.db"
+            Path(__file__).resolve().parent.parent.parent / "data" / "memos_memory.db"
         )
     return get_memory._instance

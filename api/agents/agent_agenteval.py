@@ -32,7 +32,7 @@ def agenteval_benchmark(agent_type: str = "chat", test_cases: list = None,
         try:
             from api.agent_llm import call_llm
             from api.agent_tools import exec_tool
-            BASE = Path(__file__).resolve().parent.parent
+            BASE = Path(__file__).resolve().parent.parent.parent
             OUT = BASE / "output"
             TOOLS_DIR = OUT / "tools"
             _GENERATED = {}

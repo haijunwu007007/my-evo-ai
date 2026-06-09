@@ -7,7 +7,7 @@ from pathlib import Path
 logger = get_logger("evo.api.analytics")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 _DB = BASE_DIR / "core" / "adaptive_engine.db"
 
 def _init():
@@ -43,7 +43,7 @@ async def top_endpoints(limit: int = 20):
 @router.post("/api/v1/analytics/track")
 async def track_event(event: str = "api_call", detail: str = ""):
     """记录使用事件"""
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     conn.execute("CREATE TABLE IF NOT EXISTS analytics_events (id INTEGER PRIMARY KEY AUTOINCREMENT, event TEXT, detail TEXT, created_at REAL)")
     conn.execute("INSERT INTO analytics_events (event, detail, created_at) VALUES (?,?,?)", (event, detail or "", time.time()))
     conn.commit(); conn.close()
@@ -53,7 +53,7 @@ async def track_event(event: str = "api_call", detail: str = ""):
 async def recent_events(limit: int = 20):
     """最近事件"""
     try:
-        conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+        conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
         # 重建表以确保 schema 正确
         conn.execute("DROP TABLE IF EXISTS analytics_events_old")
         conn.execute("CREATE TABLE IF NOT EXISTS analytics_events (id INTEGER PRIMARY KEY AUTOINCREMENT, event TEXT, detail TEXT DEFAULT '', created_at REAL)")

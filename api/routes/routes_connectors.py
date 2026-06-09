@@ -13,7 +13,7 @@ from pathlib import Path
 logger = get_logger("evo.api.connectors")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CONN_DIR = BASE_DIR / "connectors"
 CONN_DIR.mkdir(exist_ok=True)
 (CONN_DIR / "builtin").mkdir(exist_ok=True)

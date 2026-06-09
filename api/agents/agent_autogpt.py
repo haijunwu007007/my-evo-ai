@@ -33,7 +33,7 @@ def autogpt_run(goal: str = "", max_steps: int = 10,
             from api.agent_tools import exec_tool
             api_key = os.environ.get("OPENAI_API_KEY", "")
 
-            BASE = Path(__file__).resolve().parent.parent
+            BASE = Path(__file__).resolve().parent.parent.parent
             OUT = BASE / "output"
             TOOLS_DIR = OUT / "tools"
             _GENERATED = {}

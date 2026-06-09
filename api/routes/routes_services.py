@@ -306,7 +306,7 @@ async def external_services():
 async def rag_documents():
     """RAG 知识库文档列表"""
     from pathlib import Path
-    docs_dir = Path(__file__).parent.parent / "data" / "rag"
+    docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
     docs = []
     if docs_dir.exists():
         for f in sorted(docs_dir.iterdir()):
@@ -321,7 +321,7 @@ async def rag_upload(file: bytes | None = None):
     if file is None:
         return {"success": False, "error": "请上传文件"}
     from pathlib import Path
-    docs_dir = Path(__file__).parent.parent / "data" / "rag"
+    docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
     docs_dir.mkdir(parents=True, exist_ok=True)
     fname = f"doc_{len(list(docs_dir.iterdir())) + 1}.txt"
     (docs_dir / fname).write_bytes(file)
@@ -332,7 +332,7 @@ async def rag_upload(file: bytes | None = None):
 async def rag_delete(name: str = ""):
     """删除知识库文档"""
     from pathlib import Path
-    doc_path = Path(__file__).parent.parent / "data" / "rag" / name
+    doc_path = Path(__file__).parent.parent.parent / "data" / "rag" / name
     if doc_path.exists():
         doc_path.unlink()
         return {"success": True}

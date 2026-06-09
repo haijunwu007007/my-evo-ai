@@ -9,7 +9,7 @@ from pathlib import Path
 
 logger = get_logger("evo.api.new_features")
 router = APIRouter()
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # api/routes/ → api/ → project root
 _OUTPUT = BASE_DIR / "output"
 _OUTPUT.mkdir(exist_ok=True)
 
@@ -172,7 +172,7 @@ async def api_gateway(req: APIRequest):
 
 # ─── 6. 🔐 用户注册/登录 ─────────────────────
 def _init_users_table():
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     conn.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, role TEXT DEFAULT 'user', created_at REAL)")
     conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
     conn.commit(); conn.close()
@@ -184,7 +184,7 @@ class UserReq(BaseModel):
 
 @router.post("/api/v1/user/register")
 async def user_register(req: UserReq):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     try:
         pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
         conn.execute("INSERT INTO users (username, password, created_at) VALUES (?,?,?)", (req.username, pw, time.time()))
@@ -196,7 +196,7 @@ async def user_register(req: UserReq):
 
 @router.post("/api/v1/user/login")
 async def user_login(req: UserReq):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
     row = conn.execute("SELECT username FROM users WHERE username=? AND password=?", (req.username, pw)).fetchone()
     conn.close()
@@ -211,7 +211,7 @@ class ChatSaveReq(BaseModel):
 
 @router.post("/api/v1/chat/save")
 async def chat_save(req: ChatSaveReq):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
     conn.execute("INSERT INTO chat_history (username, role, content, created_at) VALUES (?,?,?,?)", (req.username, req.role, req.content, time.time()))
     conn.commit(); conn.close()
@@ -219,7 +219,7 @@ async def chat_save(req: ChatSaveReq):
 
 @router.get("/api/v1/chat/history")
 async def chat_history(username: str = "admin", limit: int = 50):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     conn.execute("CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, role TEXT, content TEXT, created_at REAL)")
     rows = conn.execute("SELECT role, content, created_at FROM chat_history WHERE username=? ORDER BY created_at DESC LIMIT ?", (username, limit)).fetchall()
     conn.close()
@@ -239,7 +239,7 @@ async def payment_revenue():
     """收入看板（模拟数据，接入支付后变为真实数据）"""
     import sqlite3, time
     try:
-        conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+        conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
         conn.execute("CREATE TABLE IF NOT EXISTS payment_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, plan TEXT, amount REAL, status TEXT, created_at REAL)")
         # 模拟数据
         conn.execute("INSERT OR IGNORE INTO payment_orders (id, plan, amount, status, created_at) VALUES (1,'free',0.0,'active',?)", (time.time()-86400*30,))
@@ -257,7 +257,7 @@ class WebhookEvent(BaseModel):
 
 @router.post("/api/v1/webhook")
 async def receive_webhook(req: WebhookEvent):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     conn.execute("CREATE TABLE IF NOT EXISTS webhook_events (id INTEGER PRIMARY KEY AUTOINCREMENT, event TEXT, payload TEXT, received_at REAL)")
     conn.execute("INSERT INTO webhook_events (event, payload, received_at) VALUES (?,?,?)", (req.event, json.dumps(req.payload), time.time()))
     conn.commit(); conn.close()
@@ -265,7 +265,7 @@ async def receive_webhook(req: WebhookEvent):
 
 @router.get("/api/v1/webhook/events")
 async def list_webhook_events(limit: int = 20):
-    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"))
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     rows = conn.execute("SELECT id, event, payload, received_at FROM webhook_events ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
     conn.close()
     return {"success": True, "events": [{"id":r[0],"event":r[1],"payload":r[2],"time":r[3]} for r in rows]}
@@ -274,7 +274,7 @@ async def list_webhook_events(limit: int = 20):
 @router.get("/api/v1/plugins")
 async def list_plugins():
     _installed = []
-    _plugins_dir = Path(__file__).resolve().parent.parent / "plugins"
+    _plugins_dir = Path(__file__).resolve().parent.parent.parent / "plugins"
     if _plugins_dir.exists():
         for _p in _plugins_dir.iterdir():
             if _p.is_dir() and (_p / "plugin.json").exists():
@@ -284,7 +284,7 @@ async def list_plugins():
 
 # ─── 11. 🎨 可视化 Workflow ─────────────────
 _WORKFLOWS = {}
-_WORKFLOW_DB = Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"
+_WORKFLOW_DB = Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"
 
 class WorkflowNode(BaseModel):
     id: str
@@ -417,7 +417,7 @@ async def rerank_results(req: RerankRequest):
     return {"success": True, "results": scored, "total": len(scored)}
 
 # ─── 14. 🧬 自进化引擎 ──────────────────────
-_SELFHEAL_DB = Path(__file__).resolve().parent.parent / "core" / "adaptive_engine.db"
+_SELFHEAL_DB = Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"
 
 @router.post("/api/v1/selfheal/log")
 async def log_error(module: str = "", error: str = "", context: str = ""):

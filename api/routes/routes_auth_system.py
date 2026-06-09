@@ -8,7 +8,7 @@ import time, json, logging, os
 from core.logging_config import get_logger
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 logger = get_logger("evo.api.auth_system")
 
 from api.infra import (

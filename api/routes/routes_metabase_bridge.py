@@ -8,7 +8,7 @@ from core.logging_config import get_logger
 logger = get_logger("evo.api.metabase-bridge")
 router = APIRouter()
 
-MB_DB_PATH = Path(__file__).parent.parent / "_data" / "metabase_bridge" / "evo_analytics.db"
+MB_DB_PATH = Path(__file__).parent.parent.parent / "_data" / "metabase_bridge" / "evo_analytics.db"
 
 def _ensure_db():
     """确保分析数据库存在"""

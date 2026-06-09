@@ -13,7 +13,7 @@ from pathlib import Path
 logger = get_logger("evo.api.gateway")
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # ─── 认证凭据存储 ──────────────────────────
 _CRED_DB = BASE_DIR / "core" / "adaptive_engine.db"

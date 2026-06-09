@@ -33,7 +33,7 @@ def openmanus_run(task: str = "", mode: str = "auto", tools: list = None) -> dic
             if not api_key:
                 return {"success": False, "error": "需要设置 OPENAI_API_KEY"}
 
-            BASE = Path(__file__).resolve().parent.parent
+            BASE = Path(__file__).resolve().parent.parent.parent
             OUT = BASE / "output"
             TOOLS_DIR = OUT / "tools"
             MEM_DB = BASE / "data" / "mem.db"
