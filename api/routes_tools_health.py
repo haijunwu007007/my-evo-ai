@@ -1,5 +1,4 @@
-"""工具批量健康检查 — 一键检测所有已启动的 Docker 工具"""
-import httpx, asyncio
+"""工具批量健康检查 — 返回所有已知工具的注册信息（不做实时网络探测，避免超时）"""
 from fastapi import APIRouter
 
 router = APIRouter(tags=["工具健康"])
@@ -21,15 +20,5 @@ KNOWN_PORTS = {
 
 @router.get("/api/v1/tools/health")
 async def batch_health():
-    """一键检测所有工具（超时 3s）"""
-    results = {}
-    async def check(name: str, port: int):
-        try:
-            async with httpx.AsyncClient(timeout=3) as c:
-                r = await c.get(f"http://127.0.0.1:{port}")
-                results[name] = {"port": port, "alive": True, "status": "running"}
-        except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError):
-            results[name] = {"port": port, "alive": False, "status": "stopped"}
-    tasks = [check(n, p) for n, p in KNOWN_PORTS.items()]
-    await asyncio.gather(*tasks)
-    return {"success": True, "total": len(results), "alive": sum(1 for v in results.values() if v["alive"]), "tools": results}
+    """返回所有已知工具的注册信息（不做实时网络探测）"""
+    return {"success": True, "total": len(KNOWN_PORTS), "tools": {n: {"port": p, "alive": False, "status": "unknown"} for n, p in KNOWN_PORTS.items()}}

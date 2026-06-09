@@ -226,7 +226,10 @@ async def scheduler_delete(task_id: str):
 async def events_stats():
     if HAS_EVENTS and _event_engine:
         try:
-            st = _event_engine.get_stats() if hasattr(_event_engine, 'get_stats') else {}
+            st = await asyncio.wait_for(
+                asyncio.to_thread(lambda: _event_engine.get_stats() if hasattr(_event_engine, 'get_stats') else {}),
+                timeout=2.0
+            ) if hasattr(_event_engine, 'get_stats') else {}
             return {"success": True,
                     "total_events": st.get("total_events", len(_events_db)),
                     "total_rules": st.get("total_rules", len(_rules_db)),

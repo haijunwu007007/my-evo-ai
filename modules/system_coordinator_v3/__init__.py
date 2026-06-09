@@ -37,7 +37,7 @@ try:
     else:
         graph_cls = ModuleCapabilityGraph
     
-    from modules.system_coordinator_v3.orchestrator import SystemOrchestratorV3
+    from modules.system_coordinator_v3.orchestrator import CrossModuleOrchestrator as SystemOrchestratorV3
     orchestrator = SystemOrchestratorV3
     logger.info(f"[v3] orchestrator 加载成功")
 except Exception as e:
@@ -45,7 +45,7 @@ except Exception as e:
     orchestrator = ModuleCapabilityGraph
 
 try:
-    from modules.system_coordinator_v3.coordinator import CoordinatorV3
+    from modules.system_coordinator_v3.coordinator import SystemCoordinatorV3 as CoordinatorV3
     coordinator = CoordinatorV3
     logger.info(f"[v3] coordinator 加载成功")
 except Exception as e:

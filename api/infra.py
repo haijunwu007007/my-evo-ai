@@ -170,7 +170,7 @@ class RateLimiter:
             del self._blocked_ips[client_ip]
 
 
-rate_limiter = RateLimiter(max_requests=30, window_seconds=60)
+rate_limiter = RateLimiter(max_requests=200, window_seconds=60)
 
 
 # ════════════════════════════════════════════════════════════
