@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Projects Search</title>
+    <style>
+        /* 简单的CSS样式，用于美化界面 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #search-box {
+            margin: 20px;
+        }
+        .filter-options {
+            margin: 10px;
+        }
+        .search-result {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .search-result a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Projects Search</h1>
+    <div id="search-box">
+        <input type="text" id="search-input" placeholder="Enter keyword to search...">
+        <button onclick="searchProjects()">Search</button>
+    </div>
+    <div class="filter-options">
+        <label for="language">Language:</label>
+        <select id="language" onchange="searchProjects()">
+            <option value="">All</option>
+            <option value="Python">Python</option>
+            <option value="JavaScript">JavaScript</option>
+            <option value="Java">Java</option>
+            
+        </select>
+        <label for="stars">Stars:</label>
+        <select id="stars" onchange="searchProjects()">
+            <option value="">All</option>
+            <option value="0-50">0-50</option>
+            <option value="51-100">51-100</option>
+            <option value="101-200">101-200</option>
+            
+        </select>
+        <label for="updated">Updated:</label>
+        <select id="updated" onchange="searchProjects()">
+            <option value="">All</option>
+            <option value="1d">Last 24h</option>
+            <option value="1w">Last Week</option>
+            <option value="1m">Last Month</option>
+            
+        </select>
+    </div>
+    <div id="search-results">
+        
+    </div>
+
+    <script>
+        // JavaScript函数，用于处理搜索请求
+        function searchProjects() {
+            // 这里应该包含与后端API通信的代码，以获取搜索结果
+            // 以下代码仅为示例，实际应用中需要替换为API请求
+            const keyword = document.getElementById('search-input').value;
+            const language = document.getElementById('language').value;
+            const stars = document.getElementById('stars').value;
+            const updated = document.getElementById('updated').value;
+
+            // 构建搜索参数
+            const params = {
+                q: keyword,
+                language: language,
+                stars: stars,
+                sorted: updated
+            }
+
+            // 假设的API请求函数
+            fetchSearchResults(params);
+        }
+
+        // 假设的API请求函数
+        function fetchSearchResults(params) {
+            // 这里应该是一个API请求，用于获取搜索结果
+            // 以下代码仅为示例，实际应用中需要替换为API请求
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+            // 模拟API响应
+            setTimeout(() => {
+                const mockResults = [
+                    { name: 'AI Project 1', description: 'Description 1', language: 'Python', stars: 150, link: 'https://github.com/project1' },
+                    { name: 'AI Project 2', description: 'Description 2', language: 'JavaScript', stars: 300, link: 'https://github.com/project2' }
+                    
+                ];
+
+                // 清空当前结果
+                resultsContainer.innerHTML = '';
+
+                // 渲染搜索结果
+                mockResults.forEach(result => {
+                    const resultElement = document.createElement('div');
+                    resultElement.className = 'search-result';
+                    resultElement.innerHTML = 
+                        
+                    
+                    
+                    
+                });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

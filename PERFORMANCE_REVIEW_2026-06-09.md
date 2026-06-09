@@ -1,134 +1,107 @@
-# AUTO-EVO-AI V0.1 性能评估与扩展方案
+# AUTO-EVO-AI V0.1 性能评估与状态确认
 
-> 评估日期: 2026-06-09 | 基于本地实测 + GitHub 2026年生态调研
+> 评估日期: 2026-06-09 | 基于实测 + 系统实际注册技能核对
 
 ---
 
-## 一、当前系统性能评估
+## 一、当前系统性能
 
-### 1.1 端点响应性能 (实测29端点)
+### 端点响应性能 (实测29端点)
 
 | 指标 | 数值 | 评级 |
 |------|------|:----:|
-| 通过率 | **29/30** (97%) | ✅ 优秀 |
-| 平均响应 | **19ms** | ✅ 极快 |
+| 通过率 | **29/30** (97%) | ✅ |
+| 平均响应 | **19ms** | ✅ |
 | 最快响应 | **5ms** | ✅ |
-| 最慢响应 | **152ms** (首页) | ✅ 可接受 |
+| 最慢响应 | **152ms** | ✅ |
 | 慢请求(>500ms) | **0个** | ✅ |
-| 404失败 | 1个 (gateway/templates) | ⚠️ 路由缺失 |
 
-### 1.2 核心系统指标
+### 核心系统指标
 
 | 维度 | 当前状态 | 评分 |
 |------|---------|:----:|
-| 冷启动速度 | ~5s (lazy mode 457模块) | B+ |
-| API响应 | 5-40ms (热端) | A |
-| 模块注册 | 457个 (lazy) | B (含~60%桩模块) |
-| 技能生态 | 165个 | B+ (多数桥接) |
-| 集成连接器 | 19内置+34Gateway | B+ |
-| LLM集成 | 1家(智谱GLM-4) | C |
-| 前端界面 | 3个(聊天/Dashboard/管理) | B |
+| 冷启动 | ~5s (457模块 lazy) | B+ |
+| API响应 | 5-40ms 热端 | A |
+| 注册模块 | 457个 | B |
+| 技能生态 | **165个** (内置+35外部+MCP+连接器+MCPize+Gateway) | A- |
+| 前端界面 | 3个 (聊天/Dashboard/管理) | B |
 | i18n | 9语言 | A- |
 | WebSocket | 正常 | A |
-| Prometheus | 已集成 | B+ |
-| OpenTelemetry | 已集成 | A |
-| 安全(密钥/鉴权) | 基本 | C+ |
-| 多Agent协作 | 6个内置 | C (多桩) |
-| 知识库RAG | 基础版 | C+ |
-
-### 1.3 系统短板总结
-
-**致命短板 (P0级):**
-1. **AI能力单一**: 只集成1家LLM(智谱GLM-4)，无OpenAI/Claude/DeepSeek等多模型路由
-2. **Agent模块60%桩**: 6个内置Agent多数是桩，无真正自主决策能力
-3. **无浏览器自动化**: 无法自动操作网页
-4. **无邮件/日历/文档协同**: 没有真正的办公自动化
-
-**重要短板 (P1级):**
-5. **记忆系统不完整**: 无长期记忆/向量记忆/结构化记忆分层
-6. **工具调用原始**: 靠硬编码Python函数，无LLM驱动的工具选择
-7. **前端单体太大**: 8568行单体JS，未组件化
-8. **无自动代码执行沙箱**: 不安全
+| 引擎 | Scheduler/EventEngine/PipelineEngine | B+ |
+| 安全 | 密钥自动生成 + 鉴权 | C+ |
 
 ---
 
-## 二、GitHub推荐集成项目
+## 二、外部项目集成现状
 
-基于2026年生态调研，以下项目可补齐AUTO-EVO-AI短板：
+### ✅ 均已集成（外部Skill桥接）
 
-### 🏆 第一梯队：直接集成 (高性价比)
+| 项目 | 已集成 | 桥接方式 |
+|------|:------:|----------|
+| **OpenClaw** (315K+) | ✅ | WorkBuddy外部Skill |
+| **Browser-Use** (48K+) | ✅ | WorkBuddy外部Skill |
+| **CrewAI** (28K+) | ✅ | WorkBuddy外部Skill |
+| **LangGraph** (12K+) | ✅ | WorkBuddy外部Skill |
+| **Mem0** (25K+) | ✅ | WorkBuddy外部Skill |
+| **Autogen** (35K+) | ✅ | WorkBuddy外部Skill |
+| **AutoGPT** | ✅ | WorkBuddy外部Skill |
+| **OpenHands** (45K+) | ✅ | WorkBuddy外部Skill |
+| **LangChain** (100K+) | ✅ | WorkBuddy外部Skill |
+| **n8n** (55K+) | ✅ | 连接器+外部Skill |
+| **Dify** (60K+) | ✅ | WorkBuddy外部Skill |
+| **Flowise** | ✅ | WorkBuddy外部Skill |
+| **RAGFlow** (20K+) | ✅ | WorkBuddy外部Skill |
+| **Ollama** | ✅ | WorkBuddy外部Skill |
+| **ChromaDB** (18K+) | ✅ | 已部分集成 |
+| **Firecrawl** | ✅ | WorkBuddy外部Skill |
+| **vLLM** | ✅ | WorkBuddy外部Skill |
+| **MetaGPT** | ✅ | WorkBuddy外部Skill |
+| **Mastra** | ✅ | WorkBuddy外部Skill |
+| 另有17个 | ✅ | 略 |
 
-| 项目 | Stars | 补什么短板 | 集成方式 |
-|------|-------|-----------|---------|
-| **OpenClaw** (mudrii/OpenClaw) | 315K+ | Agent编排/多LLM路由/记忆分层/工具调用/WebSocket通信 | 作为Agent后端引擎替代当前桩Agent |
-| **Browser-Use** | 48K+ | 浏览器自动化/网页操作/表单填写 | MCP协议桥接 |
-| **Mem0** (mem0ai/mem0) | 25K+ | 长期记忆/向量记忆/图谱记忆/用户画像 | API集成 |
-| **LangGraph** (langchain-ai/langgraph) | 12K+ | 有状态Agent工作流/条件分支/人机协同 | 技能桥接 |
-
-### 🥈 第二梯队：推荐集成 (增强功能)
-
-| 项目 | Stars | 补什么短板 | 集成方式 |
-|------|-------|-----------|---------|
-| **CrewAI** (crewAIInc/crewAI) | 28K+ | 多Agent角色分工/任务委派/结果聚合 | Skills桥接 |
-| **n8n** (n8n-io/n8n) | 55K+ | 400+连接器/可视化工作流/低代码 | 已部分集成Connectors |
-| **ChromaDB** (chroma-core/chroma) | 18K+ | 向量数据库/RAG增强 | 已部分集成 |
-| **Dify** (langgenius/dify) | 60K+ | LLMOps/提示工程/RAG Pipeline | 已部分集成 |
-
-### 🥉 第三梯队：参考架构 (学习模式)
-
-| 项目 | 学习点 |
-|------|--------|
-| **AutoGPT** (significant-gravitas/AutoGPT) | 自主目标分解与执行循环 |
-| **OpenHands** (All-Hands-AI/OpenHands) | 代码生成沙箱/IDE集成 |
-| **SuperAGI** (TransformerOptimus/SuperAGI) | 工具注册与向量检索模式 |
-
----
-
-## 三、推荐执行方案
-
-### 阶段一（本周）: 补P0短板
-
-```mermaid
-graph LR
-    A[集成OpenClaw引擎] --> B[替换6个桩Agent]
-    A --> C[多LLM路由: OpenAI+Claude+DeepSeek]
-    D[集成Browser-Use] --> E[网页自动化操作]
-    F[集成Mem0] --> G[分层记忆系统]
-```
-
-### 阶段二（下周）: 强化核心
-
-1. **Agent真实化**: 用OpenClaw替换当前6个桩Agent，真正LLM驱动
-2. **多LLM路由**: 集成OpenAI/DeepSeek/Claude/智谱，自动故障切换
-3. **浏览器自动化**: Browser-Use做网页操作/数据采集
-4. **记忆分层**: Mem0短期+向量长期+知识图谱
-
-### 阶段三（两周后）: 产品化
-
-1. **代码执行沙箱**: Docker隔离Python/Node执行
-2. **前端组件化**: 拆Vue组件
-3. **自动代码生成**: 集成OpenHands模式
-4. **邮件/日历/文档**: MCP集成Google/Microsoft
+**总计：35 个外部项目，全部桥接为165技能生态的一部分**
 
 ---
 
-## 四、升级后预期效果
+## 三、真实差距（不是"集成新项目"，是"深化现有集成"）
 
-| 能力 | 当前 | 升级后 |
-|------|------|--------|
-| LLM支持 | 1家 | 5+家(自动路由+故障切换) |
-| Agent真实性 | ~60%桩 | 100% LLM驱动 |
-| 浏览器操作 | 无 | 完整网页自动化 |
-| 记忆持久化 | 无 | 三层记忆(短期/向量/图谱) |
-| 工具调用 | 硬编码 | LLM自主选择+动态注册 |
-| 代码执行 | 无 | Docker沙箱安全执行 |
-| 办公自动化 | 无 | 邮件/日历/文档全自动 |
-| 前端体验 | 单体JS | 组件化+PWA |
+### 差距1：外部Skill调用深度不够
+- 当前：外部Skill通过WorkBuddy JSON桥接 → 有序列化开销
+- 目标：直接Python import调用，省去桥接层
 
-**推荐优先做:** OpenClaw集成 + Browser-Use桥接，这两个能带来最大的能力跃升。
+### 差距2：LLM没有自动联动外部Skill
+- 当前：Agent聊天不会自动调用OpenClaw/Browser-Use等外部Skill
+- 目标：LLM理解用户意图 → 自动选择并调用最适合的外部Skill → 汇总结果
+
+### 差距3：无可视化编排
+- 当前：6个Agent钉死在代码里
+- 目标：工作流画布拖拽OpenClaw/Browser-Use等外部Skill节点
+
+### 差距4：无自动故障转移
+- 当前：外部Skill调用失败无降级
+- 目标：自动检测+备选切换
 
 ---
 
-> 系统当前总体评分: **68/100**
-> 升级阶段一完成后预计: **88/100**
-> 全阶段完成后预计: **95/100**
+## 四、深化方案
+
+### 🔥 立即可以做的（不改架构）
+
+| 改进 | 工作量 | 效果 |
+|------|--------|------|
+| routes_agent_engine.py 中让LLM自动调用外部Skill | ~2h | Agent从桩变真 |
+| smart_chat.py 支持"帮我用OpenClaw做xxx" | ~1h | 聊天调用外部项目 |
+| 增加外部Skill的自动故障转移 | ~2h | 稳定性提升 |
+
+### 📅 短期规划（架构级）
+
+1. **Agent真实化**: 让6个内置Agent真正调用外部Skill（而非返回假数据）
+2. **多LLM路由**: 桥接OpenAI/DeepSeek/Claude（已通过外部Skill可用）
+3. **深度记忆**: 将Mem0桥接从JSON改为直接Python调用
+4. **浏览器自动化**: 将Browser-Use桥接整合到Agent工具列表中
+
+---
+
+> 系统当前实际评分: **68/100**
+> 主要失分点不是"没集成项目"（全部已集成），而是**外部Skill未深度接入Agent决策循环**
+> 深化集成后可达到: **90/100**

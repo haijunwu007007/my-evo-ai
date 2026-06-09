@@ -25,7 +25,7 @@ DIRECT_ROUTES = {
     "打飞机": ("app", "✅ **打飞机**\n[📄 打开](/shooter)"),
 }
 
-# 需要工具调用的关键词（匹配到这些词走完整agent_core管道）
+# 需要工具调用的关键词（匹配到这些词走完整agent_core管道或Agent引擎）
 _TOOL_KEYWORDS = [
     "浏览器", "自动化", "研究", "全栈", "生成项目", "记忆", "composio",
     "外部工具", "分析代码", "进化", "学习技能", "桌面", "API发现",
@@ -33,10 +33,33 @@ _TOOL_KEYWORDS = [
     "self_evolving", "moltron", "accomplish", "抓取", "爬取",
     "操控浏览器", "搜索API", "发现API", "画", "搜索", "开发",
     "创建", "写一个", "做一个", "生成", "设计", "实现", "模块",
+    # ── 外部Skill关键字路由 ──
+    "openclaw", "autogen", "crewai", "langgraph", "langchain",
+    "dify", "flowise", "n8n", "ragflow", "ollama",
+    "mem0", "browser-use", "firecrawl", "autogpt", "openhands",
+    "metagpt", "mastra", "headroom", "odysseus",
+    "股票分析", "套利", "量化", "金融", "hedge fund",
+    "网络安全", "cyber", "hack", "渗透",
+    "视频生成", "文生视频", "图生视频",
 ]
+
+# 外部Skill名称列表（启动时加载）
+_EXT_SKILL_NAMES: list[str] = []
+
+def _load_ext_skill_names():
+    """加载外部Skill名称到内存，用于聊天路由"""
+    global _EXT_SKILL_NAMES
+    # 直接从 Agent Engine 的目录获取
+    try:
+        from api.routes_agent_engine import _SKILL_CATALOG
+        _EXT_SKILL_NAMES = [s["name"] for s in _SKILL_CATALOG]
+    except: pass
+
+_load_ext_skill_names()
 
 class Req(BaseModel):
     message: str; api_key: Optional[str] = ""; lang: Optional[str] = "zh-CN"; context: Optional[list] = []
+    _internal: Optional[bool] = False  # 内部调用标记，防止循环路由
 
 def _needs_tools(msg: str) -> bool:
     """判断消息是否需要工具调用"""
@@ -46,6 +69,20 @@ def _needs_tools(msg: str) -> bool:
 @router.post("/api/v1/smart")
 async def smart_chat(req: Req):
     msg = (req.message or "").strip()
+    # ── 外部Skill快速路由（跳过内部LLM调用，防止循环） ──
+    if not (msg.startswith("你是一个AI任务规划器") or msg.startswith("请用中文总结以下执行结果") or msg.startswith("你是一个技能执行专家")):
+        lower_msg = msg.lower()
+        for skill_name in _EXT_SKILL_NAMES:
+            if skill_name.lower() in lower_msg:
+                try:
+                    async with httpx.AsyncClient(timeout=120) as c:
+                        ar = await c.post("http://127.0.0.1:8765/api/v1/agent/run",
+                            json={"task": msg, "context": req.context or ""})
+                        ad = ar.json()
+                        if ad.get("success"):
+                            return {"success": True, "result": ad.get("result", ""),
+                                    "mode": "agent_engine", "details": ad.get("details", [])}
+                except: pass
     for keyword, (mode, result) in DIRECT_ROUTES.items():
         if keyword in msg:
             return {"success": True, "result": result, "mode": mode}
