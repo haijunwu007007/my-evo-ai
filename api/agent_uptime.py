@@ -1,27 +1,18 @@
-"""
-uptime_kuma - Uptime Kuma站点监控 - 80+检测协议+告警+状态页
-"""
-import json
+"""Uptime Kuma - AUTO-EVO-AI集成 (localhost:3001)"""
+import json, httpx, os
+
+KUMA_URL = os.environ.get("KUMA_URL", "http://localhost:3001")
 
 def uptime_kuma(**kwargs):
-    """Uptime Kuma站点监控 - 80+检测协议+告警+状态页
-    
-    Args:
-        **kwargs: 工具参数
-    Returns:
-        dict: {"ok": bool, "data": ..., "message": ...}
-    """
+    """Uptime Kuma站点监控"""
     try:
-        # TODO: 连接Uptime Kuma站点监控 API
-        # 当前为本地mock, 后续替换为真实API调用
-        result = {
-            "ok": True,
-            "data": "{{}",
-            "message": f"{tool_name} - 请配置{tool_name.split('_')[0]}API后使用"
-        }
-        if kwargs:
-            result["data"] = f"收到参数: {json.dumps(kwargs, ensure_ascii=False)}"
-        return result
-    except Exception as e:
-        return {"ok": False, "data": f"{tool_name}失败: {e}", "message": str(e)}
+        action = kwargs.get("action", "status")
+        url = f"{KUMA_URL}/api/{action}" if action != "status" else f"{KUMA_URL}"
 
+        # Kuma不需要认证头（首次需Web UI设置用户）
+        resp = httpx.get(url, timeout=10)
+        return {"ok": resp.status_code < 500, "data": {"status_code": resp.status_code, "action": action}, "message": f"HTTP {resp.status_code}"}
+    except httpx.ConnectError:
+        return {"ok": False, "data": None, "message": "无法连接Uptime Kuma (localhost:3001)，请确认Docker容器已启动"}
+    except Exception as e:
+        return {"ok": False, "data": None, "message": f"Uptime Kuma失败: {e}"}

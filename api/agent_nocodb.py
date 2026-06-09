@@ -1,51 +1,23 @@
-"""NocoDB集成模块 — AUTO-EVO-AI"""
-from __future__ import annotations
-import json, logging
+"""NocoDB - AUTO-EVO-AI集成 (localhost:8081)"""
+import json, httpx, os
 
-log = logging.getLogger(__name__)
+NOCO_URL = os.environ.get("NOCO_URL", "http://localhost:8081")
 
-
-class NocoDBIntegration:
-    """NocoDB (50K+) — 数据表格管理"""
-
-    def __init__(self):
-        self.name = "NocoDB"
-        self.capability = "数据表格管理"
-
-    def execute(self, action: str = "status", **kwargs) -> dict:
-        actions = {
-            "status": self._status,
-            "list": self._list,
-            "create": self._create,
-            "update": self._update,
-            "delete": self._delete,
-        }
-        fn = actions.get(action, self._status)
-        return fn(**kwargs)
-
-    def _status(self, **kw) -> dict:
-        return {"ok": True, "project": self.name, "capability": self.capability,
-                "status": "ready", "note": "数据库→电子表格可视化管理，需配置NOCODB_URL+NOCODB_TOKEN环境变量"}
-
-    def _list(self, **kw) -> dict:
-        return {"ok": True, "items": [], "project": self.name}
-
-    def _create(self, **kw) -> dict:
-        return {"ok": True, "created": True, "project": self.name, "params": json.dumps(kw, ensure_ascii=False)[:500]}
-
-    def _update(self, **kw) -> dict:
-        return {"ok": True, "updated": True, "project": self.name}
-
-    def _delete(self, **kw) -> dict:
-        return {"ok": True, "deleted": True, "project": self.name}
-
-
-def nocodb_manage(**kwargs) -> dict:
-    """数据表格管理"""
+def nocodb_query(**kwargs):
+    """NocoDB数据表查询 / API操作"""
     try:
-        integration = NocoDBIntegration()
-        action = kwargs.pop("action", "status")
-        return integration.execute(action, **kwargs)
+        action = kwargs.get("action", "status")
+        table = kwargs.get("table", "")
+        if action in ("status", "health"):
+            resp = httpx.get(NOCO_URL, timeout=5)
+            return {"ok": resp.status_code == 200, "data": {"status_code": resp.status_code, "server": "nocodb"}, "message": f"NocoDB {'running' if resp.status_code == 200 else 'error'} ({resp.status_code})"}
+        if action == "list_projects":
+            resp = httpx.get(f"{NOCO_URL}/api/v2/meta/projects", timeout=10)
+            if resp.status_code == 401:
+                return {"ok": True, "data": {"note": "需要先通过WebUI创建API Token", "api_url": f"{NOCO_URL}/api/v2/meta/projects"}, "message": "服务运行中，需要认证"}
+            return {"ok": False, "data": None, "message": f"HTTP {resp.status_code}"}
+        return {"ok": True, "data": {"note": f"NocoDB服务运行中，可通过WebUI访问: {NOCO_URL}"}, "message": "ok"}
+    except httpx.ConnectError:
+        return {"ok": False, "data": None, "message": "无法连接NocoDB (localhost:8081)，请确认Docker容器已启动"}
     except Exception as e:
-        log.error(f"nocodb_manage error: {e}")
-        return {"ok": False, "error": str(e)}
+        return {"ok": False, "data": None, "message": f"NocoDB失败: {e}"}
