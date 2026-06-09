@@ -346,6 +346,13 @@ var _TOOL_HINTS = {
 }
 // 需要工具调用（走非流式）的关键词
 var _TOOL_KEYWORDS = ["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", "浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",
+  // 外部Skill关键词（触发Agent Engine）
+  "openclaw","browser-use","crewai","langgraph","mem0","autogen","autogpt","openhands",
+  "langchain","dify","flowise","n8n","ragflow","ollama","firecrawl","metagpt",
+  "mastra","headroom","odysseus","paseo","claude-mem","context7","goose",
+  "ai-hedge-fund","量化交易","股票分析","套利","金融",
+  "网络安全","渗透","cyber","hack","网络安全",
+  "视频生成","文生视频","图生视频","多模态",
   odoo_manage: "帮我管理ERP（会计/库存/采购）：",
   erpclaw_manage: "帮我用AI-ERP管理业务：",
   coolify_deploy: "帮我在PaaS上部署应用：",
@@ -379,7 +386,7 @@ function quickTool(name){
 function needsTool(msg){
   var lower = msg.toLowerCase()
   for(var i=0;i<_TOOL_KEYWORDS.length;i++){
-    if(lower.indexOf(_TOOL_KEYWORDS["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", i].toLowerCase())>=0) return true
+    if(lower.indexOf(_TOOL_KEYWORDS[i].toLowerCase())>=0) return true
   }
   return false
 }
@@ -502,7 +509,32 @@ async function send(){
         }
       }catch(e){}
     }
-    // 非流式请求（工具调用/流式失败降级）
+    // 非流式请求：先尝试 Agent Engine（工具类/外部Skill），降级到 smart chat
+    try{
+      var ar=await fetch('/api/v1/agent/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text,context:CTX.slice(-3)})})
+      if(ar.ok){
+        var ad=await ar.json()
+        if(ad.success){
+          hideLoading()
+          var resultHtml='🤖 **Agent 引擎**\n\n'+ad.result
+          if(ad.details&&ad.details.length>0){
+            resultHtml+='\n\n**执行步骤:**'
+            for(var s of ad.details){
+              var emoji=s.tool.includes('browser')?'🌐':s.tool.includes('search')?'🔍':s.tool.includes('code')?'💻':s.tool.includes('crawl')?'🕷️':s.tool.includes('github')?'⭐':s.tool.includes('translate')?'🌍':s.tool.includes('doc')?'📄':s.tool.includes('ppt')?'📽️':s.tool.includes('excel')?'📊':'➡️'
+              resultHtml+='\n'+emoji+' **'+s.tool+'**: '+s.result.slice(0,200)
+            }
+          }
+          addMsg(resultHtml,'bot')
+          CTX.push({role:'assistant',content:ad.result})
+          CHAT.push({role:'bot',text:resultHtml,time:new Date().toISOString()})
+          if(CHAT.length>100)CHAT=CHAT.slice(-100)
+          localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
+          document.getElementById('sendBtn').disabled=false;input.focus()
+          return
+        }
+      }
+    }catch(e){}
+    // 非流式降级请求（工具调用/流式失败降级）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()
