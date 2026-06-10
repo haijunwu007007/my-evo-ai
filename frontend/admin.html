@@ -56,6 +56,7 @@ button.danger{background:#e74c3c}
   <a onclick="showTab('devtokens')">🔑 Token</a>
   <a onclick="showTab('rag')">📚 知识库</a>
   <a onclick="showTab('skills')">🔧 技能</a>
+  <a onclick="showTab('market')">🛒 市场</a>
   <a onclick="showTab('gateway')">🌐 网关</a>
   <a onclick="showTab('lowcode')">🛠️ 低代码</a>
   <a onclick="showTab('flowchart')">🗺️ 流程图</a>
@@ -95,6 +96,24 @@ docker-compose up -d metabase    # BI分析</pre></div>
 <div id="tab-rag" class="tab-content" style="display:none"><h2>📚 知识库</h2><div><input type="file" id="ragFileInput" accept=".md,.txt,.pdf,.docx"><button onclick="uploadRag()">上传文档</button></div><div id="ragStatus" style="margin-top:16px"><p>知识库就绪，上传文档后即可查询</p></div></div>
 
 <div id="tab-skills" class="tab-content" style="display:none"><h2>🔧 技能浏览器</h2><input id="skillSearch" placeholder="搜索技能..." oninput="searchSkills()" style="width:100%;margin-bottom:12px"><div id="skillList"><p>加载中...</p></div></div>
+
+<div id="tab-market" class="tab-content" style="display:none">
+  <h2>🛒 技能市场</h2>
+  <p style="color:var(--text2);margin:4px 0 12px">对标OpenClaw Skills — 一键安装/卸载，已安装可直接使用</p>
+  <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <input id="mkSearch" placeholder="搜索技能..." oninput="loadMarket()" style="width:300px">
+    <select id="mkFilter" onchange="loadMarket()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px">
+      <option value="">全部</option>
+      <option value="content">📝 内容创作</option>
+      <option value="social">📱 社交媒体</option>
+      <option value="analytics">📊 数据分析</option>
+      <option value="thinking">🧠 思维框架</option>
+      <option value="productivity">⏰ 生产力</option>
+      <option value="crm">🎯 CRM</option>
+    </select>
+  </div>
+  <div id="marketList"><p>加载中...</p></div>
+</div>
 
 <div id="tab-gateway" class="tab-content" style="display:none">
   <h2>🌐 集成网关</h2>
@@ -308,6 +327,9 @@ function fcInsert(){
   if(tpls[sel]){ document.getElementById('fcInput').value = tpls[sel]; fcRender() }
 }
 fcShowHistory()
+// 技能市场
+async function loadMarket(){var q=document.getElementById('mkSearch').value||'';var c=document.getElementById('mkFilter').value||'';try{var r=await fetch(API+'/skills/market?category='+c+'&q='+encodeURIComponent(q));var d=await r.json();var items=d.skills||[];var html='<div class=grid>';items.forEach(function(s){html+='<div class=card><h3>'+s.name+'</h3><p>'+s.desc+'</p><span class="tag tag-'+(s.grade=='A'?'ready':'pending')+'">Grade '+s.grade+'</span><div class=actions><button onclick="installSkill(\''+s.id+'\',\''+s.name+'\')">'+(s.installed?'✅ 已安装':'📥 安装')+'</button></div></div>'});html+='</div>';document.getElementById('marketList').innerHTML=html}catch(e){document.getElementById('marketList').innerHTML='<p>加载失败: '+e.message+'</p>'}}
+async function installSkill(id,name){try{var r=await fetch(API+'/skills/market/install',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skill_id:id})});var d=await r.json();alert(d.result||'已安装');loadMarket()}catch(e){alert('安装失败: '+e.message)}}
 </script>
 <style>
 .lc-comp{padding:8px 12px;margin:4px 0;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:grab;font-size:13px;user-select:none}

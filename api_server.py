@@ -147,7 +147,9 @@ from api.routes.routes_selfheal import router as selfheal_router
 from api.routes.routes_rerank import router as rerank_router
 from api.routes.routes_agent_team import router as agent_team_router
 from api.routes.routes_env import router as env_router
+from api.routes.routes_skills_market import router as skills_market_router
 
+app.include_router(skills_market_router)
 app.include_router(selfheal_router)
 app.include_router(rerank_router)
 app.include_router(agent_team_router)
