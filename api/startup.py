@@ -140,6 +140,14 @@ async def lifespan(app: FastAPI):
         else:
             logger.info(f"  [WAIT] {_env_desc} — 未配置（不影响核心功能）")
 
+    # 清理 builtins 兼容层（仅清理 modules._base.compat 注入的）
+    try:
+        from modules._base.compat import cleanup_compat
+        cleanup_compat()
+        logger.info("[COMPAT] builtins 兼容层已清理")
+    except Exception:
+        pass
+
     # 初始化可观测性
     try:
         from core.telemetry import init_telemetry
@@ -221,6 +229,14 @@ async def lifespan(app: FastAPI):
         logger.info("[SHUTDOWN] 所有引擎已停止")
     except Exception as e:
         logger.warning(f"[SHUTDOWN] 引擎停止异常: {e}")
+
+    # 清理 builtins 兼容层
+    try:
+        from modules._base.compat import cleanup_compat
+        cleanup_compat()
+        logger.info("[SHUTDOWN] builtins 兼容层已清理")
+    except Exception:
+        pass
 
     # 关闭SQLite连接
     _cleanup_sqlite()

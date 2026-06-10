@@ -27,6 +27,28 @@ sudo cp deploy/logrotate.conf /etc/logrotate.d/evo-api
 sudo logrotate -f /etc/logrotate.d/evo-api
 ```
 
+## SSH 密钥配置（云服务器）
+
+```bash
+# Windows 端生成密钥（如已存在则跳过）
+ssh-keygen -t ed25519 -f ~/.ssh/Myevoaikey_ -N ""
+
+# 复制公钥到服务器（首次）
+ssh-copy-id -i ~/.ssh/Myevoaikey_ ubuntu@YOUR_SERVER_IP
+# 或用密码方式：
+cat ~/.ssh/Myevoaikey_.pub | ssh ubuntu@YOUR_SERVER_IP "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+# 测试连接（无密码）
+ssh -i ~/.ssh/Myevoaikey_ ubuntu@YOUR_SERVER_IP "echo OK"
+```
+
+## 一键部署（推荐）
+
+```bash
+# PowerShell（管理员模式）
+.\deploy\deploy_to_cloud.ps1
+```
+
 ## 安全组
 
 腾讯云安全组必须放行 TCP 8765 端口。
