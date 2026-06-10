@@ -146,6 +146,7 @@ from api.routes.routes_diagnosis import router as diagnosis_router
 from api.routes.routes_selfheal import router as selfheal_router
 from api.routes.routes_rerank import router as rerank_router
 from api.routes.routes_agent_team import router as agent_team_router
+from api.routes.routes_env import router as env_router
 
 app.include_router(selfheal_router)
 app.include_router(rerank_router)
@@ -211,6 +212,7 @@ app.include_router(tenant_router)
 app.include_router(analytics_router)
 app.include_router(events_router)
 app.include_router(diagnosis_router)
+app.include_router(env_router)
 
 # ── 动态路由加载（LLM创建的新API自动挂载） ──
 _apidir = Path(__file__).parent / "output" / "api"

@@ -57,6 +57,7 @@ button.danger{background:#e74c3c}
   <a onclick="showTab('rag')">📚 知识库</a>
   <a onclick="showTab('skills')">🔧 技能</a>
   <a onclick="showTab('gateway')">🌐 网关</a>
+  <a onclick="showTab('env')">🔧 配置</a>
   <a href="/">← 返回</a>
 </div>
 <div class="main">
@@ -93,12 +94,32 @@ docker-compose up -d metabase    # BI分析</pre></div>
 
 <div id="tab-skills" class="tab-content" style="display:none"><h2>🔧 技能浏览器</h2><input id="skillSearch" placeholder="搜索技能..." oninput="searchSkills()" style="width:100%;margin-bottom:12px"><div id="skillList"><p>加载中...</p></div></div>
 
-<div id="tab-gateway" class="tab-content" style="display:none"><h2>🌐 集成网关</h2><div id="gatewayList"><p>加载中...</p></div></div>
+<div id="tab-gateway" class="tab-content" style="display:none">
+  <h2>🌐 集成网关</h2>
+  <div style="margin-bottom:12px"><input id="gwSearch" placeholder="搜索集成..." oninput="loadGateway()" style="width:300px"></div>
+  <div id="gatewayList"><p>加载中...</p></div>
+  <div id="gwModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center">
+    <div style="background:var(--card);border-radius:16px;padding:24px;max-width:500px;width:90%;border:1px solid var(--border)">
+      <h3 id="gwModalTitle">配置</h3>
+      <div id="gwModalBody"></div>
+      <div style="margin-top:16px;display:flex;gap:8px">
+        <button onclick="gwTest()">🔍 测试</button>
+        <button onclick="gwSave()">💾 保存</button>
+        <button onclick="document.getElementById('gwModal').style.display='none'">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="tab-env" class="tab-content" style="display:none">
+  <h2>🔧 环境配置</h2>
+  <input id="envFilter" placeholder="筛选..." oninput="loadEnv()" style="width:300px;margin-bottom:12px">
+  <div id="envCats"></div>
+</div>
 
 <script>
 const API='/api/v1'
 // 显示tab
-function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway()}
+function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv()}
 // 仪表盘
 async function loadStats(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('stats').innerHTML='<div class=stat><div class=num>'+s.modules_total+'</div><div class=label>模块</div></div><div class=stat><div class=num>456</div><div class=label>技能</div></div><div class=stat><div class=num>101</div><div class=label>集成</div></div><div class=stat><div class=num>'+s.api_version+'</div><div class=label>版本</div></div>'}catch(e){document.getElementById('stats').innerHTML='<p>加载失败</p>'}}
 loadStats()
@@ -132,7 +153,16 @@ async function uploadRag(){var inp=document.getElementById('ragFileInput');if(!i
 async function loadSkills(){var q=document.getElementById('skillSearch').value||'';try{var r=await fetch(API+'/skills/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.skills||[];var html='<div class=grid>';items.slice(0,50).forEach(function(s){html+='<div class=card><h3>'+(s.icon||'🔧')+' '+(s.name||'')+'</h3><p>'+(s.description||'')+'</p><span class="tag tag-ready">'+(s.category||'通用')+'</span></div>'});if(!items.length)html+='<p style="color:var(--text2)">无匹配技能</p>';html+='</div>';document.getElementById('skillList').innerHTML=html}catch(e){}}
 function searchSkills(){loadSkills()}
 // 网关
-async function loadGateway(){try{var r=await fetch(API+'/gateway/tools');var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>操作</th><th>状态</th></tr></thead><tbody>';items.slice(0,50).forEach(function(t){html+='<tr><td>'+(t.name||'')+'</td><td>'+(t.auth_type||t.type||'')+'</td><td>'+(t.operations?t.operations.slice(0,3).join(', '):'')+'</td><td class='+(t.enabled?'success'>已启用':'warn'>未启用')+'</td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){}}
+var _gwSlug = ''
+async function loadGateway(){var q=document.getElementById('gwSearch').value||'';try{var r=await fetch(API+'/gateway/tools/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(t){html+='<tr><td>'+(t.icon?t.icon:'🔌')+' '+(t.name||'')+'</td><td>'+t.auth_type+'</td><td class='+(t.enabled?'success'>✅ 已启用':'warn'>⏸ 未启用')+'</td><td><button onclick="openGw(\''+t.slug+'\',\''+t.name+'\',\''+t.auth_type+'\')">⚙️</button></td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){}}
+function openGw(slug,name,type){_gwSlug=slug;document.getElementById('gwModalTitle').textContent='🌐 配置 '+name;var fields='';if(type=='api_key'){fields='<label>API Key</label><input id="gwKey" placeholder="sk-..." style="width:100%">'}else if(type=='basic'){fields='<label>用户名</label><input id="gwUser" placeholder="user" style="width:100%"><label>密码</label><input id="gwPass" type="password" style="width:100%">'}else if(type=='oauth2'){fields='<label>Client ID</label><input id="gwCid" style="width:100%"><label>Client Secret</label><input id="gwCs" type="password" style="width:100%">'}else{fields='<label>API Key</label><input id="gwKey" style="width:100%">'}
+fields+='<div id="gwTestResult" style="margin-top:8px;font-size:12px"></div>'
+document.getElementById('gwModalBody').innerHTML=fields;document.getElementById('gwModal').style.display='flex'}
+async function gwSave(){try{var body={};if(document.getElementById('gwKey'))body.api_key=document.getElementById('gwKey').value;if(document.getElementById('gwUser'))body.username=document.getElementById('gwUser').value;if(document.getElementById('gwPass'))body.password=document.getElementById('gwPass').value;if(document.getElementById('gwCid'))body.client_id=document.getElementById('gwCid').value;if(document.getElementById('gwCs'))body.client_secret=document.getElementById('gwCs').value;var r=await fetch(API+'/gateway/tools/'+_gwSlug+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var d=await r.json();alert(d.result||'已保存');document.getElementById('gwModal').style.display='none';loadGateway()}catch(e){alert('保存失败: '+e.message)}}
+async function gwTest(){if(!_gwSlug)return;document.getElementById('gwTestResult').textContent='⏳ 测试中...';try{var r=await fetch(API+'/gateway/tools/'+_gwSlug+'/test',{method:'POST'});var d=await r.json();document.getElementById('gwTestResult').textContent=d.result||(d.success?'✅ 成功':'❌ 失败')}catch(e){document.getElementById('gwTestResult').textContent='❌ '+e.message}}
+// 环境配置
+async function loadEnv(){var f=document.getElementById('envFilter').value||'';try{var r=await fetch(API+'/settings');var d=await r.json();var cats=d.categories||{};var html='';var catNames={'llm':'🤖 AI服务','devops':'🛠️ DevOps工具','comm':'📡 通信通知','storage':'💾 存储服务'};Object.keys(cats).forEach(function(cat){var items=cats[cat];if(f&&!cat.includes(f)&&!items.some(function(i){return i.key.includes(f)||i.label.includes(f)}))return;html+='<h3 style="margin:16px 0 8px">'+ (catNames[cat]||cat) +'</h3><table><thead><tr><th>配置项</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(i){html+='<tr><td>'+i.label+'<br><small style="color:var(--text2)">'+i.doc+'</small></td><td>'+(i.configured?'<span class=success>✅ 已配置</span>':'<span class=warn>⏳ 未配置</span>')+'</td><td>'+(i.configured?'':'<button onclick="openEnv(\''+i.key+'\',\''+i.label+'\',\''+(i.placeholder||'')+'\')">⚙️</button>')+'</td></tr>'});html+='</tbody></table>'});document.getElementById('envCats').innerHTML=html||'<p style="color:var(--text2)">无匹配项</p>'}catch(e){document.getElementById('envCats').innerHTML='<p>加载失败: '+e.message+'</p>'}}
+function openEnv(key,label,ph){var v=prompt('输入 '+label+' ('+key+'):\n'+(ph?'例如: '+ph:''));if(v!==null&&v!==''){fetch(API+'/settings/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,value:v})}).then(function(r){return r.json()}).then(function(d){alert(d.result||'已保存');loadEnv()}).catch(function(e){alert('保存失败')})}}
 // 模块
 async function loadModules(){try{var s=await(await fetch(API+'/status')).json();var html='<p>模块总数: '+s.modules_total+'</p>';for(var i=0;i<20;i++)html+='<div class=card><h3>模块 '+(i+1)+'</h3><p>系统模块 - lazy按需加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){}}
 // LLM

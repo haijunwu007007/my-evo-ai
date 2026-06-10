@@ -189,6 +189,49 @@ async def disable_gateway_tool(slug: str):
 
 
 # ============================================================
+# API: 测试集成
+# ============================================================
+@router.post("/api/v1/gateway/tools/{slug}/test")
+async def test_gateway_tool(slug: str):
+    """测试已配置的集成是否可用"""
+    conn = sqlite3.connect(str(_CRED_DB))
+    row = conn.execute(f"SELECT auth_type, credentials FROM {_CRED_TABLE} WHERE service=?", (slug,)).fetchone()
+    conn.close()
+    if not row:
+        return {"success": False, "result": f"❌ 集成 '{slug}' 未配置"}
+
+    cfg = _GATEWAY_TOOLS.get(slug, {})
+    name = cfg.get("name", slug)
+    auth_type, creds_json = row
+    creds = json.loads(creds_json)
+
+    tests = {
+        "github":    ("GET", "https://api.github.com/user"),
+        "openai":    ("GET", "https://api.openai.com/v1/models"),
+        "anthropic": ("GET", "https://api.anthropic.com/v1/messages"),
+        "deepseek":  ("POST", "https://api.deepseek.com/chat/completions", {"model":"deepseek-chat","messages":[{"role":"user","content":"hi"}]}),
+        "zhipu":     ("POST", "https://open.bigmodel.cn/api/paas/v4/chat/completions", {"model":"glm-4-flash","messages":[{"role":"user","content":"hi"}]}),
+        "telegram":  ("GET", f"https://api.telegram.org/bot{creds.get('api_key','')}/getMe"),
+    }
+
+    if slug in tests:
+        try:
+            method = tests[slug][0]
+            url = tests[slug][1]
+            body = tests[slug][2] if len(tests[slug]) > 2 else None
+            headers = {}
+            if auth_type == "api_key":
+                headers["Authorization"] = f"Bearer {creds.get('api_key','')}"
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.request(method, url, json=body, headers=headers)
+                return {"success": resp.is_success, "status": resp.status_code, "result": f"{'✅' if resp.is_success else '❌'} {name} 测试 {'成功' if resp.is_success else '失败（{resp.status_code}）'}"}
+        except Exception as e:
+            return {"success": False, "result": f"❌ {name} 测试异常: {str(e)[:100]}"}
+
+    return {"success": True, "result": f"✅ {name} 已配置（无自动测试）"}
+
+
+# ============================================================
 # API: 已启用的集成列表
 # ============================================================
 @router.get("/api/v1/gateway/enabled")
