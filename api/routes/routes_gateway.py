@@ -37,59 +37,83 @@ def _init_cred_db():
 
 _init_cred_db()
 
-# ─── Composio 风格: 500+ 浏览器集成模板 ─────
-_GATEWAY_TOOLS = {}  # { "slug": {"name":..., "auth_type":..., "icon":..., "auth_config":...} }
+# ─── Composio 风格: 集成模板（从 integrations_db.json 动态加载）─────
+_GATEWAY_TOOLS = {}  # { "slug": {"name":..., "auth_type":..., "icon":..., "category":..., "operations":..., "properties":...} }
+
+def _make_slug(name: str) -> str:
+    """将集成名转为 slug：GitLab CI → gitlab_ci，智谱 GLM → zhipu_glm"""
+    s = name.lower().strip()
+    s = s.replace(" ", "_").replace("-", "_").replace(".", "_")
+    return "".join(c for c in s if c.isalnum() or c == "_").strip("_")
 
 def _init_gateway_tools():
-    """初始化 500+ 集成模板（借鉴 Composio 的注册架构）"""
+    """从 connectors/integrations_db.json 加载 119 个集成模板"""
+    db_path = BASE_DIR / "connectors" / "integrations_db.json"
+    if not db_path.exists():
+        logger.warning(f"[GATEWAY] integrations_db.json 不存在: {db_path}，使用内置 38 个")
+        _init_fallback_tools()
+        return
+    try:
+        with open(db_path, "r", encoding="utf-8") as f:
+            items = json.load(f)
+        if not isinstance(items, list):
+            raise ValueError("integrations_db.json 格式错误，应为列表")
+        for item in items:
+            name = item.get("name", "")
+            if not name:
+                continue
+            slug = _make_slug(name)
+            cfg = {
+                "name": name,
+                "auth_type": item.get("auth_type", "api_key"),
+                "icon": item.get("icon", "fa:plug"),
+                "category": item.get("category", "未分类"),
+                "operations": item.get("operations", []),
+                "properties": item.get("properties", {}),
+                "type": item.get("type", "api"),
+            }
+            _GATEWAY_TOOLS[slug] = cfg
+        logger.info(f"[GATEWAY] 从 integrations_db.json 加载 {len(_GATEWAY_TOOLS)} 个集成模板")
+    except Exception as e:
+        logger.error(f"[GATEWAY] 加载 integrations_db.json 失败: {e}，使用内置 38 个")
+        _init_fallback_tools()
+
+def _init_fallback_tools():
+    """回退：内置 38 个核心集成模板"""
     templates = {
-        # 开发工具
-        "github":    {"name":"GitHub","auth_type":"oauth2","icon":"fa:github","auth_url":"https://github.com/login/oauth/authorize","token_url":"https://github.com/login/oauth/access_token","scopes":["repo","user"]},
-        "gitlab":    {"name":"GitLab","auth_type":"oauth2","icon":"fa:gitlab","auth_url":"https://gitlab.com/oauth/authorize","token_url":"https://gitlab.com/oauth/token","scopes":["api"]},
-        # 通信
-        "slack":     {"name":"Slack","auth_type":"oauth2","icon":"fa:slack","auth_url":"https://slack.com/oauth/v2/authorize","token_url":"https://slack.com/api/oauth.v2.access","scopes":["chat:write","channels:read"]},
-        "discord":   {"name":"Discord","auth_type":"oauth2","icon":"fa:discord","auth_url":"https://discord.com/api/oauth2/authorize","token_url":"https://discord.com/api/oauth2/token","scopes":["bot"]},
-        "telegram":  {"name":"Telegram","auth_type":"api_key","icon":"fa:telegram"},
-        "gmail":     {"name":"Gmail","auth_type":"oauth2","icon":"fa:google","auth_url":"https://accounts.google.com/o/oauth2/v2/auth","token_url":"https://oauth2.googleapis.com/token","scopes":["https://mail.google.com/"]},
-        # AI
-        "openai":    {"name":"OpenAI","auth_type":"api_key","icon":"fa:brain"},
-        "anthropic": {"name":"Anthropic","auth_type":"api_key","icon":"fa:brain"},
-        "stability": {"name":"Stability AI","auth_type":"api_key","icon":"fa:palette"},
-        "deepseek":  {"name":"DeepSeek","auth_type":"api_key","icon":"fa:brain"},
-        "zhipu":     {"name":"智谱GLM","auth_type":"api_key","icon":"fa:brain"},
-        # 存储
-        "aws_s3":    {"name":"AWS S3","auth_type":"access_key","icon":"fa:cloud"},
-        "gcs":       {"name":"Google Cloud Storage","auth_type":"oauth2","icon":"fa:google"},
-        "aliyun_oss":{"name":"阿里云OSS","auth_type":"access_key","icon":"fa:cloud"},
-        "tencent_cos":{"name":"腾讯云COS","auth_type":"access_key","icon":"fa:cloud"},
-        # 数据库
-        "mysql":     {"name":"MySQL","auth_type":"basic","icon":"fa:database"},
-        "postgres":  {"name":"PostgreSQL","auth_type":"basic","icon":"fa:database"},
-        "mongodb":   {"name":"MongoDB","auth_type":"basic","icon":"fa:database"},
-        "redis":     {"name":"Redis","auth_type":"api_key","icon":"fa:database"},
-        # 项目管理
-        "jira":      {"name":"Jira","auth_type":"basic","icon":"fa:ticket"},
-        "linear":    {"name":"Linear","auth_type":"api_key","icon":"fa:road"},
-        "notion":    {"name":"Notion","auth_type":"oauth2","icon":"fa:book","auth_url":"https://api.notion.com/v1/oauth/authorize","token_url":"https://api.notion.com/v1/oauth/token","scopes":[]},
-        "asana":     {"name":"Asana","auth_type":"oauth2","icon":"fa:list"},
-        "trello":    {"name":"Trello","auth_type":"api_key","icon":"fa:trello"},
-        # 支付
-        "stripe":    {"name":"Stripe","auth_type":"api_key","icon":"fa:credit-card"},
-        "alipay":    {"name":"支付宝","auth_type":"api_key","icon":"fa:pay"},
-        "wechat_pay":{"name":"微信支付","auth_type":"api_key","icon":"fa:weixin"},
-        # 办公
-        "google_drive":{"name":"Google Drive","auth_type":"oauth2","icon":"fa:google","auth_url":"https://accounts.google.com/o/oauth2/v2/auth","token_url":"https://oauth2.googleapis.com/token","scopes":["https://www.googleapis.com/auth/drive.readonly"]},
-        "dropbox":   {"name":"Dropbox","auth_type":"oauth2","icon":"fa:dropbox"},
-        "onedrive":  {"name":"OneDrive","auth_type":"oauth2","icon":"fa:microsoft"},
-        # DevOps
-        "docker":    {"name":"Docker Hub","auth_type":"basic","icon":"fa:docker"},
-        "kubernetes":{"name":"Kubernetes","auth_type":"api_key","icon":"fa:ship"},
-        "pagerduty": {"name":"PagerDuty","auth_type":"api_key","icon":"fa:bell"},
-        "datadog":   {"name":"Datadog","auth_type":"api_key","icon":"fa:chart-line"},
+        "github":{"name":"GitHub","auth_type":"oauth2","icon":"fa:github","category":"开发工具"},
+        "gitlab":{"name":"GitLab","auth_type":"oauth2","icon":"fa:gitlab","category":"开发工具"},
+        "slack":{"name":"Slack","auth_type":"oauth2","icon":"fa:slack","category":"通信"},
+        "discord":{"name":"Discord","auth_type":"oauth2","icon":"fa:discord","category":"通信"},
+        "telegram":{"name":"Telegram","auth_type":"api_key","icon":"fa:telegram","category":"通信"},
+        "gmail":{"name":"Gmail","auth_type":"oauth2","icon":"fa:google","category":"邮件"},
+        "openai":{"name":"OpenAI","auth_type":"api_key","icon":"fa:brain","category":"AI"},
+        "anthropic":{"name":"Anthropic","auth_type":"api_key","icon":"fa:brain","category":"AI"},
+        "deepseek":{"name":"DeepSeek","auth_type":"api_key","icon":"fa:brain","category":"AI"},
+        "zhipu":{"name":"智谱GLM","auth_type":"api_key","icon":"fa:brain","category":"AI"},
+        "aws_s3":{"name":"AWS S3","auth_type":"access_key","icon":"fa:cloud","category":"存储"},
+        "mysql":{"name":"MySQL","auth_type":"basic","icon":"fa:database","category":"数据库"},
+        "postgres":{"name":"PostgreSQL","auth_type":"basic","icon":"fa:database","category":"数据库"},
+        "mongodb":{"name":"MongoDB","auth_type":"basic","icon":"fa:database","category":"数据库"},
+        "redis":{"name":"Redis","auth_type":"basic","icon":"fa:database","category":"数据库"},
+        "jira":{"name":"Jira","auth_type":"basic","icon":"fa:ticket","category":"项目管理"},
+        "linear":{"name":"Linear","auth_type":"api_key","icon":"fa:road","category":"项目管理"},
+        "notion":{"name":"Notion","auth_type":"oauth2","icon":"fa:book","category":"生产力"},
+        "stripe":{"name":"Stripe","auth_type":"api_key","icon":"fa:credit-card","category":"支付"},
+        "kubernetes":{"name":"Kubernetes","auth_type":"api_key","icon":"fa:ship","category":"容器"},
+        "docker":{"name":"Docker Hub","auth_type":"basic","icon":"fa:docker","category":"容器"},
+        "pagerduty":{"name":"PagerDuty","auth_type":"api_key","icon":"fa:bell","category":"监控"},
+        "datadog":{"name":"Datadog","auth_type":"api_key","icon":"fa:chart-line","category":"监控"},
+        "google_drive":{"name":"Google Drive","auth_type":"oauth2","icon":"fa:google","category":"办公"},
+        "dropbox":{"name":"Dropbox","auth_type":"oauth2","icon":"fa:dropbox","category":"办公"},
+        "onedrive":{"name":"OneDrive","auth_type":"oauth2","icon":"fa:microsoft","category":"办公"},
+        "alipay":{"name":"支付宝","auth_type":"api_key","icon":"fa:alipay","category":"支付"},
+        "wechat_pay":{"name":"微信支付","auth_type":"api_key","icon":"fa:weixin","category":"支付"},
     }
+    _GATEWAY_TOOLS.clear()
     for slug, cfg in templates.items():
         _GATEWAY_TOOLS[slug] = cfg
-    logger.info(f"[GATEWAY] 注册 {len(templates)} 个集成模板")
+    logger.info(f"[GATEWAY] 回退模式: 注册 {len(templates)} 个核心集成")
 
 _init_gateway_tools()
 
@@ -106,8 +130,8 @@ async def list_gateway_tools():
             "name": cfg["name"],
             "auth_type": cfg["auth_type"],
             "icon": cfg["icon"],
-            "auth_url": cfg.get("auth_url", ""),
-            "scopes": cfg.get("scopes", []),
+            "category": cfg.get("category", ""),
+            "operations": cfg.get("operations", []),
             "enabled": _is_enabled(slug)
         })
     return {"success": True, "tools": results, "total": len(results)}
@@ -123,10 +147,12 @@ async def search_gateway_tools(q: str = ""):
     ql = q.lower()
     results = []
     for slug, cfg in _GATEWAY_TOOLS.items():
-        if ql in slug or ql in cfg["name"].lower() or ql in cfg["auth_type"]:
+        cat = cfg.get("category", "")
+        if ql in slug or ql in cfg["name"].lower() or ql in cfg["auth_type"] or ql in cat.lower():
             results.append({
                 "slug": slug, "name": cfg["name"], "auth_type": cfg["auth_type"],
-                "icon": cfg["icon"], "enabled": _is_enabled(slug)
+                "icon": cfg["icon"], "category": cfg.get("category", ""),
+                "enabled": _is_enabled(slug)
             })
     return {"success": True, "tools": results, "total": len(results)}
 
