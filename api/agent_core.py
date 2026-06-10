@@ -650,7 +650,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             # LLM纯文本响应（非文件生成），直接返回实际内容
             if content:
                 _remember(msg, content, kh=kh)
-                return {"success":True,"result":content,"mode":"chat"}
+                return {"success":True,"result":content,"mode":"llm"}
             return {"success":True,"result":_FALLBACK.get("可以做那些事情","AUTO-EVO-AI已就绪"),"mode":"direct"}
         return {"success":True,"result":"请求超时，请重试","mode":"timeout"}
     return process
