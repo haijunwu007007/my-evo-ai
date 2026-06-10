@@ -54,21 +54,80 @@ async def list_market_categories():
 
 @router.post("/api/v1/skills/market/install")
 async def install_market_skill(req: Request):
-    """安装技能（实际只是启用模块）"""
     body = await req.json()
     skill_id = body.get("skill_id", "")
     if not skill_id:
         return {"success": False, "error": "skill_id required"}
-    # 检查技能是否存在
     skill = next((s for s in MARKET_SKILLS if s["id"] == skill_id), None)
     if not skill:
-        return {"success": False, "error": f"技能 {skill_id} 不存在"}
-    # 检查模块文件是否已存在
-    module_path = SKILLS_DIR / f"{skill_id}.py"
-    if module_path.exists():
-        return {"success": True, "result": f"✅ {skill['name']} 已就绪"}
-    return {"success": True, "result": f"✅ {skill['name']} 已安装"}
+        return {"success": False, "error": "skill not found"}
+    mp = SKILLS_DIR / (skill_id + ".py")
+    if mp.exists():
+        return {"success": True, "result": skill["name"] + " ready"}
+    sid = skill_id.replace("-", "_")
+    cn = "".join(x.capitalize() for x in sid.split("_"))
+    c = '__module_meta__ = {"id":"' + skill_id + '","name":"' + cn + '","version":"V0.1","group":"' + skill["category"] + '","grade":"A","description":"' + skill["desc"] + '"}
+'
+    c += "from modules._base.enterprise_module import EnterpriseModule
+"
+    c += "class " + cn + "(EnterpriseModule):
+"
+    c += '    async def execute(self,action="run",params=None):
+'
+    c += '        return {"success":True,"module":"' + skill_id + '","action":action}
+'
+    c += "module_class = " + cn + "
+"
+    try:
+        mp.write_text(c, encoding="utf-8")
+        return {"success": True, "result": skill["name"] + " installed"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
+@router.post("/api/v1/skills/clawhub/install")
+async def install_from_clawhub(req: Request):
+    body = await req.json()
+    sn = body.get("skill_name", "")
+    if not sn:
+        return {"success": False, "error": "skill_name required"}
+    import subprocess as _sp
+    safe = sn.replace("/","_").replace(" ","_")
+    try:
+        r = _sp.run(["npx","clawhub","install",sn], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            return {"success": False, "error": r.stderr[:500]}
+        bp = SKILLS_DIR / ("clawhub_" + safe + ".py")
+        cn = "".join(x.capitalize() for x in safe.split("_"))
+        bc = '"""ClawHub: ' + sn + '"""
+'
+        bc += "import subprocess as _sp
+"
+        bc += "from modules._base.enterprise_module import EnterpriseModule
+"
+        bc += "class " + cn + "(EnterpriseModule):
+"
+        bc += '    async def execute(self,action="run",params=None):
+'
+        bc += '        try:
+'
+        bc += '            r = _sp.run(["npx","clawhub","run","' + sn + '"], capture_output=True, text=True, timeout=30)
+'
+        bc += '            return {"success": r.returncode == 0, "output": r.stdout[:2000]}
+'
+        bc += '        except Exception as e:
+'
+        bc += '            return {"success": False, "error": str(e)}
+'
+        bc += "module_class = " + cn + "
+"
+        bp.write_text(bc, encoding="utf-8")
+        return {"success": True, "result": "ClawHub " + sn + " bridged", "module": "clawhub_" + safe}
+    except FileNotFoundError:
+        return {"success": False, "error": "npx not found"}
+    except _sp.TimeoutExpired:
+        return {"success": False, "error": "timeout"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 def register_routes(app):
     app.include_router(router)
 
