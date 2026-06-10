@@ -4,7 +4,7 @@ from starlette.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from pathlib import Path
-import os, random, json, asyncio
+import os, random, json, asyncio, httpx
 from core.logging_config import get_logger
 logger = get_logger("evo.api.smart")
 router = APIRouter()
@@ -95,6 +95,10 @@ async def smart_chat(req: Req):
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
         except Exception:
             pass
+    # ── 检查是否有可用的 API Key ──
+    _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"))
+    if not _has_key:
+        return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求", "mode": "no_key"}
     from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
     result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)

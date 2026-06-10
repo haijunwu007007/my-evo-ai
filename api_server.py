@@ -143,7 +143,13 @@ from api.routes.routes_multitenant import router as tenant_router
 from api.routes.routes_analytics import router as analytics_router
 from api.routes.routes_events import router as events_router
 from api.routes.routes_diagnosis import router as diagnosis_router
+from api.routes.routes_selfheal import router as selfheal_router
+from api.routes.routes_rerank import router as rerank_router
+from api.routes.routes_agent_team import router as agent_team_router
 
+app.include_router(selfheal_router)
+app.include_router(rerank_router)
+app.include_router(agent_team_router)
 app.include_router(modules_browse_router)
 app.include_router(litellm_router)
 app.include_router(agent_s_router)

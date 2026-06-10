@@ -197,10 +197,19 @@ async def user_register(req: UserReq):
 @router.post("/api/v1/user/login")
 async def user_login(req: UserReq):
     conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
+    # 确保 users 表存在
+    conn.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, role TEXT, created_at REAL)")
+    # 确保至少有一个默认管理员用户
+    existing = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    if existing == 0:
+        default_pw = hashlib.sha256("admin123".encode()).hexdigest()
+        conn.execute("INSERT OR IGNORE INTO users (username, password, role, created_at) VALUES (?, ?, ?, ?)",
+                     ("admin", default_pw, "admin", time.time()))
+        conn.commit()
     pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
-    row = conn.execute("SELECT username FROM users WHERE username=? AND password=?", (req.username, pw)).fetchone()
+    row = conn.execute("SELECT username, role FROM users WHERE username=? AND password=?", (req.username, pw)).fetchone()
     conn.close()
-    if row: return {"success": True, "user": req.username}
+    if row: return {"success": True, "user": row[0], "role": row[1]}
     return {"success": False, "detail": "用户名或密码错误"}
 
 # ─── 7. 💬 聊天记录持久化 ─────────────────────
