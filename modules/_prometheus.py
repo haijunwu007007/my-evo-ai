@@ -43,5 +43,5 @@ def get_prometheus_text() -> str:
         lines.append(f'evo_module_errors{{metric="{key}"}} {m["errors"]}')
         avg = round(m["total_ms"] / m["count"], 1) if m["count"] > 0 else 0
         lines.append(f'evo_module_avg_ms{{metric="{key}"}} {avg}')
-    lines.append(f"evo_registered_modules {len(_registered)}")
+    lines.append(f"evo_modules_active_called {len(_registered)}")
     return "\n".join(lines) + "\n"

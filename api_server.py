@@ -359,22 +359,13 @@ async def health_check():
 
 @app.get("/api/v1/version")
 async def get_version():
-    """系统版本信息"""
+    """系统版本信息 — modules统一使用registry计数（与status一致）"""
     _mod_count = 0
     try:
-        # 优先用 registry 计数，与 /api/v1/status 保持一致
-        _reg = getattr(app.state, "module_registry", None) or getattr(app, "module_registry", None)
-        if _reg:
-            _mod_count = len(getattr(_reg, "_pending_modules", [])) + len(getattr(_reg, "modules", []))
-        if not _mod_count:
-            from api.infra import registry as _registry
-            _mod_count = len(_registry._pending_modules) + len(_registry.modules)
-        if not _mod_count:
-            _mod_dir = Path(__file__).resolve().parent / "modules"
-            if _mod_dir.exists():
-                _mod_count = len([p for p in _mod_dir.glob("*.py") if p.name != "__init__.py"])
+        from api.infra import registry as _registry
+        _mod_count = len(_registry._pending_modules) + len(_registry.modules)
     except Exception:
-        _mod_count = 0
+        pass
     return {"success": True, "version": VERSION, "build": VERSION_BUILD, "modules": _mod_count}
 
 
