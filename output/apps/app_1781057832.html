@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双文档生成 · 居家养老 & 隔热膜合同</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f7fb;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .app-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #1e2a3a;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .subhead {
+            color: #4a5b6e;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2a7f62;
+            padding-left: 1rem;
+            font-weight: 400;
+            font-size: 1.05rem;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .doc-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+            padding: 1.8rem 1.8rem 2rem;
+            transition: all 0.2s ease;
+            border: 1px solid #eef2f7;
+            display: flex;
+            flex-direction: column;
+        }
+        .doc-card:hover {
+            box-shadow: 0 20px 35px rgba(0, 20, 30, 0.08);
+            border-color: #d0dae8;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e9edf4;
+            padding-bottom: 0.75rem;
+        }
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a2a3a;
+            letter-spacing: -0.3px;
+        }
+        .badge {
+            background: #eaf3ef;
+            color: #1f6e56;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.9rem;
+            border-radius: 30px;
+            letter-spacing: 0.3px;
+        }
+        .doc-preview {
+            background: #f9fbfd;
+            border-radius: 16px;
+            padding: 1.2rem 1.2rem 0.9rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #e2e9f2;
+            min-height: 180px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #1f2a3a;
+            white-space: pre-wrap;
+            word-break: break-word;
+            flex: 1;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .doc-preview strong {
+            color: #1a3b4f;
+        }
+        .doc-preview p {
+            margin-bottom: 0.5rem;
+        }
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 0.6rem 1.6rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .btn-primary {
+            background: #1a4b3c;
+            border: 1px solid #1a4b3c;
+            color: white;
+            box-shadow: 0 4px 8px rgba(26, 75, 60, 0.12);
+        }
+        .btn-primary:hover {
+            background: #0f3d2f;
+            border-color: #0f3d2f;
+            transform: scale(1.02);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #bcc9db;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        .btn-icon {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .global-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.2rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .footer-note {
+            margin-top: 2.5rem;
+            color: #5e6f82;
+            font-size: 0.9rem;
+            border-top: 1px solid #dce3ed;
+            padding-top: 1.5rem;
+            text-align: center;
+        }
+        @media (max-width: 780px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 1.8rem;
+            }
+            body { padding: 1.2rem; }
+        }
+        /* 滚动条 */
+        .doc-preview::-webkit-scrollbar {
+            width: 4px;
+        }
+        .doc-preview::-webkit-scrollbar-track {
+            background: #eef2f7;
+            border-radius: 10px;
+        }
+        .doc-preview::-webkit-scrollbar-thumb {
+            background: #b6c5d9;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <h1>📄 双文档生成器</h1>
+            <div class="subhead">居家养老方案书 · 隔热膜施工合同</div>
+        </div>
+        <div style="margin-bottom: 0.6rem;">
+            <span style="background: #e6edf6; padding: 0.3rem 1.2rem; border-radius: 40px; font-size: 0.85rem; color: #1f3a5f;">分别生成 Word 文档</span>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        <!-- 卡片1：居家养老方案书 -->
+        <div class="doc-card">
+            <div class="card-header">
+                <h2>🏡 居家养老方案书</h2>
+                <span class="badge">完整版</span>
+            </div>
+            <div class="doc-preview" id="elderlyPreview">
+                <strong>▪ 服务对象</strong>：65岁以上居家长者，轻度/中度失能<br>
+                <strong>▪ 服务内容</strong>：生活照料、健康监测、康复护理、精神慰藉<br>
+                <strong>▪ 定制方案</strong>：根据评估等级制定个人照护计划<br>
+                <strong>▪ 智能设备</strong>：紧急呼叫器、智能床垫、体征手环<br>
+                <strong>▪ 团队配置</strong>：护士、康复师、护理员、社工<br>
+                <strong>▪ 费用参考</strong>：基础套餐 3800元/月起<br>
+                <strong>▪ 质量保障</strong>：每月家属反馈 + 服务质量巡检<br>
+                <br>
+                <span style="color: #2f5b6b;">📌 包含适老化改造建议、营养餐食方案、用药管理</span>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-outline" onclick="previewDocument('elderly')">
+                    <span class="btn-icon">👁️</span> 预览全文
+                </button>
+                <button class="btn btn-primary" onclick="generateWord('elderly')">
+                    <span class="btn-icon">⬇️</span> 生成Word
+                </button>
+            </div>
+        </div>
+
+        <!-- 卡片2：隔热膜施工合同 -->
+        <div class="doc-card">
+            <div class="card-header">
+                <h2>🪟 隔热膜施工合同</h2>
+                <span class="badge">标准条款</span>
+            </div>
+            <div class="doc-preview" id="filmPreview">
+                <strong>甲方</strong>：____________________<br>
+                <strong>乙方</strong>：____________________<br>
+                <strong>工程内容</strong>：建筑玻璃隔热膜安装（型号：X75 / R50）<br>
+                <strong>施工面积</strong>：______ 平方米<br>
+                <strong>合同总价</strong>：¥________ (含材料、人工、质保)<br>
+                <strong>付款方式</strong>：签约付50%，验收合格付50%<br>
+                <strong>质保期</strong>：5年（起泡、脱胶免费维修）<br>
+                <strong>工期</strong>：施工后3个工作日内完成<br>
+                <strong>验收标准</strong>：无气泡、无褶皱、边缘密封<br>
+                <br>
+                <span style="color: #2f5b6b;">📌 附：膜参数表、免责条款、维保范围</span>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-outline" onclick="previewDocument('film')">
+                    <span class="btn-icon">👁️</span> 预览全文
+                </button>
+                <button class="btn btn-primary" onclick="generateWord('film')">
+                    <span class="btn-icon">⬇️</span> 生成Word
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局操作 + 提示 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="color: #3b4d62; background: #eef4fa; padding: 0.4rem 1.4rem; border-radius: 40px; font-size: 0.9rem;">
+            ⚡ 点击「生成Word」分别下载 .doc 文件
+        </div>
+        <div class="global-actions">
+            <button class="btn btn-outline" onclick="previewDocument('elderly'); previewDocument('film');">
+                <span class="btn-icon">📂</span> 预览全部
+            </button>
+            <button class="btn btn-primary" onclick="generateWord('elderly'); setTimeout(()=>generateWord('film'), 200);">
+                <span class="btn-icon">📥</span> 生成两个Word
+            </button>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        ⚖️ 居家养老方案书 · 隔热膜施工合同 — 完整内容均已内嵌，点击生成即导出标准 Word 文档。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 完整文档内容 (满足需求: 居家养老方案书 & 隔热膜施工合同 具体内容) ----------
+        const DOCS = {
+            elderly: {
+                title: "居家养老方案书",
+                fullContent: `居家养老方案书（完整版）
+━━━━━━━━━━━━━━━━━━━━━━━━
+一、服务对象
+  65岁以上居家长者，经评估为轻度、中度失能或失智早期。
+
+二、服务内容
+  1. 生活照料：助浴、助洁、助餐、排泄护理、体位转移。
+  2. 健康监测：每日血压/血糖/血氧，每周医生远程问诊。
+  3. 康复护理：物理治疗、作业治疗、吞咽训练、认知训练。
+  4. 精神慰藉：陪聊、心理疏导、文娱活动、宠物疗法。
+
+三、个性化方案
+  根据《老年人能力评估标准》确定照护等级，制定个人照护计划（ICP），每月动态调整。
+
+四、智能设备支持
+  · 紧急呼叫器（24小时响应）
+  · 智能床垫（心率/呼吸/离床监测）
+  · 防走失手环（GPS+跌倒报警）
+  · 语音助手（提醒用药、预约服务）
+
+五、服务团队
+  护士（个案管理师）、康复治疗师、养老护理员、社工、营养师。
+
+六、费用参考
+  基础套餐 3800元/月（含每周6次上门，每次2小时）
+  加强套餐 5800元/月（每日上门+夜间照护）
+  费用透明，无隐形收费。
+
+七、质量保障
+  · 每月家属满意度调查
+  · 服务质量巡检（总部品控）
+  · 投诉48小时内解决
+
+八、适老化改造建议（免费评估）
+  浴室防滑、扶手安装、夜间照明、智能监测设备。
+
+九、营养餐食方案
+  由注册营养师定制，可选软食、碎食、流食、糖尿病餐。
+
+十、用药管理
+  建立用药档案，护士分药、提醒、记录不良反应。
+
+生成日期：${new Date().toLocaleDateString('zh-CN')}
+服务热线：400-8820-xxx`
+            },
+            film: {
+                title: "隔热膜施工合同",
+                fullContent: `隔热膜施工合同（标准条款）
+━━━━━━━━━━━━━━━━━━━━━━━━
+甲方（业主）：____________________
+身份证号：________________________
+乙方（施工方）：__________________
+统一社会信用代码：________________
+
+第一条 工程概况
+  1.1 工程地址：____________________
+  1.2 施工内容：建筑玻璃隔热膜安装
+  1.3 膜型号：X75（高隔热） / R50（高透光） （甲方二选一）
+  1.4 施工面积：______ 平方米
+
+第二条 合同价款及支付
+  2.1 合同总价：人民币 ¥________（大写：________________）
+  2.2 支付方式：
+      · 签约当日支付总价50%作为预付款。
+      · 验收合格后当日支付剩余50%。
+
+第三条 施工工期
+  材料到场后3个工作日内施工完毕。如遇不可抗力顺延。
+
+第四条 质量及验收标准
+  4.1 膜面平整、无气泡、无褶皱、无划痕，边缘密封严实。
+  4.2 隔热性能衰减不超过标称值5%。
+  4.3 验收时甲方现场确认，如有瑕疵乙方无条件返工。
+
+第五条 质保与售后
+  5.1 质保期5年（自验收合格之日起）。
+  5.2 质保范围：起泡、脱胶、褪色、非人为损坏。
+  5.3 质保期内免费维修，外地客户报销差旅费。
+
+第六条 违约责任
+  6.1 乙方逾期完工，每日按合同总价0.5%支付违约金。
+  6.2 甲方逾期付款，每日按应付金额0.5%支付违约金。
+
+第七条 附则
+  7.1 本合同一式两份，甲乙双方各执一份。
+  7.2 争议协商不成，提交工程所在地人民法院诉讼。
+
+甲方签字：______________  日期：______
+乙方签字：______________  日期：______
+
+附：膜参数表、免责条款、维保范围明细（共3页）`
+            }
+        };
+
+        // 获取预览元素
+        const elderlyPreview = document.getElementById('elderlyPreview');
+        const filmPreview = document.getElementById('filmPreview');
+
+        // 预览功能 (显示完整内容到预览框)
+        window.previewDocument = function(type) {
+            if (type === 'elderly') {
+                elderlyPreview.innerText = DOCS.elderly.fullContent;
+                elderlyPreview.scrollTop = 0;
+            } else if (type === 'film') {
+                filmPreview.innerText = DOCS.film.fullContent;
+                filmPreview.scrollTop = 0;
+            }
+        };
+
+        // 生成 Word 文档 (核心功能)
+        window.generateWord = function(type) {
+            const doc = DOCS[type];
+            if (!doc) return;
+
+            // 构建完整的 HTML 文档结构 (Word 兼容)
+            const style = `
+                <style>
+                    body { font-family: '宋体', SimSun, 'Times New Roman', serif; padding: 2.5cm; line-height: 1.7; }
+                    h1 { color: #1a3b4f; border-bottom: 2px solid #2a7f62; padding-bottom: 6px; }
+                    pre { white-space: pre-wrap; font-family: inherit; font-size: 14pt; margin: 0; }
+                    hr { margin: 20px 0; }
+                </style>
+            `;
+
+            const content = `
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${doc.title}</title>
+                    ${style}
+                </head>
+                <body>
+                    <h1>${doc.title}</h1>
+                    <pre>${doc.fullContent}</pre>
+                    <br/>
+                    <p style="color: #3a5a6a; font-size: 12pt;">—— 文档由双文档生成器自动导出 ——</p>
+                </body>
+                </html>
+            `;
+
+            // 生成 Blob (application/msword)
+            const blob = new Blob([content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            // 文件名: 类型 + 日期
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const fileName = `${doc.title}_${dateStr}.doc`;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // 可选: 轻提示 (控制台安静)
+            console.log(`✅ 已生成: ${fileName}`);
+        };
+
+        // 额外: 点击预览全部时，两个预览都显示完整内容
+        // 但上面 previewDocument 已经支持全部，再补充一个批量
+        // 另外，页面初始化时预览框显示摘要，但保留完整内容可随时预览。
+        // 初始化时预览框显示摘要 (已经写在html里了)
+        // 但为了更友好，如果用户点击预览全文，则替换为完整内容。
+        // 同时保留摘要可以通过刷新页面重置，但无伤大雅。
+        // 我们也可以增加一个“重置预览”功能，但非必须。
+
+        // 附加：双击卡片标题重置为摘要 (小彩蛋)
+        document.querySelectorAll('.card-header h2').forEach((el, index) => {
+            el.addEventListener('dblclick', function(e) {
+                if (index === 0) {
+                    elderlyPreview.innerHTML = ` <strong>▪ 服务对象</strong>：65岁以上居家长者，轻度/中度失能<br>
+                <strong>▪ 服务内容</strong>：生活照料、健康监测、康复护理、精神慰藉<br>
+                <strong>▪ 定制方案</strong>：根据评估等级制定个人照护计划<br>
+                <strong>▪ 智能设备</strong>：紧急呼叫器、智能床垫、体征手环<br>
+                <strong>▪ 团队配置</strong>：护士、康复师、护理员、社工<br>
+                <strong>▪ 费用参考</strong>：基础套餐 3800元/月起<br>
+                <strong>▪ 质量保障</strong>：每月家属反馈 + 服务质量巡检<br>
+                <br>
+                <span style="color: #2f5b6b;">📌 包含适老化改造建议、营养餐食方案、用药管理</span>`;
+                } else if (index === 1) {
+                    filmPreview.innerHTML = ` <strong>甲方</strong>：____________________<br>
+                <strong>乙方</strong>：____________________<br>
+                <strong>工程内容</strong>：建筑玻璃隔热膜安装（型号：X75 / R50）<br>
+                <strong>施工面积</strong>：______ 平方米<br>
+                <strong>合同总价</strong>：¥________ (含材料、人工、质保)<br>
+                <strong>付款方式</strong>：签约付50%，验收合格付50%<br>
+                <strong>质保期</strong>：5年（起泡、脱胶免费维修）<br>
+                <strong>工期</strong>：施工后3个工作日内完成<br>
+                <strong>验收标准</strong>：无气泡、无褶皱、边缘密封<br>
+                <br>
+                <span style="color: #2f5b6b;">📌 附：膜参数表、免责条款、维保范围</span>`;
+                }
+            });
+        });
+
+    })();
+</script>
+</body>
+</html>

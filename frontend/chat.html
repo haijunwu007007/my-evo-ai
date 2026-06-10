@@ -412,7 +412,7 @@ async function doRegister(){
       var r2=await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
       await r2.json()
     }
-  }catch(e){}
+  }catch(e){console.warn('auth/register fail',e)}
   if(!localStorage.getItem('evo_logged_in')){
     localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1')
   }
@@ -430,15 +430,26 @@ function doLogout(){
   document.getElementById('mainContent').classList.remove('show')
 }
 
+// 安全渲染Markdown为HTML（XSS防护：剥离事件处理器）
+function _renderMd(t){
+  return t.replace(/</g,'&lt;').replace(/\n/g,'<br>')
+    .replace(/!\[(.*?)\]\(([^)]+)\)/g,function(m,alt,src){
+      var s=src.replace(/["<>']/g,'').trim();
+      var a=alt.replace(/["<>']/g,'').trim();
+      return '<img src="'+s+'" alt="'+a+'" style="max-width:100%;border-radius:8px;margin:4px 0">'
+    })
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,text,href){
+      var u=href.replace(/["<>'` ]/g,'').trim();
+      var t=text.replace(/["<>']/g,'').trim();
+      return '<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>'
+    })
+}
 function addMsg(t,r){
   var m=document.getElementById('messages')
   var d=document.createElement('div');d.className='msg '+r
   var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI'
   var b=document.createElement('div');b.className='msg-bubble'
-  var h=t.replace(/</g,'&lt;').replace(/\n/g,'<br>')
-    .replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:4px 0">')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
-  b.innerHTML=h
+  b.innerHTML=_renderMd(t)
   d.appendChild(l);d.appendChild(b);m.appendChild(d)
   m.scrollTop=m.scrollHeight
   CHAT.push({role:r,text:t,time:new Date().toISOString()})
@@ -446,7 +457,7 @@ function addMsg(t,r){
   localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
   // 也保存到服务端
   var u=localStorage.getItem('evo_user')||'admin'
-  try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}
+  try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){console.warn('save fail',e)}
 }
 
 function showLoading(){
@@ -464,7 +475,7 @@ function restoreHistory(){
     var h=CHAT[i]
     var d=document.createElement('div');d.className='msg '+h.role
     var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI'
-    var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=h.text.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>')
+    var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text)
     d.appendChild(l);d.appendChild(b);m.appendChild(d)
   }
   m.scrollTop=m.scrollHeight
@@ -499,12 +510,12 @@ async function send(){
             var lines=decoder.decode(value).split('\n')
             for(var l of lines){
               if(!l.trim())continue
-              try{var j=JSON.parse(l);if(j.type==='chunk'){full+=j.text;bb.innerHTML=full.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:4px 0">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');d.scrollTop=d.scrollHeight}else if(j.type==='done'){d.scrollTop=d.scrollHeight}}catch(e){}
+              try{var j=JSON.parse(l);if(j.type==='chunk'){full+=j.text;bb.innerHTML=_renderMd(full);d.scrollTop=d.scrollHeight}else if(j.type==='done'){d.scrollTop=d.scrollHeight}}catch(e){console.warn('stream parse',e)}
             }
           }
-          // 渲染模块调用信息
+          // 渲染模块调用信息（保留高亮）
           if(full.includes('【模块调用】')||full.includes('execute_module')||full.includes('引擎:')){
-            bb.innerHTML=full.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/\|/g,' | ').replace(/【模块调用】/g,'<span style="color:#4361ee;font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:#7209b7">引擎:</span>')
+            bb.innerHTML=_renderMd(full).replace(/\|/g,' | ').replace(/【模块调用】/g,'<span style="color:#4361ee;font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:#7209b7">引擎:</span>')
           }
           CTX.push({role:'assistant',content:full})
           CHAT.push({role:'bot',text:full,time:new Date().toISOString()})
@@ -512,7 +523,7 @@ async function send(){
           localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
           return
         }
-      }catch(e){}
+      }catch(e){console.warn('stream fail',e)}
     }
     // 非流式请求：先尝试 Agent Engine（工具类/外部Skill），降级到 smart chat
     try{
@@ -538,7 +549,7 @@ async function send(){
           return
         }
       }
-    }catch(e){}
+    }catch(e){console.warn('agent/run fail',e)}
     // 非流式降级请求（工具调用/流式失败降级）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}

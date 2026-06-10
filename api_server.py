@@ -278,19 +278,7 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 # 根端点
 # ═══════════════════════════════════════════════════════
 
-# ── 前端静态文件路由（每文件单独注册，不干扰API路由）──
-FRONTEND_FILES = {
-    "/gomoku.html": BASE_DIR / "frontend" / "gomoku.html",
-    "/wife_well.html": BASE_DIR / "frontend" / "wife_well.html",
-    "/app_calc.html": BASE_DIR / "frontend" / "app_calc.html",
-    "/wolf": BASE_DIR / "frontend" / "wolf.html",
-    "/snake": BASE_DIR / "frontend" / "snake.html",
-    "/shooter": BASE_DIR / "frontend" / "shooter.html",
-    "/game": BASE_DIR / "frontend" / "game.html",
-}
-for _r, _p in FRONTEND_FILES.items():
-    if _p.exists():
-        app.get(_r, include_in_schema=False)(lambda p=_p: FileResponse(str(p)))
+# ── 生产路由（仅保留生产文件）──
 
 @app.get("/apps")
 async def apps_list():
