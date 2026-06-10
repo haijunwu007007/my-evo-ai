@@ -59,7 +59,7 @@ _SEED_DOCS = {
     "系统帮助": [
         "AUTO-EVO-AI V0.1 是一个 457 模块的多智能体自动化编排系统，支持聊天、仪表盘和企业管理三种入口。",
         "主要功能包括：AI 对话（支持流式输出）、模块管理（457个预置模块）、技能系统（Skills）、MCP 工具桥接、RAG 知识库、多智能体团队协作（6个默认 Agent：Planner/Coder/Reviewer/Operator/Analyst/Researcher）、工作流编排、Gateway 外部集成网关、A2A Agent 协议、MCPize 万能集成桥、REST→MCP 转换。",
-        "系统默认访问地址：http://localhost:8765。聊天首页 /，仪表盘 /dashboard，企业管理后台 /app/login。默认管理员账号 admin/admin123。",
+        "系统默认访问地址：http://localhost:8765。聊天首页 /，仪表盘 /dashboard，企业管理后台 /app/login。默认管理员账号 admin，密码由环境变量 EVO_ADMIN_PASSWORD 设置。",
         "Skills（技能）是系统的扩展能力单元，通过 POST /api/v1/skills/register 注册，通过 GET /api/v1/skills 查询列表，通过 POST /api/v1/skills/{name}/execute 执行。内置 18 个技能包括文本/文档/代码/搜索/翻译/PPT/Excel 等。",
         "MCP（Model Context Protocol）是标准化的 AI 工具接口。系统内置 8 个 MCP 工具（chat_send/document_generate/code_generate/web_search/github_trending/math_calculate/system_status/translate_text），并支持自动发现外部 MCP 服务器。",
     ],

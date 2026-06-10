@@ -202,7 +202,7 @@ async def user_login(req: UserReq):
     # 确保至少有一个默认管理员用户
     existing = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     if existing == 0:
-        default_pw = hashlib.sha256("admin123".encode()).hexdigest()
+        from api.defaults import ADMIN_PASSWORD_HASH as default_pw
         conn.execute("INSERT OR IGNORE INTO users (username, password, role, created_at) VALUES (?, ?, ?, ?)",
                      ("admin", default_pw, "admin", time.time()))
         conn.commit()
