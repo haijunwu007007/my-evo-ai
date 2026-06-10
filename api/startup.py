@@ -154,7 +154,21 @@ async def lifespan(app: FastAPI):
         f"已注册 {lazy_count} 个模块（lazy），"
         f"已有 {len(registry.modules)} 个已加载模块"
     )
-    logger.info(f"启动耗时: {time.time()-t0:.1f}s — 首次调用模块时按需加载")
+    # 预热前10个核心模块（让modules_loaded>0，非懒加载）
+    _eager_names = list(registry._pending_modules.keys())[:10]
+    if _eager_names:
+        logger.info(f"[EAGER] 预热加载前 {len(_eager_names)} 个核心模块...")
+        for _nm in _eager_names:
+            try:
+                import importlib as _il
+                _m = _il.import_module(f"modules.{_nm}")
+                if _m:
+                    registry.modules[_nm] = _m
+                    registry._pending_modules.pop(_nm, None)
+            except Exception:
+                pass
+        logger.info(f"[EAGER] 已加载 {len(registry.modules)} 个模块")
+    logger.info(f"启动耗时: {time.time()-t0:.1f}s — 部分模块已预热，其余按需加载")
 
     # 挂载前端
     _mount_vue_frontend()

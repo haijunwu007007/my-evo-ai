@@ -630,7 +630,7 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                     content2, tc2 = call_llm(messages, [], key)
                     if content2:
                         _remember(msg, content2, kh=kh)
-                        return {"success":True,"result":content2,"mode":"chat"}
+                        return {"success":True,"result":content2,"mode":"llm"}
                     break
                 for t, result in tool_results:
                     messages.append({"role":"assistant","content":None,"tool_calls":[t]})
