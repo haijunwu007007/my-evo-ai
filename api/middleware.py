@@ -19,6 +19,7 @@ from api.infra import (
     app, registry, rate_limiter, manager,
     _request_counter, _request_errors, _request_latency, _request_latency_ms,
     _API_KEY, _API_KEY_ENABLED,
+    _api_cache, _CACHE_TTL, _CACHEABLE_PATHS, _CACHE_SHORT_PATHS, _cache_hits,
 )
 from core.auth_provider import verify_token, verify_api_key, get_auth_config, check_role
 
@@ -60,6 +61,65 @@ async def api_version_redirect(request: Request, call_next):
         request.scope["path"] = new_path
         request.scope["raw_path"] = new_path.encode()
     response = await call_next(request)
+    return response
+
+
+# ═══════════════════════════════════════════════════════
+# 国际化中间件 — 设置 request.state.lang
+# ═══════════════════════════════════════════════════════
+
+_I18N_DIRS = [Path(__file__).resolve().parent.parent / "i18n"]
+try:
+    _I18N_DIRS = [d for d in _I18N_DIRS if d.is_dir()]
+except Exception:
+    _I18N_DIRS = []
+
+@app.middleware("http")
+async def i18n_middleware(request: Request, call_next):
+    """根据 Accept-Language 设置 request.state.lang"""
+    accept = request.headers.get("accept-language", "zh-CN")
+    lang = accept.split(",")[0].strip().split(";")[0]
+    request.state.lang = lang if lang else "zh-CN"
+    response = await call_next(request)
+    return response
+
+
+# ═══════════════════════════════════════════════════════
+# 缓存中间件 — 内存 LRU 缓存，对 GET 请求自动缓存
+# ═══════════════════════════════════════════════════════
+
+@app.middleware("http")
+async def cache_middleware(request: Request, call_next):
+    """内存缓存 GET 请求响应，支持 TTL + 可缓存路径白名单"""
+    path = request.url.path
+    method = request.method
+    if method != "GET":
+        return await call_next(request)
+
+    # 检查是否在缓存白名单中
+    ttl = _CACHE_TTL
+    if path in _CACHE_SHORT_PATHS:
+        ttl = 2.0
+    elif path not in _CACHEABLE_PATHS:
+        return await call_next(request)
+
+    # 查询缓存
+    now = time.time()
+    cached = _api_cache.get(path)
+    if cached and (now - cached["ts"]) < ttl and cached.get("content") is not None:
+        from api import infra as _evo_infra
+        _evo_infra._cache_hits += 1
+        from fastapi.responses import JSONResponse
+        return JSONResponse(content=cached["content"], status_code=200)
+
+    # 未命中 → 正常处理并缓存
+    response = await call_next(request)
+    if response.status_code == 200:
+        try:
+            body = await response.json()
+            _api_cache[path] = {"ts": time.time(), "content": body}
+        except Exception:
+            pass
     return response
 
 
