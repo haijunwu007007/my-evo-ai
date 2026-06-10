@@ -57,6 +57,8 @@ button.danger{background:#e74c3c}
   <a onclick="showTab('rag')">📚 知识库</a>
   <a onclick="showTab('skills')">🔧 技能</a>
   <a onclick="showTab('gateway')">🌐 网关</a>
+  <a onclick="showTab('lowcode')">🛠️ 低代码</a>
+  <a onclick="showTab('flowchart')">🗺️ 流程图</a>
   <a onclick="showTab('env')">🔧 配置</a>
   <a href="/">← 返回</a>
 </div>
@@ -116,10 +118,207 @@ docker-compose up -d metabase    # BI分析</pre></div>
   <div id="envCats"></div>
 </div>
 
+<div id="tab-lowcode" class="tab-content" style="display:none">
+  <h2>🛠️ 低代码平台</h2>
+  <p style="color:var(--text2);margin:8px 0 16px">拖拽配置，自动生成应用</p>
+  <div style="display:grid;grid-template-columns:200px 1fr 250px;gap:16px;max-width:1200px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px">
+      <h3 style="font-size:13px;margin-bottom:8px">📦 组件</h3>
+      <div id="lcComponents">
+        <div class="lc-comp" draggable="true" data-type="input">📝 输入框</div>
+        <div class="lc-comp" draggable="true" data-type="textarea">📄 多行文本</div>
+        <div class="lc-comp" draggable="true" data-type="select">📋 下拉选择</div>
+        <div class="lc-comp" draggable="true" data-type="button">🔘 按钮</div>
+        <div class="lc-comp" draggable="true" data-type="table">📊 表格</div>
+        <div class="lc-comp" draggable="true" data-type="chart">📈 图表</div>
+        <div class="lc-comp" draggable="true" data-type="date">📅 日期</div>
+        <div class="lc-comp" draggable="true" data-type="file">📁 上传</div>
+      </div>
+    </div>
+    <div id="lcCanvas" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:400px" ondragover="event.preventDefault()" ondrop="lcDrop(event)">
+      <p style="color:var(--text2);font-size:12px;text-align:center;margin-top:160px">⬇️ 拖拽组件到此处</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px">
+      <h3 style="font-size:13px;margin-bottom:8px">⚙️ 属性</h3>
+      <div id="lcProps"><p style="color:var(--text2);font-size:12px">选择一个组件</p></div>
+      <div style="margin-top:12px">
+        <button onclick="lcPreview()" style="width:100%;margin-bottom:8px">👁️ 预览</button>
+        <button onclick="lcExport()" style="width:100%" class="danger">📦 生成</button>
+      </div>
+    </div>
+  </div>
+  <div id="lcPreviewArea" style="display:none;margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;max-width:1200px">
+    <h3 style="margin-bottom:8px">👁️ 预览</h3>
+    <div id="lcPreviewBody"></div>
+    <button onclick="document.getElementById('lcPreviewArea').style.display='none'" style="margin-top:8px">关闭</button>
+  </div>
+</div>
+
+<div id="tab-flowchart" class="tab-content" style="display:none">
+  <h2>🗺️ 流程图编辑器</h2>
+  <p style="color:var(--text2);margin:8px 0 16px">Mermaid.js — 用文本描述，自动渲染流程图</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1200px">
+    <div>
+      <textarea id="fcInput" style="width:100%;height:400px;font-family:monospace;font-size:13px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text)" placeholder="输入Mermaid流程图语法...">graph TD
+    A[开始] --> B{判断}
+    B -->|是| C[处理]
+    B -->|否| D[结束]
+    C --> D</textarea>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button onclick="fcRender()">🔄 渲染</button>
+        <button onclick="fcSave()">💾 保存</button>
+        <select id="fcType" style="flex:1" onchange="fcInsert()">
+          <option value="">插入模板...</option>
+          <option value="flowchart">流程图模板</option>
+          <option value="sequence">时序图模板</option>
+          <option value="class">类图模板</option>
+          <option value="gantt">甘特图模板</option>
+        </select>
+      </div>
+    </div>
+    <div id="fcCanvas" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;min-height:400px;display:flex;align-items:center;justify-content:center;overflow:auto">
+      <p style="color:var(--text2)">点击"渲染"查看流程图</p>
+    </div>
+  </div>
+  <div id="fcHistory" style="max-width:1200px;margin-top:16px"></div>
+</div>
+
 <script>
-const API='/api/v1'
+// ===== 低代码引擎 =====
+var lcItems = []
+function lcDrop(e){
+  e.preventDefault()
+  var type = e.dataTransfer.getData('text/plain')
+  if(!type) return
+  var id = 'c' + Date.now()
+  lcItems.push({id:id, type:type, label:type, props:{}})
+  lcRender()
+  document.querySelector('#lcCanvas p')?.remove()
+}
+document.querySelectorAll('.lc-comp').forEach(function(el){
+  el.addEventListener('dragstart', function(e){ e.dataTransfer.setData('text/plain', e.dataset.type) })
+})
+function lcRender(){
+  var html = ''
+  lcItems.forEach(function(item, i){
+    html += '<div class="lc-item" data-idx="' + i + '" onclick="lcSelect(' + i + ')" style="padding:8px 12px;margin:4px 0;background:var(--bg);border-radius:6px;border:1px solid var(--border);cursor:pointer;font-size:13px">'
+    html += '<span style="float:right;cursor:pointer;color:#e74c3c" onclick="event.stopPropagation();lcItems.splice('+i+',1);lcRender();lcProps()">✕</span>'
+    html += '<strong>' + item.label + '</strong> <small style="color:var(--text2)">(' + item.type + ')</small>'
+    html += '</div>'
+  })
+  if(!html) html = '<p style="color:var(--text2);font-size:12px;text-align:center;margin-top:160px">⬇️ 拖拽组件到此处</p>'
+  document.getElementById('lcCanvas').innerHTML = html
+}
+function lcSelect(idx){
+  var item = lcItems[idx]
+  if(!item) return
+  window._lcIdx = idx
+  var html = '<label>标签</label><input id="lcPropLabel" value="' + item.label + '" style="width:100%;margin-bottom:8px" onchange="lcItems[window._lcIdx].label=this.value;lcRender()">'
+  html += '<label>类型</label><input value="' + item.type + '" disabled style="width:100%;margin-bottom:8px">'
+  if(item.type == 'input' || item.type == 'textarea'){
+    html += '<label>占位符</label><input id="lcPropPh" value="' + (item.props.placeholder||'') + '" style="width:100%;margin-bottom:8px" onchange="lcItems[window._lcIdx].props.placeholder=this.value">'
+  }
+  if(item.type == 'select'){
+    html += '<label>选项(逗号分隔)</label><input id="lcPropOpt" value="' + (item.props.options||'') + '" style="width:100%;margin-bottom:8px" onchange="lcItems[window._lcIdx].props.options=this.value">'
+  }
+  document.getElementById('lcProps').innerHTML = html
+}
+function lcProps(){ document.getElementById('lcProps').innerHTML = '<p style="color:var(--text2);font-size:12px">选择一个组件</p>' }
+function lcPreview(){
+  if(!lcItems.length) return alert('请先添加组件')
+  var html = '<form style="max-width:600px">'
+  lcItems.forEach(function(item){
+    html += '<div style="margin-bottom:12px">'
+    html += '<label style="display:block;font-size:13px;color:var(--text2);margin-bottom:4px">' + item.label + '</label>'
+    if(item.type == 'input') html += '<input placeholder="' + (item.props.placeholder||'') + '" style="width:100%">'
+    else if(item.type == 'textarea') html += '<textarea rows="3" placeholder="' + (item.props.placeholder||'') + '" style="width:100%"></textarea>'
+    else if(item.type == 'select'){
+      html += '<select style="width:100%">'
+      ;(item.props.options||'选项1,选项2').split(',').forEach(function(o){ html += '<option>' + o.trim() + '</option>' })
+      html += '</select>'
+    }
+    else if(item.type == 'button') html += '<button>' + item.label + '</button>'
+    else if(item.type == 'date') html += '<input type="date" style="width:100%">'
+    else if(item.type == 'file') html += '<input type="file" style="width:100%">'
+    else if(item.type == 'table') html += '<table style="width:100%;border:1px solid var(--border)"><tr><td style="padding:8px;border:1px solid var(--border)">数据1</td><td style="padding:8px;border:1px solid var(--border)">数据2</td></tr></table>'
+    else if(item.type == 'chart') html += '<div style="height:100px;background:linear-gradient(90deg,var(--accent) 30%,#7209b7 60%,#00b894 90%);border-radius:4px"></div>'
+    html += '</div>'
+  })
+  html += '</form>'
+  document.getElementById('lcPreviewBody').innerHTML = html
+  document.getElementById('lcPreviewArea').style.display = 'block'
+}
+function lcExport(){
+  if(!lcItems.length) return alert('请先添加组件')
+  var config = JSON.stringify({app:'lowcode-v1', components: lcItems, created: new Date().toISOString()}, null, 2)
+  var blob = new Blob([config], {type:'application/json'})
+  var a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'lowcode-app-' + Date.now() + '.json'
+  a.click()
+  alert('✅ 低代码配置已导出为JSON文件')
+}
+
+// ===== 流程图引擎 =====
+var fcSaved = JSON.parse(localStorage.getItem('evo_flowcharts')||'[]')
+function fcRender(){
+  var mermaidCode = document.getElementById('fcInput').value
+  if(!mermaidCode.trim()) return
+  var html = '<div class="mermaid" style="max-width:100%">' + mermaidCode.replace(/</g,'&lt;') + '</div>'
+  document.getElementById('fcCanvas').innerHTML = html
+  if(typeof mermaid !== 'undefined'){
+    mermaid.run({nodes: [document.querySelector('.mermaid')]})
+  } else {
+    // 加载mermaid
+    var s = document.createElement('script')
+    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'
+    s.onload = function(){ mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#4361ee',primaryTextColor:'#fff',primaryBorderColor:'#4361ee',lineColor:'#8892b0',secondaryColor:'#7209b7',tertiaryColor:'#1a1a2e'}}); mermaid.run({nodes: [document.querySelector('.mermaid')]}) }
+    document.head.appendChild(s)
+  }
+}
+function fcSave(){
+  var code = document.getElementById('fcInput').value
+  if(!code.trim()) return
+  fcSaved.unshift({id:Date.now(),code:code,time:new Date().toISOString()})
+  if(fcSaved.length > 20) fcSaved.length = 20
+  localStorage.setItem('evo_flowcharts', JSON.stringify(fcSaved))
+  fcShowHistory()
+  alert('✅ 流程图已保存')
+}
+function fcShowHistory(){
+  if(!fcSaved.length){ document.getElementById('fcHistory').innerHTML = ''; return }
+  var html = '<h3 style="margin-bottom:8px">📋 保存的历史</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'
+  fcSaved.forEach(function(f,i){
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;max-width:200px;font-size:11px" onclick="document.getElementById(\'fcInput\').value=this.dataset.code;fcRender()" data-code="' + f.code.replace(/"/g,'&quot;') + '">'
+    html += '<small style="color:var(--text2)">' + new Date(f.time).toLocaleString() + '</small>'
+    html += '<div style="margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.code.slice(0,60) + '</div>'
+    html += '</div>'
+  })
+  html += '</div>'
+  document.getElementById('fcHistory').innerHTML = html
+}
+function fcInsert(){
+  var sel = document.getElementById('fcType').value
+  var tpls = {
+    flowchart: 'graph TD\n    A[开始] --> B{判断}\n    B -->|条件1| C[分支1]\n    B -->|条件2| D[分支2]\n    C --> E[结束]\n    D --> E',
+    sequence: 'sequenceDiagram\n    participant 用户\n    participant 系统\n    participant 数据库\n    用户->>系统: 发起请求\n    系统->>数据库: 查询数据\n    数据库-->>系统: 返回结果\n    系统-->>用户: 显示结果',
+    class: 'classDiagram\n    class 用户 {\n        +String 姓名\n        +login()\n    }\n    class 订单 {\n        +Int ID\n        +create()\n    }\n    用户 "1" --> "*" 订单',
+    gantt: 'gantt\n    title 项目计划\n    dateFormat  YYYY-MM-DD\n    section 开发\n    需求分析     :a1, 2026-06-01, 7d\n    编码实现     :a2, after a1, 14d\n    测试部署     :a3, after a2, 7d'
+  }
+  if(tpls[sel]){ document.getElementById('fcInput').value = tpls[sel]; fcRender() }
+}
+fcShowHistory()
+</script>
+<style>
+.lc-comp{padding:8px 12px;margin:4px 0;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:grab;font-size:13px;user-select:none}
+.lc-comp:hover{border-color:var(--accent);background:var(--card)}
+.lc-comp:active{cursor:grabbing}
+.lc-item:hover{border-color:var(--accent)!important}
+#fcInput:focus{outline:none;border-color:var(--accent)}
+.mermaid svg{max-width:100%;height:auto}
+</style>
 // 显示tab
-function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv()}
+function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv();if(name=='lowcode')lcRender();if(name=='flowchart')setTimeout(fcRender,100)}
 // 仪表盘
 async function loadStats(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('stats').innerHTML='<div class=stat><div class=num>'+s.modules_total+'</div><div class=label>模块</div></div><div class=stat><div class=num>456</div><div class=label>技能</div></div><div class=stat><div class=num>101</div><div class=label>集成</div></div><div class=stat><div class=num>'+s.api_version+'</div><div class=label>版本</div></div>'}catch(e){document.getElementById('stats').innerHTML='<p>加载失败</p>'}}
 loadStats()
