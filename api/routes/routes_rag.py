@@ -54,6 +54,50 @@ def _init_db():
 
 _init_db()
 
+# ─── 种子文档（系统知识库自动填充）─────────────────────
+_SEED_DOCS = {
+    "系统帮助": [
+        "AUTO-EVO-AI V0.1 是一个 457 模块的多智能体自动化编排系统，支持聊天、仪表盘和企业管理三种入口。",
+        "主要功能包括：AI 对话（支持流式输出）、模块管理（457个预置模块）、技能系统（Skills）、MCP 工具桥接、RAG 知识库、多智能体团队协作（6个默认 Agent：Planner/Coder/Reviewer/Operator/Analyst/Researcher）、工作流编排、Gateway 外部集成网关、A2A Agent 协议、MCPize 万能集成桥、REST→MCP 转换。",
+        "系统默认访问地址：http://localhost:8765。聊天首页 /，仪表盘 /dashboard，企业管理后台 /app/login。默认管理员账号 admin/admin123。",
+        "Skills（技能）是系统的扩展能力单元，通过 POST /api/v1/skills/register 注册，通过 GET /api/v1/skills 查询列表，通过 POST /api/v1/skills/{name}/execute 执行。内置 18 个技能包括文本/文档/代码/搜索/翻译/PPT/Excel 等。",
+        "MCP（Model Context Protocol）是标准化的 AI 工具接口。系统内置 8 个 MCP 工具（chat_send/document_generate/code_generate/web_search/github_trending/math_calculate/system_status/translate_text），并支持自动发现外部 MCP 服务器。",
+    ],
+}
+def _seed_rag():
+    """如果知识库为空，自动填充种子文档"""
+    conn = sqlite3.connect(str(_DB))
+    try:
+        cnt = conn.execute("SELECT COUNT(*) FROM rag_knowledge").fetchone()[0]
+        if cnt > 0:
+            return
+        for kb_name, docs in _SEED_DOCS.items():
+            now = time.time()
+            conn.execute(
+                "INSERT OR IGNORE INTO rag_knowledge (name, description, doc_count, chunk_count, created_at) VALUES (?,?,?,?,?)",
+                (kb_name, f"{kb_name} 自动种子知识库", len(docs), 0, now),
+            )
+            for i, doc_text in enumerate(docs):
+                doc_hash = hashlib.md5(doc_text.encode()).hexdigest()
+                doc_path = str(RAG_DIR / "documents" / f"{kb_name}_{i}.txt")
+                with open(doc_path, "w", encoding="utf-8") as f:
+                    f.write(doc_text)
+                conn.execute(
+                    "INSERT INTO rag_documents (kb_name, filename, title, chunk_count, file_path, created_at) VALUES (?,?,?,?,?,?)",
+                    (kb_name, f"{kb_name}_{i}.txt", doc_text[:40], 1, doc_path, now),
+                )
+                # 直接作为 chunk 存储
+                chunk_path = RAG_DIR / "chunks" / f"{kb_name}_{i}.json"
+                chunk_data = {"content": doc_text, "kb": kb_name, "index": i}
+                with open(chunk_path, "w", encoding="utf-8") as f:
+                    json.dump(chunk_data, f, ensure_ascii=False)
+            conn.commit()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+_seed_rag()
+
 # ─── 分块策略 ─────────────────────────────
 _CHUNK_STRATEGIES = {
     "fixed": {"chunk_size": 500, "overlap": 50},

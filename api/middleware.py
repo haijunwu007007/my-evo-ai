@@ -101,6 +101,14 @@ async def security_middleware(request: Request, call_next):
     error_msg = ""
 
     try:
+        # ⚠️ 拦截 .env 路径探测攻击
+        _blocked_suffixes = [".env", ".git/config", "wp-admin", "phpmyadmin"]
+        if any(p in path.lower() for p in _blocked_suffixes):
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "not_found", "message": "资源不存在"},
+            )
+
         # 公共路径直接放行
         is_public = any(
             path == p or path.startswith(p)
