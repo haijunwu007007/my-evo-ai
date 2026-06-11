@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    import sys; sys.path.insert(0,'.'); exec(open('tests/test_core.py').read())
-                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
-UnicodeDecodeError: 'gbk' codec can't decode byte 0xac in position 51: illegal multibyte sequence
