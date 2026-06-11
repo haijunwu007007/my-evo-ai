@@ -83,7 +83,7 @@ import uuid
 import hashlib
 import json
 from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from enum import Enum
 from dataclasses import dataclass, field
 
@@ -139,7 +139,7 @@ class AgentDefinition:
     max_tokens: int = 4096
     tools: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 @dataclass
 class ChatMessage:
@@ -150,7 +150,7 @@ class ChatMessage:
     sender_id: str = ""
     role: str = "assistant"
     content: str = ""
-    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: dict[str, Any] = field(default_factory=dict)
     token_count: int = 0
 
@@ -166,8 +166,8 @@ class Conversation:
     max_rounds: int = 50
     current_round: int = 0
     termination: TerminationCondition = TerminationCondition.MAX_ROUNDS
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
-    updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
@@ -181,7 +181,7 @@ class AgentGroup:
     routing_strategy: str = "sequential"  # sequential, round_robin, router
     max_rounds: int = 20
     metadata: dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 @dataclass
 class SkillDefinition:
@@ -193,7 +193,7 @@ class SkillDefinition:
     handler: str = ""
     parameters: dict[str, Any] = field(default_factory=dict)
     required_permissions: list[str] = field(default_factory=list)
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     """AutoGen Studio 多智能体编排管理器"""
@@ -479,7 +479,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
         msg.token_count = len(content) // 2  # 近似token数
         conv.messages.append(msg)
         conv.current_round += 1
-        conv.updated_at = datetime.now(UTC).isoformat()
+        conv.updated_at = datetime.now(timezone.utc).isoformat()
 
         # 索引消息
         self._message_index.append({"conv_id": conv_id, "msg_id": msg.msg_id, "content": content[:200]})
@@ -566,7 +566,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return {"success": False, "error": "对话不存在"}
         c = self._conversations[cid]
         c.status = ConversationStatus(p.get("final_status", "completed"))
-        c.updated_at = datetime.now(UTC).isoformat()
+        c.updated_at = datetime.now(timezone.utc).isoformat()
         return {"success": True, "result": {"conv_id": cid, "status": c.status.value}}
 
     # ── 智能体组管理 ──
@@ -638,7 +638,7 @@ class AutoGenStudioManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             round_count = rnd + 1
 
         conv.current_round = round_count
-        conv.updated_at = datetime.now(UTC).isoformat()
+        conv.updated_at = datetime.now(timezone.utc).isoformat()
 
         metrics_collector.record("autogen_studio_group_chats")
         metrics_collector.histogram("autogen_studio_group_chat_rounds").observe(round_count)

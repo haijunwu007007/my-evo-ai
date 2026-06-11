@@ -94,7 +94,7 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -178,7 +178,7 @@ class DocumentMetadata:
         self.author = author
         self.language = language
         self.tags = tags or []
-        self.created_at = datetime.now(UTC)
+        self.created_at = datetime.now(timezone.utc)
         self.updated_at = self.created_at
         self.version = 1
         self.checksum = ""
@@ -235,7 +235,7 @@ class DocumentChunk:
         self.metadata = metadata or {}
         self.embedding: list[float] | None = None
         self.bm25_tokens: list[str] = []
-        self.created_at = datetime.now(UTC)
+        self.created_at = datetime.now(timezone.utc)
         self.score = 0.0
 
     def compute_checksum(self) -> str:
@@ -290,7 +290,7 @@ class QAResult:
         self.model_used = ""
         self.tokens_used = 0
         self.latency_ms = 0.0
-        self.created_at = datetime.now(UTC)
+        self.created_at = datetime.now(timezone.utc)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -549,7 +549,7 @@ class KnowledgeBase:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.status = KnowledgeBaseStatus.ACTIVE
-        self.created_at = datetime.now(UTC)
+        self.created_at = datetime.now(timezone.utc)
         self.updated_at = self.created_at
         self.document_count = 0
         self.chunk_count = 0
@@ -845,7 +845,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         kb.document_count += 1
         kb.chunk_count += len(chunks)
         kb.total_size_bytes += len(content.encode("utf-8"))
-        kb.updated_at = datetime.now(UTC)
+        kb.updated_at = datetime.now(timezone.utc)
         self._processing_stats["documents_ingested"] += 1
         self._processing_stats["chunks_created"] += len(chunks)
         elapsed = (time.monotonic() - start) * 1000
@@ -881,7 +881,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         kb = self._knowledge_bases[kb_id]
         kb.document_count = max(0, kb.document_count - 1)
         kb.chunk_count = max(0, kb.chunk_count - removed_chunks)
-        kb.updated_at = datetime.now(UTC)
+        kb.updated_at = datetime.now(timezone.utc)
         await self._audit_log(
             "doc_delete",
             f"Deleted document from KB: {doc_id}",
@@ -1138,7 +1138,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {
             "status": "healthy" if all_healthy else "degraded",
             "checks": checks,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     # =========================================================================
@@ -1197,7 +1197,7 @@ class RAGFlowEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     async def _audit_log(self, action: str, message: str, details: dict[str, Any] | None = None) -> None:
         """Record audit log entry."""
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "module": self.module_name,
             "action": action,
             "message": message,

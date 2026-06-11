@@ -78,7 +78,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -431,7 +431,7 @@ class SuperagentModule:
             "constraints": constraints,
             "steps": steps,
             "status": "planned",
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         return {"success": True, "plan_id": plan_id, "steps": num_steps, "goal": goal}
 
@@ -449,7 +449,7 @@ class SuperagentModule:
             step["actual_duration_ms"] = int((__import__('time').time()*1000)%(3000-100+1))+100
             tool_calls += len(step.get("tools_needed", []))
         plan["status"] = "completed"
-        plan["completed_at"] = datetime.now(UTC).isoformat()
+        plan["completed_at"] = datetime.now(timezone.utc).isoformat()
         dur = int((time.time() - t0) * 1000)
         self._stats["total_tool_calls"] += tool_calls
         self._stats["total_tasks"] += 1
@@ -491,7 +491,7 @@ class SuperagentModule:
         memory = {
             "content": content,
             "importance": importance,
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "access_count": 0,
         }
         self._memories[key].append(memory)

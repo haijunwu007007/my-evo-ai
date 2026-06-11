@@ -83,7 +83,7 @@ from core.logging_config import get_logger
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -118,7 +118,7 @@ class VectorPayload:
     namespace: str = "default"
 
     def __post_init__(self):
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         if not self.created_at:
             self.created_at = now
         if not self.updated_at:
@@ -358,7 +358,7 @@ class CollectionSyncManager:
 
     def record_replication(self, collection: str, operation: str, shard_id: str, success: bool, latency_ms: float):
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "collection": collection,
             "operation": operation,
             "shard_id": shard_id,
@@ -435,7 +435,7 @@ class IndexOptimizer:
 
         total_ms = (time.time() - start) * 1000
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "collection": collection,
             "operations": operations,
             "total_time_ms": round(total_ms, 2),
@@ -483,7 +483,7 @@ class QdrantVectorManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         self._collections[config.name] = {
             "config": config,
             "vectors": {},
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "status": "active",
             "vector_count": 0,
             "index_built": False,

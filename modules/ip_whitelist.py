@@ -79,7 +79,7 @@ import fnmatch
 from core.logging_config import get_logger
 import hashlib
 import ipaddress
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass, field
@@ -283,11 +283,11 @@ class WhitelistEntry:
         if not self.entry_id:
             self.entry_id = hashlib.md5(f"{self.ip_value}{self.created_at}".encode()).hexdigest()[:16]
         if not self.created_at:
-            self.created_at = datetime.now(UTC).isoformat()
+            self.created_at = datetime.now(timezone.utc).isoformat()
         if self.expires_at and self.expires_at != "":
             try:
                 exp = datetime.fromisoformat(self.expires_at.replace("Z", "+00:00"))
-                if datetime.now(UTC) > exp:
+                if datetime.now(timezone.utc) > exp:
                     self.status = WhitelistStatus.EXPIRED
             except ValueError:
                 pass
@@ -459,7 +459,7 @@ class IPWhitelistManager:
             metadata=metadata or {},
         )
         if expires_in_hours > 0:
-            exp = datetime.now(UTC) + timedelta(hours=expires_in_hours)
+            exp = datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
             entry.expires_at = exp.isoformat()
         self._entries[entry.entry_id] = entry
         self._audit("add", entry.entry_id, ip_value, created_by, description)
@@ -485,7 +485,7 @@ class IPWhitelistManager:
     def is_whitelisted(self, ip_address: str) -> dict:
         """Check if an IP is in any active whitelist entry."""
         self._check_count += 1
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         active_entries = sorted(
             [e for e in self._entries.values() if e.status == WhitelistStatus.ACTIVE], key=lambda e: e.priority
         )
@@ -529,7 +529,7 @@ class IPWhitelistManager:
 
     def purge_expired(self) -> int:
         count = 0
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         for eid, entry in list(self._entries.items()):
             if entry.expires_at:
                 try:
@@ -594,7 +594,7 @@ class IPWhitelistManager:
 
     def _audit(self, action: str, entry_id: str, ip_value: str, operator: str, details: str):
         entry = AuditEntry(
-            timestamp=datetime.now(UTC).isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             action=action,
             entry_id=entry_id,
             ip_value=ip_value,
@@ -634,7 +634,7 @@ class IPWhitelistManager:
             "total_checks": self._check_count,
             "total_hits": self._hit_count,
             "audit_entries": len(self._audit_log),
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

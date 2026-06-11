@@ -20,7 +20,7 @@ import logging
 import time
 import traceback
 from collections import defaultdict
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -82,7 +82,7 @@ def parse_event(event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
     repo = (payload.get("repository") or {}).get("full_name", "unknown")
     sender = (payload.get("sender") or {}).get("login", "unknown")
     sender_url = (payload.get("sender") or {}).get("html_url", "")
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
 
     base = {
         "event_type": event_type,

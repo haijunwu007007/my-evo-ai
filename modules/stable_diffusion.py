@@ -77,7 +77,7 @@ import random
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -392,7 +392,7 @@ class StableDiffusionModule:
                     "width": width,
                     "height": height,
                     "steps": steps,
-                    "created_at": datetime.now(UTC).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 }
                 images.append({"task_id": tid, "seed": s, "width": width, "height": height})
             lat = int((time.time() - t0) * 1000)
@@ -423,7 +423,7 @@ class StableDiffusionModule:
                 "model": model,
                 "status": TaskStatus.COMPLETED,
                 "seed": s,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._stats["total_generations"] += 1
@@ -451,7 +451,7 @@ class StableDiffusionModule:
                 "model": model,
                 "status": TaskStatus.COMPLETED,
                 "seed": s,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._stats["total_generations"] += 1
@@ -475,7 +475,7 @@ class StableDiffusionModule:
             "type": "upscale",
             "scale": scale,
             "status": TaskStatus.COMPLETED,
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         lat = int((time.time() - t0) * 1000)
         self._stats["total_images"] += 1
@@ -494,7 +494,7 @@ class StableDiffusionModule:
 
     def get_usage_stats(self, params: dict = None) -> dict:
         hours = (params or {}).get("hours", 24)
-        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         total = sum(r["images"] for r in recent)
         return {"success": True, "period_hours": hours, "requests": len(recent), "images": total}

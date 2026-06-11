@@ -97,7 +97,7 @@ from core.logging_config import get_logger
 import re
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -170,8 +170,8 @@ class RiskItem:
     mitigation: str
     owner_id: str
     status: str = "open"
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -220,8 +220,8 @@ class TaskNode:
     actual_hours: float = 0.0
     depends_on: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     started_at: datetime | None = None
     completed_at: datetime | None = None
 
@@ -276,7 +276,7 @@ class ResourceAllocator:
         return True, "No conflicts"
 
     def suggest_allocation(self, team_size: int, total_effort_hours: float, deadline: datetime) -> dict[str, Any]:
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         working_days = max(1, (deadline - now).days // 7 * 5)
         hours_per_person = total_effort_hours / max(1, team_size)
         daily_hours = hours_per_person / max(1, working_days)
@@ -465,7 +465,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _audit(self, action: str, entity: str, entity_id: str, details: dict[str, Any] = None):
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "action": action,
             "entity": entity,
             "entity_id": entity_id,
@@ -489,7 +489,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         budget_hours: float | None = None,
     ) -> dict[str, Any]:
         project_id = f"PRJ-{uuid.uuid4().hex[:8].upper()}"
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         project = {
             "project_id": project_id,
             "name": name,
@@ -523,7 +523,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if key in ("project_id", "created_at"):
                 continue
             project[key] = value
-        project["updated_at"] = datetime.now(UTC)
+        project["updated_at"] = datetime.now(timezone.utc)
         project["version"] += 1
         self._audit("update", "project", project_id, updates)
         return project
@@ -547,10 +547,10 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             logger.warning(f"Invalid transition {old_status} -> {new_status}")
             return None
         project["status"] = new_status.value
-        project["updated_at"] = datetime.now(UTC)
+        project["updated_at"] = datetime.now(timezone.utc)
         project["version"] += 1
         if new_status == ProjectStatus.COMPLETED:
-            project.setdefault("completed_at", datetime.now(UTC))
+            project.setdefault("completed_at", datetime.now(timezone.utc))
         self._audit("status_change", "project", project_id, {"from": old_status, "to": new_status.value})
         return project
 
@@ -619,12 +619,12 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return None
         for key, value in updates.items():
             if key == "status" and value == "in_progress" and not task.started_at:
-                task.started_at = datetime.now(UTC)
+                task.started_at = datetime.now(timezone.utc)
             if key == "status" and value == "done" and not task.completed_at:
-                task.completed_at = datetime.now(UTC)
+                task.completed_at = datetime.now(timezone.utc)
             if hasattr(task, key):
                 setattr(task, key, value)
-        task.updated_at = datetime.now(UTC)
+        task.updated_at = datetime.now(timezone.utc)
         self._audit("update", "task", task_id, updates)
         return task
 
@@ -685,12 +685,12 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if not ms:
             return None
         ms.status = MilestoneStatus.ACHIEVED
-        ms.completion_date = datetime.now(UTC)
+        ms.completion_date = datetime.now(timezone.utc)
         self._audit("achieve", "milestone", milestone_id)
         return ms
 
     def check_overdue_milestones(self, project_id: str) -> list[Milestone]:
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         overdue = []
         for ms in self._milestones.get(project_id, {}).values():
             if ms.status in (MilestoneStatus.PENDING, MilestoneStatus.IN_PROGRESS) and ms.target_date < now:
@@ -757,7 +757,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             risk.level = level
         if probability is not None:
             risk.probability = max(0.0, min(1.0, probability))
-        risk.updated_at = datetime.now(UTC)
+        risk.updated_at = datetime.now(timezone.utc)
         self._audit("update", "risk", risk_id, {"status": risk.status})
         return risk
 
@@ -767,7 +767,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         top_risks = sorted(
             [r.to_dict() for r in risks if r.status == "open"],
             key=lambda x: self._risk_engine.calculate_risk_score(
-                RiskItem(**{**x, "created_at": datetime.now(UTC), "updated_at": datetime.now(UTC)})
+                RiskItem(**{**x, "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)})
             ),
             reverse=True,
         )[:10]
@@ -792,7 +792,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             user_id=user_id,
             role=role,
             allocation_percent=allocation_percent,
-            joined_at=datetime.now(UTC),
+            joined_at=datetime.now(timezone.utc),
         )
         self._members[project_id][user_id] = member
         self._resource_allocator.register_member(user_id)
@@ -804,7 +804,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def remove_member(self, project_id: str, user_id: str) -> bool:
         member = self._members.get(project_id, {}).pop(user_id, None)
         if member:
-            member.left_at = datetime.now(UTC)
+            member.left_at = datetime.now(timezone.utc)
             self._audit("remove_member", "project", project_id, {"user_id": user_id})
             return True
         return False
@@ -850,7 +850,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "milestones": ms_progress,
             "risk_summary": risk_report.get("summary", {}),
             "team_size": team_size,
-            "updated_at": datetime.now(UTC).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
     def estimate_completion(self, project_id: str, simulations: int = 1000) -> dict[str, Any]:
@@ -902,7 +902,7 @@ class ProjectManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             "risks": [r.to_dict() for r in self._risks.get(project_id, {}).values()],
             "members": [m.to_dict() for m in self._members.get(project_id, {}).values()],
             "audit_log": self.get_audit_trail(project_id=project_id),
-            "exported_at": datetime.now(UTC).isoformat(),
+            "exported_at": datetime.now(timezone.utc).isoformat(),
         }
 
 # Module-level singleton

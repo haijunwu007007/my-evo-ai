@@ -80,7 +80,7 @@ import urllib.parse
 import json
 import re
 import threading
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -769,7 +769,7 @@ class GithubTrending(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "monthly": {"days": 90, "min_stars": 200},
             }
             cfg = period_config.get(period_key, period_config["daily"])
-            cutoff = (datetime.now(UTC) - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=cfg["days"])).strftime("%Y-%m-%d")
             fetch_limit = max(limit * 2, 50)
             q_parts = [f"created:>{cutoff}", f"stars:>{cfg['min_stars']}"]
             if language and language != "all":

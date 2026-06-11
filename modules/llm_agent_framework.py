@@ -76,7 +76,7 @@ import hashlib
 from core.logging_config import get_logger
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -396,7 +396,7 @@ class LlmAgentFrameworkModule:
             "max_steps": max_steps,
             "temperature": temperature,
             "memory_enabled": memory_enabled,
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._memories[agent_id] = []
         return {"success": True, "agent_id": agent_id, "name": name}
@@ -414,7 +414,7 @@ class LlmAgentFrameworkModule:
             "state": AgentState.IDLE,
             "messages": [],
             "steps": [],
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._stats["total_sessions"] += 1
         return {"success": True, "session_id": session_id, "agent_id": agent_id}
@@ -428,7 +428,7 @@ class LlmAgentFrameworkModule:
             return {"success": False, "error": "message is required"}
         session = self._sessions[session_id]
         agent = self._agents.get(session["agent_id"], {})
-        session["messages"].append({"role": "user", "content": message, "timestamp": datetime.now(UTC).isoformat()})
+        session["messages"].append({"role": "user", "content": message, "timestamp": datetime.now(timezone.utc).isoformat()})
         session["state"] = AgentState.THINKING
         t0 = time.time()
         try:
@@ -446,14 +446,14 @@ class LlmAgentFrameworkModule:
             steps.append({"type": "observation", "content": "Generating response", "step": step_count + 3})
             session["steps"].extend(steps)
             session["messages"].append(
-                {"role": "assistant", "content": reply, "timestamp": datetime.now(UTC).isoformat()}
+                {"role": "assistant", "content": reply, "timestamp": datetime.now(timezone.utc).isoformat()}
             )
             session["state"] = AgentState.FINISHED
             self._stats["total_steps"] += len(steps)
             self._stats["total_tokens"] += len(message) + len(reply)
             if agent.get("memory_enabled"):
                 self._memories[session["agent_id"]].append(
-                    {"query": message, "response": reply[:200], "timestamp": datetime.now(UTC).isoformat()}
+                    {"query": message, "response": reply[:200], "timestamp": datetime.now(timezone.utc).isoformat()}
                 )
             lat = int((time.time() - t0) * 1000)
             return {"success": True, "reply": reply, "steps": len(steps), "session_id": session_id, "latency_ms": lat}

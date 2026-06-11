@@ -85,7 +85,7 @@ import json
 import threading
 import shutil
 import signal
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -280,7 +280,7 @@ class ExecutionResult:
     timed_out: bool = False
     sandbox_path: str | None = None
     artifacts: list[str] = field(default_factory=list)
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 @dataclass
 class SandboxConfig:

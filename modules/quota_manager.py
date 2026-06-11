@@ -84,7 +84,7 @@ import time
 import threading
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta, UTC
+from datetime import datetime, timezone, timedelta, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 from collections.abc import Callable
@@ -233,7 +233,7 @@ class QuotaPolicyEngine:
             "limits": limits,
             "priority": priority,
             "enabled": True,
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self._policies = dict(sorted(self._policies.items(), key=lambda x: -x[1]["priority"]))
 
@@ -319,7 +319,7 @@ class QuotaAlerter:
             if usage_pct >= threshold:
                 alert_level = "critical" if threshold >= 0.95 else "warning" if threshold >= 0.8 else "info"
                 alert = {
-                    "timestamp": datetime.now(UTC).isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "target_id": target_id,
                     "dimension": dimension,
                     "usage_pct": round(usage_pct, 4),
@@ -479,7 +479,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 remaining=float("inf"),
                 used_pct=0.0,
                 action=QuotaAction.ALLOW,
-                reset_at=(datetime.now(UTC) + timedelta(seconds=86400)).isoformat(),
+                reset_at=(datetime.now(timezone.utc) + timedelta(seconds=86400)).isoformat(),
             )
 
         policy = self.policy_engine.match_policy(target_id)
@@ -496,7 +496,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 remaining=float("inf"),
                 used_pct=0.0,
                 action=QuotaAction.ALLOW,
-                reset_at=(datetime.now(UTC) + timedelta(seconds=86400)).isoformat(),
+                reset_at=(datetime.now(timezone.utc) + timedelta(seconds=86400)).isoformat(),
             )
 
         limit = matching_limits[0]
@@ -524,7 +524,7 @@ class QuotaManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 self._rejection_count += 1
 
         now = time.time()
-        reset_at = datetime.fromtimestamp(now + limit.window_seconds, tz=UTC).isoformat()
+        reset_at = datetime.fromtimestamp(now + limit.window_seconds, tz=timezone.utc).isoformat()
 
         if usage_pct >= 0.5:
             self.alerter.check_and_alert(target_id, dimension.value, usage_pct)

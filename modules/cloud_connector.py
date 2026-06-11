@@ -103,7 +103,7 @@ import base64
 import threading
 import traceback
 import uuid
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -190,7 +190,7 @@ class CloudCredentials:
     def is_expired(self) -> bool:
         if not self.expires_at:
             return False
-        return datetime.now(UTC) >= self.expires_at
+        return datetime.now(timezone.utc) >= self.expires_at
 
     def to_masked_dict(self) -> dict[str, str]:
         """返回脱敏的凭证信息"""
@@ -527,7 +527,7 @@ class RequestSigner:
         datetime_now: datetime | None = None,
     ) -> dict[str, str]:
         """AWS Signature Version 4签名"""
-        dt = datetime_now or datetime.now(UTC)
+        dt = datetime_now or datetime.now(timezone.utc)
         amz_date = dt.strftime("%Y%m%dT%H%M%SZ")
         date_stamp = dt.strftime("%Y%m%d")
 

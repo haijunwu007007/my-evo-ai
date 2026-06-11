@@ -79,7 +79,7 @@ import hashlib
 from core.logging_config import get_logger
 import ipaddress
 import threading
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
@@ -159,7 +159,7 @@ class IPRule:
 
     def __post_init__(self):
         if not self.created_at:
-            self.created_at = datetime.now(UTC).isoformat()
+            self.created_at = datetime.now(timezone.utc).isoformat()
             self.updated_at = self.created_at
 
 @dataclass
@@ -207,7 +207,7 @@ class AccessDecision:
         self.action = action
         self.rule_id = rule_id
         self.reason = reason
-        self.timestamp = datetime.now(UTC).isoformat()
+        self.timestamp = datetime.now(timezone.utc).isoformat()
         self.headers: dict = {}
 
     def to_dict(self) -> dict:
@@ -299,7 +299,7 @@ class IPRuleMatcher:
             for net in networks:
                 if ip_obj in net:
                     rule.hit_count += 1
-                    rule.last_hit_at = datetime.now(UTC).isoformat()
+                    rule.last_hit_at = datetime.now(timezone.utc).isoformat()
                     with self._cache_lock:
                         self._match_cache[ip_str] = rule.rule_id
                         self._match_cache[f"_rule_{rule.rule_id}"] = rule
@@ -504,7 +504,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 continue
 
             rule.hit_count += 1
-            rule.last_hit_at = datetime.now(UTC).isoformat()
+            rule.last_hit_at = datetime.now(timezone.utc).isoformat()
 
             if rule.action == RuleAction.ALLOW:
                 decision = AccessDecision(True, RuleAction.ALLOW, rule.rule_id, "Matched allow rule")
@@ -614,7 +614,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for k, v in kwargs.items():
             if hasattr(rule, k):
                 setattr(rule, k, v)
-        rule.updated_at = datetime.now(UTC).isoformat()
+        rule.updated_at = datetime.now(timezone.utc).isoformat()
         return True
 
     def delete_rule(self, rule_id: str) -> bool:
@@ -750,7 +750,7 @@ class IPAccessControl(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "rph": self._rate_config.requests_per_hour,
                 "rpd": self._rate_config.requests_per_day,
             },
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:

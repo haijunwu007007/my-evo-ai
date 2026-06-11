@@ -83,7 +83,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Set, Tuple
 from collections import defaultdict
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 
 from modules._base.enterprise_module import (
     EnterpriseModule,
@@ -483,7 +483,7 @@ class MCPServersManager(
             "tool": tool_name,
             "arguments": arguments,
             "status": "executed",
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     def read_resource(self, server_id: str, uri: str) -> dict[str, Any]:
@@ -670,7 +670,7 @@ class MCPServersManager(
                         metrics.uptime_seconds += 30
 
     def _emit_event(self, event_type: str, server_id: str, data: Any = None):
-        event = {"event": event_type, "server_id": server_id, "timestamp": datetime.now(UTC).isoformat(), "data": data}
+        event = {"event": event_type, "server_id": server_id, "timestamp": datetime.now(timezone.utc).isoformat(), "data": data}
         for cb in self._event_callbacks:
             try:
                 cb(event)

@@ -74,7 +74,7 @@ import hashlib
 from core.logging_config import get_logger
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -462,7 +462,7 @@ class TtsElevenlabsModule:
                 "similarity": similarity,
                 "output_format": output_format,
                 "estimated_duration_s": round(duration_estimate, 1),
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
             lat = int((time.time() - t0) * 1000)
             self._rate_limits[model]["current_requests"] += 1

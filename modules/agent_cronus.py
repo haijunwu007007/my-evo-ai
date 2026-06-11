@@ -107,7 +107,7 @@ import time
 import hashlib
 import threading
 import re
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from typing import Dict, List, Optional, Any, Tuple, Set
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -242,7 +242,7 @@ class CronExpression:
         使用简单递推算法，最多扫描365天
         """
         if after is None:
-            after = datetime.now(UTC).replace(second=0, microsecond=0)
+            after = datetime.now(timezone.utc).replace(second=0, microsecond=0)
         else:
             after = after.replace(second=0, microsecond=0)
 
@@ -272,7 +272,7 @@ class ScheduledTask:
     dependencies: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     last_run_at: str | None = None
     next_run_at: str | None = None
     last_result: str | None = None
@@ -293,7 +293,7 @@ class TaskExecution:
 
     execution_id: str
     task_id: str
-    started_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    started_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     finished_at: str | None = None
     duration_ms: int = 0
     state: TaskState = TaskState.RUNNING
@@ -333,7 +333,7 @@ class CronusTimeWindowManager:
                     "start": start,
                     "end": end,
                     "recurrence": recurrence,
-                    "created_at": datetime.now(UTC).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 }
             )
         logger.info(f"添加维护窗口: {name} [{start} ~ {end}]")
@@ -355,15 +355,15 @@ class CronusTimeWindowManager:
                     "start_hour": start_hour,
                     "end_hour": end_hour,
                     "timezone_offset": timezone_offset,
-                    "created_at": datetime.now(UTC).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 }
             )
-        logger.info(f"添加静默时段: {name} [{start_hour}:00~{end_hour}:00 UTC+{timezone_offset}]")
+        logger.info(f"添加静默时段: {name} [{start_hour}:00~{end_hour}:00 timezone.utc+{timezone_offset}]")
         return True
 
     def is_in_maintenance(self) -> bool:
         """检查当前是否处于维护窗口"""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         with self._lock:
             for window in self._maintenance_windows:
                 start = datetime.fromisoformat(window["start"])
@@ -374,7 +374,7 @@ class CronusTimeWindowManager:
 
     def is_quiet_hours(self) -> bool:
         """检查当前是否处于静默时段"""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         with self._lock:
             for qh in self._quiet_hours:
                 offset = timedelta(hours=qh["timezone_offset"])
@@ -413,7 +413,7 @@ class CronusTimeWindowManager:
             "quiet_hours": self.is_quiet_hours(),
             "maintenance_windows_count": len(self._maintenance_windows),
             "quiet_hours_count": len(self._quiet_hours),
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 class CronusDependencyGraph:
@@ -694,7 +694,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _check_and_schedule(self):
         """检查并调度到期任务"""
         with self.trace("check_and_schedule"):
-            now = datetime.now(UTC)
+            now = datetime.now(timezone.utc)
             with self._execution_lock:
                 for task_id, task in self._tasks.items():
                     if task.state not in (
@@ -845,7 +845,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             self._executions[execution_id] = execution
 
             task.state = TaskState.RUNNING
-            task.last_run_at = datetime.now(UTC).isoformat()
+            task.last_run_at = datetime.now(timezone.utc).isoformat()
             start_time = time.time()
 
             try:
@@ -855,7 +855,7 @@ class CronusAgent(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
                 execution.duration_ms = int((time.time() - start_time) * 1000)
                 execution.state = TaskState.COMPLETED
-                execution.finished_at = datetime.now(UTC).isoformat()
+                execution.finished_at = datetime.now(timezone.utc).isoformat()
                 execution.result = str(result_data)
 
                 task.state = TaskState.COMPLETED

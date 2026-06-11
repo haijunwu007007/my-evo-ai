@@ -14,7 +14,7 @@ import time
 import json
 from core.logging_config import get_logger
 import traceback
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from collections.abc import Callable
 from dataclasses import dataclass, field, asdict
@@ -52,7 +52,7 @@ class DecisionEvent:
     event_type: str       # 事件类型
     data: dict            # 事件数据
     severity: str         # 严重级别: critical/warning/info
-    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -956,7 +956,7 @@ class DecisionEngine:
             rule_name=rule_info["rule_name"],
             priority=rule_info["priority"],
             trigger_event=trigger_event or {},
-            started_at=datetime.now(UTC).isoformat(),
+            started_at=datetime.now(timezone.utc).isoformat(),
         )
         execution.status = DecisionStatus.RUNNING.value
         self._running_executions[exec_id] = execution
@@ -1018,7 +1018,7 @@ class DecisionEngine:
             await self._escalate(execution)
 
         finally:
-            execution.finished_at = datetime.now(UTC).isoformat()
+            execution.finished_at = datetime.now(timezone.utc).isoformat()
             self._persist_execution(execution)
             self._running_executions.pop(exec_id, None)
 

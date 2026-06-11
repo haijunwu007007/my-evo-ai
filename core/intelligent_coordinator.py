@@ -24,7 +24,7 @@ import hashlib
 import sqlite3
 import uuid
 import re
-from datetime import datetime, timezone, timedelta, UTC
+from datetime import datetime, timezone, timedelta, timezone.utc
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -77,7 +77,7 @@ class ConversationTurn:
     parsed_intent: dict        # ParsedIntent.asdict()
     response: dict             # 系统响应
     modules_used: list[str]    # 使用的模块
-    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -106,7 +106,7 @@ class WorkflowPlan:
     dag_order: list[str]        # DAG拓扑排序后的步骤ID
     data_flow: dict[str, str]  # 步骤间数据流映射
     estimated_duration_ms: int = 0
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 # ============================================================================
@@ -673,7 +673,7 @@ class WorkflowPlanner:
             cached = self._plan_cache[cache_key]
             try:
                 created = datetime.fromisoformat(cached.created_at)
-                if datetime.now(UTC) - created > timedelta(minutes=5):
+                if datetime.now(timezone.utc) - created > timedelta(minutes=5):
                     del self._plan_cache[cache_key]
                 else:
                     # github相关任务不使用缓存（需要实时数据）

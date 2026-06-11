@@ -77,7 +77,7 @@ from core.logging_config import get_logger
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -533,7 +533,7 @@ class LlmGeminiModule:
                     "output_tokens": out_tok,
                     "latency_ms": latency,
                     "multimodal": has_media,
-                    "timestamp": datetime.now(UTC).isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
             if len(self._request_log) > 10000:
@@ -568,7 +568,7 @@ class LlmGeminiModule:
     def get_usage_stats(self, params: dict = None) -> dict:
         params = params or {}
         hours = params.get("hours", 24)
-        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         recent = [r for r in self._request_log if r["timestamp"] >= cutoff]
         by_model = defaultdict(lambda: {"count": 0, "tokens": 0, "latency": [], "multimodal": 0})
         for r in recent:

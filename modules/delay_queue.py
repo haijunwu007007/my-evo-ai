@@ -110,7 +110,7 @@ import traceback
 import uuid
 import struct
 import pickle
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -590,8 +590,8 @@ class DelayQueue(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     ) -> str:
         """在指定时间投递消息"""
         if execute_at.tzinfo is None:
-            execute_at = execute_at.replace(tzinfo=UTC)
-        delay_ms = (execute_at - datetime.now(UTC)).total_seconds() * 1000
+            execute_at = execute_at.replace(tzinfo=timezone.utc)
+        delay_ms = (execute_at - datetime.now(timezone.utc)).total_seconds() * 1000
         if delay_ms < 0:
             delay_ms = 0
         return self.publish(topic, payload, delay_ms=delay_ms, priority=priority, **kwargs)

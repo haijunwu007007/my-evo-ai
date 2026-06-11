@@ -84,7 +84,7 @@ import time as tmod
 from typing import Any, Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from collections import defaultdict
 
 from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
@@ -613,7 +613,7 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
             self._initialized = True
             self._status = ModuleStatus(status="healthy", message="OTel bridge initialized")
             self._audit_log.append(
-                {"action": "initialize", "status": "success", "timestamp": datetime.now(UTC).isoformat()}
+                {"action": "initialize", "status": "success", "timestamp": datetime.now(timezone.utc).isoformat()}
             )
             return self._status
         except Exception as e:
@@ -622,7 +622,7 @@ class OpenTelemetryBridge(EnterpriseModule, CircuitBreakerMixin):
                     "action": "initialize",
                     "status": "error",
                     "error": str(e),
-                    "timestamp": datetime.now(UTC).isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
             self._status = ModuleStatus(status="error", message=str(e))

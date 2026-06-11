@@ -16,7 +16,7 @@ AUTO-EVO-AI V0.1 — Enterprise Notifier (企业通知网关)
 from __future__ import annotations
 import os, sys, json, time, hashlib, hmac, logging, asyncio
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from urllib.parse import urlencode
 from base64 import b64encode, b64decode
 import urllib.request, urllib.error, urllib.parse
@@ -88,10 +88,10 @@ def _send(channel: str, msg_type: str = "text", title: str = "",
     result["duration_ms"] = elapsed
 
     _history.append({"channel": channel, "msg_type": msg_type, "success": result["success"],
-                     "time": datetime.now(UTC).isoformat()})
+                     "time": datetime.now(timezone.utc).isoformat()})
     if result["success"]:
         _stats["sent"] += 1
-        _stats["last_send"] = datetime.now(UTC).isoformat()
+        _stats["last_send"] = datetime.now(timezone.utc).isoformat()
     else:
         _stats["failed"] += 1
     return result

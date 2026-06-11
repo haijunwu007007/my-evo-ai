@@ -85,7 +85,7 @@ import asyncio
 import json
 import logging
 import hashlib
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -235,7 +235,7 @@ class GitRepositoryAnalyzer:
             "author": author,
             "message": message,
             "files": files_changed or [],
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "risk_level": "low",
         }
         # 根据变更文件数量评估风险

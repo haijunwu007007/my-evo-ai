@@ -78,7 +78,7 @@ from core.logging_config import get_logger
 import hashlib
 import threading
 import json
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone, timezone.utc
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass, field
@@ -486,7 +486,7 @@ class K8sOrchestrator:
         self, event_type: str, resource_type: str, resource_name: str, namespace: str, message: str, reason: str = ""
     ):
         event = K8sEvent(
-            timestamp=datetime.now(UTC).isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             event_type=event_type,
             resource_type=resource_type,
             resource_name=resource_name,
@@ -510,7 +510,7 @@ class K8sOrchestrator:
     def create_pod(self, pod: Pod) -> dict:
         key = f"{pod.namespace}/{pod.name}"
         pod.metadata["uid"] = self._generate_uid()
-        pod.metadata["created_at"] = datetime.now(UTC).isoformat()
+        pod.metadata["created_at"] = datetime.now(timezone.utc).isoformat()
         pod.status.phase = PodPhase.PENDING
         with self._lock:
             self._pods[key] = pod
@@ -519,7 +519,7 @@ class K8sOrchestrator:
             pod.status.phase = PodPhase.RUNNING
             pod.status.host_ip = f"10.0.{hash(node) % 256}.{1}"
             pod.status.pod_ip = f"10.244.{hash(key) % 256}.{hash(key) % 254 + 1}"
-            pod.status.started_at = datetime.now(UTC).isoformat()
+            pod.status.started_at = datetime.now(timezone.utc).isoformat()
         self._record_event("create", "pod", pod.name, pod.namespace, f"Pod {pod.name} created on {node or 'pending'}")
         return {
             "name": pod.name,
@@ -583,7 +583,7 @@ class K8sOrchestrator:
                 "name": spec.name,
                 "namespace": spec.namespace,
                 "uid": uid,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "generation": 1,
             },
             "spec": spec,
@@ -720,7 +720,7 @@ class K8sOrchestrator:
                 "name": name,
                 "namespace": namespace,
                 "uid": self._generate_uid(),
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             },
             "spec": {
                 "type": service_type,
@@ -801,7 +801,7 @@ class K8sOrchestrator:
             "initialized": self._initialized,
             "cluster": cluster,
             "nodes": self._scheduler.get_node_status(),
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
