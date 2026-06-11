@@ -24,6 +24,25 @@ def _get_db():
     return conn
 
 
+# 种子：系统启动记录
+def _seed_selfheal():
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        cnt = conn.execute("SELECT COUNT(*) FROM selfheal_log").fetchone()[0]
+        if cnt == 0:
+            conn.execute(
+                "INSERT INTO selfheal_log (error_type, module_name, message, fix_suggestion, created_at, fixed) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                ("info", "system", "AUTO-EVO-AI 系统已启动", "系统运行正常，无修复建议", time.time(), 1)
+            )
+            conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+_seed_selfheal()
+
+
 @router.get("/api/v1/selfheal/log")
 async def get_selfheal_log(limit: int = 50):
     """获取自愈日志"""

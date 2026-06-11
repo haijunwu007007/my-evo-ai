@@ -652,5 +652,9 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                 _remember(msg, content, kh=kh)
                 return {"success":True,"result":content,"mode":"llm"}
             return {"success":True,"result":_FALLBACK.get("可以做那些事情","AUTO-EVO-AI已就绪"),"mode":"direct"}
-        return {"success":True,"result":"请求超时，请重试","mode":"timeout"}
+        # 全部尝试失败，检查是否有可用的 API Key
+        _any_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY","ZHIPU_API_KEY","DEEPSEEK_API_KEY","ANTHROPIC_API_KEY","GEMINI_API_KEY"))
+        if not _any_key:
+            return {"success":True,"result":"⚠️ **LLM API Key 未配置**，系统处于离线模式。请配置 API Key 后重启服务。","mode":"no_key"}
+        return {"success":True,"result":"请求超时，请检查 LLM API Key 是否有效或网络是否可达","mode":"timeout"}
     return process

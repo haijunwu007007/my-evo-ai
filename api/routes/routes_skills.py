@@ -380,7 +380,21 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
                     except:
                         return {"success": True, "result": resp.text, "execution_time": round(elapsed, 3)}
 
-        # 4) 降级：描述模式
+        # 4) LLM 自主执行降级 — 无 handler 时用 LLM 推理
+        _any_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY","ZHIPU_API_KEY","DEEPSEEK_API_KEY","ANTHROPIC_API_KEY","GEMINI_API_KEY"))
+        if _any_key:
+            try:
+                from api.agent_llm import call_llm
+                sp = f"你是一个技能执行专家。技能名称: {skill.name}，描述: {skill.description}，输入参数: {json.dumps(req.params, ensure_ascii=False)}，上下文: {json.dumps(req.context or {}, ensure_ascii=False)}。请根据技能描述和输入参数直接执行该技能的任务，输出结果。"
+                content, _ = call_llm([{"role":"user","content":sp}])
+                if content:
+                    elapsed = time.time() - start
+                    _log_execution(name, True, elapsed)
+                    return {"success": True, "result": content, "execution_time": round(elapsed, 3), "mode": "llm_fallback"}
+            except Exception:
+                pass
+
+        # 5) 降级：描述模式
         elapsed = time.time() - start
         return {"success": True, "result": {
             "message": f"Skill '{name}' 已就绪，但没有注册执行器。",

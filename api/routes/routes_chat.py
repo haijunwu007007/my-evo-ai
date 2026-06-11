@@ -1,5 +1,5 @@
 """Chat API — 意图识别+真执行操作（不再只返回翻译文本）"""
-import re
+import os, re
 from fastapi import APIRouter
 from pydantic import BaseModel
 from core.logging_config import get_logger
@@ -48,7 +48,11 @@ async def chat(req: ChatRequest):
 💾 **数据** — 说"数据分析/可视化/查询"
 已内建DeepSeek Key 🔑，直接使用全部功能！""", "mode": "capabilities"}
 
-    # ── 主动作 → 转agent_core真实执行 ──
+    # ── 主动作 → 检查Key → 转agent_core真实执行或降级 ──
+    _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"))
+    if not _has_key:
+        return {"success": True, "result": "⚠️ **LLM API Key 未配置**，系统处于离线模式。\n\n请在服务器 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`DEEPSEEK_API_KEY`、`OPENAI_API_KEY`），然后重启服务。\n\n**当前可用的直达命令：**\n- 「系统怎么样」— 查看系统运行状态\n- 「你会什么」— 查看功能列表\n- 「你好」— 打招呼\n- 「游戏」— 查看小游戏\n- 说「画xxx」/「做一份xxxPPT」— 本地生成", "mode": "no_key"}
+
     from api.agent_core import create_engine
     from pathlib import Path
     BASE = Path(__file__).resolve().parent.parent.parent

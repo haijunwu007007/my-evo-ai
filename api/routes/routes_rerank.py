@@ -3,10 +3,17 @@ AUTO-EVO-AI V0.1 — 重排序引擎
 基于查询词命中率重排序，用于 RAG 检索结果精排
 """
 from fastapi import APIRouter
+from pydantic import BaseModel
 from typing import Optional
 import re, math
 
 router = APIRouter()
+
+
+class RerankRequest(BaseModel):
+    query: str = ""
+    documents: Optional[list[str]] = None
+    top_k: int = 5
 
 
 def _score_document(query: str, doc: str) -> float:
@@ -28,20 +35,20 @@ def _score_document(query: str, doc: str) -> float:
 
 
 @router.post("/api/v1/rerank")
-async def rerank_documents(query: str = "", documents: Optional[list[str]] = None, top_k: int = 5):
+async def rerank_documents(req: RerankRequest):
     """对文档列表进行重排序"""
-    if not query or not documents:
+    if not req.query or not req.documents:
         return {"success": True, "results": [], "total": 0}
     scored = []
-    for doc in documents:
-        score = _score_document(query, doc)
+    for doc in req.documents:
+        score = _score_document(req.query, doc)
         scored.append((score, doc))
     scored.sort(key=lambda x: x[0], reverse=True)
     results = [
         {"index": i, "score": round(score, 4), "document": doc[:500]}
-        for i, (score, doc) in enumerate(scored[:top_k])
+        for i, (score, doc) in enumerate(scored[:req.top_k])
     ]
-    return {"success": True, "results": results, "total": len(documents)}
+    return {"success": True, "results": results, "total": len(req.documents)}
 
 
 def register_routes(app):

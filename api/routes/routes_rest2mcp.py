@@ -19,9 +19,15 @@ REST2MCP_DIR.mkdir(exist_ok=True)
 _REST_MCP_TOOLS: dict = {}  # {tool_name: {...}}
 
 
+class Rest2MCPRequest(BaseModel):
+    url: str
+    name: str = ""
+
 @router.post("/api/v1/rest2mcp/convert")
-async def convert_openapi(url: str, name: str = ""):
+async def convert_openapi(req: Rest2MCPRequest):
     """将 OpenAPI/Swagger URL 转换为 MCP 工具"""
+    url = req.url
+    name = req.name
     if not url:
         raise HTTPException(status_code=400, detail="需要提供 OpenAPI URL")
     

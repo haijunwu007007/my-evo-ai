@@ -439,6 +439,36 @@ async def rag_chat(payload: dict):
 
 
 # ============================================================
+# API: 强制重新填充种子知识库
+# ============================================================
+@router.post("/api/v1/rag/reseed")
+async def reseed_knowledge():
+    """强制重新填充种子知识库（清空后重建）"""
+    conn = sqlite3.connect(str(_DB))
+    try:
+        conn.execute("DELETE FROM rag_knowledge")
+        conn.execute("DELETE FROM rag_documents")
+        conn.execute("DELETE FROM rag_chunks")
+        conn.commit()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    # 删除旧 chunk 文件
+    import shutil
+    for d in ["documents", "chunks", "vectors"]:
+        dd = RAG_DIR / d
+        if dd.exists():
+            shutil.rmtree(str(dd))
+            dd.mkdir(exist_ok=True)
+    _seed_rag()
+    conn2 = sqlite3.connect(str(_DB))
+    cnt = conn2.execute("SELECT COUNT(*) FROM rag_knowledge").fetchone()[0]
+    conn2.close()
+    return {"success": True, "knowledge_count": cnt, "message": "种子知识库已重新填充"}
+
+
+# ============================================================
 # 注册到 smart_chat 的关键词
 # ============================================================
 _RAG_KEYWORDS = ["知识库", "上传文档", "查询知识库", "找资料", "RAG", "rag查询"]
