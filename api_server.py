@@ -92,6 +92,7 @@ from api.routes.routes_insights import router as insights_router
 from api.routes.routes_modules_browse import router as modules_browse_router
 from api.routes.routes_litellm import router as litellm_router
 from api.routes.routes_agent_s import router as agent_s_router
+from api.routes.routes_missing import router as missing_router
 from api.routes.routes_tools_health import router as tools_health_router
 from api.routes.routes_gitea_sync import router as gitea_sync_router
 from api.routes.routes_metabase_bridge import router as metabase_bridge_router
@@ -190,6 +191,8 @@ app.include_router(grafana_router)
 app.include_router(outline_router)
 app.include_router(appsmith_router)
 app.include_router(code_server_router)
+app.include_router(missing_router)
+
 app.include_router(dashy_router)
 app.include_router(ntfy_router)
 app.include_router(nocodb_router)
