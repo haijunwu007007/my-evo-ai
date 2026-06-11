@@ -66,18 +66,12 @@ async def install_market_skill(req: Request):
         return {"success": True, "result": skill["name"] + " ready"}
     sid = skill_id.replace("-", "_")
     cn = "".join(x.capitalize() for x in sid.split("_"))
-    c = '__module_meta__ = {"id":"' + skill_id + '","name":"' + cn + '","version":"V0.1","group":"' + skill["category"] + '","grade":"A","description":"' + skill["desc"] + '"}
-'
-    c += "from modules._base.enterprise_module import EnterpriseModule
-"
-    c += "class " + cn + "(EnterpriseModule):
-"
-    c += '    async def execute(self,action="run",params=None):
-'
-    c += '        return {"success":True,"module":"' + skill_id + '","action":action}
-'
-    c += "module_class = " + cn + "
-"
+    c = json.dumps({"id": skill_id, "name": cn, "version": "V0.1", "group": skill["category"], "grade": "A", "description": skill["desc"]}, ensure_ascii=False)
+    c += "\nfrom modules._base.enterprise_module import EnterpriseModule"
+    c += "\nclass " + cn + "(EnterpriseModule):"
+    c += '\n    async def execute(self,action="run",params=None):'
+    c += '\n        return {"success":True,"module":"' + skill_id + '","action":action}'
+    c += '\nmodule_class = ' + cn
     try:
         mp.write_text(c, encoding="utf-8")
         return {"success": True, "result": skill["name"] + " installed"}
@@ -98,28 +92,17 @@ async def install_from_clawhub(req: Request):
             return {"success": False, "error": r.stderr[:500]}
         bp = SKILLS_DIR / ("clawhub_" + safe + ".py")
         cn = "".join(x.capitalize() for x in safe.split("_"))
-        bc = '"""ClawHub: ' + sn + '"""
-'
-        bc += "import subprocess as _sp
-"
-        bc += "from modules._base.enterprise_module import EnterpriseModule
-"
-        bc += "class " + cn + "(EnterpriseModule):
-"
-        bc += '    async def execute(self,action="run",params=None):
-'
-        bc += '        try:
-'
-        bc += '            r = _sp.run(["npx","clawhub","run","' + sn + '"], capture_output=True, text=True, timeout=30)
-'
-        bc += '            return {"success": r.returncode == 0, "output": r.stdout[:2000]}
-'
-        bc += '        except Exception as e:
-'
-        bc += '            return {"success": False, "error": str(e)}
-'
-        bc += "module_class = " + cn + "
-"
+        bc = '"""ClawHub: ' + sn + '"""\n'
+        bc += 'import subprocess as _sp\n'
+        bc += 'from modules._base.enterprise_module import EnterpriseModule\n'
+        bc += 'class ' + cn + '(EnterpriseModule):\n'
+        bc += '    async def execute(self,action="run",params=None):\n'
+        bc += '        try:\n'
+        bc += '            r = _sp.run(["npx","clawhub","run","' + sn + '"], capture_output=True, text=True, timeout=30)\n'
+        bc += '            return {"success": r.returncode == 0, "output": r.stdout[:2000]}\n'
+        bc += '        except Exception as e:\n'
+        bc += '            return {"success": False, "error": str(e)}\n'
+        bc += 'module_class = ' + cn
         bp.write_text(bc, encoding="utf-8")
         return {"success": True, "result": "ClawHub " + sn + " bridged", "module": "clawhub_" + safe}
     except FileNotFoundError:
