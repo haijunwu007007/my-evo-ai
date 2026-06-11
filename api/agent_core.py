@@ -15,6 +15,20 @@ try:
     _memos = get_memory()
 except: _memos = None
 
+# ===== 并发多Agent引擎（开机加载）=====
+try:
+    from api.agents.agent_concurrent import run_concurrent, run_team
+    _CONCURRENT_READY = True
+except Exception:
+    _CONCURRENT_READY = False
+
+# ===== YoYo-Evolve 自进化系统（开机加载）=====
+try:
+    from api.agents.yoyo_evolve import auto_evolve as yoyo_evolve, auto_scan, get_evolution_history
+    _YOYO_READY = True
+except Exception:
+    _YOYO_READY = False
+
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY", "")  # 从环境变量读取Key，不硬编码
 _FALLBACK = {
     "可以做那些事情": "AUTO-EVO-AI 能做的事:\n- 💻 开发网页/系统(说'开发xxx')\n- 🎨 画图(说'画xxx')\n- 🔍 搜索信息(说'搜索xxx')\n- 📊 做PPT(说'做一份PPT')\n- 🎮 玩游戏(说'游戏')\n- 📦 调模块(说'调xxx模块')\n- ⚡ 查状态(说'系统怎么样')",
@@ -205,6 +219,10 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             {"type": "function", "function": {"name": "nocobase_build", "description": "🏗️ NocoBase低代码：AI+低代码快速构建业务应用", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "create/schema/query"}}, "required": ["app_name"]}}},
             {"type": "function", "function": {"name": "scriberr_transcribe", "description": "🎤 音频转录：AI将音频/会议转录为文字", "parameters": {"type": "object", "properties": {"audio_path": {"type": "string", "description": "音频路径"}, "action": {"type": "string", "description": "transcribe/list"}}, "required": ["audio_path"]}}},
             {"type": "function", "function": {"name": "keploy_test", "description": "🧪 Keploy AI测试：自动生成API回归测试", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "record/test/report"}, "endpoint": {"type": "string", "description": "API地址"}}, "required": ["endpoint"]}}},
+            # ===== 并发多Agent + 自进化 =====
+            {"type": "function", "function": {"name": "concurrent_run", "description": "🧵 并发多Agent：同时运行多个Agent并行协作完成任务", "parameters": {"type": "object", "properties": {"task_name": {"type": "string", "description": "任务名"}, "details": {"type": "string", "description": "任务详情"}, "mode": {"type": "string", "description": "team(团队协作)/parallel(并行独立)"}}, "required": ["task_name"]}}},
+            {"type": "function", "function": {"name": "yoyo_scan", "description": "🧬 自进化扫描：自动分析代码库质量和潜在改进点", "parameters": {"type": "object", "properties": {"scope": {"type": "string", "description": "扫描范围: auto/api/agents/modules"}}, "required": []}}},
+            {"type": "function", "function": {"name": "yoyo_history", "description": "📊 自进化历史：查看自进化系统的优化记录", "parameters": {"type": "object", "properties": {"limit": {"type": "integer", "description": "返回条数"}}, "required": []}}},
         return bt
 
     def _generate_page(msg, title):
@@ -221,12 +239,11 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
         while True:
             try:
                 now = _t.time()
-                # 自进化：每30分钟触发一次代码分析
+                # 自进化：使用YoYo-Evolve系统每30分钟分析一次
                 if int(now) % 1800 < 10:
                     try:
-                        evo_module = importlib.import_module("api.agent_evolve")
-                        if hasattr(evo_module, 'auto_evolve'):
-                            evo_module.auto_evolve(BASE, _memos)
+                        from api.agents.yoyo_evolve import auto_evolve
+                        auto_evolve(BASE, _memos)
                     except Exception:
                         pass
                 # A2A: 清理过期会话
@@ -568,6 +585,14 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
     示例: scriberr_transcribe(audio_path="meeting.mp3", action="transcribe")
 93. 🧪 keploy_test - Keploy AI测试：自动生成API回归测试
     示例: keploy_test(action="record", endpoint="/api/orders")
+
+【2026-06-11 新增 并发多Agent + 自进化】
+94. 🧵 concurrent_run - 并发多Agent：多Agent并行协作（分析师+开发者+审查者）
+    示例: concurrent_run(task_name="开发记账应用", details="需用户登录和账单管理", mode="team")
+95. 🧬 yoyo_scan - 自进化扫描：自动检测代码库问题并生成优化建议
+    示例: yoyo_scan(scope="auto")
+96. 📊 yoyo_history - 查看自进化历史记录
+    示例: yoyo_history(limit=10)
 
 【原有能力】
 - 💻 开发网页/系统 (说"开发xxx")

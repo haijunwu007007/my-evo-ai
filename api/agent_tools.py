@@ -806,5 +806,46 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                 return {"ok": r.get("ok", False) if isinstance(r, dict) else False, "data": json.dumps(r, ensure_ascii=False)[:2000]}
             except Exception as e:
                 return {"ok": False, "data": f"keploy_test执行失败: {e}"}
+        # ===== 并发多Agent =====
+        if name == "concurrent_run":
+            try:
+                from api.agents.agent_concurrent import run_team
+                r = run_team(
+                    task_name=args.get("task_name", "任务"),
+                    msg=args.get("details", ""),
+                    BASE=BASE, OUT=OUT, _LAST=_LAST, _GENERATED_TOOLS=_GENERATED_TOOLS
+                )
+                res = r.get("final_result") or r.get("analysis", "")[:300]
+                return {"ok": True, "data": res}
+            except Exception as e:
+                return {"ok": False, "data": f"并发执行失败: {e}"}
+        # ===== YoYo-Evolve自进化 =====
+        if name == "yoyo_scan":
+            try:
+                from api.agents.yoyo_evolve import auto_scan, auto_evolve
+                scope = args.get("scope", "auto")
+                if scope == "auto":
+                    r = auto_evolve(BASE)
+                else:
+                    r = auto_scan(BASE)
+                if isinstance(r, dict):
+                    summary = r.get("analysis") or r.get("message", "")
+                    details = r.get("details", [])
+                    return {"ok": True, "data": f"{summary}\n详情报{len(details)}条"}
+                return {"ok": True, "data": str(r)[:500]}
+            except Exception as e:
+                return {"ok": False, "data": f"自进化扫描失败: {e}"}
+        if name == "yoyo_history":
+            try:
+                from api.agents.yoyo_evolve import get_evolution_history
+                history = get_evolution_history(limit=args.get("limit", 10))
+                if not history:
+                    return {"ok": True, "data": "暂无自进化记录"}
+                lines = []
+                for h in history:
+                    lines.append(f"[{h['time'][:16]}] {h['target'][:30]} → {h['status']}")
+                return {"ok": True, "data": "\n".join(lines)}
+            except Exception as e:
+                return {"ok": False, "data": f"查询历史失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}
