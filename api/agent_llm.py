@@ -2,13 +2,13 @@
 import os, json, httpx, re
 
 _LLM_PROVIDERS = [
-    {"name":"DeepSeek","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-chat","priority":0},
-    {"name":"DeepSeek-Coder","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-coder","priority":1},
-    {"name":"智谱GLM","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-flash","priority":2},
-    {"name":"通义千问","env":"QWEN_API_KEY","url":"https://dashscope.aliyuncs.com/compatible-mode/v1","model":"qwen-plus","priority":3},
-    {"name":"月之暗面Kimi","env":"KIMI_API_KEY","url":"https://api.moonshot.cn/v1","model":"moonshot-v1-8k","priority":4},
-    {"name":"零一万物Yi","env":"YI_API_KEY","url":"https://api.lingyiwanwu.com/v1","model":"yi-lightning","priority":5},
-    {"name":"OpenAI","env":"OPENAI_API_KEY","url":"https://api.openai.com/v1","model":"gpt-4o-mini","priority":6},
+    # 国内优先：智谱GLM最快（服务器已配置ZHIPU_API_KEY）
+    {"name":"智谱GLM","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-flash","priority":0},
+    {"name":"智谱GLM-Plus","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-plus","priority":1},
+    # 国际/国内备份
+    {"name":"DeepSeek","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-chat","priority":2},
+    {"name":"DeepSeek-Coder","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-coder","priority":3},
+    {"name":"OpenAI","env":"OPENAI_API_KEY","url":"https://api.openai.com/v1","model":"gpt-4o-mini","priority":4},
     {"name":"Ollama-qwen2.5:1.5b","env":"","url":"http://localhost:11434/api/chat","model":"qwen2.5:1.5b","priority":7,"local":True},
     {"name":"Ollama-qwen2.5:0.5b","env":"","url":"http://localhost:11434/api/chat","model":"qwen2.5:0.5b","priority":8,"local":True},
     {"name":"Ollama-llama3.2:1b","env":"","url":"http://localhost:11434/api/chat","model":"llama3.2:1b","priority":9,"local":True},
@@ -28,7 +28,7 @@ def call_llm(messages, tools=None, key=""):
             payload = {"model":p["model"],"messages":messages,"temperature":0.1,"max_tokens":8192}
             if tools: payload["tools"] = tools
             url = p["url"].rstrip("/")+"/chat/completions"
-            r = httpx.post(url, headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"}, json=payload, timeout=30)
+            r = httpx.post(url, headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"}, json=payload, timeout=15)
             if r.status_code == 200:
                 data = r.json()
                 content = data.get("choices",[{}])[0].get("delta",{}).get("content","") or data.get("choices",[{}])[0].get("message",{}).get("content","")
