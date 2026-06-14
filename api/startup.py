@@ -70,7 +70,11 @@ def _mount_vue_frontend():
         if html_path.exists():
             @app.get("/dashboard", include_in_schema=False)
             async def serve_dashboard():
-                return FileResponse(str(html_path), media_type="text/html")
+                from fastapi.responses import Response
+                import os
+                content = open(str(html_path), "rb").read()
+                return Response(content=content, media_type="text/html",
+                    headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
             logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
 
         # 商业版管理后台

@@ -35,6 +35,17 @@ router = APIRouter()
 # 模块查询与搜索
 # ═══════════════════════════════════════════════════════════════
 
+@router.get("/api/v1/modules/stats")
+async def modules_stats():
+    """Module file stats"""
+    from pathlib import Path
+    mod_dir = Path(__file__).parent.parent.parent / "modules"
+    files = [f for f in mod_dir.glob("*.py") if f.name != "__init__.py"] if mod_dir.exists() else []
+    sizes = [f.stat().st_size for f in files]
+    return {"success": True, "total_files": len(files),
+        "total_size_kb": round(sum(sizes)/1024, 1) if sizes else 0,
+        "avg_size_kb": round(sum(sizes)/len(sizes)/1024, 1) if sizes else 0}
+
 @router.get("/api/v1/modules/categories")
 async def get_module_categories():
     """Get Module Categories - GET /api/v1/modules/categories"""

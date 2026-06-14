@@ -242,6 +242,10 @@ frontend_static = BASE_DIR / "frontend" / "static"
 if frontend_static.exists():
     app.mount("/frontend/static", StaticFiles(directory=str(frontend_static)), name="frontend_static")
 
+js_dir = BASE_DIR / "js"
+if js_dir.exists():
+    app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+
 output_dir = BASE_DIR / "output"
 if output_dir.exists():
     app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
@@ -318,6 +322,16 @@ async def root():
     chat_path = BASE_DIR / "frontend" / "chat.html"
     if chat_path.exists():
         return FileResponse(str(chat_path))
+
+# ── i18n.js 兼容路径 ──
+@app.get("/frontend/i18n.js", include_in_schema=False)
+async def frontend_i18n_js():
+    from fastapi.responses import FileResponse
+    from api.infra import BASE_DIR as _BD
+    js_path = _BD / "js" / "i18n.js"
+    if js_path.exists():
+        return FileResponse(str(js_path))
+    return {"success": False, "error": "i18n.js not found"}
     # fallback: 返回 JSON 状态
     return {
         "success": True,
@@ -341,9 +355,9 @@ async def system_status():
                 "version": VERSION,
                 "coordinator_version": "3.0.0",
                 "status": st.get("status", "ready"),
-                "automation_score": coord.get_automation_score(),
-                "modules_registered": st.get("modules", {}).get("registered", 0),
-                "modules_healthy": st.get("modules", {}).get("healthy", 0),
+                "automation_score": coord.get_automation_score() or 0,
+                "modules_registered": st.get("modules", {}).get("registered", 0) or len(registry.modules),
+                "modules_healthy": st.get("modules", {}).get("healthy", 0) or 0,
             }
         except Exception:
             coord_data = {"status": "initializing"}
@@ -352,8 +366,8 @@ async def system_status():
         "system": BUILD_TAG,
         "status": "running",
         "uptime": datetime.now().isoformat(),
-        "modules_loaded": len(registry.modules),
-        "modules_total": len(registry._pending_modules) + len(registry.modules),
+        "modules_loaded": len(registry.modules) + len(getattr(registry, '_pending_modules', {})),
+        "modules_total": len(registry.modules) + len(getattr(registry, '_pending_modules', {})),
         "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_stub": registry.get_stub_count(),
         "coordinator": coord_data,

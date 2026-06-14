@@ -1,4 +1,4 @@
-"""补充缺失的API端点：dashboard/data / enterprise / services / gateway/templates / rag/search"""
+"""补充缺失的API端点：dashboard/data / enterprise / services / gateway/templates / rag/search / notify/providers / modules/stats / v2/modules"""
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from typing import Optional
@@ -9,6 +9,25 @@ from core.logging_config import get_logger
 logger = get_logger("evo.api.missing")
 router = APIRouter()
 
+@router.get("/api/v1/notify/providers")
+async def notify_providers():
+    return {"success": True, "providers": [], "count": 0, "note": "通知提供商管理功能待实现"}
+
+@router.get("/api/v1/modules/stats")
+async def modules_stats():
+    mod_dir = Path(__file__).parent.parent.parent / "modules"
+    files = list(mod_dir.glob("*.py")) if mod_dir.exists() else []
+    sizes = [f.stat().st_size for f in files if f.name != "__init__.py"]
+    return {
+        "success": True, "total_files": len(files),
+        "total_size_kb": round(sum(sizes)/1024, 1),
+        "avg_size_kb": round(sum(sizes)/len(sizes)/1024, 1) if sizes else 0,
+        "note": "模块文件系统统计"
+    }
+
+@router.get("/api/v2/modules")
+async def modules_v2():
+    return {"success": True, "version": "v2", "modules": [], "count": 0, "note": "v2 API 暂未开放"}
 
 @router.get("/api/v1/dashboard/data")
 async def dashboard_data():
@@ -70,60 +89,34 @@ async def dashboard_data():
 
     return data
 
-
 @router.get("/api/v1/enterprise")
 async def enterprise_status():
-    """企业管理状态"""
-    return {
-        "success": True,
-        "status": "available",
-        "features": {
-            "tenant_management": False,
-            "sso": False,
-            "audit_log": False,
-            "rbac": False,
-            "api_key_management": True,
-            "rate_limiting": True,
-        },
-        "note": "企业功能开发中，请联系管理员获取完整版本"
-    }
-
+    return {"success": True, "status": "available",
+        "features": {"tenant_management": False,"sso": False,"audit_log": False,"rbac": False,"api_key_management": True,"rate_limiting": True},
+        "note": "企业功能开发中，请联系管理员获取完整版本"}
 
 @router.get("/api/v1/services")
 async def services_list():
-    """列出所有系统服务状态"""
     services = []
     endpoints = [
-        ("API服务", "/api/v1/health", "运行中"),
-        ("智能聊天", "/api/v1/smart", "运行中"),
-        ("Agent引擎", "/api/v1/agent/run", "运行中"),
-        ("技能系统", "/api/v1/skills", "运行中"),
-        ("模块系统", "/api/v1/modules", "运行中"),
-        ("MCP集成", "/api/v1/mcp/servers", "运行中"),
-        ("A2A通信", "/api/v1/a2a/agents", "运行中"),
-        ("RAG知识库", "/api/v1/rag/documents", "运行中"),
-        ("工作流", "/api/v1/workflows", "运行中"),
-        ("定时任务", "/api/v1/scheduler/tasks", "运行中"),
-        ("连接器", "/api/v1/connectors", "运行中"),
-        ("Gateway网关", "/api/v1/gateway/health", "运行中"),
+        ("API服务", "/api/v1/health", "运行中"),("智能聊天", "/api/v1/smart", "运行中"),
+        ("Agent引擎", "/api/v1/agent/run", "运行中"),("技能系统", "/api/v1/skills", "运行中"),
+        ("模块系统", "/api/v1/modules", "运行中"),("MCP集成", "/api/v1/mcp/servers", "运行中"),
+        ("A2A通信", "/api/v1/a2a/agents", "运行中"),("RAG知识库", "/api/v1/rag/documents", "运行中"),
+        ("工作流", "/api/v1/workflows", "运行中"),("定时任务", "/api/v1/scheduler/tasks", "运行中"),
+        ("连接器", "/api/v1/connectors", "运行中"),("Gateway网关", "/api/v1/gateway/health", "运行中"),
     ]
     for name, ep, status in endpoints:
         try:
             async with httpx.AsyncClient(timeout=3) as c:
                 r = await c.get(f"http://127.0.0.1:8765{ep}")
-                services.append({
-                    "name": name, "endpoint": ep,
-                    "status": "healthy" if r.status_code == 200 else "error",
-                    "code": r.status_code
-                })
+                services.append({"name": name, "endpoint": ep, "status": "healthy" if r.status_code == 200 else "error", "code": r.status_code})
         except Exception:
             services.append({"name": name, "endpoint": ep, "status": "unreachable", "code": 0})
     return {"success": True, "services": services, "count": len(services)}
 
-
 @router.get("/api/v1/gateway/templates")
 async def gateway_templates():
-    """列出所有可用的Gateway集成模板"""
     try:
         async with httpx.AsyncClient(timeout=5) as c:
             r = await c.get("http://127.0.0.1:8765/api/v1/gateway/health")
@@ -131,9 +124,6 @@ async def gateway_templates():
                 return {"success": True, "templates": [], "note": "Gateway服务未完全启动"}
     except Exception:
         return {"success": True, "templates": [], "note": "Gateway服务未启动"}
-
-    # 从集成数据库获取模板
-    from pathlib import Path
     db_path = Path(__file__).parent.parent.parent / "connectors" / "integrations_db.json"
     if db_path.exists():
         try:
@@ -146,10 +136,8 @@ async def gateway_templates():
             pass
     return {"success": True, "templates": [], "note": "暂无集成模板"}
 
-
 @router.get("/api/v1/rag/search")
 async def rag_search(q: str = Query("", description="搜索关键词")):
-    """RAG知识库搜索"""
     if not q:
         return {"success": True, "results": [], "note": "请提供搜索关键词 ?q=xxx"}
     try:

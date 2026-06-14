@@ -2,33 +2,46 @@
 import os, json, httpx, re
 
 _LLM_PROVIDERS = [
-    # 国内优先：智谱GLM最快（服务器已配置ZHIPU_API_KEY）
-    {"name":"智谱GLM","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-flash","priority":0},
-    {"name":"智谱GLM-Plus","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-plus","priority":1},
-    # 国际/国内备份
-    {"name":"DeepSeek","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-chat","priority":2},
-    {"name":"DeepSeek-Coder","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-coder","priority":3},
+    # DeepSeek优先：实测可用且稳定（非流式7-15s）
+    # Ollama本地优先（免费零延迟）
+    {"name":"Ollama本地","env":"","url":"http://localhost:11434","model":"dsr1","priority":-1,"local":True},
+    {"name":"DeepSeek","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-chat","priority":0},
+    {"name":"DeepSeek-Coder","env":"DEEPSEEK_API_KEY","url":"https://api.deepseek.com/v1","model":"deepseek-coder","priority":1},
+    # 智谱GLM（如果Key有聊天权限则可提速）
+    {"name":"智谱GLM","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-flash","priority":2},
+    {"name":"智谱GLM-Plus","env":"ZHIPU_API_KEY","url":"https://open.bigmodel.cn/api/paas/v4","model":"glm-4-plus","priority":3},
     {"name":"OpenAI","env":"OPENAI_API_KEY","url":"https://api.openai.com/v1","model":"gpt-4o-mini","priority":4},
+    # Ollama本地（服务器无Ollama，只要3秒超时就跳过）
     {"name":"Ollama-qwen2.5:1.5b","env":"","url":"http://localhost:11434/api/chat","model":"qwen2.5:1.5b","priority":7,"local":True},
     {"name":"Ollama-qwen2.5:0.5b","env":"","url":"http://localhost:11434/api/chat","model":"qwen2.5:0.5b","priority":8,"local":True},
     {"name":"Ollama-llama3.2:1b","env":"","url":"http://localhost:11434/api/chat","model":"llama3.2:1b","priority":9,"local":True},
 ]
 
 def call_llm(messages, tools=None, key=""):
-    for p in sorted(_LLM_PROVIDERS, key=lambda x: x["priority"]):
+    # 用户在前端输入了自定义Key → sk-开头先试OpenAI（8秒快速判断）
+    providers = _LLM_PROVIDERS
+    if key and key.startswith("sk-"):
+        oai = [p for p in _LLM_PROVIDERS if "openai" in p["name"].lower()]
+        others = [p for p in _LLM_PROVIDERS if "openai" not in p["name"].lower()]
+        for p in oai: p["_custom_timeout"] = 8
+        providers = oai + others
+    for p in sorted(providers, key=lambda x: x["priority"]):
         try:
             if p.get("local"):
-                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False,"options":{"num_predict":4096}}, timeout=5)
+                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False,"options":{"num_predict":4096}}, timeout=3)
                 if r.status_code == 200:
                     content = r.json().get("message",{}).get("content","")
                     if content: return content, None
                 continue
             api_key = key or os.environ.get(p["env"],"")
             if not api_key: continue
+            timeout = p.get("_custom_timeout", 15)
             payload = {"model":p["model"],"messages":messages,"temperature":0.1,"max_tokens":8192}
             if tools: payload["tools"] = tools
             url = p["url"].rstrip("/")+"/chat/completions"
-            r = httpx.post(url, headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"}, json=payload, timeout=15)
+            r = httpx.post(url, headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"}, json=payload, timeout=timeout)
+            # 401/402 = Key无效或权限/余额不足，快速跳过
+            if r.status_code in (401, 402): continue
             if r.status_code == 200:
                 data = r.json()
                 content = data.get("choices",[{}])[0].get("delta",{}).get("content","") or data.get("choices",[{}])[0].get("message",{}).get("content","")
@@ -85,8 +98,9 @@ def call_llm_stream(messages, key="", system_prompt=""):
                 return
             payload = {"model":p["model"],"messages":msgs,"temperature":0.1,"max_tokens":8192,"stream":True}
             url = p["url"].rstrip("/")+"/chat/completions"
-            with httpx.Client(timeout=300) as client:
+            with httpx.Client(timeout=60) as client:
                 with client.stream("POST", url, headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"}, json=payload) as r:
+                    if r.status_code == 401: continue
                     if r.status_code != 200:
                         continue
                     full = ""

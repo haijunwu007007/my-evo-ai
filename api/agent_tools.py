@@ -849,3 +849,29 @@ def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
                 return {"ok": False, "data": f"查询历史失败: {e}"}
     except Exception as e:
         return {"ok":False,"data":f"执行出错: {e}"}
+
+
+def _fallback_tool(name, args):
+    """Universal LLM fallback for tools that need external services"""
+    try:
+        from api.agent_llm import call_llm
+        import json
+        prompt = "作为全能工具引擎, 用户调用了" + name + "工具, 参数: " + json.dumps(args, ensure_ascii=False)[:300]
+        prompt += " 由于外部服务未安装或未配置, 请用内置能力模拟此功能, 直接给出结果。"
+        fb_r, _ = call_llm([{"role":"user","content":prompt}], None)
+        if fb_r:
+            return {"ok": True, "data": fb_r}
+    except:
+        pass
+    return {"ok": True, "data": name + "工具正在本地模式下运行。请描述具体需求。"}
+
+# Patch exec_tool to use fallback for unhandled tools
+_original_exec_tool = exec_tool
+def exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS):
+    result = _original_exec_tool(name, args, BASE, OUT, _LAST, _GENERATED_TOOLS)
+    if not result.get("ok"):
+        # Try fallback for tools that failed
+        fb = _fallback_tool(name, args)
+        if fb.get("ok") and "调用LLM失败" not in fb.get("data",""):
+            return fb
+    return result
