@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>编排画布 - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#e0e0e0;display:flex;height:100vh}
+.sidebar{width:260px;background:#1a1a2e;border-right:1px solid #2d3561;display:flex;flex-direction:column}
+.sidebar h2{padding:16px;font-size:16px;border-bottom:1px solid #2d3561;text-align:center}
+.sidebar h2 span{background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar .section{padding:8px 12px;font-size:12px;color:#8892b0;font-weight:600}
+.node-list{flex:1;overflow-y:auto;padding:4px}
+.node-item{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:2px 0;border-radius:8px;cursor:grab;font-size:13px;background:#16213e;border:1px solid #2d3561;transition:all .2s}
+.node-item:hover{border-color:#4361ee;transform:translateX(2px)}
+.node-item:active{cursor:grabbing;transform:scale(.97)}
+.node-item .icon{font-size:16px;width:24px;text-align:center}
+.node-item .info{flex:1;overflow:hidden}
+.node-item .info .name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-item .info .desc{font-size:10px;color:#8892b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.main{flex:1;display:flex;flex-direction:column}
+.toolbar{display:flex;gap:8px;align-items:center;padding:8px 16px;background:#1a1a2e;border-bottom:1px solid #2d3561}
+.toolbar select{background:#16213e;color:#e0e0e0;border:1px solid #2d3561;border-radius:6px;padding:6px 10px;font-size:12px}
+.toolbar button{padding:6px 14px;border:none;border-radius:6px;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
+.toolbar button:hover{opacity:.9}
+.toolbar button.danger{background:#e74c3c}
+.canvas{flex:1;position:relative;overflow:hidden;background:#0a0a1a;background-image:radial-gradient(circle,#2d3561 1px,transparent 1px);background-size:24px 24px}
+.canvas .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#2d3561;font-size:16px;text-align:center;pointer-events:none}
+.node-el{position:absolute;width:160px;background:#1a1a2e;border:1px solid #2d3561;border-radius:10px;padding:10px;cursor:move;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.node-el:hover{border-color:#4361ee;z-index:20}
+.node-el .hdr{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.node-el .hdr .icon{font-size:14px}
+.node-el .hdr .nm{font-size:13px;font-weight:600;flex:1}
+.node-el .hdr .del{font-size:12px;cursor:pointer;color:#e74c3c;opacity:.6}
+.node-el .hdr .del:hover{opacity:1}
+.node-el .port{font-size:10px;color:#8892b0}
+.node-el .outs{position:absolute;right:-6px;top:50%;width:12px;height:12px;border-radius:50%;background:#4361ee;cursor:crosshair;transform:translateY(-50%)}
+.node-el .ins{position:absolute;left:-6px;top:50%;width:12px;height:12px;border-radius:50%;background:#00b894;cursor:crosshair;transform:translateY(-50%)}
+.edge{position:absolute;z-index:5;pointer-events:none}
+.prop-panel{position:absolute;right:12px;top:12px;width:220px;background:#1a1a2e;border:1px solid #2d3561;border-radius:10px;padding:14px;display:none}
+.prop-panel h3{font-size:14px;margin-bottom:8px}
+.prop-panel label{font-size:11px;color:#8892b0;display:block;margin:6px 0 2px}
+.prop-panel input,.prop-panel select{width:100%;padding:5px 8px;border-radius:4px;border:1px solid #2d3561;background:#0f0f1a;color:#e0e0e0;font-size:12px}
+</style></head><body>
+<div class="sidebar">
+  <h2><span>🎨 编排画布</span></h2>
+  <div class="section">📦 已集成项目（拖入画布）</div>
+  <div class="node-list" id="projectList"></div>
+</div>
+<div class="main">
+  <div class="toolbar">
+    <select id="comboSelect" onchange="loadCombo(this.value)"><option value="">+ 新建组合</option></select>
+    <input id="comboName" placeholder="组合名称" style="background:#16213e;color:#e0e0e0;border:1px solid #2d3561;border-radius:6px;padding:6px 10px;font-size:12px;width:150px">
+    <button onclick="saveCombo()">💾 保存</button>
+    <button onclick="deployCombo()">🚀 部署</button>
+    <button class="danger" onclick="clearCanvas()">🗑️ 清空</button>
+    <span style="color:#8892b0;font-size:11px;margin-left:auto">拖拽节点·连线自动连接</span>
+  </div>
+  <div class="canvas" id="canvas" ondrop="onDrop(event)" ondragover="event.preventDefault()">
+    <div class="hint" id="hint">⬇️ 从左侧拖入项目<br>或选择已有组合加载</div>
+  </div>
+  <div class="prop-panel" id="propPanel"></div>
+</div>
+<script>
+var NODES={}, EDGES=[], NODE_COUNTER=0, SELECTED=null, canv=document.getElementById('canvas'), NEXT_ID=1, COMBO_ITEMS={}
+async function api(m,p,d){try{var r=await fetch('/api/v1/hub/'+m,{method:p||'GET',headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):null});return await r.json()}catch(e){return{success:false}}}
+async function loadProjects(){
+  var d=await api('projects');
+  var el=document.getElementById('projectList');
+  if(!d||!d.projects)return el.innerHTML='<p style="color:#8892b0;font-size:12px;padding:8px">暂无项目</p>';
+  el.innerHTML=d.projects.map(p=>`<div class="node-item" draggable="true" data-id="${p.id}" data-name="${p.name}" data-source="${p.source||'github'}" ondragstart="onDragStart(event)">
+    <span class="icon">${p.source=='gitee'?'🇨🇳':p.source=='huggingface'?'🤗':'🐙'}</span>
+    <div class="info"><div class="name">${p.name}</div><div class="desc">${(p.description||p.source||'').slice(0,30)}</div></div>
+  </div>`).join('')
+}
+async function loadComboList(){
+  var d=await api('composes');
+  var sel=document.getElementById('comboSelect');
+  if(!d||!d.composes)return;
+  COMBO_ITEMS={};d.composes.forEach(c=>{COMBO_ITEMS[c.id]=c});
+  var opts=d.composes.map(c=>`<option value="${c.id}">${c.name}</option>`);
+  sel.innerHTML='<option value="">+ 新建组合</option>'+opts.join('')
+}
+async function loadCombo(id){
+  if(!id||!COMBO_ITEMS[id]){clearCanvas();return}
+  var c=COMBO_ITEMS[id];
+  document.getElementById('comboName').value=c.name;
+  clearCanvas();
+  try{
+    var nds=typeof c.nodes=='string'?JSON.parse(c.nodes):(c.nodes||[]);
+    var edgs=typeof c.edges=='string'?JSON.parse(c.edges):(c.edges||[]);
+    nds.forEach(function(n){NODE_COUNTER++;var id='n'+NODE_COUNTER;addNodeEl(n.name||n.id||'node',n.source||'github',id);if(n.x)NODES[id].x=n.x;if(n.y)NODES[id].y=n.y;if(n.port)NODES[id].port=n.port});
+    EDGES=edgs.map(function(e,i){return{id:'e'+i,from:e.from,to:e.to}})
+  }catch(e){}
+  saveComboId=id;renderAll()
+}
+function onDragStart(e){e.dataTransfer.setData('text/plain',JSON.stringify({id:e.target.dataset.id,name:e.target.dataset.name,source:e.target.dataset.source}))}
+function onDrop(e){
+  e.preventDefault();
+  try{var data=JSON.parse(e.dataTransfer.getData('text/plain'))}catch(ex){return}
+  var rect=canv.getBoundingClientRect();var x=e.clientX-rect.left-80;var y=e.clientY-rect.top-20;
+  document.getElementById('hint').style.display='none';NODE_COUNTER++;var nid='n'+NODE_COUNTER;
+  addNodeEl(data.name,data.source||'github',nid,x,y)
+}
+function addNodeEl(name,source,nid,x,y){
+  var el=document.createElement('div');el.className='node-el';el.id=nid;
+  el.style.left=(x||100+NODE_COUNTER*30)+'px';el.style.top=(y||100+NODE_COUNTER*40)+'px';
+  el.innerHTML='<div class="hdr"><span class="icon">'+(source=='gitee'?'🇨🇳':source=='huggingface'?'🤗':'🐙')+'</span><span class="nm">'+name+'</span><span class="del" onclick="delNode(\''+nid+'\')">✕</span></div><div class="port">🔗 '+source+'</div><div class="ins"></div><div class="outs"></div>';
+  el.addEventListener('mousedown',function(e){if(e.target.closest('.del'))return;startDrag(e,this)});
+  canv.appendChild(el);
+  NODES[nid]={el:el,name:name,source:source,x:parseInt(el.style.left),y:parseInt(el.style.top),port:9000}
+}
+function delNode(id){var el=document.getElementById(id);if(el)el.remove();delete NODES[id];EDGES=EDGES.filter(function(e){return e.from!=id&&e.to!=id});renderAll()}
+var DRAG={}
+function startDrag(e,el){
+  DRAG={el:el,ox:e.clientX-parseInt(el.style.left),oy:e.clientY-parseInt(el.style.top)};
+  el.style.zIndex=100;
+  document.addEventListener('mousemove',onDrag);document.addEventListener('mouseup',endDrag)
+}
+function onDrag(e){
+  if(!DRAG.el)return;
+  DRAG.el.style.left=(e.clientX-DRAG.ox)+'px';DRAG.el.style.top=(e.clientY-DRAG.oy)+'px';
+  var id=DRAG.el.id;if(NODES[id]){NODES[id].x=parseInt(DRAG.el.style.left);NODES[id].y=parseInt(DRAG.el.style.top)}
+  renderAll()
+}
+function endDrag(e){if(DRAG.el){DRAG.el.style.zIndex=10;snapConnect();};DRAG={};document.removeEventListener('mousemove',onDrag);document.removeEventListener('mouseup',endDrag)}
+function snapConnect(){
+  var els=canv.querySelectorAll('.node-el');
+  var arr=[];els.forEach(function(e){arr.push({id:e.id,x:parseInt(e.style.left),y:parseInt(e.style.top)})});
+  var THRESH=60;
+  arr.sort(function(a,b){return a.x-b.x});
+  EDGES=[];
+  for(var i=0;i<arr.length-1;i++){
+    var from=arr[i],to=arr[i+1];
+    var dy=Math.abs(from.y-to.y);
+    if(dy<THRESH&&to.x>from.x){EDGES.push({id:'e'+i,from:from.id,to:to.id})}
+  }
+  renderAll()
+}
+function renderAll(){
+  document.querySelectorAll('.edge').forEach(function(e){e.remove()});
+  EDGES.forEach(function(e){
+    var f=document.getElementById(e.from);var t=document.getElementById(e.to);
+    if(!f||!t)return;
+    var fx=parseInt(f.style.left)+160,fy=parseInt(f.style.top)+25,tx=parseInt(t.style.left),ty=parseInt(t.style.top)+25;
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','edge');svg.style.width='100%';svg.style.height='100%';svg.style.position='absolute';svg.style.top='0';svg.style.left='0';svg.style.pointerEvents='none';
+    var line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',fx);line.setAttribute('y1',fy);line.setAttribute('x2',tx);line.setAttribute('y2',ty);
+    line.setAttribute('stroke','#4361ee');line.setAttribute('stroke-width','2');line.setAttribute('stroke-dasharray','5,3');
+    svg.appendChild(line);canv.appendChild(svg)
+  })
+}
+var saveComboId=null;
+async function saveCombo(){
+  var name=document.getElementById('comboName').value||'未命名组合';
+  var nlist=[];Object.keys(NODES).forEach(function(k){var n=NODES[k];nlist.push({id:k,name:n.name,source:n.source,x:n.x,y:n.y,port:n.port})});
+  var edlist=EDGES.map(function(e,i){return{from:e.from,to:e.to}});
+  var data={name:name,nodes:nlist,edges:edlist};
+  if(saveComboId){data.id=saveComboId;var r=await api('composes/'+saveComboId,'PUT',data)}else{var r=await api('composes','POST',data)}
+  if(r&&r.success){saveComboId=r.id;await loadComboList();document.getElementById('comboSelect').value=r.id;alert('✅ 已保存')}else{alert('❌ 保存失败')}
+}
+async function deployCombo(){
+  if(!saveComboId){alert('请先保存组合');return}
+  var r=await api('composes/'+saveComboId+'/deploy','POST',{nodes:Object.keys(NODES)});
+  alert((r&&r.success)?'🚀 部署已启动':'❌ 部署失败: '+(r&&r.error||'未知'))
+}
+function clearCanvas(){
+  document.querySelectorAll('.node-el').forEach(function(e){e.remove()});
+  document.querySelectorAll('.edge').forEach(function(e){e.remove()});
+  NODES={};EDGES=[];NODE_COUNTER=0;saveComboId=null;document.getElementById('hint').style.display='block'
+}
+loadProjects();loadComboList()
+</script></body></html>
