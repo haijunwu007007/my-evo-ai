@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AUTO-EVO-AI 新手引导</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
+body{background:#0f0f1a;color:#e0e0e0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#1a1a2e;border:1px solid #2d3561;border-radius:20px;padding:36px;max-width:520px;width:90%;text-align:center}
+.card h1{font-size:22px;margin-bottom:8px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card p{color:#8892b0;font-size:14px;margin-bottom:24px;line-height:1.6}
+.steps{text-align:left;margin-bottom:24px}
+.step{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#16213e;border-radius:10px;margin-bottom:8px;border:1px solid #2d3561;cursor:pointer;transition:all.2s}
+.step:hover{border-color:#4361ee;transform:translateX(4px)}
+.step .num{width:28px;height:28px;border-radius:50%;background:#4361ee;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step .text{flex:1}
+.step .text b{display:block;font-size:14px;margin-bottom:2px}
+.step .text small{color:#64748b;font-size:12px}
+.btn{display:inline-block;padding:12px 32px;border-radius:10px;background:#4361ee;color:#fff;border:none;font-size:14px;cursor:pointer;font-weight:600}
+.btn:hover{opacity:.9}
+.skip{display:block;margin-top:12px;color:#64748b;font-size:12px;cursor:pointer;text-decoration:none}
+.skip:hover{color:#8892b0}
+</style></head><body>
+<div class="card">
+  <h1>🚀 欢迎使用 AUTO-EVO-AI</h1>
+  <p>选一个身份，系统自动为你推荐最适合的工具<br>不懂技术也能立即开始</p>
+  <div class="steps" id="roles">
+    <div class="step" onclick="goto('hub')">
+      <div class="num">🎨</div>
+      <div class="text"><b>创作者 / 自媒体</b><small>写作、画图、做视频、搞内容</small></div>
+    </div>
+    <div class="step" onclick="goto('hub')">
+      <div class="num">💼</div>
+      <div class="text"><b>创业者 / 个体户</b><small>管客户、开发票、做营销、看数据</small></div>
+    </div>
+    <div class="step" onclick="goto('hub')">
+      <div class="num">💻</div>
+      <div class="text"><b>开发者 / 技术人</b><small>写代码、管服务、用开源项目</small></div>
+    </div>
+    <div class="step" onclick="goto('hub')">
+      <div class="num">🏢</div>
+      <div class="text"><b>团队 / 小企业</b><small>协作、项目、知识库、自动化</small></div>
+    </div>
+    <div class="step" onclick="goto('chat')">
+      <div class="num">🤖</div>
+      <div class="text"><b>随便看看</b><small>先聊聊天，感受一下 AI 能力</small></div>
+    </div>
+  </div>
+  <a href="/" class="skip">跳过引导 →</a>
+</div>
+<script>
+function goto(path){
+  localStorage.setItem('evo_tutorial', 'done')
+  window.location.href = '/' + path
+}
+if(localStorage.getItem('evo_tutorial')==='done') window.location.href='/'
+</script>
+</body></html>

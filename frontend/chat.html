@@ -104,6 +104,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       <div class="nav-tabs" id="navTabs">
         <span id="tabChat" class="tab active">💬 对话</span>
         <span id="tabDash" class="tab" onclick="showDashboard()">📊 仪表盘</span>
+        <span id="tabHub" class="tab" onclick="openHub()">🪐 开源中心</span>
         <span id="tabBiz" class="tab" onclick="showEnterprise()">🏢 企业管理</span>
       </div>
       <div class="lang-bar" id="langBarTop">
@@ -597,6 +598,7 @@ function showArchives(){
 
 function showDashboard(){window.location.href='/app/dashboard?lang='+_LOCALE}
 function showEnterprise(){window.location.href='/dashboard?lang='+_LOCALE}
+function openHub(){window.location.href='/hub'}
 
 function startVoice(){
   var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition

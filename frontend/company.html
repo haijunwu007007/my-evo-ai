@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📊 虚拟公司 — AUTO-EVO-AI</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee}body{background:var(--bg);color:var(--text);padding:20px;max-width:1000px;margin:0 auto}.header{text-align:center;padding:16px 0}.header h1{font-size:24px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.nav{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}.nav a{padding:6px 14px;border-radius:8px;font-size:13px;color:var(--text2);text-decoration:none;border:1px solid var(--border)}.nav a:hover{color:var(--accent);border-color:var(--accent)}.dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}.dept-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}.dept-card .icon{font-size:28px;margin-bottom:8px}.dept-card h3{font-size:14px;margin-bottom:4px}.dept-card .agent{font-size:11px;color:var(--text2);margin-bottom:6px}.dept-card .status{font-size:11px;padding:2px 8px;border-radius:4px;display:inline-block}.status-idle{background:#00b89420;color:#00b894;border:1px solid #00b89440}.status-working{background:#fdcb6e20;color:#fdcb6e;border:1px solid #fdcb6e40}.dept-card .stat{font-size:11px;color:var(--text2);margin-top:6px}.goal-area{margin:16px 0;display:flex;gap:8px}.goal-area input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px}.goal-area button{padding:10px 20px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:14px}.tasks{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0}.tasks h3{font-size:14px;margin-bottom:8px}.task-item{padding:8px;margin:4px 0;border-radius:6px;font-size:13px;display:flex;justify-content:space-between}.task-pending{background:#fdcb6e10;border-left:3px solid #fdcb6e}.task-done{background:#00b89410;border-left:3px solid #00b894}.task .dept-tag{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px}.score{text-align:center;font-size:32px;font-weight:700;color:var(--accent);padding:16px}.score-label{font-size:12px;color:var(--text2)}</style></head><body>
+<div class="header"><h1>📊 虚拟公司</h1><p style="color:var(--text2);font-size:13px">AI 员工团队 · 自动执行</p></div>
+<div class="nav"><a href="/">💬 对话</a><a href="/hub">🪐 开源中心</a><a href="/canvas">🎨 画布</a><a href="/fork">🧬 二次开发</a></div>
+<div class="score" id="score">0<div class="score-label">自动化率</div></div>
+<div class="dept-grid" id="deptGrid"></div>
+<div class="goal-area">
+  <input id="goalInput" placeholder="说一个目标，CEO Agent会拆解给各部门..." onkeydown="if(event.key=='Enter')submitGoal()">
+  <button onclick="submitGoal()">🎯 提交目标</button>
+  <button onclick="autoCycle()" style="background:#00b894">⚡ 自动</button>
+</div>
+<div class="tasks"><h3>📋 任务列表</h3><div id="taskList">暂无任务，输入目标开始</div></div>
+<script>
+async function loadStatus(){try{
+  var r=await fetch('/api/v1/company/status');var d=await r.json();if(!d.success)return
+  var score=d.automation_score||0;document.getElementById('score').textContent=score+'%'
+  var html='';for(var k in d.departments){var dept=d.departments[k];var st=dept.status=='working'?'working':'idle'
+    var icons={ceo:'👑',cto:'💻',coo:'⚙️',cmo:'📣',design:'🎨',cs:'💁',finance:'💰',hr:'👥'}
+    html+='<div class="dept-card"><div class="icon">'+(icons[k]||'🏢')+'</div>'
+    html+='<h3>'+dept.name+'</h3><div class="agent">'+dept.agent+'</div>'
+    html+='<div class="status status-'+st+'">'+{idle:'空闲',working:'工作中'}[st]+'</div>'
+    html+='<div class="stat">✅ '+dept.tasks_done+'/'+dept.tasks_total+'</div></div>'}
+  document.getElementById('deptGrid').innerHTML=html
+  var th='';d.tasks&&d.tasks.slice().reverse().forEach(function(t){
+    var st=t.status=='completed'?'done':'pending';var tag={ceo:'👑',cto:'💻',coo:'⚙️',cmo:'📣',design:'🎨',cs:'💁',finance:'💰',hr:'👥'}
+    th+='<div class="task-item task-'+st+'"><span>'+(t.task||'')+' <span class="dept-tag">'+(tag[t.department]||'')+'</span></span><span style="color:var(--text2);font-size:11px">'+{pending:'待办',completed:'✅完成'}[st]+'</span></div>'
+  });document.getElementById('taskList').innerHTML=th||'暂无任务'
+}catch(e){}}
+async function submitGoal(){var inp=document.getElementById('goalInput');var g=inp.value.trim();if(!g)return
+  await fetch('/api/v1/company/goal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal:g})});inp.value='';loadStatus()}
+async function autoCycle(){await fetch('/api/v1/company/cycle',{method:'POST'});loadStatus()}
+loadStatus();setInterval(loadStatus,5000)
+</script>
+</body></html>

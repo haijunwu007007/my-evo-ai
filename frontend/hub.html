@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🪐 开源中心 - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee;--success:#00b894;--warn:#fdcb6e;--error:#e74c3c}
+body{background:var(--bg);color:var(--text)}
+.topbar{display:flex;align-items:center;gap:16px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.topbar h2{font-size:16px;white-space:nowrap}
+.topbar .nav{display:flex;gap:4px;flex-wrap:wrap}
+.topbar .nav a{padding:6px 14px;border-radius:8px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all .2s}
+.topbar .nav a:hover,.topbar .nav a.active{background:var(--accent);color:#fff}
+.topbar .nav a.back{margin-left:auto;border:1px solid var(--border)}
+.main{max-width:1200px;margin:0 auto;padding:20px}
+.filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filters input[type=text]{flex:1;min-width:200px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none}
+.filters input:focus{border-color:var(--accent)}
+.filters .source-tabs{display:flex;gap:4px}
+.filters .source-tabs span{padding:6px 12px;border-radius:6px;font-size:12px;background:var(--card);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .2s}
+.filters .source-tabs span.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filters select{padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;outline:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .2s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .header{display:flex;justify-content:space-between;align-items:start;margin-bottom:8px}
+.card .name{font-size:15px;font-weight:600}
+.card .source{font-size:11px;padding:2px 6px;border-radius:4px;background:var(--bg);color:var(--text2)}
+.card .desc{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.card .meta .tag{font-size:11px;padding:2px 6px;border-radius:4px;background:var(--bg)}
+.card .actions{display:flex;gap:6px}
+.card .actions button{padding:7px 16px;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--error);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border)!important;color:var(--text2)}
+.btn-small{padding:4px 10px!important;font-size:11px!important}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.empty{padding:60px;text-align:center;color:var(--text2)}
+.empty .big{font-size:48px;margin-bottom:12px}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px}
+.status-running{background:#00b89420;color:var(--success);border:1px solid #00b89440}
+.status-stopped{background:#8892b020;color:var(--text2);border:1px solid var(--border)}
+.status-error{background:#e74c3c20;color:var(--error);border:1px solid #e74c3c40}
+.status-deploying{background:#fdcb6e20;color:var(--warn);border:1px solid #fdcb6e40}
+.deploy-log{background:#0a0a1a;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;margin-top:12px}
+.deploy-log .line{color:var(--text2)}
+.deploy-log .line.done{color:var(--success)}
+.deploy-log .line.err{color:var(--error)}
+.loading{text-align:center;padding:60px;color:var(--text2)}.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}@keyframes spin{to{transform:rotate(360deg)}}
+.card.project-card .source-badge{font-size:10px;padding:1px 5px;border-radius:3px;background:var(--bg);color:var(--text2);margin-left:6px}
+.project-row{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.project-row .info{display:flex;align-items:center;gap:12px;flex:1}
+.project-row .info .name{font-size:14px;font-weight:500}
+.project-row .actions{display:flex;gap:6px;align-items:center}
+@media(max-width:768px){.grid{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:stretch}.topbar .nav{justify-content:center}.filters{flex-direction:column}}
+</style></head><body>
+<div class="topbar">
+  <h2>🪐 开源中心</h2>
+  <div class="nav">
+    <a class="active" onclick="showTab('discover')">🔥 发现</a>
+    <a onclick="showTab('mine')">📦 我的项目</a>
+    <a onclick="showTab('composes')">🔗 组合</a>
+    <a onclick="showTab('templates')">📋 模板</a>
+    <a href="/" class="back">← 回首页</a>
+    <a href="/canvas" class="back">🎨 画布</a>
+    <a href="/fork" class="back">🧬 开发</a>
+  </div>
+</div>
+<div class="main">
+
+<!-- 发现 -->
+<div id="tab-discover" class="tab-content active">
+  <div class="filters">
+    <div class="source-tabs">
+      <span class="active" onclick="setSource('all')">🌍 全部</span>
+      <span onclick="setSource('github')">🐙 GitHub</span>
+      <span onclick="setSource('huggingface')">🤗 HuggingFace</span>
+      <span onclick="setSource('gitee')">🇨🇳 Gitee</span>
+    </div>
+    <input type="text" id="searchInput" placeholder="搜索项目..." onkeydown="if(event.key=='Enter')search()">
+    <button class="btn-primary" onclick="search()" style="padding:8px 20px;border:none;border-radius:6px;cursor:pointer;font-size:13px">🔍 搜索</button>
+    <select onchange="filterCategory(this.value)">
+      <option value="">全部分类</option>
+      <option value="ai">🤖 AI</option>
+      <option value="web">🌐 Web</option>
+      <option value="data">📊 数据</option>
+      <option value="devtools">🛠 开发工具</option>
+      <option value="infra">🔧 基础设施</option>
+      <option value="media">🎨 媒体</option>
+      <option value="security">🔒 安全</option>
+    </select>
+  </div>
+  <div id="discoverGrid" class="grid"><div class="loading"><div class="spinner"></div><p>加载中...</p></div></div>
+</div>
+
+<!-- 我的项目 -->
+<div id="tab-mine" class="tab-content">
+  <h2 style="margin-bottom:16px">📦 我的项目</h2>
+  <div id="mineList"><div class="empty"><div class="big">📦</div><p>还没有项目，去「发现」页加入吧</p></div></div>
+</div>
+
+<!-- 组合 -->
+<div id="tab-composes" class="tab-content">
+  <h2 style="margin-bottom:16px">🔗 组合</h2>
+  <div id="composeList"><div class="empty"><div class="big">🔗</div><p>还没有组合<br>去画布拖拽组合你的项目</p><br><a href="/canvas" class="btn-primary" style="display:inline-block;padding:10px 24px;border-radius:8px;text-decoration:none">🎨 打开画布</a></div></div>
+</div>
+
+<!-- 模板 -->
+<div id="tab-templates" class="tab-content">
+  <h2 style="margin-bottom:16px">📋 模板市场</h2>
+  <div id="templateList"><div class="empty"><div class="big">📋</div><p>还没有模板<br>将组合好的项目保存为模板，分享给社区</p></div></div>
+</div>
+
+</div>
+<script>
+let _source = 'all', _category = ''
+
+function showTab(name){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'))
+  document.querySelectorAll('.nav a').forEach(e=>e.classList.remove('active'))
+  document.getElementById('tab-'+name).classList.add('active')
+  document.querySelector(`.nav a[onclick*="'${name}'"]`).classList.add('active')
+  if(name=='discover') loadDiscover()
+  if(name=='mine') loadMine()
+  if(name=='composes') loadComposes()
+  if(name=='templates') loadTemplates()
+}
+
+function setSource(s){_source=s;
+  document.querySelectorAll('.source-tabs span').forEach(e=>e.classList.remove('active'))
+  document.querySelector(`.source-tabs span[onclick*="'${s}'"]`).classList.add('active')
+  loadDiscover()
+}
+
+function filterCategory(c){_category=c;loadDiscover()}
+
+function search(){loadDiscover()}
+
+// ── 发现 ──
+
+async function loadDiscover(){
+  const q=document.getElementById('searchInput').value
+  const url=q ? `/api/v1/hub/search?q=${encodeURIComponent(q)}&source=${_source}`
+              : `/api/v1/hub/discover?source=${_source}&category=${_category}`
+  try{
+    const r=await fetch(url)
+    const d=await r.json()
+    renderGrid(d.projects||d.projects||[])
+  }catch(e){document.getElementById('discoverGrid').innerHTML=`<div class="empty"><div class="big">⚠️</div><p>加载失败</p></div>`}
+}
+
+function renderGrid(projects){
+  const el=document.getElementById('discoverGrid')
+  if(!projects.length){el.innerHTML=`<div class="empty"><div class="big">🔍</div><p>没有找到项目</p></div>`;return}
+  el.innerHTML=projects.map(p=>`
+    <div class="card">
+      <div class="header">
+        <div class="name">${p.name||'未知'}<span class="source-badge">${p.source||''}</span></div>
+        <span class="source">⭐ ${(p.stars||0).toLocaleString()}</span>
+      </div>
+      <div class="desc">${(p.description||'暂无描述').substring(0,150)}</div>
+      <div class="meta">
+        <span class="tag">${p.category||'其他'}</span>
+        ${(p.tags||[]).slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}
+        ${p.license?`<span class="tag">${p.license}</span>`:''}
+      </div>
+      <div class="actions">
+        ${p.integrated
+          ? `<span class="status-badge status-running">✅ 已加入</span>`
+          : `<button class="btn-primary" onclick="addProject('${p.id}','${p.name}','${p.source}','${(p.repo_url||'').replace(/'/g,"\\'")}','${(p.description||'').replace(/'/g,"\\'")}','${p.category||''}')">➕ 加入工作区</button>`
+        }
+        ${p.repo_url?`<button class="btn-outline btn-small" onclick="window.open('${p.repo_url}')">🔗 打开</button>`:''}
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── 加入项目 ──
+
+async function addProject(id,name,source,repo_url,desc,category){
+  try{
+    const r=await fetch('/api/v1/hub/projects',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id,name,source,repo_url,description:desc,category,tags:[],stars:0})})
+    const d=await r.json()
+    if(d.success){
+      alert(`✅ ${name} 已加入工作区！\n去「我的项目」页签查看部署`)
+      loadDiscover()
+      loadMine()
+    }else{alert('加入失败: '+d.error)}
+  }catch(e){alert('网络错误')}
+}
+
+// ── 我的项目 ──
+
+async function loadMine(){
+  const el=document.getElementById('mineList')
+  try{
+    const r=await fetch('/api/v1/hub/projects')
+    const d=await r.json()
+    const projects=d.projects||d.projects||[]
+    if(!projects.length){el.innerHTML=`<div class="empty"><div class="big">📦</div><p>还没有项目</p></div>`;return}
+    el.innerHTML=projects.map(p=>`
+      <div class="project-row" id="mrow-${p.id}">
+        <div class="info">
+          <div>
+            <div class="name">${p.name||'未知'}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">
+              <span class="status-badge status-${p.status||'stopped'}">● ${p.status||'未知'}</span>
+              ${p.port?` | 端口 ${p.port}`:''}
+              ${p.stars?` | ⭐ ${p.stars}`:''}
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          ${p.status=='running'
+            ? `<button class="btn-danger btn-small" onclick="stopProject('${p.id}')">⏹ 停止</button><button class="btn-outline btn-small" onclick="window.open('http://localhost:${p.port}','_blank')">🔗 打开</button>`
+            : p.status=='deploying'
+              ? `<span class="status-badge status-deploying">⏳ 部署中</span>`
+              : p.status=='ready'||p.status=='stopped'
+                ? `<button class="btn-primary btn-small" onclick="deployProject('${p.id}')">🚀 部署</button>`
+                : `<button class="btn-primary btn-small" onclick="deployProject('${p.id}')">🚀 重新部署</button>`
+          }
+          <button class="btn-outline btn-small" onclick="deleteProject('${p.id}')">🗑️</button>
+        </div>
+        <div id="dlog-${p.id}" class="deploy-log" style="display:none"></div>
+      </div>
+    `).join('')
+  }catch(e){el.innerHTML=`<div class="empty"><p>加载失败</p></div>`}
+}
+
+async function deployProject(pid){
+  try{
+    const r=await fetch(`/api/v1/hub/projects/${pid}/integrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    const d=await r.json()
+    if(d.success){
+      loadMine()
+      // 轮询状态
+      pollStatus(pid)
+    }else{alert('部署失败: '+(d.error||'未知'))}
+  }catch(e){alert('网络错误')}
+}
+
+function pollStatus(pid){
+  const logEl=document.getElementById('dlog-'+pid)
+  if(logEl) logEl.style.display='block'
+  const iv=setInterval(async()=>{
+    try{
+      const r=await fetch(`/api/v1/hub/projects/${pid}/status`)
+      const d=await r.json()
+      if(logEl && d.log) logEl.innerHTML=d.log.map(l=>`<div class="line">${l}</div>`).join('')+'<div class="line" style="color:var(--text2)">◉ 轮询中...</div>'
+      if(d.status=='running'||d.status=='error'||d.status=='stopped'){
+        clearInterval(iv)
+        loadMine()
+        if(logEl && d.status=='running') logEl.innerHTML=(d.log||[]).map(l=>`<div class="line done">${l}</div>`).join('')+'<div class="line done">✅ 部署完成</div>'
+        if(logEl && d.status=='error') logEl.innerHTML=(d.log||[]).map(l=>`<div class="line err">${l}</div>`).join('')
+      }
+    }catch(e){}
+  },2000)
+  setTimeout(()=>clearInterval(iv),300000)
+}
+
+async function stopProject(pid){
+  await fetch(`/api/v1/hub/projects/${pid}/stop`,{method:'POST'})
+  loadMine()
+}
+
+async function deleteProject(pid){
+  if(!confirm('确认删除？')) return
+  await fetch(`/api/v1/hub/projects/${pid}`,{method:'DELETE'})
+  loadMine()
+}
+
+// ── 组合 ──
+
+async function loadComposes(){
+  const el=document.getElementById('composeList')
+  try{
+    const r=await fetch('/api/v1/hub/composes')
+    const d=await r.json()
+    const composes=(d.composes||d.composes||[])
+    if(!composes.length){el.innerHTML=`<div class="empty"><div class="big">🔗</div><p>还没有组合</p><br><a href="/canvas" style="display:inline-block;padding:10px 24px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none">🎨 打开画布</a></div>`;return}
+    el.innerHTML=composes.map(c=>`<div class="card"><h3>${c.name}</h3><p style="color:var(--text2)">${c.description||''}</p></div>`).join('')
+  }catch(e){}
+}
+
+// ── 模板 ──
+
+async function loadTemplates(){
+  const el=document.getElementById('templateList')
+  try{
+    const r=await fetch('/api/v1/hub/templates')
+    const d=await r.json()
+    const templates=(d.templates||d.templates||[])
+    if(!templates.length){el.innerHTML=`<div class="empty"><div class="big">📋</div><p>还没有模板</p></div>`;return}
+    el.innerHTML=templates.map(t=>`<div class="card"><h3>${t.name}</h3><p style="color:var(--text2)">${t.description||''}</p></div>`).join('')
+  }catch(e){}
+}
+
+// ── 初始化 ──
+loadDiscover()
+</script>
+</body></html>

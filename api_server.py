@@ -150,7 +150,17 @@ from api.routes.routes_agent_team import router as agent_team_router
 from api.routes.routes_env import router as env_router
 from api.routes.routes_skills_market import router as skills_market_router
 from api.routes.routes_github import router as github_router
+from api.routes.routes_hub import router as hub_router
+from api.routes.hub_static import router as hub_static_router
+from api.routes.routes_gitea import router as gitea_router
+from api.routes.routes_plane import router as plane_router
+from api.routes.routes_nextcloud import router as nextcloud_router
+from api.routes.routes_homeassistant import router as homeassistant_router
+from api.routes.routes_vaultwarden import router as vaultwarden_router
+from api.routes.routes_metabase import router as metabase_router
 
+app.include_router(hub_router)
+app.include_router(hub_static_router)
 app.include_router(skills_market_router)
 app.include_router(selfheal_router)
 app.include_router(rerank_router)
@@ -220,6 +230,12 @@ app.include_router(events_router)
 app.include_router(diagnosis_router)
 app.include_router(env_router)
 app.include_router(github_router)
+app.include_router(gitea_router)
+app.include_router(plane_router)
+app.include_router(nextcloud_router)
+app.include_router(homeassistant_router)
+app.include_router(vaultwarden_router)
+app.include_router(metabase_router)
 
 # ── 动态路由加载（LLM创建的新API自动挂载） ──
 _apidir = Path(__file__).parent / "output" / "api"
