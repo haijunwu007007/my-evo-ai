@@ -2,7 +2,7 @@
 from __future__ import annotations
 import os, json, subprocess, time
 from pathlib import Path
-from api.hub.models import get_project, update_project, get_connection, list_connections
+from api.hub.models import get_project, update_project, list_connections
 
 COMPOSE_DIR = Path(__file__).resolve().parent.parent.parent / "hub_composes"
 NGINX_CONF = Path("/etc/nginx/sites-enabled") / "evo-composes.conf"
