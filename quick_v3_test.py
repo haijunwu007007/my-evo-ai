@@ -1,0 +1,12 @@
+import sys, paramiko
+sys.stdout.reconfigure(encoding='utf-8')
+C=paramiko.SSHClient()
+C.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+C.connect('122.51.144.227',port=22,username='ubuntu',password='Hj711201',timeout=10,banner_timeout=60)
+_,o,_=C.exec_command('curl -s http://127.0.0.1:8765/api/v1/hub/composes 2>/dev/null|python3 -c "import sys,json;d=json.load(sys.stdin);print(len(d.get(\"composes\",[])),\"组合\")"',timeout=10,get_pty=True)
+print(o.read().decode().strip())
+_,o2,_=C.exec_command('curl -s http://127.0.0.1:8765/api/v1/hub/templates 2>/dev/null|python3 -c "import sys,json;d=json.load(sys.stdin);print(len(d.get(\"templates\",[])),\"模板\")"',timeout=10,get_pty=True)
+print(o2.read().decode().strip())
+_,o3,_=C.exec_command('curl -s http://127.0.0.1:8765/ 2>/dev/null|head -1',timeout=10,get_pty=True)
+print('首页:', '✅' if 'DOCTYPE' in o3.read().decode(errors='replace') else '❌')
+C.close()
