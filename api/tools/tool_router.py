@@ -45,7 +45,7 @@ _KEYWORD_TOOLS: list[tuple[re.Pattern, str]] = [
     for p, t in [
         (r"浏览|打开|访问.*网址|抓取.*页面|网页截图", "browser_automate"),
         (r"爬取|抓取.*内容|爬虫", "web_scrape"),
-        (r"搜索.*信息|查.*资料|找.*资料|查询", "web_search"),
+        (r"搜索.*信息|查.*资料|找.*资料|查询|搜索|搜一搜", "web_search"),
         (r"研究|调研|分析.*趋势|报告.*主题", "deep_research"),
         (r"审查.*代码|review|PR|代码审查", "code_review"),
         (r"修复.*issue|修.*Bug|修.*问题", "fix_issue"),
@@ -114,6 +114,7 @@ _KEYWORD_TOOLS: list[tuple[re.Pattern, str]] = [
         (r"视频.*脚本|脚本.*生成", "video_script"),
         (r"多智能体|multi.*agent|多Agent|团队", "multi_agent"),
         (r"自主.*任务|自动.*任务", "autonomous_task"),
+        (r"部署|docker.*运行|启动.*容器", "paas_deploy"),
         (r"生成.*应用|Web.*应用|生成.*网站", "create_webapp"),
         (r"Markdown|文档.*转换|转MD", "markdown_convert"),
         (r"OCR|图片.*识别|识别.*文字", "ocr_image"),

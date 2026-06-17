@@ -189,8 +189,10 @@ async def auto_deploy_github_async(repo_url: str, extra_config: dict = None) -> 
             asyncio.create_task(_do_dockerfile_deploy(pid, full_name, branch, port))
             return {"success": True, "project_id": pid, "name": name,
                     "message": f"Dockerfile 部署已启动", "deploy_type": deploy_type, "port": port}
+        # 源码自动构建（无 Docker 时）
+        asyncio.create_task(_do_source_build(pid, full_name, branch))
         return {"success": True, "project_id": pid, "name": name,
-                "message": f"项目已添加，无自动Docker配置，可手动部署", "deploy_type": deploy_type}
+                "message": f"项目已添加，正在源码自动构建", "deploy_type": "source_build"}
     except Exception as e:
         logger.error(f"auto_deploy_github: {e}")
         return {"success": False, "error": str(e)}
@@ -223,6 +225,23 @@ async def _do_compose_deploy(pid: str, full_name: str, branch: str, port: int):
     except Exception as e:
         logger.error(f"compose_deploy error: {e}")
         update_project(pid, {"status": "error"})
+
+async def _do_source_build(pid: str, full_name: str, branch: str):
+    """源码项目自动构建"""
+    from api.hub.auto_build import auto_deploy_source
+    proj_dir = HUBS_DIR / full_name.replace("/", "_")
+    if proj_dir.exists():
+        shutil.rmtree(proj_dir)
+    repo_url = f"https://github.com/{full_name}.git"
+    proc = await asyncio.create_subprocess_exec(
+        "git", "clone", "--depth=1", "-b", branch, repo_url, str(proj_dir),
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    await proc.wait()
+    if proc.returncode != 0:
+        update_project(pid, {"status": "error"})
+        return
+    await auto_deploy_source(pid, full_name, branch)
 
 async def _do_dockerfile_deploy(pid: str, full_name: str, branch: str, port: int):
     try:
