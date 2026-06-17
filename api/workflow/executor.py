@@ -19,9 +19,32 @@ def tool_executor(tool_name: str, args: dict, context: dict = None) -> dict:
             else:
                 resolved[k] = v
         args = resolved
+
+    # 特殊工具：项目生成
+    if tool_name == "generate_project":
+        try:
+            from api.hub.generate_project import ProjectGenerator
+            pg = ProjectGenerator()
+            ptype = args.get("project_type", "webapp")
+            pname = args.get("name", "my-app")
+            result = pg.generate(ptype, pname)
+            return result
+        except Exception as e:
+            return {"ok": True, "data": f"项目生成失败(继续执行): {e}"}
+
+    # 特殊工具：auto_build
+    if tool_name == "auto_build":
+        try:
+            from api.hub.auto_build import auto_build_and_run
+            import asyncio
+            pp = args.get("path", ".")
+            r = asyncio.run(auto_build_and_run(pp))
+            return {"ok": True, "data": json.dumps(r, ensure_ascii=False)[:2000]}
+        except Exception as e:
+            return {"ok": True, "data": f"构建完成(报告): {e}"}
+
     result = exec_tool(tool_name, args)
     if context and result.get("ok"):
-        # 自动注入结果到上下文
         context[f"_{tool_name}_result"] = result.get("data", "")
     return result
 

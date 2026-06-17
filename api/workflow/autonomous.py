@@ -160,7 +160,35 @@ class AutonomousAgent:
         if ("监控" in tl or "检查" in tl) and ("通知" in tl or "报警" in tl or "邮件" in tl):
             return [{"id":"s1","tool":"site_monitor","args":{"url":self._extract_url(text) or "https://example.com"},"label":"监控"},
                     {"id":"s2","tool":"send_notification","args":{"message":"$last"},"label":"通知"}]
+        # 项目生成类任务
+        if ("电商" in tl or "商城" in tl or "ecommerce" in tl or "shop" in tl):
+            return [{"id":"s1","tool":"generate_project","args":{"project_type":"ecommerce","name":self._extract_project_name(text)},"label":"生成电商项目"},
+                    {"id":"s2","tool":"code_review","args":{"code":"$last"},"label":"审查代码"},
+                    {"id":"s3","tool":"paas_deploy","args":{"name":"ecommerce"},"label":"部署上线"}]
+        if ("博客" in tl or "blog" in tl or "cms" in tl):
+            return [{"id":"s1","tool":"generate_project","args":{"project_type":"blog","name":self._extract_project_name(text)},"label":"生成博客"},
+                    {"id":"s2","tool":"paas_deploy","args":{"name":"blog"},"label":"部署上线"}]
+        if ("crm" in tl or "客户" in tl):
+            return [{"id":"s1","tool":"generate_project","args":{"project_type":"crm","name":self._extract_project_name(text)},"label":"生成CRM"},
+                    {"id":"s2","tool":"paas_deploy","args":{"name":"crm"},"label":"部署上线"}]
+        if ("网站" in tl or "全栈" in tl or "webapp" in tl):
+            return [{"id":"s1","tool":"generate_project","args":{"project_type":"webapp","name":self._extract_project_name(text)},"label":"生成Web应用"},
+                    {"id":"s2","tool":"paas_deploy","args":{"name":"webapp"},"label":"部署上线"}]
         return None
+
+    def _extract_url(self, text: str) -> str:
+        import re
+        urls = re.findall(r'https?://[^\s,；，。]+', text)
+        return urls[0] if urls else ""
+
+    def _extract_project_name(self, text: str) -> str:
+        import re
+        # 尝试从"做个XXX"、叫"XXX"提取
+        m = re.search(r'叫["""]?(.+?)["""]?[的的]', text)
+        if m: return m.group(1).strip()
+        m = re.search(r'(?:做个|创建|生成|搭建)(.{2,8}?)(?:网站|系统|项目|商城)', text)
+        if m: return m.group(1).strip()
+        return "my-app"
 
     @staticmethod
     def _extract_url(text: str) -> str:

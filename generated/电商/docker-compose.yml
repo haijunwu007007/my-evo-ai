@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_PATH=/data/shop.db
+      - SECRET_KEY=change_this_secret_key_in_production
+    volumes:
+      - shop_data:/data
+    depends_on:
+      mysql:
+        condition: service_healthy
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: shop
+      MYSQL_USER: shop
+      MYSQL_PASSWORD: shoppass
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
+  redis:
+    image: redis:7
+    ports:
+      - "6380:6379"
+volumes:
+  shop_data:
+  mysql_data:
