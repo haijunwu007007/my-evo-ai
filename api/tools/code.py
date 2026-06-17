@@ -2,6 +2,15 @@
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any
+
+def _req(url, timeout=30):
+    try:
+        import httpx
+        r = httpx.get(url, timeout=timeout, headers={"User-Agent": "EvoAI/1.0"})
+        return r.text
+    except Exception as e:
+        return f"[请求失败] {e}"
+
 try:
     from api.tools.registry import tool, exec_tool, list_tools, _tools, BASE, _llm
 except ImportError:

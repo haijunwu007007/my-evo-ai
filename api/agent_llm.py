@@ -6,11 +6,12 @@ _LLM_PROVIDERS = [
     {"name":"Ollama","env":"","url":"http://localhost:11434/api/chat","model":"dsr1","priority":-1,"local":"ollama","timeout":60},
 ]
 
-def call_llm(messages, tools=None, key=""):
+def call_llm(messages, tools=None, key="", timeout=None):
     for p in sorted(_LLM_PROVIDERS, key=lambda x: x["priority"]):
         try:
+            t = timeout or p.get("timeout", 30)
             if p.get("local") == "openai":
-                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=p.get("timeout",30))
+                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=t)
                 if r.status_code == 200:
                     text = r.json().get("choices",[{}])[0].get("message",{}).get("content","")
                     if text: return text, None
