@@ -131,3 +131,83 @@ async def auto_deploy_source(pid: str, full_name: str, branch: str = "main") -> 
     return {"success": True, "project_id": pid, "language": build_info.get("lang"),
         "run": build_info.get("run"), "port": build_info.get("port", 8080),
         "services": build_info.get("services", "")}
+
+
+# ── K8s 部署（带 Docker 降级） ──
+
+def detect_k8s() -> dict:
+    """检测 K8s 集群是否可用，不存在时返回降级信息"""
+    import shutil, subprocess
+    # 检查 kubectl 是否存在
+    kubectl = shutil.which("kubectl")
+    if not kubectl:
+        return {"has_k8s": False, "reason": "kubectl 未安装", "fallback": "docker"}
+    # 尝试连接集群
+    try:
+        r = subprocess.run([kubectl, "cluster-info", "--request-timeout=5"],
+            capture_output=True, text=True, timeout=10)
+        if r.returncode == 0:
+            # 提取集群信息
+            lines = r.stdout.strip().split("\n")
+            info = [l.strip() for l in lines if l.strip()][:3]
+            return {"has_k8s": True, "info": "; ".join(info), "fallback": "k8s"}
+        else:
+            err = r.stderr.strip()[:100]
+            return {"has_k8s": False, "reason": f"集群不可达: {err}", "fallback": "docker"}
+    except FileNotFoundError:
+        return {"has_k8s": False, "reason": "kubectl 命令不可用", "fallback": "docker"}
+    except subprocess.TimeoutExpired:
+        return {"has_k8s": False, "reason": "连接集群超时", "fallback": "docker"}
+    except Exception as e:
+        return {"has_k8s": False, "reason": f"检测异常: {str(e)[:50]}", "fallback": "docker"}
+
+async def auto_deploy_k8s(proj_dir, pid: str = "") -> dict:
+    """部署 K8s 项目，集群不存在时自动降级到 Docker"""
+    k8s_info = detect_k8s()
+    proj_path = Path(proj_dir) if isinstance(proj_dir, str) else proj_dir
+    # 查找 K8s 配置文件
+    k8s_files = list(proj_path.rglob("*.yaml")) + list(proj_path.rglob("*.yml"))
+    k8s_configs = [str(f) for f in k8s_files if any(kw in f.read_text(encoding="utf-8", errors="replace")[:500].lower()
+                  for kw in ["kind:", "apiVersion:", "namespace:"])]
+    if not k8s_configs:
+        # 无 K8s 配置，直接回退 Docker
+        build_info = await auto_build_with_services(proj_path, pid or "default")
+        return {"ok": True, "method": "docker", "build": build_info}
+    if not k8s_info["has_k8s"]:
+        # K8s 集群不存在，降级到 Docker compose
+        logger.info(f"[{pid}] K8s 集群不可用 ({k8s_info.get('reason','')})，降级到 Docker")
+        build_info = await auto_build_with_services(proj_path, pid or "default")
+        return {"ok": True, "method": "docker_fallback", "reason": k8s_info.get("reason"),
+                "build": build_info}
+    # K8s 集群可用，执行部署
+    results = []
+    for cfg in k8s_configs:
+        try:
+            proc = await asyncio.create_subprocess_shell(
+                f"kubectl apply -f {cfg}",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            out, err = await proc.communicate()
+            if proc.returncode == 0:
+                results.append(f"OK: {Path(cfg).name}")
+            else:
+                results.append(f"FAIL: {Path(cfg).name} - {err.decode()[:50]}")
+        except Exception as e:
+            results.append(f"FAIL: {Path(cfg).name} - {e}")
+    return {"ok": True, "method": "k8s", "results": results,
+            "configs_count": len(k8s_configs)}
+
+def get_k8s_status() -> dict:
+    """获取 K8s 部署状态"""
+    import subprocess
+    k8s_info = detect_k8s()
+    if not k8s_info["has_k8s"]:
+        return {"status": "unavailable", "reason": k8s_info.get("reason", "无 K8s 集群"),
+                "fallback": "docker"}
+    try:
+        pods = subprocess.run(["kubectl", "get", "pods", "--all-namespaces"],
+            capture_output=True, text=True, timeout=10)
+        svcs = subprocess.run(["kubectl", "get", "svc", "--all-namespaces"],
+            capture_output=True, text=True, timeout=10)
+        return {"status": "available", "pods": pods.stdout[:1000], "services": svcs.stdout[:500]}
+    except Exception as e:
+        return {"status": "error", "reason": str(e)[:100], "fallback": "docker"}

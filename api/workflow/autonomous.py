@@ -48,7 +48,17 @@ class AutonomousAgent:
             except Exception:
                 if attempt == self.max_plan_retries:
                     return {"ok": False, "error": f"规划失败: {traceback.format_exc()[:200]}"}
-        return {"ok": False, "error": "LLM规划多次失败"}
+        # 降级: LLM 规划全部失败 → 关键词匹配 + 多步检测
+        multi = self._detect_multi_step(goal)
+        if multi:
+            return {"ok": True, "steps": multi, "note": "降级: 关键词匹配(多步)"}
+        matched = self._direct_match(goal)
+        if matched:
+            return {"ok": True, "steps": [{"id": "step_1", "tool": matched,
+                     "args": self._infer_args(matched, goal),
+                     "label": f"执行: {matched}"}], "note": "降级: 关键词匹配(单步)"}
+        return {"ok": False, "error": "LLM规划多次失败，且无关键词匹配",
+                "note": "请明确告诉我你想做什么，或更详细地描述任务"}
 
     def execute_step(self, tool: str, args: dict) -> dict:
         """执行单步并记录记忆"""
