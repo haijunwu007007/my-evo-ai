@@ -30,4 +30,23 @@ try:
 except Exception:
     pass
 
+# ── Java/K8s 部署工具 ──
+try:
+    from api.hub.java_build_deploy import auto_build_java, detect_java_type
+    _tools["java_build"] = lambda a, **k: auto_build_java(a.get("path","."))
+    _tools["java_build"]._meta = {"name":"java_build","category":"部署","description":"Java自动检测构建部署"}
+except Exception:
+    pass
+
+try:
+    from api.hub.k8s_fallback import deploy_k8s_or_fallback, check_k8s
+    _tools["k8s_deploy"] = lambda a, **k: deploy_k8s_or_fallback(a.get("config",""), a.get("name","evo-app"))
+    _tools["k8s_deploy"]._meta = {"name":"k8s_deploy","category":"部署","description":"K8s部署+自动降级docker-compose"}
+    _tools["k8s_check"] = lambda a, **k: check_k8s()
+    _tools["k8s_check"]._meta = {"name":"k8s_check","category":"部署","description":"检查K8s集群状态"}
+except Exception:
+    pass
+
+print(f"  [agent_tools] +3 tools (java_build,k8s_deploy,k8s_check)")
+
 __all__ = ["tool", "exec_tool", "list_tools", "_tools", "BASE"]
