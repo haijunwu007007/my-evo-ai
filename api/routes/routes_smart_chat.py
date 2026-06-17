@@ -90,11 +90,21 @@ async def smart_chat(req: Req):
             return {"success": True, "result": result, "mode": mode}
     if ("PPT" in msg or "做一份" in msg) and "app_" not in msg:
         try:
-            from api.routes.routes_pptx import generate_presentation  # if exists
+            from api.routes.routes_pptx import generate_presentation
             r = generate_presentation(msg.replace("做一份","").replace("PPT","").strip() or "主题")
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
         except Exception:
             pass
+    # ── 智能工具路由层 ──
+    try:
+        from api.tools.tool_router import route_and_execute
+        result = route_and_execute(msg)
+        rtype = result.get("type", "chat")
+        output = result.get("data", "")
+        if rtype == "tool" or rtype == "direct":
+            return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
+    except Exception:
+        pass
     # ── 检查是否有可用的 API Key ──
     _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"))
     if not _has_key:
