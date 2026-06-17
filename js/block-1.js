@@ -2041,7 +2041,10 @@
 
             var container = document.getElementById('moduleList');
 
-            container.innerHTML = customModules.map(m => `
+            // 合并默认模块 + 自定义模块
+            var allModules = DEFAULT_MODULES.concat(customModules);
+
+            container.innerHTML = allModules.map(m => `
 
                 <div class="module-list-item">
 

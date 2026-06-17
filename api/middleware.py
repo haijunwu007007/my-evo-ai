@@ -32,6 +32,7 @@ logger = get_logger("evo.api")
 # ── 公共路径白名单（无需认证/限流）──
 _PUBLIC_PATHS = {
     "/static/fix.js", "/i18n.js", "/", "/health",
+    "/js/", "/frontend/", "/output/",
     "/docs", "/openapi.json", "/redoc", "/dashboard",
     "/manifest.json", "/sw.js",
     "/api/auth/login", "/api/auth/config",
@@ -173,7 +174,7 @@ async def security_middleware(request: Request, call_next):
         # 公共路径直接放行
         is_public = any(
             path == p or path.startswith(p)
-            for p in ["/docs", "/redoc", "/openapi", "/static", "/icon-"]
+            for p in ["/docs", "/redoc", "/openapi", "/static", "/icon-", "/js/", "/frontend/"]
         ) or path in _PUBLIC_PATHS
 
         # API Key 验证
