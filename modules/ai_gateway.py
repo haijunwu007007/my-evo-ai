@@ -784,3 +784,45 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         return {"success": True, "module": "ai_gateway"}
 
 module_class = AIGateway
+
+
+# ═══════════════════════════════════════════════════════
+# 便捷 LLM API 调用（原 modules/_zhipu_helper.py 合并至此）
+# ═══════════════════════════════════════════════════════
+
+_ZHIPU_API_KEY = os.environ.get("ZHIPU_API_KEY", "d9f5a51b0a014a68ad5ba34653a616dc.vJtwFWKvLbIZ67Uz")
+_API2D_KEY = os.environ.get("API2D_KEY", "fk242997-B0YGuNctpt45eveYnaJVhKNylgNVHbG6")
+_API2D_URL = "https://oa.api2d.net/v1/chat/completions"
+
+def llm_chat(prompt: str, system: str = "", temperature: float = 0.7, provider: str = "zhipu") -> str:
+    """便捷 LLM API 调用。支持 zhipu (GLM-4.7) 或 api2d (GPT-3.5)。
+    
+    旧版入口：modules._zhipu_helper.llm_chat (仍可用)
+    """
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    if provider == "api2d":
+        url = _API2D_URL
+        key = _API2D_KEY
+        model = "gpt-3.5-turbo"
+    else:
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        key = _ZHIPU_API_KEY
+        model = "glm-4.7"
+
+    payload = json.dumps({"model": model, "messages": messages, "temperature": temperature}).encode()
+    try:
+        req = urllib.request.Request(
+            url, data=payload,
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode())
+        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    except Exception as e:
+        logger.error("llm_chat call failed (%s): %s", provider, e)
+        return ""

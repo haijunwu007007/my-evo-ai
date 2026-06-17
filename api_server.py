@@ -1,9 +1,9 @@
 """AUTO-EVO-AI V0.1 — API服务器（入口文件）
 ====================================
-路由已拆分到 api/routes_*.py
+路由已拆分到 api/routes/routes_*.py（含 routes_static.py 静态资源）
 中间件已拆分到 api/middleware.py
 后台任务已拆分到 api/startup.py
-本文件只保留：端点注册 + 静态资源 + 入口
+本文件只保留：应用初始化 + 路由注册 + 入口
 """
 
 from __future__ import annotations
@@ -163,24 +163,6 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 # 根端点
 # ═══════════════════════════════════════════════════════
 
-# ── 生产路由（仅保留生产文件）──
-
-@app.get("/apps")
-async def apps_list():
-    from fastapi.responses import HTMLResponse
-    from api.infra import BASE_DIR
-    from pathlib import Path
-    apps_dir = BASE_DIR / "output" / "apps"
-    apps = []
-    if apps_dir.exists():
-        for f in sorted(apps_dir.glob("*.html"), reverse=True)[:50]:
-            apps.append({"name":f.stem[:40], "url":f"/output/apps/{f.name}", "size":f"{f.stat().st_size/1024:.1f}KB", "date":__import__('time').ctime(f.stat().st_mtime)})
-    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}h1{font-size:24px}.app{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}.app a{color:#818cf8;text-decoration:none;font-size:16px}.meta{color:#64748b;font-size:12px;margin-top:4px}.size{color:#22c55e}.empty{text-align:center;padding:60px;color:#64748b}</style></head><body><h1>📂 已生成APP</h1>'
-    if not apps: html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
-    for a in apps: html += f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a><div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
-    html += '</body></html>'
-    return HTMLResponse(html)
-
 @app.get("/")
 async def root():
     from fastapi.responses import FileResponse
@@ -188,25 +170,6 @@ async def root():
     chat_path = BASE_DIR / "frontend" / "chat.html"
     if chat_path.exists():
         return FileResponse(str(chat_path))
-
-# ── i18n.js 兼容路径 ──
-@app.get("/frontend/i18n.js", include_in_schema=False)
-async def frontend_i18n_js():
-    from fastapi.responses import FileResponse
-    from api.infra import BASE_DIR as _BD
-    js_path = _BD / "js" / "i18n.js"
-    if js_path.exists():
-        return FileResponse(str(js_path))
-    return {"success": False, "error": "i18n.js not found"}
-    # fallback: 返回 JSON 状态
-    return {
-        "success": True,
-        "system": BUILD_TAG,
-        "status": "running",
-        "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
-        "modules_stub": registry.get_stub_count(),
-        "timestamp": datetime.now().isoformat(),
-    }
 
 
 @app.get("/api/status")
@@ -233,7 +196,7 @@ async def system_status():
         "status": "running",
         "uptime": datetime.now().isoformat(),
         "modules_loaded": len(registry.modules) + len(getattr(registry, '_pending_modules', {})),
-        "modules_total": len(registry.modules) + len(getattr(registry, '_pending_modules', {})),
+        "modules_total": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_stub": registry.get_stub_count(),
         "coordinator": coord_data,
@@ -256,51 +219,6 @@ async def get_version():
     except Exception:
         pass
     return {"success": True, "version": VERSION, "build": VERSION_BUILD, "modules": _mod_count}
-
-
-# ═══════════════════════════════════════════════════════
-# i18n 及 PWA 静态资源（由 api/startup.py 中 _mount_vue_frontend()
-# 挂载 Vue SPA 前端 + /assets 静态文件 + 路由兜底）
-# ═══════════════════════════════════════════════════════
-
-@app.get("/manifest.json")
-async def get_manifest():
-    manifest_path = BASE_DIR / "manifest.json"
-    if manifest_path.exists():
-        return FileResponse(str(manifest_path), media_type="application/json")
-    return JSONResponse({"name": "AUTO-EVO-AI", "short_name": "EVO-AI"})
-
-
-@app.get("/icon-{size}.png")
-async def get_icon(size: int):
-    icon_path = BASE_DIR / f"icon-{size}.png"
-    if icon_path.exists():
-        return FileResponse(str(icon_path), media_type="image/png")
-    raise HTTPException(404)
-
-
-@app.get("/sw.js")
-async def service_worker():
-    sw_path = BASE_DIR / "sw.js"
-    if sw_path.exists():
-        return FileResponse(sw_path, media_type="application/javascript")
-    return StreamingResponse(iter(["// Service Worker"]), media_type="application/javascript")
-
-@app.get("/docs")
-@app.get("/api/docs")
-async def api_docs_redirect():
-    """API 文档重定向到 Scalar"""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/scalar")
-
-
-@app.get("/i18n.js")
-async def i18n_js():
-    """返回国际化 JS 配置"""
-    i18n_path = BASE_DIR / "frontend" / "i18n.js"
-    if i18n_path.exists():
-        return FileResponse(str(i18n_path), media_type="application/javascript")
-    return {"error": "i18n file not found"}
 
 
 # ═══════════════════════════════════════════════════════

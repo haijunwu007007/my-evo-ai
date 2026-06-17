@@ -1,0 +1,102 @@
+"""
+路由文件: routes_static.py — 静态资源和前端路由端点
+
+从 api_server.py 抽离的内联端点，保持功能不变。
+"""
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
+from pathlib import Path
+from api.infra import BASE_DIR
+
+router = APIRouter(tags=["static"])
+
+
+@router.get("/apps")
+async def apps_list():
+    """列出已生成的 APP 文件"""
+    apps_dir = BASE_DIR / "output" / "apps"
+    apps = []
+    if apps_dir.exists():
+        for f in sorted(apps_dir.glob("*.html"), reverse=True)[:50]:
+            apps.append({
+                "name": f.stem[:40],
+                "url": f"/output/apps/{f.name}",
+                "size": f"{f.stat().st_size / 1024:.1f}KB",
+                "date": __import__("time").ctime(f.stat().st_mtime),
+            })
+    html = f"""<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><title>已生成APP</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}}
+h1{{font-size:24px}}
+.app{{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}}
+.app a{{color:#818cf8;text-decoration:none;font-size:16px}}
+.meta{{color:#64748b;font-size:12px;margin-top:4px}}
+.size{{color:#22c55e}}
+.empty{{text-align:center;padding:60px;color:#64748b}}
+@media(max-width:480px){{body{{padding:10px}}h1{{font-size:20px}}.app{{padding:12px}}}}
+</style></head><body><h1>📂 已生成APP</h1>"""
+    if not apps:
+        html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
+    for a in apps:
+        html += (
+            f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a>'
+            f'<div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
+        )
+    html += "</body></html>"
+    return HTMLResponse(html)
+
+
+@router.get("/manifest.json")
+async def get_manifest():
+    """PWA manifest 文件"""
+    manifest_path = BASE_DIR / "manifest.json"
+    if manifest_path.exists():
+        return FileResponse(str(manifest_path), media_type="application/json")
+    return JSONResponse({"name": "AUTO-EVO-AI", "short_name": "EVO-AI"})
+
+
+@router.get("/icon-{size}.png")
+async def get_icon(size: int):
+    """PWA 图标"""
+    icon_path = BASE_DIR / f"icon-{size}.png"
+    if icon_path.exists():
+        return FileResponse(str(icon_path), media_type="image/png")
+    raise HTTPException(404)
+
+
+@router.get("/sw.js")
+async def service_worker():
+    """Service Worker"""
+    sw_path = BASE_DIR / "sw.js"
+    if sw_path.exists():
+        return FileResponse(sw_path, media_type="application/javascript")
+    return StreamingResponse(iter(["// Service Worker"]), media_type="application/javascript")
+
+
+@router.get("/docs")
+@router.get("/api/docs")
+async def api_docs_redirect():
+    """API 文档重定向到 Scalar"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/scalar")
+
+
+@router.get("/i18n.js")
+async def i18n_js():
+    """返回国际化 JS 配置"""
+    i18n_path = BASE_DIR / "frontend" / "i18n.js"
+    if i18n_path.exists():
+        return FileResponse(str(i18n_path), media_type="application/javascript")
+    return JSONResponse({"error": "i18n file not found"})
+
+
+@router.get("/frontend/i18n.js", include_in_schema=False)
+async def frontend_i18n_js():
+    """兼容旧路径的 i18n.js"""
+    js_path = BASE_DIR / "js" / "i18n.js"
+    if js_path.exists():
+        return FileResponse(str(js_path))
+    return JSONResponse({"success": False, "error": "i18n.js not found"})
