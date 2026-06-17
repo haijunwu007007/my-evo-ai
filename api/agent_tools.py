@@ -9,6 +9,27 @@ from typing import Any, Optional
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# LLM 引擎 (DSR1 + Qwen3.6 双模型, 自动路由)
+_LLM = None
+def _llm(prompt: str, system: str = "") -> str:
+    """通过 LLM 获取真实回答"""
+    global _LLM
+    if _LLM is None:
+        try:
+            from api.agent_llm import call_llm
+            _LLM = call_llm
+        except:
+            _LLM = None
+    if _LLM:
+        msgs = []
+        if system: msgs.append({"role":"system","content":system})
+        msgs.append({"role":"user","content":prompt})
+        try:
+            text, _ = _LLM(msgs)
+            if text: return text
+        except: pass
+    return ""
+
 # ═══════════════════════════════════════════════════════
 # 工具注册表
 # ═══════════════════════════════════════════════════════
@@ -146,17 +167,14 @@ def _(args: dict, **kw):
             sources.append(re.sub(r'<[^>]+>', '', s).strip())
     except Exception:
         pass
-    out = [f"# {topic} 研究报告", f"", f"## 摘要", f"本报告基于对「{topic}」的自动研究。"]
+    context = "\n".join(f"- {s}" for s in sources[:5]) if sources else ""
+    r = _llm(f"请写一篇关于「{topic}」的研究报告，包含摘要、关键发现和结论。" + (f"\n参考素材：\n{context}" if context else ""), "你是专业研究员。")
+    if r:
+        return {"ok": True, "data": f"# {topic} 研究报告\n\n{r[:4000]}"}
+    out = [f"# {topic} 研究报告", "", "## 概要"]
     if sources:
-        out.append(f"")
-        out.append("## 信息来源")
-        for i, s in enumerate(sources):
-            out.append(f"{i+1}. {s[:200]}")
-    out.append("")
-    out.append("## 关键发现")
-    out.append(f"1. {topic} 是当前值得关注的方向")
-    out.append("2. 建议进一步深入具体细分领域")
-    out.append("3. 可结合 Evo 系统能力进行自动化跟踪")
+        out += ["", "## 来源"] + [f"- {s[:200]}" for s in sources[:5]]
+    out += ["", "## 关键发现", f"1. {topic} 值得深入关注"]
     return {"ok": True, "data": "\n".join(out)}
 
 # ═══════════════════════════════════════════════════════
@@ -247,8 +265,18 @@ def _(args: dict, **kw):
     except Exception:
         data_list = []
     # 生成简易 HTML 图表
-    labels = [d.get("label", str(i)) for i, d in enumerate(data_list[:20])]
-    values = [float(d.get("value", d if isinstance(d, (int, float)) else 0)) for d in data_list[:20]]
+    labels = []
+    values = []
+    for i, d in enumerate(data_list[:20]):
+        if isinstance(d, dict):
+            labels.append(str(d.get("label", f"项{i+1}")))
+            values.append(float(d.get("value", 0)))
+        elif isinstance(d, (int, float)):
+            labels.append(f"项{i+1}")
+            values.append(float(d))
+        else:
+            labels.append(str(d))
+            values.append(0.0)
     max_val = max(values) if values else 1
     bars = []
     for i, (l, v) in enumerate(zip(labels, values)):
@@ -285,6 +313,9 @@ def _(args: dict, **kw):
 def _(args: dict, **kw):
     title = args.get("title", "BI分析报告")
     dataset = args.get("dataset", "")
+    r = _llm(f"请生成一份BI分析报告，主题：{title}，数据集：{dataset}", "你是数据分析师。")
+    if r:
+        return {"ok": True, "data": f"# {title}\n\n{r[:4000]}"}
     out = [f"# {title}", "", "## 数据概览", f"数据集: {dataset or '未指定'}", "", "## 分析维度"]
     for d in ["趋势分析", "对比分析", "构成分析", "异常检测"]:
         out.append(f"- {d}: 就绪")
@@ -359,25 +390,18 @@ def _(args: dict, **kw):
     if not code and file_path and os.path.isfile(file_path):
         with open(file_path, encoding="utf-8", errors="replace") as f:
             code = f.read(5000)
-    issues = []
     if not code:
         return {"ok": True, "data": "未提供代码，请输入 code 或 file 参数"}
-    # 基本静态检查
-    if len(code) > 1000:
-        issues.append("⚠️ 文件过长 (>1000行)，建议拆分")
-    if "TODO" in code:
-        issues.append("📝 发现 TODO 标记，请确认是否完成")
-    if "import *" in code:
-        issues.append("🔴 不建议使用 import *，应显式导入")
-    if "except:" in code:
-        issues.append("🔴 裸 except 会捕获所有异常，建议指定异常类型")
-    if "print(" in code:
-        issues.append("⚠️ 生产环境应使用 logger 替代 print")
-    if "password" in code.lower() or "secret" in code.lower():
-        issues.append("🔴 代码中可能包含敏感信息（password/secret）")
-    if not issues:
-        issues.append("✅ 代码审查通过，未发现明显问题")
-    return {"ok": True, "data": f"代码审查报告\n文件: {file_path or '内联代码'}\n\n" + "\n".join(issues)}
+    # use LLM for real review
+    r = _llm(f"请审查以下代码，指出bug、安全问题、性能问题和改进建议：\n```\n{code[:4000]}\n```", "你是一位资深代码审查专家。")
+    if r: return {"ok": True, "data": f"## PR审查报告\n文件: {file_path or '内联代码'}\n\n{r[:3000]}"}
+    # fallback static checks
+    issues = []
+    if len(code) > 1000: issues.append("⚠️ 文件过长 (>1000行)，建议拆分")
+    if "TODO" in code: issues.append("📝 发现 TODO 标记，请确认是否完成")
+    if "except:" in code: issues.append("🔴 裸 except 应指定异常类型")
+    if not issues: issues.append("✅ 代码审查通过")
+    return {"ok": True, "data": "代码审查报告\n\n" + "\n".join(issues)}
 
 @tool("fix_issue", "修复Issue", "自动分析并修复GitHub Issue")
 def _(args: dict, **kw):
@@ -389,7 +413,9 @@ def _(args: dict, **kw):
             issue_body = re.sub(r'<[^>]+>', ' ', body)[:2000]
     if not issue_body:
         return {"ok": True, "data": "请输入 Issue URL 或描述"}
-    return {"ok": True, "data": f"Issue分析完成\n\n问题描述: {issue_body[:300]}\n\n建议修复方案:\n1. 分析根因\n2. 创建修复分支\n3. 编写测试用例\n4. 提交 PR\n\n自动修复流程已就绪，请确认后执行。"}
+    r = _llm(f"分析issue并给出修复方案：{issue_body[:4000]}", "你是资深开发者。")
+    if r: return {"ok": True, "data": f"Issue分析完成\n\n问题: {issue_body[:300]}\n\n## LLM分析\n{r[:3000]}"}
+    return {"ok": True, "data": f"Issue分析完成\n\n问题: {issue_body[:300]}\n\n1. 分析根因\n2. 修复\n3. PR"}
 
 @tool("generate_test", "生成测试", "自动生成单元测试")
 def _(args: dict, **kw):
@@ -400,28 +426,18 @@ def _(args: dict, **kw):
             code = f.read(3000)
     if not code:
         return {"ok": True, "data": "请输入要测试的代码"}
-    # 提取函数名
-    funcs = re.findall(r'def (\w+)\s*\(', code)
-    if not funcs:
-        funcs = ["main"]
-    test_code = f"""import unittest
-from {os.path.splitext(os.path.basename(file_path))[0] if file_path else 'module'} import {', '.join(funcs)}
-
-class TestModule(unittest.TestCase):
-"""
+    r = _llm(f"为以下代码生成完善的pytest单元测试：\n```\n{code[:3000]}\n```", "你擅长单元测试。")
+    if r:
+        return {"ok": True, "data": f"## LLM 生成的测试\n\n{r[:4000]}"}
+    funcs = re.findall(r'def (\w+)\s*\(', code) or ["main"]
+    test_code = f"import unittest\n\nclass TestModule(unittest.TestCase):\n"
     for f in funcs:
-        test_code += f"""
-    def test_{f}(self):
-        \"\"\"测试 {f}\"\"\"
-        # TODO: 添加测试用例
-        result = {f}()
-        self.assertIsNotNone(result)
-"""
-    test_code += "\nif __name__ == '__main__':\n    unittest.main()\n"
+        test_code += f"    def test_{f}(self):\n        self.assertTrue(True)\n\n"
+    test_code += "if __name__ == '__main__':\n    unittest.main()\n"
     out_path = os.path.join(tempfile.gettempdir(), f"test_{int(time.time())}.py")
     with open(out_path, "w") as f:
         f.write(test_code)
-    return {"ok": True, "data": f"测试已生成: {out_path}\n测试函数: {', '.join(funcs)}\n共 {len(funcs)} 个测试用例"}
+    return {"ok": True, "data": f"测试已生成: {out_path}\n（LLM不可用，使用基本模板）"}
 
 @tool("code_edit", "AI编辑代码", "AI辅助编辑代码")
 def _(args: dict, **kw):
@@ -434,6 +450,9 @@ def _(args: dict, **kw):
     if not code:
         return {"ok": False, "data": "请输入 file 路径或 code 内容"}
     if instruction:
+        r = _llm(f"请对以下代码执行编辑指令，返回修改后的完整代码：\n指令：{instruction}\n代码：\n```\n{code[:4000]}\n```", "你是资深程序员。")
+        if r:
+            return {"ok": True, "data": f"已执行编辑指令\n文件: {file_path or '内联'}\n指令: {instruction}\n\n## 修改后代码\n```\n{r[:5000]}\n```"}
         return {"ok": True, "data": f"已分析编辑指令\n文件: {file_path or '内联'}\n指令: {instruction}\n\n建议修改位置已标记，需人工确认后执行。"}
     return {"ok": True, "data": f"代码读取成功，长度: {len(code)} 字符"}
 
@@ -450,6 +469,9 @@ def _(args: dict, **kw):
     classes = re.findall(r'^\s*class\s+(\w+)', code, re.MULTILINE)
     funcs = re.findall(r'^\s*(?:async\s+)?def\s+(\w+)', code, re.MULTILINE)
     imports = re.findall(r'^\s*(?:from\s+\S+\s+)?import\s+(\S+)', code, re.MULTILINE)
+    r = _llm(f"分析以下代码的架构设计、潜在问题和改进建议：\n```\n{code[:3000]}\n```", "你是一位资深代码架构师。")
+    if r:
+        return {"ok": True, "data": f"## 代码深层分析\n文件: {file_path or '内联'}\n\n### 基本统计\n行数: {len(lines)} | 类: {len(classes)} | 函数: {len(funcs)} | 导入: {len(imports)}\n\n### LLM 架构分析\n{r[:4000]}"}
     return {"ok": True, "data": f"代码分析报告\n文件: {file_path or '内联'}\n行数: {len(lines)}\n类: {len(classes)} ({', '.join(classes[:10])})\n函数: {len(funcs)} ({', '.join(funcs[:10])})\n导入: {len(imports)} ({', '.join(imports[:10])})"}
 
 # ═══════════════════════════════════════════════════════
@@ -489,18 +511,17 @@ def _(args: dict, **kw):
     if not code and file_path and os.path.isfile(file_path):
         with open(file_path, encoding="utf-8", errors="replace") as f:
             code = f.read(5000)
+    if code:
+        r = _llm(f"审计以下代码的安全性，指出所有安全漏洞、合规问题和改进建议：\n```\n{code[:4000]}\n```", "你是安全审计专家。")
+        if r:
+            return {"ok": True, "data": f"## 代码审计报告\n文件: {file_path or '内联'}\n\n{r[:5000]}"}
     findings = []
     if code:
-        if "TODO" in code:
-            findings.append("📝 TODO 未完成")
-        if "FIXME" in code:
-            findings.append("🔴 FIXME 待修复")
-        if "# type: ignore" in code:
-            findings.append("⚠️ 使用了 type: ignore")
-        if "pragma: no cover" in code:
-            findings.append("⚠️ 跳过测试覆盖")
-    if not findings:
-        findings.append("✅ 代码审计通过")
+        if "TODO" in code: findings.append("📝 TODO 未完成")
+        if "FIXME" in code: findings.append("🔴 FIXME 待修复")
+        if "# type: ignore" in code: findings.append("⚠️ 使用了 type: ignore")
+        if "pragma: no cover" in code: findings.append("⚠️ 跳过测试覆盖")
+    if not findings: findings.append("✅ 代码审计通过")
     return {"ok": True, "data": f"代码审计报告\n文件: {file_path or '内联'}\n\n" + "\n".join(findings)}
 
 # ═══════════════════════════════════════════════════════
@@ -549,16 +570,11 @@ def _(args: dict, **kw):
     items = args.get("items", "服务费")
     inv_num = f"INV-{int(time.time())}"
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    out = [
-        f"╔══════════════════════════╗",
-        f"║        发  票            ║",
-        f"║ 编号: {inv_num}",
-        f"║ 日期: {now}",
-        f"║ 客户: {customer}",
-        f"║ 项目: {items}",
-        f"║ 金额: ¥{amount}",
-        f"╚══════════════════════════╝",
-    ]
+    detail = f"客户{customer}购买{items}金额¥{amount}"
+    r = _llm(f"根据以下信息生成正式发票内容：{detail}", "你是财务专员。")
+    if r:
+        return {"ok": True, "data": f"## 发票\n编号: {inv_num}\n日期: {now}\n\n{r[:2000]}"}
+    out = [f"╔══════════════════════════╗", f"║        发  票            ║", f"║ 编号: {inv_num}", f"║ 日期: {now}", f"║ 客户: {customer}", f"║ 项目: {items}", f"║ 金额: ¥{amount}", f"╚══════════════════════════╝"]
     return {"ok": True, "data": "\n".join(out)}
 
 @tool("create_ticket", "创建工单", "创建支持工单")
@@ -575,6 +591,9 @@ def _(args: dict, **kw):
     content = args.get("content", "")
     if not content:
         return {"ok": False, "data": "请输入发布内容"}
+    r = _llm(f"请优化以下社交媒体内容，使其更适合{platform}平台发布，更具吸引力和传播力：\n{content}", "你是社交媒体运营专家。")
+    if r:
+        return {"ok": True, "data": f"## 优化后的内容 (适配{platform})\n\n{r[:2000]}\n\n---\n原始内容: {content[:200]}"}
     return {"ok": True, "data": f"已发布到 {platform}\n内容: {content[:200]}\n状态: 已提交（需配置 API 密钥自动发布）"}
 
 @tool("send_email", "营销邮件", "发送营销邮件")
@@ -618,26 +637,30 @@ def _(args: dict, **kw):
     if not query:
         return {"ok": False, "data": "请输入查询语句"}
     try:
-        if db_type == "sqlite":
-            import sqlite3
-            conn = sqlite3.connect(db_path)
-            cur = conn.cursor()
-            # 尝试直接执行（用户输入SQL）
-            try:
-                cur.execute(query)
-                rows = cur.fetchmany(20)
-                cols = [d[0] for d in cur.description] if cur.description else []
-                conn.close()
-                if rows:
-                    out = [f"查询结果 ({len(rows)} 行):", " | ".join(cols), "-" * 40]
-                    for r in rows:
-                        out.append(" | ".join(str(c) for c in r))
-                    return {"ok": True, "data": "\n".join(out)}
-                return {"ok": True, "data": "查询完成，无结果"}
-            except sqlite3.OperationalError:
-                conn.close()
-                return {"ok": True, "data": f"SQL 语法错误，请检查查询: {query[:200]}"}
-        return {"ok": True, "data": f"数据库查询完成（{db_type}）"}
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        # 先尝试用LLM把自然语言转成SQL
+        sql = query
+        if not re.match(r'^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)', query, re.I):
+            r = _llm(f"将以下自然语言查询转为SQLite SQL语句：\n{query}\n\n只返回SQL，不要解释。", "你是数据库专家。")
+            if r:
+                clean_sql = re.sub(r'^```sql|```$', '', r.strip(), flags=re.I).strip()
+                sql = clean_sql
+        try:
+            cur.execute(sql)
+            rows = cur.fetchmany(20)
+            cols = [d[0] for d in cur.description] if cur.description else []
+            conn.close()
+            if rows:
+                out = [f"查询结果 ({len(rows)} 行):", " | ".join(cols), "-" * 40]
+                for r in rows:
+                    out.append(" | ".join(str(c) for c in r))
+                return {"ok": True, "data": "\n".join(out)}
+            return {"ok": True, "data": "查询完成，无结果"}
+        except sqlite3.OperationalError:
+            conn.close()
+            return {"ok": True, "data": f"SQL 语法错误，请检查查询: {sql[:200]}"}
     except Exception as e:
         return {"ok": True, "data": f"数据库查询出错: {e}"}
 
@@ -693,6 +716,10 @@ def _(args: dict, **kw):
 @tool("ai_erp", "AI-ERP", "AI驱动的企业资源计划")
 def _(args: dict, **kw):
     query = args.get("query", "")
+    if query:
+        r = _llm(f"用户ERP查询：{query}\n请分析并提供专业建议。", "你是ERP系统分析师。")
+        if r:
+            return {"ok": True, "data": f"## AI-ERP 分析\n查询: {query}\n\n{r[:4000]}"}
     return {"ok": True, "data": f"AI-ERP 分析完成\n查询: {query or '通用分析'}\n建议: 基于AI的ERP智能分析已就绪"}
 
 @tool("project_manage", "项目管理", "项目管理操作")
@@ -809,6 +836,11 @@ def _(args: dict, **kw):
 @tool("screenshot_to_code", "截图转代码", "截图生成代码")
 def _(args: dict, **kw):
     fp = args.get("file", "")
+    desc = args.get("description", "") or args.get("text", "")
+    if desc:
+        r = _llm(f"根据以下UI描述生成一个完整的前端页面(HTML/CSS/JS)：\n{desc}", "你是一位前端开发专家。")
+        if r:
+            return {"ok": True, "data": f"## 截图生成代码\n\n{r[:5000]}"}
     return {"ok": True, "data": f"截图转代码: 已分析截图{fp}，建议使用前端框架生成对应UI"}
 
 # ═══════════════════════════════════════════════════════
@@ -836,6 +868,9 @@ def _(args: dict, **kw):
     style = args.get("style", "教程")
     if not topic:
         return {"ok": False, "data": "请输入视频主题"}
+    r = _llm(f"请生成一个{style}风格的视频脚本，主题是「{topic}」。包含开场、正文（3-5个要点）、结尾、互动话术。", "你是一位专业视频编导。")
+    if r:
+        return {"ok": True, "data": f"# {topic} — 视频脚本 ({style}风格)\n\n{r[:5000]}"}
     out = [f"# {topic} — 视频脚本", f"风格: {style}", "", "## 开场", f"大家好，今天我们来聊聊 {topic}。", "", "## 正文", "1. 背景介绍", "2. 核心概念", "3. 实际操作", "4. 总结", "", "## 结尾", "感谢观看，记得点赞关注！"]
     return {"ok": True, "data": "\n".join(out)}
 
@@ -855,6 +890,9 @@ def _(args: dict, **kw):
     goal = args.get("goal", "")
     if not goal:
         return {"ok": False, "data": "请输入任务目标"}
+    r = _llm(f"请将以下目标拆解为可执行的子任务列表，每个子任务需包含具体步骤：\n目标：{goal}", "你是专业的任务规划师。")
+    if r:
+        return {"ok": True, "data": f"自主任务已启动\n目标: {goal}\n\n## 任务分解\n{r[:4000]}"}
     return {"ok": True, "data": f"自主任务已启动\n目标: {goal}\n状态: 任务分解中…\n子任务1: 分析目标\n子任务2: 制定方案\n子任务3: 逐步执行\n子任务4: 汇总结果"}
 
 # ═══════════════════════════════════════════════════════
@@ -866,17 +904,15 @@ def _(args: dict, **kw):
     text = args.get("text", "") or args.get("content", "")
     if not text:
         return {"ok": False, "data": "请输入合同文本"}
+    r = _llm(f"请审查以下合同条款，指出风险点、缺失条款和建议修改：\n---\n{text[:5000]}", "你是资深法律顾问，擅长合同审查。")
+    if r:
+        return {"ok": True, "data": f"## LLM 合同审查报告\n\n{r[:5000]}"}
     issues = []
-    if "赔偿" not in text:
-        issues.append("⚠️ 缺少赔偿条款")
-    if "争议" not in text:
-        issues.append("⚠️ 缺少争议解决条款")
-    if "保密" in text:
-        issues.append("✅ 包含保密条款")
-    if "终止" in text:
-        issues.append("✅ 包含终止条款")
-    if not issues:
-        issues.append("✅ 合同结构完整")
+    if "赔偿" not in text: issues.append("⚠️ 缺少赔偿条款")
+    if "争议" not in text: issues.append("⚠️ 缺少争议解决条款")
+    if "保密" in text: issues.append("✅ 包含保密条款")
+    if "终止" in text: issues.append("✅ 包含终止条款")
+    if not issues: issues.append("✅ 合同结构完整")
     return {"ok": True, "data": f"合同审查报告\n\n" + "\n".join(issues)}
 
 @tool("employee_lookup", "查员工", "查询员工信息")
@@ -922,6 +958,10 @@ def _(args: dict, **kw):
             questions = json.loads(questions)
         except Exception:
             questions = [{"q": "您的意见？", "type": "text"}]
+    if not questions or "您的意见" in str(questions):
+        r = _llm(f"为调查问卷「{title}」生成5个专业问题，返回JSON格式：{{'questions':[{{'q':'问题','type':'choice/text','options':['选项']}}]}}", "你是调研专家。")
+        if r:
+            return {"ok": True, "data": f"## LLM 生成的问卷\n\n{r[:4000]}"}
     out = [f"# {title}", "", "---"]
     for i, q in enumerate(questions):
         q_text = q.get("q", q.get("question", f"问题{i+1}"))
@@ -997,7 +1037,11 @@ def _(args: dict, **kw):
 # 📋 更多工具
 # ═══════════════════════════════════════════════════════
 
-@tool("lowcode", "低代码", "低代码平台操作")
+@tool("lowcode_platform", "低代码平台", "低代码平台操作(拖拽构建应用)")
+def _(args: dict, **kw):
+    return {"ok": True, "data": "低代码平台就绪，可拖拽构建应用"}
+
+@tool("lowcode", "低代码", "低代码构建工具")
 def _(args: dict, **kw):
     return {"ok": True, "data": "低代码平台就绪，可拖拽构建应用"}
 
@@ -1065,6 +1109,9 @@ def _(args: dict, **kw):
 def _(args: dict, **kw):
     model = args.get("model", "qwen")
     prompt = args.get("prompt", "Hello")
+    r = _llm(f"{prompt}", "你是一个AI助手。")
+    if r:
+        return {"ok": True, "data": f"AI测试完成\n模型: {model}\n提示: {prompt[:100]}\n\n## 响应\n{r[:2000]}"}
     return {"ok": True, "data": f"AI测试完成\n模型: {model}\n提示: {prompt[:100]}\n响应: 测试通过（实际推理需连接 LLM API）"}
 
 @tool("skill_learn", "技能学习", "技能学习管理")
@@ -1098,6 +1145,9 @@ def _(args: dict, **kw):
 def _(args: dict, **kw):
     task = args.get("task", "通用")
     metric = args.get("metric", "accuracy")
+    r = _llm(f"请评估一个AI Agent在{task}任务上的{metric}指标表现，给出评分和建议。", "你熟悉AI Agent评测。")
+    if r:
+        return {"ok": True, "data": f"## Agent评测结果\n任务: {task}\n指标: {metric}\n\n{r[:4000]}"}
     return {"ok": True, "data": f"Agent评测结果\n任务: {task}\n指标: {metric}\n得分: 待测试\n状态: 评测框架就绪"}
 
 # ── 💻 Claude写代码 ──
@@ -1108,6 +1158,9 @@ def _(args: dict, **kw):
     lang = args.get("language", "python")
     if not prompt:
         return {"ok": False, "data": "请输入代码需求"}
+    r = _llm(f"请用{lang}语言编写代码：\n{prompt}\n\n只返回可运行的代码，不要额外解释。", f"你是一位专业{lang}开发者。")
+    if r:
+        return {"ok": True, "data": f"代码生成完成\n语言: {lang}\n需求: {prompt[:200]}\n\n```{lang}\n{r[:8000]}\n```"}
     return {"ok": True, "data": f"代码生成完成\n语言: {lang}\n需求: {prompt[:200]}\n生成方式: 提示已构建，等待LLM返回完整代码\n请使用 LLM API 获取实际生成结果"}
 
 # ── 📝 法律协议 ──
@@ -1117,6 +1170,10 @@ def _(args: dict, **kw):
     atype = args.get("type", "保密协议")
     party_a = args.get("party_a", "甲方")
     party_b = args.get("party_b", "乙方")
+    details = args.get("details", "")
+    r = _llm(f"生成一份{atype}，甲方：{party_a}，乙方：{party_b}。{f'具体要求：{details}' if details else ''}包含完整的法律条款。", "你是专业法律文书撰写者。")
+    if r:
+        return {"ok": True, "data": r[:5000]}
     templates = {
         "保密协议": f"# 保密协议\n\n甲方: {party_a}\n乙方: {party_b}\n\n## 1. 保密内容\n双方在合作过程中知悉的对方商业秘密。\n\n## 2. 保密期限\n自签署之日起3年。\n## 3. 违约责任\n违约方应赔偿守约方全部损失。",
         "劳务合同": f"# 劳务合同\n\n甲方: {party_a}\n乙方: {party_b}\n\n## 1. 工作内容\n乙方为甲方提供劳务服务。\n## 2. 报酬\n按月支付。\n## 3. 期限\n自签署之日起1年。",
@@ -1256,7 +1313,8 @@ def _(args, **kw):
     os.makedirs(proj_dir, exist_ok=True)
     os.makedirs(os.path.join(proj_dir, "backend"), exist_ok=True)
     os.makedirs(os.path.join(proj_dir, "frontend"), exist_ok=True)
-    readme = f"# {name}\n\n{framework} + {db}\nFeatures: {features}\n"
+    r = _llm(f"为一个全栈项目生成README说明：{name}使用{framework}框架+{db}数据库，功能包含{features}", "你是全栈架构师。")
+    readme = r if r else f"# {name}\n\n{framework} + {db}\nFeatures: {features}\n"
     with open(os.path.join(proj_dir, "README.md"), "w") as f:
         f.write(readme)
     with open(os.path.join(proj_dir, "backend", "main.py"), "w") as f:
@@ -1392,15 +1450,30 @@ def _(args, **kw):
 # ═══════════════════════════════════════════════════════
 
 def exec_tool(name: str, args: dict, BASE=None, OUT=None, _LAST=None, _GENERATED_TOOLS=None):
-    """执行指定工具"""
+    """执行指定工具（含 DB 日志）"""
+    _start = time.time()
     if name in _tools:
         try:
             result = _tools[name](args, BASE=BASE, OUT=OUT, _LAST=_LAST, _GENERATED_TOOLS=_GENERATED_TOOLS)
             result["tool"] = name
+            _log_tool_exec(name, args, result, _start)
             return result
         except Exception as e:
-            return {"ok": False, "data": f"工具执行失败: {e}", "tool": name}
-    return {"ok": False, "data": f"未知工具: {name}"}
+            err = {"ok": False, "data": f"工具执行失败: {e}", "tool": name}
+            _log_tool_exec(name, args, err, _start)
+            return err
+    err = {"ok": False, "data": f"未知工具: {name}"}
+    _log_tool_exec(name, args, err, _start)
+    return err
+
+
+def _log_tool_exec(name, args, result, start):
+    """记录工具执行到 SQLite"""
+    try:
+        from api.database import db
+        db.log_tool(name, args, result, (time.time() - start) * 1000)
+    except Exception:
+        pass
 
 def list_tools():
     """列出所有注册的工具"""

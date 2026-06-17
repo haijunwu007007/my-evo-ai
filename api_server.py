@@ -10,9 +10,8 @@ from __future__ import annotations
 import os, sys, json, time, asyncio, importlib
 from typing import Any
 from datetime import datetime
-from dataclasses import dataclass
 from pathlib import Path
-from collections import defaultdict
+
 
 # ── 统一 HTTP 客户端（在任意模块导入前生效）──
 try:
@@ -27,7 +26,7 @@ from api._paths import BASE_DIR
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -204,11 +203,6 @@ async def system_status():
     }
 
 
-@app.get("/api/v1/health")
-async def health_check():
-    """系统健康检查端点"""
-    return {"success": True, "status": "healthy", "version": VERSION, "timestamp": __import__('time').time()}
-
 @app.get("/api/v1/version")
 async def get_version():
     """系统版本信息 — modules统一使用registry计数（与status一致）"""
@@ -222,115 +216,12 @@ async def get_version():
 
 
 # ═══════════════════════════════════════════════════════
-# 认证端点
+# 以下端点已抽离到独立路由文件：
+#   routes_auth.py  — 认证 (login/config/verify)
+#   routes_metrics.py — Prometheus 指标 + 健康检查
+#   routes_static.py — 静态资源 (manifest/icon/sw/docs/i18n)
+# 自动发现系统（routes/__init__.py）会自动注册它们。
 # ═══════════════════════════════════════════════════════
-
-@dataclass
-class LoginRequest:
-    username: str = ""
-    api_key: str = ""
-    role: str = "user"
-
-@dataclass
-class TokenRefreshRequest:
-    token: str = ""
-
-@app.post("/api/auth/login")
-@app.post("/api/v1/auth/login")
-async def auth_login(req: LoginRequest):
-    """登录获取 JWT 令牌。"""
-    from core.auth_provider import create_token, verify_api_key, _ADMIN_KEY
-    # 支持 API Key 登录
-    if req.api_key:
-        if verify_api_key(req.api_key):
-            token = create_token(subject="api_user", role="admin" if req.api_key == _ADMIN_KEY else "user")
-            return token
-        return JSONResponse(status_code=401, content={"detail": "无效的 API Key", "error": "unauthorized"})
-    # 支持用户名密码式（简化，生产环境应查数据库）
-    if req.username:
-        role = "admin" if req.username == "admin" else "user"
-        token = create_token(subject=req.username, role=role)
-        return token
-    return JSONResponse(status_code=400, content={"detail": "请提供 username 或 api_key"})
-
-@app.get("/api/auth/config")
-@app.get("/api/v1/auth/config")
-async def auth_config():
-    """获取认证配置状态。"""
-    from core.auth_provider import get_auth_config
-    return get_auth_config()
-
-@app.get("/api/auth/verify")
-@app.get("/api/v1/auth/verify")
-async def auth_verify(token: str = ""):
-    """验证令牌是否有效。"""
-    from core.auth_provider import verify_token
-    payload = verify_token(token)
-    if payload:
-        return {"valid": True, "subject": payload.get("sub"), "role": payload.get("role"), "expires_at": payload.get("exp")}
-    return {"valid": False, "error": "令牌无效或已过期"}
-
-
-# ═══════════════════════════════════════════════════════
-# Prometheus Metrics
-# ═══════════════════════════════════════════════════════
-
-@app.get("/metrics", include_in_schema=False)
-@app.get("/api/v1/metrics", include_in_schema=False)
-async def prometheus_metrics():
-    now = time.time()
-    uptime = now - _START_TIME
-    lines: list = []
-    lines.append(f"# {BUILD_TAG} Prometheus Metrics Export")
-
-    # 模块级 Prometheus 指标（由 _prometheus 模块收集）
-    try:
-        from modules._prometheus import get_prometheus_text
-        pt = get_prometheus_text()
-        if pt.strip():
-            lines.append("")
-            lines.append("# -- modules._prometheus --")
-            lines.append(pt)
-    except Exception:
-        pass
-
-    health = registry.get_all_health()
-    ok_count = sum(1 for h in health.values() if h.get("status") in ("ok", "healthy", "configured", "module_only"))
-    err_count = sum(1 for h in health.values() if h.get("status") in ("error", "lazy_error", "timeout"))
-    lazy_count = sum(1 for h in health.values() if h.get("status") in ("pending_lazy",))
-
-    lines.append(f"evo_system_uptime_seconds {uptime:.0f}")
-    lines.append(f"evo_modules_total {len(health)}")
-    lines.append(f"evo_modules_healthy {ok_count}")
-    lines.append(f"evo_modules_error {err_count}")
-    stub_count = registry.get_stub_count()
-    lines.append(f"evo_modules_lazy_pending {lazy_count}")
-    lines.append(f"evo_modules_stub {stub_count}")
-
-    for path, count in sorted(_request_counter.items()):
-        lines.append(f'evo_http_requests_total{{endpoint="{path}"}} {count}')
-    for path, count in sorted(_request_errors.items()):
-        lines.append(f'evo_http_errors_total{{endpoint="{path}"}} {count}')
-    for path, avg in sorted(_request_latency_ms.items()):
-        lines.append(f'evo_http_request_duration_ms{{endpoint="{path}"}} {avg:.1f}')
-
-    lines.append(f"evo_ws_connections_active {len(manager.active)}")
-    lines.append(f"evo_cache_hits_total {_cache_hits}")
-    lines.append(f"evo_cache_entries {len(_api_cache)}")
-
-    # 引擎指标
-    try:
-        from api.routes.routes_scheduler import HAS_SCHEDULER, HAS_EVENTS, HAS_PIPELINE, HAS_QUEUE
-        lines.append(f'evo_engine_active{{engine="scheduler"}} {1 if HAS_SCHEDULER else 0}')
-        lines.append(f'evo_engine_active{{engine="events"}} {1 if HAS_EVENTS else 0}')
-        lines.append(f'evo_engine_active{{engine="pipeline"}} {1 if HAS_PIPELINE else 0}')
-        lines.append(f'evo_engine_active{{engine="queue"}} {1 if HAS_QUEUE else 0}')
-    except Exception:
-        pass
-
-    text = "\n".join(lines)
-    return Response(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")
-
 
 # ═══════════════════════════════════════════════════════
 # 入口

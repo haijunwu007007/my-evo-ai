@@ -252,27 +252,21 @@ async def lifespan(app: FastAPI):
 # ═══════════════════════════════════════════════════════
 
 async def warmup_modules():
-    """快速预热核心模块（优化版：数量减半、超时缩短、可跳过）"""
+    """批次预热模块 — 每次尝试50个，失败自动跳过并日志"""
     fast = os.environ.get("EVO_FAST_START", "").lower() in ("1", "true", "yes")
     if fast:
         logger.info("[WARMUP] 快速模式，跳过预热")
         return
 
-    await asyncio.sleep(0.5)  # 等 API 先就绪
-    candidate_names = list(registry.classes.keys())[:20]
-    if not candidate_names:
-        candidate_names = list(registry._pending_modules.keys())[:20]
-    if not candidate_names:
-        logger.info("[WARMUP] 无待加载模块，跳过预热")
+    await asyncio.sleep(0.5)
+    candidates = list(registry._pending_modules.keys())[:50]
+    if not candidates:
+        logger.info("[WARMUP] 无待加载模块")
         return
 
-    ok = 0
-    start = 0
-    for i, name in enumerate(candidate_names):
-        if i >= 12:  # 最多预热 12 个
-            break
+    ok, fail = 0, 0
+    for name in candidates:
         try:
-            await asyncio.sleep(0)  # 不阻塞事件循环
             mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
             if mod is None:
                 continue
@@ -284,9 +278,30 @@ async def warmup_modules():
                     init()
             ok += 1
         except (TimeoutError, Exception):
-            pass
-    if ok:
-        logger.info(f"[WARMUP] {ok}/{len(candidate_names)} 模块预热完成 ({time.time()-start:.1f}s)" if start else f"[WARMUP] {ok} 模块预热完成")
+            fail += 1
+    logger.info(f"[WARMUP] {ok} 模块预热成功 / {fail} 失败 / {len(candidates)} 尝试")
+
+    # 后台持续加载剩余pending模块
+    async def bulk_load_task():
+        await asyncio.sleep(5)
+        while True:
+            remaining = len(registry._pending_modules)
+            if remaining == 0:
+                await asyncio.sleep(120)
+                continue
+            batch = list(registry._pending_modules.keys())[:30]
+            loaded = 0
+            for name in batch:
+                try:
+                    mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
+                    if mod: loaded += 1
+                except:
+                    pass
+            if loaded:
+                logger.info(f"[BULK-LOAD] 后台加载 {loaded}/{len(batch)} 模块 (剩余 {remaining})")
+            await asyncio.sleep(30)  # 每30秒加载一批
+
+    asyncio.create_task(bulk_load_task())
 
 
 # ═══════════════════════════════════════════════════════
@@ -331,15 +346,25 @@ async def sysmon_broadcast_task():
 
 
 async def auto_heal_task():
+    """修复出错模块 + 持续尝试 pending 模块"""
     await asyncio.sleep(15)
     while True:
         await asyncio.sleep(60)
         try:
-            for name, health in registry.get_all_health().items():
+            # 修复出错的模块
+            all_health = registry.get_all_health()
+            for name, health in all_health.items():
                 if health.get("status") in ("error", "timeout"):
                     logger.info(f"[AUTO-HEAL] 尝试恢复: {name}")
                     registry.modules.pop(name, None)
                     await registry.lazy_load_module(name)
+            # 尝试加载 pending 模块（每次最多10个）
+            pending = [n for n in registry._pending_modules.keys() if n not in all_health or all_health[n].get("status") != "ok"]
+            for name in pending[:10]:
+                try:
+                    await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
+                except:
+                    pass
         except Exception:
             pass
 
