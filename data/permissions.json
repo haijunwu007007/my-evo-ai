@@ -1,0 +1,28 @@
+{
+  "mode": "default",
+  "rules": [
+    {
+      "path": "/home/*",
+      "allow": true
+    },
+    {
+      "path": "/tmp/*",
+      "allow": true
+    },
+    {
+      "path": "/etc/*",
+      "allow": false
+    },
+    {
+      "path": "/root/*",
+      "allow": false
+    }
+  ],
+  "command_blacklist": [
+    "rm -rf /",
+    "mkfs",
+    "dd if=",
+    "chmod -R 777 /"
+  ],
+  "tool_blacklist": []
+}
