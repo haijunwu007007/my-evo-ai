@@ -1,6 +1,6 @@
 """组合部署引擎 — 多个项目合成Docker Compose + 统一Nginx入口"""
 from __future__ import annotations
-import os, json, subprocess, time
+import os, json, subprocess, time, hashlib
 from pathlib import Path
 from api.hub.models import get_project, update_project, list_connections
 
@@ -104,17 +104,25 @@ def gen_nginx_conf(compose_id: str, upstreams: list, compose_dir: Path):
     
     return conf_text
 
-def deploy_compose(compose_id: str) -> dict:
-    """部署整个组合"""
-    from api.hub.models import get_compose, update_compose
-    comp = get_compose(compose_id)
-    if not comp:
-        return {"success": False, "error": "组合不存在"}
+def deploy_compose(name: str, nodes: list | None = None) -> dict:
+    """部署整个组合（支持路由直接传入 nodes 列表）"""
+    compose_id = hashlib.md5(name.encode()).hexdigest()[:12]
     
-    nodes = json.loads(comp.get("nodes", "[]"))
-    edges = json.loads(comp.get("edges", "[]"))
+    if nodes is None:
+        # 从数据库读取现有组合
+        from api.hub.models import get_compose
+        comp = get_compose(compose_id)
+        if not comp:
+            return {"success": False, "error": "组合不存在"}
+        nodes_list = json.loads(comp.get("nodes", "[]"))
+        edges = json.loads(comp.get("edges", "[]"))
+    else:
+        # 从API路由直接传入
+        nodes_list = nodes
+        edges = []
     
-    result = generate_compose(compose_id, nodes, edges)
+    from api.hub.models import update_compose
+    result = generate_compose(compose_id, nodes_list, edges)
     compose_dir = result.get("compose_dir")
     
     # docker-compose up
