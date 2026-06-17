@@ -1,28 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — 模块包入口
-==============================
-modules/ 包含 455+ 个模块文件，注册到全局 Registry。
-通过 _base/ 基础设施层提供 EnterpriseModule 基类支持。
+"""AUTO-EVO-AI module package. Auto-scans and registers modules."""
+import os, sys, importlib, logging, time
+logger = logging.getLogger("evo.modules")
 
-用法：
-    from modules import EnterpriseModule, ModuleRegistry
-    from modules._base import TracingContext, get_tracer
-"""
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+_registered_modules = []
 
-from modules._base import (
-    EnterpriseModule,
-    ModuleStats,
-    HealthReport,
-    Result,
-    ModuleStatus,
-    ModuleRegistry,
-)
+def scan_and_register():
+    """Background scan all .py files in modules/ and try to register"""
+    global _registered_modules
+    count = 0
+    for f in sorted(os.listdir(_MODULE_DIR)):
+        if not f.endswith(".py") or f.startswith("_") or f == "__init__.py":
+            continue
+        name = f[:-3]
+        try:
+            spec = importlib.util.spec_from_file_location(name, os.path.join(_MODULE_DIR, f))
+            if spec and spec.loader:
+                mod = importlib.util.module_from_spec(spec)
+                sys.modules[f"modules.{name}"] = mod
+                spec.loader.exec_module(mod)
+                if hasattr(mod, "__module_meta__"):
+                    _registered_modules.append(name)
+                    count += 1
+        except Exception as ex:
+            logger.debug(f"Module {name} skipped: {ex}")
+    logger.info(f"Scanned {len(os.listdir(_MODULE_DIR))} files, registered {count} modules")
+    return count
 
-__all__ = [
-    "EnterpriseModule",
-    "ModuleStats",
-    "HealthReport",
-    "Result",
-    "ModuleStatus",
-    "ModuleRegistry",
-]
+# Auto-run on import
+scan_and_register()
