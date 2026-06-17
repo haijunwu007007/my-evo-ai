@@ -1,0 +1,24 @@
+# AUTO-EVO-AI 配置中心
+server:
+  host: "0.0.0.0"
+  port: 8765
+  workers: 4
+  tool_timeout: 60
+
+auth:
+  enabled: true
+  mode: "jwt+apikey"
+  token_ttl: 86400
+
+database:
+  type: "sqlite"  # sqlite | postgresql
+  url: ""  # postgresql://user:pass@host/db
+
+rate_limit:
+  enabled: true
+  default: 60
+  admin: 300
+
+logging:
+  level: "INFO"
+  file: "logs/evo.log"

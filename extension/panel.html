@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Evo助手</title>
+<style>body{font-family:sans-serif;padding:12px;width:350px}
+input,button{width:100%;margin:4px 0;padding:8px;box-sizing:border-box}
+#result{white-space:pre-wrap;font-size:12px;margin-top:8px;background:#f5f5f5;padding:8px;border-radius:4px}
+</style></head>
+<body>
+<h3>🤖 Evo 助手</h3>
+<input id="toolInput" placeholder="输入指令...">
+<button onclick="exec()">执行</button>
+<div id="result"></div>
+<script>
+async function exec(){
+  const input = document.getElementById('toolInput').value;
+  const res = document.getElementById('result');
+  res.textContent = '执行中...';
+  try {
+    const r = await fetch('https://autoevoai.com/api/v2/tools/exec?name=tool_router&args={"query":"'+encodeURIComponent(input)+'"}');
+    const d = await r.json();
+    res.textContent = d.data || JSON.stringify(d);
+  } catch(e) {
+    res.textContent = '错误: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
