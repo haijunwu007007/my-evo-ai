@@ -33,7 +33,9 @@ logger = get_logger("evo.api")
 _PUBLIC_PATHS = {
     "/static/fix.js", "/i18n.js", "/", "/health",
     "/js/", "/frontend/", "/output/",
-    "/docs", "/openapi.json", "/redoc", "/dashboard",
+    "/hub", "/dashboard", "/canvas", "/fork", "/ComposeCanvas",
+    "/app/dashboard",
+    "/docs", "/openapi.json", "/redoc",
     "/manifest.json", "/sw.js",
     "/api/auth/login", "/api/auth/config",
 }

@@ -100,3 +100,30 @@ async def frontend_i18n_js():
     if js_path.exists():
         return FileResponse(str(js_path))
     return JSONResponse({"success": False, "error": "i18n.js not found"})
+
+
+# ── 前端页面路由 ──
+
+@router.get("/canvas")
+async def canvas_page():
+    """工作流画布页面"""
+    html_path = BASE_DIR / "frontend" / "canvas.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
+@router.get("/fork")
+async def fork_page():
+    """Fork 工作室页面"""
+    html_path = BASE_DIR / "frontend" / "ForkStudio.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
+@router.get("/ComposeCanvas")
+async def compose_canvas_page():
+    """组合画布页面"""
+    html_path = BASE_DIR / "frontend" / "ComposeCanvas.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
