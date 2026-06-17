@@ -39,4 +39,11 @@ def _llm(prompt: str, system: str = "") -> str:
 
 def list_tools():
     """列出所有注册的工具"""
-    return [{"name": n, **fn._meta} for n, fn in _tools.items()]
+    result = []
+    for n, fn in _tools.items():
+        meta = getattr(fn, '_meta', None)
+        if meta:
+            result.append({"name": n, **meta})
+        else:
+            result.append({"name": n, "category": "集成", "description": ""})
+    return result
