@@ -47,6 +47,15 @@ try:
 except Exception:
     pass
 
-print(f"  [agent_tools] +3 tools (java_build,k8s_deploy,k8s_check)")
+# ── BrowserAct 反爬浏览器自动化 ──
+try:
+    from api.agent_tools_browseract import get_browseract_tools
+    for _bt in get_browseract_tools():
+        _tools[_bt["name"]] = _bt["fn"]
+        _tools[_bt["name"]]._meta = {"name": _bt["name"], "category": "浏览器", "description": _bt["desc"]}
+except Exception:
+    pass
+
+print(f"  [agent_tools] +5 new tools (browseract_extract,browseract_browse,codemem_index,codemem_query,java_build)")
 
 __all__ = ["tool", "exec_tool", "list_tools", "_tools", "BASE"]

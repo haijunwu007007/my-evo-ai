@@ -127,6 +127,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <!-- 快捷操作：9个新集成工具 -->
     <div class="quick-actions" id="quickActions">
       <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器自动化</span>
+      <span class="qa" onclick="quickTool('browseract_extract')">🕷️ 反爬提取</span>
+      <span class="qa" onclick="quickTool('codemem_query')">🧠 代码知识</span>
       <span class="qa" onclick="quickTool('gpt_research')">📊 自主研究</span>
       <span class="qa" onclick="quickTool('openhands_generate')">🏗️ 全栈项目</span>
       <span class="qa" onclick="quickTool('letta_message')">🧠 记忆管理</span>
@@ -290,6 +292,8 @@ function translateUI(){
 // ===== 快捷工具 =====
 var _TOOL_HINTS = {
   browser_use_task: "帮我用浏览器自动化完成一个任务：",
+  browseract_extract: "帮我用反爬提取这个网页内容：",
+  codemem_query: "帮我查询代码库知识：",
   gpt_research: "请帮我做一个深度研究：",
   openhands_generate: "帮我生成一个全栈项目：",
   letta_message: "记住以下信息到长期记忆：",
