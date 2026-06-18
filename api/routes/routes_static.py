@@ -158,6 +158,14 @@ async def enterprise_page():
         return FileResponse(str(html_path))
     raise HTTPException(404)
 
+@router.get("/deploy")
+async def deploy_page():
+    """一键部署页面"""
+    html_path = BASE_DIR / "frontend" / "deploy.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
 @router.get("/ComposeCanvas")
 async def compose_canvas_page():
     """组合画布页面"""
