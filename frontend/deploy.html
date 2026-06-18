@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🚀 一键部署 — AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0b16;color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}
+.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}
+.hdr .l{font-size:15px;font-weight:700;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}
+.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+.c{max-width:900px;margin:0 auto;padding:20px 16px}
+h2{font-size:18px;margin-bottom:12px}
+.inp{display:flex;gap:8px;margin-bottom:16px}
+.inp input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none}
+.inp input:focus{border-color:#4361ee}
+.inp button{padding:10px 20px;border:none;border-radius:8px;background:#4361ee;color:#fff;font-size:14px;cursor:pointer;font-weight:600}
+.inp button:hover{opacity:.9}
+.inp button:disabled{opacity:.4}
+.cd{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.4);border-radius:12px;padding:16px;margin-bottom:14px;transition:.2s}
+.cd h3{font-size:14px;margin-bottom:8px}.cd .st{font-size:11px;color:#8892b0;margin-bottom:4px}
+.cd .lg{background:rgba(20,20,35,.6);border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#636e70;max-height:200px;overflow-y:auto;white-space:pre-wrap;margin-top:8px}
+.ok{color:#10b981}.er{color:#ef4444}.wa{color:#f59e0b}
+.tb{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.4);border-radius:12px;overflow:hidden}
+.tb table{width:100%;border-collapse:collapse;font-size:12px}
+.tb th{padding:8px 10px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5)}
+.tb td{padding:6px 10px;color:#a0a8b8;border-bottom:1px solid rgba(45,53,97,.1)}
+.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+</style></head><body>
+<div class="hdr">
+  <div class="l">AUTO-EVO-AI</div>
+  <div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy" class="a">一键部署</a><a href="/hub">开源中心</a><a href="/enterprise.html">企业管理</a></div>
+  <div class="r">V0.1</div>
+</div>
+<div class="c">
+  <h2>🚀 一键部署开源项目</h2>
+  <div class="inp">
+    <input id="url" placeholder="输入 GitHub 仓库 URL，如 https://github.com/user/project" onkeydown="if(event.key==='Enter')deploy()">
+    <button id="btn" onclick="deploy()">部署</button>
+  </div>
+  <div id="log" style="display:none" class="cd"><h3><span id="logTitle">部署中...</span></h3><div class="lg" id="logContent"></div></div>
+  <h2 style="margin-top:24px">📋 已部署项目</h2>
+  <div class="tb"><table><thead><tr><th>名称</th><th>端口</th><th>状态</th><th>操作</th></tr></thead><tbody id="list"></tbody></table></div>
+</div>
+<div class="ft">AUTO-EVO-AI V0.1 · 万能部署引擎</div>
+<script>
+async function deploy(){
+  var url=document.getElementById('url').value.trim()
+  if(!url){alert('请输入 GitHub 仓库 URL');return}
+  document.getElementById('btn').disabled=true;document.getElementById('btn').textContent='部署中...'
+  document.getElementById('log').style.display='block'
+  document.getElementById('logTitle').textContent='🚀 部署中: '+url.split('/').pop()
+  document.getElementById('logContent').textContent='正在分析项目...\n'
+  try{
+    var r=await fetch('/api/v1/deploy/universal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})})
+    var d=await r.json()
+    document.getElementById('logContent').textContent+=JSON.stringify(d.data||d, null, 2)
+    document.getElementById('logTitle').textContent=d.success?'✅ 部署成功':'❌ 部署失败'
+    document.getElementById('logTitle').className=d.success?'ok':'er'
+  }catch(e){document.getElementById('logContent').textContent+='\n错误: '+e.message}
+  document.getElementById('btn').disabled=false;document.getElementById('btn').textContent='部署'
+  loadContainers()
+}
+async function loadContainers(){
+  try{
+    var r=await fetch('/api/v1/deploy/status');var d=await r.json()
+    var h=''
+    for(var c of(d.containers||[])){
+      h+='<tr><td style="font-weight:500">'+c.name+'</td><td>'+c.ports+'</td><td><span class="ok">'+c.status+'</span></td>'
+      h+='<td><button onclick="stop(\\''+c.name+'\\')" style="padding:2px 8px;border:none;border-radius:4px;background:#ef4444;color:#fff;font-size:10px;cursor:pointer">停止</button></td></tr>'
+    }
+    if(!h)h='<tr><td colspan="4" style="text-align:center;padding:20px;color:#636e70">暂无部署项目</td></tr>'
+    document.getElementById('list').innerHTML=h
+  }catch(e){}
+}
+async function stop(name){
+  await fetch('/api/v1/deploy/stop/'+name,{method:'POST'})
+  loadContainers()
+}
+loadContainers()
+</script></body></html>
