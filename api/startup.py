@@ -88,6 +88,8 @@ def _mount_vue_frontend():
         _OVERRIDE = {
             "enterprise.html": "enterprise.html",
             "company.html": "company.html",
+            "deploy.html": "deploy.html",
+            "deploy": "deploy.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)
