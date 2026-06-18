@@ -42,7 +42,9 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#e0e0e0;displ
 </style></head><body>
 <div class="sidebar">
   <h2><span>🎨 编排画布</span></h2>
-  <div class="section">📦 已集成项目（拖入画布）</div>
+  <div class="section">🧩 系统模块（拖入画布）</div>
+  <div class="node-list" id="modList"></div>
+  <div class="section">📦 开源项目</div>
   <div class="node-list" id="projectList"></div>
 </div>
 <div class="main">
@@ -168,5 +170,21 @@ function clearCanvas(){
   document.querySelectorAll('.edge').forEach(function(e){e.remove()});
   NODES={};EDGES=[];NODE_COUNTER=0;saveComboId=null;document.getElementById('hint').style.display='block'
 }
+async function loadMods(){
+  var cats=[
+    {icon:'\u{1F504}',name:'自动部署',desc:'万能部署器·Docker·K8s',source:'deploy'},
+    {icon:'\u{1F916}',name:'AI工具',desc:'LLM·Agent·RAG·向量',source:'ai'},
+    {icon:'\u{1F4CA}',name:'数据处理',desc:'ETL·分析·可视化·报表',source:'data'},
+    {icon:'\u{1F514}',name:'通知推送',desc:'邮件·钉钉·Webhook·短信',source:'notify'},
+    {icon:'\u{1F6E1}\uFE0F',name:'安全审计',desc:'扫描·合规·渗透·审计',source:'security'},
+    {icon:'\u{1F4BE}',name:'存储',desc:'数据库·文件·缓存·备份',source:'storage'},
+    {icon:'\u{1F310}',name:'网络',desc:'代理·CDN·DNS·隧道',source:'network'},
+    {icon:'\u{2699}\uFE0F',name:'系统',desc:'监控·调度·日志·配置',source:'system'},
+  ];
+  var el=document.getElementById('modList');
+  el.innerHTML=cats.map(c=>'<div class="node-item" draggable="true" data-id="mod_'+c.source+'" data-name="'+c.name+'" data-source="'+c.source+'" ondragstart="onDragStart(event)">'
+    +'<span class="icon">'+c.icon+'</span><div class="info"><div class="name">'+c.name+'</div><div class="desc">'+c.desc+'</div></div></div>').join('')
+}
+loadMods();
 loadProjects();loadComboList()
 </script></body></html>
