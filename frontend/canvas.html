@@ -171,19 +171,21 @@ function clearCanvas(){
   NODES={};EDGES=[];NODE_COUNTER=0;saveComboId=null;document.getElementById('hint').style.display='block'
 }
 async function loadMods(){
-  var cats=[
-    {icon:'\u{1F504}',name:'自动部署',desc:'万能部署器·Docker·K8s',source:'deploy'},
-    {icon:'\u{1F916}',name:'AI工具',desc:'LLM·Agent·RAG·向量',source:'ai'},
-    {icon:'\u{1F4CA}',name:'数据处理',desc:'ETL·分析·可视化·报表',source:'data'},
-    {icon:'\u{1F514}',name:'通知推送',desc:'邮件·钉钉·Webhook·短信',source:'notify'},
-    {icon:'\u{1F6E1}\uFE0F',name:'安全审计',desc:'扫描·合规·渗透·审计',source:'security'},
-    {icon:'\u{1F4BE}',name:'存储',desc:'数据库·文件·缓存·备份',source:'storage'},
-    {icon:'\u{1F310}',name:'网络',desc:'代理·CDN·DNS·隧道',source:'network'},
-    {icon:'\u{2699}\uFE0F',name:'系统',desc:'监控·调度·日志·配置',source:'system'},
-  ];
-  var el=document.getElementById('modList');
-  el.innerHTML=cats.map(c=>'<div class="node-item" draggable="true" data-id="mod_'+c.source+'" data-name="'+c.name+'" data-source="'+c.source+'" ondragstart="onDragStart(event)">'
-    +'<span class="icon">'+c.icon+'</span><div class="info"><div class="name">'+c.name+'</div><div class="desc">'+c.desc+'</div></div></div>').join('')
+  try{
+    var r=await fetch('/api/v1/modules?all=1');var d=await r.json()
+    var all=(d.modules||[]).slice(0,450)
+    var cats={};all.forEach(m=>{var c=m.category||'other';if(!cats[c])cats[c]=[];cats[c].push(m)})
+    var icons={'agent':'🤖','api':'🔌','backup':'💾','cache':'⚡','config':'⚙️','crypto':'🔐','data':'📊','database':'🗄️','logging':'📝','messaging':'📨','monitor':'📈','network':'🌐','notification':'🔔','search':'🔍','security':'🛡️','storage':'💿','system':'⚙️','task':'📋','testing':'🧪','ai':'🧠','auth':'🔑'}
+    var el=document.getElementById('modList')
+    el.innerHTML=Object.keys(cats).sort().map(function(cat){
+      var icon=icons[cat]||'📦'
+      return '<div class="section">'+icon+' '+cat.toUpperCase()+' ('+cats[cat].length+')</div>'
+        +cats[cat].slice(0,20).map(m=>
+          '<div class="node-item" draggable="true" data-id="mod_'+m.id+'" data-name="'+m.name+'" data-source="'+m.id+'" ondragstart="onDragStart(event)">'
+          +'<span class="icon">'+icon+'</span><div class="info"><div class="name">'+(m.name||m.id||'').slice(0,22)+'</div><div class="desc">'+(m.status||'ready')+'</div></div></div>'
+        ).join('')
+    }).join('')
+  }catch(e){console.warn('mod load fail',e)}
 }
 loadMods();
 loadProjects();loadComboList()
