@@ -120,6 +120,44 @@ async def fork_page():
         return FileResponse(str(html_path))
     raise HTTPException(404)
 
+@router.get("/company.html")
+async def company_page():
+    """虚拟公司页面"""
+    html_path = BASE_DIR / "frontend" / "company.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
+@router.get("/dashboard")
+async def dash_route():
+    """仪表盘"""
+    from fastapi.responses import HTMLResponse
+    html_path = BASE_DIR / "frontend" / "dashboard.html"
+    if html_path.exists():
+        html = html_path.read_text(encoding="utf-8")
+        # Add no-cache headers and version bust
+        html = html.replace('</head>', '<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><style>body{transition:opacity .3s}</style></head>')
+        return HTMLResponse(html, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
+    return FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
+
+@router.get("/app/dashboard")
+@router.get("/app/dash")
+@router.get("/dash")
+async def app_dashboard_route():
+    """仪表盘（showDashboard 跳转目标）"""
+    html_path = BASE_DIR / "frontend" / "dashboard.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    return FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
+
+@router.get("/enterprise.html")
+async def enterprise_page():
+    """企业管理 — v6.39完整模块管理器"""
+    html_path = BASE_DIR / "frontend" / "enterprise.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
 @router.get("/ComposeCanvas")
 async def compose_canvas_page():
     """组合画布页面"""

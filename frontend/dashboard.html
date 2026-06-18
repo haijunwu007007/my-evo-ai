@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📊 仪表盘 — AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0b16;color:#e8e8ef;font-family:-apple-system,sans-serif}
+.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.hdr .l{font-size:15px;font-weight:700;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}
+.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+.hdr .r{font-size:11px;color:#636e70;margin-left:auto}
+.c{max-width:1200px;margin:0 auto;padding:12px 16px}
+
+.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.sc{background:rgba(26,26,46,.6);border:1px solid rgba(45,53,97,.4);border-radius:12px;padding:12px}
+.sc .sv{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.sc .sl{font-size:10px;color:#8892b0;margin-top:2px}
+.sc:nth-child(1) .sv{color:#4361ee}.sc:nth-child(2) .sv{color:#a855f7}.sc:nth-child(3) .sv{color:#06b6d4}
+.sc:nth-child(4) .sv{color:#10b981}.sc:nth-child(5) .sv{color:#f59e0b}.sc:nth-child(6) .sv{color:#f472b6}
+
+.tb{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.4);border-radius:12px;overflow:hidden}
+.tb table{width:100%;border-collapse:collapse;font-size:12px}
+.tb th{padding:8px 10px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5);border-bottom:1px solid rgba(45,53,97,.2)}
+.tb td{padding:6px 10px;border-bottom:1px solid rgba(45,53,97,.1);color:#a0a8b8}
+.tb tr:hover td{background:rgba(22,33,62,.4)}
+.srch{width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:12px;outline:none;margin:10px 0}
+.srch:focus{border-color:#4361ee}
+.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;border-top:1px solid rgba(45,53,97,.2);margin-top:14px}
+</style></head><body>
+<div class="hdr">
+  <div class="l">AUTO-EVO-AI</div>
+  <div class="n"><a href="/">对话</a><a href="/dashboard" class="a">仪表盘</a><a href="/hub">开源中心</a><a href="/company.html">虚拟公司</a><a href="/enterprise.html">企业管理</a></div>
+  <div class="r">V0.1</div>
+</div>
+<div class="c">
+  <div class="sr" id="stats"></div>
+  <input class="srch" id="filter" placeholder="🔍 搜索模块..." oninput="filt()">
+  <div class="tb"><table><thead><tr><th style="width:30%">名称</th><th style="width:15%">状态</th><th style="width:15%">分类</th><th style="width:40%">操作</th></tr></thead><tbody id="mt"></tbody></table></div>
+</div>
+<div class="ft">AUTO-EVO-AI V0.1</div>
+<script>
+var _M=[],_F={};
+async function load(){
+  try{
+    var r=await fetch('/api/status');var s=await r.json()
+    var ld=s.modules_loaded||0,tt=s.modules_total||0,st=s.status||'-'
+    var h='<div class="sc"><div class="sv">'+ld+'</div><div class="sl">已加载</div></div>'
+        +'<div class="sc"><div class="sv">'+tt+'</div><div class="sl">模块总数</div></div>'
+        +'<div class="sc"><div class="sv">'+(st||'-')+'</div><div class="sl">系统状态</div></div>'
+        +'<div class="sc"><div class="sv">'+((s.coordinator&&s.coordinator.status)||'-')+'</div><div class="sl">协调器</div></div>'
+        +'<div class="sc"><div class="sv">'+((s.coordinator&&s.coordinator.automation_score)||0)+'%</div><div class="sl">自动化</div></div>'
+        +'<div class="sc"><div class="sv">'+(s.modules_stub||0)+'</div><div class="sl">桩模块</div></div>'
+    document.getElementById('stats').innerHTML=h
+    // Real module data
+    try{
+      var r2=await fetch('/api/v1/modules?all=1');var d2=await r2.json()
+      _M=(d2.modules||[]).map(function(m,i){return{name:m.name||m.id||'模块'+(i+1),status:m.status||'pending',cat:m.category||'其他',id:m.id||'id_'+(i+1)}})
+    }catch(e){_M=[]}
+    show()
+  }catch(e){document.getElementById('stats').innerHTML='<div style="grid-column:span 6;text-align:center;color:#636e70;padding:20px">⚠️ 无法连接服务器</div>'}
+}
+function show(){
+  var q=document.getElementById('filter').value.toLowerCase()
+  var fl=_M.filter(function(m){return!q||m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)||m.cat.toLowerCase().includes(q)})
+  var h=''
+  for(var i=0;i<Math.min(fl.length,200);i++){
+    var m=fl[i]
+    var st='ok',stxt='✅ 正常'
+    if(m.status==='error'||m.status==='timeout'){st='err';stxt='❌ 异常'}
+    else if(m.status==='pending'||m.status==='pending_lazy'){st='pen';stxt='⏳ 待加载'}
+    h+='<tr><td style="font-weight:500;color:#c8d0e0">'+m.name+'</td>'
+       +'<td><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;'
+       +(st==='ok'?'background:rgba(16,185,129,.12);color:#10b981"':st==='err'?'background:rgba(239,68,68,.12);color:#ef4444"':'background:rgba(245,158,11,.12);color:#f59e0b"')+'>'+stxt+'</span></td>'
+       +'<td style="color:#8892b0">'+m.cat+'</td>'
+       +'<td style="font-size:10px"><a href="/enterprise.html?mod='+m.id+'" style="color:#818cf8;text-decoration:none">管理</a></td></tr>'
+  }
+  if(!h)h='<tr><td colspan="4" style="text-align:center;color:#636e70;padding:20px">无匹配</td></tr>'
+  document.getElementById('mt').innerHTML=h
+}
+function filt(){show()}
+load()
+setInterval(load,30000)
+</script></body></html>

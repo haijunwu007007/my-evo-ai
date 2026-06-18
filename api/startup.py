@@ -65,18 +65,6 @@ def _mount_vue_frontend():
                 return _nocache(FileResponse(str(chat_html), media_type="text/html"))
             logger.info(f"[CHAT] 聊天界面已挂载: /")
 
-        # Dashboard（旧版）— 放在 catch-all 之前
-        html_path = BASE_DIR / "index.html"
-        if html_path.exists():
-            @app.get("/dashboard", include_in_schema=False)
-            async def serve_dashboard():
-                from fastapi.responses import Response
-                import os
-                content = open(str(html_path), "rb").read()
-                return Response(content=content, media_type="text/html",
-                    headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
-            logger.info(f"[VUE] Dashboard 已挂载: {html_path}")
-
         # 商业版管理后台
         _admin_html = BASE_DIR / "frontend" / "admin.html"
         if _admin_html.exists():
@@ -96,11 +84,22 @@ def _mount_vue_frontend():
         except ImportError:
             logger.warning("[WORKFLOW] 未找到 workflow HTML (routes_new_features 未加载)")
 
-        # 非 API/App 路径兜底 → 聊天界面
+        # 非 API/App 路径兜底 + 特定文件覆盖
+        _OVERRIDE = {
+            "enterprise.html": "enterprise.html",
+            "company.html": "company.html",
+        }
+
         @app.get("/{path:path}", include_in_schema=False)
         async def _spa_catchall(path: str):
             if path.startswith("api/") or path.startswith("app/"):
                 return JSONResponse(status_code=404, content={"error": "not_found"})
+            # 检查覆盖文件
+            if path in _OVERRIDE:
+                fp = BASE_DIR / "frontend" / _OVERRIDE[path]
+                if fp.exists():
+                    return FileResponse(str(fp))
+            # 兜底返回聊天界面
             if chat_html.exists():
                 resp = FileResponse(str(chat_html), media_type="text/html")
                 resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"

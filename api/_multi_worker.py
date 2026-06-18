@@ -1,10 +1,32 @@
 """多Worker支持 + 超时熔断"""
 import os, time, json, threading
 from functools import wraps
+import threading
 
 # Worker 配置
 WORKERS = int(os.environ.get("EVO_WORKERS", "4"))
 TIMEOUT_SECONDS = int(os.environ.get("EVO_TOOL_TIMEOUT", "60"))
+
+class WorkerManager:
+    """多Worker管理器 — 控制并发与资源"""
+    def __init__(self, max_workers=None):
+        self.max_workers = max_workers or WORKERS
+        self._active = 0
+        self._lock = threading.Lock()
+
+    def get_active(self):
+        return self._active
+
+    def acquire(self):
+        with self._lock:
+            if self._active < self.max_workers:
+                self._active += 1
+                return True
+            return False
+
+    def release(self):
+        with self._lock:
+            self._active = max(0, self._active - 1)
 
 def get_worker_count():
     return WORKERS

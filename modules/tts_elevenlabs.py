@@ -598,6 +598,8 @@ class TtsElevenlabsModule:
 
     def shutdown(self) -> dict:
         self.status = "stopped"
+        if hasattr(self, '_executor'):
+            self._executor.shutdown(wait=False)
         return {"success": True, "module": "tts_elevenlabs"}
 
     def health_check(self) -> dict:

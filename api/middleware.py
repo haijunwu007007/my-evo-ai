@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import time
+import asyncio
 from pathlib import Path
 from core.logging_config import get_logger
 from fastapi import Request
@@ -34,7 +35,10 @@ _PUBLIC_PATHS = {
     "/static/fix.js", "/i18n.js", "/", "/health",
     "/js/", "/frontend/", "/output/",
     "/hub", "/dashboard", "/canvas", "/fork", "/ComposeCanvas",
-    "/app/dashboard",
+    "/app/dashboard", "/dashboard", "/company.html", "/enterprise.html", "/preview_v637.html",
+    "/api/v1/", "/company.html",
+    "/api/auth/login", "/api/v1/auth/login", "/api/v1/user/login",
+    "/api/v1/user/register", "/api/auth/register", "/api/v1/auth/register",
     "/docs", "/openapi.json", "/redoc",
     "/manifest.json", "/sw.js",
     "/api/auth/login", "/api/auth/config",
@@ -92,6 +96,8 @@ async def i18n_middleware(request: Request, call_next):
 # 缓存中间件 — 内存 LRU 缓存，对 GET 请求自动缓存
 # ═══════════════════════════════════════════════════════
 
+_cache_lock = asyncio.Lock()
+
 @app.middleware("http")
 async def cache_middleware(request: Request, call_next):
     """内存缓存 GET 请求响应，支持 TTL + 可缓存路径白名单"""
@@ -109,19 +115,21 @@ async def cache_middleware(request: Request, call_next):
 
     # 查询缓存
     now = time.time()
-    cached = _api_cache.get(path)
-    if cached and (now - cached["ts"]) < ttl and cached.get("content") is not None:
-        from api import infra as _evo_infra
-        _evo_infra._cache_hits += 1
-        from fastapi.responses import JSONResponse
-        return JSONResponse(content=cached["content"], status_code=200)
+    async with _cache_lock:
+        cached = _api_cache.get(path)
+        if cached and (now - cached["ts"]) < ttl and cached.get("content") is not None:
+            from api import infra as _evo_infra
+            _evo_infra._cache_hits += 1
+            from fastapi.responses import JSONResponse
+            return JSONResponse(content=cached["content"], status_code=200)
 
     # 未命中 → 正常处理并缓存
     response = await call_next(request)
     if response.status_code == 200:
         try:
             body = await response.json()
-            _api_cache[path] = {"ts": time.time(), "content": body}
+            async with _cache_lock:
+                _api_cache[path] = {"ts": time.time(), "content": body}
         except Exception:
             pass
     return response
@@ -163,6 +171,8 @@ async def security_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
     status_code = 500
     error_msg = ""
+    remaining = 0
+    reset_at = 0
 
     try:
         # ⚠️ 拦截 .env 路径探测攻击
@@ -177,7 +187,7 @@ async def security_middleware(request: Request, call_next):
         is_public = any(
             path == p or path.startswith(p)
             for p in ["/docs", "/redoc", "/openapi", "/static", "/icon-", "/js/", "/frontend/"]
-        ) or path in _PUBLIC_PATHS
+        ) or path in _PUBLIC_PATHS or any(path.startswith(p) for p in _PUBLIC_PATHS if p.endswith("/"))
 
         # API Key 验证
         if _API_KEY_ENABLED and not is_public:
@@ -219,6 +229,7 @@ async def security_middleware(request: Request, call_next):
                 request.state.user = payload
 
         # 限流检查
+        remaining, reset_at = 0, 0
         if not is_public:
             allowed, remaining, reset_at = await rate_limiter.is_allowed(client_ip, method, path)
             if not allowed:

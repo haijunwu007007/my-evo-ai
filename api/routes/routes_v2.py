@@ -10,8 +10,10 @@ async def v2_list_tools():
     return ok({"tools": [{"name": t["name"], "cat": t["category"]} for t in list_tools()]})
 
 @router.post("/tools/exec")
-async def v2_exec_tool(name: str, args: dict = {}):
-    r = exec_tool(name, args)
+async def v2_exec_tool(name: str, args: str = ""):
+    import json
+    args_dict = json.loads(args) if args else {}
+    r = exec_tool(name, args_dict)
     return ok({"tool": name, "result": r.get("data", "")})
 
 @router.get("/status")

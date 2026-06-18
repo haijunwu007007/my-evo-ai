@@ -780,6 +780,8 @@ class AgentBoreas(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         self._running = False
         if self._monitor_thread and self._monitor_thread.is_alive():
             self._monitor_thread.join(timeout=10)
+        if hasattr(self, '_executor'):
+            self._executor.shutdown(wait=False)
         self._audit("shutdown", "Boreas智能体已关闭")
         return Result(success=True, message="Boreas智能体已关闭")
 

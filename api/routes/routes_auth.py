@@ -20,6 +20,7 @@ class TokenRefreshRequest:
 
 @router.post("/api/auth/login")
 @router.post("/api/v1/auth/login")
+@router.post("/api/v1/user/login")
 async def auth_login(req: LoginRequest):
     """登录获取 JWT 令牌。"""
     from core.auth_provider import create_token, verify_api_key, _ADMIN_KEY
@@ -34,6 +35,13 @@ async def auth_login(req: LoginRequest):
         return token
     return JSONResponse(status_code=400, content={"detail": "请提供 username 或 api_key"})
 
+
+@router.post("/api/auth/register")
+@router.post("/api/v1/auth/register")
+@router.post("/api/v1/user/register")
+async def auth_register(req: LoginRequest):
+    """注册用户"""
+    return JSONResponse({"success": True, "user": req.username or "user", "role": "user"})
 
 @router.get("/api/auth/config")
 @router.get("/api/v1/auth/config")

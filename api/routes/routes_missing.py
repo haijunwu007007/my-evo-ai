@@ -13,18 +13,6 @@ router = APIRouter()
 async def notify_providers():
     return {"success": True, "providers": [], "count": 0, "note": "通知提供商管理功能待实现"}
 
-@router.get("/api/v1/modules/stats")
-async def modules_stats():
-    mod_dir = Path(__file__).parent.parent.parent / "modules"
-    files = list(mod_dir.glob("*.py")) if mod_dir.exists() else []
-    sizes = [f.stat().st_size for f in files if f.name != "__init__.py"]
-    return {
-        "success": True, "total_files": len(files),
-        "total_size_kb": round(sum(sizes)/1024, 1),
-        "avg_size_kb": round(sum(sizes)/len(sizes)/1024, 1) if sizes else 0,
-        "note": "模块文件系统统计"
-    }
-
 @router.get("/api/v2/modules")
 async def modules_v2():
     return {"success": True, "version": "v2", "modules": [], "count": 0, "note": "v2 API 暂未开放"}

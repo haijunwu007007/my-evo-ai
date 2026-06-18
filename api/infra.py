@@ -111,8 +111,8 @@ if _API_KEY_ENABLED and not _API_KEY:
 
 _cors_origins = os.environ.get("EVO_CORS_ORIGINS", "*").split(",")
 
-_PUBLIC_PATHS = {"/static/fix.js", "/i18n.js", "/", "/health",
-                 "/docs", "/openapi.json", "/redoc", "/dashboard"}
+
+
 
 
 # ════════════════════════════════════════════════════════════
@@ -510,7 +510,8 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-_cors_origins = os.environ.get("EVO_CORS_ORIGINS", "http://localhost:8765,http://127.0.0.1:8765,http://122.51.144.227:8765").split(",")
+_PORT = os.environ.get("PORT", "8765")
+_cors_origins = os.environ.get("EVO_CORS_ORIGINS", f"http://localhost:{_PORT},http://127.0.0.1:{_PORT},http://122.51.144.227:{_PORT}").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
@@ -524,6 +525,10 @@ try:
     app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
 except ImportError:
     pass
+
+def set_lifespan(lifespan_fn):
+    """由 startup 模块调用，统一设置 lifespan"""
+    app.router.lifespan_context = lifespan_fn
 
 
 
@@ -665,8 +670,10 @@ def get_coordinator_v3():
 _planner_instance: Any = None
 
 async def _preload_modules(batch_size=20, delay=0.3):
-    """后台分批预加载 — 已废弃，完全依赖lazy load"""
+    """已废弃，完全依赖lazy load"""
     pass
+
+
 
 
 def get_planner():
@@ -844,12 +851,6 @@ from core.auth_engine import AuthEngine, init_auth, get_auth, is_auth_enabled, s
 _auth_secret = os.environ.get("EVO_AUTH_SECRET", secrets.token_hex(32))
 _auth_enabled_env = os.environ.get("EVO_AUTH_ENABLED", "true").lower() == "true"
 _auth_engine = init_auth(secret=_auth_secret, enabled=_auth_enabled_env)
-
-_AUTH_WHITELIST = {
-    "/api/auth/login", "/api/auth/refresh", "/api/health",
-    "/api/status", "/dashboard", "/docs", "/redoc", "/openapi.json",
-    "/manifest.json", "/sw.js", "/", "/favicon.ico",
-}
 
 # BGOS 数据路径
 BGOS_DATA_PATH = (_ORIGINAL_BASE if (getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')) else BASE_DIR) / "bgos_data.json"

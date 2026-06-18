@@ -28,7 +28,16 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 import uvicorn
+
+class RequestBodyLimitMiddleware(BaseHTTPMiddleware):
+    """限制请求体最大10MB，防止DoS"""
+    async def dispatch(self, request, call_next):
+        cl = request.headers.get("content-length")
+        if cl and int(cl) > 10_485_760:
+            return JSONResponse(status_code=413, content={"success": False, "error": "请求体过大", "max_size_mb": 10})
+        return await call_next(request)
 
 # ── 日志 ──
 from core.logging_config import get_logger
@@ -58,8 +67,37 @@ from api.infra import (
     get_coordinator_v3, get_planner,
 )
 
+# ── 多Worker + 熔断器 + 配置热加载 ──
+from api._multi_worker import get_worker_count, get_circuit_breaker, with_timeout
+_WORKER_COUNT = get_worker_count()
+
+
+# ── RBAC ──
+try:
+    from api._rbac import RBACMiddleware, check_permission
+    _rbac_ok = True
+except Exception:
+    _rbac_ok = False
+
+
+# ── 统一响应格式 ──
+try:
+    from api._response import StandardResponse
+    _response_ok = True
+except Exception:
+    _response_ok = False
+
 # ── 加载中间件（副作用：注册 @app.middleware）──
 import api.middleware  # noqa: F401
+
+# ── RBAC 集成 ──
+if _rbac_ok:
+    try:
+        from api._rbac import require_role
+        # require_role 作为装饰器在路由中使用
+        logger.info("[rbac] RBAC loaded (require_role decorator)")
+    except Exception:
+        pass
 
 # ── Scalar API 文档（替换 Swagger UI）──
 try:
@@ -124,8 +162,16 @@ if frontend_dir.exists():
 # 全局异常处理 — 统一 JSON 响应格式
 # ═══════════════════════════════════════════════════════
 
+
 def _error_response(status: int, error: str, message: str, detail: str = "") -> dict:
     return {"success": False, "error": error, "message": message, "detail": detail, "status_code": status}
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=404,
+        content=_error_response(404, "not_found", f"资源不存在: {request.url.path}"),
+    )
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
@@ -142,13 +188,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content=_error_response(500, "internal_error", "服务器内部错误", str(exc)[:500]),
-    )
-
-@app.exception_handler(404)
-async def not_found_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=404,
-        content=_error_response(404, "not_found", f"资源不存在: {request.url.path}"),
     )
 
 @app.exception_handler(RequestValidationError)
@@ -234,9 +273,9 @@ if __name__ == "__main__":
     reload = os.environ.get("EVO_RELOAD", "").lower() in ("1", "true", "yes")
     _frozen = getattr(sys, 'frozen', False)
 
-    # 启动时预热（如果 startup 模块提供了 warmup 函数）
+    # 启动时预热（warmup_modules 在 startup.py 中定义）
     try:
-        from api.startup import warmup as _warmup_fn
+        from api.startup import warmup_modules as _warmup_fn
         _warmup_fn()
     except (ImportError, Exception):
         pass
@@ -266,4 +305,11 @@ if __name__ == "__main__":
             webbrowser.open(f"http://localhost:{port}/dashboard")
         threading.Thread(target=_open_browser, daemon=True).start()
 
-    uvicorn.run(app, host=host, port=port, log_level="info", reload=reload)
+    uvicorn.run(
+        app,
+        host=host,
+        port=port,
+        log_level="info",
+        reload=reload,
+        workers=_WORKER_COUNT,
+    )
