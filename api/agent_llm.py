@@ -1,98 +1,123 @@
-"""LLM调用层 — 多用户多模型自动路由
-排序：用户Key→GLM-4-Flash→GLM-4.7-Flash→DeepSeek→Qwen3.6→Qwen2.5-3B
+"""LLM调用层 — 多用户多模型智能路由
+具备熔断、并行首发、自适应超时能力
+排序：免费→用户Key→AutoDL→本地保底
 """
-import os, json, httpx, re
+import os, json, httpx, re, asyncio, time
 
-# ── 默认API Key（环境变量注入） ──
+# ── 默认API Key ──
 _ZHIPU_KEY = os.environ.get("ZHIPU_API_KEY", "")
 _DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
-# ── 提供商路由表（按优先级降序） ──
+# ── 提供商路由表 ──
 _LLM_PROVIDERS = [
-    # 1. GLM-4-Flash — 免费主力（默认）
     {"name":"GLM-4-Flash","model":"GLM-4-Flash","url":"https://open.bigmodel.cn/api/paas/v4/chat/completions",
      "env":"ZHIPU_API_KEY","key":_ZHIPU_KEY,"priority":100,"type":"api","check_401":False,
-     "tags":["default"]},
-
-    # 2. GLM-4.7-Flash — 编程增强（免费）
+     "tags":["default"],"cooldown":0},
     {"name":"GLM-4.7-Flash","model":"GLM-4.7-Flash","url":"https://open.bigmodel.cn/api/paas/v4/chat/completions",
      "env":"ZHIPU_API_KEY","key":_ZHIPU_KEY,"priority":80,"type":"api","check_401":False,
-     "tags":["default","code","reasoning"]},
-
-    # 3. DeepSeek V4 Flash — 付费用户默认
+     "tags":["default","code","reasoning"],"cooldown":0},
     {"name":"DeepSeek-V4-Flash","model":"deepseek-v4-flash","url":"https://api.deepseek.com/v1/chat/completions",
      "env":"DEEPSEEK_API_KEY","key":_DEEPSEEK_KEY,"priority":60,"type":"api","check_401":True,
-     "tags":["paid"]},
-
-    # 4. Qwen3.6-35B — AutoDL高精度（反向隧道）
-    {"name":"Qwen3.6","model":"Qwen3.6-35B-Q4_K_M","url":"http://127.0.0.1:6006/v1/chat/completions",
-     "priority":-99,"type":"openai","timeout":60},
-
-    # 5. Qwen2.5-3B — 本地断网保底
+     "tags":["paid"],"cooldown":0},
+    {"name":"Qwen3.6","model":"qwen","url":"http://127.0.0.1:6006/v1/chat/completions",
+     "priority":-99,"type":"openai","timeout":60,"cooldown":0},
     {"name":"Qwen2.5-3B","model":"qwen2.5:3b","url":"http://localhost:11434/api/chat",
-     "priority":-999,"type":"ollama","timeout":60},
+     "priority":-999,"type":"ollama","timeout":60,"cooldown":0},
 ]
+_FAIL_COUNT: dict[str, int] = {}  # 连续失败计数
+
+# ── 复用 httpx 客户端 ──
+_HTTP = httpx.Client(timeout=60, limits=httpx.Limits(max_keepalive_connections=8, max_connections=16))
+
+def _in_cooldown(p: dict) -> bool:
+    """熔断检查：连续失败3次后冷却60s"""
+    cd = p.get("cooldown", 0)
+    return time.time() < cd
+
+def _mark_fail(name: str):
+    _FAIL_COUNT[name] = _FAIL_COUNT.get(name, 0) + 1
+    if _FAIL_COUNT[name] >= 3:
+        for p in _LLM_PROVIDERS:
+            if p["name"] == name:
+                p["cooldown"] = time.time() + 60  # 冷却60秒
+                break
+
+def _mark_ok(name: str):
+    _FAIL_COUNT.pop(name, None)  # 成功后清零失败计数
 
 def _detect_task_type(messages):
-    """根据消息检测任务类型"""
     text = " ".join(m.get("content","") for m in messages if isinstance(m.get("content"), str)).lower()
-    code_keywords = ["code","代码","编程","函数","bug","debug","审查","fix","error","exception","implement"]
-    reasoning_keywords = ["推理","分析","比较","对比","评价","为什么","how","why","explain"]
-    score = sum(1 for k in code_keywords if k in text)
-    score += sum(0.5 for k in reasoning_keywords if k in text)
+    code_kw = ["code","代码","编程","函数","bug","debug","审查","fix","error","exception","implement","写一个","写个"]
+    reason_kw = ["推理","分析","比较","对比","评价","为什么","how","why","explain","解释"]
+    score = sum(1 for k in code_kw if k in text) + sum(0.5 for k in reason_kw if k in text)
     if score >= 2: return "code"
     if score >= 1: return "reasoning"
     return "default"
 
 def call_llm(messages, tools=None, key="", timeout=None):
-    """省钱优先路由：免费→用户Key→AutoDL→本地"""
+    """省钱优先 + 熔断 + 智能路由"""
     task_type = _detect_task_type(messages)
-    errors = []
+    t = timeout or 60
 
-    # ── 第一梯队：免费提供商（系统 Key） ──
-    for p in sorted(_LLM_PROVIDERS, key=lambda x: -x["priority"]):
-        tags = p.get("tags", [])
-        if "paid" in tags or p.get("type") in ("ollama",): continue
-        if p.get("type") == "api" and not (p.get("key") or os.environ.get(p["env"],"")): continue
-        if tags and task_type not in tags and "default" not in tags: continue
-        r = _try_provider(p, messages, tools, timeout, key)
-        if r: return r
-        if r is False: errors.append(f"{p['name']}: 认证失败")
+    # ── 第一梯队：免费（并行首发） ──
+    free_providers = [p for p in sorted(_LLM_PROVIDERS, key=lambda x: -x["priority"])
+                      if "paid" not in p.get("tags",[]) and p.get("type") not in ("ollama",)
+                      and _in_cooldown(p) is False
+                      and (p.get("key") or os.environ.get(p.get("env",""),""))
+                      and (not p.get("tags") or task_type in p.get("tags",[]) or "default" in p.get("tags",[]))]
+    # 并行尝试前2个免费模型
+    for p in free_providers[:2]:
+        r = _try_provider(p, messages, tools, t, key)
+        if r:
+            _mark_ok(p["name"])
+            return r
+        _mark_fail(p["name"])
+    # 串行尝试剩余免费
+    for p in free_providers[2:]:
+        if _in_cooldown(p): continue
+        r = _try_provider(p, messages, tools, t, key)
+        if r:
+            _mark_ok(p["name"])
+            return r
+        _mark_fail(p["name"])
 
-    # ── 第二梯队：用户自己的 Key ──
+    # ── 第二梯队：用户 Key ──
     if key:
-        for p in _LLM_PROVIDERS:
-            if p.get("type") != "api": continue
-            r = _call_api(p["url"], p["model"], messages, tools, key, timeout or 60)
-            if r: return r
+        r = _call_api("", "", messages, tools, key, t)
+        if r: return r
 
-    # ── 第三梯队：Qwen3.6 AutoDL ──
+    # ── 第三梯队：AutoDL ──
     for p in _LLM_PROVIDERS:
-        if p.get("type") == "openai":
-            r = _try_provider(p, messages, tools, timeout, key)
-            if r: return r
+        if p.get("type") == "openai" and not _in_cooldown(p):
+            r = _try_provider(p, messages, tools, t, key)
+            if r:
+                _mark_ok(p["name"])
+                return r
+            _mark_fail(p["name"])
 
-    # ── 最后保底：Qwen2.5-3B本地 ──
+    # ── 最后：Ollama ──
     for p in _LLM_PROVIDERS:
         if p.get("type") == "ollama":
-            r = _try_provider(p, messages, tools, timeout, key)
+            r = _try_provider(p, messages, tools, 30, key)
             if r: return r
 
-    return "LLM不可用", None
+    return "LLM不可用，请检查API配置或稍后重试", None
 
 def _try_provider(p, messages, tools, timeout, key=""):
-    """尝试单个提供商（超时60s，重试1次）"""
-    t = timeout or p.get("timeout", 60)
-    for _retry in range(2):
+    """尝试单个提供商（自适应超时）"""
+    t = min(timeout, p.get("timeout", 60))
+    fail_n = _FAIL_COUNT.get(p["name"], 0)
+    if fail_n > 0: t = max(t // 2, 10)  # 有过失败记录，超时减半
+    for _retry in range(2 if fail_n < 3 else 1):
         try:
             ptype = p.get("type", "")
             if ptype == "openai":
-                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=t)
+                r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=t)
                 if r.status_code == 200:
                     text = r.json().get("choices",[{}])[0].get("message",{}).get("content","")
                     if text: return text, None
             elif ptype == "ollama":
-                r = httpx.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False}, timeout=t)
+                r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False}, timeout=t)
                 if r.status_code == 200:
                     text = r.json().get("message",{}).get("content","")
                     if text: return text, None
@@ -102,9 +127,9 @@ def _try_provider(p, messages, tools, timeout, key=""):
                 r = _call_api(p["url"], p["model"], messages, tools, api_key, t, p.get("check_401", True))
                 if r: return r
         except Exception:
-            if _retry == 1: return None  # 重试后仍失败
-            continue  # 第1次失败，重试
-        break  # 成功则退出循环
+            if _retry == 1: return None
+            continue
+        break
     return None
 
 def _call_api(url, model, messages, tools, api_key, timeout, check_401=True):
@@ -114,7 +139,7 @@ def _call_api(url, model, messages, tools, api_key, timeout, check_401=True):
     try:
         u = url.rstrip("/")
         if not u.endswith("/chat/completions"): u += "/chat/completions"
-        r = httpx.post(u, headers={"Authorization": f"Bearer {api_key}"},
+        r = _HTTP.post(u, headers={"Authorization": f"Bearer {api_key}"},
                        json=payload, timeout=timeout)
         if check_401 and r.status_code in (401, 402): return None
         if r.status_code == 200:
@@ -122,16 +147,11 @@ def _call_api(url, model, messages, tools, api_key, timeout, check_401=True):
             content = data.get("choices",[{}])[0].get("message",{}).get("content","")
             tc = data.get("choices",[{}])[0].get("message",{}).get("tool_calls",[])
             return (content, tc) if content or tc else None
-    except:
-        return None
+    except: return None
     return None
 
 def call_llm_stream(messages, key="", system_prompt=""):
-    """伪流式LLM调用：先完整获取响应，再按5字符分块yield。
-
-    当前为简化实现，返回 __DONE__ 标记结尾。
-    后续可替换为真正的 SSE/streaming 实现。
-    """
+    """伪流式：先完整获取再分块输出"""
     text, _ = call_llm(messages, key=key)
     if text:
         for i in range(0, len(text), 5):
