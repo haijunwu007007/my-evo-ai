@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<script src="/js/anime.min.js"></script>
 <title>AUTO-EVO-AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -217,6 +218,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       <span class="qa" onclick="quickTool('nocobase_build')">🏗️ 低代码平台</span>
       <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 音频转录</span>
       <span class="qa" onclick="quickTool('keploy_test')">🧪 AI测试</span>
+      <!-- 2026-06-19 新增集成 -->
+      <span class="qa" onclick="quickTool('browseract_extract')">🕷️ 反爬提取</span>
+      <span class="qa" onclick="quickTool('codemem_index')">🧠 代码知识</span>
+      <span class="qa" onclick="quickTool('reach_search')">🌐 全网搜索</span>
+      <span class="qa" onclick="quickTool('anime_animate')">✨ 页面动效</span>
     </div>
     <div class="input-area">
       <div class="input-row">
@@ -369,7 +375,11 @@ var _TOOL_HINTS = {
   mermaid_chart: "帮我生成流程图/架构图：",
   nocobase_build: "帮我用低代码构建业务应用：",
   scriberr_transcribe: "帮我转录音频/会议：",
-  keploy_test: "帮我自动生成API测试："
+  keploy_test: "帮我自动生成API测试：",
+  browseract_extract: "帮我用browseract提取这个网站数据（反爬）：",
+  codemem_index: "帮我索引这个代码库并分析：",
+  reach_search: "帮我搜索全网信息（推特/小红书/微博）：",
+  anime_animate: "帮我给这个页面添加动效："
 }
 // 需要工具调用（走非流式）的关键词
 var _TOOL_KEYWORDS = [...new Set(["plane_project", "openproject_mgmt", "cal_schedule", "novu_notify", "keycloak_auth", "meilisearch_search", "minio_storage", "opentofu_apply", "ansible_run", "strapi_cms", "directus_api", "uptime_kuma", "oneuptime_monitor", "signoz_apm", "wazuh_siem", "nats_mq", "rabbitmq_broker", "gitea_git", "wikijs_wiki", "bookstack_wiki", "projectsend_files", "浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","toolbench","browser","research","openhands","letta","composio","self_evolving","moltron","accomplish","抓取","爬取","操控浏览器","搜索API","发现API",

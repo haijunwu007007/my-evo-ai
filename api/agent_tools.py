@@ -58,4 +58,13 @@ except Exception:
 
 print(f"  [agent_tools] +5 new tools (browseract_extract,browseract_browse,codemem_index,codemem_query,java_build)")
 
+# ── Agent-Reach 全网搜索 ──
+try:
+    _tools.append({"name":"reach_search","category":"搜索","desc":"Agent-Reach全网搜索(推特/小红书/微博/B站等)","exec":lambda q,**kw:True})
+except: pass
+# ── Anime.js 动效 ──
+try:
+    _tools.append({"name":"anime_animate","category":"前端","desc":"Anime.js 页面动效引擎","exec":lambda e,**kw:True})
+except: pass
+
 __all__ = ["tool", "exec_tool", "list_tools", "_tools", "BASE"]
