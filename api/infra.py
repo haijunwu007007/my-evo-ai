@@ -39,7 +39,6 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Requ
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from starlette.responses import Response as StarletteResponse
 
 import uvicorn
@@ -48,31 +47,12 @@ import uvicorn
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-8s | %(message)s")
 logger = get_logger("evo.api")
 
-
-# ════════════════════════════════════════════════════════════
-# WebSocket 连接管理器
-# ════════════════════════════════════════════════════════════
-class ConnectionManager:
-    def __init__(self):
-        self.active: list = []
-
-    async def connect(self, ws: WebSocket):
-        await ws.accept()
-        self.active.append(ws)
-
-    def disconnect(self, ws: WebSocket):
-        if ws in self.active:
-            self.active.remove(ws)
-
-    async def broadcast(self, message: dict):
-        for ws in self.active[:]:
-            try:
-                await ws.send_json(message)
-            except Exception:
-                self.disconnect(ws)
-
-
-manager = ConnectionManager()
+# ── 从拆分模块导入（保持向后兼容）──
+from api.infra_ws import ConnectionManager, manager
+from api.infra_models import (ModuleCallRequest, ExecuteRequest,
+    PlannerChatRequest, PlannerTaskRequest, EmailConfigRequest,
+    NotificationRequest, LLMChatRequest, LLMProviderRequest,
+    DocReportRequest, DocPresentationRequest)
 
 
 # ════════════════════════════════════════════════════════════
@@ -107,7 +87,7 @@ _API_KEY_ENABLED = os.environ.get("EVO_API_KEY_ENABLED", "false").lower() == "tr
 _API_KEY = os.environ.get("EVO_API_KEY", "")
 if _API_KEY_ENABLED and not _API_KEY:
     _API_KEY = secrets.token_urlsafe(32)
-    logger.warning(f"[SECURITY] 自动生成API Key: {_API_KEY}")
+    logger.warning(f"[SECURITY] 自动生成API Key: {_API_KEY[:8]}...")
 
 _cors_origins = os.environ.get("EVO_CORS_ORIGINS", "*").split(",")
 
@@ -536,81 +516,6 @@ def set_lifespan(lifespan_fn):
 
 # ════════════════════════════════════════════════════════════
 # Pydantic 请求模型
-# ════════════════════════════════════════════════════════════
-class ModuleCallRequest(BaseModel):
-    module: str
-    method: str
-    args: list[Any] = []
-    kwargs: dict[str, Any] = {}
-
-
-class ExecuteRequest(BaseModel):
-    task: str
-    context: dict[str, Any] = {}
-
-
-class PlannerChatRequest(BaseModel):
-    message: str
-    context: dict[str, Any] | None = None
-
-
-class PlannerTaskRequest(BaseModel):
-    task: str
-    params: dict[str, Any] | None = None
-
-
-class EmailConfigRequest(BaseModel):
-    host: str = ""
-    port: int = 465
-    user: str = ""
-    password: str = ""
-    ssl: bool = True
-    from_name: str = ""
-
-
-class NotificationRequest(BaseModel):
-    channel: str = ""
-    to: str = ""
-    subject: str = ""
-    content: str = ""
-    msg_type: str = "text"
-    secret: str = ""
-    html: str = ""
-
-
-class LLMChatRequest(BaseModel):
-    prompt: str = ""
-    messages: list[dict] = []
-    model: str = ""
-    session_id: str = ""
-    system_prompt: str = ""
-    temperature: float = 0.7
-    max_tokens: int = 0
-    stream: bool = False
-    use_cache: bool = True
-
-
-class LLMProviderRequest(BaseModel):
-    name: str = ""
-    provider_type: str = "openai_compatible"
-    base_url: str = ""
-    api_key: str = ""
-    models: list[str] = []
-    priority: int = 10
-
-
-class DocReportRequest(BaseModel):
-    title: str = "报告"
-    sections: list[dict] = []
-    format: str = "markdown"
-    metadata: dict = None
-
-
-class DocPresentationRequest(BaseModel):
-    title: str = "演示文稿"
-    slides: list[dict] = []
-
-
 # ════════════════════════════════════════════════════════════
 # 缓存/执行日志 辅助函数
 # ════════════════════════════════════════════════════════════

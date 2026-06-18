@@ -10,6 +10,7 @@ router = APIRouter(tags=["auth"])
 class LoginRequest:
     username: str = ""
     api_key: str = ""
+    password: str = ""
     role: str = "user"
 
 

@@ -406,6 +406,8 @@ function quickTool(name){
   var hint = _TOOL_HINTS[name] || ""
   document.getElementById('input').value = hint
   document.getElementById('input').focus()
+  // 自动发送（延迟2ms确保状态更新）
+  setTimeout(function(){ send() }, 2)
 }
 
 function needsTool(msg){
@@ -423,7 +425,9 @@ try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array
 var CTX=[] // 上下文
 
 async function doRegister(){
-  var user=document.getElementById('regUser').value.trim()||'admin'
+  var user=document.getElementById('regUser').value.trim()
+  if(!user||user.length<2){alert('用户名至少2个字符');return}
+  if(user=='admin'){} // 允许admin
   var key=document.getElementById('regKey').value.trim()
   try{
     var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
@@ -440,6 +444,15 @@ async function doRegister(){
   document.getElementById('authCard').style.display='none'
   document.getElementById('mainContent').classList.add('show')
   document.getElementById('greeting').textContent=__('greeting').replace('{name}',user)
+  // 首次使用欢迎引导
+  if(!localStorage.getItem('evo_guide_done')){
+    setTimeout(function(){
+      var ow=document.createElement('div');ow.id='onboardingOverlay'
+      ow.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center'
+      ow.innerHTML='<div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;padding:32px;max-width:480px;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center"><h2 style="margin:0 0 8px">🚀 欢迎使用 AUTO-EVO-AI</h2><p style="opacity:0.9;margin:8px 0 16px;line-height:1.6">试试这些操作：<br>✨ <b>点击任意工具按钮</b>→自动执行<br>💬 <b>输入文字</b>→AI自动回复<br>📊 <b>顶部Tab</b>→切换仪表盘/开源中心<br>🔑 在右上角<b>设置Key</b>启用更多模型</p><button onclick="document.getElementById(\'onboardingOverlay\').remove();localStorage.setItem(\'evo_guide_done\',\'1\')" style="background:#fff;color:#667eea;border:none;padding:10px 28px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold">✓ 知道了</button></div>'
+      document.body.appendChild(ow)
+    }, 500)
+  }
   translateUI()
   restoreHistory()
 }
@@ -513,10 +526,26 @@ async function send(){
     showLoading()
     var ak=localStorage.getItem('evo_api_key')||''
     var useTools=needsTool(text)
+
+    // 超时30s的fetch包装
+    async function tFetch(url,opts,ms=30000){
+      var c=new AbortController()
+      var t=setTimeout(function(){c.abort()},ms)
+      try{
+        var r=await fetch(url,Object.assign({},opts,{signal:c.signal}))
+        clearTimeout(t)
+        return r
+      }catch(e){
+        clearTimeout(t)
+        if(e.name==='AbortError') throw new Error('⏱️ LLM 响应超时，正在降级处理...')
+        throw e
+      }
+    }
+
     // 工具类消息直接走非流式（有完整工具链），其他走流式
     if(!useTools){
       try{
-        var ssr=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
+        var ssr=await tFetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
         if(ssr.ok){
           var d=document.getElementById('messages');var msgDiv=document.createElement('div');msgDiv.className='msg bot'
           var lb=document.createElement('div');lb.className='msg-label';lb.textContent='AUTO-EVO-AI'
