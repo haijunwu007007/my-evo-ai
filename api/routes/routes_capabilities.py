@@ -1,8 +1,24 @@
 # -*- coding: utf-8 -*-
-"""8大能力真实路由（含SQLite持久化+LLM接入+权限拦截）"""
+"""8大能力真实路由（含SQLite持久化+LLM缓存+权限拦截）"""
 from fastapi import APIRouter, Request
 import importlib, os, json, time, sqlite3, hashlib
 from typing import Optional
+
+# ── 全局LLM缓存层（防智谱API抖动） ──
+_CACHE: dict = {}
+_CACHE_TTL = 300
+
+def cached_call_llm(messages, key="", timeout=None):
+    ck = hashlib.md5((str(messages[-2:]) + key).encode()).hexdigest()[:16]
+    if ck in _CACHE:
+        v, t = _CACHE[ck]
+        if time.time() - t < _CACHE_TTL:
+            return v
+    from api.agent_llm import call_llm
+    r = call_llm(messages, None, key, timeout)
+    if r and r[0]:
+        _CACHE[ck] = (r[0], time.time())
+    return r
 
 router = APIRouter(prefix="/api/v1", tags=["capabilities"])
 
