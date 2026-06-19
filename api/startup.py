@@ -105,6 +105,7 @@ def _mount_vue_frontend():
             "deploy": "deploy.html",
             "canvas": "canvas.html",
             "workflow": "workflow.html",
+            "deploy": "deploy.html",
             "automations": "automations.html",
             "hub": "hub.html",
             "video": "video.html",

@@ -3,272 +3,186 @@
 <title>🚀 一键部署 — AUTO-EVO-AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
-/* header */
+body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}
 .hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}
-.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gs 4s ease infinite}
-@keyframes gs{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none;transition:all .2s}
+.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .n{display:flex;gap:2px;flex-wrap:wrap}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}
 .hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
-.c{max-width:960px;margin:0 auto;padding:20px 16px}
+.c{max-width:900px;margin:0 auto;padding:20px}
 h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-
-/* deploy input */
-.inp{display:flex;gap:8px;margin-bottom:16px}
-.inp input{flex:1;padding:12px 16px;border-radius:10px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
-.inp input:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.3)}
-.inp button{padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:14px;cursor:pointer;font-weight:700;transition:transform .2s,box-shadow .2s}
-.inp button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(67,97,238,.3)}
-.inp button:disabled{opacity:.4;transform:none;cursor:not-allowed;box-shadow:none}
-
-/* pipeline */
-.pipeline{display:flex;gap:6px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
-.p-step{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:80px;padding:10px 12px;border-radius:10px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);transition:all .3s}
-.p-step .icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;background:rgba(45,53,97,.3);transition:all .3s}
-.p-step.done .icon{background:#10b981;box-shadow:0 0 12px rgba(16,185,129,.4)}
-.p-step.cur .icon{background:#4361ee;box-shadow:0 0 12px rgba(67,97,238,.4);animation:pulse 1.5s infinite}
-.p-step.err .icon{background:#ef4444;box-shadow:0 0 12px rgba(239,68,68,.4)}
-.p-step .lb{font-size:10px;color:#8892b0;white-space:nowrap}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.arrow{display:flex;align-items:center;color:#2d3561;font-size:18px}
-
-/* cards row */
-.row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.card{flex:1;min-width:160px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;transition:all .3s}
-.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2);border-color:rgba(67,97,238,.5)}
-.card .num{font-size:28px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card .lb{font-size:11px;color:#636e70;margin-top:2px}
-.card .sub{font-size:11px;color:#10b981;margin-top:4px}
-
-/* log console */
-.console{background:rgba(10,10,20,.8);border:1px solid rgba(45,53,97,.4);border-radius:12px;overflow:hidden;margin-bottom:14px;display:none}
-.console .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(20,20,35,.6);border-bottom:1px solid rgba(45,53,97,.2)}
-.console .bar .t{font-size:12px;font-weight:600;color:#8892b0}
-.console .bar .c{font-size:10px;color:#636e70}
-.console .lg{padding:14px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#a0a8b8;line-height:1.7;max-height:280px;overflow-y:auto;white-space:pre-wrap}
-.console .lg .ok{color:#10b981}
-.console .lg .er{color:#ef4444}
-.console .lg .wa{color:#f59e0b}
-
-/* topology */
-.topo{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.topo-node{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 18px;border-radius:10px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);min-width:100px;transition:all .2s}
-.topo-node:hover{border-color:rgba(67,97,238,.5);transform:translateY(-2px)}
-.topo-node .ico{font-size:22px}
-.topo-node .nm{font-size:11px;font-weight:600;color:#e8e8ef}
-.topo-node .st{font-size:9px;padding:1px 6px;border-radius:4px}
-.topo-node .st.up{background:rgba(16,185,129,.15);color:#10b981}
-.topo-node .st.down{background:rgba(239,68,68,.15);color:#ef4444}
-.topo-line{display:flex;align-items:center;color:#2d3561;font-size:14px}
-
-/* table */
-.tb{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;overflow:hidden;margin-bottom:14px}
-.tb table{width:100%;border-collapse:collapse;font-size:12px}
-.tb th{padding:8px 12px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5);text-transform:uppercase;letter-spacing:.5px}
-.tb td{padding:8px 12px;color:#a0a8b8;border-bottom:1px solid rgba(45,53,97,.1)}
-.tb tr:hover td{background:rgba(67,97,238,.05)}
-.tb .ok{color:#10b981}.tb .er{color:#ef4444}
-.tb button{padding:2px 10px;border:none;border-radius:6px;cursor:pointer;font-size:10px;transition:all .2s}
-.tb .stop{background:rgba(239,68,68,.15);color:#ef4444}.tb .stop:hover{background:#ef4444;color:#fff}
-.tb .logs{background:rgba(67,97,238,.15);color:#4361ee}.tb .logs:hover{background:#4361ee;color:#fff}
-
-/* history chart */
-.chart{display:flex;gap:4px;align-items:flex-end;height:50px;margin:8px 0}
-.chart-bar{width:12px;border-radius:4px 4px 0 0;transition:height .5s;min-height:4px}
-.chart-bar.ok{background:linear-gradient(to top,#10b981,#34d399)}
-.chart-bar.er{background:linear-gradient(to top,#ef4444,#f87171)}
-
-@media(max-width:600px){.p-step{min-width:50px;padding:6px 8px}.p-step .icon{width:24px;height:24px;font-size:11px}.row{flex-direction:column}.card{min-width:auto}}
-.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+.inp{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.inp input{flex:1;min-width:200px;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none}
+.inp input:focus{border-color:#4361ee}
+.inp input.s{width:100px;flex:none}
+.inp button{padding:10px 24px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.inp button:hover{transform:translateY(-1px)}
+.inp button:disabled{opacity:.5;cursor:not-allowed}
+.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:12px;transition:all .2s}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:12px 0}
+.g-item{background:rgba(22,33,62,.4);border-radius:8px;padding:12px;text-align:center}
+.g-item .v{font-size:18px;font-weight:700;color:#fff}
+.g-item .l{font-size:11px;color:#636e70;margin-top:2px}
+.progress{height:6px;background:rgba(45,53,97,.3);border-radius:3px;overflow:hidden;margin:8px 0}
+.progress .bar{height:100%;background:linear-gradient(90deg,#4361ee,#a855f7);border-radius:3px;transition:width .5s}
+.log{font-family:monospace;font-size:11px;color:#8892b0;background:rgba(0,0,0,.3);padding:10px;border-radius:8px;max-height:150px;overflow:auto;white-space:pre-wrap;margin-top:8px}
+.topo{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:16px 0}
+.topo .node{background:rgba(22,33,62,.6);border:1px solid rgba(45,53,97,.3);border-radius:10px;padding:12px 20px;text-align:center;font-size:12px;min-width:80px}
+.topo .node .ico{font-size:20px;margin-bottom:4px}
+.topo .node .nm{color:#e8e8ef;font-weight:500}
+.topo .node .st{font-size:10px;color:#10b981}
+.topo .arrow{color:#4361ee;font-size:20px}
+.deploy-list{display:grid;gap:8px}
+.dl-item{background:rgba(26,26,46,.3);border:1px solid rgba(45,53,97,.2);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.dl-item .nm{color:#e8e8ef;font-weight:500;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dl-item .st{font-size:10px;padding:2px 10px;border-radius:10px;background:rgba(67,97,238,.15);color:#4361ee}
+.dl-item .st.done{background:rgba(16,185,129,.12);color:#10b981}
+.dl-item .st.fail{background:rgba(239,68,68,.12);color:#ef4444}
+@media(max-width:600px){.inp{flex-direction:column}.inp input.s{width:100%}}
 </style></head><body>
-<div class="hdr">
-  <div class="l">AUTO-EVO-AI</div>
-  <div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy" class="a">一键部署</a><a href="/automations">自动化</a><a href="/hub">开源中心</a></div>
-  <div style="flex:1"></div><span id="modelBadge" onclick="checkLLM()" style="font-size:11px;cursor:pointer;color:#636e70;padding:4px 8px;border-radius:6px;background:rgba(45,53,97,.2)">🧠 GLM-4-Flash</span>
-</div>
+<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy" class="a">部署</a><a href="/canvas">编排</a><a href="/video">视频</a></div></div>
 <div class="c">
-  <h2>🚀 可视化部署流水线</h2>
-  <div class="inp">
-    <input id="url" placeholder="输入 GitHub 仓库 URL，如 https://github.com/user/project" onkeydown="if(event.key==='Enter')deploy()">
-    <button id="btn" onclick="deploy()">部署</button>
+  <h2>🚀 一键部署任意开源项目</h2>
+  <div class="card">
+    <p style="font-size:12px;color:#636e70;margin-bottom:12px">输入 GitHub 仓库地址，系统自动克隆、分析、构建并生成可访问的部署</p>
+    <div class="inp">
+      <input id="repoUrl" placeholder="GitHub URL，例如 https://github.com/user/project" value="https://github.com/haijunwu007007/my-evo-ai">
+      <input class="s" id="branch" placeholder="分支" value="">
+      <button id="deployBtn" onclick="startDeploy()">🚀 一键部署</button>
+    </div>
   </div>
 
-  <!-- Pipeline Steps -->
-  <div class="pipeline" id="pipeline">
-    <div class="p-step" id="ps0"><div class="icon">🔍</div><div class="lb">分析</div></div>
-    <div class="arrow">→</div>
-    <div class="p-step" id="ps1"><div class="icon">📦</div><div class="lb">克隆</div></div>
-    <div class="arrow">→</div>
-    <div class="p-step" id="ps2"><div class="icon">🔨</div><div class="lb">构建</div></div>
-    <div class="arrow">→</div>
-    <div class="p-step" id="ps3"><div class="icon">🚢</div><div class="lb">打包</div></div>
-    <div class="arrow">→</div>
-    <div class="p-step" id="ps4"><div class="icon">🚀</div><div class="lb">部署</div></div>
-    <div class="arrow">→</div>
-    <div class="p-step" id="ps5"><div class="icon">✅</div><div class="lb">健康检查</div></div>
+  <!-- Active build -->
+  <div id="activeBuild" style="display:none">
+    <h2>⏳ 部署进度</h2>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span id="deployUrl" style="font-size:12px;color:#8892b0"></span>
+        <span id="deployStatus" style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(67,97,238,.15);color:#4361ee">构建中</span>
+      </div>
+      <div class="progress"><div class="bar" id="progressBar" style="width:10%"></div></div>
+      <div id="deployProgress" style="font-size:11px;color:#8892b0;margin-bottom:8px"></div>
+      <div class="log" id="deployLog"></div>
+    </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="row">
-    <div class="card"><div class="num" id="totalDeploys">0</div><div class="lb">总部署</div><div class="sub">↑ 累计成功</div></div>
-    <div class="card"><div class="num" style="color:#10b981;-webkit-text-fill-color:#10b981" id="successRate">0%</div><div class="lb">成功率</div><div class="sub" id="rateSub">等待数据</div></div>
-    <div class="card"><div class="num" id="activeContainers">0</div><div class="lb">运行中</div><div class="sub" id="containerSub">等待检测</div></div>
-    <div class="card"><div class="num" id="lastDeploy">-</div><div class="lb">最近部署</div><div class="sub">时间戳</div></div>
+  <!-- Topology -->
+  <h2>🌐 部署拓扑</h2>
+  <div class="card">
+    <div class="topo" id="topology">
+      <div class="node"><div class="ico">🌍</div><div class="nm">GitHub</div><div class="st">源</div></div>
+      <div class="arrow">→</div>
+      <div class="node" id="typeNode"><div class="ico">📦</div><div class="nm">分析中</div><div class="st">等待</div></div>
+      <div class="arrow">→</div>
+      <div class="node" id="buildNode"><div class="ico">🔨</div><div class="nm">构建</div><div class="st">等待</div></div>
+      <div class="arrow">→</div>
+      <div class="node" id="runNode"><div class="ico">🚀</div><div class="nm">运行</div><div class="st">等待</div></div>
+      <div class="arrow">→</div>
+      <div class="node" id="accessNode"><div class="ico">🔗</div><div class="nm">访问</div><div class="st">等待</div></div>
+    </div>
   </div>
 
-  <!-- Console Log -->
-  <div class="console" id="console"><div class="bar"><span class="t" id="logTitle">日志输出</span><span class="c" id="logTime">等待...</span></div><div class="lg" id="logContent"></div></div>
+  <!-- Info -->
+  <div id="deployInfo" style="display:none">
+    <h2>📋 项目信息</h2>
+    <div class="card">
+      <div class="g" id="infoGrid"></div>
+      <div style="margin-top:8px">
+        <h3 style="font-size:12px;color:#8892b0;margin-bottom:6px">📄 生成的 Dockerfile</h3>
+        <div class="log" id="dfPreview"></div>
+      </div>
+    </div>
+  </div>
 
-  <!-- History Chart -->
-  <h2 style="margin-top:20px">📊 部署历史</h2>
-  <div class="chart" id="historyChart"><div style="width:100%;text-align:center;color:#636e70;font-size:12px;padding:12px">暂无部署记录</div></div>
-
-  <!-- Deployed Topology -->
-  <h2 style="margin-top:20px">🗺️ 服务拓扑</h2>
-  <div class="topo" id="topoList"><div style="width:100%;text-align:center;color:#636e70;font-size:12px;padding:12px">暂无运行中的容器</div></div>
-
-  <!-- Deployed List -->
-  <h2 style="margin-top:20px">📋 部署列表</h2>
-  <div class="tb"><table><thead><tr><th>名称</th><th>端口</th><th>状态</th><th>操作</th></tr></thead><tbody id="list"><tr><td colspan="4" style="text-align:center;padding:20px;color:#636e70">暂无部署项目</td></tr></tbody></table></div>
+  <!-- History -->
+  <h2>📜 部署历史</h2>
+  <div class="card">
+    <div class="deploy-list" id="deployList"><p style="color:#636e70;text-align:center;padding:8px">暂无部署记录</p></div>
+  </div>
 </div>
-<div class="ft">AUTO-EVO-AI V0.1 · 万能部署引擎 · 可视化流水线</div>
 <script>
-var _LOG=[] // deployment history
+var _currentDeploy = null
 
-function setStep(i,cls){
-  var el=document.getElementById('ps'+i)
-  if(!el)return
-  el.className='p-step'+' '+cls
-}
-function resetSteps(){
-  for(var i=0;i<6;i++)setStep(i,'')
-}
-function addLog(msg,cls){
-  var el=document.getElementById('logContent')
-  el.innerHTML+='<span class="'+(cls||'')+'">'+msg.replace(/</g,'&lt;')+'</span>\n'
-  el.scrollTop=el.scrollHeight
-}
+async function startDeploy(){
+  var url=document.getElementById('repoUrl').value.trim()
+  var branch=document.getElementById('branch').value.trim()
+  if(!url){alert('请输入GitHub URL');return}
+  document.getElementById('deployBtn').disabled=true;document.getElementById('deployBtn').textContent='部署中...'
+  document.getElementById('activeBuild').style.display='block'
+  document.getElementById('deployUrl').textContent=url
 
-async function deploy(){
-  var url=document.getElementById('url').value.trim()
-  if(!url){alert('请输入 GitHub 仓库 URL');return}
-  var btn=document.getElementById('btn')
-  btn.disabled=true;btn.textContent='⏳ 部署中'
-  document.getElementById('console').style.display='block'
-  document.getElementById('logContent').innerHTML=''
-  document.getElementById('logTime').textContent=new Date().toLocaleTimeString()
-  resetSteps()
-  setStep(0,'cur')
-  addLog('🔍 开始分析项目: '+url,'wa')
-  // Simulated pipeline steps (actual API returns real results)
-  setStep(0,'done');setStep(1,'cur')
-  addLog('📦 正在克隆仓库...')
   try{
-    var r=await fetch('/api/v1/deploy/universal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})})
+    var r=await fetch('/api/v1/deploy/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url,branch:branch})})
     var d=await r.json()
-    setStep(1,'done');setStep(2,'done');setStep(3,'done')
-    if(d.success){
-      setStep(4,'done');setStep(5,'done')
-      addLog('✅ 部署成功!','ok')
-      addLog(JSON.stringify(d.data||d).slice(0,300),'')
-      document.getElementById('logTitle').textContent='✅ 部署成功: '+url.split('/').pop()
-    }else{
-      setStep(4,'err')
-      addLog('❌ 部署失败: '+(d.error||'未知错误'),'er')
-      document.getElementById('logTitle').textContent='❌ 部署失败'
-    }
-  }catch(e){
-    setStep(1,'err')
-    addLog('❌ 错误: '+e.message,'er')
-  }
-  btn.disabled=false;btn.textContent='部署'
-  document.getElementById('logTime').textContent=new Date().toLocaleTimeString()
-  loadAll()
+    if(!d.success){alert(d.error);return}
+    _currentDeploy=d.id
+    pollDeploy(d.id)
+  }catch(e){alert('启动失败: '+e.message)}
 }
 
-async function loadAll(){
-  try{
-    var r=await fetch('/api/v1/deploy/status');var d=await r.json()
-    var containers=d.containers||[], history=d.history||[]
-    // cards
-    var ok=d.ok||0, fail=d.fail||0, total=ok+fail
-    document.getElementById('totalDeploys').textContent=total||containers.length
-    document.getElementById('successRate').textContent=total>0?Math.round(ok/total*100)+'%':'0%'
-    document.getElementById('rateSub').textContent=total>0?ok+'成功 / '+fail+'失败':'暂无记录'
-    // active containers
-    var running=containers.filter(function(c){return c.status==='running'}).length
-    document.getElementById('activeContainers').textContent=running
-    document.getElementById('lastDeploy').textContent=total>0?'#'+total:'-'
+async function pollDeploy(id){
+  var intv=setInterval(async function(){
+    try{
+      var r=await fetch('/api/v1/deploy/status/'+id);var d=await r.json()
+      if(!d.success){clearInterval(intv);return}
+      var p=d.progress||'',s=d.status||'building'
+      document.getElementById('deployProgress').textContent=p
+      document.getElementById('deployUrl').textContent=d.url||''
 
-    // history chart
-    genChart(history)
-    // topology
-    genTopo(containers)
-    // table
+      // Update topology
+      if(d.type){
+        document.getElementById('typeNode').querySelector('.nm').textContent=d.type.toUpperCase()
+        document.getElementById('typeNode').querySelector('.st').textContent='✅ 已识别'
+      }
+      if(s==='ready'){
+        document.getElementById('buildNode').querySelector('.st').textContent='✅ 完成'
+        document.getElementById('runNode').querySelector('.st').textContent='✅ 就绪'
+        document.getElementById('accessNode').querySelector('.st').textContent='🔗 可访问'
+        document.getElementById('deployStatus').textContent='✅ 部署完成'
+        document.getElementById('deployStatus').style.background='rgba(16,185,129,.12)'
+        document.getElementById('deployStatus').style.color='#10b981'
+        document.getElementById('progressBar').style.width='100%'
+        document.getElementById('deployBtn').disabled=false;document.getElementById('deployBtn').textContent='🚀 一键部署'
+        clearInterval(intv)
+        // Show info
+        if(d.info){showInfo(d.info)}
+        if(d.dockerfile){document.getElementById('dfPreview').textContent=d.dockerfile}
+        document.getElementById('deployInfo').style.display='block'
+      }else if(s==='failed'){
+        document.getElementById('deployStatus').textContent='❌ 部署失败'
+        document.getElementById('deployStatus').style.background='rgba(239,68,68,.12)'
+        document.getElementById('deployStatus').style.color='#ef4444'
+        document.getElementById('progressBar').style.width='100%'
+        document.getElementById('progressBar').style.background='#ef4444'
+        document.getElementById('deployBtn').disabled=false;document.getElementById('deployBtn').textContent='🚀 一键部署'
+        clearInterval(intv)
+      }
+      // Progress bar simulation
+      var pw={'排队中':10,'克隆':30,'分析':50,'构建':70,'完成':100,'失败':100}
+      for(var k in pw){if(p.includes(k)){document.getElementById('progressBar').style.width=pw[k]+'%';break}}
+      if(d.logs){document.getElementById('deployLog').textContent=d.logs.slice(0,2000)}
+    }catch(e){}
+  },1500)
+}
+
+function showInfo(info){
+  var rows=[['📛 项目名',info.name||'-'],['📦 类型',info.type||'-'],['🔌 端口',(info.ports||[]).join(',')||'-'],['⚡ 运行',info.run_cmd||'-']]
+  var h=''
+  for(var r of rows){h+='<div class="g-item"><div class="v">'+r[1]+'</div><div class="l">'+r[0]+'</div></div>'}
+  document.getElementById('infoGrid').innerHTML=h
+  document.getElementById('deployInfo').style.display='block'
+}
+
+async function loadHistory(){
+  try{
+    var r=await fetch('/api/v1/deploy/list');var d=await r.json()
+    if(!d.deploys||d.deploys.length===0)return
     var h=''
-    for(var c of containers){
-      var st=c.status==='running'?'<span class="ok">● 运行中</span>':'<span class="er">● 已停止</span>'
-      h+='<tr><td style="font-weight:500">'+(c.name||'unknown')+'</td><td>'+(c.ports||'-')+'</td><td>'+st+'</td>'
-      h+='<td><button class="logs" onclick="showLog(\''+(c.name||'')+'\')">日志</button> '
-      h+='<button class="stop" onclick="stop(\''+(c.name||'')+'\')">停止</button></td></tr>'
+    for(var dep of d.deploys.slice(0,10)){
+      var st=dep.status==='ready'?'done':dep.status==='failed'?'fail':''
+      h+='<div class="dl-item"><span class="nm">'+(dep.url||'').slice(0,40)+'</span><span class="st '+st+'">'+(dep.status||'')+'</span></div>'
     }
-    if(!h)h='<tr><td colspan="4" style="text-align:center;padding:20px;color:#636e70">暂无部署项目</td></tr>'
-    document.getElementById('list').innerHTML=h
+    document.getElementById('deployList').innerHTML=h
   }catch(e){}
 }
-
-function genChart(h){
-  var el=document.getElementById('historyChart')
-  if(!h||h.length===0){el.innerHTML='<div style="width:100%;text-align:center;color:#636e70;font-size:12px;padding:12px">暂无部署记录</div>';return}
-  var bars='', max=Math.max.apply(null,h.map(function(x){return x.count||1}))
-  for(var i=Math.max(0,h.length-20);i<h.length;i++){
-    var p=h[i], ht=Math.max(4,(p.count||1)/max*40)
-    bars+='<div class="chart-bar '+(p.success?'ok':'er')+'" style="height:'+ht+'px" title="'+p.date+': '+p.count+'次"></div>'
-  }
-  el.innerHTML=bars
-}
-
-function genTopo(containers){
-  var el=document.getElementById('topoList')
-  if(!containers||containers.length===0){el.innerHTML='<div style="width:100%;text-align:center;color:#636e70;font-size:12px;padding:12px">暂无运行中的容器</div>';return}
-  var h=''
-  for(var c of containers.slice(0,12)){
-    var up=c.status==='running'
-    h+='<div class="topo-node"><div class="ico">'+(up?'🟢':'🔴')+'</div>'
-    h+='<div class="nm">'+(c.name||'?')+'</div>'
-    h+='<div class="st '+(up?'up':'down')+'">'+(up?'运行中':'已停止')+'</div></div>'
-    h+='<div class="topo-line">→</div>'
-  }
-  if(h)h=h.slice(0,-('<div class="topo-line">→</div>'.length))
-  el.innerHTML=h
-}
-
-async function stop(name){
-  if(!confirm('确定停止 '+name+'?'))return
-  await fetch('/api/v1/deploy/stop/'+name,{method:'POST'})
-  loadAll()
-}
-async function showLog(name){
-  try{
-    var r=await fetch('/api/v1/deploy/logs/'+name)
-    var d=await r.json()
-    document.getElementById('console').style.display='block'
-    document.getElementById('logTitle').textContent='📋 '+name+' 日志'
-    document.getElementById('logContent').innerHTML=((d.logs||d.data||'无日志').replace(/</g,'&lt;').replace(/\n/g,'<br>'))
-  }catch(e){alert('获取日志失败')}
-}
-
-async function checkLLM(){
-  var badge=document.getElementById('modelBadge')
-  badge.textContent='⏳'
-  try{
-    var r=await fetch('/api/v1/llm/status',{signal:AbortSignal.timeout(5000)})
-    var d=await r.json()
-    if(d&&d.active&&d.active.length>0){badge.textContent='🧠 '+d.active[0].name}
-    else if(d&&d.providers){var a=d.providers.filter(function(p){return p.available});badge.textContent='🧠 '+(a[0]?.name||'无模型')}
-    else badge.textContent='❌ 无模型'
-  }catch(e){badge.textContent='❌ 检测失败'}
-}
-
-loadAll()
+loadHistory()
 </script></body></html>

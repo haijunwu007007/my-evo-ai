@@ -33,8 +33,8 @@ body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d
 .auth-card .btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:14px;cursor:pointer;font-weight:700;transition:transform .2s,box-shadow .2s}
 .auth-card .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--glow)}
 .auth-card .btn:active{transform:scale(.98)}
-.nav-tabs{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;flex-shrink:0;padding:4px;background:var(--glass);border-radius:12px;border:1px solid var(--border);margin:4px 0}
-.nav-tabs .tab{padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text2);text-decoration:none;background:transparent;border:none;cursor:pointer;transition:all .2s}
+.nav-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;flex-shrink:0;padding:6px 4px;background:var(--glass);border-radius:12px;border:1px solid var(--border);margin:4px auto;max-width:550px}
+.nav-tabs .tab{padding:5px 10px;border-radius:6px;font-size:11px;color:var(--text2);text-decoration:none;background:transparent;border:none;cursor:pointer;transition:all .2s}
 .nav-tabs .tab:hover{color:var(--accent);background:var(--glass)}
 .nav-tabs .tab.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 2px 8px var(--glow)}
 .main-content{display:none;flex-direction:column;flex:1;animation:contentIn .4s ease-out}
@@ -441,15 +441,22 @@ function quickTool(name){
   fetch('/api/v1/tool/execute/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
     .then(function(r){return r.json()})
     .then(function(d){
-      if(d.success){
-        document.getElementById('input').value = '✅ ['+name+'] 执行结果: '+JSON.stringify(d.result||d.note||'ok')
+      if(d.success && (d.result || d.doc)){
+        var msg = '✅ **' + (d.module||name) + '** 执行成功\n\n' + (d.doc||JSON.stringify(d.result||'ok')).slice(0,500)
+        addMsg(msg, 'bot')
+        document.getElementById('input').value = ''
       }else{
-        // fallback: LLM提示模式
         var hint = _TOOL_HINTS[name] || ""
         document.getElementById('input').value = hint
         document.getElementById('input').focus()
         setTimeout(function(){ send() }, 2)
       }
+    })
+    .catch(function(){
+      var hint = _TOOL_HINTS[name] || ""
+      document.getElementById('input').value = hint
+      document.getElementById('input').focus()
+      setTimeout(function(){ send() }, 2)
     })
     .catch(function(){
       var hint = _TOOL_HINTS[name] || ""
