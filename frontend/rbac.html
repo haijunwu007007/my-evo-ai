@@ -1,21 +1,10 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🛡️ 角色权限 — AUTO-EVO-AI</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
-.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}
-.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none;transition:all .2s}
-.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
-.c{max-width:960px;margin:0 auto;padding:20px 16px}
-h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>🛡️ 角色权限 — AUTO-EVO-AI</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:720px;margin:0 auto;padding:20px 16px}h2{font-size:18px;margin-bottom:12px}.tb{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;overflow:hidden}.tb table{width:100%;border-collapse:collapse;font-size:12px}.tb th{padding:8px 12px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5)}.tb td{padding:8px 12px;color:#a0a8b8;border-bottom:1px solid rgba(45,53,97,.1)}.role-admin{color:#4361ee;font-weight:600}.role-dev{color:#10b981}.role-view{color:#8892b0}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
 </style></head><body>
-<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/rbac" class="a">🛡️ RBAC</a></div></div>
-<div class="c">
-<h2>🛡️ 角色权限管理</h2>
-<p style="color:#636e70;font-size:13px">admin / dev / viewer 三级角色，支持细粒度权限控制。</p>
-</div>
-<div class="ft">AUTO-EVO-AI V0.1 · RBAC引擎</div>
-</body></html>
+<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/capabilities">能力中心</a></div></div><div class="c">
+<h2>🛡️ 角色权限管理 — Mercury RBAC 风格</h2>
+<div class="tb"><table><thead><tr><th>角色</th><th>权限</th><th>可操作范围</th></tr></thead><tbody>
+<tr><td class="role-admin">🔑 管理员</td><td>全部</td><td>系统配置·用户管理·模块管理·审计</td></tr>
+<tr><td class="role-dev">💻 开发者</td><td>读写</td><td>模块使用·API调用·文件操作</td></tr>
+<tr><td class="role-view">👀 观察者</td><td>只读</td><td>查看仪表盘·查看日志·查看模块</td></tr>
+</tbody></table></div>
+</div><div class="ft">AUTO-EVO-AI · 角色权限 (参考 Mercury Agent)</div></body></html>
