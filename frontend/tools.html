@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🛠️ 工具 — AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0b0b16;color:#e8e8ef;min-height:100vh}
+.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}
+.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .n{display:flex;gap:2px;flex-wrap:wrap}
+.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}
+.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+.c{max-width:900px;margin:0 auto;padding:16px}
+h2{font-size:18px;margin-bottom:12px}
+.search{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none;margin-bottom:12px}
+.search:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.3)}
+.cat-title{font-size:13px;font-weight:700;color:#8892b0;padding:10px 0 6px;border-top:1px solid rgba(45,53,97,.15);margin-top:8px}
+.qa{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;background:rgba(255,255,255,.03);border:1px solid rgba(45,53,97,.3);color:#8892b0;cursor:pointer;transition:all .2s;margin:3px}
+.qa:hover{border-color:#4361ee;color:#4361ee;transform:translateY(-1px)}
+.qa:active{transform:scale(.95)}
+.tool-cnt{font-size:11px;color:#636e70;float:right}
+</style></head><body>
+<div class="hdr">
+  <div class="l">AUTO-EVO-AI</div>
+  <div class="n"><a href="/">对话</a><a href="/tools" class="a">工具</a><a href="/dashboard">仪表盘</a><a href="/canvas">编排</a><a href="/enterprise">企业</a><a href="/hub">开源</a><a href="/automations">自动化</a><a href="/deploy">部署</a></div>
+</div>
+<div class="c">
+  <h2>🛠️ 全部工具 <span id="totalCnt" style="font-size:12px;color:#636e70;font-weight:400"></span></h2>
+  <input class="search" id="toolSearch" oninput="filterTools(this.value)" placeholder="🔍 搜索工具...">
+  <div id="toolList"></div>
+</div>
+<script src="/js/tools_data.js"></script>
+<script>
+var cats=[],tools=[];
+// Build tool list from TOOL_HINTS, TOOL_KEYWORDS, TOOL_CATS
+(function(){
+  for(var name in _TOOL_HINTS){
+    var kw=_TOOL_KEYWORDS[name]||'', cat='other'
+    for(var c in _TOOL_CATS){if(_TOOL_CATS[c].indexOf(name)>=0){cat=c;break}}
+    tools.push({name:name,cat:cat,hint:_TOOL_HINTS[name],kw:kw})
+  }
+  // Group by category
+  var catOrder=['doc','data','comm','enterprise','devops','monitor','smart','search','other']
+  var catNames={'doc':'📋 文档/办公','data':'📊 数据/分析','comm':'📱 通信/协作','enterprise':'🏢 企业/管理','devops':'🚀 部署/运维','monitor':'🔧 监控/工具','smart':'🏠 智能/生活','search':'🌐 搜索/集成','other':'📦 其他'}
+  var groups={}
+  for(var t of tools){if(!groups[t.cat])groups[t.cat]=[];groups[t.cat].push(t)}
+  var html='',total=0
+  for(var k of catOrder){
+    if(!groups[k])continue
+    html+='<div class="cat-title">'+ (catNames[k]||k) +' ('+groups[k].length+')</div>'
+    for(var t of groups[k]){
+      html+='<span class="qa" onclick="selectTool(\''+t.name+'\')" title="'+t.hint+'">'+t.name+'</span>'
+      total++
+    }
+  }
+  document.getElementById('toolList').innerHTML=html
+  document.getElementById('totalCnt').textContent='('+total+' 个)'
+})()
+function filterTools(q){
+  q=q.toLowerCase().trim()
+  var btns=document.querySelectorAll('.qa'),cnt=0
+  for(var b of btns){
+    if(!q||b.textContent.toLowerCase().indexOf(q)>=0){b.style.display='inline-flex';cnt++}
+    else b.style.display='none'
+  }
+  document.getElementById('totalCnt').textContent='('+cnt+'/'+tools.length+')'
+}
+function selectTool(name){
+  window.location.href='/?tool='+name
+}
+</script></body></html>

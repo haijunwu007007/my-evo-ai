@@ -142,8 +142,9 @@ def _try_provider(p, messages, tools, timeout, key=""):
                 r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=t)
                 if r.status_code == 200:
                     text = r.json().get("choices",[{}])[0].get("message",{}).get("content","")
-                    if text: _LLM_CACHE[_cache_key(messages, key)] = (text, time.time())
-        return text, None
+                    if text:
+                        _LLM_CACHE[_cache_key(messages, key)] = (text, time.time())
+                        return text, None
             elif ptype == "ollama":
                 r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False}, timeout=t)
                 if r.status_code == 200:

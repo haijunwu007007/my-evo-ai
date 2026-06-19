@@ -17,7 +17,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0f0f23;--bg2:#151530;--card:#1a1a3e;--text:#e0e6f0;--text2:#8892b0;--input-bg:#12122a;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#1a1a3e;--border:#2a2a5a;--glass:rgba(255,255,255,.04);--glow:rgba(67,97,238,.3)}
 @media(prefers-color-scheme:light){:root{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--input-bg:#fff;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#f0f2f8;--border:#d0d5e0;--glass:rgba(0,0,0,.02);--glow:rgba(67,97,238,.15)}}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
+body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--input-bg:#fff;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#f0f2f8;--border:#d0d5e0;--glass:rgba(0,0,0,.02);--glow:rgba(67,97,238,.15)}html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
 .container{max-width:740px;margin:0 auto;padding:20px 16px;min-height:100vh;display:flex;flex-direction:column}
 .header{text-align:center;padding:16px 0 8px;flex-shrink:0}
 .header h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,#4361ee,#7209b7,#e94560);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s ease infinite}
@@ -103,7 +103,10 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
   <div class="main-content" id="mainContent">
     <div class="header">
       <div class="header-actions">
-        <h1 id="mainTitle">🤖 AUTO-EVO-AI</h1>
+        <div style="display:flex;align-items:center;gap:8px">
+          <h1 id="mainTitle" style="font-size:16px;margin:0">🤖 AUTO-EVO-AI</h1>
+          <span onclick="toggleTheme()" style="font-size:14px;cursor:pointer;padding:2px 6px;border-radius:6px;background:var(--glass);border:1px solid var(--border)" id="themeBtn" title="切换亮暗主题"></span>
+        </div>
         <div style="display:flex;align-items:center;gap:6px">
           <span id="modelBadge" style="font-size:10px;background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;cursor:pointer" onclick="checkLLM()" title="点击检查LLM状态">🧠 检测中</span>
           <span id="newChatBtn" onclick="clearHistory()" style="margin-right:4px">🔄 新对话</span>
@@ -123,6 +126,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
         <span id="tabWF" class="tab" onclick="window.location.href='/workflow'">📝 工作流</span>
         <span id="tabCaps" class="tab" onclick="window.location.href='/capabilities'">🧠 能力中心</span>
         <span id="tabDeploy" class="tab" onclick="window.location.href='/deploy'">🚀 一键部署</span>
+        <span id="tabVideo" class="tab" onclick="window.location.href='/video'">🎬 视频生成</span>
+        <span id="tabMonitor" class="tab" onclick="window.location.href='/monitor'">📈 监控</span>
       </div>
       <div class="lang-bar" id="langBarTop">
 <select onchange="setLocale(this.value)" style="padding:4px 8px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer">
@@ -713,6 +718,9 @@ function filterTools(q){
   document.getElementById('toolCount').textContent=cnt+'/'+btns.length
 }
 
+// ===== 全局主题切换 =====
+(function(){var t=localStorage.getItem('evo_theme');if(t==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='🌙'}else{document.getElementById('themeBtn').textContent='🌓'}})()
+function toggleTheme(){var b=document.body;b.classList.toggle('light');var l=b.classList.contains('light');localStorage.setItem('evo_theme',l?'light':'dark');document.getElementById('themeBtn').textContent=l?'🌙':'🌓'}
 // ===== LLM状态检测 =====
 async function checkLLM(){
   var badge=document.getElementById('modelBadge')

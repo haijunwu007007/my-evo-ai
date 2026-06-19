@@ -87,23 +87,14 @@ def _mount_vue_frontend():
         # 非 API/App 路径兜底 + 特定文件覆盖
         _OVERRIDE = {
             "enterprise.html": "enterprise.html",
-            "company.html": "company.html",
-            "deploy.html": "deploy.html",
-            "capabilities": "capabilities.html",
-            "oss-distiller": "oss-distiller.html",
-            "codebase": "codebase.html",
-            "self-evolve": "self_evolve.html",
-            "permission": "permission.html",
-            "memory": "memory.html",
-            "multi-agent": "multi_agent.html",
-            "desktop": "desktop.html",
-            "rbac": "rbac.html",
-            "channel": "channel.html",
+            "tools": "tools.html",
+            "enterprise": "enterprise.html",
             "deploy": "deploy.html",
             "canvas": "canvas.html",
-            "workflow": "workflow.html",
-            "video": "video.html",
             "automations": "automations.html",
+            "hub": "hub.html",
+            "video": "video.html",
+            "monitor": "monitor.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)
