@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>n8n 工作流浏览器 — AUTO-EVO-AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e17;color:#e6edf3;min-height:100vh}
+.header{background:rgba(13,17,23,.8);border-bottom:1px solid rgba(255,255,255,.06);padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:18px;color:#58a6ff}
+.search-bar{display:flex;gap:8px;flex:1;min-width:200px}
+.search-bar input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;color:#e6edf3;font-size:14px;outline:none}
+.search-bar input:focus{border-color:#58a6ff}
+.search-bar button{background:#238636;border:none;border-radius:8px;padding:8px 18px;color:#fff;font-size:14px;cursor:pointer}
+.search-bar button:hover{background:#2ea043}
+.stats{display:flex;gap:12px;padding:12px 24px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 20px;font-size:13px}
+.stat b{font-size:20px;color:#58a6ff;display:block}
+.container{display:flex;gap:16px;padding:0 24px 24px;min-height:60vh}
+.categories{width:200px;flex-shrink:0}
+.categories h3{font-size:13px;color:#8b949e;margin-bottom:8px}
+.cat{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:6px;padding:5px 10px;color:#8b949e;font-size:12px;cursor:pointer;margin-bottom:2px}
+.cat:hover,.cat.active{background:rgba(88,166,255,.1);border-color:rgba(88,166,255,.2);color:#58a6ff}
+.results{flex:1}
+.result-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.result-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.result-item h4{font-size:14px;color:#e6edf3;margin-bottom:4px}
+.result-item .meta{font-size:11px;color:#8b949e;display:flex;gap:12px;flex-wrap:wrap}
+.detail-panel{width:380px;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;overflow-y:auto;max-height:75vh;display:none}
+.detail-panel.open{display:block}
+.detail-panel h3{font-size:15px;color:#58a6ff;margin-bottom:8px}
+.detail-panel .row{font-size:12px;color:#8b949e;margin-bottom:4px}
+.detail-panel .row span{color:#e6edf3}
+.detail-panel pre{background:rgba(0,0,0,.3);border-radius:6px;padding:10px;font-size:10px;overflow:auto;max-height:400px;color:#8b949e;margin-top:8px}
+.pagination{display:flex;gap:6px;justify-content:center;padding:12px 0;flex-wrap:wrap}
+.pagination button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 12px;color:#8b949e;font-size:12px;cursor:pointer}
+.pagination button:hover{background:rgba(88,166,255,.15);color:#58a6ff}
+.pagination button.cur{background:#58a6ff;color:#fff;border-color:#58a6ff}
+.empty{text-align:center;padding:60px 20px;color:#8b949e}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.tag{background:rgba(88,166,255,.1);border-radius:4px;padding:1px 6px;font-size:10px;color:#58a6ff}
+.inactive{opacity:.5}
+@media(max-width:768px){.container{flex-direction:column}.categories{width:100%;display:flex;gap:4px;flex-wrap:wrap}.detail-panel{width:100%}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>n8n 工作流库</h1>
+  <div class="search-bar">
+    <input id="q" placeholder="搜索工作流..." onkeydown="if(event.key==='Enter')search()">
+    <button onclick="search()">搜索</button>
+  </div>
+  <button onclick="showRaw='!'+showRaw;renderRaw()" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;color:#8b949e;font-size:12px;cursor:pointer">🔍 搜索</button>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="container">
+  <div class="categories" id="cats"></div>
+  <div class="results" id="results"></div>
+  <div class="detail-panel" id="detail"></div>
+</div>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+let allData = []
+let currentQuery = ''
+let page = 0
+const PAGE = 25
+let showRaw = ''
+
+async function loadStatus(){
+  try{
+    var r = await fetch('/api/v1/n8n/status')
+    var d = await r.json()
+    document.getElementById('stats').innerHTML = '<div class=stat><b>'+d.total+'</b>工作流总数</div>' +
+      '<div class=stat><b>'+d.total_nodes+'</b>总节点</div>' +
+      '<div class=stat><b>'+(d.unique_integrations||'100+')+'</b>集成数</div>' +
+      '<div class=stat><b>'+(d.complexity.high||0)+'</b>高复杂度</div>' +
+      '<div class=stat><b>'+(d.complexity.medium||0)+'</b>中复杂度</div>'
+  }catch(e){}
+}
+
+async function loadCats(){
+  try{
+    var r = await fetch('/api/v1/n8n/categories')
+    var d = await r.json()
+    var h = '<h3>分类</h3><button class="cat active" onclick="filterCat(\'\')">全部</button>'
+    d.categories.forEach(function(c){
+      h += '<button class="cat" onclick="filterCat(\''+c+'\')">'+c+'</button>'
+    })
+    document.getElementById('cats').innerHTML = h
+  }catch(e){}
+}
+
+async function search(){
+  var q = document.getElementById('q').value.trim()
+  currentQuery = q
+  page = 0
+  await doSearch(q)
+}
+
+async function doSearch(q){
+  try{
+    var url = '/api/v1/n8n/search?q='+encodeURIComponent(q||'')+'&limit=999999'
+    var r = await fetch(url)
+    var d = await r.json()
+    allData = d.results || []
+    renderPage()
+  }catch(e){
+    document.getElementById('results').innerHTML = '<div class=empty>搜索失败</div>'
+  }
+}
+
+function filterCat(catName){
+  document.querySelectorAll('.cat').forEach(function(b){b.className='cat'})
+  event.target.className='cat active'
+  if(catName){
+    doSearch(''); // reset to full
+    setTimeout(function(){
+      allData = allData.filter(function(w){return w.integrations && w.integrations.indexOf(catName)>=0})
+      renderPage()
+    },200)
+  }else{
+    doSearch('')
+  }
+}
+
+function renderPage(){
+  var start = page * PAGE
+  var items = allData.slice(start, start + PAGE)
+  var totalPages = Math.ceil(allData.length / PAGE)
+  var h = items.length ? '' : '<div class=empty>没有找到匹配的工作流</div>'
+  items.forEach(function(w){
+    var name = w.name || w.filename.split('/').pop().replace('.json','')
+    var active = w.active !== false ? '' : ' inactive'
+    var tags = ''
+    if(w.integrations && Array.isArray(w.integrations)){
+      tags = '<div class=tags>' + w.integrations.slice(0,6).map(function(t){return '<span class=tag>'+t+'</span>'}).join('') + '</div>'
+    }
+    h += '<div class="result-item'+active+'" onclick="showDetail('+w.id+')">' +
+      '<h4>' + name.slice(0,80) + '</h4>' +
+      '<div class=meta><span>'+w.trigger+'</span><span>'+w.complexity+'</span><span>'+w.nodes+'节点</span><span>'+w.filename+'</span></div>' +
+      tags + '</div>'
+  })
+  document.getElementById('results').innerHTML = h
+  // pagination
+  var ph = ''
+  if(totalPages > 1){
+    for(var i=0;i<totalPages&&i<20;i++){
+      var c = i===page ? 'cur' : ''
+      ph += '<button class="'+c+'" onclick="goPage('+i+')">'+(i+1)+'</button>'
+    }
+  }
+  document.getElementById('pagination').innerHTML = ph
+}
+
+function goPage(p){page=p;renderPage()}
+
+async function showDetail(id){
+  try{
+    var r = await fetch('/api/v1/n8n/workflow/'+id)
+    var d = await r.json()
+    var p = document.getElementById('detail')
+    if(!d.success){p.innerHTML='<div class=row>未找到</div>';p.className='detail-panel open';return}
+    p.innerHTML = '<h3>'+(d.name||d.filename)+'</h3>' +
+      '<div class=row>📄 文件: <span>'+d.filename+'</span></div>' +
+      '<div class=row>⚡ 触发: <span>'+d.trigger+'</span></div>' +
+      '<div class=row>📊 复杂度: <span>'+d.complexity+'</span></div>' +
+      '<div class=row>🔗 节点: <span>'+d.nodes+'个</span></div>' +
+      '<div class=row>🏷️ 集成: <span>'+(d.integrations||'-')+'</span></div>'
+    if(showRaw.startsWith('!')){
+      p.innerHTML += '<pre>' + JSON.stringify(d.raw||{},null,2).slice(0,3000) + '</pre>'
+    }
+    p.className = 'detail-panel open'
+  }catch(e){}
+}
+
+function renderRaw(){}
+
+loadStatus()
+loadCats()
+doSearch('')
+</script>
+</body>
+</html>

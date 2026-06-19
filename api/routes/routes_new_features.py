@@ -578,6 +578,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e
   <button class="btn-danger" onclick="clearWF()">🗑 清空</button>
   <button class="btn-secondary" onclick="document.getElementById('modalRerank').classList.add('active')">🔍 Rerank</button>
   <button class="btn-secondary" onclick="document.getElementById('modalSelfHeal').classList.add('active')">🧬 自进化</button>
+  <button class="btn-secondary" onclick="window.open('/n8n','_blank')">🔄 n8n工作流</button>
   <button class="btn-secondary" onclick="document.getElementById('modalConnectors').classList.add('active')">🔌 连接器</button>
   <button class="btn-secondary" onclick="document.getElementById('modalMCP').classList.add('active')">🤝 MCP</button>
   <span style="font-size:11px;color:#666;margin-left:auto" id="statusBar">就绪</span>

@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>🤖 智能体团队 — AUTO-EVO-AI</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px;flex-wrap:wrap}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+.c{max-width:960px;margin:0 auto;padding:20px}h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0}
+.inp{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}.inp input{flex:1;min-width:200px;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none}.inp input:focus{border-color:#4361ee}.inp select{padding:10px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none}.inp button{padding:10px 24px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:600}.inp button:disabled{opacity:.5}.btn2{padding:6px 14px;border:none;border-radius:6px;background:rgba(67,97,238,.15);color:#4361ee;font-size:12px;cursor:pointer}.btn2:hover{background:rgba(67,97,238,.25)}
+#resultArea{font-size:13px;line-height:1.6}#taskHistory{max-height:200px;overflow-y:auto}
+@media(max-width:600px){.inp{flex-direction:column}.grid{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy">部署</a><a href="/agents" class="a">智能体</a></div></div>
+<div class="c">
+  <h2>🤖 智能体团队</h2>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:14px;color:#e8e8ef">已注册智能体</span>
+      <button class="btn2" onclick="registerAgent()">➕ 注册</button>
+    </div>
+    <div class="grid" id="agentList"><div style="color:#636e70;text-align:center;padding:8px">加载中...</div></div>
+    <div style="font-size:11px;color:#636e70;margin-top:6px">💡 6个默认Agent: 规划师(GLM-4) 程序员(DeepSeek) 设计师(GLM-4) 审查员(DeepSeek) 分析师(GLM-4) 部署员(DeepSeek)</div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:14px;margin-bottom:8px;color:#e8e8ef">🚀 分配任务</div>
+    <div class="inp">
+      <input id="taskInput" placeholder="输入任务描述，例如：帮我做一个个人博客网站">
+      <select id="agentSelect"><option value="">自动分配</option></select>
+      <select id="modeSelect"><option value="auto">自动</option><option value="parallel">并行</option><option value="serial">串行</option></select>
+      <button id="taskBtn" onclick="dispatchTask()">🚀 开始</button>
+    </div>
+    <div id="taskProgress" style="display:none;height:4px;background:rgba(45,53,97,.3);border-radius:2px;overflow:hidden;margin:8px 0"><div style="height:100%;width:60%;background:linear-gradient(90deg,#4361ee,#a855f7);border-radius:2px;animation:shimmer 1.5s infinite"></div></div>
+    <div id="resultArea"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:14px;margin-bottom:8px;color:#e8e8ef">📜 历史任务</div>
+    <div id="taskHistory"><div style="color:#636e70;text-align:center;padding:8px">暂无任务</div></div>
+  </div>
+</div>
+<style>@keyframes shimmer{0%{width:20%}50%{width:80%}100%{width:20%}}</style>
+<script>
+var AGENTS = {}; var currentTask = null;
+async function loadAgents(){try{var r=await fetch('/api/v1/agents/registry');var d=await r.json();if(!d.success)return;AGENTS=d.agents;renderAgents();renderAgentSelect()}catch(e){}}
+function renderAgents(){var c=document.getElementById('agentList');var h='';for(var k in AGENTS){var a=AGENTS[k];h+='<div style="background:rgba(22,33,62,.5);border:1px solid rgba(67,97,238,.2);border-radius:10px;padding:12px;text-align:center">'
++'<div style="font-size:24px;margin-bottom:4px">'+(a.icon||'🤖')+'</div>'
++'<div style="font-size:12px;font-weight:600;color:#e8e8ef">'+a.name+'</div>'
++'<div style="font-size:10px;color:#636e70;margin:2px 0">'+a.llm+'</div>'
++'<span style="font-size:10px;padding:1px 8px;border-radius:8px;background:'+(a.status==='ready'?'rgba(16,185,129,.15);color:#10b981':'rgba(239,68,68,.15);color:#ef4444')+'">'+a.status+'</span></div>'}c.innerHTML=h}
+function renderAgentSelect(){var s=document.getElementById('agentSelect');s.innerHTML='<option value="">自动分配</option>';for(var k in AGENTS){s.innerHTML+='<option value="'+k+'">'+AGENTS[k].icon+' '+AGENTS[k].name+' ('+AGENTS[k].llm+')</option>'}}
+async function dispatchTask(){var task=document.getElementById('taskInput').value.trim();if(!task){alert('请输入任务');return}
+var mode=document.getElementById('modeSelect').value;var agent=document.getElementById('agentSelect').value
+document.getElementById('taskBtn').disabled=true;document.getElementById('taskBtn').textContent='执行中...'
+document.getElementById('resultArea').innerHTML='<div style="text-align:center;padding:20px;color:#636e70">⏳ 智能体团队正在工作...</div>';document.getElementById('taskProgress').style.display='block'
+try{var r=await fetch('/api/v1/agents/dispatch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:task,agents:agent?[agent]:null,mode:mode})});var d=await r.json()
+var h='';if(d.subtasks&&d.subtasks.length>0){h+='<h3 style="font-size:14px;margin-bottom:10px;color:#e8e8ef">📋 拆解为 '+d.subtasks.length+' 个子任务</h3>';for(var i=0;i<d.subtasks.length;i++){var s=d.subtasks[i];var a=AGENTS[s.agent]||{name:s.agent,icon:'🤖'};h+='<div style="background:rgba(22,33,62,.4);border-left:3px solid #4361ee;padding:10px;margin-bottom:6px;border-radius:0 8px 8px 0"><div style="font-size:12px;font-weight:600;color:#e8e8ef">'+a.icon+' '+a.name+' → '+s.action+'</div><div style="font-size:11px;color:#636e70;margin-top:2px">'+(s.expected||'')+'</div></div>'}}
+if(d.merged){h+='<h3 style="font-size:14px;margin:12px 0 8px;color:#e8e8ef">📄 合并结果</h3><div style="font-size:12px;color:#e8e8ef;background:rgba(0,0,0,.2);padding:12px;border-radius:8px;white-space:pre-wrap;max-height:400px;overflow:auto">'+d.merged+'</div>'}
+document.getElementById('resultArea').innerHTML=h}catch(e){document.getElementById('resultArea').innerHTML='<div style="color:#ef4444">执行失败: '+e.message+'</div>'}
+document.getElementById('taskBtn').disabled=false;document.getElementById('taskBtn').textContent='🚀 开始';document.getElementById('taskProgress').style.display='none'}
+async function registerAgent(){var name=prompt('Agent 名称 (英文)');if(!name)return;var display=prompt('显示名称');var llm=prompt('LLM (GLM-4-Flash/DeepSeek)');var caps=prompt('能力 (逗号分隔)');await fetch('/api/v1/agents/registry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,display_name:display||name,llm:llm||'GLM-4-Flash',capabilities:(caps||'').split(','),icon:'🤖'})});loadAgents()}
+async function loadTasks(){try{var r=await fetch('/api/v1/agents/tasks');var d=await r.json();if(!d.success||!d.tasks)return;var c=document.getElementById('taskHistory');var h='';var n=0;for(var k in d.tasks){if(n++>10)break;var t=d.tasks[k];h+='<div style="font-size:11px;padding:6px 10px;background:rgba(22,33,62,.3);border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between"><span style="color:#e8e8ef;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.task+'</span><span style="color:'+(t.status==='completed'?'#10b981':'#636e70')+'">'+t.progress+'%</span></div>'}c.innerHTML=h||'<div style="color:#636e70;text-align:center;padding:8px">暂无任务</div>'}catch(e){}}
+loadAgents();loadTasks();setInterval(loadTasks,5000);
+</script></body></html>

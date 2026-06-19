@@ -121,6 +121,8 @@ def _mount_vue_frontend():
             "desktop": "desktop.html",
             "rbac": "rbac.html",
             "channel": "channel.html",
+            "n8n": "n8n.html",
+            "agents": "agents.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)
