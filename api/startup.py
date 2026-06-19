@@ -90,6 +90,7 @@ def _mount_vue_frontend():
             "company.html": "company.html",
             "deploy.html": "deploy.html",
             "deploy": "deploy.html",
+            "automations": "automations.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)

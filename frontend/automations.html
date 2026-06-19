@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🤖 自动化中心 - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f23;--bg2:#151530;--card:#1a1a3e;--text:#e0e6f0;--text2:#8892b0;--accent:#4361ee;--accent2:#7209b7;--border:#2a2a5a;--glow:rgba(67,97,238,.3);--green:#2ecc71;--red:#e74c3c;--yellow:#f1c40f}
+@media(prefers-color-scheme:light){:root{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--accent:#4361ee;--accent2:#7209b7;--border:#d0d5e0;--glow:rgba(67,97,238,.15)}}
+body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh;padding:20px}
+.container{max-width:900px;margin:0 auto}
+h1{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.back{display:inline-block;margin-bottom:16px;color:var(--text2);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);transition:all .2s}
+.back:hover{border-color:var(--accent);color:var(--accent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .3s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--glow)}
+.card h2{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card .stat{font-size:28px;font-weight:700;color:var(--accent)}
+.card .label{font-size:12px;color:var(--text2)}
+.card table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.card td, .card th{padding:6px 4px;text-align:left;border-bottom:1px solid var(--border)}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.s-running{background:rgba(46,204,113,.15);color:var(--green)}
+.s-idle{background:rgba(241,196,15,.15);color:var(--yellow)}
+.s-stopped{background:rgba(231,76,60,.15);color:var(--red)}
+.btn{display:inline-block;padding:6px 14px;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--glow)}
+.btn-sm{padding:4px 10px;font-size:11px;background:var(--border);color:var(--text);margin-right:4px}
+.btn-sm:hover{background:var(--accent);color:#fff;transform:none}
+.log-box{background:rgba(0,0,0,.2);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;max-height:200px;overflow-y:auto;margin-top:8px;line-height:1.6;white-space:pre-wrap}
+.log-box::-webkit-scrollbar{width:4px}
+.log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">← 返回首页</a>
+  <h1>🤖 自动化中心</h1>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:8px">系统定时任务、自动化流程、自修复状态总览</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>⏱️ GitHub 自动扫描</h2>
+      <div style="display:flex;gap:12px;margin:8px 0">
+        <div><div class="stat" id="scanTotal">-</div><div class="label">扫描次数</div></div>
+        <div><div class="stat" id="scanProjects">-</div><div class="label">发现项目</div></div>
+        <div><div class="stat" id="scanNext">-</div><div class="label">下次扫描</div></div>
+      </div>
+      <div style="margin-top:8px">
+        <span>状态: <span id="scanStatus" class="status-badge s-idle">检测中...</span></span>
+        <button class="btn btn-sm" onclick="runScan()" style="float:right">▶ 立即扫描</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔄 定时任务</h2>
+      <table>
+        <thead><tr><th>任务</th><th>周期</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="cronTable">
+          <tr><td>📊 GitHub扫描</td><td>每天 08:00 UTC</td><td><span class="status-badge s-running">运行中</span></td><td><button class="btn btn-sm">停用</button></td></tr>
+          <tr><td>🔄 自修复检查</td><td>每 30 分钟</td><td><span class="status-badge s-running">运行中</span></td><td><button class="btn btn-sm">停用</button></td></tr>
+          <tr><td>📈 系统状态采集</td><td>每 5 分钟</td><td><span class="status-badge s-running">运行中</span></td><td><button class="btn btn-sm">停用</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>🔧 自修复引擎</h2>
+      <div style="display:flex;gap:12px;margin:8px 0">
+        <div><div class="stat" id="healTotal">-</div><div class="label">修复次数</div></div>
+        <div><div class="stat" id="healSuccess">-</div><div class="label">成功</div></div>
+        <div><div class="stat" id="healFail">-</div><div class="label">失败</div></div>
+      </div>
+      <div style="margin-top:4px">
+        <button class="btn btn-sm" onclick="runHeal()">▶ 手动修复</button>
+        <button class="btn btn-sm" onclick="loadHealLog()">📋 查看日志</button>
+      </div>
+      <div id="healLog" class="log-box" style="display:none">加载中...</div>
+    </div>
+
+    <div class="card">
+      <h2>📋 最近扫描记录</h2>
+      <table>
+        <thead><tr><th>时间</th><th>项目</th><th>结果</th></tr></thead>
+        <tbody id="scanTable">
+          <tr><td colspan="3" style="text-align:center;color:var(--text2)">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadStatus(){
+  try{
+    var r=await fetch('/api/v1/selfheal/report',{signal:AbortSignal.timeout(5000)})
+    var d=await r.json()
+    if(d&&typeof d.total==='number'){
+      document.getElementById('healTotal').textContent=d.total
+      document.getElementById('healSuccess').textContent=d.success||0
+      document.getElementById('healFail').textContent=d.fail||0
+    }
+  }catch(e){console.warn('selfheal error',e)}
+
+  try{
+    var r=await fetch('/api/v1/modules?all=1',{signal:AbortSignal.timeout(5000)})
+    var d=await r.json()
+    if(d&&d.modules){
+      document.getElementById('scanProjects').textContent=d.modules.length
+    }
+  }catch(e){}
+}
+async function loadHealLog(){
+  var el=document.getElementById('healLog');el.style.display='block'
+  try{
+    var r=await fetch('/api/v1/selfheal/log',{signal:AbortSignal.timeout(5000)})
+    var d=await r.json()||{}
+    var logs=d.logs||d||[]
+    el.textContent=Array.isArray(logs)?logs.map(function(l){return typeof l==='string'?l:JSON.stringify(l)}).join('\n')||'暂无日志':JSON.stringify(logs,null,2)
+  }catch(e){el.textContent='加载失败: '+e.message}
+}
+async function runScan(){
+  var btn=event.target;btn.disabled=true;btn.textContent='⏳ 扫描中...'
+  try{
+    var r=await fetch('/api/v1/github/scan',{signal:AbortSignal.timeout(30000)})
+    var d=await r.json()
+    alert('扫描完成: '+(d.message||d.status||'OK'))
+  }catch(e){alert('扫描失败: '+e.message)}
+  btn.disabled=false;btn.textContent='▶ 立即扫描'
+}
+async function runHeal(){
+  try{
+    var r=await fetch('/api/v1/selfheal/run',{method:'POST',signal:AbortSignal.timeout(15000)})
+    var d=await r.json()
+    alert('修复完成: '+(d.message||d.status||'OK'))
+    loadStatus()
+  }catch(e){alert('修复触发失败: '+e.message)}
+}
+loadStatus()
+</script>
+</body>
+</html>
