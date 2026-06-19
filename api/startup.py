@@ -93,7 +93,15 @@ def _mount_vue_frontend():
             "oss-distiller": "oss-distiller.html",
             "codebase": "codebase.html",
             "self-evolve": "self_evolve.html",
+            "permission": "permission.html",
+            "memory": "memory.html",
+            "multi-agent": "multi_agent.html",
+            "desktop": "desktop.html",
+            "rbac": "rbac.html",
+            "channel": "channel.html",
             "deploy": "deploy.html",
+            "canvas": "canvas.html",
+            "workflow": "workflow.html",
             "automations": "automations.html",
         }
 
