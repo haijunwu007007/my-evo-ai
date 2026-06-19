@@ -89,6 +89,10 @@ def _mount_vue_frontend():
             "enterprise.html": "enterprise.html",
             "company.html": "company.html",
             "deploy.html": "deploy.html",
+            "capabilities": "capabilities.html",
+            "oss-distiller": "oss-distiller.html",
+            "codebase": "codebase.html",
+            "self-evolve": "self_evolve.html",
             "deploy": "deploy.html",
             "automations": "automations.html",
         }
