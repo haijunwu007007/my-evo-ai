@@ -76,3 +76,7 @@ output/*.docx
 output/*.pptx
 output/*.xlsx
 output/*.txt
+data/documents/
+data/presentations/
+data/spreadsheets/
+.evo_module_cache.json

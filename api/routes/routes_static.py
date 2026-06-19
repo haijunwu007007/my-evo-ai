@@ -173,3 +173,11 @@ async def compose_canvas_page():
     if html_path.exists():
         return FileResponse(str(html_path))
     raise HTTPException(404)
+
+@router.get("/docs")
+async def docs_page():
+    """文档办公套件页面"""
+    html_path = BASE_DIR / "frontend" / "docs.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)

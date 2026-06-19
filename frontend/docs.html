@@ -1,0 +1,450 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📋 文档办公套件 - EVO-AI</title>
+<style>:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee;--success:#00b894;--warn:#fdcb6e;--danger:#e74c3c}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,system-ui,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#4361ee20,#7209b720);border-bottom:1px solid var(--border);padding:20px;text-align:center}
+.header h1{font-size:24px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:var(--text2);font-size:13px;margin-top:4px}
+.nav{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;padding:0 16px}
+.nav a{display:block;padding:12px 20px;color:var(--text2);text-decoration:none;font-size:14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s}
+.nav a:hover{color:var(--text)}
+.nav a.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent)10}
+.main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+.section{display:none}
+.section.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card textarea,.card input[type=text],.card input[type=file]{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:8px}
+.card textarea{min-height:80px;resize:vertical;font-family:monospace}
+.card textarea:focus,.card input:focus{outline:none;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.flex{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warn{background:var(--warn);color:#1a1a2e}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{padding:10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--text2);font-size:11px;text-transform:uppercase}
+.result-box{background:#0d0d1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;max-height:300px;overflow:auto;font-size:13px;white-space:pre-wrap;font-family:monospace}
+.empty{text-align:center;padding:40px;color:var(--text2)}
+.toolbar{margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px}
+.badge-blue{background:var(--accent)20;color:var(--accent);border:1px solid var(--accent)40}
+.badge-green{background:var(--success)20;color:var(--success);border:1px solid var(--success)40}
+.badge-red{background:var(--danger)20;color:var(--danger);border:1px solid var(--danger)40}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;max-width:400px}
+.toast.show{opacity:1}
+.toast-success{background:var(--success);color:#fff}
+.toast-error{background:var(--danger);color:#fff}
+select{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;margin-bottom:8px}
+.flex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+@media(max-width:768px){.nav a{padding:10px 14px;font-size:13px}.main{padding:12px}.grid{grid-template-columns:1fr}}
+</style></head><body>
+
+<div class="header"><h1>📋 文档办公套件</h1><p>Word · PDF · PPT · Excel 一站式文档处理</p></div>
+
+<div class="nav" id="tabNav">
+  <a class="active" onclick="switchTab('docx')">📄 Word 文档</a>
+  <a onclick="switchTab('pdf')">📑 PDF工具</a>
+  <a onclick="switchTab('ppt')">🎬 PPT演示</a>
+  <a onclick="switchTab('excel')">📊 Excel表格</a>
+  <a onclick="switchTab('files')">📁 已生成文件</a>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════ DOCX ─═══════════════════ -->
+<div id="s-docx" class="section active">
+  <div class="grid">
+    <div class="card"><h3>📄 创建文档</h3>
+      <label>标题</label><input id="dtitle" placeholder="文档标题" value="新文档">
+      <label>内容 (支持多段用 || 分隔)</label><textarea id="dcontent" rows="5">主要段落内容||第二个段落内容||第三个段落</textarea>
+      <label>样式</label>
+      <div class="flex-row">
+        <select id="dstyle"><option value="">默认</option><option value="bold">加粗标题</option><option value="color">彩色标题</option><option value="table">含表格</option></select>
+      </div>
+      <div class="flex"><button class="btn btn-primary" onclick="createDocx()">📝 生成文档</button></div>
+      <div id="dresult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>🔍 读取文档</h3>
+      <label>文件路径或上传</label>
+      <input type="file" id="dreadFile" accept=".docx" onchange="readDocx()">
+      <div class="flex"><button class="btn btn-ghost" onclick="readDocx()">📖 读取</button></div>
+      <div id="dreadResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>🔧 查找替换</h3>
+      <label>文件路径</label><input id="drepPath" placeholder="output/docs/xxx.docx">
+      <label>查找 → 替换 (JSON格式)</label><textarea id="drepMap" rows="3">{"{{name}}": "张三", "{{date}}": "2026-06-19"}</textarea>
+      <div class="flex"><button class="btn btn-warn" onclick="replaceDocx()">🔄 替换并下载</button></div>
+      <div id="drepResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>🔗 合并文档</h3>
+      <label>文件路径 (逗号分隔)</label><textarea id="dmergePaths" rows="2" placeholder="path1.docx, path2.docx"></textarea>
+      <div class="flex"><button class="btn btn-primary" onclick="mergeDocx()">📎 合并</button></div>
+      <div id="dmergeResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PDF ─═══════════════════ -->
+<div id="s-pdf" class="section">
+  <div class="grid">
+    <div class="card"><h3>🔗 合并PDF</h3>
+      <label>PDF文件路径 (逗号分隔)</label><textarea id="pdfMergePaths" rows="3" placeholder="path1.pdf, path2.pdf"></textarea>
+      <div class="flex"><button class="btn btn-primary" onclick="mergePdf()">📎 合并</button></div>
+      <div id="pdfMergeResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>✂️ 拆分PDF</h3>
+      <label>文件路径</label><input id="pdfSplitPath" placeholder="output/docs/xxx.pdf">
+      <label>页码范围 (例: 1-3,5,7-9 留空=全部)</label><input id="pdfSplitPages" placeholder="1-3,5">
+      <div class="flex"><button class="btn btn-warn" onclick="splitPdf()">✂️ 拆分</button></div>
+      <div id="pdfSplitResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>📝 提取文本</h3>
+      <label>文件路径</label><input id="pdfExtractPath" placeholder="output/docs/xxx.pdf">
+      <div class="flex"><button class="btn btn-primary" onclick="extractPdfText()">📖 提取文本</button>
+      <button class="btn btn-ghost" onclick="extractPdfTables()">📊 提取表格</button></div>
+      <div id="pdfExtractResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>ℹ️ 文件信息</h3>
+      <label>文件路径</label><input id="pdfInfoPath" placeholder="output/docs/xxx.pdf">
+      <div class="flex"><button class="btn btn-ghost" onclick="getPdfInfo()">ℹ️ 查看信息</button></div>
+      <div id="pdfInfoResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PPT ─═══════════════════ -->
+<div id="s-ppt" class="section">
+  <div class="grid">
+    <div class="card"><h3>🎬 创建演示文稿</h3>
+      <label>标题</label><input id="pptTitle" placeholder="演示文稿标题" value="项目汇报">
+      <label>页面定义 (JSON数组)</label><textarea id="pptPages" rows="6">[
+  {"type":"title","title":"项目汇报","subtitle":"2026年度"},
+  {"type":"content","title":"项目概述","items":["项目背景","核心目标","关键指标"]},
+  {"type":"two_column","title":"对比分析","left":"方案A\n优点：成本低\n缺点：周期长","right":"方案B\n优点：效率高\n缺点：投入大"},
+  {"type":"table","title":"数据汇总","rows":[["指标","目标","实际"],["收入","100万","120万"],["利润","30万","35万"]]}
+]</textarea>
+      <label>主题</label>
+      <div class="flex-row">
+        <select id="pptTheme"><option value="default">默认</option><option value="light">浅色</option><option value="dark">深色</option><option value="corporate">商务</option><option value="nature">自然</option></select>
+      </div>
+      <div class="flex"><button class="btn btn-primary" onclick="createPpt()">🎬 生成PPT</button></div>
+      <div id="pptResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>📖 读取PPT</h3>
+      <label>文件路径</label><input id="pptReadPath" placeholder="output/docs/xxx.pptx">
+      <div class="flex"><button class="btn btn-ghost" onclick="readPpt()">📖 读取</button></div>
+      <div id="pptReadResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ EXCEL ─═══════════════════ -->
+<div id="s-excel" class="section">
+  <div class="grid">
+    <div class="card"><h3>📊 创建表格</h3>
+      <label>Sheet定义 (JSON: {sheet名: [[行数据]]})</label><textarea id="exCreateSheets" rows="6">{"销售数据": [["产品","Q1","Q2","Q3","Q4"],["A产品",120,150,180,200],["B产品",80,95,110,130],["C产品",200,240,280,320]],["汇总": [["总营收", "860万"]]]}</textarea>
+      <div class="flex"><button class="btn btn-primary" onclick="createExcel()">📊 生成Excel</button></div>
+      <div id="exCreateResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>📈 插入图表</h3>
+      <label>文件路径</label><input id="exChartPath" placeholder="output/docs/xxx.xlsx">
+      <label>图表类型</label>
+      <div class="flex-row">
+        <select id="exChartType"><option value="bar">柱状图</option><option value="line">折线图</option><option value="pie">饼图</option></select>
+      </div>
+      <div class="flex"><button class="btn btn-primary" onclick="addExcelChart()">📈 生成图表</button></div>
+      <div id="exChartResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>🔄 数据透视</h3>
+      <label>数据 (JSON数组)</label><textarea id="exPivotData" rows="4">[{"地区":"华东","产品":"A","销量":120},{"地区":"华东","产品":"B","销量":80},{"地区":"华北","产品":"A","销量":95},{"地区":"华北","产品":"B","销量":110}]</textarea>
+      <label>行字段 (逗号分隔)</label><input id="exPivotRows" value="地区">
+      <label>值字段 (逗号分隔)</label><input id="exPivotVals" value="销量">
+      <div class="flex"><button class="btn btn-warn" onclick="createPivot()">🔄 生成透视表</button></div>
+      <div id="exPivotResult" class="result-box" style="display:none"></div>
+    </div>
+    <div class="card"><h3>📐 公式计算</h3>
+      <label>文件路径</label><input id="exFormulaPath" placeholder="output/docs/xxx.xlsx">
+      <label>公式 (JSON: {单元格: 公式})</label><textarea id="exFormulas" rows="4">{"E2": "=SUM(B2:D2)", "E3": "=SUM(B3:D3)", "E6": "=SUM(E2:E5)"}</textarea>
+      <div class="flex"><button class="btn btn-primary" onclick="setFormulas()">📐 注入公式</button></div>
+      <div id="exFormulaResult" class="result-box" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ 已生成文件 ─═══════════════════ -->
+<div id="s-files" class="section">
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="loadGeneratedFiles()">🔄 刷新列表</button>
+  </div>
+  <div id="fileList"></div>
+  <div id="fileContent" style="display:none" class="card">
+    <h3>📄 文件预览</h3>
+    <iframe id="filePreview" style="width:100%;min-height:500px;border:none;background:var(--bg);border-radius:8px"></iframe>
+  </div>
+</div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ===== 全局配置 =====
+const API = '/api/v1/docs'
+const API2 = '/api/v1'
+
+// ===== Toast 提示 =====
+function toast(msg, type='success'){
+  var el = document.getElementById('toast')
+  el.textContent = msg
+  el.className = 'toast toast-' + type + ' show'
+  setTimeout(function(){ el.classList.remove('show') }, 3000)
+}
+
+// ===== Tab切换 =====
+function switchTab(name){
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active') })
+  document.querySelectorAll('.nav a').forEach(function(a){ a.classList.remove('active') })
+  document.getElementById('s-' + name).classList.add('active')
+  document.querySelector('.nav a[onclick*="' + name + '"]').classList.add('active')
+  if(name == 'files') loadGeneratedFiles()
+}
+
+// ===== 文件下载 =====
+function downloadFile(url, filename){
+  var a = document.createElement('a')
+  a.href = url
+  a.download = filename || 'download'
+  a.click()
+}
+
+// ===== 显示结果 =====
+function showResult(elId, data, isFile){
+  var el = document.getElementById(elId)
+  el.style.display = 'block'
+  if(isFile && data){
+    el.innerHTML = '<a href="' + data.url + '" target="_blank" style="color:var(--accent)">📥 下载文件: ' + data.name + '</a> (' + data.size + ')'
+  } else if(typeof data == 'string'){
+    el.textContent = data
+  } else {
+    el.textContent = JSON.stringify(data, null, 2)
+  }
+}
+
+// ===== 统一API调用 =====
+async function apiCall(url, body){
+  try{
+    var r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)})
+    if(r.headers.get('content-type')?.includes('application/json')){
+      return await r.json()
+    }
+    // 文件响应
+    var blob = await r.blob()
+    var filename = r.headers.get('content-disposition')?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)?.[1] || 'download'
+    var url2 = URL.createObjectURL(blob)
+    var a = document.createElement('a')
+    a.href = url2
+    a.download = decodeURIComponent(filename)
+    a.click()
+    URL.revokeObjectURL(url2)
+    return {success: true, file: true, name: decodeURIComponent(filename)}
+  }catch(e){
+    toast('请求失败: ' + e.message, 'error')
+    return {success: false, error: e.message}
+  }
+}
+
+// ═══════════ DOCX ═══════════
+
+async function createDocx(){
+  var title = document.getElementById('dtitle').value || '新文档'
+  var content = document.getElementById('dcontent').value
+  var style = document.getElementById('dstyle').value
+  var r = await apiCall(API + '/docx/create', {title: title, content: content, style: style})
+  showResult('dresult', r, r.file && r.success)
+  if(r.success && !r.file) toast('文档创建成功')
+}
+
+async function readDocx(){
+  var files = document.getElementById('dreadFile').files
+  if(files.length){
+    var fd = new FormData()
+    fd.append('file', files[0])
+    // 上传到临时目录并获取路径
+    var r2 = await fetch('/api/v1/upload', {method:'POST', body:fd})
+    var d2 = await r2.json()
+    if(d2.files && d2.files.length){
+      await readDocxByPath(d2.files[0].path)
+    }
+    return
+  }
+  toast('请选择文件', 'error')
+}
+
+async function readDocxByPath(p){
+  var r = await apiCall(API + '/docx/read', {path: p})
+  showResult('dreadResult', r)
+}
+
+async function replaceDocx(){
+  var path = document.getElementById('drepPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var repMap
+  try{ repMap = JSON.parse(document.getElementById('drepMap').value) }catch(e){ toast('替换JSON格式错误', 'error'); return }
+  var r = await apiCall(API + '/docx/edit', {path: path, replacements: repMap})
+  showResult('drepResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('替换完成')
+}
+
+async function mergeDocx(){
+  var val = document.getElementById('dmergePaths').value
+  var paths = val.split(',').map(function(s){ return s.trim() }).filter(Boolean)
+  if(paths.length < 2){ toast('请至少输入2个文件路径', 'error'); return }
+  var r = await apiCall(API + '/docx/merge', {paths: paths, output: ''})
+  showResult('dmergeResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('合并完成')
+}
+
+// ═══════════ PDF ═══════════
+
+async function mergePdf(){
+  var val = document.getElementById('pdfMergePaths').value
+  var paths = val.split(',').map(function(s){ return s.trim() }).filter(Boolean)
+  if(paths.length < 2){ toast('请至少输入2个文件路径', 'error'); return }
+  var r = await apiCall(API + '/pdf/merge', {paths: paths, output: ''})
+  showResult('pdfMergeResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('PDF合并完成')
+}
+
+async function splitPdf(){
+  var path = document.getElementById('pdfSplitPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var pages = document.getElementById('pdfSplitPages').value
+  var r = await apiCall(API + '/pdf/split', {path: path, pages: pages, output: ''})
+  showResult('pdfSplitResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('PDF拆分完成')
+}
+
+async function extractPdfText(){
+  var path = document.getElementById('pdfExtractPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var r = await apiCall(API + '/pdf/extract-text', {path: path})
+  showResult('pdfExtractResult', r)
+}
+
+async function extractPdfTables(){
+  var path = document.getElementById('pdfExtractPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var r = await apiCall(API + '/pdf/extract-tables', {path: path})
+  showResult('pdfExtractResult', r)
+}
+
+async function getPdfInfo(){
+  var path = document.getElementById('pdfInfoPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var r = await apiCall(API + '/pdf/info', {path: path})
+  showResult('pdfInfoResult', r)
+}
+
+// ═══════════ PPT ═══════════
+
+async function createPpt(){
+  var title = document.getElementById('pptTitle').value || '演示文稿'
+  var theme = document.getElementById('pptTheme').value
+  var pages
+  try{ pages = JSON.parse(document.getElementById('pptPages').value) }catch(e){ toast('页面JSON格式错误', 'error'); return }
+  var r = await apiCall(API + '/ppt/create', {title: title, pages: pages, theme: theme, output: ''})
+  showResult('pptResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('PPT生成成功')
+}
+
+async function readPpt(){
+  var path = document.getElementById('pptReadPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var r = await apiCall(API + '/ppt/read', {path: path})
+  showResult('pptReadResult', r)
+}
+
+// ═══════════ EXCEL ═══════════
+
+async function createExcel(){
+  var sheets
+  try{ sheets = JSON.parse(document.getElementById('exCreateSheets').value) }catch(e){ toast('Sheet JSON格式错误', 'error'); return }
+  var r = await apiCall(API + '/excel/create', {sheets: sheets, output: ''})
+  showResult('exCreateResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('Excel生成成功')
+}
+
+async function addExcelChart(){
+  var path = document.getElementById('exChartPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var chartType = document.getElementById('exChartType').value
+  var r = await apiCall(API + '/excel/chart', {path: path, chart_type: chartType, title: '图表', data_range: '', output: ''})
+  showResult('exChartResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('图表已添加')
+}
+
+async function createPivot(){
+  var data, rows, vals
+  try{ data = JSON.parse(document.getElementById('exPivotData').value) }catch(e){ toast('数据JSON格式错误', 'error'); return }
+  rows = document.getElementById('exPivotRows').value.split(',').map(function(s){ return s.trim() })
+  vals = document.getElementById('exPivotVals').value.split(',').map(function(s){ return s.trim() })
+  var r = await apiCall(API + '/excel/pivot', {data: data, rows: rows, values: vals, agg_func: 'sum', output: ''})
+  showResult('exPivotResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('透视表生成成功')
+}
+
+async function setFormulas(){
+  var path = document.getElementById('exFormulaPath').value
+  if(!path){ toast('请输入文件路径', 'error'); return }
+  var formulas
+  try{ formulas = JSON.parse(document.getElementById('exFormulas').value) }catch(e){ toast('公式JSON格式错误', 'error'); return }
+  var r = await apiCall(API + '/excel/formula', {path: path, formulas: formulas, output: ''})
+  showResult('exFormulaResult', r, r.file && r.success)
+  if(r.success && !r.file) toast('公式已注入')
+}
+
+// ═══════════ 已生成文件 ═══════════
+
+async function loadGeneratedFiles(){
+  try{
+    var r = await fetch(API + '/list')
+    var d = await r.json()
+    var files = d.files || []
+    var el = document.getElementById('fileList')
+    if(!files.length){
+      el.innerHTML = '<div class="empty">还没有生成任何文档<br>试试用上面工具创建一份</div>'
+      return
+    }
+    var html = '<table><thead><tr><th>文件名</th><th>大小</th><th>修改时间</th><th>操作</th></tr></thead><tbody>'
+    files.forEach(function(f){
+      html += '<tr><td>' + f.name + '</td><td>' + f.size + '</td><td>' + f.mtime + '</td>'
+      html += '<td><button class="btn btn-ghost" onclick="downloadGenerated(\'' + f.path + '\',\'' + f.name + '\')">📥 下载</button></td></tr>'
+    })
+    html += '</tbody></table>'
+    el.innerHTML = html
+  }catch(e){
+    document.getElementById('fileList').innerHTML = '<div class="empty">加载失败: ' + e.message + '</div>'
+  }
+}
+
+function downloadGenerated(path, name){
+  window.open('/' + path, '_blank')
+}
+</script>
+</body></html>
