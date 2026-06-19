@@ -1,12 +1,28 @@
 """LLM调用层 — 多用户多模型智能路由
-具备熔断、并行首发、自适应超时能力
+具备熔断、并行首发、自适应超时、结果缓存能力
 排序：免费→用户Key→AutoDL→本地保底
 """
-import os, json, httpx, re, asyncio, time
+import os, json, httpx, re, asyncio, time, hashlib
 
 # ── 默认API Key ──
 _ZHIPU_KEY = os.environ.get("ZHIPU_API_KEY", "")
 _DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+
+# ── LLM结果缓存（防API抖动） ──
+_LLM_CACHE: dict = {}
+_LLM_CACHE_MAX = 100
+_LLM_CACHE_TTL = 300  # 5分钟
+
+def _cache_key(messages, key=""):
+    return hashlib.md5((str(messages[-2:]) + key).encode()).hexdigest()[:16]
+
+def _cache_get(key):
+    if key in _LLM_CACHE:
+        v, t = _LLM_CACHE[key]
+        if time.time() - t < _LLM_CACHE_TTL:
+            return v
+        del _LLM_CACHE[key]
+    return None
 
 # ── 提供商路由表 ──
 _LLM_PROVIDERS = [
@@ -126,7 +142,8 @@ def _try_provider(p, messages, tools, timeout, key=""):
                 r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"max_tokens":4096}, timeout=t)
                 if r.status_code == 200:
                     text = r.json().get("choices",[{}])[0].get("message",{}).get("content","")
-                    if text: return text, None
+                    if text: _LLM_CACHE[_cache_key(messages, key)] = (text, time.time())
+        return text, None
             elif ptype == "ollama":
                 r = _HTTP.post(p["url"], json={"model":p["model"],"messages":messages,"stream":False}, timeout=t)
                 if r.status_code == 200:

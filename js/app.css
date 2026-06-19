@@ -1,0 +1,52 @@
+/* AUTO-EVO-AI 共享CSS — 所有页面共用 */
+:root {
+  --bg: #0b0b16; --bg2: #12122a; --card: #1a1a3e;
+  --text: #e8e8ef; --text2: #8892b0;
+  --input-bg: rgba(22,33,62,.6); --accent: #4361ee; --accent2: #7209b7;
+  --border: rgba(45,53,97,.4); --glass: rgba(255,255,255,.04); --glow: rgba(67,97,238,.3);
+}
+@media(prefers-color-scheme:light){
+  :root{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--input-bg:#fff;--accent:#4361ee;--accent2:#7209b7;--border:#d0d5e0;--glass:rgba(0,0,0,.02);--glow:rgba(67,97,238,.15)}
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(135deg,var(--bg),var(--bg2));color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
+/* 顶部导航 */
+.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid var(--border);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}
+.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gs 4s ease infinite}
+@keyframes gs{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hdr .n{display:flex;gap:2px;flex-wrap:wrap}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none;transition:all .2s}
+.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+/* 内容区 */
+.c{max-width:900px;margin:0 auto;padding:20px 16px}
+h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h3{font-size:15px;margin-bottom:8px}
+/* 卡片 */
+.card{background:rgba(26,26,46,.5);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;transition:all .3s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2);border-color:rgba(67,97,238,.5)}
+/* 输入 */
+.inp{display:flex;gap:8px;margin-bottom:12px}
+.inp input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp input:focus{border-color:#4361ee;box-shadow:0 0 0 3px var(--glow)}
+.inp button{padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:700;transition:transform .2s,box-shadow .2s}
+.inp button:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--glow)}
+.inp button:disabled{opacity:.4;transform:none;cursor:not-allowed}
+/* 标签 */
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin:2px}
+.tag.ok{background:rgba(16,185,129,.15);color:#10b981}
+.tag.er{background:rgba(239,68,68,.15);color:#ef4444}
+.tag.wa{background:rgba(245,158,11,.15);color:#f59e0b}
+.tag.info{background:rgba(67,97,238,.15);color:#4361ee}
+/* 表格 */
+.tb{background:rgba(26,26,46,.5);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.tb table{width:100%;border-collapse:collapse;font-size:12px}
+.tb th{padding:8px 12px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5);text-transform:uppercase;letter-spacing:.5px}
+.tb td{padding:8px 12px;color:#a0a8b8;border-bottom:1px solid rgba(45,53,97,.1)}
+.tb tr:hover td{background:rgba(67,97,238,.05)}
+/* 工具网格 */
+.tool-grid{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0}
+.tool-grid .tool-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;background:var(--glass);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .25s;white-space:nowrap}
+.tool-grid .tool-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px var(--glow)}
+/* 底部 */
+.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+/* 响应式 */
+@media(max-width:600px){.c{padding:12px 8px}.inp{flex-direction:column}.hdr .n a{padding:3px 6px;font-size:11px}}
