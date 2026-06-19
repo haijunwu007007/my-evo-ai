@@ -142,6 +142,17 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
     <input id="toolSearch" type="text" placeholder="🔍 搜索94个工具..." style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;outline:none" oninput="filterTools(this.value)">
     <span id="toolCount" style="font-size:11px;color:var(--text2);padding:6px 0;white-space:nowrap"></span>
   </div>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📋 文档/办公</div>
+      <span class="qa" onclick="quickTool('docx_processor')">📄 文档生成</span>
+      <span class="qa" onclick="quickTool('excel_pro')">📊 电子表格</span>
+      <span class="qa" onclick="quickTool('ppt_generator')">📽️ 演示文稿</span>
+      <span class="qa" onclick="quickTool('pdf_toolkit')">📃 PDF处理</span>
+      <span class="qa" onclick="quickTool('code_review')">🔍 代码审查</span>
+      <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 音频转录</span>
+      <span class="qa" onclick="quickTool('legal_review_contract')">⚖️ 合同审查</span>
+      <span class="qa" onclick="quickTool('paddleocr_image')">🖼️ OCR识别</span>
+      <span class="qa" onclick="quickTool('lida_visualize')">📈 数据图表</span>
+      <span class="qa" onclick="quickTool('mermaid_chart')">🗺️ 流程图</span>
   <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📊 数据/分析</div>
       <span class="qa" onclick="quickTool('nocodb_manage')">📊 NocoDB管理</span>
       <span class="qa" onclick="quickTool('grist_analyze')">📋 Grist分析</span>
@@ -166,8 +177,6 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
       <span class="qa" onclick="quickTool('strapi_cms')">📄 内容管理</span>
       <span class="qa" onclick="quickTool('directus_api')">🗄 数据API</span>
       <span class="qa" onclick="quickTool('coolify_deploy')">🚀 一键部署</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📋 文档/办公</div>
-      <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 音频转录</span>
   <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🔧 监控/工具</div>
       <span class="qa" onclick="quickTool('meilisearch_search')">🔍 全文搜索</span>
       <span class="qa" onclick="quickTool('minio_storage')">💾 对象存储</span>
