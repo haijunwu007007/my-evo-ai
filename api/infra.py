@@ -223,16 +223,59 @@ class ModuleRegistry:
         self._pending_modules: dict[str, dict] = {}
         self._pending_init: dict[str, Any] = {}
 
+    @staticmethod
+    def _get_cache_path() -> Path:
+        """返回模块缓存文件路径（30s TTL）"""
+        return Path(os.environ.get("EVO_DATA_DIR", str(BASE_DIR))) / ".evo_module_cache.json"
+
+    def _load_cached_files(self, modules_dir: str = "modules") -> list | None:
+        """从缓存文件加载模块列表，过期或无效返回 None"""
+        try:
+            cache = self._get_cache_path()
+            if not cache.exists(): return None
+            cached = json.loads(cache.read_text("utf-8"))
+            cached_at = cached.get("_cached_at", 0)
+            if time.time() - cached_at > 30: return None  # TTL 30s
+            logger.info(f"[CACHE] 命中模块缓存 ({len(cached)-1} 个文件)")
+            return cached
+        except Exception:
+            return None
+
+    def _save_cache(self, files: list[str], modules_dir: str):
+        """保存模块列表到缓存文件"""
+        try:
+            data = {"_cached_at": time.time(), "_dir": modules_dir}
+            for f in files: data[f] = 1
+            cache = self._get_cache_path()
+            cache.write_text(json.dumps(data, separators=(",", ":")), "utf-8")
+        except Exception:
+            pass
+
     def auto_discover(self, modules_dir: str = "modules"):
         mod_path = BASE_DIR / modules_dir
         if not mod_path.exists():
             logger.warning(f"模块目录不存在: {mod_path}")
             return
         discovered = 0
+        # 尝试从缓存加载
+        cached = self._load_cached_files(modules_dir)
+        if cached:
+            for name, val in cached.items():
+                if name.startswith("_"): continue
+                if name not in self.modules and name not in self._pending_modules:
+                    self._pending_modules[name] = {"dir": modules_dir, "file": name + ".py"}
+                    self.health[name] = {"status": "pending_lazy", "last_beat": "", "error": "", "grade": "lazy"}
+                    discovered += 1
+            logger.info(f"[CACHE+LAZY] 注册 {discovered} 个模块待按需加载")
+            return
+        # 缓存未命中，从文件系统扫描
+        discovered = 0
+        files: list[str] = []
         for f in sorted(mod_path.glob("*.py")):
             if f.name.startswith("_") or f.name.startswith("test"):
                 continue
             name = f.stem
+            files.append(name)
             if name not in self.modules and name not in self._pending_modules:
                 if name in self.classes:
                     self._pending_modules[name] = {"dir": modules_dir, "file": f.name, "pre_registered": True}
@@ -241,6 +284,7 @@ class ModuleRegistry:
                     self._pending_modules[name] = {"dir": modules_dir, "file": f.name}
                     self.health[name] = {"status": "pending_lazy", "last_beat": "", "error": "", "grade": "lazy"}
                 discovered += 1
+        self._save_cache(files, modules_dir)
         logger.info(f"[LAZY] 注册 {discovered} 个模块待按需加载")
 
     def rescan_modules(self, modules_dir: str = "modules") -> int:
