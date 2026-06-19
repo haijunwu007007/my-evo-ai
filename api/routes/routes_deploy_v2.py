@@ -71,3 +71,36 @@ async def deploy_status(deploy_id: str):
 async def deploy_list():
     """列出所有部署"""
     return {"success": True, "deploys": sorted(_DEPLOYS.values(), key=lambda x: -len(x.get("status",""))), "total": len(_DEPLOYS)}
+
+# ── 旧版兼容端点（从 routes_deploy.py 合并） ──
+
+@router.post("/v1/deploy/universal")
+async def deploy_universal(data: dict):
+    """[兼容] 旧版万能部署"""
+    url = (data.get("url") or "").strip()
+    if not url: return {"success": False, "error": "需要 url"}
+    return await deploy_start({"url": url})
+
+@router.post("/deploy/stop/{name}")
+async def deploy_stop(name: str):
+    """停止并删除部署"""
+    import subprocess
+    subprocess.run(["docker", "stop", name], capture_output=True, timeout=30)
+    subprocess.run(["docker", "rm", name], capture_output=True, timeout=30)
+    return {"success": True, "message": f"{name} 已停止"}
+
+@router.get("/v1/deploy/status")
+async def deploy_status_old():
+    """[兼容] 旧版部署状态"""
+    import subprocess
+    r = subprocess.run(["docker", "ps", "--format", '{{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}'],
+                       capture_output=True, text=True, timeout=10)
+    containers = []
+    for line in r.stdout.strip().split("\n"):
+        if not line.strip(): continue
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            containers.append({"name": parts[0], "image": parts[1] if len(parts) > 1 else "",
+                               "ports": parts[2] if len(parts) > 2 else "",
+                               "status": parts[3] if len(parts) > 3 else ""})
+    return {"success": True, "containers": containers}
