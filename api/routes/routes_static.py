@@ -76,7 +76,6 @@ async def service_worker():
     return StreamingResponse(iter(["// Service Worker"]), media_type="application/javascript")
 
 
-@router.get("/docs")
 @router.get("/api/docs")
 async def api_docs_redirect():
     """API 文档重定向到 Scalar"""
@@ -174,8 +173,8 @@ async def compose_canvas_page():
         return FileResponse(str(html_path))
     raise HTTPException(404)
 
-@router.get("/docs")
-async def docs_page():
+@router.get("/office")
+async def office_page():
     """文档办公套件页面"""
     html_path = BASE_DIR / "frontend" / "docs.html"
     if html_path.exists():
