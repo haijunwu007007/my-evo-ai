@@ -803,3 +803,40 @@ _auth_engine = init_auth(secret=_auth_secret, enabled=_auth_enabled_env)
 
 # BGOS 数据路径
 BGOS_DATA_PATH = (_ORIGINAL_BASE if (getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')) else BASE_DIR) / "bgos_data.json"
+
+
+# ── 模块状态持久化 ──
+_MODULE_STATE_DB = os.path.join(os.path.dirname(__file__), "module_state.db")
+
+def _init_module_db():
+    """初始化模块持久化数据库"""
+    try:
+        import sqlite3
+        conn = sqlite3.connect(_MODULE_STATE_DB)
+        conn.execute("CREATE TABLE IF NOT EXISTS module_state (id TEXT PRIMARY KEY, name TEXT, state TEXT, updated_at REAL)")
+        conn.execute("CREATE TABLE IF NOT EXISTS module_calls (module_id TEXT, called_at REAL, duration REAL)")
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+def save_module_state(module_id, name, state):
+    try:
+        import sqlite3, time
+        conn = sqlite3.connect(_MODULE_STATE_DB)
+        conn.execute("INSERT OR REPLACE INTO module_state VALUES (?,?,?,?)", (module_id, name, json.dumps(state), time.time()))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+def load_module_state(module_id):
+    try:
+        import sqlite3
+        conn = sqlite3.connect(_MODULE_STATE_DB)
+        row = conn.execute("SELECT state FROM module_state WHERE id=?", (module_id,)).fetchone()
+        conn.close()
+        return json.loads(row[0]) if row else {}
+    except Exception:
+        return {}

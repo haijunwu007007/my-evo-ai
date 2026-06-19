@@ -140,105 +140,113 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
       <span id="toolCount" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text2)">94工具</span>
     </div>
     <!-- 快捷操作：9个新集成工具 -->
-    <div class="quick-actions" id="quickActions">
-      <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器自动化</span>
-      <span class="qa" onclick="quickTool('browseract_extract')">🕷️ 反爬提取</span>
-      <span class="qa" onclick="quickTool('codemem_query')">🧠 代码知识</span>
-      <span class="qa" onclick="quickTool('gpt_research')">📊 自主研究</span>
-      <span class="qa" onclick="quickTool('openhands_generate')">🏗️ 全栈项目</span>
-      <span class="qa" onclick="quickTool('letta_message')">🧠 记忆管理</span>
-      <span class="qa" onclick="quickTool('composio_execute')">🔧 外部工具</span>
-      <span class="qa" onclick="quickTool('self_evolving_analyze')">🧬 代码分析</span>
-      <span class="qa" onclick="quickTool('moltron_learn')">📚 技能学习</span>
-      <span class="qa" onclick="quickTool('accomplish_desktop')">🖥️ 桌面自动化</span>
-      <span class="qa" onclick="quickTool('toolbench_discover')">🔌 API发现</span>
-      <!-- 2026-06-09 新增16个 -->
-      <span class="qa" onclick="quickTool('markitdown_convert')">📄 文档转Markdown</span>
-      <span class="qa" onclick="quickTool('scrapegraphai_scrape')">🕷️ AI智能爬虫</span>
-      <span class="qa" onclick="quickTool('interpreter_execute')">💻 电脑控制</span>
-      <span class="qa" onclick="quickTool('s2c_generate')">🎨 截图转代码</span>
-      <span class="qa" onclick="quickTool('pra_review')">🔍 PR审查</span>
-      <span class="qa" onclick="quickTool('qodo_testgen')">🧪 生成测试</span>
-      <span class="qa" onclick="quickTool('aider_edit')">✏️ AI编辑代码</span>
-      <span class="qa" onclick="quickTool('openclaw_connect')">📱 消息平台</span>
-      <span class="qa" onclick="quickTool('tts_speak')">🔊 语音合成</span>
-      <span class="qa" onclick="quickTool('chatdev_run')">🤖 多智能体</span>
-      <span class="qa" onclick="quickTool('autogpt_run')">🧠 自主任务</span>
-      <span class="qa" onclick="quickTool('swe_fix')">🛠️ 修复Issue</span>
-      <span class="qa" onclick="quickTool('gptpilot_build')">🏗️ 生成项目</span>
-      <span class="qa" onclick="quickTool('text2sql_query')">🗃️ 自然语言查库</span>
-      <span class="qa" onclick="quickTool('bolt_generate')">⚡ 生成Web应用</span>
-      <span class="qa" onclick="quickTool('agenteval_benchmark')">📊 Agent评测</span>
-      <!-- 2026-06-09 第3轮22个 -->
-      <span class="qa" onclick="quickTool('openmontage_generate_script')">🎬 视频脚本</span>
-      <span class="qa" onclick="quickTool('lida_visualize')">📈 数据可视化</span>
-      <span class="qa" onclick="quickTool('paddleocr_image')">📝 图片OCR</span>
-      <span class="qa" onclick="quickTool('paddleocr_pdf')">📄 PDF识别</span>
-      <span class="qa" onclick="quickTool('zen_scan')">🔒 安全扫描</span>
-      <span class="qa" onclick="quickTool('shannon_audit')">🔐 代码审计</span>
-      <span class="qa" onclick="quickTool('legal_review_contract')">⚖️ 合同审查</span>
-      <span class="qa" onclick="quickTool('twenty_create_contact')">👤 CRM联系人</span>
-      <span class="qa" onclick="quickTool('invoice_create')">🧾 开发票</span>
-      <span class="qa" onclick="quickTool('chatwoot_create_ticket')">🎫 创建工单</span>
-      <span class="qa" onclick="quickTool('postiz_create_post')">📱 发社交媒体</span>
-      <span class="qa" onclick="quickTool('mautic_send_email')">📧 营销邮件</span>
-      <span class="qa" onclick="quickTool('superset_create_chart')">📊 BI图表</span>
-      <span class="qa" onclick="quickTool('heyform_create_survey')">📋 创建问卷</span>
-      <span class="qa" onclick="quickTool('docetl_extract')">📂 文档提取</span>
-      <span class="qa" onclick="quickTool('accord_create_contract')">📝 法律协议</span>
-      <span class="qa" onclick="quickTool('claude_code_generate')">💻 Claude写代码</span>
-      <span class="qa" onclick="quickTool('frappe_hr_employee')">🏢 查员工</span>
-      <span class="qa" onclick="quickTool('dataease_create_dashboard')">📉 仪表盘</span>
-      <span class="qa" onclick="quickTool('invoice_track_expense')">💳 记费用</span>
-      <!-- 2026-06-09 第4轮21个基础设施 -->
-      <span class="qa" onclick="quickTool('plane_project')">📋 项目管理</span>
-      <span class="qa" onclick="quickTool('openproject_mgmt')">📋 企业项目</span>
-      <span class="qa" onclick="quickTool('cal_schedule')">📅 日程调度</span>
-      <span class="qa" onclick="quickTool('novu_notify')">📢 发通知</span>
-      <span class="qa" onclick="quickTool('keycloak_auth')">🔐 身份认证</span>
-      <span class="qa" onclick="quickTool('meilisearch_search')">🔍 搜索内容</span>
-      <span class="qa" onclick="quickTool('minio_storage')">💾 文件存储</span>
-      <span class="qa" onclick="quickTool('opentofu_apply')">🏗️ IaC部署</span>
-      <span class="qa" onclick="quickTool('ansible_run')">⚙️ 运维自动化</span>
-      <span class="qa" onclick="quickTool('strapi_cms')">📄 CMS管理</span>
-      <span class="qa" onclick="quickTool('directus_api')">🗄️ 数据API</span>
-      <span class="qa" onclick="quickTool('uptime_kuma')">📊 站点监控</span>
-      <span class="qa" onclick="quickTool('oneuptime_monitor')">📊 可观测</span>
-      <span class="qa" onclick="quickTool('signoz_apm')">📊 APM监控</span>
-      <span class="qa" onclick="quickTool('wazuh_siem')">🛡️ 安全监控</span>
-      <span class="qa" onclick="quickTool('nats_mq')">🔄 消息队列</span>
-      <span class="qa" onclick="quickTool('rabbitmq_broker')">🔄 消息代理</span>
-      <span class="qa" onclick="quickTool('gitea_git')">📦 Git管理</span>
-      <span class="qa" onclick="quickTool('wikijs_wiki')">📚 Wiki知识</span>
-      <span class="qa" onclick="quickTool('bookstack_wiki')">📚 文档系统</span>
-      <span class="qa" onclick="quickTool('projectsend_files')">📁 文件共享</span>
-      <span class="qa" onclick="quickTool('odoo_manage')">🏢 ERP</span>
-      <span class="qa" onclick="quickTool('erpclaw_manage')">🏭 AI-ERP</span>
-      <span class="qa" onclick="quickTool('coolify_deploy')">🚀 PaaS部署</span>
-      <span class="qa" onclick="quickTool('rustdesk_connect')">🖥️ 远程桌面</span>
-      <span class="qa" onclick="quickTool('docuseal_sign')">✍️ 电子签名</span>
-      <span class="qa" onclick="quickTool('homeassistant_control')">🏠 智能家居</span>
-      <span class="qa" onclick="quickTool('vaultwarden_manage')">🔐 密码管理</span>
-      <span class="qa" onclick="quickTool('nocodb_manage')">📊 数据表格</span>
-      <span class="qa" onclick="quickTool('appsmith_build')">🛠️ 低代码</span>
-      <span class="qa" onclick="quickTool('airbyte_sync')">🔄 ETL管道</span>
-      <span class="qa" onclick="quickTool('mlflow_track')">📈 MLOps</span>
-      <span class="qa" onclick="quickTool('langfuse_observe')">👁️ LLM观测</span>
-      <span class="qa" onclick="quickTool('hoppscotch_test')">🧪 API测试</span>
-      <span class="qa" onclick="quickTool('grist_analyze')">📋 电子表格</span>
-      <span class="qa" onclick="quickTool('freshrss_read')">📰 RSS聚合</span>
-      <span class="qa" onclick="quickTool('listmonk_send')">📧 邮件</span>
-      <span class="qa" onclick="quickTool('mermaid_chart')">🗺️ 流程图</span>
-      <span class="qa" onclick="quickTool('nocobase_build')">🏗️ 低代码平台</span>
-      <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 音频转录</span>
-      <span class="qa" onclick="quickTool('keploy_test')">🧪 AI测试</span>
-      <!-- 2026-06-19 新增集成 -->
-      <span class="qa" onclick="quickTool('browseract_extract')">🕷️ 反爬提取</span>
-      <span class="qa" onclick="quickTool('codemem_index')">🧠 代码知识</span>
-      <span class="qa" onclick="quickTool('reach_search')">🌐 全网搜索</span>
-      <span class="qa" onclick="quickTool('anime_animate')">✨ 页面动效</span>
+    <div class="quick-actions">
+  <div style="width:100%;padding:0 0 6px;display:flex;gap:6px">
+    <input id="toolSearch" type="text" placeholder="🔍 搜索94个工具..." style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;outline:none" oninput="filterTools(this.value)">
+    <span id="toolCount" style="font-size:11px;color:var(--text2);padding:6px 0;white-space:nowrap"></span>
+  </div>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📊 数据/分析</div>
+      <span class="qa" onclick="quickTool('nocodb_manage')">📊 nocodb_manage</span>
+      <span class="qa" onclick="quickTool('grist_analyze')">📋 grist_analyze</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📱 通信/协作</div>
+      <span class="qa" onclick="quickTool('novu_notify')">📢 novu_notify</span>
+      <span class="qa" onclick="quickTool('gitea_git')">📦 gitea_git</span>
+      <span class="qa" onclick="quickTool('wikijs_wiki')">📚 wikijs_wiki</span>
+      <span class="qa" onclick="quickTool('bookstack_wiki')">📚 bookstack_wiki</span>
+      <span class="qa" onclick="quickTool('projectsend_files')">📁 projectsend_files</span>
+      <span class="qa" onclick="quickTool('freshrss_read')">📰 freshrss_read</span>
+      <span class="qa" onclick="quickTool('listmonk_send')">📧 listmonk_send</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🏢 企业/管理</div>
+      <span class="qa" onclick="quickTool('plane_project')">📋 plane_project</span>
+      <span class="qa" onclick="quickTool('openproject_mgmt')">📋 openproject_mgmt</span>
+      <span class="qa" onclick="quickTool('cal_schedule')">📅 cal_schedule</span>
+      <span class="qa" onclick="quickTool('keycloak_auth')">🔐 keycloak_auth</span>
+      <span class="qa" onclick="quickTool('odoo_manage')">🏢 odoo_manage</span>
+      <span class="qa" onclick="quickTool('erpclaw_manage')">🏭 erpclaw_manage</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🚀 部署/运维</div>
+      <span class="qa" onclick="quickTool('opentofu_apply')">🏗 opentofu_apply</span>
+      <span class="qa" onclick="quickTool('ansible_run')">⚙ ansible_run</span>
+      <span class="qa" onclick="quickTool('strapi_cms')">📄 strapi_cms</span>
+      <span class="qa" onclick="quickTool('directus_api')">🗄 directus_api</span>
+      <span class="qa" onclick="quickTool('coolify_deploy')">🚀 coolify_deploy</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📋 文档/办公</div>
+      <span class="qa" onclick="quickTool('scriberr_transcribe')">🎤 scriberr_transcribe</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🔧 监控/工具</div>
+      <span class="qa" onclick="quickTool('meilisearch_search')">🔍 meilisearch_search</span>
+      <span class="qa" onclick="quickTool('minio_storage')">💾 minio_storage</span>
+      <span class="qa" onclick="quickTool('uptime_kuma')">📊 uptime_kuma</span>
+      <span class="qa" onclick="quickTool('oneuptime_monitor')">📊 oneuptime_monitor</span>
+      <span class="qa" onclick="quickTool('signoz_apm')">📊 signoz_apm</span>
+      <span class="qa" onclick="quickTool('wazuh_siem')">🛡 wazuh_siem</span>
+      <span class="qa" onclick="quickTool('nats_mq')">🔄 nats_mq</span>
+      <span class="qa" onclick="quickTool('rabbitmq_broker')">🔄 rabbitmq_broker</span>
+      <span class="qa" onclick="quickTool('mlflow_track')">📈 mlflow_track</span>
+      <span class="qa" onclick="quickTool('langfuse_observe')">👁 langfuse_observe</span>
+      <span class="qa" onclick="quickTool('hoppscotch_test')">🧪 hoppscotch_test</span>
+      <span class="qa" onclick="quickTool('mermaid_chart')">🗺 mermaid_chart</span>
+      <span class="qa" onclick="quickTool('keploy_test')">🧪 keploy_test</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🏠 智能/生活</div>
+      <span class="qa" onclick="quickTool('rustdesk_connect')">🖥 rustdesk_connect</span>
+      <span class="qa" onclick="quickTool('docuseal_sign')">✍ docuseal_sign</span>
+      <span class="qa" onclick="quickTool('homeassistant_control')">🏠 homeassistant_control</span>
+      <span class="qa" onclick="quickTool('vaultwarden_manage')">🔐 vaultwarden_manage</span>
+      <span class="qa" onclick="quickTool('appsmith_build')">🛠 appsmith_build</span>
+      <span class="qa" onclick="quickTool('airbyte_sync')">🔄 airbyte_sync</span>
+      <span class="qa" onclick="quickTool('nocobase_build')">🏗 nocobase_build</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🌐 搜索/集成</div>
+      <span class="qa" onclick="quickTool('browseract_extract')">🕷 browseract_extract</span>
+      <span class="qa" onclick="quickTool('codemem_index')">🧠 codemem_index</span>
+      <span class="qa" onclick="quickTool('reach_search')">🌐 reach_search</span>
+      <span class="qa" onclick="quickTool('anime_animate')">✨ anime_animate</span>
+  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📦 其他</div>
+      <span class="qa" onclick="quickTool('browser_use_task')">🌐 browser_use_task</span>
+      <span class="qa" onclick="quickTool('codemem_query')">🧠 codemem_query</span>
+      <span class="qa" onclick="quickTool('gpt_research')">📊 gpt_research</span>
+      <span class="qa" onclick="quickTool('openhands_generate')">🏗 openhands_generate</span>
+      <span class="qa" onclick="quickTool('letta_message')">🧠 letta_message</span>
+      <span class="qa" onclick="quickTool('composio_execute')">🔧 composio_execute</span>
+      <span class="qa" onclick="quickTool('self_evolving_analyze')">🧬 self_evolving_analyze</span>
+      <span class="qa" onclick="quickTool('moltron_learn')">📚 moltron_learn</span>
+      <span class="qa" onclick="quickTool('accomplish_desktop')">🖥 accomplish_desktop</span>
+      <span class="qa" onclick="quickTool('toolbench_discover')">🔌 toolbench_discover</span>
+      <span class="qa" onclick="quickTool('markitdown_convert')">📄 markitdown_convert</span>
+      <span class="qa" onclick="quickTool('scrapegraphai_scrape')">🕷 scrapegraphai_scrape</span>
+      <span class="qa" onclick="quickTool('interpreter_execute')">💻 interpreter_execute</span>
+      <span class="qa" onclick="quickTool('s2c_generate')">🎨 s2c_generate</span>
+      <span class="qa" onclick="quickTool('pra_review')">🔍 pra_review</span>
+      <span class="qa" onclick="quickTool('qodo_testgen')">🧪 qodo_testgen</span>
+      <span class="qa" onclick="quickTool('aider_edit')">✏ aider_edit</span>
+      <span class="qa" onclick="quickTool('openclaw_connect')">📱 openclaw_connect</span>
+      <span class="qa" onclick="quickTool('tts_speak')">🔊 tts_speak</span>
+      <span class="qa" onclick="quickTool('chatdev_run')">🤖 chatdev_run</span>
+      <span class="qa" onclick="quickTool('autogpt_run')">🧠 autogpt_run</span>
+      <span class="qa" onclick="quickTool('swe_fix')">🛠 swe_fix</span>
+      <span class="qa" onclick="quickTool('gptpilot_build')">🏗 gptpilot_build</span>
+      <span class="qa" onclick="quickTool('text2sql_query')">🗃 text2sql_query</span>
+      <span class="qa" onclick="quickTool('bolt_generate')">⚡ bolt_generate</span>
+      <span class="qa" onclick="quickTool('agenteval_benchmark')">📊 agenteval_benchmark</span>
+      <span class="qa" onclick="quickTool('openmontage_generate_script')">🎬 openmontage_generate_script</span>
+      <span class="qa" onclick="quickTool('lida_visualize')">📈 lida_visualize</span>
+      <span class="qa" onclick="quickTool('paddleocr_image')">📝 paddleocr_image</span>
+      <span class="qa" onclick="quickTool('paddleocr_pdf')">📄 paddleocr_pdf</span>
+      <span class="qa" onclick="quickTool('zen_scan')">🔒 zen_scan</span>
+      <span class="qa" onclick="quickTool('shannon_audit')">🔐 shannon_audit</span>
+      <span class="qa" onclick="quickTool('legal_review_contract')">⚖ legal_review_contract</span>
+      <span class="qa" onclick="quickTool('twenty_create_contact')">👤 twenty_create_contact</span>
+      <span class="qa" onclick="quickTool('invoice_create')">🧾 invoice_create</span>
+      <span class="qa" onclick="quickTool('chatwoot_create_ticket')">🎫 chatwoot_create_ticket</span>
+      <span class="qa" onclick="quickTool('postiz_create_post')">📱 postiz_create_post</span>
+      <span class="qa" onclick="quickTool('mautic_send_email')">📧 mautic_send_email</span>
+      <span class="qa" onclick="quickTool('superset_create_chart')">📊 superset_create_chart</span>
+      <span class="qa" onclick="quickTool('heyform_create_survey')">📋 heyform_create_survey</span>
+      <span class="qa" onclick="quickTool('docetl_extract')">📂 docetl_extract</span>
+      <span class="qa" onclick="quickTool('accord_create_contract')">📝 accord_create_contract</span>
+      <span class="qa" onclick="quickTool('claude_code_generate')">💻 claude_code_generate</span>
+      <span class="qa" onclick="quickTool('frappe_hr_employee')">🏢 frappe_hr_employee</span>
+      <span class="qa" onclick="quickTool('dataease_create_dashboard')">📉 dataease_create_dashboard</span>
+      <span class="qa" onclick="quickTool('invoice_track_expense')">💳 invoice_track_expense</span>
     </div>
-    <div class="input-area">
+<div class="input-area">
       <div class="input-row">
         <input id="input" data-i18n="input_placeholder" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
         <button id="micBtn" class="mic" onclick="startVoice()" style="background:transparent;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:0 4px">🎤</button>
