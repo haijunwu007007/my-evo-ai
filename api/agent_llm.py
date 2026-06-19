@@ -195,3 +195,8 @@ def get_active_model(api_key="") -> dict:
 
 def _build_fallback_reply(messages, tools=None) -> str:
     return "LLM不可用，请检查API配置或稍后重试"
+
+def reset_fail_count():
+    """重置所有LLM失败计数"""
+    _FAIL_COUNT.clear()
+    return {"success": True, "count": len(_FAIL_COUNT)}

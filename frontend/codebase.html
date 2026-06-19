@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🖥️ Codebase理解 — AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}
+.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}
+.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}
+.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+.c{max-width:800px;margin:0 auto;padding:20px 16px}
+h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:12px}
+.inp{display:flex;gap:8px;margin-bottom:12px}
+.inp input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none}
+.inp input:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.3)}
+.inp button{padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:700}
+.inp button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(67,97,238,.3)}
+.st{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.st span{font-size:12px;color:#8892b0;background:rgba(22,33,62,.4);padding:4px 10px;border-radius:6px}
+.l{font-size:12px;color:#8892b0;padding:4px 0}
+@media(max-width:600px){.inp{flex-direction:column}}
+</style></head><body>
+<div class="hdr">
+  <div class="l">AUTO-EVO-AI</div>
+  <div class="n"><a href="/">对话</a><a href="/capabilities">能力中心</a><a href="/codebase" class="a">Codebase</a></div>
+</div>
+<div class="c">
+  <h2>🖥️ Codebase 理解引擎</h2>
+  <div class="card">
+    <div class="st"><span>📊 状态: <b id="status">加载中...</b></span><span>📁 项目: <b id="projects">0</b></span></div>
+    <p class="l">输入项目目录路径扫描代码库，或搜索已索引的代码</p>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:8px">📂 扫描项目</h3>
+    <div class="inp">
+      <input id="rootInput" value="/home/ubuntu/my-evo-ai" placeholder="项目根目录">
+      <button onclick="scanCode()">扫描</button>
+    </div>
+    <div id="scanResult" class="l"></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:8px">🔍 搜索代码</h3>
+    <div class="inp">
+      <input id="searchInput" placeholder="搜索文件名或路径">
+      <button onclick="searchCode()">搜索</button>
+    </div>
+    <div id="searchResult" class="l"></div>
+  </div>
+</div>
+<script>
+async function loadStatus(){
+  try{
+    var r=await fetch('/api/v1/codebase/status');var d=await r.json()
+    document.getElementById('status').textContent=d.available?'已就绪':'不可用'
+    document.getElementById('projects').textContent=d.projects||0
+  }catch(e){document.getElementById('status').textContent='加载失败'}
+}
+async function scanCode(){
+  var btn=event.target;btn.disabled=true;btn.textContent='扫描中...'
+  var root=document.getElementById('rootInput').value.trim()
+  try{
+    var r=await fetch('/api/v1/codebase/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({root:root})});var d=await r.json()
+    document.getElementById('scanResult').textContent='✅ 已完成: '+d.files_indexed+' 个文件已索引'
+    loadStatus()
+  }catch(e){document.getElementById('scanResult').textContent='❌ 扫描失败: '+e.message}
+  btn.disabled=false;btn.textContent='扫描'
+}
+async function searchCode(){
+  var q=document.getElementById('searchInput').value.trim()
+  if(!q){document.getElementById('searchResult').textContent='请输入搜索关键词';return}
+  try{
+    var r=await fetch('/api/v1/codebase/search?q='+encodeURIComponent(q));var d=await r.json()
+    var h='找到 '+d.total+' 个项目\n'+(d.results||[]).map(function(x){return '  📄 '+x.path}).join('\n')
+    document.getElementById('searchResult').textContent=h||'无结果'
+  }catch(e){document.getElementById('searchResult').textContent='搜索失败: '+e.message}
+}
+loadStatus()
+</script></body></html>
