@@ -181,7 +181,7 @@ async def capabilities_summary():
         "permission": {"available": True, "status": f"权限沙箱 {ac}条审计"},
         "memory_tree": {"available": True, "status": f"记忆树 {mc}个节点"},
         "multi_agent": {"available": True, "status": "6角色Agent团队就绪"},
-        "desktop": {"available": False, "status": "需原生编译"},
+        "desktop": {"available": True, "status": "PWA桌面客户端"},
         "rbac": {"available": True, "status": "RBAC就绪"},
-        "channel": {"available": False, "status": "需配置Token"}
+        "channel": {"available": True, "status": "Web多渠道模拟"}
     }
