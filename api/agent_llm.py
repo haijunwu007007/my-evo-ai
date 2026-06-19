@@ -59,27 +59,38 @@ def call_llm(messages, tools=None, key="", timeout=None):
     task_type = _detect_task_type(messages)
     t = timeout or 60
 
-    # ── 第一梯队：免费（并行首发） ──
+    # ── 第一梯队：免费（并行首发 + 熔断） ──
     free_providers = [p for p in sorted(_LLM_PROVIDERS, key=lambda x: -x["priority"])
                       if "paid" not in p.get("tags",[]) and p.get("type") not in ("ollama",)
                       and _in_cooldown(p) is False
                       and (p.get("key") or os.environ.get(p.get("env",""),""))
                       and (not p.get("tags") or task_type in p.get("tags",[]) or "default" in p.get("tags",[]))]
-    # 并行尝试前2个免费模型
-    for p in free_providers[:2]:
-        r = _try_provider(p, messages, tools, t, key)
-        if r:
-            _mark_ok(p["name"])
-            return r
-        _mark_fail(p["name"])
-    # 串行尝试剩余免费
-    for p in free_providers[2:]:
-        if _in_cooldown(p): continue
-        r = _try_provider(p, messages, tools, t, key)
-        if r:
-            _mark_ok(p["name"])
-            return r
-        _mark_fail(p["name"])
+    if free_providers:
+        # 前2个并行竞速
+        top2 = free_providers[:2]
+        async def _race():
+            async def _try_async(p):
+                return p, await asyncio.to_thread(_try_provider, p, messages, tools, t, key)
+            done, _ = await asyncio.wait([_try_async(p) for p in top2],
+                                          return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                p, r = task.result()
+                if r:
+                    _mark_ok(p["name"])
+                    return r
+                _mark_fail(p["name"])
+            # 都失败则串行试剩余
+            for p in free_providers[2:]:
+                if _in_cooldown(p): continue
+                r = _try_provider(p, messages, tools, t, key)
+                if r:
+                    _mark_ok(p["name"])
+                    return r
+                _mark_fail(p["name"])
+            return None
+        result = asyncio.run(_race())
+        if result:
+            return result
 
     # ── 第二梯队：用户 Key ──
     if key:
