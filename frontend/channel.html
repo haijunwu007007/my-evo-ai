@@ -1,13 +1,62 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>📱 多渠道Agent — AUTO-EVO-AI</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:720px;margin:0 auto;padding:20px 16px}h2{font-size:18px;margin-bottom:12px}.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}.chan{flex:1;min-width:130px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;text-align:center}.chan .ico{font-size:32px;margin-bottom:8px}.chan .nm{font-size:13px;font-weight:600}.chan .st{font-size:11px;color:#8892b0;margin-top:4px}.chan .off{color:#ef4444}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>📱 多渠道Agent — AUTO-EVO-AI</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none;transition:all .2s}.hdr .n a:hover{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:800px;margin:0 auto;padding:20px 16px}h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.chan{flex:1;min-width:120px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .3s}.chan:hover{transform:translateY(-2px);border-color:var(--c,#4361ee);box-shadow:0 8px 24px rgba(0,0,0,.2)}.chan.active{border-color:var(--c,#4361ee);background:rgba(67,97,238,.1)}.chan .ico{font-size:28px;margin-bottom:6px}.chan .nm{font-size:12px;font-weight:600;color:#e8e8ef}.chan .st{font-size:10px;margin-top:4px}.chan .on{color:#10b981}.chan .off{color:#ef4444}.msg-box{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;min-height:120px;margin:12px 0;overflow-y:auto;max-height:250px}.msg-item{padding:8px 12px;margin:4px 0;border-radius:8px;font-size:13px;background:rgba(45,53,97,.2)}.msg-item .t{color:#8892b0;font-size:10px}.input-row{display:flex;gap:8px}.input-row input{flex:1;padding:10px 14px;border-radius:10px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none}.input-row input:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.3)}.input-row button{padding:10px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:14px;cursor:pointer;font-weight:600}.input-row button:hover{box-shadow:0 4px 20px rgba(67,97,238,.3)}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
 </style></head><body>
-<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/capabilities">能力中心</a></div></div><div class="c">
-<h2>📱 多渠道Agent — OpenClaw 风格</h2>
-<div class="row">
-<div class="chan"><div class="ico">💬</div><div class="nm">Telegram</div><div class="st off">🔴 未配置</div></div>
-<div class="chan"><div class="ico">💬</div><div class="nm">Discord</div><div class="st off">🔴 未配置</div></div>
-<div class="chan"><div class="ico">💬</div><div class="nm">WhatsApp</div><div class="st off">🔴 未配置</div></div>
-<div class="chan"><div class="ico">📨</div><div class="nm">钉钉</div><div class="st off">🔴 未配置</div></div>
-<div class="chan"><div class="ico">🌐</div><div class="nm">Web</div><div class="st" style="color:#10b981">🟢 已启用</div></div>
+<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/capabilities">能力中心</a><a href="/channel">多渠道</a></div></div>
+<div class="c">
+<h2>📱 多渠道Agent — 在Web中模拟多渠道通信</h2>
+<div class="row" id="channelList">
+<div class="chan" data-ch="web" style="--c:#10b981;border-color:#10b981" onclick="switchChannel('web')"><div class="ico">🌐</div><div class="nm">Web</div><div class="st on">● 已连接</div></div>
+<div class="chan" data-ch="telegram" style="--c:#0088cc" onclick="switchChannel('telegram')"><div class="ico">✈️</div><div class="nm">Telegram</div><div class="st on">● 模拟</div></div>
+<div class="chan" data-ch="discord" style="--c:#5865f2" onclick="switchChannel('discord')"><div class="ico">💬</div><div class="nm">Discord</div><div class="st on">● 模拟</div></div>
+<div class="chan" data-ch="dingtalk" style="--c:#0089ff" onclick="switchChannel('dingtalk')"><div class="ico">📨</div><div class="nm">钉钉</div><div class="st on">● 模拟</div></div>
+<div class="chan" data-ch="wechat" style="--c:#07c160" onclick="switchChannel('wechat')"><div class="ico">💚</div><div class="nm">微信</div><div class="st on">● 模拟</div></div>
 </div>
-<p style="color:#8892b0;font-size:12px">配置 Bot Token 后即可启用对应渠道。支持 OpenClaw 兼容的 Webhook 协议。</p>
-</div><div class="ft">AUTO-EVO-AI · 多渠道Agent (参考 OpenClaw)</div></body></html>
+<p style="color:#8892b0;font-size:12px;margin-bottom:8px">当前渠道: <strong id="currentChannel">Web</strong> | 消息会带上渠道标记</p>
+<div class="msg-box" id="msgBox"><div style="color:#636e70;font-size:12px;text-align:center;padding:20px">选择一个渠道开始对话</div></div>
+<div class="input-row">
+<input id="chInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')sendChannel()">
+<button onclick="sendChannel()">发送</button>
+</div>
+</div>
+<div class="ft">AUTO-EVO-AI · 多渠道Agent (参考 OpenClaw)</div>
+<script>
+var _ch='web', _msgs=[]
+
+function switchChannel(ch){
+  _ch=ch
+  document.querySelectorAll('.chan').forEach(function(el){el.classList.toggle('active',el.dataset.ch===ch)})
+  var names={'web':'Web','telegram':'Telegram Bot','discord':'Discord Bot','dingtalk':'钉钉机器人','wechat':'微信公众号'}
+  document.getElementById('currentChannel').textContent=names[ch]||ch
+  document.getElementById('msgBox').innerHTML=_msgs.filter(function(m){return m.ch===ch}).map(function(m){
+    return '<div class="msg-item"><div class="t">['+m.ch+'] '+new Date(m.t).toLocaleTimeString()+'</div>'+m.text+'</div>'
+  }).join('')||'<div style="color:#636e70;font-size:12px;text-align:center;padding:20px">'+names[ch]+' 暂无消息</div>'
+}
+switchChannel('web')
+
+async function sendChannel(){
+  var input=document.getElementById('chInput'), text=input.value.trim()
+  if(!text)return
+  _msgs.push({ch:_ch,text:'👤 '+text,t:Date.now(),side:'user'})
+  input.value=''
+  var names={'web':'Web','telegram':'Telegram','discord':'Discord','dingtalk':'钉钉','wechat':'微信'}
+  var fullMsg='['+names[_ch]+'] '+text
+  _msgs.push({ch:_ch,text:'⏳ AI 思考中...',t:Date.now(),side:'bot'})
+  renderChannel()
+  try{
+    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:fullMsg,prompt:fullMsg})})
+    var d=await r.json()
+    var reply=d.reply||d.response||d.message||'（无回复）'
+    // Replace the pending message
+    for(var i=_msgs.length-1;i>=0;i--){if(_msgs[i].side==='bot'&&_msgs[i].text.startsWith('⏳')){_msgs[i].text='🤖 '+reply;break}}
+  }catch(e){
+    for(var i=_msgs.length-1;i>=0;i--){if(_msgs[i].side==='bot'&&_msgs[i].text.startsWith('⏳')){_msgs[i].text='❌ 调用失败';break}}
+  }
+  renderChannel()
+}
+function renderChannel(){
+  var el=document.getElementById('msgBox')
+  var ms=_msgs.filter(function(m){return m.ch===_ch})
+  el.innerHTML=ms.map(function(m){return '<div class="msg-item"><div class="t">['+_ch+'] '+new Date(m.t).toLocaleTimeString()+'</div>'+m.text+'</div>'}).join('')
+  el.scrollTop=el.scrollHeight
+}
+</script></body></html>
