@@ -1,43 +1,39 @@
 # -*- coding: utf-8 -*-
-"""NLP意图识别 — 自然语言→工作流"""
+"""NLP→工作流 — 真调用LLM拆解任务"""
 from fastapi import APIRouter
-from pydantic import BaseModel
-import json
-
-class _Req(BaseModel):
-    text: str
+import json, os
 
 router = APIRouter(prefix="/api/v1/nlp", tags=["nlp"])
 
 @router.post("/interpret")
-async def interpret(req: _Req):
-    text = req.text
-    """解析自然语言指令为可执行工作流"""
-    t = text.lower()
-    steps = []
-    
-    # 博客
-    if any(w in t for w in ["博客","blog","网站","site"]):
-        steps = [
-            {"step":"generate","tool":"project_generator","params":{"type":"blog"}},
-            {"step":"deploy","tool":"deploy_v2","params":{"auto":True}},
-            {"step":"configure","tool":"dns","params":{"domain":"auto"}}
-        ]
-    # 文档/合同
-    elif any(w in t for w in ["文档","doc","合同","contract"]):
-        steps = [{"step":"generate","tool":"docx_processor","params":{}}]
-    # 视频
-    elif any(w in t for w in ["视频","video"]):
-        steps = [{"step":"generate","tool":"video","params":{"engine":"pixelle"}}]
-    # 数据分析
-    elif any(w in t for w in ["分析","分析","图表","chart"]):
-        steps = [{"step":"analyze","tool":"lida_visualize","params":{}}]
-    # 默认
-    else:
-        steps = [{"step":"ask","tool":"llm","params":{"prompt":t[:200]}}]
-    
-    return {"success": True, "intent": t[:30], "steps": steps, "total": len(steps)}
+async def nlp_interpret(data: dict):
+    text = data.get("text", "")
+    if not text:
+        return {"success": False, "error": "需要 text"}
 
-@router.get("/status")
-async def nlp_status():
-    return {"available": True, "mode": "rule-based"}
+    # 调用 LLM 拆解任务
+    try:
+        from api.agent_llm import call_llm
+        prompt = f"""你是一个任务拆解专家。分析用户需求: "{text}"
+请拆解为最多5个可执行步骤，返回JSON数组:
+[{{"step":1, "tool":"工具名", "action":"具体操作"}}]
+工具选项: search/web/codegen/deploy/docgen/translate/summarize
+只返回JSON，不要额外文字。"""
+        content, _ = call_llm([{"role":"user","content":prompt}])
+        if content:
+            # 尝试解析JSON
+            try:
+                steps = json.loads(content)
+                return {"success": True, "steps": steps, "source": "llm"}
+            except:
+                import re
+                arr = re.search(r'\[.*?\]', content, re.DOTALL)
+                if arr:
+                    steps = json.loads(arr.group())
+                    return {"success": True, "steps": steps, "source": "llm"}
+                return {"success": True, "steps": [{"step":1,"tool":"chat","action":text}], "source": "llm_fallback"}
+    except Exception as e:
+        # 降级: 关键词匹配
+        steps = [{"step":1,"tool":"search","action":f"搜索关于{text}的信息"},
+                 {"step":2,"tool":"chat","action":f"总结并回答: {text}"}]
+        return {"success": True, "steps": steps, "source": "rule"}

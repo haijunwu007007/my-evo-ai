@@ -181,30 +181,3 @@ async def llm_status():
     """返回当前 LLM 模型状态（前端显示）"""
     from api.agent_llm import get_active_model
     return get_active_model()
-
-
-# ===== Merged from routes_chat.py =====
-
-# ===== Merged from routes_llm_chat.py =====
-@router.post("/api/v1/llm/chat")
-async def chat(req: LLMChatRequest):
-    pid = req.provider or "autodl"
-    p = PROVIDERS.get(pid)
-    if not p: return {"success":False,"error":f"Provider {pid} not found"}
-    try:
-        async with httpx.AsyncClient(timeout=120) as client:
-            body = {"messages": _build_messages(req), "max_tokens": 2000}
-            if req.model: body["model"] = req.model
-            r = await client.post(p["endpoint"], json=body)
-            data = r.json()
-            return {"success":True,"data":data}
-    except Exception as e:
-        return {"success":False,"error":str(e)}
-
-@router.get("/api/v1/llm/providers")
-async def list_providers():
-    return {k:{"name":v["name"],"emoji":v["emoji"],"models":v["models"]} for k,v in PROVIDERS.items()}
-
-@router.get("/api/v1/llm/default")
-async def default_provider():
-    return {"provider":"autodl","model":"Qwen3.6-35B-Q4_K_M"}

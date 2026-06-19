@@ -98,8 +98,10 @@ def _mount_vue_frontend():
 
         # 非 API/App 路径兜底 + 特定文件覆盖
         _OVERRIDE = {
+            "enterprise.html": "enterprise.html",
             "company.html": "company.html",
             "tools": "tools.html",
+            "enterprise": "enterprise.html",
             "deploy": "deploy.html",
             "canvas": "canvas.html",
             "workflow": "workflow.html",
@@ -117,6 +119,7 @@ def _mount_vue_frontend():
             "memory": "memory.html",
             "multi-agent": "multi_agent.html",
             "desktop": "desktop.html",
+            "rbac": "rbac.html",
             "channel": "channel.html",
         }
 

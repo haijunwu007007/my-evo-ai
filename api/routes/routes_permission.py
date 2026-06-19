@@ -32,28 +32,3 @@ async def check_tool(user: str, tool: str, action: str = "execute"):
 @router.get("/api/v1/permission/audit")
 async def get_audit(limit: int = 50):
     return {"logs": _get().get_audit_log(limit)}
-
-# ===== RBAC（从 routes_rbac.py 合并） =====
-from modules.role_rbac import RoleRBAC
-_rbac = None
-def _get_rbac():
-    global _rbac
-    if _rbac is None:
-        _rbac = RoleRBAC()
-        _rbac.add_role("admin", ["*"], "管理员")
-        _rbac.add_role("dev", ["read","write","deploy"], "开发者")
-        _rbac.add_role("viewer", ["read"], "只读用户")
-    return _rbac
-
-@router.get("/api/v1/rbac/status")
-async def rbac_status():
-    return {"status": "ok", "roles": _get_rbac().get_roles()}
-
-@router.post("/api/v1/rbac/check")
-async def rbac_check(username: str, permission: str):
-    return _get_rbac().check(username, permission)
-
-@router.post("/api/v1/rbac/assign")
-async def rbac_assign(username: str, role: str):
-    _get_rbac().assign(username, role)
-    return {"ok": True}
