@@ -108,6 +108,8 @@ def _mount_vue_frontend():
             "automations": "automations.html",
             "hub": "hub.html",
             "video": "video.html",
+            "register": "register.html",
+            "login": "login.html",
             "monitor": "monitor.html",
             "capabilities": "capabilities.html",
             "codebase": "codebase.html",

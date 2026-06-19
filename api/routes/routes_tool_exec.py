@@ -163,3 +163,17 @@ async def tool_direct(tool_name: str):
     if tool_name not in _DIRECT_TOOLS:
         return {"success": False, "error": "工具不在直接执行列表中"}
     return await tool_execute(tool_name)
+
+
+@router.get("/api/v1/download/{filepath:path}")
+async def download_file(filepath: str):
+    """下载工具生成的文件"""
+    import os as _os, aiofiles
+    from fastapi.responses import FileResponse
+    base = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    fp = _os.path.join(base, "data", "generated", filepath)
+    if not _os.path.exists(fp):
+        return {"success": False, "error": "文件不存在"}
+    resp = FileResponse(fp, filename=_os.path.basename(fp))
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
