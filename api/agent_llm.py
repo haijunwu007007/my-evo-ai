@@ -158,5 +158,29 @@ def call_llm_stream(messages, key="", system_prompt=""):
             yield text[i:i+5]
     yield "__DONE__"
 
+def get_active_model(api_key="") -> dict:
+    """返回当前可用的模型状态（供前端查询）"""
+    providers = []
+    for p in _LLM_PROVIDERS:
+        task_type = "default"
+        tags = p.get("tags", [])
+        if "paid" in tags: task_type = "paid"
+        elif "default" in tags: task_type = "free"
+        has_key = bool(p.get("key") or os.environ.get(p.get("env",""),""))
+        available = has_key and not _in_cooldown(p)
+        if p.get("type") == "openai": available = not _in_cooldown(p)
+        if p.get("type") == "ollama": available = True
+        providers.append({
+            "name": p["name"],
+            "model": p.get("model",""),
+            "priority": p.get("priority",0),
+            "task_type": task_type,
+            "available": available,
+            "in_cooldown": _in_cooldown(p),
+            "fail_count": _FAIL_COUNT.get(p["name"],0),
+        })
+    providers.sort(key=lambda x: -x["priority"])
+    return {"providers": providers, "active": [p for p in providers if p["available"]][:1] if providers else []}
+
 def _build_fallback_reply(messages, tools=None) -> str:
     return "LLM不可用，请检查API配置或稍后重试"

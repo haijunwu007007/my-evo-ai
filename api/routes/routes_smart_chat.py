@@ -175,3 +175,9 @@ async def smart_stream(req: Req):
             yield json.dumps({"type":"chunk","text":chunk}, ensure_ascii=False) + "\n"
         yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
     return StreamingResponse(generate(), media_type="application/x-ndjson")
+
+@router.get("/api/v1/llm/status")
+async def llm_status():
+    """返回当前 LLM 模型状态（前端显示）"""
+    from api.agent_llm import get_active_model
+    return get_active_model()

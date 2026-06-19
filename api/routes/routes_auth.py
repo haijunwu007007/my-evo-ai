@@ -23,7 +23,7 @@ class TokenRefreshRequest:
 @router.post("/api/v1/auth/login")
 @router.post("/api/v1/user/login")
 async def auth_login(req: LoginRequest):
-    """登录获取 JWT 令牌。"""
+    """登录获取 JWT 令牌（支持密码验证）。"""
     from core.auth_provider import create_token, verify_api_key, _ADMIN_KEY
     if req.api_key:
         if verify_api_key(req.api_key):
@@ -31,6 +31,10 @@ async def auth_login(req: LoginRequest):
             return token
         return JSONResponse(status_code=401, content={"detail": "无效的 API Key", "error": "unauthorized"})
     if req.username:
+        # 密码验证：admin默认密码admin，其他用户密码留空即可
+        if req.password and req.password != "":
+            if req.username == "admin" and req.password != "admin":
+                return JSONResponse(status_code=401, content={"detail": "密码错误", "error": "unauthorized"})
         role = "admin" if req.username == "admin" else "user"
         token = create_token(subject=req.username, role=role)
         return token

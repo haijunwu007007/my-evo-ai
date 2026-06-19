@@ -96,9 +96,10 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
     <div class="header">
       <div class="header-actions">
         <h1 id="mainTitle">🤖 AUTO-EVO-AI</h1>
-        <div>
-          <span id="newChatBtn" onclick="clearHistory()" style="margin-right:8px">🔄 新对话</span>
-          <span id="archivesBtn" onclick="showArchives()" style="margin-right:8px">📋 历史</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span id="modelBadge" style="font-size:10px;background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;cursor:pointer" onclick="checkLLM()" title="点击检查LLM状态">🧠 检测中</span>
+          <span id="newChatBtn" onclick="clearHistory()" style="margin-right:4px">🔄 新对话</span>
+          <span id="archivesBtn" onclick="showArchives()" style="margin-right:4px">📋 历史</span>
           <span id="logoutBtn" onclick="doLogout()">🔓 退出</span>
         </div>
       </div>
@@ -128,6 +129,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;ba
       </div>
     </div>
     <div class="messages" id="messages"></div>
+    <!-- 搜索框 + 快捷工具 -->
+    <div style="padding:8px 0 4px;flex-shrink:0;position:relative">
+      <input id="toolSearch" oninput="filterTools(this.value)" placeholder="🔍 搜索工具..." style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:13px;outline:none">
+      <span id="toolCount" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text2)">94工具</span>
+    </div>
     <!-- 快捷操作：9个新集成工具 -->
     <div class="quick-actions" id="quickActions">
       <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器自动化</span>
@@ -429,16 +435,17 @@ async function doRegister(){
   if(!user||user.length<2){alert('用户名至少2个字符');return}
   if(user=='admin'){} // 允许admin
   var key=document.getElementById('regKey').value.trim()
+  var pass=document.getElementById('regPass').value.trim()
   try{
-    var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
+    var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})})
     var d=await r.json()
-    if(!d.success){
-      var r2=await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:''})})
+    if(!d.success&&!d.access_token){
+      var r2=await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})})
       await r2.json()
     }
   }catch(e){console.warn('auth/register fail',e)}
   if(!localStorage.getItem('evo_logged_in')){
-    localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1')
+    localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1');localStorage.setItem('evo_login_ts',Date.now().toString())
   }
   if(key)localStorage.setItem('evo_api_key',key)
   document.getElementById('authCard').style.display='none'
@@ -449,7 +456,7 @@ async function doRegister(){
     setTimeout(function(){
       var ow=document.createElement('div');ow.id='onboardingOverlay'
       ow.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center'
-      ow.innerHTML='<div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;padding:32px;max-width:480px;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center"><h2 style="margin:0 0 8px">🚀 欢迎使用 AUTO-EVO-AI</h2><p style="opacity:0.9;margin:8px 0 16px;line-height:1.6">试试这些操作：<br>✨ <b>点击任意工具按钮</b>→自动执行<br>💬 <b>输入文字</b>→AI自动回复<br>📊 <b>顶部Tab</b>→切换仪表盘/开源中心<br>🔑 在右上角<b>设置Key</b>启用更多模型</p><button onclick="document.getElementById(\'onboardingOverlay\').remove();localStorage.setItem(\'evo_guide_done\',\'1\')" style="background:#fff;color:#667eea;border:none;padding:10px 28px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold">✓ 知道了</button></div>'
+      ow.innerHTML='<div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;padding:32px;max-width:520px;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:left"><h2 style="margin:0 0 12px;text-align:center">🚀 欢迎使用 AUTO-EVO-AI</h2><p style="opacity:0.9;margin:8px 0 16px;line-height:1.8">快速上手：</p><ol style="margin:0 0 16px;padding-left:20px;line-height:2;opacity:0.95"><li>💬 在输入框<strong>打字</strong>，AI自动回复</li><li>🔍 用<strong>搜索框</strong>快速找到需要的工具</li><li>🖱️ <strong>点击工具按钮</strong>→自动填充并执行</li><li>📊 <strong>顶部Tab</strong>切换仪表盘/画布/部署器</li><li>🔑 右上角<strong>设置API Key</strong>解锁更多模型</li><li>📋 <strong>92个工具</strong>覆盖开发/运维/业务全流程</li></ol><p style="opacity:0.8;font-size:13px;margin:0 0 16px;text-align:center">💡 搜一下"<strong>部署</strong>"试试？所有工具一键搜索！</p><button onclick="document.getElementById(\'onboardingOverlay\').remove();localStorage.setItem(\'evo_guide_done\',\'1\')" style="display:block;margin:0 auto;background:#fff;color:#667eea;border:none;padding:10px 28px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold">✓ 知道了，开始使用</button></div>'
       document.body.appendChild(ow)
     }, 500)
   }
@@ -657,13 +664,52 @@ function startVoice(){
   r.start()
 }
 
+// ===== 工具搜索 =====
+function filterTools(q){
+  var btns=document.querySelectorAll('.quick-actions .qa'), cnt=0
+  q=q.toLowerCase().trim()
+  for(var i=0;i<btns.length;i++){
+    var t=btns[i].textContent.toLowerCase()
+    if(!q||t.indexOf(q)>=0){btns[i].style.display='inline-flex';cnt++}else{btns[i].style.display='none'}
+  }
+  document.getElementById('toolCount').textContent=cnt+'/'+btns.length
+}
+
+// ===== LLM状态检测 =====
+async function checkLLM(){
+  var badge=document.getElementById('modelBadge')
+  badge.textContent='⏳ 检测...'
+  try{
+    var r=await fetch('/api/v1/llm/status',{signal:AbortSignal.timeout(5000)})
+    var d=await r.json()
+    if(d&&d.active&&d.active.length>0){
+      var m=d.active[0]
+      badge.textContent='🧠 '+m.name
+      badge.title='当前模型: '+m.name+' (优先级:'+m.priority+')'
+    }else if(d&&d.providers){
+      var avail=d.providers.filter(function(p){return p.available})
+      if(avail.length>0){badge.textContent='🧠 '+avail[0].name
+        badge.title='可用: '+avail.map(function(p){return p.name}).join(', ')}else{badge.textContent='❌ 无模型'
+        badge.title='所有模型均不可用，请配置 API Key'}
+    }else{badge.textContent='❌ 无模型'}
+  }catch(e){badge.textContent='❌ 检测失败';badge.title='LLM服务未响应'}
+}
+
 // ===== 初始化 =====
+var _LOGIN_TTL=86400000 // 24小时会话过期（毫秒）
+var _loginTs=localStorage.getItem('evo_login_ts')
+if(_loginTs&&(Date.now()-parseInt(_loginTs)>_LOGIN_TTL)){
+  localStorage.removeItem('evo_logged_in')
+  localStorage.removeItem('evo_login_ts')
+}
 if(localStorage.getItem('evo_logged_in')){
   document.getElementById('authCard').style.display='none'
   document.getElementById('mainContent').classList.add('show')
   document.getElementById('greeting').textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')
   translateUI()
   restoreHistory()
+  // 延迟检测LLM状态
+  setTimeout(function(){checkLLM()},1000)
 }
 translateUI()
 </script>
