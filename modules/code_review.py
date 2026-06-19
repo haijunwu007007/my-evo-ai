@@ -1,1071 +1,422 @@
 """
-AUTO-EVO-AI V0.1 — 代码审查引擎
-Grade: A (生产级) | Category: 工具链
-职责：自动化代码审查、质量评分、安全扫描、最佳实践检测、变更分析
+Grade: A
+AUTO-EVO-AI V0.1 — AI Code Review Engine
+基于 Git diff + LLM 的专业代码审查引擎
+支持：审查未提交变更 / 审查 commit / 审查 PR / 分支对比
 """
+from __future__ import annotations
 
 __module_meta__ = {
-        "id": "code-review",
-        "name": "Code Review",
-        "version": "V0.1",
-        "group": "developer",
-        "inputs": [
-            {
-                "name": "name",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "value",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "name_2",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "value_2",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "name_3",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "value_3",
-                "type": "string",
-                "required": True,
-                "description": ""
-            }
-        ],
-        "outputs": [
-            {
-                "name": "result",
-                "type": "dict",
-                "description": "执行结果"
-            },
-            {
-                "name": "result_2",
-                "type": "dict",
-                "description": "执行结果"
-            },
-            {
-                "name": "result_3",
-                "type": "dict",
-                "description": "执行结果"
-            }
-        ],
-        "triggers": [],
-        "depends_on": [],
-        "tags": [
-            "code",
-            "developer",
-            "adapter"
-        ],
-        "grade": "A",
-        "description": "AUTO-EVO-AI V0.1 — 代码审查引擎 Grade: A (生产级) | Category: 工具链"
-    }
+    "id": "code-review",
+    "name": "AI 代码审查引擎",
+    "version": "V0.1",
+    "group": "developer",
+    "grade": "A",
+    "description": "基于 Git diff + LLM 的专业代码审查引擎",
+    "tags": ["code-review", "git", "ai", "quality"],
+}
 
-import asyncio
-import time
-import uuid
-import re
-import os
-import ast
-import json
-import logging
-import subprocess
-import tempfile
-from typing import Any, Dict, List, Optional, Tuple
-from enum import Enum
-from dataclasses import dataclass, field
+import subprocess, os, json, re, time, difflib
+from pathlib import Path
+from typing import Optional
 from datetime import datetime
-from collections import defaultdict
+from dataclasses import dataclass, field, asdict
 
-try:
-    from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from modules._base.tracing import trace_operation
-    from modules._base.metrics import MetricsCollector, metrics_collector
-    from modules._base.audit import AuditLogger
-except ImportError:
-    import sys
+from modules._base import Result
+from modules._base.enterprise_module import EnterpriseModule
 
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from _base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from _base.tracing import trace_operation
-    from _base.metrics import metrics_collector
-    from _base.audit import AuditLogger
-logger = logging.getLogger("code_review")
-
-class _MetricsAdapter:
-    """轻量指标适配器"""
-    def __init__(self):self._data={}
-    def increment(self,name:str,value:float=1.0,**kw):self._data[name]=self._data.get(name,0)+value
-    def histogram(self,name:str,value:float,**kw):self._data[name]=value
-    def gauge(self,name:str,value:float,**kw):self._data[name]=value
-    def snapshot(self):return dict(self._data)
-
-    def counter(self, name: str, value: float = 1.0, **kw):
-        pass
-
-    # --- Auto-generated action dispatch methods ---
-    def _action_counter(self, params=None):
-        """Auto-generated action wrapper for counter"""
-        if params is None:
-            params = {}
-        return self.counter(**params)
-
-    def _action_gauge(self, params=None):
-        """Auto-generated action wrapper for gauge"""
-        if params is None:
-            params = {}
-        return self.gauge(**params)
-
-    def _action_histogram(self, params=None):
-        """Auto-generated action wrapper for histogram"""
-        if params is None:
-            params = {}
-        return self.histogram(**params)
-
-    def _action_increment(self, params=None):
-        """Auto-generated action wrapper for increment"""
-        if params is None:
-            params = {}
-        return self.increment(**params)
-
-class Severity(Enum):
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
-
-class RuleCategory(Enum):
-    SECURITY = "security"
-    PERFORMANCE = "performance"
-    STYLE = "style"
-    BEST_PRACTICE = "best_practice"
-    BUG_RISK = "bug_risk"
-    MAINTAINABILITY = "maintainability"
-    DOCUMENTATION = "documentation"
-
-@dataclass
-class ReviewRule:
-    """审查规则"""
-
-    rule_id: str
-    name: str
-    category: RuleCategory
-    severity: Severity
-    description: str
-    pattern: str = ""
-    check_fn: str | None = None
-    auto_fix: bool = False
 
 @dataclass
 class ReviewIssue:
-    """审查问题"""
-
-    issue_id: str
-    rule_id: str
-    file_path: str
-    line_number: int
-    severity: Severity
-    category: RuleCategory
-    message: str
-    code_snippet: str = ""
+    severity: str  # critical / major / minor / info
+    category: str  # security / bug / style / performance / best_practice / documentation
+    file: str
+    line: int = 0
+    message: str = ""
     suggestion: str = ""
-    auto_fixable: bool = False
+    code_snippet: str = ""
+
 
 @dataclass
 class ReviewResult:
-    """审查结果"""
-
-    review_id: str
-    file_path: str
-    language: str
-    total_lines: int = 0
+    review_id: str = ""
+    timestamp: str = ""
+    target_type: str = ""  # working_tree / commit / branch / pr
+    target: str = ""
     issues: list[ReviewIssue] = field(default_factory=list)
-    score: float = 100.0
-    metrics: dict[str, Any] = field(default_factory=dict)
-    duration_ms: float = 0.0
-    reviewed_at: float = field(default_factory=time.time)
-
-@dataclass
-class CodeMetrics:
-    """代码度量"""
-
+    summary: str = ""
+    score: int = 100  # 0-100
+    files_reviewed: list[str] = field(default_factory=list)
     total_lines: int = 0
-    code_lines: int = 0
-    comment_lines: int = 0
-    blank_lines: int = 0
-    complexity: int = 0
-    functions: int = 0
-    classes: int = 0
-    imports: int = 0
-    avg_function_length: float = 0.0
-    max_function_length: int = 0
-    duplication_ratio: float = 0.0
+    duration_ms: int = 0
 
-class ReviewPatternAnalyzer:
-    """代码审查模式分析器 — 识别重复代码、复杂度热点、风格偏差"""
 
-    def __init__(self):
-        self._complexity_cache: dict[str, int] = {}
+_review_history: list[ReviewResult] = []
+_REVIEW_DB_PATH = Path(__file__).parent.parent / ".evo_data" / "reviews.json"
 
-    def analyze_complexity(self, code: str) -> dict[str, Any]:
-        """分析代码复杂度：圈复杂度、嵌套深度、函数长度"""
-        lines = code.split("\n")
-        functions = self._extract_functions(lines)
-        results = []
-        for func_name, start, end in functions:
-            func_lines = lines[start:end]
-            body = "\n".join(func_lines)
-            complexity = self._cyclomatic_complexity(body)
-            max_nest = self._max_nesting_depth(func_lines)
-            length = end - start
-            grade = "A" if complexity <= 5 and max_nest <= 3 else "B" if complexity <= 10 and max_nest <= 4 else "C"
-            results.append(
-                {
-                    "function": func_name,
-                    "lines": length,
-                    "complexity": complexity,
-                    "max_nesting": max_nest,
-                    "grade": grade,
-                }
-            )
-        results.sort(key=lambda x: x["complexity"], reverse=True)
-        return {
-            "total_functions": len(results),
-            "average_complexity": round(sum(r["complexity"] for r in results) / max(len(results), 1), 1),
-            "hotspots": [r for r in results if r["grade"] == "C"],
-            "functions": results,
-        }
 
-    def detect_code_smells(self, code: str) -> list[dict[str, Any]]:
-        """检测代码异味：过长函数、过深嵌套、魔法数字、重复代码"""
-        smells = []
-        lines = code.split("\n")
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if len(stripped) > 120:
-                smells.append({"type": "long_line", "line": i + 1, "length": len(stripped), "severity": "warning"})
-            magic = re.findall(r"\b\d{2,}\b", stripped)
-            for num in magic:
-                if num not in ("0", "1", "10", "100", "1000", "3600", "86400"):
-                    smells.append({"type": "magic_number", "line": i + 1, "value": num, "severity": "info"})
-                    break
-        func_pairs = self._extract_functions(lines)
-        for i in range(len(func_pairs)):
-            for j in range(i + 1, len(func_pairs)):
-                body_i = "\n".join(lines[func_pairs[i][1] : func_pairs[i][2]])
-                body_j = "\n".join(lines[func_pairs[j][1] : func_pairs[j][2]])
-                similarity = self._quick_similarity(body_i, body_j)
-                if similarity > 0.7:
-                    smells.append(
-                        {
-                            "type": "duplicate_code",
-                            "functions": [func_pairs[i][0], func_pairs[j][0]],
-                            "similarity": round(similarity, 3),
-                            "severity": "warning",
-                        }
-                    )
-        return smells
+def _load_history():
+    global _review_history
+    if _REVIEW_DB_PATH.exists():
+        try:
+            raw = json.loads(_REVIEW_DB_PATH.read_text(encoding="utf-8"))
+            _review_history = [ReviewResult(**r) for r in raw[-50:]]
+        except Exception:
+            _review_history = []
 
-    def _extract_functions(self, lines):
-        functions = []
-        for i, line in enumerate(lines):
-            if re.match(r"^\s*(async\s+)?def\s+(\w+)", line):
-                name = re.match(r"^\s*(async\s+)?def\s+(\w+)", line).group(2)
-                if name.startswith("_"):
-                    continue
-                end = i + 1
-                while end < len(lines) and lines[end].strip() and not re.match(r"^\s*(async\s+)?def\s+", lines[end]):
-                    end += 1
-                functions.append((name, i, end))
-        return functions
 
-    def _cyclomatic_complexity(self, code: str) -> int:
-        branches = len(re.findall(r"\bif\b|\belif\b|\bfor\b|\bwhile\b|\band\b|\bor\b|\bexcept\b", code))
-        return branches + 1
+def _save_history():
+    _REVIEW_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    raw = [asdict(r) for r in _review_history[-100:]]
+    _REVIEW_DB_PATH.write_text(json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    def _max_nesting_depth(self, lines):
-        max_depth = 0
-        current = 0
+
+def _run_git(cmd: list[str], cwd: Optional[str] = None) -> tuple[str, str]:
+    """执行 git 命令"""
+    if not cwd:
+        cwd = str(Path(__file__).parent.parent)
+    try:
+        r = subprocess.run(["git"] + cmd, capture_output=True, text=True, timeout=30, cwd=cwd)
+        return r.stdout, r.stderr
+    except subprocess.TimeoutExpired:
+        return "", "TIMEOUT"
+    except FileNotFoundError:
+        return "", "git not found"
+
+
+def _parse_diff(diff_text: str) -> list[dict]:
+    """解析 git diff 输出为结构化数据"""
+    files = []
+    current = None
+    for line in diff_text.split("\n"):
+        if line.startswith("diff --git"):
+            if current:
+                files.append(current)
+            m = re.search(r" b/(.+)$", line)
+            current = {"file": m.group(1) if m else "unknown", "additions": 0, "deletions": 0, "chunks": [], "content": line + "\n"}
+        elif current:
+            current["content"] += line + "\n"
+            if line.startswith("@@"):
+                m = re.search(r"\+(\d+)", line)
+                current["chunks"].append({"start_line": int(m.group(1)) if m else 0, "lines": []})
+            elif line.startswith("+"):
+                current["additions"] += 1
+                if current["chunks"]:
+                    current["chunks"][-1]["lines"].append(line)
+            elif line.startswith("-"):
+                current["deletions"] += 1
+    if current:
+        files.append(current)
+    return files
+
+
+class CodeReviewer:
+    """AI 代码审查引擎"""
+
+    def __init__(self, repo_path: Optional[str] = None):
+        self.repo_path = repo_path or str(Path(__file__).parent.parent)
+        _load_history()
+
+    def _call_llm(self, prompt: str, system: str = "你是资深代码审查专家，精通安全审计、性能优化和最佳实践。") -> str:
+        """调用 LLM 进行审查"""
+        try:
+            from api.agent_llm import call_llm
+            msgs = [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt[:8000]},
+            ]
+            r, _ = call_llm(msgs, None, "")
+            return r or "（LLM 审查未返回结果）"
+        except Exception as e:
+            return f"LLM 调用失败: {e}"
+
+    def _parse_llm_review(self, text: str, file_path: str) -> list[ReviewIssue]:
+        """解析 LLM 审查结果"""
+        issues = []
+        lines = text.split("\n")
+        current_severity = "info"
+        current_category = "best_practice"
+
         for line in lines:
-            stripped = line.strip()
-            if stripped.startswith(("if ", "elif ", "else:", "for ", "while ", "try:", "with ", "except ")):
-                current += 1
-                max_depth = max(max_depth, current)
-            elif stripped and not stripped.startswith("#"):
-                indent = len(line) - len(line.lstrip())
-                spaces = indent // 4
-                current = min(current, spaces)
-        return max_depth
+            line_lower = line.lower()
+            if "[critical]" in line_lower or "🔴" in line or "严重" in line:
+                current_severity = "critical"
+            elif "[major]" in line_lower or "🟠" in line or "主要" in line:
+                current_severity = "major"
+            elif "[minor]" in line_lower or "🟡" in line or "次要" in line:
+                current_severity = "minor"
+            elif "[info]" in line_lower or "🔵" in line or "建议" in line:
+                current_severity = "info"
 
-    def _quick_similarity(self, a: str, b: str) -> float:
-        set_a = set(a.split())
-        set_b = set(b.split())
-        if not set_a and not set_b:
-            return 1.0
-        return len(set_a & set_b) / len(set_a | set_b)
+            if "安全" in line or "security" in line_lower:
+                current_category = "security"
+            elif "bug" in line_lower or "错误" in line:
+                current_category = "bug"
+            elif "性能" in line or "performance" in line_lower:
+                current_category = "performance"
+            elif "风格" in line or "style" in line_lower:
+                current_category = "style"
+            elif "文档" in line or "doc" in line_lower:
+                current_category = "documentation"
 
-class CodeReview(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
-    """代码审查引擎"""
+            if line.strip().startswith("- ") or line.strip().startswith("* "):
+                msg = line.strip().lstrip("-* ").strip()
+                if msg:
+                    line_num = 0
+                    m = re.search(r":(\d+)", msg)
+                    if m:
+                        line_num = int(m.group(1))
+                    issues.append(ReviewIssue(
+                        severity=current_severity,
+                        category=current_category,
+                        file=file_path,
+                        line=line_num,
+                        message=msg[:200],
+                    ))
 
-    def __init__(self):
+        return issues
 
-        super().__init__(
-            config={
-                "module_id": "code_review",
-                "version": "7.0.0",
-                "description": "代码审查引擎，支持安全扫描/质量评分/最佳实践检测",
-            }
-        )
-        self.module_name = "code_review"
-        self.module_id = self.module_name
-        self._rules: list[ReviewRule] = []
-        self._results: list[ReviewResult] = []
-        self._max_file_size = 500000
-        self._supported_languages = {"python": ".py", "javascript": ".js", "typescript": ".ts"}
-
-    def initialize(self) -> None:
-        self._register_rules()
-        logger.info(f"代码审查引擎初始化完成，{len(self._rules)} 条规则")
-
-    def _register_rules(self) -> None:
-        """注册审查规则"""
-        self._rules = [
-            # 安全规则
-            ReviewRule(
-                "sec_001",
-                "硬编码密码",
-                RuleCategory.SECURITY,
-                Severity.CRITICAL,
-                "检测硬编码密码、密钥或token",
-                pattern=r"(password|passwd|secret|api_key|token)\s*=\s*['\"][^'\"]+['\"]",
-            ),
-            ReviewRule(
-                "sec_002",
-                "SQL注入风险",
-                RuleCategory.SECURITY,
-                Severity.CRITICAL,
-                "检测字符串拼接SQL",
-                pattern=r"(execute|cursor\.execute)\s*\(\s*['\"].*\+.*['\"]",
-            ),
-            ReviewRule(
-                "sec_003",
-                "eval使用",
-                RuleCategory.SECURITY,
-                Severity.ERROR,
-                "检测eval/exec的使用",
-                pattern=r"\b(eval|exec)\s*\(",
-            ),
-            ReviewRule(
-                "sec_004",
-                "pickle反序列化",
-                RuleCategory.SECURITY,
-                Severity.ERROR,
-                "检测不安全的pickle使用",
-                pattern=r"pickle\.loads?\s*\(",
-            ),
-            ReviewRule(
-                "sec_005",
-                "调试代码",
-                RuleCategory.SECURITY,
-                Severity.WARNING,
-                "检测调试代码残留",
-                pattern=r"(pdb\.set_trace|breakpoint\(\)|import pdb|print\(.{0,50}(password|token|secret))",
-            ),
-            ReviewRule(
-                "sec_006",
-                "弱加密",
-                RuleCategory.SECURITY,
-                Severity.ERROR,
-                "检测弱加密算法",
-                pattern=r"\b(md5|sha1)\s*\(",
-            ),
-            # 性能规则
-            ReviewRule(
-                "perf_001",
-                "循环内数据库查询",
-                RuleCategory.PERFORMANCE,
-                Severity.WARNING,
-                "检测循环内数据库操作",
-                pattern=r"(for|while).{0,200}(execute|query|fetch|cursor)",
-            ),
-            ReviewRule(
-                "perf_002",
-                "全局变量",
-                RuleCategory.PERFORMANCE,
-                Severity.INFO,
-                "检测过多全局变量",
-                check_fn="check_globals",
-            ),
-            ReviewRule(
-                "perf_003",
-                "大列表推导",
-                RuleCategory.PERFORMANCE,
-                Severity.INFO,
-                "检测可能消耗大量内存的列表推导",
-                pattern=r"\[\s*\w+\s+for\s+\w+\s+in\s+range\(\d{5,}\)",
-            ),
-            ReviewRule(
-                "perf_004",
-                "未使用生成器",
-                RuleCategory.PERFORMANCE,
-                Severity.INFO,
-                "检测可改为生成器的场景",
-                check_fn="check_generator",
-            ),
-            # 最佳实践
-            ReviewRule(
-                "bp_001",
-                "缺少类型注解",
-                RuleCategory.BEST_PRACTICE,
-                Severity.INFO,
-                "函数缺少类型注解",
-                check_fn="check_type_hints",
-            ),
-            ReviewRule(
-                "bp_002",
-                "缺少docstring",
-                RuleCategory.BEST_PRACTICE,
-                Severity.INFO,
-                "类/函数缺少docstring",
-                check_fn="check_docstrings",
-            ),
-            ReviewRule(
-                "bp_003",
-                "过于宽泛的except",
-                RuleCategory.BEST_PRACTICE,
-                Severity.WARNING,
-                "使用裸except或过于宽泛的异常捕获",
-                pattern=r"except\s*:\s*$|except\s+Exception\s*:\s*$",
-            ),
-            ReviewRule(
-                "bp_004",
-                "魔法数字",
-                RuleCategory.BEST_PRACTICE,
-                Severity.INFO,
-                "使用魔法数字",
-                check_fn="check_magic_numbers",
-            ),
-            ReviewRule(
-                "bp_005",
-                "过长函数",
-                RuleCategory.MAINTAINABILITY,
-                Severity.WARNING,
-                "函数超过50行",
-                check_fn="check_function_length",
-            ),
-            ReviewRule(
-                "bp_006",
-                "过长参数列表",
-                RuleCategory.MAINTAINABILITY,
-                Severity.WARNING,
-                "函数参数超过5个",
-                check_fn="check_param_count",
-            ),
-            # 风格规则
-            ReviewRule(
-                "style_001",
-                "行过长",
-                RuleCategory.STYLE,
-                Severity.WARNING,
-                "行超过120字符",
-                check_fn="check_line_length",
-            ),
-            ReviewRule(
-                "style_002",
-                "尾随空格",
-                RuleCategory.STYLE,
-                Severity.INFO,
-                "行尾有多余空格",
-                check_fn="check_trailing_whitespace",
-            ),
-            ReviewRule(
-                "style_003",
-                "缺少模块文档",
-                RuleCategory.DOCUMENTATION,
-                Severity.INFO,
-                "模块缺少顶部文档字符串",
-                check_fn="check_module_docstring",
-            ),
-            # Bug风险
-            ReviewRule(
-                "bug_001",
-                "可变默认参数",
-                RuleCategory.BUG_RISK,
-                Severity.ERROR,
-                "使用可变对象作为默认参数",
-                pattern=r"def\s+\w+\s*\([^)]*=\s*(\[\]|\{\}|\[.*\]|\{.*\})",
-            ),
-            ReviewRule(
-                "bug_002",
-                "比较None",
-                RuleCategory.BUG_RISK,
-                Severity.WARNING,
-                "使用 == 比较 None",
-                pattern=r"[!=]=\s*None\s*$|[!=]=\s+None[^a-zA-Z]",
-            ),
-            ReviewRule(
-                "bug_003",
-                "未关闭资源",
-                RuleCategory.BUG_RISK,
-                Severity.WARNING,
-                "文件操作未使用with语句",
-                pattern=r"open\s*\([^)]+\)\s*(?!.*as\s)",
-            ),
-        ]
-
-    def review_code(self, file_path: str, content: str | None = None, language: str = "") -> dict[str, Any]:
-        """审查代码文件"""
+    def review_working_tree(self, staged: bool = False) -> ReviewResult:
+        """审查工作区变更（未提交代码）"""
         start = time.time()
+        cmd = ["diff", "--cached"] if staged else ["diff"]
+        diff_text, err = _run_git(cmd, self.repo_path)
+        files = _parse_diff(diff_text)
 
-        if content is None:
-            with open(file_path, encoding="utf-8", errors="replace") as f:
-                content = f.read()
-
-        ext = os.path.splitext(file_path)[1].lower()
-        language = self._detect_language(ext)
-
-        review = ReviewResult(
-            review_id=f"rev_{uuid.uuid4().hex[:8]}",
-            file_path=file_path,
-            language=language,
-            total_lines=len(content.split("\n")),
+        result = ReviewResult(
+            review_id=f"rev_{int(time.time())}",
+            timestamp=datetime.now().isoformat(),
+            target_type="working_tree",
+            target="staged" if staged else "unstaged",
+            files_reviewed=[f["file"] for f in files],
+            total_lines=sum(f["additions"] + f["deletions"] for f in files),
         )
+        result.duration_ms = int((time.time() - start) * 1000)
 
-        # 计算代码度量
-        review.metrics = self._compute_metrics(content, language)
+        if not files:
+            result.summary = "✅ 没有未提交的变更"
+            result.score = 100
+            _review_history.append(result)
+            _save_history()
+            return result
 
-        # 应用规则检查
-        lines = content.split("\n")
-        for rule in self._rules:
-            if rule.pattern:
-                issues = self._check_pattern_rule(rule, lines, file_path)
-                review.issues.extend(issues)
+        # LLM 审查每个文件
+        all_issues = []
+        for f in files:
+            prompt = f"""请审查以下代码变更文件（{f['file']}），逐条列出问题：
+变更统计：+{f['additions']} / -{f['deletions']}
 
-        # 结构化检查（Python）
-        if language == "python":
-            structural_issues = self._check_python_structure(content, file_path)
-            review.issues.extend(structural_issues)
+变更内容：
+```diff
+{f['content'][:3000]}
+```
 
-        # 计算评分
-        review.score = self._calculate_score(review.issues, review.total_lines)
-        review.duration_ms = (time.time() - start) * 1000
+请按以下格式逐条列出问题：
+- [severity] [category] 描述信息
 
-        self._results.append(review)
-        if not hasattr(self, "_files_reviewed"):
-            self._files_reviewed = 0
-        self._files_reviewed += 1
+severity: critical/major/minor/info
+category: security/bug/performance/style/best_practice
+"""
+            review_text = self._call_llm(prompt)
+            issues = self._parse_llm_review(review_text, f["file"])
+            all_issues.extend(issues)
 
-        severity_counts = defaultdict(int)
-        for issue in review.issues:
-            severity_counts[issue.severity.value] += 1
+        result.issues = all_issues
 
-        return {
-            "review_id": review.review_id,
-            "file_path": file_path,
-            "language": language,
-            "score": round(review.score, 1),
-            "total_lines": review.total_lines,
-            "issues_total": len(review.issues),
-            "issues_by_severity": dict(severity_counts),
-            "metrics": review.metrics,
-            "top_issues": [
-                {
-                    "line": i.line_number,
-                    "severity": i.severity.value,
-                    "category": i.category.value,
-                    "message": i.message,
-                    "suggestion": i.suggestion,
-                }
-                for i in sorted(review.issues, key=lambda x: x.severity.value, reverse=True)[:10]
-            ],
-            "duration_ms": round(review.duration_ms, 2),
-        }
+        # 评分
+        critical_count = sum(1 for i in all_issues if i.severity == "critical")
+        major_count = sum(1 for i in all_issues if i.severity == "major")
+        result.score = max(0, 100 - critical_count * 15 - major_count * 5 - len(all_issues))
 
-    def _detect_language(self, ext: str) -> str:
-        lang_map = {
-            ".py": "python",
-            ".js": "javascript",
-            ".ts": "typescript",
-            ".jsx": "javascript",
-            ".tsx": "typescript",
-        }
-        return lang_map.get(ext, "unknown")
+        # 摘要
+        if all_issues:
+            summary_prompt = f"""基于以下代码审查问题（{len(all_issues)}项），生成一段中文摘要（50字以内）：
+{chr(10).join(f'- [{i.severity}] {i.category}: {i.message}' for i in all_issues[:10])}"""
+            result.summary = self._call_llm(summary_prompt, "简洁总结") or f"发现 {len(all_issues)} 个问题"
+        else:
+            result.summary = "✅ 代码质量良好，未发现问题"
 
-    def _compute_metrics(self, content: str, language: str) -> dict[str, Any]:
-        """计算代码度量"""
-        lines = content.split("\n")
-        total = len(lines)
-        code_lines = 0
-        comment_lines = 0
-        blank_lines = 0
-        in_multiline_string = False
-        in_comment = False
-
-        for line in lines:
-            stripped = line.strip()
-            if not stripped:
-                blank_lines += 1
-            elif stripped.startswith("#") or stripped.startswith("//") or stripped.startswith('"""') or stripped.startswith("'''") or in_multiline_string:
-                comment_lines += 1
-            else:
-                code_lines += 1
-
-        metrics = {
-            "total_lines": total,
-            "code_lines": code_lines,
-            "comment_lines": comment_lines,
-            "blank_lines": blank_lines,
-            "comment_ratio": round(comment_lines / max(total, 1), 4),
-            "code_ratio": round(code_lines / max(total, 1), 4),
-        }
-
-        if language == "python":
-            try:
-                tree = ast.parse(content)
-                functions = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-                classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
-                imports = [n for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
-
-                func_lengths = []
-                for func in functions:
-                    if hasattr(func, "end_lineno") and hasattr(func, "lineno"):
-                        func_lengths.append(func.end_lineno - func.lineno)
-
-                metrics.update(
-                    {
-                        "functions": len(functions),
-                        "classes": len(classes),
-                        "imports": len(imports),
-                        "avg_function_length": round(sum(func_lengths) / max(len(func_lengths), 1), 1),
-                        "max_function_length": max(func_lengths) if func_lengths else 0,
-                        "complexity": self._estimate_complexity(functions),
-                    }
-                )
-            except SyntaxError:
-                pass
-
-        return metrics
-
-    def _estimate_complexity(self, functions) -> int:
-        """估算圈复杂度"""
-        complexity = 0
-        for func in functions:
-            for node in ast.walk(func):
-                if isinstance(node, (ast.If, ast.While, ast.For, ast.ExceptHandler)):
-                    complexity += 1
-                elif isinstance(node, ast.BoolOp):
-                    complexity += len(node.values) - 1
-        return complexity
-
-    def _check_pattern_rule(self, rule: ReviewRule, lines: list[str], file_path: str) -> list[ReviewIssue]:
-        """基于正则的规则检查"""
-        issues = []
-        try:
-            pattern = re.compile(rule.pattern, re.IGNORECASE)
-        except re.error:
-            return issues
-
-        for i, line in enumerate(lines, 1):
-            if pattern.search(line):
-                issues.append(
-                    ReviewIssue(
-                        issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                        rule_id=rule.rule_id,
-                        file_path=file_path,
-                        line_number=i,
-                        severity=rule.severity,
-                        category=rule.category,
-                        message=rule.description,
-                        code_snippet=line.strip()[:200],
-                        suggestion=self._get_suggestion(rule.rule_id),
-                        auto_fixable=rule.auto_fix,
-                    )
-                )
-        return issues
-
-    def _check_python_structure(self, content: str, file_path: str) -> list[ReviewIssue]:
-        """Python结构化检查"""
-        issues = []
-        try:
-            tree = ast.parse(content)
-            lines = content.split("\n")
-
-            # 检查类型注解
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    # 检查返回类型注解
-                    if node.returns is None and not node.name.startswith("_"):
-                        issues.append(
-                            ReviewIssue(
-                                issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                                rule_id="bp_001",
-                                file_path=file_path,
-                                line_number=node.lineno,
-                                severity=Severity.INFO,
-                                category=RuleCategory.BEST_PRACTICE,
-                                message=f"函数 '{node.name}' 缺少返回类型注解",
-                                code_snippet=f"def {node.name}({self._get_params_preview(node)})",
-                                suggestion="添加返回类型注解，例如 -> None 或 -> Dict[str, Any]",
-                            )
-                        )
-
-                    # 检查docstring
-                    docstring = ast.get_docstring(node)
-                    if not docstring:
-                        issues.append(
-                            ReviewIssue(
-                                issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                                rule_id="bp_002",
-                                file_path=file_path,
-                                line_number=node.lineno,
-                                severity=Severity.INFO,
-                                category=RuleCategory.DOCUMENTATION,
-                                message=f"函数 '{node.name}' 缺少docstring",
-                                suggestion="添加三引号文档字符串描述函数用途",
-                            )
-                        )
-
-                    # 检查函数长度
-                    if hasattr(node, "end_lineno"):
-                        length = node.end_lineno - node.lineno
-                        if length > 50:
-                            issues.append(
-                                ReviewIssue(
-                                    issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                                    rule_id="bp_005",
-                                    file_path=file_path,
-                                    line_number=node.lineno,
-                                    severity=Severity.WARNING,
-                                    category=RuleCategory.MAINTAINABILITY,
-                                    message=f"函数 '{node.name}' 过长 ({length} 行, 建议 < 50)",
-                                    suggestion="考虑拆分为更小的函数",
-                                )
-                            )
-
-                        # 检查参数数量
-                        args = list(node.args.args) + list(node.args.kwonlyargs)
-                        if node.args.vararg:
-                            args.append(node.args.vararg)
-                        if node.args.kwarg:
-                            args.append(node.args.kwarg)
-                        if len(args) > 5:
-                            issues.append(
-                                ReviewIssue(
-                                    issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                                    rule_id="bp_006",
-                                    file_path=file_path,
-                                    line_number=node.lineno,
-                                    severity=Severity.WARNING,
-                                    category=RuleCategory.MAINTAINABILITY,
-                                    message=f"函数 '{node.name}' 参数过多 ({len(args)} 个, 建议 <= 5)",
-                                    suggestion="考虑使用dataclass或配置字典封装参数",
-                                )
-                            )
-
-                # 检查类docstring
-                elif isinstance(node, ast.ClassDef):
-                    docstring = ast.get_docstring(node)
-                    if not docstring:
-                        issues.append(
-                            ReviewIssue(
-                                issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                                rule_id="bp_002",
-                                file_path=file_path,
-                                line_number=node.lineno,
-                                severity=Severity.INFO,
-                                category=RuleCategory.DOCUMENTATION,
-                                message=f"类 '{node.name}' 缺少docstring",
-                            )
-                        )
-
-        except SyntaxError:
-            pass
-
-        # 行长度检查
-        for i, line in enumerate(lines, 1):
-            if len(line) > 120:
-                issues.append(
-                    ReviewIssue(
-                        issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                        rule_id="style_001",
-                        file_path=file_path,
-                        line_number=i,
-                        severity=Severity.WARNING,
-                        category=RuleCategory.STYLE,
-                        message=f"行过长 ({len(line)} 字符, 建议 <= 120)",
-                    )
-                )
-            if line != line.rstrip() and line.strip():
-                issues.append(
-                    ReviewIssue(
-                        issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                        rule_id="style_002",
-                        file_path=file_path,
-                        line_number=i,
-                        severity=Severity.INFO,
-                        category=RuleCategory.STYLE,
-                        message="行尾有多余空格",
-                        auto_fixable=True,
-                    )
-                )
-
-        # 模块docstring
-        if lines and not lines[0].strip().startswith(('"""', "'''", "#")):
-            issues.append(
-                ReviewIssue(
-                    issue_id=f"iss_{uuid.uuid4().hex[:8]}",
-                    rule_id="style_003",
-                    file_path=file_path,
-                    line_number=1,
-                    severity=Severity.INFO,
-                    category=RuleCategory.DOCUMENTATION,
-                    message="模块缺少顶部文档字符串",
-                )
-            )
-
-        return issues
-
-    def _get_params_preview(self, node) -> str:
-        """获取函数参数预览"""
-        params = [a.arg for a in node.args.args[:3]]
-        suffix = ", ..." if len(node.args.args) > 3 else ""
-        return ", ".join(params) + suffix
-
-    def _get_suggestion(self, rule_id: str) -> str:
-        suggestions = {
-            "sec_001": "使用环境变量或配置管理器存储敏感信息",
-            "sec_002": "使用参数化查询替代字符串拼接",
-            "sec_003": "避免使用eval/exec，考虑使用ast.literal_eval或JSON",
-            "sec_004": "使用更安全的序列化方式如json",
-            "sec_005": "移除调试代码后提交",
-            "sec_006": "使用sha256或更强的哈希算法",
-            "bp_003": "捕获具体异常类型，如 ValueError, KeyError",
-            "bug_001": "使用None代替可变默认参数，在函数体内初始化",
-            "bug_002": "使用 is None / is not None 比较None",
-            "bug_003": "使用with语句自动管理资源",
-        }
-        return suggestions.get(rule_id, "")
-
-    def _calculate_score(self, issues: list[ReviewIssue], total_lines: int) -> float:
-        """计算审查评分"""
-        if not issues:
-            return 100.0
-
-        deductions = {
-            Severity.CRITICAL: 10,
-            Severity.ERROR: 5,
-            Severity.WARNING: 2,
-            Severity.INFO: 0.5,
-        }
-        total_deduction = sum(deductions.get(i.severity, 0) for i in issues)
-        score = max(0, 100 - total_deduction)
-        return score
-
-    def batch_review(self, file_paths: list[str]) -> dict[str, Any]:
-        """批量审查"""
-        results = []
-        for path in file_paths:
-            try:
-                result = self.review_code(path)
-                results.append(result)
-            except Exception as e:
-                results.append({"file_path": path, "error": str(e)})
-
-        total_issues = sum(r.get("issues_total", 0) for r in results)
-        avg_score = sum(r.get("score", 0) for r in results) / max(len(results), 1)
-
-        critical = sum(1 for r in results for i in r.get("top_issues", []) if i.get("severity") == "critical")
-
-        return {
-            "total_files": len(results),
-            "total_issues": total_issues,
-            "critical_issues": critical,
-            "avg_score": round(avg_score, 1),
-            "files_below_threshold": sum(1 for r in results if r.get("score", 0) < 70),
-            "results": results,
-        }
-
-    def get_review_history(self, limit: int = 50) -> list[dict]:
-        return [
-            {
-                "review_id": r.review_id,
-                "file_path": r.file_path,
-                "score": round(r.score, 1),
-                "issues": len(r.issues),
-                "lines": r.total_lines,
-                "reviewed_at": datetime.fromtimestamp(r.reviewed_at).isoformat(),
-            }
-            for r in reversed(self._results[-limit:])
-        ]
-
-    def health_check(self) -> dict[str, Any]:
-        base = super().health_check()
-        if base and hasattr(base, "to_dict"):
-            base = base.to_dict()
-        elif base and not isinstance(base, dict):
-            base = {}
-        base = base or {}
-        avg_score = 0
-        if self._results:
-            avg_score = sum(r.score for r in self._results) / len(self._results)
-        result = dict(base)
-        result.update(
-            {
-                "status": "ok",
-                "files_reviewed": len(self._results),
-                "rules_loaded": len(self._rules),
-                "avg_score": round(avg_score, 1),
-                "total_issues": sum(len(r.issues) for r in self._results),
-            }
-        )
+        _review_history.append(result)
+        _save_history()
         return result
 
-    def shutdown(self) -> None:
-        self._initialized = False
-        logger.info(f"关闭代码审查引擎，共审查 {len(self._results)} 个文件")
+    def review_commit(self, commit_hash: str, compare_with: str = "") -> ReviewResult:
+        """审查指定的 commit"""
+        start = time.time()
+        if compare_with:
+            diff_text, _ = _run_git(["diff", f"{compare_with}..{commit_hash}"], self.repo_path)
+        else:
+            diff_text, _ = _run_git(["show", "--format=", commit_hash], self.repo_path)
 
-    async def execute(self, action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-        """统一execute入口"""
-        _ = self.trace("execute")
-        metrics_collector.counter("code_review_ops_total", labels={"action": action})
-        self.audit("execute", f"action={action}")
-        params = params or {}
+        files = _parse_diff(diff_text)
+        result = ReviewResult(
+            review_id=f"rev_{int(time.time())}",
+            timestamp=datetime.now().isoformat(),
+            target_type="commit",
+            target=f"{commit_hash[:12]} vs {compare_with}" if compare_with else commit_hash[:12],
+            files_reviewed=[f["file"] for f in files],
+            total_lines=sum(f["additions"] + f["deletions"] for f in files),
+        )
+
+        if not files:
+            result.summary = "指定 commit 无代码变更"
+            result.score = 100
+            result.duration_ms = int((time.time() - start) * 1000)
+            _review_history.append(result)
+            _save_history()
+            return result
+
+        all_issues = []
+        for f in files:
+            prompt = f"""审查以下 commit 变更 ({f['file']}):
++{f['additions']} / -{f['deletions']}
+
+```diff
+{f['content'][:3000]}
+```
+
+按格式逐条列出问题，focus on security, bug, performance"""
+            review_text = self._call_llm(prompt)
+            all_issues.extend(self._parse_llm_review(review_text, f["file"]))
+
+        result.issues = all_issues
+        critical_count = sum(1 for i in all_issues if i.severity == "critical")
+        major_count = sum(1 for i in all_issues if i.severity == "major")
+        result.score = max(0, 100 - critical_count * 15 - major_count * 5)
+        result.summary = f"发现 {len(all_issues)} 个问题 (critical:{critical_count} major:{major_count})" if all_issues else "✅ 代码质量良好"
+        result.duration_ms = int((time.time() - start) * 1000)
+
+        _review_history.append(result)
+        _save_history()
+        return result
+
+    def review_branch(self, base_branch: str = "master", head_branch: str = "") -> ReviewResult:
+        """审查分支对比"""
+        if not head_branch:
+            head_branch, _ = _run_git(["rev-parse", "--abbrev-ref", "HEAD"], self.repo_path)
+            head_branch = head_branch.strip()
+
+        diff_text, _ = _run_git(["diff", f"{base_branch}..{head_branch}"], self.repo_path)
+        files = _parse_diff(diff_text)
+
+        result = ReviewResult(
+            review_id=f"rev_{int(time.time())}",
+            timestamp=datetime.now().isoformat(),
+            target_type="branch",
+            target=f"{base_branch}..{head_branch}",
+            files_reviewed=[f["file"] for f in files],
+            total_lines=sum(f["additions"] + f["deletions"] for f in files),
+        )
+        result.duration_ms = 0
+
+        if not files:
+            result.summary = "两个分支无差异"
+            result.score = 100
+            _review_history.append(result)
+            _save_history()
+            return result
+
+        all_issues = []
+        for f in files[:10]:
+            prompt = f"""审查分支变更 ({f['file']}):
+```diff
+{f['content'][:3000]}
+```
+列出问题"""
+            review_text = self._call_llm(prompt)
+            all_issues.extend(self._parse_llm_review(review_text, f["file"]))
+
+        result.issues = all_issues
+        result.score = max(0, 100 - sum(1 for i in all_issues if i.severity == "critical") * 15)
+        result.summary = f"分支差异审查: {len(files)} 文件, {len(all_issues)} 问题" if all_issues else "✅ 分支差异无问题"
+        result.duration_ms = int((time.time() - start) * 1000)
+
+        _review_history.append(result)
+        _save_history()
+        return result
+
+    def get_history(self, limit: int = 20) -> list[dict]:
+        """获取审查历史"""
+        return [asdict(r) for r in _review_history[-limit:]]
+
+    def get_diff(self, target: str = "", compare: str = "") -> str:
+        """获取原始 diff 文本"""
+        if not target:
+            stdout, _ = _run_git(["diff"], self.repo_path)
+        elif compare:
+            stdout, _ = _run_git(["diff", f"{compare}..{target}"], self.repo_path)
+        else:
+            stdout, _ = _run_git(["show", "--format=", target], self.repo_path)
+        return stdout
+
+    def get_commit_log(self, limit: int = 20) -> list[dict]:
+        """获取 commit 日志"""
+        stdout, _ = _run_git(
+            ["log", f"--max-count={limit}", "--format=%H|%an|%s|%ai"],
+            self.repo_path,
+        )
+        commits = []
+        for line in stdout.strip().split("\n"):
+            if "|" in line:
+                parts = line.split("|", 3)
+                commits.append({
+                    "hash": parts[0],
+                    "author": parts[1],
+                    "message": parts[2],
+                    "date": parts[3] if len(parts) > 3 else "",
+                })
+        return commits
+
+
+class CodeReviewModule(EnterpriseModule):
+    """企业级 AI 代码审查模块"""
+
+    def __init__(self):
+        super().__init__(module_id="code-review", name="AI 代码审查引擎")
+        self.reviewer = CodeReviewer()
+
+    async def initialize(self):
+        self._status = "ready"
+        return Result(success=True, message="Code Review 引擎就绪")
+
+    async def execute(self, action: str, **params) -> Result:
         try:
             if action == "review":
-                result = self.review_code(
-                    file_path=params.get("file_path", ""),
-                    content=params.get("content", ""),
-                    language=params.get("language", ""),
-                )
-                return {"success": True, "result": result}
-            elif action == "batch_review":
-                result = self.batch_review(params.get("files", []))
-                return {"success": True, "result": result}
+                target = params.get("target", "working")
+                if target == "commit":
+                    r = self.reviewer.review_commit(params.get("hash", "HEAD"))
+                elif target == "branch":
+                    r = self.reviewer.review_branch(
+                        params.get("base", "master"), params.get("head", "")
+                    )
+                else:
+                    r = self.reviewer.review_working_tree(params.get("staged", False))
+                return Result(success=True, data=asdict(r))
+
+            elif action == "diff":
+                text = self.reviewer.get_diff(params.get("target", ""), params.get("compare", ""))
+                return Result(success=True, data={"diff": text})
+
             elif action == "history":
-                results = self.get_review_history(limit=params.get("limit", 20))
-                return {"success": True, "result": results}
-            elif action == "list_rules":
-                return {
-                    "success": True,
-                    "result": [
-                        {
-                            "rule_id": r.rule_id,
-                            "name": r.name,
-                            "category": r.category.value,
-                            "severity": r.severity.value,
-                        }
-                        for r in self._rules
-                    ],
-                }
-            elif action == "get_stats":
-                hc = self.health_check()
-                return {"success": True, "result": hc}
-            else:
-                return {"success": False, "error": f"未知操作: {action}"}
+                return Result(success=True, data={"reviews": self.reviewer.get_history()})
+
+            elif action == "commits":
+                return Result(success=True, data={"commits": self.reviewer.get_commit_log()})
+
+            elif action == "status":
+                return Result(success=True, data={"status": self._status})
+
+            return Result(success=False, error=f"未知动作: {action}")
         except Exception as e:
-            logger.error(f"[CodeReview] execute异常: {action}, {e}")
-            return {"success": False, "error": str(e)}
+            return Result(success=False, error=str(e))
 
-    # ────────── 真实代码分析（AST + pylint）──────────
+    async def health_check(self):
+        return Result(success=True, data={"status": self._status})
 
-    def review_code(self, params: dict) -> dict:
-        """真实代码审查：AST 结构分析 + pylint 静态检查"""
-        code = params.get("code", "")
-        filepath = params.get("filepath", "")
-        if not code and not filepath:
-            return {"success": False, "error": "code or filepath required"}
-        if filepath:
-            try:
-                with open(filepath, encoding="utf-8", errors="ignore") as f:
-                    code = f.read()
-            except Exception as e:
-                return {"success": False, "error": f"cannot read file: {e}"}
-        report = {"issues": [], "score": 100, "ast_analysis": {}, "pylint_output": ""}
-        # 1. AST 真实分析
-        try:
-            tree = ast.parse(code)
-            funcs = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
-            classes = [n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
-            imports = []
-            for n in ast.walk(tree):
-                if isinstance(n, ast.Import):
-                    for alias in n.names:
-                        imports.append(alias.name)
-                elif isinstance(n, ast.ImportFrom):
-                    imports.append(f"{n.module or ''}.{n.names[0].name if n.names else ''}")
-            report["ast_analysis"] = {
-                "func_count": len(funcs), "class_count": len(classes),
-                "import_count": len(imports), "line_count": len(code.splitlines()),
-                "functions": funcs[:20], "classes": classes[:10], "imports": imports[:10],
-            }
-            # 检测问题
-            for n in ast.walk(tree):
-                if isinstance(n, ast.FunctionDef) and len(n.body) == 1 and isinstance(n.body[0], ast.Pass):
-                    report["issues"].append({"type": "empty_function", "name": n.name, "line": n.lineno})
-                    report["score"] -= 5
-                if isinstance(n, ast.Try) and not n.handlers and not n.finalbody:
-                    report["issues"].append({"type": "bare_try", "line": n.lineno})
-                    report["score"] -= 3
-        except SyntaxError as e:
-            report["issues"].append({"type": "syntax_error", "error": str(e)})
-            report["score"] -= 20
-        # 2. pylint 真实调用
-        try:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as tmp:
-                tmp.write(code)
-                tmp_path = tmp.name
-            r = subprocess.run(
-                ["python", "-m", "pylint", tmp_path, "--score=y", "--output-format=text"],
-                capture_output=True, text=True, timeout=30
-            )
-            os.unlink(tmp_path)
-            report["pylint_output"] = r.stdout[:2000] + r.stderr[:500]
-            for line in r.stdout.split("\n"):
-                m = re.search(r"Your code has been rated at (-?\d+\.?\d*)", line)
-                if m:
-                    report["score"] = min(report["score"], float(m.group(1)))
-        except FileNotFoundError:
-            report["pylint_output"] = "pylint not installed, skipping"
-        except subprocess.TimeoutExpired:
-            report["issues"].append({"type": "pylint_timeout"})
-            report["score"] -= 5
-        report["score"] = max(0, min(100, report["score"]))
-        return {"success": True, "report": report}
 
-    def search_security_issues(self, params: dict) -> dict:
-        """真实安全扫描：AST 检测高危模式"""
-        code = params.get("code", "")
-        if not code:
-            return {"success": False, "error": "code required"}
-        try:
-            tree = ast.parse(code)
-        except SyntaxError:
-            return {"success": False, "error": "syntax error"}
-        findings = []
-        dangerous = ["eval", "exec", "__import__", "pickle.loads", "os.system", "subprocess.call", "subprocess.Popen"]
-        for n in ast.walk(tree):
-            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
-                call_str = f"{ast.unparse(n.func)}"
-                if call_str in dangerous:
-                    findings.append({"type": "dangerous_call", "name": call_str, "line": n.lineno})
-                if call_str in ["subprocess.call", "subprocess.Popen"]:
-                    findings.append({"type": "subprocess_risk", "name": call_str, "line": n.lineno})
-            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ("eval", "exec", "__import__"):
-                findings.append({"type": "dangerous_builtin", "name": n.func.id, "line": n.lineno})
-        return {"success": True, "findings": findings, "total": len(findings)}
+# 单例
+_code_reviewer = CodeReviewer()
 
-module_class = CodeReview
+
+def get_reviewer() -> CodeReviewer:
+    return _code_reviewer

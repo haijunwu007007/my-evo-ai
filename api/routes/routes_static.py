@@ -180,3 +180,19 @@ async def office_page():
     if html_path.exists():
         return FileResponse(str(html_path))
     raise HTTPException(404)
+
+@router.get("/review")
+async def review_page():
+    """AI 代码审查 + Diff 对比页面"""
+    html_path = BASE_DIR / "frontend" / "review.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
+
+@router.get("/hooks")
+async def hooks_page():
+    """Hooks 拦截器配置页面"""
+    html_path = BASE_DIR / "frontend" / "hooks.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)
