@@ -25,6 +25,9 @@ class TokenRefreshRequest:
 async def auth_login(req: LoginRequest):
     """登录获取 JWT 令牌（支持密码验证）。"""
     from core.auth_provider import create_token, verify_api_key, _ADMIN_KEY
+    # 如果传了密码但为空，拒绝
+    if not req.api_key and not req.password:
+        return JSONResponse({"success": False, "code": "PASSWORD_REQUIRED", "msg": "请输入密码或API Key"})
     if req.api_key:
         if verify_api_key(req.api_key):
             token = create_token(subject="api_user", role="admin" if req.api_key == _ADMIN_KEY else "user")
