@@ -19,6 +19,18 @@ from api.infra import app, registry, manager, _module_activity, _START_TIME, BAS
 logger = get_logger("evo.api")
 
 
+async def _probe_ollama():
+    """检测本地 Ollama"""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=3) as cl:
+            r = await cl.get("http://localhost:11434/api/tags")
+            if r.status_code == 200:
+                models = [m["name"] for m in r.json().get("models",[]) if "qwen" in m["name"].lower()]
+                if models: return models
+    except: pass
+    return []
+
 def _mount_vue_frontend():
     """挂载 Vue 3 SPA (/app) + 旧版 Dashboard (/dashboard)"""
     from fastapi.staticfiles import StaticFiles

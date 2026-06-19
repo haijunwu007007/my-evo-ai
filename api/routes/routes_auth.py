@@ -1,3 +1,53 @@
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import Optional
+import sqlite3, os, time, hashlib, json
+
+router = APIRouter(prefix="/api/v1/users", tags=["users"])
+
+_DB = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "users.db")
+
+def _get_db():
+    conn = sqlite3.connect(_DB)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""CREATE TABLE IF NOT EXISTS users(
+        id TEXT PRIMARY KEY, username TEXT UNIQUE, password TEXT, role TEXT DEFAULT 'user',
+        created_at REAL, last_login REAL
+    )""")
+    return conn
+
+@router.post("/register")
+async def register(req: dict):
+    db = _get_db()
+    uname = req.get("username", "").strip()
+    pwd = req.get("password", "").strip()
+    if not uname or len(uname) < 2: return JSONResponse({"success":False,"error":"用户名至少2位"})
+    if not pwd or len(pwd) < 3: return JSONResponse({"success":False,"error":"密码至少3位"})
+    try:
+        uid = hashlib.md5((uname+str(time.time())).encode()).hexdigest()[:12]
+        db.execute("INSERT INTO users VALUES(?,?,?,?,?,?)",(uid,uname,pwd,"user",time.time(),0))
+        db.commit()
+        return {"success":True,"user":uname,"role":"user"}
+    except Exception as e:
+        return JSONResponse({"success":False,"error":"用户名已存在"})
+
+@router.get("/list")
+async def user_list():
+    db = _get_db()
+    rows = db.execute("SELECT id,username,role,created_at FROM users ORDER BY created_at").fetchall()
+    return {"users":[dict(r) for r in rows]}
+
+@router.post("/login")
+async def user_login(req: dict):
+    db = _get_db()
+    row = db.execute("SELECT * FROM users WHERE username=? AND password=?",(req.get("username",""),req.get("password",""))).fetchone()
+    if row:
+        db.execute("UPDATE users SET last_login=? WHERE id=?",(time.time(),row["id"]))
+        db.commit()
+        return {"success":True,"user":row["username"],"role":row["role"]}
+    return JSONResponse({"success":False,"error":"用户名或密码错误"},status_code=401)
+
 """AUTO-EVO-AI V0.1 — 认证路由（从 api_server.py 抽离）"""
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse

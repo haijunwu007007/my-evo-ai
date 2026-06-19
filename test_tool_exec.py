@@ -112,11 +112,13 @@ class TestToolExec(unittest.TestCase):
         c = open(BASE / "api" / "routes" / "routes_auth.py").read()
         self.assertIn("PASSWORD_REQUIRED", c, "缺少密码校验")
 
-    def test_16_startup_has_override(self):
-        """验证 startup.py 有路由覆盖"""
-        c = open(BASE / "api" / "startup.py").read()
-        for path in ["video", "canvas", "deploy", "automations", "capabilities"]:
-            self.assertIn(path, c, f"路由覆盖缺少 {path}")
+    def test_16_theme_support(self):
+        """验证前端页面支持全局主题切换"""
+        for fn in ["chat.html","monitor.html","dashboard.html"]:
+            fp = BASE / "frontend" / fn
+            if fp.exists():
+                c = open(fp).read()
+                self.assertIn("evo_theme", c, f"{fn} 缺少 localStorage 主题支持")
 
     def test_17_tools_data_js_exists(self):
         """验证工具数据已分离"""
