@@ -40,6 +40,22 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#
 .ql a:hover{background:rgba(67,97,238,.2);color:#e8e8ef;transform:translateY(-1px)}
 @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.mgrid{grid-template-columns:repeat(2,1fr)}}
 .ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
+/* monitor merge styles */
+.info-card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:0}
+.info-card h3{font-size:13px;color:#8892b0;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ei{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.02);border-radius:6px;font-size:12px}
+.ei .st{display:flex;align-items:center;gap:4px;font-size:11px;color:#10b981}
+.ei .st .dot{width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block}
+.h-item{text-align:center;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;font-size:13px}
+.h-item .num{font-size:18px;font-weight:700;color:#fff}
+.h-item .lb{font-size:11px;color:#636e70;margin-top:2px}
+.st-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.st-tbl td{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.st-tbl td:last-child{text-align:right;color:#10b981}
+.st-tbl .l{color:#636e70}
+.i-item{text-align:center;padding:10px;background:rgba(255,255,255,.02);border-radius:6px}
+.i-item .num{font-size:14px;font-weight:600;color:#fff}
+.i-item .lb{font-size:10px;color:#636e70;margin-top:2px}
 </style></head><body>
 <div class="hdr">
   <div class="l">AUTO-EVO-AI</div>
@@ -87,6 +103,53 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#
   <!-- Module Grid -->
   <h2>🗂️ 模块网格</h2>
   <div class="mgrid" id="modGrid"><div style="grid-column:1/-1;text-align:center;color:#636e70;padding:12px">加载中...</div></div>
+
+  <!-- ===== 监控面板 (合并自 monitor) ===== -->
+  <h2>⚙️ 引擎状态</h2>
+  <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="info-card">
+      <h3>🔄 引擎运行</h3>
+      <div class="engrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="ei"><span>调度器</span><span class="st"><span class="dot"></span> UP</span></div>
+        <div class="ei"><span>事件引擎</span><span class="st"><span class="dot"></span> UP</span></div>
+        <div class="ei"><span>管线引擎</span><span class="st"><span class="dot"></span> UP</span></div>
+        <div class="ei"><span>任务队列</span><span class="st"><span class="dot"></span> UP</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>🔬 模块健康分布</h3>
+      <div class="health-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div class="h-item"><div class="num" id="gradeA">-</div><div class="lb">Grade A</div></div>
+        <div class="h-item"><div class="num" id="gradeB">-</div><div class="lb">Grade B</div></div>
+        <div class="h-item"><div class="num" id="gradeC">-</div><div class="lb">Grade C</div></div>
+        <div class="h-item"><div class="num" id="gradeStub">-</div><div class="lb">Stub</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Status + Infra -->
+  <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="info-card">
+      <h3>⚡ 系统状态</h3>
+      <table class="st-tbl" style="width:100%;font-size:12px">
+        <tr><td class="l">API 版本</td><td id="apiVer">0.1.0</td></tr>
+        <tr><td class="l">运行时间</td><td id="runTime">0h</td></tr>
+        <tr><td class="l">模块数</td><td id="modTotal">-</td></tr>
+        <tr><td class="l">系统状态</td><td style="color:#10b981">✅ 正常</td></tr>
+      </table>
+    </div>
+    <div class="info-card">
+      <h3>📊 基础设施指标</h3>
+      <div class="infra" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        <div class="i-item"><div class="num" id="iqCount">0</div><div class="lb">队列待处理</div></div>
+        <div class="i-item"><div class="num" id="ifCount">0</div><div class="lb">队列失败</div></div>
+        <div class="i-item"><div class="num" id="ipCount">0</div><div class="lb">管线活跃</div></div>
+        <div class="i-item"><div class="num" id="ieCount">0</div><div class="lb">事件总数</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- /监控面板合并 -->
+
 </div>
 <div class="ft">AUTO-EVO-AI V0.1 · 系统仪表盘</div>
 <script>

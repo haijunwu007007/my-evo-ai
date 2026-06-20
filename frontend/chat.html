@@ -33,7 +33,7 @@ body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d
 .auth-card .btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:14px;cursor:pointer;font-weight:700;transition:transform .2s,box-shadow .2s}
 .auth-card .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--glow)}
 .auth-card .btn:active{transform:scale(.98)}
-.nav-tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;flex-shrink:0;padding:6px 4px;background:var(--glass);border-radius:12px;border:1px solid var(--border);margin:4px auto;max-width:580px}
+.nav-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;flex-shrink:0;padding:6px 4px;background:var(--glass);border-radius:12px;border:1px solid var(--border);margin:4px auto;max-width:550px}
 .nav-tabs .tab{padding:5px 10px;border-radius:6px;font-size:11px;color:var(--text2);text-decoration:none;background:transparent;border:none;cursor:pointer;transition:all .2s}
 .nav-tabs .tab:hover{color:var(--accent);background:var(--glass)}
 .nav-tabs .tab.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 2px 8px var(--glow)}
@@ -127,7 +127,6 @@ body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d
         <span id="tabCaps" class="tab" onclick="window.location.href='/capabilities'">🧠 能力中心</span>
         <span id="tabDeploy" class="tab" onclick="window.location.href='/deploy'">🚀 一键部署</span>
         <span id="tabVideo" class="tab" onclick="window.location.href='/video'">🎬 视频生成</span>
-        <span id="tabMonitor" class="tab" onclick="window.location.href='/monitor'">📈 监控</span>
         <span id="tabAgents" class="tab" onclick="window.location.href='/agents'">🤖 智能体</span>
       </div>
       <div class="lang-bar" id="langBarTop">
