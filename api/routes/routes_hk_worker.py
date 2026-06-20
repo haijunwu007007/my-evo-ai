@@ -11,10 +11,12 @@ HK_URL = "http://43.129.75.222:8766"
 @router.get("/health")
 async def hk_health():
     """检查香港 Worker 状态"""
+    import subprocess
     try:
-        async with httpx.AsyncClient(timeout=10) as cli:
-            r = await cli.get(f"{HK_URL}/health")
-            return {"success": True, "hk": r.json()}
+        r = subprocess.run(["curl","-sf","--connect-timeout","5","http://localhost:18766/health"], capture_output=True, text=True, timeout=10)
+        if r.returncode == 0 and r.stdout:
+            return {"success": True, "hk": json.loads(r.stdout)}
+        return {"success": False, "error": r.stderr[:80] if r.stderr else "empty response"}
     except Exception as e:
         return {"success": False, "error": str(e)[:100]}
 

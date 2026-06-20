@@ -122,6 +122,7 @@ def _mount_vue_frontend():
             "multi-agent": "multi_agent.html",
             "desktop": "desktop.html",
             "rbac": "rbac.html",
+            "copilot": "copilot.html",
             "channel": "channel.html",
             "n8n": "n8n.html",
             "agents": "agents.html",
