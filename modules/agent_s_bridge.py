@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """AUTO-EVO-AI V0.1 — Agent-S GUI Agent Bridge
 Simular Agent-S 集成桥接模块
 =========================
@@ -219,3 +220,19 @@ async def execute(action: str = "", params: dict = None) -> dict:
     if action in ("list_actions", "help"):
         return {"success": True, "actions": _actions, "module": MODULE_ID}
     return {"success": False, "error": f"Unknown action: {action}"}
+
+
+class AgentSBridge(EnterpriseModule):
+    MODULE_ID = "agent_s_bridge"
+    MODULE_NAME = "AgentSBridge"
+
+    async def initialize(self):
+        self.info(f"AgentSBridge initialized")
+
+    async def execute(self, action, params=None):
+        return await super().execute(action, params)
+
+    def health_check(self):
+        return super().health_check()
+
+module_class = AgentSBridge

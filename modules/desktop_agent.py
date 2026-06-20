@@ -1,10 +1,11 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """桌面Agent — 远程桌面+文件操作"""
 from __future__ import annotations
 import os, json, sqlite3, time, subprocess
 from typing import Optional
 
-class DesktopAgent:
+class DesktopAgent(EnterpriseModule):
     def __init__(self):
         self._allowed_cmds = ["ls","dir","pwd","whoami","echo","cat","type","head","tail","wc","date"]
     

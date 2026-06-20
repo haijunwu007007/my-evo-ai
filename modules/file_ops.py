@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """文件/邮件操作模块 — Excel读写/Word生成/邮件发送"""
 
 import os, csv, io, smtplib, email.utils
@@ -117,7 +118,7 @@ def handle_file_cmd(args: list[str]) -> str:
     return "用法见: file help"
 
 
-class FileOps:
+class FileOps(EnterpriseModule):
     """文件操作模块 — Excel/Word/邮件"""
     def __init__(self): pass
     def execute(self, action: str = "", params: dict = None) -> dict:

@@ -1,10 +1,11 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """自进化学习引擎 — 记录→评分→优化策略"""
 from __future__ import annotations
 import os, json, sqlite3, time
 from typing import Optional
 
-class SelfEvolveLearner:
+class SelfEvolveLearner(EnterpriseModule):
     def __init__(self, db_path: str = ""):
         self._db = db_path or os.path.join(os.path.dirname(__file__), "..", "self_evolve.db")
         self._conn: Optional[sqlite3.Connection] = None

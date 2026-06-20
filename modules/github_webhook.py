@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """
 AUTO-EVO-AI V0.1 — GitHub Webhook 接收与事件处理模块
 ======================================================
@@ -469,3 +470,19 @@ module_class = type("GitHubWebhookModule", (), {
 })
 
 __all__ = ["execute", "health_check", "process_webhook", "list_events", "get_event_stats", "get_config", "update_config", "module_class"]
+
+
+class GithubWebhook(EnterpriseModule):
+    MODULE_ID = "github_webhook"
+    MODULE_NAME = "GithubWebhook"
+
+    async def initialize(self):
+        self.info(f"GithubWebhook initialized")
+
+    async def execute(self, action, params=None):
+        return await super().execute(action, params)
+
+    def health_check(self):
+        return super().health_check()
+
+module_class = GithubWebhook

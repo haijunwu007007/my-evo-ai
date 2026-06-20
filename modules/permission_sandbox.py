@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """权限沙箱 — 工具权限分级+审计日志"""
 from __future__ import annotations
@@ -6,7 +7,7 @@ from typing import Optional
 
 PERM_LEVELS = {"safe": 0, "ask": 1, "danger": 2}
 
-class PermissionSandbox:
+class PermissionSandbox(EnterpriseModule):
     def __init__(self, db_path: str = ""):
         self._db = db_path or os.path.join(os.path.dirname(__file__), "..", "permission.db")
         self._conn: Optional[sqlite3.Connection] = None

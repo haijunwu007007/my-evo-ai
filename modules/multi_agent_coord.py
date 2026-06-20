@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """多Agent协作 — 角色编排+任务分配"""
 from __future__ import annotations
@@ -7,7 +8,7 @@ from typing import Optional
 ROLES = {"planner": "规划者", "coder": "编码者", "reviewer": "审查者",
          "operator": "执行者", "analyst": "分析师", "researcher": "研究者"}
 
-class MultiAgentCoordinator:
+class MultiAgentCoordinator(EnterpriseModule):
     def __init__(self, db_path: str = ""):
         self._db = db_path or os.path.join(os.path.dirname(__file__), "..", "multi_agent.db")
         self._conn: Optional[sqlite3.Connection] = None

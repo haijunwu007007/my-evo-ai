@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """开源项目分析器 — 自动检测项目类型、提取配置、分析依赖"""
 import os, json, re, subprocess, tempfile, shutil, hashlib
@@ -166,3 +167,19 @@ CMD ["python3", "-m", "http.server", "{port}"]
 """)
     port = info.get("ports", ["3000"])[0]
     return tmpl.format(port=port)
+
+
+class RepoAnalyzer(EnterpriseModule):
+    MODULE_ID = "repo_analyzer"
+    MODULE_NAME = "RepoAnalyzer"
+
+    async def initialize(self):
+        self.info(f"RepoAnalyzer initialized")
+
+    async def execute(self, action, params=None):
+        return await super().execute(action, params)
+
+    def health_check(self):
+        return super().health_check()
+
+module_class = RepoAnalyzer

@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """
 # Grade: A
 AUTO-EVO-AI V0.1 — Trending Pipeline (Production Grade)
@@ -48,7 +49,7 @@ DEFAULT_CONFIG = {
 }
 
 @dataclass
-class TrendingReport:
+class TrendingReport(EnterpriseModule):
     """趋势分析报告"""
     id: str = ""
     scanned_at: str = ""
@@ -58,7 +59,7 @@ class TrendingReport:
     repos: list[dict] = field(default_factory=list)
     summary: str = ""
 
-class TrendingPipeline:
+class TrendingPipeline(EnterpriseModule):
     """
     趋势分析管线 — 上市公司级自主运行
     集扫描、筛选、格式化、通知、持久化于一体

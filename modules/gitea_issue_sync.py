@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """
 Grade: A
 Gitea Issue ↔ 协调中心双向同步 Plugin
@@ -93,7 +94,7 @@ async def get_sync_status() -> dict:
     }
 
 
-class GiteaIssueSync:
+class GiteaIssueSync(EnterpriseModule):
     """Gitea Issue同步模块"""
     def __init__(self): pass
     def execute(self, action: str = "", params: dict = None) -> dict:

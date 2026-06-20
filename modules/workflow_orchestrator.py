@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """
 Grade: A
 自定义工作流编排引擎 — YAML 定义 → 按步骤执行工具链
@@ -141,3 +142,19 @@ def list_workflows() -> list:
 def get_executions(limit: int = 20) -> list:
     """获取执行历史"""
     return _executions[-limit:]
+
+
+class WorkflowOrchestrator(EnterpriseModule):
+    MODULE_ID = "workflow_orchestrator"
+    MODULE_NAME = "WorkflowOrchestrator"
+
+    async def initialize(self):
+        self.info(f"WorkflowOrchestrator initialized")
+
+    async def execute(self, action, params=None):
+        return await super().execute(action, params)
+
+    def health_check(self):
+        return super().health_check()
+
+module_class = WorkflowOrchestrator

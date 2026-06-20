@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """Codebase理解引擎 — 索引→分析→AI编辑→PR生成"""
 from __future__ import annotations
@@ -5,7 +6,7 @@ import os, re, json, sqlite3, hashlib, time
 from pathlib import Path
 from typing import Optional
 
-class CodebaseIndexer:
+class CodebaseIndexer(EnterpriseModule):
     """扫描项目目录，构建代码结构索引"""
     
     def __init__(self, db_path: str = ""):
@@ -109,7 +110,7 @@ class CodebaseIndexer:
         if self._conn: self._conn.close()
 
 
-class CodebaseAgent:
+class CodebaseAgent(EnterpriseModule):
     """AI驱动的代码编辑和分析"""
     
     def __init__(self, indexer: CodebaseIndexer):

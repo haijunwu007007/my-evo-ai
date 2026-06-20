@@ -1,10 +1,11 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """持久记忆树 — 持久化知识图谱"""
 from __future__ import annotations
 import os, json, sqlite3, time
 from typing import Optional
 
-class MemoryTree:
+class MemoryTree(EnterpriseModule):
     def __init__(self, db_path: str = ""):
         self._db = db_path or os.path.join(os.path.dirname(__file__), "..", "memory_tree.db")
         self._conn: Optional[sqlite3.Connection] = None

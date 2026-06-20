@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 """
 Grade: A
 AUTO-EVO-AI V0.1 — 斜杠命令系统
@@ -21,7 +22,7 @@ from typing import Callable, Optional
 
 
 @dataclass
-class Command:
+class Command(EnterpriseModule):
     name: str
     description: str
     usage: str

@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 #!/usr/bin/env python3
 """
 Fast N8N Workflow Database
@@ -13,7 +14,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
 
 
-class WorkflowDatabase:
+class WorkflowDatabase(EnterpriseModule):
     """High-performance SQLite database for workflow metadata and search."""
 
     def __init__(self, db_path: str = None):

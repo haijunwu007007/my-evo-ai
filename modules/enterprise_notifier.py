@@ -1,3 +1,4 @@
+from modules._base.enterprise_module import EnterpriseModule
 #!/usr/bin/env python3
 """
 AUTO-EVO-AI V0.1 — Enterprise Notifier (企业通知网关)
@@ -228,3 +229,19 @@ if __name__ == "__main__":
         h = health_check()
         print("Health:", json.dumps(h, ensure_ascii=False, indent=2))
     asyncio.run(test())
+
+
+class EnterpriseNotifier(EnterpriseModule):
+    MODULE_ID = "enterprise_notifier"
+    MODULE_NAME = "EnterpriseNotifier"
+
+    async def initialize(self):
+        self.info(f"EnterpriseNotifier initialized")
+
+    async def execute(self, action, params=None):
+        return await super().execute(action, params)
+
+    def health_check(self):
+        return super().health_check()
+
+module_class = EnterpriseNotifier

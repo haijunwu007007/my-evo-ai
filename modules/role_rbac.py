@@ -1,10 +1,11 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """角色权限管理 — RBAC 角色+权限"""
 from __future__ import annotations
 import os, json, sqlite3, time
 from typing import Optional
 
-class RoleRBAC:
+class RoleRBAC(EnterpriseModule):
     def __init__(self, db_path: str = ""):
         self._db = db_path or os.path.join(os.path.dirname(__file__), "..", "rbac.db")
         self._conn: Optional[sqlite3.Connection] = None

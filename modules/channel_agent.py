@@ -1,10 +1,11 @@
+from modules._base.enterprise_module import EnterpriseModule
 # -*- coding: utf-8 -*-
 """多渠道Agent — 消息通道抽象层"""
 from __future__ import annotations
 import os, json, sqlite3, time
 from typing import Optional
 
-class ChannelAgent:
+class ChannelAgent(EnterpriseModule):
     """多渠道消息收发抽象层"""
     
     def __init__(self, db_path: str = ""):
