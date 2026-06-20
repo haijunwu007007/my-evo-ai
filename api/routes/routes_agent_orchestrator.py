@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
+import httpx
 
 router = APIRouter(prefix="/api/v1/agents", tags=["agents"])
 
@@ -182,14 +183,27 @@ async def _call_agent(agent_name: str, action: str, expected: str) -> str:
 请直接输出结果（代码/文本/步骤）。"""
 
     try:
-        import httpx
         r = await asyncio.wait_for(httpx.AsyncClient(timeout=60).post(
             "http://localhost:8765/api/v1/llm/chat",
             json={"messages": [{"role": "user", "content": prompt}], "model": agent.get("llm", "GLM-4-Flash")},
             timeout=60), timeout=60)
-        return r.json().get("choices", [{}])[0].get("message", {}).get("content", "（无响应）")
+        txt = r.json().get("choices", [{}])[0].get("message", {}).get("content", "（无响应）")
     except Exception as e:
-        return f"（执行出错: {str(e)[:50]}）"
+        txt = f"（执行出错: {str(e)[:50]}）"
+
+    # 如果 Agent 输出了代码，送入沙箱验证
+    if "```" in txt and agent_name in ("coder", "deployer", "planner"):
+        try:
+            sr = await asyncio.wait_for(httpx.AsyncClient(timeout=120).post(
+                "http://localhost:8765/api/v1/sandbox/run",
+                json={"code": txt, "action": "install"}, timeout=120), timeout=120)
+            sr_json = sr.json()
+            if sr_json.get("success"):
+                txt += "\n\n🛝 沙箱执行结果:\n" + str(sr_json.get("results", {}))
+        except:
+            pass
+
+    return txt
 
 async def _merge_results(task: str, results: dict) -> str:
     """合并所有 Agent 结果"""

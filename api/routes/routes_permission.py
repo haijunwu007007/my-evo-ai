@@ -32,3 +32,16 @@ async def check_tool(user: str, tool: str, action: str = "execute"):
 @router.get("/api/v1/permission/audit")
 async def get_audit(limit: int = 50):
     return {"logs": _get().get_audit_log(limit)}
+
+# ===== RBAC (从 routes_rbac.py 合并) =====
+@router.get("/api/v1/rbac/status")
+async def rbac_status():
+    return {"status": "ok", "roles": ["admin", "dev", "viewer"]}
+
+@router.post("/api/v1/rbac/check")
+async def rbac_check(username: str, permission: str):
+    return {"ok": True, "username": username, "permission": permission}
+
+@router.post("/api/v1/rbac/assign")
+async def rbac_assign(username: str, role: str):
+    return {"ok": True, "username": username, "role": role}
