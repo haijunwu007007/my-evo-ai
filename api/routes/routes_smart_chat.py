@@ -101,13 +101,27 @@ async def smart_chat(req: Req):
         result = route_and_execute(msg)
         rtype = result.get("type", "chat")
         output = result.get("data", "")
-        if rtype == "tool" or rtype == "direct":
+        if rtype in ("tool", "direct", "chat"):
             return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
     except Exception:
         pass
-    # ── 检查是否有可用的 API Key ──
-    _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"))
-    if not _has_key:
+    # ── 检查是否有可用的 API Key（os.environ + .env 兜底） ──
+    if not any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")):
+        # 尝试从 .env 文件直接读取
+        try:
+            for p in [BASE/".env", BASE/".env.production", BASE.parent/".env"]:
+                if p.exists():
+                    for line in p.read_text().splitlines():
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            os.environ[k.strip()] = v.strip()
+                        if any(os.environ.get(k) for k in ("ZHIPU_API_KEY",)):
+                            break
+                    break
+        except Exception:
+            pass
+    if not any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")):
         return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求", "mode": "no_key"}
     from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)

@@ -4,9 +4,26 @@
 """
 import os, json, httpx, re, asyncio, time, hashlib
 
-# ── 默认API Key ──
-_ZHIPU_KEY = os.environ.get("ZHIPU_API_KEY", "")
-_DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+# ── 默认API Key（延迟读取，避免模块加载时 .env 未生效） ──
+def _load_env():
+    """从 .env 文件加载环境变量（兜底）"""
+    for p in [os.path.join(os.path.dirname(__file__), "..", ".env"),
+              os.path.join(os.path.dirname(__file__), "..", ".env.production"),
+              "/home/ubuntu/my-evo-ai/.env"]:
+        p = os.path.abspath(p)
+        if os.path.exists(p):
+            try:
+                for line in open(p, encoding='utf-8'):
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        os.environ[k.strip()] = v.strip()
+            except Exception:
+                pass
+            break
+_load_env()
+def _get_key(name): return os.environ.get(name, "")
+
 
 # ── LLM结果缓存（防API抖动） ──
 _LLM_CACHE: dict = {}
@@ -27,13 +44,13 @@ def _cache_get(key):
 # ── 提供商路由表 ──
 _LLM_PROVIDERS = [
     {"name":"GLM-4-Flash","model":"GLM-4-Flash","url":"https://open.bigmodel.cn/api/paas/v4/chat/completions",
-     "env":"ZHIPU_API_KEY","key":_ZHIPU_KEY,"priority":100,"type":"api","check_401":False,
+     "env":"ZHIPU_API_KEY","key":_get_key("ZHIPU_API_KEY"),"priority":100,"type":"api","check_401":False,
      "tags":["default"],"cooldown":0},
     {"name":"GLM-4.7-Flash","model":"GLM-4.7-Flash","url":"https://open.bigmodel.cn/api/paas/v4/chat/completions",
-     "env":"ZHIPU_API_KEY","key":_ZHIPU_KEY,"priority":80,"type":"api","check_401":False,
+     "env":"ZHIPU_API_KEY","key":_get_key("ZHIPU_API_KEY"),"priority":80,"type":"api","check_401":False,
      "tags":["default","code","reasoning"],"cooldown":0},
     {"name":"DeepSeek-V4-Flash","model":"deepseek-v4-flash","url":"https://api.deepseek.com/v1/chat/completions",
-     "env":"DEEPSEEK_API_KEY","key":_DEEPSEEK_KEY,"priority":60,"type":"api","check_401":True,
+     "env":"DEEPSEEK_API_KEY","key":_get_key("DEEPSEEK_API_KEY"),"priority":60,"type":"api","check_401":True,
      "tags":["paid"],"cooldown":0},
     {"name":"Qwen3.6","model":"qwen","url":"http://127.0.0.1:6006/v1/chat/completions",
      "priority":-99,"type":"openai","timeout":60,"cooldown":0},
@@ -82,31 +99,22 @@ def call_llm(messages, tools=None, key="", timeout=None):
                       and (p.get("key") or os.environ.get(p.get("env",""),""))
                       and (not p.get("tags") or task_type in p.get("tags",[]) or "default" in p.get("tags",[]))]
     if free_providers:
-        # 前2个并行竞速
+        # 前2个并行竞速（同步化：直接串行执行避免 asyncio.run 嵌套冲突）
         top2 = free_providers[:2]
-        async def _race():
-            async def _try_async(p):
-                return p, await asyncio.to_thread(_try_provider, p, messages, tools, t, key)
-            done, _ = await asyncio.wait([_try_async(p) for p in top2],
-                                          return_when=asyncio.FIRST_COMPLETED)
-            for task in done:
-                p, r = task.result()
-                if r:
-                    _mark_ok(p["name"])
-                    return r
-                _mark_fail(p["name"])
-            # 都失败则串行试剩余
-            for p in free_providers[2:]:
-                if _in_cooldown(p): continue
-                r = _try_provider(p, messages, tools, t, key)
-                if r:
-                    _mark_ok(p["name"])
-                    return r
-                _mark_fail(p["name"])
-            return None
-        result = asyncio.run(_race())
-        if result:
-            return result
+        for p in top2:
+            r = _try_provider(p, messages, tools, t, key)
+            if r:
+                _mark_ok(p["name"])
+                return r
+            _mark_fail(p["name"])
+        # 都失败则串行试剩余
+        for p in free_providers[2:]:
+            if _in_cooldown(p): continue
+            r = _try_provider(p, messages, tools, t, key)
+            if r:
+                _mark_ok(p["name"])
+                return r
+            _mark_fail(p["name"])
 
     # ── 第二梯队：用户 Key ──
     if key:

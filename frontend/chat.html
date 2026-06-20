@@ -599,64 +599,7 @@ async function send(){
       }
     }
 
-    // 工具类消息直接走非流式（有完整工具链），其他走流式
-    if(!useTools){
-      try{
-        var ssr=await tFetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
-        if(ssr.ok){
-          var d=document.getElementById('messages');var msgDiv=document.createElement('div');msgDiv.className='msg bot'
-          var lb=document.createElement('div');lb.className='msg-label';lb.textContent='AUTO-EVO-AI'
-          var bb=document.createElement('div');bb.className='msg-bubble';bb.textContent=''
-          msgDiv.appendChild(lb);msgDiv.appendChild(bb);d.appendChild(msgDiv)
-          hideLoading()
-          var full='';var reader=ssr.body.getReader();var decoder=new TextDecoder()
-          while(true){
-            var {done,value}=await reader.read()
-            if(done)break
-            var lines=decoder.decode(value).split('\n')
-            for(var l of lines){
-              if(!l.trim())continue
-              try{var j=JSON.parse(l);if(j.type==='chunk'){full+=j.text;bb.innerHTML=_renderMd(full);d.scrollTop=d.scrollHeight}else if(j.type==='done'){d.scrollTop=d.scrollHeight}}catch(e){console.warn('stream parse',e)}
-            }
-          }
-          // 渲染模块调用信息（保留高亮）
-          if(full.includes('【模块调用】')||full.includes('execute_module')||full.includes('引擎:')){
-            bb.innerHTML=_renderMd(full).replace(/\|/g,' | ').replace(/【模块调用】/g,'<span style="color:#4361ee;font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:#7209b7">引擎:</span>')
-          }
-          CTX.push({role:'assistant',content:full})
-          CHAT.push({role:'bot',text:full,time:new Date().toISOString()})
-          if(CHAT.length>100)CHAT=CHAT.slice(-100)
-          localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
-          return
-        }
-      }catch(e){console.warn('stream fail',e)}
-    }
-    // 非流式请求：先尝试 Agent Engine（工具类/外部Skill），降级到 smart chat
-    try{
-      var ar=await fetch('/api/v1/agent/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text,context:CTX.slice(-3)})})
-      if(ar.ok){
-        var ad=await ar.json()
-        if(ad.success){
-          hideLoading()
-          var resultHtml='🤖 **Agent 引擎**\n\n'+ad.result
-          if(ad.details&&ad.details.length>0){
-            resultHtml+='\n\n**执行步骤:**'
-            for(var s of ad.details){
-              var emoji=s.tool.includes('browser')?'🌐':s.tool.includes('search')?'🔍':s.tool.includes('code')?'💻':s.tool.includes('crawl')?'🕷️':s.tool.includes('github')?'⭐':s.tool.includes('translate')?'🌍':s.tool.includes('doc')?'📄':s.tool.includes('ppt')?'📽️':s.tool.includes('excel')?'📊':'➡️'
-              resultHtml+='\n'+emoji+' **'+s.tool+'**: '+s.result.slice(0,200)
-            }
-          }
-          addMsg(resultHtml,'bot')
-          CTX.push({role:'assistant',content:ad.result})
-          CHAT.push({role:'bot',text:resultHtml,time:new Date().toISOString()})
-          if(CHAT.length>100)CHAT=CHAT.slice(-100)
-          localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))
-          document.getElementById('sendBtn').disabled=false;input.focus()
-          return
-        }
-      }
-    }catch(e){console.warn('agent/run fail',e)}
-    // 非流式降级请求（工具调用/流式失败降级）
+    // 非流式请求：直接走 smart（稳定可靠）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');document.getElementById('sendBtn').disabled=false;return}
     var sd=await sr.json()

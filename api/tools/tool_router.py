@@ -224,7 +224,7 @@ def _try_function_calling(text: str, history: list | None = None) -> dict | None
 
     text_out, _ = call_llm(messages, timeout=60)
 
-    if not text_out:
+    if not text_out or "LLM不可用" in str(text_out):
         return None
 
     text_out = text_out.strip()
