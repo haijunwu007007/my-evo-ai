@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>🔧 CLI 终端 — AUTO-EVO-AI</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:monospace;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.c{max-width:900px;margin:0 auto;padding:20px}.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:14px}.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.tool{background:rgba(22,33,62,.5);border:1px solid rgba(67,97,238,.2);border-radius:8px;padding:12px;text-align:center;font-size:12px}.tool .st{font-size:10px;padding:1px 8px;border-radius:8px}.term{background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:12px;font-size:12px;min-height:120px;white-space:pre-wrap;overflow:auto;color:#06d6a0}.inp{display:flex;gap:8px;margin:10px 0}.inp input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-family:monospace;font-size:13px;outline:none}.inp button{padding:10px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;cursor:pointer}
+</style></head><body>
+<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/cli">CLI</a></div></div>
+<div class="c">
+  <h2 style="font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🔧 CLI 能力网关</h2>
+
+  <div class="card">
+    <div style="font-size:14px;margin-bottom:8px">CLI 工具状态</div>
+    <div class="tools" id="toolList"><div style="color:#636e70">加载中...</div></div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:14px;margin-bottom:8px">💬 终端对话 (AIChat)</div>
+    <div class="inp"><input id="aiMsg" placeholder="输入消息..." onkeydown="if(event.key=='Enter')cliAIChat()"><button onclick="cliAIChat()">发送</button></div>
+    <div class="term" id="aiOut"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:14px;margin-bottom:8px">🐳 Docker 容器</div>
+    <button onclick="dockerPS()" style="padding:6px 14px;border:none;border-radius:6px;background:rgba(67,97,238,.15);color:#4361ee;cursor:pointer;font-size:12px">刷新</button>
+    <div class="term" id="dockerOut" style="margin-top:8px"></div>
+  </div>
+</div>
+<script>
+async function loadTools(){try{var r=await fetch('/api/v1/cli/tools');var d=await r.json();var h='';for(var k in d.tools){var t=d.tools[k];h+='<div class=tool><div>'+t.name+'</div><div style=font-size:10px;color:#636e70>'+t.desc+'</div><div class=st style=background:'+(t.installed?'rgba(16,185,129,.15);color:#10b981':'rgba(239,68,68,.15);color:#ef4444')+'>'+(t.installed?'✅已装':'❌未装')+'</div></div>'}document.getElementById('toolList').innerHTML=h||'<div style=color:#636e70>无工具</div>'}catch(e){}}
+async function cliAIChat(){var m=document.getElementById('aiMsg').value.trim();if(!m)return;document.getElementById('aiOut').textContent='⏳ 思考中...';try{var r=await fetch('/api/v1/cli/aichat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})});var d=await r.json();document.getElementById('aiOut').textContent=d.result||d.error||'无响应'}catch(e){document.getElementById('aiOut').textContent='失败: '+e.message}}
+async function dockerPS(){document.getElementById('dockerOut').textContent='⏳ 加载中...';try{var r=await fetch('/api/v1/cli/docker/ps');var d=await r.json();if(!d.containers||d.containers.length==0){document.getElementById('dockerOut').textContent='无运行容器';return}var h='';for(var c of d.containers){h+=c.id.slice(0,12)+'  '+c.name+'  '+c.status+'\n'}document.getElementById('dockerOut').textContent=h}catch(e){document.getElementById('dockerOut').textContent='失败: '+e.message}}
+loadTools();dockerPS();
+</script></body></html>
