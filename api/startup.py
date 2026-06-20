@@ -6,6 +6,17 @@ AUTO-EVO-AI V0.1 — API 启动/后台任务层
 from __future__ import annotations
 
 import os
+import os
+# ── 加载 /etc/evo.env（系统环境变量配置） ──
+try:
+    with open("/etc/evo.env") as f:
+        for line in f:
+            line = line.strip()
+            if line and "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ[k.strip()] = v.strip()
+except: pass
+
 import sys
 import time
 import asyncio
@@ -122,7 +133,6 @@ def _mount_vue_frontend():
             "multi-agent": "multi_agent.html",
             "desktop": "desktop.html",
             "rbac": "rbac.html",
-            "copilot": "copilot.html",
             "channel": "channel.html",
             "n8n": "n8n.html",
             "agents": "agents.html",

@@ -101,27 +101,14 @@ async def smart_chat(req: Req):
         result = route_and_execute(msg)
         rtype = result.get("type", "chat")
         output = result.get("data", "")
-        if rtype in ("tool", "direct", "chat"):
+        if rtype == "tool" or rtype == "direct":
             return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
     except Exception:
         pass
-    # ── 检查是否有可用的 API Key（os.environ + .env 兜底） ──
-    if not any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")):
-        # 尝试从 .env 文件直接读取
-        try:
-            for p in [BASE/".env", BASE/".env.production", BASE.parent/".env"]:
-                if p.exists():
-                    for line in p.read_text().splitlines():
-                        line = line.strip()
-                        if line and not line.startswith("#") and "=" in line:
-                            k, v = line.split("=", 1)
-                            os.environ[k.strip()] = v.strip()
-                        if any(os.environ.get(k) for k in ("ZHIPU_API_KEY",)):
-                            break
-                    break
-        except Exception:
-            pass
-    if not any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")):
+    # ── 检查是否有可用的 API Key ──
+    from api.agent_llm import _get_key as _llm_key
+    _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")) or bool(_llm_key())
+    if not _has_key:
         return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求", "mode": "no_key"}
     from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
@@ -193,9 +180,5 @@ async def smart_stream(req: Req):
 @router.get("/api/v1/llm/status")
 async def llm_status():
     """返回当前 LLM 模型状态（前端显示）"""
-    import os
-    key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
-    model = os.environ.get("LLM_MODEL", "GLM-4-Flash")
-    if key:
-        return {"success": True, "active": [{"name": model, "provider": "zhipu", "available": True}], "providers": [{"name": model, "available": True}]}
-    return {"success": True, "active": [], "providers": [{"name": "GLM-4-Flash", "available": False}], "hint": "请配置 ZHIPU_API_KEY"}
+    from api.agent_llm import get_active_model
+    return get_active_model()

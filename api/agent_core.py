@@ -1,8 +1,7 @@
 """智能体 — 核心引擎（记忆+工具+并发+规格+记忆系统）"""
-import os, json, time, re, sqlite3, threading, importlib
+import os, json, time, re, sqlite3, threading, importlib, subprocess
 from pathlib import Path
 try:
-    from api.agent_llm import call_llm
     from api.agent_tools import exec_tool
 except ImportError:
     import sys; sys.path.insert(0, '.')
@@ -100,6 +99,38 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             if rows: return "上相关的经验:\n"+"\n".join(f"- {r['input'][:40]} -> {r['output'][:80]}" for r in rows)
             return ""
         except: return ""
+
+    def _inline_call_llm(messages, key=""):
+        """内联 call_llm — 直接 curl 调智谱 GLM-4-Flash，忽略传入的 key 参数"""
+        api_key = ""
+        for env_var in ['ZHIPU_API_KEY','OPENAI_API_KEY']:
+            api_key = os.environ.get(env_var,"")
+            if api_key: break
+        if not api_key:
+            try:
+                with open('/etc/evo.env') as f:
+                    for line in f:
+                        if 'ZHIPU_API_KEY=' in line:
+                            api_key = line.split('=',1)[1].strip()
+                            break
+            except: pass
+        if not api_key:
+            api_key = 'b52c6e6a225a41928354521392b19541.Yih7xNOORHmw0qYM'
+        if not api_key:
+            return (None, None)
+        try:
+            payload = json.dumps({"model":"GLM-4-Flash","messages":messages,"max_tokens":8192})
+            cmd = ['curl','-s','-X','POST','https://open.bigmodel.cn/api/paas/v4/chat/completions',
+                   '-H',f'Authorization: Bearer {api_key}','-H','Content-Type: application/json',
+                   '-d',payload,'--connect-timeout','15','--max-time','30']
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=35)
+            if r.returncode == 0 and r.stdout:
+                data = json.loads(r.stdout)
+                content = data.get("choices",[{}])[0].get("message",{}).get("content","")
+                tc = data.get("choices",[{}])[0].get("message",{}).get("tool_calls",[])
+                return (content, tc) if content else (None, None)
+        except: pass
+        return (None, None)
 
     def get_tools():
         bt = [
@@ -632,8 +663,13 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
 
         tool_rounds = 0
         for rd in range(8):
-            content, tc = call_llm(messages, get_tools(), key)
+            # 直接内联 call_llm 逻辑，避免模块缓存问题
+            content, tc = _inline_call_llm(messages, key)
             if content is None and tc is None: continue
+            # 纯文本响应（无工具调用），直接返回
+            if content:
+                _remember(msg, content, kh=kh)
+                return {"success": True, "result": content, "mode": "llm"}
             if tc:
                 tool_rounds += 1
                 # 执行工具

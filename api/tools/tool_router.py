@@ -185,7 +185,11 @@ def route_and_execute(user_input: str, history: list | None = None) -> dict:
 
     # ── 3. 纯聊天（兜底）──
     try:
-        text_out, _ = call_llm([{"role": "user", "content": text}], timeout=30)
+        result = call_llm([{"role": "user", "content": text}], timeout=30)
+        if result and isinstance(result, tuple) and len(result) >= 1 and result[0]:
+            text_out = result[0]
+        else:
+            text_out = None
         return {"type": "chat", "name": "chat", "data": text_out or "抱歉，我没有理解你的意思。", "latency": time.time() - start}
     except Exception:
         return {"type": "chat", "name": "chat", "data": "你好！我是 AUTO-EVO-AI，有87个工具可用。请告诉我需要什么帮助？", "latency": time.time() - start}
@@ -222,9 +226,10 @@ def _try_function_calling(text: str, history: list | None = None) -> dict | None
         messages.extend(history[-4:])
     messages.append({"role": "user", "content": text})
 
-    text_out, _ = call_llm(messages, timeout=60)
+    result = call_llm(messages, timeout=60)
+    text_out = result[0] if isinstance(result, (list, tuple)) and result else None
 
-    if not text_out or "LLM不可用" in str(text_out):
+    if not text_out:
         return None
 
     text_out = text_out.strip()
@@ -244,5 +249,7 @@ def _try_function_calling(text: str, history: list | None = None) -> dict | None
                 "latency": time.time() - start,
             }
 
-    # LLM 选择直接回复
+    # LLM 选择直接回复——但如果是"系统提示"类文字（工具名、菜单等），交给纯聊天兜底
+    if len(text_out) < 10 or text_out.startswith("browser") or text_out.startswith("TOOL") or "_task" in text_out:
+        return None
     return {"type": "chat", "name": "chat", "data": text_out, "latency": time.time() - start}
