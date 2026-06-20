@@ -179,5 +179,9 @@ async def smart_stream(req: Req):
 @router.get("/api/v1/llm/status")
 async def llm_status():
     """返回当前 LLM 模型状态（前端显示）"""
-    from api.agent_llm import get_active_model
-    return get_active_model()
+    import os
+    key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+    model = os.environ.get("LLM_MODEL", "GLM-4-Flash")
+    if key:
+        return {"success": True, "active": [{"name": model, "provider": "zhipu", "available": True}], "providers": [{"name": model, "available": True}]}
+    return {"success": True, "active": [], "providers": [{"name": "GLM-4-Flash", "available": False}], "hint": "请配置 ZHIPU_API_KEY"}
