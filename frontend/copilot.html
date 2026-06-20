@@ -18,7 +18,7 @@
 <div class=inp><input id=inp placeholder="问我点什么..." onkeydown=if(event.key=='Enter')sendMsg()><button onclick=sendMsg()>发送</button></div>
 </div>
 </div>
-<script>const api='https://autoevoai.com/api/v1'
+<script>const api=window.location.origin+'/api/v1'
 async function sendMsg(pre){const inp=document.getElementById('inp');const msg=pre||inp.value.trim();if(!msg)return;if(!pre)inp.value=''
 const box=document.getElementById('chatbox')
 box.innerHTML+=`<div class="msg user">${msg}</div>`
