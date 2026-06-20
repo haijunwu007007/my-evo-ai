@@ -1,4 +1,11 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="description" content="AUTO-EVO-AI 智能进化平台 - 一键部署、智能Agent、自动化工作流">
+<meta property="og:title" content="AUTO-EVO-AI">
+<meta property="og:description" content="一键部署任意项目，自动完成所有工作">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🤖 多Agent协作 — AUTO-EVO-AI</title>
 <style>
@@ -16,6 +23,17 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#
 <div class="c">
 <h2>🤖 多Agent协作</h2>
 <p style="color:#636e70;font-size:13px">6个角色团队协作：Planner→Coder→Reviewer→Operator→Analyst→Researcher</p>
+<div id="agentGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:15px"><p style="color:#636e70">⏳ 加载Agent状态...</p></div>
 </div>
 <div class="ft">AUTO-EVO-AI V0.1 · 多Agent协作引擎</div>
+<script>
+fetch('/api/v1/agents/list').then(function(r){return r.json()}).then(function(d){
+  var agents=d.agents||[];
+  var h='';
+  agents.slice(0,6).forEach(function(a){
+    h+='<div style="background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px"><h3>'+(a.name||a.id)+'</h3><p style="font-size:12px;color:#8892b0">'+(a.desc||'')+'</p><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:'+(a.status==='running'?'rgba(67,238,100,.2);color:#43ee64':a.status==='idle'?'rgba(255,180,0,.2);color:#ffb400':'rgba(99,110,112,.2);color:#636e70')+'">'+(a.status||'idle')+'</span></div>';
+  });
+  document.getElementById('agentGrid').innerHTML=h||'<p style="color:#636e70">暂无Agent数据</p>';
+}).catch(function(){document.getElementById('agentGrid').innerHTML='<p style="color:#636e70">❌ 无法加载</p>'});
+</script>
 </body></html>

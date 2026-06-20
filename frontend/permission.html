@@ -1,4 +1,11 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="description" content="AUTO-EVO-AI 智能进化平台 - 一键部署、智能Agent、自动化工作流">
+<meta property="og:title" content="AUTO-EVO-AI">
+<meta property="og:description" content="一键部署任意项目，自动完成所有工作">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🔐 权限沙箱 — AUTO-EVO-AI</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:900px;margin:0 auto;padding:20px 16px}h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}.card{flex:1;min-width:150px;background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px}.card .num{font-size:28px;font-weight:800;color:#10b981}.card .lb{font-size:11px;color:#636e70;margin-top:2px}.tb{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;overflow:hidden}.tb table{width:100%;border-collapse:collapse;font-size:12px}.tb th{padding:8px 12px;text-align:left;font-size:10px;color:#636e70;background:rgba(20,20,35,.5)}.tb td{padding:8px 12px;color:#a0a8b8;border-bottom:1px solid rgba(45,53,97,.1)}.safe{color:#10b981}.caut{color:#f59e0b}.dang{color:#ef4444}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
@@ -12,7 +19,17 @@
     <div class="card"><div class="num" style="color:#4361ee">全部</div><div class="lb">审计日志</div></div>
   </div>
   <h2>📋 工具权限列表</h2>
-  <div class="tb"><table><thead><tr><th>工具</th><th>等级</th><th>说明</th></tr></thead><tbody>
+  <div class="tb"><h2>角色权限配置</h2>
+<div id="rbacView"><p>⏳ 加载中...</p></div>
+<script>
+fetch('/api/v1/rbac/status').then(r=>r.json()).then(d=>{
+  var html='<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%"><tr><th>角色</th><th>权限</th></tr>';
+  (d.roles||[]).forEach(function(r){html+='<tr><td><strong>'+r.name+'</strong></td><td>'+(r.permissions||[]).join(', ')+'</td></tr>'});
+  html+='</table>';
+  document.getElementById('rbacView').innerHTML=html;
+}).catch(function(){document.getElementById('rbacView').innerHTML='<p>❌ 无法加载权限数据</p>'});
+</script>
+<table style="display:none"><thead><tr><th>工具</th><th>等级</th><th>说明</th></tr></thead><tbody>
     <tr><td>📄 文件读取</td><td class="safe">🟢 安全</td><td>读文件/目录</td></tr>
     <tr><td>📝 文件写入</td><td class="caut">🟡 谨慎</td><td>修改已有文件</td></tr>
     <tr><td>🗑️ 文件删除</td><td class="dang">🔴 危险</td><td>永久删除</td></tr>
@@ -24,7 +41,17 @@
 <div class="ft">AUTO-EVO-AI · 权限沙箱 (参考 Mercury Agent)</div>
 <hr style="margin:20px 0;border-color:rgba(45,53,97,.3)">
 <h2>🛡️ 角色权限管理 — Mercury RBAC 风格</h2>
-<div class="tb"><table><thead><tr><th>角色</th><th>权限</th><th>可操作范围</th></tr></thead><tbody>
+<div class="tb"><h2>角色权限配置</h2>
+<div id="rbacView"><p>⏳ 加载中...</p></div>
+<script>
+fetch('/api/v1/rbac/status').then(r=>r.json()).then(d=>{
+  var html='<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%"><tr><th>角色</th><th>权限</th></tr>';
+  (d.roles||[]).forEach(function(r){html+='<tr><td><strong>'+r.name+'</strong></td><td>'+(r.permissions||[]).join(', ')+'</td></tr>'});
+  html+='</table>';
+  document.getElementById('rbacView').innerHTML=html;
+}).catch(function(){document.getElementById('rbacView').innerHTML='<p>❌ 无法加载权限数据</p>'});
+</script>
+<table style="display:none"><thead><tr><th>角色</th><th>权限</th><th>可操作范围</th></tr></thead><tbody>
 <tr><td class="role-admin">🔑 管理员</td><td>全部</td><td>系统配置·用户管理·模块管理·审计</td></tr>
 <tr><td class="role-dev">💻 开发者</td><td>读写</td><td>模块使用·API调用·文件操作</td></tr>
 <tr><td class="role-view">👀 观察者</td><td>只读</td><td>查看仪表盘·查看日志·查看模块</td></tr>
