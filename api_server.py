@@ -54,7 +54,7 @@ logger = get_logger("evo.api")
 
 # ── 版本常量（集中管理，升级只需改此处）──
 VERSION = "V0.1"
-VERSION_BUILD = "20260609"
+VERSION_BUILD = "20260620"
 BUILD_TAG = f"AUTO-EVO-AI {VERSION}"
 
 # ── 导入共享基础设施 ──
