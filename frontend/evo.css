@@ -1,9 +1,0 @@
-/* evo.css — 设计系统变量，不污染页面自有样式 */
-:root{--bg:#0b0b16;--bg2:#12122a;--card:#1a1a2e;--text:#e8e8ef;--text2:#8892b0;--border:#2d3561;--accent:#4361ee;--glass:rgba(255,255,255,.03)}
-body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--border:#d0d5e0;--accent:#4361ee;--glass:rgba(0,0,0,.02)}
-/* 共享工具类 — 各页面可选用 */
-.btn-prime{padding:8px 18px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px}
-.btn-prime:disabled{opacity:.5;cursor:default}
-.btn-ghost{padding:6px 14px;border:none;border-radius:6px;background:rgba(67,97,238,.12);color:#4361ee;font-size:12px;cursor:pointer}
-.card-bg{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px}
-body.light .card-bg{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.08)}
