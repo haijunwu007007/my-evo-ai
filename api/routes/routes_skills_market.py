@@ -1,117 +1,142 @@
+# -*- coding: utf-8 -*-
 """
-AUTO-EVO-AI V0.1 — 技能市场路由
-提供 Skills 安装/搜索/分类浏览 API
+🌐 Skills 平台集成网关 — 发现/安装/桥接任意第三方 Skills
+支持: GitHub Skills仓库 / MCP市场 / 自定义Skills源
 """
-from fastapi import APIRouter, Request
-import json, subprocess, sys, os
+from fastapi import APIRouter, Query
+import os, json, subprocess, re, urllib.request, tempfile, shutil
 from pathlib import Path
 
-router = APIRouter()
-BASE = Path(__file__).resolve().parent.parent
-SKILLS_DIR = BASE / "modules"
-CLONE_DIR = BASE / "skills" / "marketplace"
+router = APIRouter(prefix="/api/v1/skills-platform", tags=["skills-platform"])
+BASE = Path(__file__).resolve().parent.parent.parent
+SKILLS_DIR = Path(os.path.expanduser("~/.workbuddy/skills/auto-discovered"))
 
-# 预定义技能市场数据（对标OpenClaw ClawHub）
-MARKET_SKILLS = [
-    {"id": "bird-twitter", "name": "🐦 Bird 推特运营", "category": "social", "desc": "发推/搜索/回复/时间线管理", "grade": "A"},
-    {"id": "ga4-analytics", "name": "📊 GA4 分析", "category": "analytics", "desc": "Google Analytics流量/用户/转化追踪", "grade": "A"},
-    {"id": "gsc-search", "name": "🔍 GSC 搜索控制台", "category": "analytics", "desc": "Google Search Console关键词/索引分析", "grade": "A"},
-    {"id": "swot-analyzer", "name": "🧠 SWOT 分析器", "category": "thinking", "desc": "优劣势/机会/威胁结构化分析", "grade": "A"},
-    {"id": "first-principles", "name": "🧩 第一性原理", "category": "thinking", "desc": "复杂问题拆解分析框架", "grade": "A"},
-    {"id": "decision-tree", "name": "🌳 决策树", "category": "thinking", "desc": "多方案决策分析与推荐", "grade": "A"},
-    {"id": "lead-catcher", "name": "🎯 线索捕获", "category": "crm", "desc": "潜在客户自动抓取与分类", "grade": "A"},
-    {"id": "plagiarism-check", "name": "📝 查重检测", "category": "content", "desc": "文本查重与原创度优化", "grade": "A"},
-    {"id": "title-optimizer", "name": "🏷️ 标题优化", "category": "content", "desc": "多平台标题优化提升点击率", "grade": "A"},
-    {"id": "reference-checker", "name": "📚 引用检查", "category": "content", "desc": "文献引用格式自动规范", "grade": "A"},
-    {"id": "pomodoro-timer", "name": "⏰ 番茄钟", "category": "productivity", "desc": "番茄工作法计时器与专注统计", "grade": "A"},
-    {"id": "time-blocker", "name": "📅 时间块", "category": "productivity", "desc": "时间块管理与每日规划", "grade": "A"},
-    {"id": "wechat-oa", "name": "💬 公众号运营", "category": "social", "desc": "公众号选题/排版/发布管理", "grade": "A"},
-    {"id": "humanizer", "name": "🎭 AI去痕迹", "category": "content", "desc": "去除AI写作痕迹，让文本更自然", "grade": "A"},
-]
+# ===== 内置 Skills 源 =====
+SKILL_SOURCES = {
+    "github-trending": {
+        "name": "GitHub Trending Skills",
+        "desc": "从GitHub扫描热门AI Skills仓库",
+        "type": "github",
+    },
+    "mcp-marketplace": {
+        "name": "MCP Marketplace",
+        "desc": "MCP协议工具市场",
+        "type": "mcp",
+    },
+    "custom": {
+        "name": "自定义Skills",
+        "desc": "手动注册的Skills",
+        "type": "custom",
+    }
+}
 
-@router.get("/api/v1/skills/market")
-async def list_market_skills(category: str = ""):
-    """技能市场列表"""
-    skills = MARKET_SKILLS
-    if category:
-        skills = [s for s in skills if s["category"] == category]
-    # 检查本地是否已安装
-    installed_modules = {p.stem for p in SKILLS_DIR.glob("*.py") if not p.stem.startswith("_")}
-    for s in skills:
-        s["installed"] = s["id"] in installed_modules
-    return {"success": True, "skills": skills, "total": len(skills)}
+# ===== 预定义热门Skills模板 =====
+BUILTIN_SKILLS = {
+    "web-scraper": {"name": "网页抓取", "desc": "抓取网页内容转为Markdown", "source": "builtin", "cmd": "python3 -c \"import requests;print('ok')\""},
+    "image-ocr": {"name": "图片OCR", "desc": "从图片提取文字", "source": "builtin", "cmd": "python3 -c \"import pytesseract;print('ocr')\""},
+    "code-executor": {"name": "代码执行", "desc": "沙箱执行代码片段", "source": "builtin", "cmd": "python3 -c \"print('code')\""},
+    "data-viz": {"name": "数据可视化", "desc": "生成图表", "source": "builtin", "cmd": "python3 -c \"import matplotlib;print('viz')\""},
+    "translation": {"name": "翻译", "desc": "多语言翻译", "source": "builtin", "cmd": "python3 -c \"print('translate')\""},
+    "summarizer": {"name": "摘要生成", "desc": "文本摘要", "source": "builtin", "cmd": "python3 -c \"print('sum')\""},
+    "web-search": {"name": "网页搜索", "desc": "搜索引擎查询", "source": "builtin", "cmd": "python3 -c \"print('search')\""},
+    "mcp-filesystem": {"name": "文件系统MCP", "desc": "读写文件系统", "source": "mcp", "cmd": "filesystem"},
+    "mcp-github": {"name": "GitHub MCP", "desc": "GitHub API操作", "source": "mcp", "cmd": "github"},
+    "mcp-puppeteer": {"name": "浏览器MCP", "desc": "Headless浏览器", "source": "mcp", "cmd": "puppeteer"},
+}
 
-@router.get("/api/v1/skills/market/categories")
-async def list_market_categories():
-    """技能市场分类"""
-    cats = {}
-    for s in MARKET_SKILLS:
-        c = s["category"]
-        if c not in cats:
-            cats[c] = {"name": c, "count": 0}
-        cats[c]["count"] += 1
-    return {"success": True, "categories": cats}
+@router.get("/sources")
+def list_sources():
+    """列出所有 Skills 源"""
+    sources = {}
+    for k, v in SKILL_SOURCES.items():
+        sources[k] = v
+    return {"success": True, "sources": sources}
 
-@router.post("/api/v1/skills/market/install")
-async def install_market_skill(req: Request):
-    body = await req.json()
-    skill_id = body.get("skill_id", "")
-    if not skill_id:
-        return {"success": False, "error": "skill_id required"}
-    skill = next((s for s in MARKET_SKILLS if s["id"] == skill_id), None)
-    if not skill:
-        return {"success": False, "error": "skill not found"}
-    mp = SKILLS_DIR / (skill_id + ".py")
-    if mp.exists():
-        return {"success": True, "result": skill["name"] + " ready"}
-    sid = skill_id.replace("-", "_")
-    cn = "".join(x.capitalize() for x in sid.split("_"))
-    c = json.dumps({"id": skill_id, "name": cn, "version": "V0.1", "group": skill["category"], "grade": "A", "description": skill["desc"]}, ensure_ascii=False)
-    c += "\nfrom modules._base.enterprise_module import EnterpriseModule"
-    c += "\nclass " + cn + "(EnterpriseModule):"
-    c += '\n    async def execute(self,action="run",params=None):'
-    c += '\n        return {"success":True,"module":"' + skill_id + '","action":action}'
-    c += '\nmodule_class = ' + cn
-    try:
-        mp.write_text(c, encoding="utf-8")
-        return {"success": True, "result": skill["name"] + " installed"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+@router.get("/list")
+def list_skills(source: str = "", search: str = ""):
+    """列出可用的Skills（支持按源过滤和搜索）"""
+    result = []
+    for name, info in BUILTIN_SKILLS.items():
+        if source and info["source"] != source:
+            continue
+        if search and search.lower() not in name.lower() and search.lower() not in info["name"].lower():
+            continue
+        result.append({**info, "id": name})
+    
+    # 从文件系统扫描已安装的Skills
+    if SKILLS_DIR.exists():
+        for f in SKILLS_DIR.glob("**/SKILL.md"):
+            try:
+                c = f.read_text(encoding="utf-8")
+                m = re.search(r'name:\s*["\']?(.+?)["\']?\n', c)
+                sn = m.group(1).strip() if m else f.parent.name
+                result.append({"name": sn, "desc": c[:80].replace("\n"," "), "source": "installed", "id": f.parent.name})
+            except:
+                pass
+    
+    return {"success": True, "skills": result, "total": len(result)}
 
-@router.post("/api/v1/skills/clawhub/install")
-async def install_from_clawhub(req: Request):
-    body = await req.json()
-    sn = body.get("skill_name", "")
-    if not sn:
-        return {"success": False, "error": "skill_name required"}
-    import subprocess as _sp
-    safe = sn.replace("/","_").replace(" ","_")
-    try:
-        r = _sp.run(["npx","clawhub","install",sn], capture_output=True, text=True, timeout=60)
-        if r.returncode != 0:
-            return {"success": False, "error": r.stderr[:500]}
-        bp = SKILLS_DIR / ("clawhub_" + safe + ".py")
-        cn = "".join(x.capitalize() for x in safe.split("_"))
-        bc = '"""ClawHub: ' + sn + '"""\n'
-        bc += 'import subprocess as _sp\n'
-        bc += 'from modules._base.enterprise_module import EnterpriseModule\n'
-        bc += 'class ' + cn + '(EnterpriseModule):\n'
-        bc += '    async def execute(self,action="run",params=None):\n'
-        bc += '        try:\n'
-        bc += '            r = _sp.run(["npx","clawhub","run","' + sn + '"], capture_output=True, text=True, timeout=30)\n'
-        bc += '            return {"success": r.returncode == 0, "output": r.stdout[:2000]}\n'
-        bc += '        except Exception as e:\n'
-        bc += '            return {"success": False, "error": str(e)}\n'
-        bc += 'module_class = ' + cn
-        bp.write_text(bc, encoding="utf-8")
-        return {"success": True, "result": "ClawHub " + sn + " bridged", "module": "clawhub_" + safe}
-    except FileNotFoundError:
-        return {"success": False, "error": "npx not found"}
-    except _sp.TimeoutExpired:
-        return {"success": False, "error": "timeout"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-def register_routes(app):
-    app.include_router(router)
+@router.post("/install")
+def install_skill(data: dict):
+    """安装Skills到本地系统"""
+    skill_id = data.get("skill_id", "")
+    skill_info = BUILTIN_SKILLS.get(skill_id)
+    if not skill_info:
+        return {"success": False, "error": f"未找到Skills: {skill_id}"}
+    
+    # 创建SKILL.md
+    target = SKILLS_DIR / skill_id
+    target.mkdir(parents=True, exist_ok=True)
+    skill_md = f"""---
+name: "{skill_info['name']}"
+description: "{skill_info['desc']}"
+source: "{skill_info['source']}"
+version: "1.0.0"
+---
 
-setup_skills_market_routes = register_routes
+# {skill_info['name']}
+
+{skill_info['desc']}
+
+## 使用方法
+{skill_info['cmd']}
+"""
+    (target / "SKILL.md").write_text(skill_md, encoding="utf-8")
+    return {"success": True, "skill": skill_id, "path": str(target)}
+
+@router.delete("/{skill_id}")
+def uninstall_skill(skill_id: str):
+    """卸载Skills"""
+    target = SKILLS_DIR / skill_id
+    if target.exists():
+        shutil.rmtree(target)
+        return {"success": True, "removed": skill_id}
+    return {"success": False, "error": "not found"}
+
+@router.get("/discover")
+def discover_skills():
+    """自动发现系统已安装的Skills"""
+    results = []
+    # 检测外部CLI工具
+    cli_checks = {
+        "aichat": {"name": "AIChat", "cmd": "aichat"},
+        "officecli": {"name": "OfficeCLI", "cmd": "officecli"},
+        "lazydocker": {"name": "LazyDocker", "cmd": "lazydocker"},
+        "n8n": {"name": "n8n", "cmd": "n8n"},
+    }
+    for name, info in cli_checks.items():
+        r = subprocess.run(["which", info["cmd"]], capture_output=True, text=True, timeout=5)
+        if r.returncode == 0:
+            results.append({"name": info["name"], "type": "cli", "status": "available", "path": r.stdout.strip()})
+    
+    # 检测MCP服务器
+    mcp_config = Path.home() / ".workbuddy" / "mcp.json"
+    if mcp_config.exists():
+        try:
+            mcps = json.loads(mcp_config.read_text())
+            for name in mcps.get("mcpServers", {}):
+                results.append({"name": name, "type": "mcp", "status": "available"})
+        except:
+            pass
+    
+    return {"success": True, "discovered": results, "total": len(results)}

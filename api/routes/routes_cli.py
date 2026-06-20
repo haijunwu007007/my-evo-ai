@@ -19,6 +19,8 @@ CLI_TOOLS = {
     "pipx": {"name": "PipX", "desc": "Python CLI 管理", "cmd": "pipx", "install": "pip install pipx", "builtin": True},
     "ffmpeg": {"name": "FFmpeg", "desc": "视频处理", "cmd": "ffmpeg", "install": "apt install ffmpeg", "builtin": True},
     "btop": {"name": "BTop", "desc": "系统监控 TUI", "cmd": "btop", "install": "apt install btop", "builtin": True},
+    "officecli": {"name": "OfficeCLI", "desc": "Word/Excel/PPT CLI", "cmd": "officecli", "install": "bash scripts/setup_new_server.sh", "builtin": False},
+    "n8n": {"name": "n8n", "desc": "工作流引擎 CLI", "cmd": "n8n", "install": "npm install -g n8n", "builtin": False},
 }
 
 def _check_tool(name: str) -> bool:

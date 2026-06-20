@@ -99,6 +99,7 @@ def _mount_vue_frontend():
         # 非 API/App 路径兜底 + 特定文件覆盖
         _OVERRIDE = {
             "enterprise.html": "enterprise.html",
+            "cli": "cli.html",
             "monitor": "dashboard.html",
             "company": "company.html",
             "tools": "tools.html",

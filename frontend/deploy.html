@@ -2,6 +2,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🚀 一键部署 — AUTO-EVO-AI</title>
 <style>
+body{background:var(--bg);color:var(--text);min-height:100vh}
+
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}
 .hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}
@@ -38,7 +40,10 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#
 .dl-item .st.done{background:rgba(16,185,129,.12);color:#10b981}
 .dl-item .st.fail{background:rgba(239,68,68,.12);color:#ef4444}
 @media(max-width:600px){.inp{flex-direction:column}.inp input.s{width:100%}}
-</style></head><body>
+</style>
+body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--border:#d0d5e0}
+:root{--bg:#0b0b16;--bg2:#12122a;--card:#1a1a2e;--text:#e8e8ef;--text2:#8892b0;--border:#2d3561;--glass:rgba(255,255,255,.03)}
+</head><body>
 <div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy" class="a">部署</a><a href="/canvas">编排</a><a href="/video">视频</a></div></div>
 <div class="c">
   <h2>🔍 搜索开源项目</h2>
@@ -261,4 +266,6 @@ function searchCat(cat){
   searchProjects()
 }
 loadCategories()
-</script></body></html>
+</script>
+<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
+</body></html>

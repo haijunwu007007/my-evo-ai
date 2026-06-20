@@ -1,12 +1,17 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>🤖 智能体团队 — AUTO-EVO-AI</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px;flex-wrap:wrap}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
+<style>
+body{background:var(--bg);color:var(--text);min-height:100vh}
+*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px;flex-wrap:wrap}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}
 .c{max-width:960px;margin:0 auto;padding:20px}h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0}
 .inp{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}.inp input{flex:1;min-width:200px;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none}.inp input:focus{border-color:#4361ee}.inp select{padding:10px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none}.inp button{padding:10px 24px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:600}.inp button:disabled{opacity:.5}.btn2{padding:6px 14px;border:none;border-radius:6px;background:rgba(67,97,238,.15);color:#4361ee;font-size:12px;cursor:pointer}.btn2:hover{background:rgba(67,97,238,.25)}
 #resultArea{font-size:13px;line-height:1.6}#taskHistory{max-height:200px;overflow-y:auto}
 @media(max-width:600px){.inp{flex-direction:column}.grid{grid-template-columns:repeat(3,1fr)}}
-</style></head><body>
+</style>
+body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--border:#d0d5e0}
+:root{--bg:#0b0b16;--bg2:#12122a;--card:#1a1a2e;--text:#e8e8ef;--text2:#8892b0;--border:#2d3561;--glass:rgba(255,255,255,.03)}
+</head><body>
 <div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy">部署</a><a href="/agents" class="a">智能体</a></div></div>
 <div class="c">
   <h2>🤖 智能体团队</h2>
@@ -37,7 +42,9 @@
     <div id="taskHistory"><div style="color:#636e70;text-align:center;padding:8px">暂无任务</div></div>
   </div>
 </div>
-<style>@keyframes shimmer{0%{width:20%}50%{width:80%}100%{width:20%}}</style>
+<style>
+body{background:var(--bg);color:var(--text);min-height:100vh}
+@keyframes shimmer{0%{width:20%}50%{width:80%}100%{width:20%}}</style>
 <script>
 var AGENTS = {}; var currentTask = null;
 async function loadAgents(){try{var r=await fetch('/api/v1/agents/registry');var d=await r.json();if(!d.success)return;AGENTS=d.agents;renderAgents();renderAgentSelect()}catch(e){}}
@@ -59,4 +66,6 @@ document.getElementById('taskBtn').disabled=false;document.getElementById('taskB
 async function registerAgent(){var name=prompt('Agent 名称 (英文)');if(!name)return;var display=prompt('显示名称');var llm=prompt('LLM (GLM-4-Flash/DeepSeek)');var caps=prompt('能力 (逗号分隔)');await fetch('/api/v1/agents/registry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,display_name:display||name,llm:llm||'GLM-4-Flash',capabilities:(caps||'').split(','),icon:'🤖'})});loadAgents()}
 async function loadTasks(){try{var r=await fetch('/api/v1/agents/tasks');var d=await r.json();if(!d.success||!d.tasks)return;var c=document.getElementById('taskHistory');var h='';var n=0;for(var k in d.tasks){if(n++>10)break;var t=d.tasks[k];h+='<div style="font-size:11px;padding:6px 10px;background:rgba(22,33,62,.3);border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between"><span style="color:#e8e8ef;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.task+'</span><span style="color:'+(t.status==='completed'?'#10b981':'#636e70')+'">'+t.progress+'%</span></div>'}c.innerHTML=h||'<div style="color:#636e70;text-align:center;padding:8px">暂无任务</div>'}catch(e){}}
 loadAgents();loadTasks();setInterval(loadTasks,5000);
-</script></body></html>
+</script>
+<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
+</body></html>

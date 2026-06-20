@@ -2,6 +2,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🎬 视频生成 — AUTO-EVO-AI</title><link rel="stylesheet" href="/js/app.css">
 <style>
+body{background:var(--bg);color:var(--text);min-height:100vh}
+
 .c{max-width:800px;margin:0 auto;padding:20px 16px}
 h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:12px}
@@ -19,7 +21,10 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#
 .e .st.no{background:rgba(239,68,68,.15);color:#ef4444}
 .e .st.wa{background:rgba(245,158,11,.15);color:#f59e0b}
 @media(max-width:600px){.inp{flex-direction:column}}
-</style></head><body>
+</style>
+body.light{--bg:#eef0f6;--bg2:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;--border:#d0d5e0}
+:root{--bg:#0b0b16;--bg2:#12122a;--card:#1a1a2e;--text:#e8e8ef;--text2:#8892b0;--border:#2d3561;--glass:rgba(255,255,255,.03)}
+</head><body>
 <div class="hdr" style="background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px">
   <div class="l" style="font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</div>
   <div class="n" style="display:flex;gap:2px"><a href="/" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none">对话</a><a href="/capture" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none">能力中心</a><a href="/video" class="a" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#e8e8ef;background:rgba(67,97,238,.15);text-decoration:none">视频生成</a></div>
@@ -70,4 +75,6 @@ async function loadVideos(){
   }catch(e){}
 }
 loadStatus();loadVideos()
-</script></body></html>
+</script>
+<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
+</body></html>
