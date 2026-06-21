@@ -72,6 +72,14 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
 .quick-actions .qa{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;background:var(--glass);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .25s;white-space:nowrap}
 .quick-actions .qa:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px var(--glow)}
 .quick-actions .qa:active{transform:scale(.95)}
+.cat-head{display:flex;align-items:center;gap:6px;padding:6px 8px;margin:2px 0;border-radius:8px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;background:var(--glass);border:1px solid var(--border);transition:all .2s;user-select:none}
+.cat-head:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cat-head:hover .cat-count{color:rgba(255,255,255,.7)}
+.cat-head .cat-icon{font-size:10px;transition:transform .25s;width:14px;text-align:center}
+.cat-head.open .cat-icon{transform:rotate(90deg)}
+.cat-count{font-weight:400;font-size:10px;color:var(--text2);margin-left:auto}
+.cat-body{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px 8px;animation:catSlideIn .25s ease-out}
+@keyframes catSlideIn{from{opacity:0;max-height:0;transform:translateY(-6px)}to{opacity:1;max-height:600px;transform:translateY(0)}}
 @media(max-width:480px){.container{padding:12px 8px}.header h1{font-size:18px}.msg-bubble{max-width:92%;font-size:13px}.input-row input{font-size:14px;padding:8px 0}.input-row button{width:38px;height:38px;font-size:16px}.nav-tabs .tab{padding:4px 8px;font-size:11px}.quick-actions .qa{padding:4px 7px;font-size:11px}.auth-card{padding:20px;max-width:100%}}
 </style></style>
 </head>
@@ -151,7 +159,9 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
     <input id="toolSearch" type="text" placeholder="🔍 搜索94个工具..." style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;outline:none" oninput="filterTools(this.value)">
     <span id="toolCount" style="font-size:11px;color:var(--text2);padding:6px 0;white-space:nowrap"></span>
   </div>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📋 文档/办公</div>
+  <div id="toolCategoryList">
+  <div class="cat-head" onclick="toggleCategory('cat_doc')"><span class="cat-icon">▶</span> 📋 文档/办公 <span class="cat-count">(10)</span></div>
+  <div id="cat_doc" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('docx_processor')">📄 文档生成</span>
       <span class="qa" onclick="quickTool('excel_pro')">📊 电子表格</span>
       <span class="qa" onclick="quickTool('ppt_generator')">📽️ 演示文稿</span>
@@ -162,10 +172,14 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('paddleocr_image')">🖼️ OCR识别</span>
       <span class="qa" onclick="quickTool('lida_visualize')">📈 数据图表</span>
       <span class="qa" onclick="quickTool('mermaid_chart')">🗺️ 流程图</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📊 数据/分析</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_data')"><span class="cat-icon">▶</span> 📊 数据/分析 <span class="cat-count">(2)</span></div>
+  <div id="cat_data" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('nocodb_manage')">📊 NocoDB管理</span>
       <span class="qa" onclick="quickTool('grist_analyze')">📋 Grist分析</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📱 通信/协作</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_comm')"><span class="cat-icon">▶</span> 📱 通信/协作 <span class="cat-count">(7)</span></div>
+  <div id="cat_comm" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('novu_notify')">📢 Novu通知</span>
       <span class="qa" onclick="quickTool('gitea_git')">📦 Gitea代码</span>
       <span class="qa" onclick="quickTool('wikijs_wiki')">📚 Wiki知识</span>
@@ -173,20 +187,26 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('projectsend_files')">📁 文件分享</span>
       <span class="qa" onclick="quickTool('freshrss_read')">📰 RSS阅读</span>
       <span class="qa" onclick="quickTool('listmonk_send')">📧 邮件营销</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🏢 企业/管理</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_biz')"><span class="cat-icon">▶</span> 🏢 企业/管理 <span class="cat-count">(6)</span></div>
+  <div id="cat_biz" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('plane_project')">📋 项目管理</span>
       <span class="qa" onclick="quickTool('openproject_mgmt')">📋 项目管理</span>
       <span class="qa" onclick="quickTool('cal_schedule')">📅 日程调度</span>
       <span class="qa" onclick="quickTool('keycloak_auth')">🔐 身份认证</span>
       <span class="qa" onclick="quickTool('odoo_manage')">🏢 Odoo管理</span>
       <span class="qa" onclick="quickTool('erpclaw_manage')">🏭 ERP管理</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🚀 部署/运维</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_ops')"><span class="cat-icon">▶</span> 🚀 部署/运维 <span class="cat-count">(5)</span></div>
+  <div id="cat_ops" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('opentofu_apply')">🏗 部署编排</span>
       <span class="qa" onclick="quickTool('ansible_run')">⚙ 自动化运维</span>
       <span class="qa" onclick="quickTool('strapi_cms')">📄 内容管理</span>
       <span class="qa" onclick="quickTool('directus_api')">🗄 数据API</span>
       <span class="qa" onclick="quickTool('coolify_deploy')">🚀 一键部署</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🔧 监控/工具</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_monitor')"><span class="cat-icon">▶</span> 🔧 监控/工具 <span class="cat-count">(13)</span></div>
+  <div id="cat_monitor" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('meilisearch_search')">🔍 全文搜索</span>
       <span class="qa" onclick="quickTool('minio_storage')">💾 对象存储</span>
       <span class="qa" onclick="quickTool('uptime_kuma')">📊 站点监控</span>
@@ -200,7 +220,9 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('hoppscotch_test')">🧪 API测试</span>
       <span class="qa" onclick="quickTool('mermaid_chart')">🗺 流程图</span>
       <span class="qa" onclick="quickTool('keploy_test')">🧪 AI测试</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🏠 智能/生活</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_life')"><span class="cat-icon">▶</span> 🏠 智能/生活 <span class="cat-count">(7)</span></div>
+  <div id="cat_life" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('rustdesk_connect')">🖥 远程桌面</span>
       <span class="qa" onclick="quickTool('docuseal_sign')">✍ 电子签名</span>
       <span class="qa" onclick="quickTool('homeassistant_control')">🏠 智能家居</span>
@@ -208,12 +230,16 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('appsmith_build')">🛠 低代码构建</span>
       <span class="qa" onclick="quickTool('airbyte_sync')">🔄 数据同步</span>
       <span class="qa" onclick="quickTool('nocobase_build')">🏗 低代码平台</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">🌐 搜索/集成</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_search')"><span class="cat-icon">▶</span> 🌐 搜索/集成 <span class="cat-count">(4)</span></div>
+  <div id="cat_search" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('browseract_extract')">🕷 反爬提取</span>
       <span class="qa" onclick="quickTool('codemem_index')">🧠 代码知识</span>
       <span class="qa" onclick="quickTool('reach_search')">🌐 全网搜索</span>
       <span class="qa" onclick="quickTool('anime_animate')">✨ 页面动效</span>
-  <div style="width:100%;font-size:11px;color:var(--accent);padding:4px 0 0;font-weight:600;border-top:1px solid var(--border);margin-top:4px">📦 其他</div>
+  </div>
+  <div class="cat-head" onclick="toggleCategory('cat_other')"><span class="cat-icon">▶</span> 📦 其他 <span class="cat-count">(40)</span></div>
+  <div id="cat_other" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器任务</span>
       <span class="qa" onclick="quickTool('codemem_query')">🧠 知识查询</span>
       <span class="qa" onclick="quickTool('gpt_research')">📊 GPT研究</span>
@@ -260,7 +286,8 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('frappe_hr_employee')">🏢 查员工</span>
       <span class="qa" onclick="quickTool('dataease_create_dashboard')">📉 仪表盘</span>
       <span class="qa" onclick="quickTool('invoice_track_expense')">💳 记费用</span>
-    </div>
+  </div>
+  </div>
 <div class="input-area">
       <div class="input-row">
         <input id="input" data-i18n="input_placeholder" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
@@ -657,15 +684,48 @@ function startVoice(){
   r.start()
 }
 
-// ===== 工具搜索 =====
+// ===== 工具搜索（支持折叠分类）=====
+function toggleCategory(id){
+  var el=document.getElementById(id)
+  if(!el)return
+  var head=el.previousElementSibling
+  var isOpen=el.style.display!=='none'
+  el.style.display=isOpen?'none':'flex'
+  if(head)head.classList.toggle('open',!isOpen)
+}
 function filterTools(q){
-  var btns=document.querySelectorAll('.quick-actions .qa'), cnt=0
+  var cats=document.querySelectorAll('#toolCategoryList .cat-head')
+  var bodies=document.querySelectorAll('#toolCategoryList .cat-body')
   q=q.toLowerCase().trim()
-  for(var i=0;i<btns.length;i++){
-    var t=btns[i].textContent.toLowerCase()
-    if(!q||t.indexOf(q)>=0){btns[i].style.display='inline-flex';cnt++}else{btns[i].style.display='none'}
+  if(!q){
+    // 无搜索词：全部收起，只显示分类标题
+    for(var i=0;i<bodies.length;i++){bodies[i].style.display='none';if(cats[i])cats[i].classList.remove('open')}
+    document.getElementById('toolCount').textContent=''
+    return
   }
-  document.getElementById('toolCount').textContent=cnt+'/'+btns.length
+  // 有搜索词：显示所有分类，展开匹配的分类
+  for(var i=0;i<bodies.length;i++){
+    var btns=bodies[i].querySelectorAll('.qa')
+    var matched=0
+    for(var j=0;j<btns.length;j++){
+      var t=btns[j].textContent.toLowerCase()
+      var show=!q||t.indexOf(q)>=0
+      btns[j].style.display=show?'inline-flex':'none'
+      if(show)matched++
+    }
+    if(matched>0){
+      bodies[i].style.display='flex'
+      if(cats[i])cats[i].classList.add('open')
+    }else{
+      bodies[i].style.display='none'
+      if(cats[i])cats[i].classList.remove('open')
+    }
+  }
+  // 统计匹配总数
+  var total=0
+  var allBtns=document.querySelectorAll('.cat-body .qa')
+  for(var i=0;i<allBtns.length;i++){if(allBtns[i].style.display!=='none')total++}
+  document.getElementById('toolCount').textContent=total+'/'+allBtns.length
 }
 
 // ===== 全局主题切换 =====
