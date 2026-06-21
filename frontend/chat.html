@@ -72,13 +72,12 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
 .quick-actions .qa{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;background:var(--glass);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .25s;white-space:nowrap}
 .quick-actions .qa:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px var(--glow)}
 .quick-actions .qa:active{transform:scale(.95)}
-.cat-head{display:flex;align-items:center;gap:6px;padding:6px 8px;margin:2px 0;border-radius:8px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;background:var(--glass);border:1px solid var(--border);transition:all .2s;user-select:none}
-.cat-head:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.cat-head:hover .cat-count{color:rgba(255,255,255,.7)}
-.cat-head .cat-icon{font-size:10px;transition:transform .25s;width:14px;text-align:center}
-.cat-head.open .cat-icon{transform:rotate(90deg)}
-.cat-count{font-weight:400;font-size:10px;color:var(--text2);margin-left:auto}
-.cat-body{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px 8px;animation:catSlideIn .25s ease-out}
+.cat-strip{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none;-ms-overflow-style:none;white-space:nowrap;flex-shrink:0}
+.cat-strip::-webkit-scrollbar{display:none}
+.cat-strip .cat-tab{flex-shrink:0;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;background:var(--glass);border:1px solid var(--border);transition:all .2s;user-select:none}
+.cat-strip .cat-tab:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cat-strip .cat-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:var(--accent)}
+.cat-body{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 8px;animation:catSlideIn .25s ease-out}
 @keyframes catSlideIn{from{opacity:0;max-height:0;transform:translateY(-6px)}to{opacity:1;max-height:600px;transform:translateY(0)}}
 @media(max-width:480px){.container{padding:12px 8px}.header h1{font-size:18px}.msg-bubble{max-width:92%;font-size:13px}.input-row input{font-size:14px;padding:8px 0}.input-row button{width:38px;height:38px;font-size:16px}.nav-tabs .tab{padding:4px 8px;font-size:11px}.quick-actions .qa{padding:4px 7px;font-size:11px}.auth-card{padding:20px;max-width:100%}}
 </style></style>
@@ -160,7 +159,17 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
     <span id="toolCount" style="font-size:11px;color:var(--text2);padding:6px 0;white-space:nowrap"></span>
   </div>
   <div id="toolCategoryList">
-  <div class="cat-head" onclick="toggleCategory('cat_doc')"><span class="cat-icon">▶</span> 📋 文档/办公 <span class="cat-count">(10)</span></div>
+  <div class="cat-strip" id="catStrip">
+    <span class="cat-tab" onclick="toggleCategory('cat_doc')">📋 文档/办公</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_data')">📊 数据/分析</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_comm')">📱 通信/协作</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_biz')">🏢 企业/管理</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_ops')">🚀 部署/运维</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_monitor')">🔧 监控/工具</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_life')">🏠 智能/生活</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_search')">🌐 搜索/集成</span>
+    <span class="cat-tab" onclick="toggleCategory('cat_other')">📦 其他</span>
+  </div>
   <div id="cat_doc" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('docx_processor')">📄 文档生成</span>
       <span class="qa" onclick="quickTool('excel_pro')">📊 电子表格</span>
@@ -173,12 +182,10 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('lida_visualize')">📈 数据图表</span>
       <span class="qa" onclick="quickTool('mermaid_chart')">🗺️ 流程图</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_data')"><span class="cat-icon">▶</span> 📊 数据/分析 <span class="cat-count">(2)</span></div>
   <div id="cat_data" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('nocodb_manage')">📊 NocoDB管理</span>
       <span class="qa" onclick="quickTool('grist_analyze')">📋 Grist分析</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_comm')"><span class="cat-icon">▶</span> 📱 通信/协作 <span class="cat-count">(7)</span></div>
   <div id="cat_comm" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('novu_notify')">📢 Novu通知</span>
       <span class="qa" onclick="quickTool('gitea_git')">📦 Gitea代码</span>
@@ -188,7 +195,6 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('freshrss_read')">📰 RSS阅读</span>
       <span class="qa" onclick="quickTool('listmonk_send')">📧 邮件营销</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_biz')"><span class="cat-icon">▶</span> 🏢 企业/管理 <span class="cat-count">(6)</span></div>
   <div id="cat_biz" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('plane_project')">📋 项目管理</span>
       <span class="qa" onclick="quickTool('openproject_mgmt')">📋 项目管理</span>
@@ -197,7 +203,6 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('odoo_manage')">🏢 Odoo管理</span>
       <span class="qa" onclick="quickTool('erpclaw_manage')">🏭 ERP管理</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_ops')"><span class="cat-icon">▶</span> 🚀 部署/运维 <span class="cat-count">(5)</span></div>
   <div id="cat_ops" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('opentofu_apply')">🏗 部署编排</span>
       <span class="qa" onclick="quickTool('ansible_run')">⚙ 自动化运维</span>
@@ -205,7 +210,6 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('directus_api')">🗄 数据API</span>
       <span class="qa" onclick="quickTool('coolify_deploy')">🚀 一键部署</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_monitor')"><span class="cat-icon">▶</span> 🔧 监控/工具 <span class="cat-count">(13)</span></div>
   <div id="cat_monitor" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('meilisearch_search')">🔍 全文搜索</span>
       <span class="qa" onclick="quickTool('minio_storage')">💾 对象存储</span>
@@ -221,7 +225,6 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('mermaid_chart')">🗺 流程图</span>
       <span class="qa" onclick="quickTool('keploy_test')">🧪 AI测试</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_life')"><span class="cat-icon">▶</span> 🏠 智能/生活 <span class="cat-count">(7)</span></div>
   <div id="cat_life" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('rustdesk_connect')">🖥 远程桌面</span>
       <span class="qa" onclick="quickTool('docuseal_sign')">✍ 电子签名</span>
@@ -231,14 +234,12 @@ body.light{--bg:#eef0f6;--bg:#f8f9fc;--card:#fff;--text:#1a1a2e;--text2:#6c757d;
       <span class="qa" onclick="quickTool('airbyte_sync')">🔄 数据同步</span>
       <span class="qa" onclick="quickTool('nocobase_build')">🏗 低代码平台</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_search')"><span class="cat-icon">▶</span> 🌐 搜索/集成 <span class="cat-count">(4)</span></div>
   <div id="cat_search" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('browseract_extract')">🕷 反爬提取</span>
       <span class="qa" onclick="quickTool('codemem_index')">🧠 代码知识</span>
       <span class="qa" onclick="quickTool('reach_search')">🌐 全网搜索</span>
       <span class="qa" onclick="quickTool('anime_animate')">✨ 页面动效</span>
   </div>
-  <div class="cat-head" onclick="toggleCategory('cat_other')"><span class="cat-icon">▶</span> 📦 其他 <span class="cat-count">(40)</span></div>
   <div id="cat_other" class="cat-body" style="display:none">
       <span class="qa" onclick="quickTool('browser_use_task')">🌐 浏览器任务</span>
       <span class="qa" onclick="quickTool('codemem_query')">🧠 知识查询</span>
@@ -685,21 +686,42 @@ function startVoice(){
 }
 
 // ===== 工具搜索（支持折叠分类）=====
+var _activeCat = null
 function toggleCategory(id){
   var el=document.getElementById(id)
   if(!el)return
-  var head=el.previousElementSibling
-  var isOpen=el.style.display!=='none'
-  el.style.display=isOpen?'none':'flex'
-  if(head)head.classList.toggle('open',!isOpen)
+  // 如果点的是同一个分类，切换开关
+  if(_activeCat===id){
+    el.style.display='none'
+    _activeCat=null
+    _updateActiveTab(null)
+    return
+  }
+  // 收起上一个
+  if(_activeCat){
+    var prev=document.getElementById(_activeCat)
+    if(prev)prev.style.display='none'
+  }
+  // 展开当前
+  el.style.display='flex'
+  _activeCat=id
+  _updateActiveTab(id)
+}
+function _updateActiveTab(id){
+  var tabs=document.querySelectorAll('#catStrip .cat-tab')
+  for(var i=0;i<tabs.length;i++){
+    tabs[i].classList.toggle('active',tabs[i].getAttribute('onclick').indexOf(id||'____')>=0)
+  }
 }
 function filterTools(q){
-  var cats=document.querySelectorAll('#toolCategoryList .cat-head')
+  var tabs=document.querySelectorAll('#catStrip .cat-tab')
   var bodies=document.querySelectorAll('#toolCategoryList .cat-body')
   q=q.toLowerCase().trim()
   if(!q){
-    // 无搜索词：全部收起，只显示分类标题
-    for(var i=0;i<bodies.length;i++){bodies[i].style.display='none';if(cats[i])cats[i].classList.remove('open')}
+    // 无搜索词：全部收起
+    for(var i=0;i<bodies.length;i++){bodies[i].style.display='none'}
+    for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('active')}
+    _activeCat=null
     document.getElementById('toolCount').textContent=''
     return
   }
@@ -715,10 +737,10 @@ function filterTools(q){
     }
     if(matched>0){
       bodies[i].style.display='flex'
-      if(cats[i])cats[i].classList.add('open')
+      if(tabs[i])tabs[i].classList.add('active')
     }else{
       bodies[i].style.display='none'
-      if(cats[i])cats[i].classList.remove('open')
+      if(tabs[i])tabs[i].classList.remove('active')
     }
   }
   // 统计匹配总数
