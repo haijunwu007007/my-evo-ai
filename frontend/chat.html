@@ -689,7 +689,9 @@ function filterTools(q){
 
 // ===== 全局主题切换 =====
 (function(){var t=localStorage.getItem('evo_theme');if(t==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='🌙'}else{document.getElementById('themeBtn').textContent='🌓'}})()
-function toggleTheme(){var b=document.body;b.classList.toggle('light');var l=b.classList.contains('light');localStorage.setItem('evo_theme',l?'light':'dark');document.getElementById('themeBtn').textContent=l?'🌙':'🌓'}
+function toggleTheme(){
+  // TODO: 主题切换后同步更新图表配色
+  // TODO: 持久化用户主题偏好到后端var b=document.body;b.classList.toggle('light');var l=b.classList.contains('light');localStorage.setItem('evo_theme',l?'light':'dark');document.getElementById('themeBtn').textContent=l?'🌙':'🌓'}
 // ===== LLM状态检测 =====
 async function checkLLM(){
   var badge=document.getElementById('modelBadge')
