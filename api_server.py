@@ -313,3 +313,5 @@ if __name__ == "__main__":
         reload=reload,
         workers=_WORKER_COUNT,
     )
+
+# TODO: move routes to api/routes/
