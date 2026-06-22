@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🧠 智能体工厂</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:-apple-system,sans-serif;padding:16px;min-height:100vh}
+.container{max-width:720px;margin:0 auto}
+h1{font-size:24px;margin-bottom:4px}
+.sub{color:#8892b0;font-size:13px;margin-bottom:20px}
+.card{background:#16213e;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d3561}
+.card h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px;margin-bottom:8px;font-family:inherit}
+input:focus{outline:none;border-color:#8b5cf6}
+textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px;min-height:80px;font-family:inherit;resize:vertical}
+textarea:focus{outline:none;border-color:#8b5cf6}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600}
+.btn-primary{background:#8b5cf6;color:#fff}
+.btn-primary:hover{background:#7c3aed}
+.btn-secondary{background:#2d3561;color:#e0e0e0}
+.btn-start{background:#10b981;color:#fff}
+.btn-start:hover{background:#059669}
+.agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.agent-btn{padding:10px;border-radius:8px;border:1px solid #2d3561;cursor:pointer;text-align:center;font-size:13px;transition:.2s;background:rgba(139,92,246,0.08)}
+.agent-btn:hover{background:rgba(139,92,246,0.2);border-color:#8b5cf6}
+.room-msg{background:#0f3460;border-radius:8px;padding:10px;margin:6px 0;font-size:13px;max-height:300px;overflow-y:auto}
+.msg-item{padding:6px 0;border-bottom:1px solid #2d3561}
+.msg-item:last-child{border-bottom:none}
+.msg-from{color:#8b5cf6;font-weight:600;font-size:12px}
+.msg-text{color:#e0e0e0;font-size:13px;margin-top:2px}
+.back{color:#8b5cf6;text-decoration:none;font-size:13px;display:inline-block;margin-top:12px}
+#loading{display:none;text-align:center;padding:20px;color:#8892b0}
+#loading.show{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:24px;height:24px;border:3px solid #2d3561;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🧠 智能体工厂</h1>
+<p class="sub">创建、配置和管理你的 AI 智能体团队</p>
+
+<div class="card">
+<h3>🤖 预设智能体</h3>
+<div class="agent-grid">
+<div class="agent-btn" onclick="selectAgent('Athena','项目经理','分配任务、汇总结果')">🦉 Athena<br><small>项目经理</small></div>
+<div class="agent-btn" onclick="selectAgent('Hermes','信息搜集员','查询数据、搜索信息')">⚡ Hermes<br><small>信息搜集</small></div>
+<div class="agent-btn" onclick="selectAgent('Apollo','分析师','分析数据、给出洞察')">🔮 Apollo<br><small>分析师</small></div>
+<div class="agent-btn" onclick="selectAgent('Hecate','安全审计','检查安全性、合规')">🛡️ Hecate<br><small>安全审计</small></div>
+<div class="agent-btn" onclick="selectAgent('Minerva','研究员','深度研究、技术方案')">🔬 Minerva<br><small>研究员</small></div>
+<div class="agent-btn" onclick="selectAgent('Phoebus','执行者','执行代码、操作任务')">⚙️ Phoebus<br><small>执行者</small></div>
+</div>
+</div>
+
+<div class="card">
+<h3>✏️ 自定义智能体</h3>
+<input id="agentName" placeholder="智能体名称（如：小助手）">
+<input id="agentRole" placeholder="角色描述（如：客服助手，回答用户问题）">
+<textarea id="agentDesc" placeholder="能力描述（如：擅长回答问题、查询订单、处理投诉）"></textarea>
+<div class="row">
+<button class="btn btn-primary" onclick="createAgent()">➕ 创建智能体</button>
+<button class="btn btn-start" onclick="startDiscussion()">💬 团队讨论</button>
+</div>
+</div>
+
+<div class="card" id="roomCard" style="display:none">
+<h3>💬 智能体讨论室</h3>
+<div class="room-msg" id="roomMessages"><div style="color:#8892b0;text-align:center">创建智能体后开始讨论</div></div>
+<input id="taskInput" placeholder="输入任务让智能体团队讨论..." style="margin-bottom:0">
+<div class="row">
+<button class="btn btn-start" onclick="sendTask()">🚀 发送任务</button>
+</div>
+</div>
+
+<div id="loading"><div class="spinner"></div><span>智能体思考中...</span></div>
+
+<a href="/" class="back">← 返回聊天</a>
+</div>
+<script>
+var _roomId=null,_agents=[]
+function selectAgent(n,r,d){
+  document.getElementById('agentName').value=n
+  document.getElementById('agentRole').value=r
+  document.getElementById('agentDesc').value=d
+}
+function addMsg(roomEl,from,text){
+  var d=document.createElement('div');d.className='msg-item'
+  d.innerHTML='<div class="msg-from">'+from+'</div><div class="msg-text">'+text+'</div>'
+  roomEl.appendChild(d);roomEl.scrollTop=roomEl.scrollHeight
+}
+async function createAgent(){
+  var n=document.getElementById('agentName').value.trim()||'Agent-'+(Math.random()*100|0)
+  var r=document.getElementById('agentRole').value.trim()||'通用助手'
+  _agents.push({name:n,role:r})
+  document.getElementById('agentName').value='';document.getElementById('agentRole').value='';document.getElementById('agentDesc').value=''
+  try{
+    await fetch('/api/v1/a2a/register?name='+encodeURIComponent(n)+'&capabilities='+encodeURIComponent(r),{method:'POST'})
+    addMsg(document.getElementById('roomMessages'),'系统','✅ 智能体「'+n+'」创建成功！')
+  }catch(e){addMsg(document.getElementById('roomMessages'),'系统','创建失败: '+e.message)}
+  document.getElementById('roomCard').style.display='block'
+}
+async function startDiscussion(){
+  document.getElementById('loading').classList.add('show')
+  document.getElementById('roomCard').style.display='block'
+  try{
+    var r=await fetch('/api/v1/a2a/create-room?agents=&task=智能体团队已就绪',{method:'POST'})
+    var d=await r.json()
+    if(d.success){_roomId=d.room_id;addMsg(document.getElementById('roomMessages'),'系统','✅ 讨论室已创建 ('+d.agents.length+' 个智能体)')}
+  }catch(e){addMsg(document.getElementById('roomMessages'),'系统','创建失败:'+e.message)}
+  document.getElementById('loading').classList.remove('show')
+}
+async function sendTask(){
+  var t=document.getElementById('taskInput').value.trim()
+  if(!t)return
+  document.getElementById('loading').classList.add('show')
+  addMsg(document.getElementById('roomMessages'),'你',t)
+  document.getElementById('taskInput').value=''
+  try{
+    if(_roomId){
+      var r=await fetch('/api/v1/a2a/room/'+_roomId+'/chat?message='+encodeURIComponent(t)+'&sender=user',{method:'POST'})
+      var d=await r.json()
+      if(d.success)d.responses.forEach(function(rp){addMsg(document.getElementById('roomMessages'),'🤖 '+rp.agent,rp.response)})
+    }
+  }catch(e){addMsg(document.getElementById('roomMessages'),'系统','错误:'+e.message)}
+  document.getElementById('loading').classList.remove('show')
+}
+</script>
+</body>
+</html>

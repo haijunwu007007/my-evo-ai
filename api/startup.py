@@ -97,6 +97,21 @@ def _mount_vue_frontend():
             logger.info(f"[ADMIN] 管理后台已挂载: {_admin_html}")
 
         # Workflow 画布 — 从 routes_new_features 模块获取内联 HTML
+        # 游戏页面
+        game_html = frontend_dir / "game.html"
+        if game_html.exists():
+            @app.get("/game", include_in_schema=False)
+            async def serve_game():
+                return _nocache(FileResponse(str(game_html), media_type="text/html"))
+            logger.info("[GAME] 游戏页面已挂载: /game")
+
+        wolf_html = frontend_dir / "wolf.html"
+        if wolf_html.exists():
+            @app.get("/wolf", include_in_schema=False)
+            async def serve_wolf():
+                return _nocache(FileResponse(str(wolf_html), media_type="text/html"))
+            logger.info("[WOLF] 狼吃娃游戏已挂载: /wolf")
+
         try:
             from api.routes.routes_new_features import _WORKFLOW_HTML
             @app.get("/workflow", include_in_schema=False)

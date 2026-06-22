@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🐺 狼吃娃</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none}
+body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,sans-serif;overflow:hidden}
+#gameWrap{text-align:center;width:100%;max-width:500px}
+#title{font-size:24px;font-weight:700;color:#e0e0e0;padding:8px;display:flex;justify-content:space-between;align-items:center}
+#score{font-size:20px;color:#f59e0b;font-weight:700}
+#restart{padding:6px 16px;border-radius:8px;border:1px solid #4361ee;background:transparent;color:#4361ee;cursor:pointer;font-size:14px}
+canvas{display:block;margin:0 auto;background:#16213e;border-radius:16px;border:2px solid #2d3561;touch-action:none;width:100%;max-width:400px;aspect-ratio:1}
+#info{color:#8892b0;font-size:13px;margin-top:8px;padding:4px}
+#info span{margin:0 12px}
+#goBack{color:#4361ee;text-decoration:none;font-size:13px}
+</style>
+</head>
+<body>
+<div id="gameWrap">
+<div id="title">
+<span>🐺 狼吃娃</span>
+<span id="score">0</span>
+<button id="restart">🔄</button>
+</div>
+<canvas id="gc"></canvas>
+<div id="info">
+<span id="statusTxt">👆 点击/触摸控制狼移动</span>
+<a id="goBack" href="/">← 返回聊天</a>
+</div>
+</div>
+<script>
+var C=document.getElementById('gc'),ctx=C.getContext('2d')
+var W=400,H=400,CELL=20,cols=W/CELL,rows=H/CELL
+var wolf={x:5,y:5},dir='right'
+var kids=[{x:15,y:15},{x:8,y:12},{x:18,y:5}]
+var score=0,gameOver=false,gameWin=false
+var speed=150,lastMove=0,animId=null
+var touchStartX=0,touchStartY=0,swiped=false
+var moveQueue=[]
+
+function init(){
+  wolf={x:5,y:5}
+  kids=[]
+  for(var i=0;i<5;i++){spawnKid()}
+  score=0;gameOver=false;gameWin=false;speed=150
+  document.getElementById('score').textContent='0'
+  document.getElementById('statusTxt').textContent='👆 点击/触摸控制狼移动'
+  moveQueue=[]
+}
+
+function spawnKid(){
+  var k
+  for(var tries=0;tries<200;tries++){
+    k={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)}
+    if(k.x===wolf.x&&k.y===wolf.y)continue
+    var overlap=false
+    for(var i=0;i<kids.length;i++){if(kids[i].x===k.x&&kids[i].y===k.y){overlap=true;break}}
+    if(!overlap){kids.push(k);return}
+  }
+}
+
+// 键盘控制
+document.addEventListener('keydown',function(e){
+  if(gameOver||gameWin)return
+  switch(e.key){
+    case 'ArrowUp':moveWolf(0,-1);break
+    case 'ArrowDown':moveWolf(0,1);break
+    case 'ArrowLeft':moveWolf(-1,0);break
+    case 'ArrowRight':moveWolf(1,0);break
+  }
+})
+
+// 触摸/鼠标控制
+C.addEventListener('touchstart',function(e){
+  e.preventDefault();swiped=false
+  var t=e.touches[0];touchStartX=t.clientX;touchStartY=t.clientY
+},{passive:false})
+
+C.addEventListener('touchmove',function(e){
+  e.preventDefault()
+  if(swiped)return
+  var t=e.touches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY
+  if(Math.abs(dx)<15&&Math.abs(dy)<15)return
+  swiped=true
+  if(Math.abs(dx)>Math.abs(dy)){
+    moveWolf(dx>0?1:-1,0)
+  }else{
+    moveWolf(0,dy>0?1:-1)
+  }
+},{passive:false})
+
+var mouseDown=false
+C.addEventListener('mousedown',function(e){
+  mouseDown=true
+  var rect=C.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top
+  touchStartX=e.clientX;touchStartY=e.clientY
+})
+C.addEventListener('mousemove',function(e){
+  if(!mouseDown||swiped)return
+  var dx=e.clientX-touchStartX,dy=e.clientY-touchStartY
+  if(Math.abs(dx)<15&&Math.abs(dy)<15)return
+  swiped=true;mouseDown=false
+  if(Math.abs(dx)>Math.abs(dy)){moveWolf(dx>0?1:-1,0)}else{moveWolf(0,dy>0?1:-1)}
+})
+C.addEventListener('mouseup',function(){mouseDown=false})
+
+function moveWolf(dx,dy){
+  if(gameOver||gameWin)return
+  var nx=wolf.x+dx,ny=wolf.y+dy
+  if(nx<0||nx>=cols||ny<0||ny>=rows)return
+  wolf.x=nx;wolf.y=ny
+  // 检查吃娃
+  var eaten=false
+  for(var i=kids.length-1;i>=0;i--){
+    if(kids[i].x===wolf.x&&kids[i].y===wolf.y){
+      kids.splice(i,1);score+=10
+      document.getElementById('score').textContent=score
+      eaten=true
+      spawnKid()
+      break
+    }
+  }
+  if(eaten&&speed>60)speed-=3
+  checkGameState()
+}
+
+function checkGameState(){
+  if(score>=100||kids.length===0){
+    gameWin=true;document.getElementById('statusTxt').textContent='🎉 你赢了！狼吃饱了！'
+  }
+}
+
+// AI狼自动追逐（简单AI）
+function aiMove(){
+  if(gameOver||gameWin)return
+  // 找最近的娃
+  var nearest=null,minDist=9999
+  for(var i=0;i<kids.length;i++){
+    var d=Math.abs(kids[i].x-wolf.x)+Math.abs(kids[i].y-wolf.y)
+    if(d<minDist){minDist=d;nearest=kids[i]}
+  }
+  if(!nearest)return
+  var dx=0,dy=0
+  if(nearest.x>wolf.x)dx=1
+  else if(nearest.x<wolf.x)dx=-1
+  else if(nearest.y>wolf.y)dy=1
+  else if(nearest.y<wolf.y)dy=-1
+  // 随机化让它不那么完美
+  if(Math.random()<0.2){
+    var dirs=[[1,0],[-1,0],[0,1],[0,-1]]
+    var r=dirs[Math.floor(Math.random()*4)]
+    dx=r[0];dy=r[1]
+  }
+  var nx=wolf.x+dx,ny=wolf.y+dy
+  if(nx>=0&&nx<cols&&ny>=0&&ny<rows){
+    wolf.x=nx;wolf.y=ny
+    var eaten=false
+    for(var i=kids.length-1;i>=0;i--){
+      if(kids[i].x===wolf.x&&kids[i].y===wolf.y){
+        kids.splice(i,1);score+=10
+        document.getElementById('score').textContent=score
+        eaten=true;spawnKid()
+        if(score>=100)gameWin=true
+        break
+      }
+    }
+  }
+  checkGameState()
+}
+
+function draw(){
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H)
+  // 网格
+  ctx.strokeStyle='#1e2a4a';ctx.lineWidth=0.5
+  for(var i=0;i<=cols;i++){ctx.beginPath();ctx.moveTo(i*CELL,0);ctx.lineTo(i*CELL,H);ctx.stroke()}
+  for(var i=0;i<=rows;i++){ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(W,i*CELL);ctx.stroke()}
+  // 娃
+  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle'
+  for(var i=0;i<kids.length;i++){
+    ctx.fillText('👶',kids[i].x*CELL+CELL/2,kids[i].y*CELL+CELL/2)
+  }
+  // 狼
+  ctx.font='22px sans-serif'
+  ctx.fillText('🐺',wolf.x*CELL+CELL/2,wolf.y*CELL+CELL/2+2)
+  // Game Over/Win
+  if(gameWin){
+    ctx.fillStyle='rgba(16,185,129,0.3)';ctx.fillRect(0,0,W,H)
+    ctx.fillStyle='#10b981';ctx.font='bold 28px sans-serif';ctx.textAlign='center'
+    ctx.fillText('🎉 过关！',W/2,H/2)
+  }
+}
+
+function gameLoop(){
+  var now=Date.now()
+  aiMove()
+  draw()
+  animId=requestAnimationFrame(gameLoop)
+}
+
+document.getElementById('restart').addEventListener('click',function(){init();document.getElementById('restart').blur()})
+init()
+animId=requestAnimationFrame(gameLoop)
+</script>
+</body>
+</html>
