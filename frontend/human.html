@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Human - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif}
+body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
+.sidebar{width:120px;background:#f0f0f4;display:flex;flex-direction:column;padding:8px 0;border-right:1px solid #e8eaed;flex-shrink:0}
+.sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:#6b7280;font-size:11px;cursor:pointer}
+.sbtn:hover{background:#e4e6ed;color:#1a1a2e}
+.sbtn .sicon{font-size:13px;width:20px;text-align:center}
+.sbtn.active{background:#eef0f8;color:#4361ee;font-weight:600}
+.spacer{flex:1}
+.divider{height:1px;background:#e8eaed;margin:4px 10px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #e8eaed;background:#fff;height:44px}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-left h1{font-size:14px;font-weight:700}
+.back-btn{font-size:11px;color:#6b7280;cursor:pointer;padding:3px 8px;border-radius:6px}
+.back-btn:hover{background:#f0f2f8;color:#4361ee}
+.content{flex:1;padding:20px 24px;overflow-y:auto;max-width:900px}
+.card{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;margin-bottom:8px;color:#1a1a2e}
+.card p{font-size:12px;color:#6b7280;line-height:1.6}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.stat-card{padding:12px;border-radius:8px;border:1px solid #e8eaed;text-align:center}
+.stat-card .snum{font-size:22px;font-weight:700;color:#4361ee}
+.stat-card .slabel{font-size:10px;color:#9ca3af;margin-top:2px}
+.input-area{display:flex;gap:8px;margin-top:12px}
+.input-area input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #e8eaed;font-size:13px;outline:none;background:#f9fafb}
+.input-area input:focus{border-color:#4361ee}
+.input-area button{padding:8px 16px;border-radius:10px;border:none;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
+.input-area button:hover{background:#3651d4}
+.output-box{background:#f9fafb;border-radius:10px;padding:12px;font-size:12px;color:#374151;margin-top:8px;min-height:40px;white-space:pre-wrap;display:none}
+</style>
+</head><body>
+
+<div class="sidebar">
+  <div class="sbtn" onclick="window.location.href='/'"><span class="sicon">&#x1F4AC;</span> 对话</div>
+  <div class="divider"></div>
+  <div class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">&#x1F579;</span> Claw</div>
+  <div class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">&#x1F3DB;</span> Hermes</div>
+  <div class="sbtn active"><span class="sicon">&#x1F64B;</span> Human</div>
+  <div class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">&#x1F465;</span> 专家</div>
+  <div class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">&#x1F9E9;</span> 技能</div>
+  <div class="sbtn" onclick="window.location.href='/plugins'"><span class="sicon">&#x1F50C;</span> 插件</div>
+  <div class="spacer"></div>
+  <div class="divider"></div>
+  <div class="sbtn" onclick="window.location.href='/'">&#x1F313; 浅色</div>
+  <div class="sbtn" onclick="doLogout()">&#x1F513; 退出</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Human 人机协作</h1></div>
+    <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h2>&#x1F4CA; 系统概览</h2>
+      <div class="stat-grid" id="statsGrid">
+        <div class="stat-card"><div class="snum" id="statModules">-</div><div class="slabel">注册模块</div></div>
+        <div class="stat-card"><div class="snum" id="statApis">-</div><div class="slabel">API 端点</div></div>
+        <div class="stat-card"><div class="snum" id="statTools">94</div><div class="slabel">可用工具</div></div>
+        <div class="stat-card"><div class="snum" id="statSkills">-</div><div class="slabel">内置技能</div></div>
+        <div class="stat-card"><div class="snum" id="statStatus">-</div><div class="slabel">系统状态</div></div>
+        <div class="stat-card"><div class="snum" id="statUptime">-</div><div class="slabel">运行时间</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>&#x1F4DD; 人机协作</h2>
+      <p>向系统发送指令，Human将分析你的需求并调用最合适的工具执行。</p>
+      <div class="input-area">
+        <input id="humanInput" placeholder="输入需求，例如: 检查系统运行状态" onkeydown="if(event.key==='Enter')sendToHuman()">
+        <button onclick="sendToHuman()">&#x27A4; 执行</button>
+      </div>
+      <div class="output-box" id="humanOutput"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  try{
+    var r=await fetch('/api/v1/status',{signal:AbortSignal.timeout(5000)});
+    var d=await r.json();
+    document.getElementById('statModules').textContent=d.modules_loaded||'-';
+    document.getElementById('statApis').textContent=d.api_endpoints||d.routes_count||'-';
+    document.getElementById('statSkills').textContent=d.skills_count||'-';
+    document.getElementById('statStatus').textContent=d.status||'running';
+    document.getElementById('statUptime').textContent=d.uptime?new Date(d.uptime).toLocaleTimeString():'-';
+  }catch(e){}
+})();
+async function sendToHuman(){
+  var input=document.getElementById('humanInput'),text=input.value.trim();
+  if(!text)return;
+  var out=document.getElementById('humanOutput');out.style.display='block';
+  out.textContent='Human 处理中...\n\n需求: '+text;
+  input.value='';
+  try{
+    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',api_key:'',provider:'',context:[{role:'system',content:'你是Human人机协作智能体。你的任务是理解用户需求，调用系统提供的工具和技能来执行任务，并给出清晰的执行结果。如果用户请求查询系统状态，调用系统API获取最新数据。'}],task_id:'human_'+Date.now()})});
+    var d=await r.json();
+    if(d&&d.success){out.textContent='Human 响应:\n\n'+d.result;}
+    else{out.textContent='Human 返回错误: '+(d&&d.detail||r.status);}
+  }catch(e){out.textContent='Human 执行失败: '+e.message;}
+}
+function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
+</script>
+</body></html>

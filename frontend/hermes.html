@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hermes - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif}
+body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
+.sidebar{width:120px;background:#f0f0f4;display:flex;flex-direction:column;padding:8px 0;border-right:1px solid #e8eaed;flex-shrink:0}
+.sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:#6b7280;font-size:11px;cursor:pointer}
+.sbtn:hover{background:#e4e6ed;color:#1a1a2e}
+.sbtn .sicon{font-size:13px;width:20px;text-align:center}
+.sbtn.active{background:#eef0f8;color:#4361ee;font-weight:600}
+.spacer{flex:1}
+.divider{height:1px;background:#e8eaed;margin:4px 10px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #e8eaed;background:#fff;height:44px}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-left h1{font-size:14px;font-weight:700}
+.back-btn{font-size:11px;color:#6b7280;cursor:pointer;padding:3px 8px;border-radius:6px}
+.back-btn:hover{background:#f0f2f8;color:#4361ee}
+.content{flex:1;padding:20px 24px;overflow-y:auto;max-width:900px}
+.card{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;margin-bottom:8px;color:#1a1a2e}
+.card p{font-size:12px;color:#6b7280;line-height:1.6;margin-bottom:12px}
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px}
+.agent-card{padding:12px;border-radius:8px;border:1px solid #e8eaed;text-align:center;font-size:11px;cursor:pointer;transition:all .2s}
+.agent-card:hover{border-color:#4361ee;background:#f0f2f8}
+.agent-card .aicon{font-size:22px;margin-bottom:4px}
+.agent-card .aname{font-weight:600;color:#1a1a2e;margin-bottom:2px}
+.agent-card .adesc{color:#9ca3af;font-size:10px}
+.input-area{display:flex;gap:8px;margin-top:12px}
+.input-area input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #e8eaed;font-size:13px;outline:none;background:#f9fafb}
+.input-area input:focus{border-color:#4361ee}
+.input-area button{padding:8px 16px;border-radius:10px;border:none;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
+.input-area button:hover{background:#3651d4}
+.output-box{background:#f9fafb;border-radius:10px;padding:12px;font-size:12px;color:#374151;margin-top:8px;min-height:40px;white-space:pre-wrap;display:none}
+</style>
+</head><body>
+
+<div class="sidebar">
+  <div class="sbtn" onclick="window.location.href='/'"><span class="sicon">&#x1F4AC;</span> 对话</div>
+  <div class="divider"></div>
+  <div class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">&#x1F579;</span> Claw</div>
+  <div class="sbtn active"><span class="sicon">&#x1F3DB;</span> Hermes</div>
+  <div class="sbtn" onclick="window.location.href='/human'"><span class="sicon">&#x1F64B;</span> Human</div>
+  <div class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">&#x1F465;</span> 专家</div>
+  <div class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">&#x1F9E9;</span> 技能</div>
+  <div class="sbtn" onclick="window.location.href='/plugins'"><span class="sicon">&#x1F50C;</span> 插件</div>
+  <div class="spacer"></div>
+  <div class="divider"></div>
+  <div class="sbtn" onclick="window.location.href='/'">&#x1F313; 浅色</div>
+  <div class="sbtn" onclick="doLogout()">&#x1F513; 退出</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Hermes 智能体框架</h1></div>
+    <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h2>&#x1F916; 智能体团队</h2>
+      <div class="agent-grid">
+        <div class="agent-card" onclick="activateAgent('planner')"><div class="aicon">&#x1F9E0;</div><div class="aname">Planner</div><div class="adesc">任务规划拆解</div></div>
+        <div class="agent-card" onclick="activateAgent('coder')"><div class="aicon">&#x1F4BB;</div><div class="aname">Coder</div><div class="adesc">代码编写</div></div>
+        <div class="agent-card" onclick="activateAgent('reviewer')"><div class="aicon">&#x1F50D;</div><div class="aname">Reviewer</div><div class="adesc">代码审查</div></div>
+        <div class="agent-card" onclick="activateAgent('operator')"><div class="aicon">&#x2699;</div><div class="aname">Operator</div><div class="adesc">运维执行</div></div>
+        <div class="agent-card" onclick="activateAgent('analyst')"><div class="aicon">&#x1F4CA;</div><div class="aname">Analyst</div><div class="adesc">数据分析</div></div>
+        <div class="agent-card" onclick="activateAgent('researcher')"><div class="aicon">&#x1F50D;</div><div class="aname">Researcher</div><div class="adesc">信息调研</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>&#x1F4DD; 任务执行</h2>
+      <p>选择智能体或直接输入任务，Hermes 将自动调度团队完成任务。</p>
+      <div class="input-area">
+        <input id="hermesInput" placeholder="输入任务，例如: 写一个Python爬虫" onkeydown="if(event.key==='Enter')sendToHermes()">
+        <button onclick="sendToHermes()">&#x27A4; 执行</button>
+      </div>
+      <div class="output-box" id="hermesOutput"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentAgent='';
+function activateAgent(name){
+  currentAgent=name;
+  var labels={'planner':'任务规划师','coder':'程序员','reviewer':'代码审查员','operator':'运维工程师','analyst':'数据分析师','researcher':'研究员'};
+  var descs={'planner':'负责将复杂任务拆解为可执行步骤','coder':'负责编写代码实现功能','reviewer':'负责审查代码质量和安全','operator':'负责部署和运维操作','analyst':'负责数据分析与可视化','researcher':'负责信息检索和调研'};
+  var input=document.getElementById('hermesInput');
+  input.placeholder='向 '+labels[name]+' 发送指令...';
+  input.focus();
+  var out=document.getElementById('hermesOutput');out.style.display='block';
+  out.textContent='已激活: '+labels[name]+'\n'+descs[name]+'\n\n输入你的任务开始协作。';
+}
+async function sendToHermes(){
+  var input=document.getElementById('hermesInput'),text=input.value.trim();
+  if(!text)return;
+  var out=document.getElementById('hermesOutput');out.style.display='block';
+  out.textContent='Hermes 处理中...\n\n任务: '+text;
+  if(currentAgent)out.textContent+='\n智能体: '+currentAgent;
+  input.value='';
+  try{
+    var sys='你是Hermes智能体框架。你管理一个智能体团队(Planner/Coder/Reviewer/Operator/Analyst/Researcher)。';
+    if(currentAgent)sys+='\n当前激活的智能体是: '+currentAgent+'。请以该智能体角色执行任务。';
+    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',api_key:'',provider:'',context:[{role:'system',content:sys}],task_id:'hermes_'+Date.now()})});
+    var d=await r.json();
+    if(d&&d.success){out.textContent='Hermes 响应:\n\n'+d.result;}
+    else{out.textContent='Hermes 返回错误: '+(d&&d.detail||r.status);}
+  }catch(e){out.textContent='Hermes 执行失败: '+e.message;}
+}
+function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
+</script>
+</body></html>

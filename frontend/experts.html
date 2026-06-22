@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>专家中心 - 266位AI专家</title><style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif;background:#f5f5f8;margin:0;padding:16px;color:#1a1a2e;max-width:1200px;margin:0 auto}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.header h1{margin:0;font-size:18px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .stats{font-size:12px;color:#6b7280;margin-left:auto}
+.header a{color:#4361ee;text-decoration:none;font-size:12px;padding:4px 10px;border-radius:6px;background:#fff;border:1px solid #e5e7eb}
+.search-bar{width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:12px;box-sizing:border-box;background:#fff;outline:none}
+.search-bar:focus{border-color:#4361ee}
+.dept{margin-bottom:6px;border-radius:10px;overflow:hidden;border:1px solid #e8eaed;background:#fff}
+.dept-head{display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;background:#fff;transition:background .15s}
+.dept-head:hover{background:#f3f4f6}
+.dept-head .arrow{font-size:10px;transition:transform .2s;width:12px;text-align:center;color:#9ca3af}
+.dept-head.open .arrow{transform:rotate(90deg)}
+.dept-head .count{font-size:11px;color:#9ca3af;margin-left:auto}
+.dept-body{display:none;padding:4px 8px 8px;flex-wrap:wrap;gap:4px}
+.dept-body.open{display:flex}
+.agent{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #e5e7eb;background:#f9fafb;transition:all .15s;white-space:nowrap}
+.agent:hover{border-color:#4361ee;background:#eef2ff;color:#4361ee;box-shadow:0 1px 4px rgba(67,97,238,.1)}
+.agent .ico{font-size:12px}
+#result{position:fixed;bottom:16px;right:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:12px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;display:none;color:#1a1a2e}
+#result.show{display:block}
+#result .close{float:right;cursor:pointer;color:#9ca3af;font-size:14px;margin-left:8px}
+</style></head><body>
+<div class="header">
+<span style="font-size:22px">👥</span><h1>AI 专家中心</h1>
+<span class="stats">266 位专家 · 18 个部门</span>
+<a href="/">← 返回</a>
+</div>
+<input class="search-bar" id="search" placeholder="🔍 搜索专家名称..." oninput="filterExperts(this.value)">
+<div id="deptList"></div>
+<div id="result"></div>
+<script>
+var DEPTS=[
+{name:'📖 学术部',icon:'📖',agents:[
+['🧑','人类学家'],['🌍','地理学家'],['📜','历史学家'],['📖','叙事学家'],['🧠','心理学家'],['📚','学习规划师']]},
+{name:'🎨 设计部',icon:'🎨',agents:[
+['👤','Persona走查专家'],['🏷️','品牌守护者'],['🖼️','图像提示词工程师'],['♿','包容性视觉专家'],['🖥️','UI设计师'],
+['🧩','UX架构师'],['🔬','UX研究员'],['📖','视觉叙事师'],['🎪','趣味注入师']]},
+{name:'🛠️ 工程部',icon:'💻',agents:[
+['🛒','Drupal购物车工程师'],['🖥️','IT服务经理'],['🤖','多智能体系统架构师'],['🔧','OrgScript工程师'],['💡','Prompt工程师'],
+['🛒','WordPress购物车工程师'],['🔍','AI数据修复工程师'],['🤖','AI工程师'],['⚡','自主优化架构师'],
+['🏗️','后端架构师'],['📝','CMS开发者'],['📋','代码库入职引导工程师'],['🔍','代码审查员'],['📊','数据工程师'],
+['📧','邮件智能工程师'],['🗄️','数据库优化师'],['🔄','DevOps自动化师'],['💬','钉钉集成开发工程师'],
+['🔌','嵌入式固件工程师'],['⚙️','上位机工程师'],['🎨','Filament优化专家'],['🐧','嵌入式Linux驱动工程师'],
+['💬','飞书集成开发工程师'],['🔲','FPGA数字设计工程师'],['🌐','前端开发者'],['🔀','Git工作流大师'],
+['⚙️','机械设计工程师'],['🚨','故障响应指挥官'],['🌐','IoT方案架构师'],['✂️','最小变更工程师'],
+['📱','移动应用开发者'],['⚡','快速原型师'],['🔒','安全工程师'],['👨‍💻','高级开发者'],
+['🏛️','软件架构师'],['💰','Solidity智能合约工程师'],['🖥️','SRE工程师'],['📄','技术文档工程师'],
+['🔍','威胁检测工程师'],['🎙️','语音AI集成工程师'],['💬','微信小程序开发者']]},
+{name:'🏦 金融部',icon:'💰',agents:[
+['📒','簿记与财务总监'],['📈','财务分析师'],['🔮','财务预测分析师'],['📊','FP&A分析师'],
+['🛡️','金融风控分析师'],['📚','投资研究员'],['🧾','发票管理专家'],['💰','税务策略师']]},
+{name:'🎮 游戏开发部',icon:'🎮',agents:[
+['🟠','Blender插件工程师'],['🎵','游戏音频工程师'],['🎲','游戏设计师'],['🟣','Godot游戏脚本开发者'],
+['🌐','Godot多人游戏工程师'],['✨','GodotShader开发者'],['🗺️','关卡设计师'],['📖','叙事设计师'],
+['🎭','Roblox虚拟形象创作者'],['🎮','Roblox体验设计师'],['🔧','Roblox系统脚本工程师'],
+['🎨','技术美术'],['🏛️','Unity架构师'],['🔧','Unity编辑器工具开发者'],['🌐','Unity多人游戏工程师'],
+['✨','UnityShaderGraph美术师'],['🌐','Unreal多人游戏架构师'],['🔧','Unreal系统工程师'],
+['🎨','Unreal技术美术'],['🌍','Unreal世界构建师']]},
+{name:'👔 人力资源部',icon:'👥',agents:[
+['📊','绩效管理专家'],['🔍','招聘专家']]},
+{name:'⚖️ 法务部',icon:'⚖️',agents:[
+['📝','合同审查专家'],['📄','制度文件撰写专家']]},
+{name:'📢 营销部',icon:'📱',agents:[
+['📈','AEO基础架构师'],['📧','邮件营销策略师'],['🎙️','全球播客策略师'],['📱','多平台发布编排官'],
+['📰','PR与传播经理'],['🐦','X/Twitter情报分析师'],['🔍','智能搜索优化师'],['📄','AI引文策略师'],
+['📱','应用商店优化师'],['🔍','百度SEO专家'],['📺','B站内容策略师'],['📖','图书联合作者'],
+['🔄','轮播图增长引擎'],['🌏','中国市场本地化策略师'],['📰','新闻情报官'],['🏪','中国电商运营专家'],
+['✍️','内容创作者'],['🌐','跨境电商运营专家'],['🎵','抖音策略师'],['🛒','电商运营师'],
+['📈','增长黑客'],['📸','Instagram策展师'],['🎓','知识付费产品策划师'],['⚡','快手策略师'],
+['💼','LinkedIn内容创作专家'],['🎥','直播电商主播教练'],['🎙️','播客内容策略师'],['💬','私域流量运营师'],
+['🤝','Reddit社区运营'],['🔍','SEO专家'],['✂️','短视频剪辑指导师'],['📱','社交媒体策略师'],
+['🎵','TikTok策略师'],['🎬','视频优化专家'],['🐦','Twitter互动官'],['💬','微信公众号管理'],
+['📱','微信公众号运营'],['📱','微博运营策略师'],['📹','微信视频号运营策略师'],['📕','小红书运营专家'],
+['📕','小红书专家'],['💡','知乎策略师']]},
+{name:'💰 付费媒体部',icon:'📊',agents:[
+['📋','付费媒体审计师'],['🎨','广告创意策略师'],['📱','社交广告策略师'],['💰','PPC竞价策略师'],
+['📊','程序化广告采买专家'],['🔍','搜索词分析师'],['📈','追踪与归因专家']]},
+{name:'📦 产品部',icon:'📋',agents:[
+['🧠','行为助推引擎'],['📊','反馈分析师'],['📋','产品经理'],['📝','Sprint排序师'],['🔍','趋势研究员']]},
+{name:'📋 项目管理部',icon:'📋',agents:[
+['📝','会议纪要专家'],['📊','实验追踪员'],['🟠','Jira工作流管家'],['🐑','项目牧羊人'],
+['🎬','工作室运营'],['🎥','工作室制片人'],['👔','高级项目经理']]},
+{name:'💼 销售部',icon:'💼',agents:[
+['📋','Offer与LeadGen策略师'],['🤝','客户拓展策略师'],['👨‍🏫','销售教练'],['🏆','赢单策略师'],
+['🔍','Discovery教练'],['🔧','售前工程师'],['📤','Outbound策略师'],['📊','Pipeline分析师'],
+['📝','投标策略师']]},
+{name:'🥽 空间计算部',icon:'🥽',agents:[
+['💻','macOSMetal空间工程师'],['🔌','终端集成专家'],['👓','visionOS空间工程师'],
+['🚗','XR座舱交互专家'],['🌐','XR沉浸式开发者'],['🏗️','XR界面架构师']]},
+{name:'🔬 专项部',icon:'🔬',agents:[
+['📊','商业战略家'],['🔄','变革管理顾问'],['💰','首席财务官'],['🤝','客户成功经理'],
+['🔒','数据隐私官'],['🌱','ESG与可持续发展官'],['📝','资助申请撰稿人'],['🤝','M&A整合经理'],
+['🏥','医疗账单与编码专员'],['📊','运营经理'],['🧠','组织心理学家'],['🌱','个人成长导师'],
+['💰','定价分析师'],['⚔️','策略对决推演师'],['📒','应付账款智能体'],['🔐','身份信任架构师'],
+['🤖','智能体编排者'],['🔒','自动化治理架构师'],['🐔','养殖档案核对员'],['🏗️','土木工程师'],
+['📚','企业培训课程设计师'],['🔗','数据整合师'],['🎓','高考志愿填报顾问'],['🏛️','政务数字化售前顾问'],
+['🏥','医疗客服专家'],['⚕️','医疗健康营销合规师'],['🏨','酒店宾客服务专家'],['📋','HR入职管理专家'],
+['🔐','身份图谱操作员'],['🌐','语言翻译专家'],['⚖️','律所计费与工时专家'],['⚖️','律所客户接案专家'],
+['📝','法律文书审查专家'],['💰','信贷经理助手'],['🔍','LSP索引工程师'],['💡','提示词工程师'],
+['🔍','招聘专家'],['📤','报告分发师'],['📊','销售数据提取师'],['🤖','AI治理政策专家'],
+['🌐','文化智能策略师'],['📣','开发者布道师'],['📄','文档生成器'],['🇫🇷','法国咨询市场专家'],
+['🇰🇷','韩国商务专家'],['🔌','MCP构建器'],['📋','会议效率专家'],['🧪','模型QA专家'],
+['💰','动态定价策略师'],['🏠','房地产经纪助手'],['🛒','零售退货专家'],['📊','企业风险评估师'],
+['🏗️','Salesforce架构师'],['🔧','工作流架构师'],['👔','幕僚长'],['🌍','留学规划顾问'],
+['📄','技术翻译专家'],['🔐','ZK管家']]},
+{name:'🚚 供应链部',icon:'📦',agents:[
+['📦','库存预测专家'],['🗺️','物流路线优化师'],['📋','供应链采购策略师'],
+['📊','供应商评估专家'],['👔','服装工厂规划工程师']]},
+{name:'🤝 支持部',icon:'🤝',agents:[
+['📊','数据分析师'],['📝','高管摘要师'],['💰','财务追踪员'],['🖥️','基础设施运维师'],
+['⚖️','法务合规员'],['📋','招聘运营专家'],['📞','客服响应者']]},
+{name:'🧪 测试部',icon:'🧪',agents:[
+['♿','无障碍审核员'],['🌐','API测试员'],['🔌','嵌入式测试工程师'],['📸','证据收集者'],
+['⚡','性能基准师'],['🔍','现实检验者'],['📊','测试结果分析师'],['🔧','工具评估师'],
+['🔄','工作流优化师']]},
+{name:'🗺️ GIS部',icon:'🗺️',agents:[
+['🌐','三维场景开发者'],['📊','GIS分析师'],['🏗️','BIM/GIS专家'],['🗺️','地图制图设计师'],
+['✈️','无人机实景测绘专家'],['🤖','GeoAI/ML工程师'],['🔧','地理处理专家'],['📋','GIS质检工程师'],
+['💡','解决方案工程师'],['🗄️','空间数据工程师'],['🔬','空间数据科学家'],['👨‍💼','技术顾问'],
+['🌐','WebGIS开发工程师']]},
+{name:'🛡️ 安全部',icon:'🔒',agents:[
+['🔐','应用安全工程师'],['🏛️','安全架构师'],['💰','区块链安全审计师'],['☁️','云安全架构师'],
+['📋','合规审计师'],['🚨','事件响应专家'],['🔍','渗透测试员'],['👨‍💻','高级安全运营工程师'],
+['🔍','威胁检测工程师'],['📊','威胁情报分析师']]}
+];
+function rd(){var d=document.getElementById('deptList');d.innerHTML='';for(var i=0;i<DEPTS.length;i++){var dept=DEPTS[i];var h='<div class="dept"><div class="dept-head" onclick="toggleDept('+i+')"><span class="arrow">▶</span>'+dept.name+'<span class="count">'+dept.agents.length+'个</span></div><div id="d'+i+'" class="dept-body">';for(var j=0;j<dept.agents.length;j++){var a=dept.agents[j];h+='<span class="agent" onclick="activateExpert(this,\''+a[1]+'\',\''+dept.name+'\')"><span class="ico">'+a[0]+'</span> '+a[1]+'</span>'}h+='</div></div>';d.innerHTML+=h}}
+function toggleDept(i){var h=document.getElementById('d'+i);h.classList.toggle('open');var p=h.previousElementSibling;p.classList.toggle('open')}
+function activateExpert(el,name,dept){
+  localStorage.setItem('evo_active_expert',JSON.stringify({name:name,dept:dept,ts:Date.now()}))
+  window.location.href='/'
+}
+function filterExperts(q){q=(q||'').toLowerCase().trim()
+  for(var i=0;i<DEPTS.length;i++){var body=document.getElementById('d'+i),head=body.previousElementSibling;if(!q){body.classList.remove('open');head.classList.remove('open');continue}
+    var agents=body.querySelectorAll('.agent'),matched=0
+    for(var j=0;j<agents.length;j++){var m=agents[j].textContent.toLowerCase().indexOf(q)>=0;agents[j].style.display=m?'':'none';if(m)matched++}
+    if(matched>0){body.classList.add('open');head.classList.add('open')}else{body.classList.remove('open');head.classList.remove('open')}
+  }
+}
+rd();
+</script></body></html>
