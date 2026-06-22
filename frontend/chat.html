@@ -59,6 +59,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .right-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
 .right-header h3{font-size:12px;font-weight:600;color:var(--text2)}
 .right-header span{cursor:pointer;font-size:14px;color:var(--text3)}
+.attach-bar{display:flex;gap:4px;padding:2px 0;flex-wrap:wrap}.attach-bar:empty{display:none}
+.attach-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:5px;font-size:10px;background:var(--glass);border:1px solid var(--border);color:var(--text2)}.attach-chip .del{color:var(--text3);cursor:pointer;margin-left:2px;font-size:11px}.attach-chip .del:hover{color:#e74c3c}
+.attach-btn{font-size:16px;padding:0 6px;background:none;border:none;cursor:pointer;opacity:.6;flex-shrink:0}.attach-btn:hover{opacity:1}
 .right-content{flex:1;overflow-y:auto;padding:8px}
 /* 搜索框 - 卡片样式 */
 .search-card{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;margin-bottom:8px}
@@ -114,7 +117,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 /* 滚轮滑动 */
 .cat-strip,.tip-bar{touch-action:pan-x}
 .cat-strip:hover,.tip-bar:hover{cursor:grab}
-@media(max-width:768px){.right-panel{display:none}.messages{padding:6px 10px}.input-area{padding:6px 10px 10px}}
+/* 移动端响应式 */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:transform .25s;width:180px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.3);display:none}
+  .sidebar-overlay.show{display:block}
+  .right-panel{position:fixed;right:0;top:0;height:100vh;z-index:80;width:260px;box-shadow:-4px 0 20px rgba(0,0,0,.12)}
+  .topbar{padding:6px 10px;height:40px}
+  .topbar-left h1{font-size:13px}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:16px;cursor:pointer;flex-shrink:0}
+  .hamburger:hover{background:var(--glass)}
+  .main{flex:1}
+  .messages{padding:6px 10px}
+  .greeting{margin:0 0 8px}
+  .greeting p{font-size:13px}
+  .cat-strip{gap:3px;padding:6px 4px;margin:2px 0}
+  .cat-strip .cat-tab{padding:4px 8px;font-size:10px}
+  .tools-section{padding:2px 0}
+  .tools-section .cat-body{gap:3px;padding:4px}
+  .tool-chip{padding:4px 8px;font-size:10px}
+  .input-area{padding:6px 10px 10px}
+  .input-row input{font-size:14px;padding:8px 0}
+  .input-row button{width:34px;height:34px}
+  .attach-bar{padding:2px 10px}
+  .msg-bubble{max-width:92%;font-size:13px}
+  .auth-card{padding:20px;max-width:100%}
+  .right-toggle-btn{display:flex;z-index:81}
+}
+@media(min-width:769px){
+  .hamburger{display:none}
+  .sidebar-overlay{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -141,7 +175,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 <!-- 主应用 -->
 <div class="app" id="appMain" style="display:none">
   <!-- 左侧导航 - 核心页面 + WorkBuddy功能 -->
-  <div class="sidebar">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
+  <div class="sidebar" id="sidebar">
     <div class="logo">⚡</div>
     <button class="sbtn active" id="sChat"><span class="sicon">💬</span> 对话</button>
     <button class="sbtn" onclick="showDashboard()"><span class="sicon">📊</span> 仪表盘</button>
@@ -169,6 +204,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
   <div class="main" id="mainContent">
     <div class="topbar">
       <div class="topbar-left">
+        <span class="hamburger" id="hamburgerBtn" onclick="toggleSidebarMobile()">☰</span>
         <h1>AUTO-EVO-AI</h1>
         <span class="model-badge" id="modelBadge" onclick="checkLLM()">🧠 检测中</span>
       </div>
@@ -207,7 +243,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
         </div>
         <!-- 输入区 -->
         <div class="input-area">
+          <div class="attach-bar" id="attachBar"></div>
+          <input id="fileInput" type="file" multiple style="display:none" onchange="handleFiles(this)">
           <div class="input-row">
+            <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="上传文件/拍照">📎</button>
             <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter')send()">
             <button class="mic" onclick="startVoice()">🎤</button>
             <button onclick="send()">➤</button>
@@ -215,7 +254,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
         </div>
       </div>
       <!-- 右侧面板 - WorkBuddy风格 -->
-      <div class="right-panel" id="rightPanel">
+      <div class="right-panel hidden" id="rightPanel">
         <div class="right-header">
           <h3>📦 快捷面板</h3>
         </div>
@@ -268,6 +307,11 @@ function setLocale(c){localStorage.setItem('evo_locale',c);window.location.reloa
 
 var _TOOL_HINTS={"docx_processor":"帮我生成一份文档，主题是：","excel_pro":"帮我创建一个电子表格，包含：","ppt_generator":"帮我生成一份演示文稿，主题是：","pdf_toolkit":"帮我处理这个PDF文件：","code_review":"帮我审查这段代码：","browser_use_task":"帮我用浏览器自动化完成一个任务：","browseract_extract":"帮我用反爬提取这个网页内容：","codemem_query":"帮我查询代码库知识：","gpt_research":"请帮我做一个深度研究：","openhands_generate":"帮我生成一个全栈项目：","letta_message":"记住以下信息到长期记忆：","composio_execute":"使用外部工具执行：","self_evolving_analyze":"帮我分析当前代码库的改进点","moltron_learn":"学习一个新技能：","accomplish_desktop":"执行桌面自动化工作流：","toolbench_discover":"帮我发现可用的外部API：","markitdown_convert":"帮我转换这个文档为Markdown：","scrapegraphai_scrape":"帮我爬取这个网站的数据：","interpreter_execute":"帮我执行这个电脑操作：","s2c_generate":"帮我从截图生成代码：","pra_review":"帮我审查这个PR：","qodo_testgen":"帮我给这个文件生成测试：","aider_edit":"帮我修改这个代码文件：","openclaw_connect":"帮我连接消息平台：","tts_speak":"帮我转换成语音：","chatdev_run":"帮我用多智能体团队完成任务：","autogpt_run":"帮我自主执行这个目标：","agenteval_benchmark":"帮我评测Agent性能：","swe_fix":"帮我分析修复这个Issue：","gptpilot_build":"帮我从需求生成项目：","text2sql_query":"帮我查询数据库：","bolt_generate":"帮我生成Web应用：","openmontage_generate_script":"帮我生成一个视频脚本，主题是：","lida_visualize":"帮我分析数据并生成可视化图表：","paddleocr_image":"帮我识别这张图片中的文字：","paddleocr_pdf":"帮我识别PDF中的文字：","zen_scan":"帮我扫描这个网站的安全漏洞：","shannon_audit":"帮我审计这个目录的代码安全：","legal_review_contract":"帮我审查这份合同：","twenty_create_contact":"帮我在CRM创建一个联系人：","invoice_create":"帮我创建一张发票：","chatwoot_create_ticket":"帮我创建一个客服工单：","postiz_create_post":"帮我在社交媒体发帖：","mautic_send_email":"帮我发送营销邮件：","superset_create_chart":"帮我在Superset创建图表：","dataease_create_dashboard":"帮我创建DataEase仪表盘：","heyform_create_survey":"帮我创建一个问卷调查：","docetl_extract":"帮我提取文档内容：","accord_create_contract":"帮我创建一份协议：","claude_code_generate":"帮我用Claude Code生成代码：","odoo_manage":"帮我管理ERP：","erpclaw_manage":"帮我用AI-ERP管理业务：","coolify_deploy":"帮我在PaaS上部署应用：","rustdesk_connect":"帮我远程连接电脑：","docuseal_sign":"帮我发送电子签名：","homeassistant_control":"帮我控制智能家居设备：","vaultwarden_manage":"帮我管理密码/凭证：","nocodb_manage":"帮我管理数据表格：","appsmith_build":"帮我用低代码构建管理工具：","airbyte_sync":"帮我同步数据管道：","mlflow_track":"帮我追踪AI模型训练：","langfuse_observe":"帮我监控LLM应用：","hoppscotch_test":"帮我测试API：","grist_analyze":"帮我分析电子表格数据：","freshrss_read":"帮我读取RSS资讯：","listmonk_send":"帮我发送邮件：","mermaid_chart":"帮我生成流程图：","nocobase_build":"帮我用低代码构建业务应用：","scriberr_transcribe":"帮我转录音频：","keploy_test":"帮我自动生成API测试：","browseract_extract":"帮我用browseract提取这个网站数据：","codemem_index":"帮我索引这个代码库：","reach_search":"帮我搜索全网信息：","anime_animate":"帮我给这个页面添加动效："}
 var _TOOL_KEYWORDS = [...new Set(["plane_project","openproject_mgmt","cal_schedule","novu_notify","keycloak_auth","meilisearch_search","minio_storage","opentofu_apply","ansible_run","strapi_cms","directus_api","uptime_kuma","oneuptime_monitor","signoz_apm","wazuh_siem","nats_mq","rabbitmq_broker","gitea_git","wikijs_wiki","bookstack_wiki","projectsend_files","odoo_manage","erpclaw_manage","coolify_deploy","rustdesk_connect","docuseal_sign","homeassistant_control","vaultwarden_manage","nocodb_manage","appsmith_build","airbyte_sync","mlflow_track","langfuse_observe","hoppscotch_test","grist_analyze","freshrss_read","listmonk_send","mermaid_chart","nocobase_build","scriberr_transcribe","keploy_test","浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","抓取","爬取","代码审查","测试","编辑代码","语音","多智能体","智能体团队","自主","issue","数据库","部署","k8s","视频","数据可视化","ocr","安全扫描","漏洞","合同","crm","发票","工单","客服","社交媒体","营销","bi","表单","法律","claude"])]
+var attachFiles=[];
+function handleFiles(el){for(var i=0;i<el.files.length;i++)attachFiles.push(el.files[i]);renderAttachBar();el.value=''}
+function removeAttach(idx){attachFiles.splice(idx,1);renderAttachBar()}
+function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,18)+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
+function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=[];for(var i=0;i<attachFiles.length;i++)a.push(attachFiles[i].name);return'[已上传文件: '+a.join(', ')+']'}
 function quickTool(el, name){
   var inp=document.getElementById('input')
   inp.value=el.textContent.trim()+': ';inp.focus()
@@ -294,7 +338,7 @@ function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
 async function send(){
-  try{var input=document.getElementById('input');var text=input.value.trim();if(!text)return;input.value='';addMsg(text,'user');CTX.push({role:'user',content:text});if(CTX.length>10)CTX=CTX.slice(-10);showLoading();var ak=localStorage.getItem('evo_api_key')||''
+  try{var input=document.getElementById('input');var text=input.value.trim();if(!text&&attachFiles.length===0)return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');addMsg(ft,'user');CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');return};var sd=await sr.json();hideLoading()
     if(sd&&sd.success){var rt=sd.result||'(空)'
@@ -310,6 +354,7 @@ function showVirtualCompany(){window.location.href='/company.html'}
 function openHub(){window.location.href='/hub'}
 function startVoice(){var S=window.SpeechRecognition||window.webkitSpeechRecognition;if(!S){alert('不支持语音输入');return};var r=new S();r.lang=_LOCALE;r.onresult=function(e){document.getElementById('input').value=e.results[0][0].transcript;send()};r.start()}
 function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
+function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 
 var _activeCat=null
 function toggleCategory(id){
