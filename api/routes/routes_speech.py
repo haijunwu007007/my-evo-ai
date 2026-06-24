@@ -1,15 +1,10 @@
 """
 AUTO-EVO-AI V0.1 — 语音识别路由
-主引擎：Google 免费语音识别（支持中文，免费，需联网）
-备用：PocketSphinx（英文）+ Vosk（中文，模型就绪时）
+引擎顺序：百度ASR(中国可用) > Google > PocketSphinx(英文)
 """
-
-import os
-import json
-import logging
-import tempfile
-import subprocess
+import os, json, logging, tempfile, base64, struct
 from fastapi import APIRouter, UploadFile, File
+import subprocess
 
 logger = logging.getLogger("routes_speech")
 router = APIRouter(prefix="/api/v1/speech", tags=["speech"])
@@ -17,7 +12,7 @@ router = APIRouter(prefix="/api/v1/speech", tags=["speech"])
 VOSK_MODEL_DIR = "/home/ubuntu/vosk_models"
 _vosk_model = None
 
-def _wav_from_webm(webm_bytes: bytes) -> tuple[bytes | None, int]:
+def _wav_from_webm(webm_bytes):
     try:
         with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as fin:
             fin.write(webm_bytes)
@@ -36,93 +31,94 @@ def _wav_from_webm(webm_bytes: bytes) -> tuple[bytes | None, int]:
             os.unlink(wav_path)
         return wav_data, 16000
     except Exception as e:
-        logger.warning(f"ffmpeg 转码失败: {e}")
+        logger.warning(f"转码失败: {e}")
         return None, 0
 
-def _google_recognize(wav_data: bytes) -> str:
-    """Google 免费语音识别 — 支持中文"""
+def _baidu_recognize(wav_data):
+    """百度ASR — 国内免费可用"""
+    try:
+        import requests
+        # 获取token
+        ak, sk = "4E1BG9lTnlSeIf1NQFlrSUeG", "rB28R1UdbK6NsEzAVw2sVVrEbTNZIHp2"
+        r = requests.post(
+            "https://openapi.baidu.com/oauth/2.0/token",
+            params={"grant_type": "client_credentials", "client_id": ak, "client_secret": sk},
+            timeout=5
+        )
+        token = r.json().get("access_token", "")
+        if not token:
+            return ""
+        # 语音识别
+        b64 = base64.b64encode(wav_data).decode()
+        body = {
+            "format": "wav", "rate": 16000, "channel": 1,
+            "cuid": "autoevoai", "token": token,
+            "speech": b64, "len": len(wav_data),
+            "dev_pid": 1537
+        }
+        r = requests.post("https://vop.baidu.com/server_api", json=body, timeout=15)
+        ret = r.json()
+        if ret.get("err_no") == 0:
+            return ret.get("result", [""])[0]
+        return ""
+    except Exception:
+        return ""
+
+def _google_recognize(wav_data):
     try:
         import speech_recognition as sr
         r = sr.Recognizer()
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp:
-            tmp.write(wav_data)
-            tmp.flush()
-            with sr.AudioFile(tmp.name) as source:
-                audio = r.record(source)
+            tmp.write(wav_data); tmp.flush()
+            with sr.AudioFile(tmp.name) as src:
+                audio = r.record(src)
             return r.recognize_google(audio, language="zh-CN")
-    except sr.UnknownValueError:
-        return ""
-    except sr.RequestError as e:
-        logger.warning(f"Google 识别请求失败: {e}")
-        return ""
-    except Exception as e:
-        logger.warning(f"Google 识别错误: {e}")
+    except Exception:
         return ""
 
-def _pocketsphinx_recognize(wav_data: bytes) -> str:
-    """PocketSphinx 离线识别（英文）"""
+def _sphinx_recognize(wav_data):
     try:
         import speech_recognition as sr
         r = sr.Recognizer()
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp:
-            tmp.write(wav_data)
-            tmp.flush()
-            with sr.AudioFile(tmp.name) as source:
-                audio = r.record(source)
+            tmp.write(wav_data); tmp.flush()
+            with sr.AudioFile(tmp.name) as src:
+                audio = r.record(src)
             return r.recognize_sphinx(audio)
-    except Exception as e:
+    except Exception:
         return ""
 
-def _vosk_recognize(wav_data: bytes, sample_rate: int = 16000) -> str:
+def _vosk_recognize(wav_data, sr=16000):
     global _vosk_model
     if _vosk_model is None:
         try:
             import vosk
             if os.path.isdir(VOSK_MODEL_DIR):
-                for entry in sorted(os.listdir(VOSK_MODEL_DIR)):
-                    full = os.path.join(VOSK_MODEL_DIR, entry)
-                    if os.path.isdir(full):
-                        _vosk_model = vosk.Model(full)
-                        logger.info(f"Vosk 模型加载: {full}")
-                        break
-        except Exception as e:
-            logger.warning(f"Vosk 加载失败: {e}")
-    if _vosk_model is None:
+                for e in sorted(os.listdir(VOSK_MODEL_DIR)):
+                    p = os.path.join(VOSK_MODEL_DIR, e)
+                    if os.path.isdir(p):
+                        _vosk_model = vosk.Model(p); break
+        except Exception:
+            pass
+    if not _vosk_model:
         return ""
     try:
         import vosk, wave, io
-        rec = vosk.KaldiRecognizer(_vosk_model, sample_rate)
-        try:
-            wf = wave.open(io.BytesIO(wav_data), 'rb')
-            data = wf.readframes(wf.getnframes())
-            wf.close()
-        except wave.Error:
-            rec.AcceptWaveform(wav_data)
-            result = json.loads(rec.Result())
-            return result.get("text", "").strip()
+        rec = vosk.KaldiRecognizer(_vosk_model, sr)
+        wf = wave.open(io.BytesIO(wav_data), 'rb')
+        data = wf.readframes(wf.getnframes()); wf.close()
         if rec.AcceptWaveform(data):
-            result = json.loads(rec.Result())
-            text = result.get("text", "").strip()
-            if text:
-                return text
-        partial = json.loads(rec.PartialResult())
-        return partial.get("partial", "").strip()
-    except Exception as e:
-        logger.warning(f"Vosk 识别失败: {e}")
+            return json.loads(rec.Result()).get("text","").strip()
+        return json.loads(rec.PartialResult()).get("partial","").strip()
+    except Exception:
         return ""
 
 @router.get("/status")
 def speech_status():
-    vosk_ok = _vosk_model is not None or os.path.isdir(VOSK_MODEL_DIR)
     return {
         "available": True,
-        "providers": {
-            "google_free": True,
-            "pocketsphinx": True,
-            "vosk": vosk_ok,
-            "vosk_model_ready": _vosk_model is not None,
-        },
-        "active": "google",
+        "providers": {"baidu_free": True, "google_free": True, "pocketsphinx": True},
+        "active": "baidu"
     }
 
 @router.post("/recognize")
@@ -134,28 +130,29 @@ async def recognize_speech(file: UploadFile = File(...)):
 
         wav_data, sr = _wav_from_webm(raw)
         if wav_data is None:
-            return {"success": False, "text": "", "error": "音频转码失败"}
+            return {"success": False, "text": "", "error": "转码失败"}
 
-        # 1) Google 中文识别（免费，首选）
-        text = _google_recognize(wav_data)
+        # 1) 百度ASR（中国，首选）
+        text = _baidu_recognize(wav_data)
         if text:
-            logger.info(f"Google: {text[:50]}")
-            return {"success": True, "text": text, "provider": "google"}
+            return {"success": True, "text": text, "provider": "baidu"}
 
-        # 2) Vosk 离线中文
+        # 2) Vosk
         text = _vosk_recognize(wav_data, sr)
         if text:
-            logger.info(f"Vosk: {text[:50]}")
             return {"success": True, "text": text, "provider": "vosk"}
 
-        # 3) PocketSphinx 英文
-        text = _pocketsphinx_recognize(wav_data)
+        # 3) Google
+        text = _google_recognize(wav_data)
         if text:
-            logger.info(f"Sphinx: {text[:50]}")
+            return {"success": True, "text": text, "provider": "google"}
+
+        # 4) Sphinx
+        text = _sphinx_recognize(wav_data)
+        if text:
             return {"success": True, "text": text, "provider": "pocketsphinx"}
 
-        return {"success": False, "text": "", "error": "所有引擎均识别失败，请重试"}
+        return {"success": False, "text": "", "error": "识别失败，请重试"}
 
     except Exception as e:
-        logger.error(f"语音识别错误: {e}")
         return {"success": False, "text": "", "error": str(e)[:200]}

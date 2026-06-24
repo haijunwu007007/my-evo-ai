@@ -362,8 +362,8 @@ function showDashboard(){window.location.href='/dashboard'}
 function showEnterprise(){window.location.href='/enterprise.html'}
 function showVirtualCompany(){window.location.href='/company.html'}
 function openHub(){window.location.href='/hub'}
-// 语音 - 浏览器原生语音识别（离线可用，不依赖服务器）
-var _voiceRec=null,_voicing=false;
+// 语音 - 双通道：Web Speech API + MediaRecorder降级
+var _voicing=false,_voiceWebSpeech=null,_voiceMediaRec=null,_voiceStream=null,_voiceChunks=[];
 function switchToText(){
   document.getElementById('voiceMic').style.display='none';document.getElementById('kbdBtn').style.display='none'
   document.getElementById('voiceBackBtn').style.display=''
@@ -377,42 +377,73 @@ function backToVoice(){
 function startVoiceRecord(e){
   if(e)e.preventDefault();if(_voicing)return;_voicing=true
   var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel'),inp=document.getElementById('input')
-  btn.classList.add('recording');lb.textContent='请说话...'
+  btn.classList.add('recording');lb.textContent='录音中...'
+  // 通道1: 浏览器语音识别(首选)
+  _voiceWebSpeech=null
   var S=window.SpeechRecognition||window.webkitSpeechRecognition
-  if(!S){lb.textContent='不支持';setTimeout(function(){lb.textContent='按住 说话'},1500);_voicing=false;return}
-  _voiceRec=new S();_voiceRec.lang='zh-CN';_voiceRec.continuous=false;_voiceRec.interimResults=true
-  _voiceRec.onresult=function(r){
-    var t=''
-    for(var i=r.resultIndex;i<r.results.length;i++){
-      t+=r.results[i][0].transcript
-      if(r.results[i].isFinal){inp.value=t;lb.textContent='识别完成'}
-    }
-    if(t)inp.value=t
+  if(S){
+    try{
+      _voiceWebSpeech=new S();_voiceWebSpeech.lang='zh-CN';_voiceWebSpeech.continuous=true;_voiceWebSpeech.interimResults=true
+      _voiceWebSpeech.onresult=function(r){
+        var t=''
+        for(var i=r.resultIndex;i<r.results.length;i++){t+=r.results[i][0].transcript}
+        if(t)inp.value=t
+      }
+      _voiceWebSpeech.onerror=function(){}
+      _voiceWebSpeech.onend=function(){
+        btn.classList.remove('recording')
+        if(!_voicing){lb.textContent='按住 说话';if(inp.value.trim())send();return}
+        // onend静默触发时重启
+        _voiceWebSpeech.start()
+      }
+      _voiceWebSpeech.start()
+    }catch(e){_voiceWebSpeech=null}
   }
-  _voiceRec.onerror=function(err){
-    btn.classList.remove('recording');lb.textContent='错误:'+(err.error||'?')
-    setTimeout(function(){lb.textContent='按住 说话'},2000);_voicing=false
-  }
-  _voiceRec.onend=function(){
-    btn.classList.remove('recording');lb.textContent='按住 说话';_voicing=false
-    if(inp.value.trim())send()
-  }
-  _voiceRec.start();lb.textContent='松开 发送'
+  // 通道2: MediaRecorder录音(备用)
+  _voiceChunks=[];_voiceMediaRec=null
+  try{
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      _voiceStream=stream
+      var mt=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'
+      _voiceMediaRec=new MediaRecorder(stream,{mimeType:mt})
+      _voiceMediaRec.ondataavailable=function(e){if(e.data.size>0)_voiceChunks.push(e.data)}
+      _voiceMediaRec.start()
+      lb.textContent='松开 发送'
+    }).catch(function(){})
+  }catch(e){}
+  lb.textContent='松开 发送'
 }
 function stopVoiceRecord(e){
-  if(e)e.preventDefault()
-  if(!_voicing||!_voiceRec)return
-  var lb=document.getElementById('voiceLabel')
-  try{_voiceRec.stop()}catch(e){}
-  lb.textContent='识别中...'
+  if(e)e.preventDefault();if(!_voicing)return;_voicing=false
+  var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel'),inp=document.getElementById('input')
+  btn.classList.remove('recording')
+  // 停WebSpeech
+  if(_voiceWebSpeech){try{_voiceWebSpeech.stop()}catch(e){};_voiceWebSpeech=null}
+  // 有文字了直接发
+  if(inp.value.trim()){lb.textContent='按住 说话';send();return}
+  // 停MediaRecorder上传服务器
+  if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
+  if(_voiceMediaRec&&_voiceChunks.length>0){
+    _voiceMediaRec.onstop=function(){
+      if(_voiceChunks.length>0){
+        lb.textContent='识别中...'
+        var fd=new FormData();fd.append('file',new Blob(_voiceChunks,{type:'audio/webm'}),'voice.webm');_voiceChunks=[]
+        fetch('/api/v1/speech/recognize',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(j){
+          if(j.success&&j.text){inp.value=j.text;send()}else{lb.textContent='按住 说话'}
+        }).catch(function(){lb.textContent='按住 说话'})
+      }
+    }
+    try{_voiceMediaRec.stop()}catch(e){lb.textContent='按住 说话'}
+  }else{lb.textContent='按住 说话'}
 }
 function cancelVoiceRecord(e){
-  if(e)e.preventDefault()
-  if(!_voicing||!_voiceRec)return
+  if(e)e.preventDefault();if(!_voicing)return;_voicing=false
   var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel')
-  btn.classList.remove('recording');lb.textContent='按住 说话';_voicing=false
-  try{_voiceRec.abort()}catch(e){};_voiceRec=null
-  document.getElementById('input').value=''
+  btn.classList.remove('recording');lb.textContent='按住 说话'
+  if(_voiceWebSpeech){try{_voiceWebSpeech.abort()}catch(e){};_voiceWebSpeech=null}
+  if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
+  if(_voiceMediaRec){try{_voiceMediaRec.stop()}catch(e){}}
+  _voiceChunks=[];document.getElementById('input').value=''
 }
 function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
