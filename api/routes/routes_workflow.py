@@ -1,68 +1,39 @@
-"""AUTO-EVO-AI V0.1 — 工作流 API 路由"""
-from fastapi import APIRouter, HTTPException
+"""AUTO-EVO-AI V0.1 — 全自动工作流路由"""
+import logging
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
 
+logger = logging.getLogger("workflow")
 router = APIRouter(prefix="/api/v1/workflow", tags=["workflow"])
 
-from api.workflow.engine import get_engine
-from api.workflow.executor import tool_executor, create_and_run
-from api.workflow.planner import create_planner_prompt, parse_steps
-from api.workflow.autonomous import get_agent
+try:
+    from modules.workflow_engine import WorkflowEngine
+    _engine = WorkflowEngine()
+except Exception as e:
+    _engine = None
+    logger.warning(f"工作流引擎加载失败: {e}")
 
-engine = get_engine()
-engine._tool_executor = tool_executor
+class RunRequest(BaseModel):
+    workflow: str = ""
+    text: str = ""
+    inputs: dict = {}
 
-class StepDef(BaseModel):
-    id: str = ""
-    tool: str
-    args: dict = {}
-    depends_on: List[str] = []
-    max_retries: int = 2
-    timeout: int = 120
-    label: str = ""
+@router.get("/status")
+def get_status():
+    if _engine: return _engine.get_status()
+    return {"success": False, "error": "未加载"}
 
-class CreateWorkflow(BaseModel):
-    name: str
-    steps: List[StepDef]
-    description: str = ""
-    owner: str = "user"
+@router.get("/list")
+def list_workflows():
+    if _engine: return {"success": True, "workflows": _engine.list_workflows()}
+    return {"success": False}
 
-class RunGoal(BaseModel):
-    goal: str
-    max_steps: int = 10
-    context: str = ""
+@router.post("/run")
+def run_workflow(req: RunRequest):
+    if not _engine: return {"success": False, "error": "未加载"}
+    return _engine.run_workflow(req.workflow, req.inputs)
 
-@router.post("/create")
-async def create(req: CreateWorkflow):
-    steps = [s.model_dump() for s in req.steps]
-    wf = engine.create(req.name, steps, req.description, req.owner)
-    return {"ok": True, "wf_id": wf.wf_id}
-
-@router.post("/{wf_id}/execute")
-async def execute(wf_id: str):
-    return engine.execute(wf_id)
-
-@router.get("/{wf_id}")
-async def get(wf_id: str):
-    wf = engine.get(wf_id)
-    if not wf:
-        raise HTTPException(404)
-    return wf.to_dict()
-
-@router.get("")
-async def list_all(owner: str = ""):
-    ws = engine.list(owner)
-    return {"ok": True, "workflows": [w.to_dict() for w in ws]}
-
-@router.post("/plan")
-async def plan(req: RunGoal):
-    agent = get_agent()
-    result = agent.plan(req.goal, req.context)
-    return result
-
-@router.post("/run-goal")
-async def run_goal(req: RunGoal):
-    agent = get_agent()
-    result = agent.run(req.goal, req.max_steps)
-    return result
+@router.post("/auto")
+def auto_trigger(req: RunRequest):
+    if not _engine: return {"success": False, "error": "未加载"}
+    return _engine.execute("auto", {"text": req.text or req.workflow, "inputs": req.inputs})
