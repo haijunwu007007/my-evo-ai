@@ -22,20 +22,28 @@ from io import BytesIO
 logger = logging.getLogger("ocr_engine")
 
 _ocr_reader = None
+_ocr_loading = False
 
 def _get_reader(languages=None):
-    global _ocr_reader
+    global _ocr_reader, _ocr_loading
     if languages is None:
         languages = ['ch_sim', 'en']
-    if _ocr_reader is None:
+    if _ocr_reader is None and not _ocr_loading:
+        _ocr_loading = True
         try:
             import easyocr
+            logger.info("EasyOCR 加载中（首次需下载模型）...")
             _ocr_reader = easyocr.Reader(languages, gpu=False)
             logger.info(f"EasyOCR 加载成功: languages={languages}")
         except Exception as e:
             logger.error(f"EasyOCR 加载失败: {e}")
+            _ocr_loading = False
             return None
     return _ocr_reader
+
+def is_reader_ready():
+    """检查 OCR 引擎是否已加载（不触发下载）"""
+    return _ocr_reader is not None or _ocr_loading
 
 
 def recognize_image(image_data: str | bytes, languages: list = None) -> dict:
@@ -228,5 +236,17 @@ class OcrEngineManager:
             "engine": "EasyOCR",
             "languages": ["ch_sim", "en"],
         }
+
+def get_status():
+    """Module-level OCR engine status (for routes_ocr import)"""
+    ready = is_reader_ready()
+    return {
+        "success": True,
+        "module": "OCR Engine",
+        "status": "active" if _ocr_reader is not None else ("loading" if _ocr_loading else "ready"),
+        "engine": "EasyOCR",
+        "loaded": _ocr_reader is not None,
+        "languages": ["ch_sim", "en"],
+    }
 
 module_class = OcrEngineManager

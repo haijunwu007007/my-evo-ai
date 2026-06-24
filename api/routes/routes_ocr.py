@@ -12,6 +12,18 @@ logger = logging.getLogger("routes_ocr")
 router = APIRouter(prefix="/api/v1/ocr", tags=["ocr"])
 
 
+@router.get("/status")
+def ocr_status():
+    """OCR 服务状态"""
+    try:
+        from modules.ocr_engine import get_status
+        return get_status()
+    except ImportError:
+        return {"status": "degraded", "engine": "fallback", "available": True}
+    except Exception as e:
+        return {"status": "error", "error": str(e)[:200]}
+
+
 @router.post("/recognize")
 async def ocr_recognize(file: UploadFile = File(...), languages: str = Form("ch_sim,en")):
     """上传图片进行 OCR 识别"""

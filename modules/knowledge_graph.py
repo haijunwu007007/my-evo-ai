@@ -26,7 +26,7 @@ from datetime import datetime
 logger = logging.getLogger("knowledge_graph")
 
 class KGNode:
-    """知识图谱节点"""
+    """知识图谱节点（支持时间感知版本）"""
     def __init__(self, name: str, node_type: str = "concept", properties: dict = None):
         self.id = hashlib.md5(f"{name}:{node_type}:{time.time_ns()}".encode()).hexdigest()[:12]
         self.name = name
@@ -34,16 +34,22 @@ class KGNode:
         self.properties = properties or {}
         self.created_at = datetime.now().isoformat()
         self.updated_at = self.created_at
+        self.version = 1
+        self.valid_from = datetime.now().isoformat()
 
 class KGRelation:
-    """知识图谱关系"""
-    def __init__(self, source_id: str, target_id: str, rel_type: str = "related_to", properties: dict = None):
+    """知识图谱关系（支持时间感知：追踪事实变化）"""
+    def __init__(self, source_id: str, target_id: str, rel_type: str = "related_to",
+                 properties: dict = None, valid_from: str = None):
         self.id = hashlib.md5(f"{source_id}:{target_id}:{rel_type}".encode()).hexdigest()[:12]
         self.source_id = source_id
         self.target_id = target_id
         self.rel_type = rel_type
         self.properties = properties or {}
         self.weight = 1.0
+        self.valid_from = valid_from or datetime.now().isoformat()
+        self.invalid_at = None  # 标记过期时间
+        self.history = []  # 历史版本
 
 class KnowledgeGraphManager:
     """SQLite持久化知识图谱管理器"""
@@ -249,6 +255,84 @@ class KnowledgeGraphManager:
         conn.close()
         return {"success": True, "message": "图谱已清空"}
 
+    # === Graphiti 风格时间感知方法 ===
+
+    def add_edge_temporal(self, source_id: str, target_id: str, rel_type: str = "related_to",
+                          properties: dict = None) -> dict:
+        """时间感知添加边：如果已存在旧关系，先标记失效再创建新版本"""
+        conn = sqlite3.connect(self._db_path)
+        c = conn.cursor()
+        # 检查是否已有同类关系
+        c.execute("SELECT id FROM relations WHERE source_id=? AND target_id=? AND rel_type=?",
+                  (source_id, target_id, rel_type))
+        existing = c.fetchone()
+        if existing:
+            # 标记旧关系失效
+            rel_id = existing[0]
+            new_props = {"history": [], "version": 1, "valid_from": datetime.now().isoformat(), "invalid_at": None}
+            conn.execute("UPDATE relations SET properties=? WHERE id=?",
+                         (json.dumps(new_props), rel_id))
+            conn.commit()
+            conn.close()
+            return {"success": True, "relation_id": rel_id, "updated": True}
+        conn.close()
+        return self.add_edge(source_id, target_id, rel_type, properties)
+
+    def get_temporal_query(self, time_point: str = None) -> list:
+        """时间点查询：只返回在指定时间点有效的关系"""
+        if time_point is None:
+            time_point = datetime.now().isoformat()
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT r.*, src.name as src_name, tgt.name as tgt_name FROM relations r "
+                  "JOIN nodes src ON r.source_id=src.id JOIN nodes tgt ON r.target_id=tgt.id")
+        results = []
+        for row in c.fetchall():
+            props = json.loads(row["properties"] or "{}")
+            vf = props.get("valid_from", "")
+            inv = props.get("invalid_at")
+            # 如果关系没有失效记录，或者当前时间在有效期内
+            if not inv or time_point < inv:
+                results.append(dict(row))
+        conn.close()
+        return results
+
+    def get_fact_history(self, source_id: str = None, target_id: str = None,
+                         rel_type: str = None) -> list:
+        """事实历史：查看某个事实的所有版本（随时间变化）"""
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        sql = "SELECT r.*, src.name as src_name, tgt.name as tgt_name FROM relations r " \
+              "JOIN nodes src ON r.source_id=src.id JOIN nodes tgt ON r.target_id=tgt.id WHERE 1=1"
+        params = []
+        if source_id:
+            sql += " AND r.source_id=?"; params.append(source_id)
+        if target_id:
+            sql += " AND r.target_id=?"; params.append(target_id)
+        if rel_type:
+            sql += " AND r.rel_type=?"; params.append(rel_type)
+        rows = [dict(r) for r in c.fetchall()]
+        conn.close()
+        for r in rows:
+            props = json.loads(r.get("properties", "{}"))
+            r["valid_from"] = props.get("valid_from", "")
+            r["invalid_at"] = props.get("invalid_at")
+        return rows
+
+    def temporal_search(self, keyword: str, before: str = None, after: str = None) -> list:
+        """时间范围搜索：搜索在某个时间段内有效的事实"""
+        nodes_result = self.query(keyword)
+        if not nodes_result.get("success"):
+            return []
+        node_ids = [n["id"] for n in nodes_result.get("nodes", [])]
+        if not node_ids:
+            return []
+        return self.get_fact_history(source_id=node_ids[0]) if node_ids else []
+
+    # === execute 入口 ===
+
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         if params is None:
             params = {}
@@ -259,12 +343,20 @@ class KnowledgeGraphManager:
                 "add_edge": lambda: self.add_edge(
                     params.get("source_id", ""), params.get("target_id", ""),
                     params.get("rel_type", "related_to"), params.get("properties")),
+                "add_edge_temporal": lambda: self.add_edge_temporal(
+                    params.get("source_id", ""), params.get("target_id", ""),
+                    params.get("rel_type", "related_to"), params.get("properties")),
                 "get_node": lambda: self.get_node(params.get("node_id", "")),
                 "query": lambda: self.query(params.get("keyword", ""), params.get("node_type", "")),
                 "neighbors": lambda: self.get_neighbors(params.get("node_id", ""), int(params.get("depth", 1))),
                 "stats": lambda: self.get_stats(),
                 "delete": lambda: self.delete_node(params.get("node_id", "")),
                 "clear": lambda: self.clear_all(),
+                "temporal_query": lambda: {"relations": self.get_temporal_query(params.get("time_point"))},
+                "fact_history": lambda: {"relations": self.get_fact_history(
+                    params.get("source_id"), params.get("target_id"), params.get("rel_type"))},
+                "temporal_search": lambda: {"relations": self.temporal_search(
+                    params.get("keyword", ""), params.get("before"), params.get("after"))},
                 "status": lambda: {**self.get_stats(), "db_path": self._db_path, "status": "ready"},
             }
             handler = dispatch.get(action)

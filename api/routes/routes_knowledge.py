@@ -65,3 +65,26 @@ async def neighbors(req: NeighborReq):
 async def kg_stats():
     if not _kg: return {"success": False, "error": "KG 未加载"}
     return _kg.get_stats()
+
+# === Graphiti 风格时间感知端点 ===
+
+class TemporalEdgeReq(BaseModel):
+    source_id: str; target_id: str; rel_type: str = "related_to"; properties: dict = {}
+
+@router.post("/edge/temporal")
+async def add_edge_temporal(req: TemporalEdgeReq):
+    """时间感知添加关系（自动版本管理）"""
+    if not _kg: return {"success": False, "error": "KG 未加载"}
+    return _kg.add_edge_temporal(req.source_id, req.target_id, req.rel_type, req.properties)
+
+@router.get("/temporal/query")
+async def temporal_query(time_point: str = None):
+    """时间点查询：只返回指定时间有效的关系"""
+    if not _kg: return {"success": False, "error": "KG 未加载"}
+    return {"relations": _kg.get_temporal_query(time_point)}
+
+@router.get("/fact/history")
+async def fact_history(source_id: str = None, target_id: str = None, rel_type: str = None):
+    """查看事实的历史版本"""
+    if not _kg: return {"success": False, "error": "KG 未加载"}
+    return {"relations": _kg.get_fact_history(source_id, target_id, rel_type)}
