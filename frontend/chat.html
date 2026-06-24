@@ -356,8 +356,8 @@ function showDashboard(){window.location.href='/dashboard'}
 function showEnterprise(){window.location.href='/enterprise.html'}
 function showVirtualCompany(){window.location.href='/company.html'}
 function openHub(){window.location.href='/hub'}
-// 语音 - 微信风格：按住说话，松开发送
-var _voiceRec=null,_voicing=false,_voiceStream=null,_voiceChunks=[];
+// 语音 - 浏览器原生语音识别（离线可用，不依赖服务器）
+var _voiceRec=null,_voicing=false;
 function switchToText(){
   document.getElementById('voiceMic').style.display='none';document.getElementById('kbdBtn').style.display='none'
   document.getElementById('voiceBackBtn').style.display=''
@@ -371,42 +371,41 @@ function backToVoice(){
 function startVoiceRecord(e){
   if(e)e.preventDefault();if(_voicing)return;_voicing=true
   var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel'),inp=document.getElementById('input')
-  btn.classList.add('recording');lb.textContent='录音中...'
-  try{
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-      _voiceStream=stream
-      var mt=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'
-      var mr=new MediaRecorder(stream,{mimeType:mt});_voiceRec=mr;_voiceChunks=[]
-      lb.textContent='松开 发送'
-      mr.ondataavailable=function(e){if(e.data.size>0)_voiceChunks.push(e.data)}
-      mr.start()
-    }).catch(function(){
-      btn.classList.remove('recording');lb.textContent='无权限';_voicing=false
-      setTimeout(function(){lb.textContent='按住 说话'},1200)
-    })
-  }catch(err){btn.classList.remove('recording');lb.textContent='错误';_voicing=false;setTimeout(function(){lb.textContent='按住 说话'},1200)}
+  btn.classList.add('recording');lb.textContent='请说话...'
+  var S=window.SpeechRecognition||window.webkitSpeechRecognition
+  if(!S){lb.textContent='不支持';setTimeout(function(){lb.textContent='按住 说话'},1500);_voicing=false;return}
+  _voiceRec=new S();_voiceRec.lang='zh-CN';_voiceRec.continuous=false;_voiceRec.interimResults=true
+  _voiceRec.onresult=function(r){
+    var t=''
+    for(var i=r.resultIndex;i<r.results.length;i++){
+      t+=r.results[i][0].transcript
+      if(r.results[i].isFinal){inp.value=t;lb.textContent='识别完成'}
+    }
+    if(t)inp.value=t
+  }
+  _voiceRec.onerror=function(err){
+    btn.classList.remove('recording');lb.textContent='错误:'+(err.error||'?')
+    setTimeout(function(){lb.textContent='按住 说话'},2000);_voicing=false
+  }
+  _voiceRec.onend=function(){
+    btn.classList.remove('recording');lb.textContent='按住 说话';_voicing=false
+    if(inp.value.trim())send()
+  }
+  _voiceRec.start();lb.textContent='松开 发送'
 }
 function stopVoiceRecord(e){
-  if(e)e.preventDefault();if(!_voicing)return;_voicing=false
-  var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel'),inp=document.getElementById('input')
-  if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
-  if(!_voiceRec||!_voiceChunks||_voiceChunks.length===0){btn.classList.remove('recording');lb.textContent='按住 说话';return}
+  if(e)e.preventDefault()
+  if(!_voicing||!_voiceRec)return
+  var lb=document.getElementById('voiceLabel')
   try{_voiceRec.stop()}catch(e){}
   lb.textContent='识别中...'
-  var blob=new Blob(_voiceChunks,{type:'audio/webm'});_voiceChunks=[]
-  var fd=new FormData();fd.append('file',blob,'voice.webm')
-  fetch('/api/v1/speech/recognize',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(json){
-    btn.classList.remove('recording');lb.textContent='按住 说话'
-    if(json.success&&json.text){inp.value=json.text;send()}
-    else{lb.textContent='失败';setTimeout(function(){lb.textContent='按住 说话'},1200)}
-  }).catch(function(){btn.classList.remove('recording');lb.textContent='失败';setTimeout(function(){lb.textContent='按住 说话'},1200)})
 }
 function cancelVoiceRecord(e){
-  if(e)e.preventDefault();if(!_voicing)return;_voicing=false
+  if(e)e.preventDefault()
+  if(!_voicing||!_voiceRec)return
   var btn=document.getElementById('voiceMic'),lb=document.getElementById('voiceLabel')
-  btn.classList.remove('recording');lb.textContent='按住 说话'
-  if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
-  if(_voiceRec){try{_voiceRec.abort()}catch(e){};try{_voiceRec.stop()}catch(e){};_voiceRec=null}
+  btn.classList.remove('recording');lb.textContent='按住 说话';_voicing=false
+  try{_voiceRec.abort()}catch(e){};_voiceRec=null
   document.getElementById('input').value=''
 }
 function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
