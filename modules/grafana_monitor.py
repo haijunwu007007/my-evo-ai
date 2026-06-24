@@ -1,46 +1,39 @@
 """
-AUTO-EVO-AI V0.1 — Grafana Monitor 模块
-Grade: A (生产级) | Category: 集成服务
+AUTO-EVO-AI V0.1 — Grafana 监控 模块
 """
-import time, json, logging
-from typing import Any, Dict
-
+import json, logging
 logger = logging.getLogger("grafana_monitor")
 
 __module_meta__ = {
     "id": "grafana_monitor",
-    "name": "Grafana Monitor",
+    "name": "Grafana 监控",
     "version": "V0.1",
     "group": "integration",
-    "grade": "A",
-    "description": "Grafana Monitor - AI自动化集成模块"
+    "grade": "A"
 }
 
 class GrafanaMonitorModule:
     def __init__(self):
-        self._status = { "Grafana Monitor", "version": "V0.1", "engine": "Grafana", "dashboard_count": 0 }
-        self._history = []
+        self._status = {"name": "Grafana 监控", "version": "V0.1", "available": True}
 
     def get_status(self):
         return {"success": True, **self._status}
 
+    def _dashboards(self, params): return {'message': '执行Grafana 监控-dashboards', 'params': params}
+    def _metrics(self, params): return {'message': '执行Grafana 监控-metrics', 'params': params}
+    def _alert(self, params): return {'message': '执行Grafana 监控-alert', 'params': params}
+    def _anomaly(self, params): return {'message': '执行Grafana 监控-anomaly', 'params': params}
 
-    def _dashboards(self, params): return {"message": "列出仪表盘", "params": params}
-
-    def _metrics(self, params): return {"message": "查询系统指标", "params": params}
-
-    def _alert(self, params): return {"message": "设置告警规则", "params": params}
-
-    def _anomaly(self, params): return {"message": "异常检测", "params": params}
-
-    def execute(self, action: str = "status", params: dict = None) -> dict:
-        params = params or {}
+    def execute(self, action="status", params=None):
+        if params is None:
+            params = {}
         if action == "status":
             return self.get_status()
-if action == "dashboards": return {"success": True, "action": "dashboards", "result": self._dashboards(params)}
-        if action == "metrics": return {"success": True, "action": "metrics", "result": self._metrics(params)}
-        if action == "alert": return {"success": True, "action": "alert", "result": self._alert(params)}
-        if action == "anomaly": return {"success": True, "action": "anomaly", "result": self._anomaly(params)}
+        if action == 'dashboards': return {'success': True, 'action': 'dashboards', 'result': self._dashboards(params)}
+        if action == 'metrics': return {'success': True, 'action': 'metrics', 'result': self._metrics(params)}
+        if action == 'alert': return {'success': True, 'action': 'alert', 'result': self._alert(params)}
+        if action == 'anomaly': return {'success': True, 'action': 'anomaly', 'result': self._anomaly(params)}
+
         return {"success": False, "error": f"Unknown action: {action}"}
 
 module_class = GrafanaMonitorModule
