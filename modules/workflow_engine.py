@@ -1,11 +1,32 @@
-"""AUTO-EVO-AI V0.1 — 全自动工作流引擎：一键串联所有模块"""
-import json, time, logging
+"""AUTO-EVO-AI V0.1 — 全自动工作流引擎：一键串联所有模块（持久化版）"""
+import json, time, logging, os
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("workflow_engine")
 
+WF_FILE = "data/workflows.json"
+
+def _load():
+    if not os.path.exists(WF_FILE): return {}
+    try: return json.load(open(WF_FILE, 'r'))
+    except: return {}
+
+def _save(wfs):
+    os.makedirs(os.path.dirname(WF_FILE), exist_ok=True)
+    json.dump(wfs, open(WF_FILE, 'w'), ensure_ascii=False, indent=2)
+
+def get_workflows():
+    return _load()
+
+def save_workflow(wf):
+    wfs = _load()
+    wfs[wf["trigger"]] = wf
+    _save(wfs)
+
 # ========== 工作流定义 ==========
-WORKFLOWS = {}
+WORKFLOWS = _load()
+if not WORKFLOWS:
+    pass  # 默认工作流由初始化逻辑填充
 
 # 1. 文档处理全自动
 WORKFLOWS["doc_auto"] = {
@@ -138,6 +159,28 @@ class WorkflowEngine:
         if not wf:
             wf = next((w for w in WORKFLOWS.values() if w["trigger"] == wf_id), None)
         return wf
+
+    def create_workflow(self, wf_id: str, name: str, trigger: str, steps: list, desc: str = ""):
+        wf = {
+            "id": f"workflow-{wf_id}",
+            "name": name,
+            "description": desc,
+            "trigger": trigger or wf_id,
+            "steps": steps or [],
+        }
+        WORKFLOWS[trigger or wf_id] = wf
+        _save(WORKFLOWS)
+        logger.info(f"工作流已保存: {name}")
+        return {"success": True, "workflow": wf}
+
+    def delete_workflow(self, wf_id: str):
+        wf = self.get_workflow(wf_id)
+        if not wf: return {"success": False, "error": "未找到"}
+        trigger = wf.get("trigger") or wf_id
+        if trigger in WORKFLOWS: del WORKFLOWS[trigger]
+        _save(WORKFLOWS)
+        logger.info(f"工作流已删除: {wf['name']}")
+        return {"success": True, "deleted": wf_id}
 
     def execute_module(self, module: str, action: str, params: dict = None) -> dict:
         """调用模块执行步骤"""

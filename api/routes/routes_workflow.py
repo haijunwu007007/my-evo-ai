@@ -1,7 +1,8 @@
-"""AUTO-EVO-AI V0.1 — 全自动工作流路由"""
+"""AUTO-EVO-AI V0.1 — 全自动工作流路由（持久化版）"""
 import logging
 from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import Optional
 
 logger = logging.getLogger("workflow")
 router = APIRouter(prefix="/api/v1/workflow", tags=["workflow"])
@@ -17,6 +18,13 @@ class RunRequest(BaseModel):
     workflow: str = ""
     text: str = ""
     inputs: dict = {}
+
+class SaveRequest(BaseModel):
+    id: str = ""
+    name: str = ""
+    trigger: str = ""
+    steps: list = []
+    desc: str = ""
 
 @router.get("/status")
 def get_status():
@@ -37,3 +45,21 @@ def run_workflow(req: RunRequest):
 def auto_trigger(req: RunRequest):
     if not _engine: return {"success": False, "error": "未加载"}
     return _engine.execute("auto", {"text": req.text or req.workflow, "inputs": req.inputs})
+
+# ========== 持久化操作 ==========
+@router.post("/create")
+def create_workflow(req: SaveRequest):
+    if not _engine: return {"success": False, "error": "未加载"}
+    return _engine.create_workflow(req.id, req.name, req.trigger, req.steps, req.desc)
+
+@router.post("/delete")
+def delete_workflow(req: RunRequest):
+    if not _engine: return {"success": False, "error": "未加载"}
+    return _engine.delete_workflow(req.workflow)
+
+@router.get("/get/{wf_id}")
+def get_workflow(wf_id: str):
+    if not _engine: return {"success": False, "error": "未加载"}
+    wf = _engine.get_workflow(wf_id)
+    if wf: return {"success": True, "workflow": wf}
+    return {"success": False, "error": "未找到"}
