@@ -328,10 +328,7 @@ function quickTool(el, name){
   inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}
 }
 function needsTool(msg){var l=msg.toLowerCase();for(var i=0;i<_TOOL_KEYWORDS.length;i++){if(l.indexOf(_TOOL_KEYWORDS[i].toLowerCase())>=0)return true}return false}
-  "n8n_search":"帮我搜索n8n工作流（2077个模板库）：",
-  "n8n_email":"帮我找一个邮件自动化的n8n工作流：",  
-  "n8n_ai":"帮我找一个AI相关的n8n工作流：",
-  "n8n_trigger":"帮我触发这个n8n工作流（输入ID）：",
+
 
 var API='/api/v1';var CHAT=[];try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array.isArray(_tmp))CHAT=_tmp}catch(e){CHAT=[]};var CTX=[]
 
