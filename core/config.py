@@ -1,3 +1,10 @@
+import os
+# Config — 统一配置入口
+EVO_HOME = os.getenv('EVO_HOME', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EVO_PORT = int(os.getenv('EVO_PORT', '8765'))
+EVO_HOST = os.getenv('EVO_HOST', '0.0.0.0')
+DEBUG = os.getenv('EVO_DEBUG', '0') == '1'
+
 """系统配置 — 集中管理硬编码值"""
 import os
 
