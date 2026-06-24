@@ -1,4 +1,4 @@
-c = open('D:/AUTO-EVO-AI-V0.1/frontend/chat.html', encoding='utf-8').read()
+c = open('./frontend/chat.html', encoding='utf-8').read()
 
 # Find the tools section - between tabs and input area
 ti = c.index('<!-- 文档/办公 -->')
@@ -29,5 +29,5 @@ for l in lines:
         # Simple approach: replace the exact string
         pass
 
-open('D:/AUTO-EVO-AI-V0.1/frontend/chat.html', 'w', encoding='utf-8').write(c)
+open('./frontend/chat.html', 'w', encoding='utf-8').write(c)
 print('done')

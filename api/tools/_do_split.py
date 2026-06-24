@@ -1,8 +1,8 @@
 """Split agent_tools.py into api/tools submodules"""
 import re, os
 
-SRC = r"D:\AUTO-EVO-AI-V0.1\api\agent_tools.py"
-DST = r"D:\AUTO-EVO-AI-V0.1\api\tools"
+SRC = r"./api\agent_tools.py"
+DST = r"./api\tools"
 
 with open(SRC, encoding="utf-8") as f:
     text = f.read()

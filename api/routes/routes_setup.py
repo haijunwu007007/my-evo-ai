@@ -13,7 +13,7 @@ logger = get_logger("evo.api.setup")
 router = APIRouter()
 
 # 配置文件存放位置
-_EVO_DATA = Path(os.environ.get("EVO_DATA_DIR", "D:/AUTO-EVO-AI-V0.1/.evo_data"))
+_EVO_DATA = Path(os.environ.get("EVO_DATA_DIR", "./.evo_data"))
 _SETUP_FLAG = _EVO_DATA / "setup_complete.flag"
 _USERS_FILE = _EVO_DATA / "users.json"
 
@@ -74,7 +74,7 @@ async def setup_complete(req: SetupRequest):
         json.dump(users, f, indent=2, ensure_ascii=False)
 
     # 2. 保存 API Key 到环境变量 / .env
-    env_path = Path("D:/AUTO-EVO-AI-V0.1/.env")
+    env_path = Path("./.env")
     env_lines = []
     if env_path.exists():
         env_lines = env_path.read_text(encoding="utf-8").splitlines()

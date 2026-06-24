@@ -151,7 +151,7 @@ async def app_dashboard_route():
 
 @router.get("/enterprise.html")
 async def enterprise_page():
-    """企业管理 — v6.39完整模块管理器"""
+    """企业管理 — V0.1完整模块管理器"""
     html_path = BASE_DIR / "frontend" / "enterprise.html"
     if html_path.exists():
         return FileResponse(str(html_path))

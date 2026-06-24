@@ -1,6 +1,6 @@
 import shutil, os
 
-root = r'D:\AUTO-EVO-AI-V0.1\frontend'
+root = r'./frontend'
 
 # ===== FIX 1: index.html - remove broken refs =====
 print('SKIP index.html (root stub, not served)')

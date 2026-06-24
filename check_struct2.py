@@ -1,4 +1,4 @@
-c = open('D:/AUTO-EVO-AI-V0.1/frontend/chat.html', encoding='utf-8').read()
+c = open('./frontend/chat.html', encoding='utf-8').read()
 i1 = c.index('quick-actions')
 i2 = c.index('input-area', i1)
 block = c[i1:i2]

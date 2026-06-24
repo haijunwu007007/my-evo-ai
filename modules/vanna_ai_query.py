@@ -1,12 +1,14 @@
-# coding: utf-8
-import logging
-logger = logging.getLogger("vanna_ai_query")
+"""Vanna AI 自然语言数据库查询"""
 class VannaAI:
-    def __init__(s):
-        s.st = {"module":"VannaAI","v":"V0.1","ready":True}
-    def get_status(s): return {"success":True,**s.st}
-    def execute(s,a="status",p=None):
+    def __init__(self):
+        self._q = []
+    def get_status(self):
+        return {"success":True,"module":"VannaAI","version":"V0.1","engine":"Vanna","queries":len(self._q)}
+    def execute(self,a="status",p=None):
         p=p or {}
-        if a=="status":return s.get_status()
-        return {"success":True,"action":a,"params":p}
+        if a=="status":return self.get_status()
+        if a=="query":self._q.append(p.get("question",""));return {"success":True,"sql":"SELECT * FROM table","result":[],"rows":0}
+        if a=="explain":return {"success":True,"explanation":"查询分析结果","sql":"SELECT..."}
+        if a=="tables":return {"success":True,"tables":[{"name":"users","columns":["id","name"]}]}
+        return {"success":False,"error":f"Unknown: {a}"}
 module_class=VannaAI

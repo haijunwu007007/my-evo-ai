@@ -79,7 +79,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .tools-section{padding:0}
 .cat-body{display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;animation:catSlideIn .2s ease-out;margin-bottom:8px}
 @keyframes catSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.tool-chip{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:6px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tool-chip.clicked{background:var(--accent)!important;color:#fff!important;transform:scale(.95);transition:all .1s}.tool-chip{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:6px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
 .tool-chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(67,97,238,.05)}
 .tool-chip:active{transform:scale(.96)}
 /* 右侧面板内容 */
@@ -322,6 +322,7 @@ function removeAttach(idx){attachFiles.splice(idx,1);renderAttachBar()}
 function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,18)+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
 function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=[];for(var i=0;i<attachFiles.length;i++)a.push(attachFiles[i].name);return'[已上传文件: '+a.join(', ')+']'}
 function quickTool(el, name){
+  el.classList.add('clicked');setTimeout(function(){el.classList.remove('clicked')},300)
   var inp=document.getElementById('input')
   inp.value=el.textContent.trim()+': ';inp.focus()
   var isEnter=function(e){if(e.key==='Enter')send()}

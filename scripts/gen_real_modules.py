@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """生成21个真实业务逻辑模块"""
 import os, json, time, hashlib
-BASE = 'D:/AUTO-EVO-AI-V0.1/modules'
+BASE = './modules'
 STUB = os.path.join(BASE, '_archive_stub')
 OUT = os.path.join(BASE, '_real')
 

@@ -1,8 +1,15 @@
+
+import hashlib
+def _check_auth(req):
+    """简单API Key认证"""
+    key = req.headers.get("X-API-Key", "") or req.query_params.get("api_key", "")
+    expected = os.environ.get("MCP_GATEWAY_KEY", "evo-mcp-default")
+    return key == expected
 """
 万能MCP聚合网关 — 连接 Smithery / MCP.so / Glama 三大MCP市场
 支持一键搜索、安装、执行外部MCP服务器
 """
-import os, json, logging, subprocess, tempfile, urllib.request
+import os,hashlib, json, logging, subprocess, tempfile, urllib.request
 from fastapi import APIRouter
 from pydantic import BaseModel
 

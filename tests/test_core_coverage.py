@@ -162,7 +162,7 @@ class TestModulesLoader:
     def test_scan(self):
         from core.modules_loader import scan_modules
         try:
-            found = scan_modules("D:/AUTO-EVO-AI-V0.1/modules") if callable(scan_modules) else []
+            found = scan_modules("./modules") if callable(scan_modules) else []
             assert isinstance(found, list) or True
         except Exception:
             pass

@@ -175,7 +175,7 @@ def _scan_external_skills():
         if ws_path.exists():
             ext_dirs.append(ws_path)
         # 尝试 D 盘项目
-        d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
+        d_ws = Path("./.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
     except Exception:
@@ -427,7 +427,7 @@ async def import_skill_from_workbuddy(name: str):
         ws = Path.cwd() / ".workbuddy" / "skills"
         if ws.exists():
             ext_dirs.append(ws)
-        d_ws = Path("D:/AUTO-EVO-AI-V0.1/.workbuddy/skills")
+        d_ws = Path("./.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
     except Exception:

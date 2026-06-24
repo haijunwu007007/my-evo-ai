@@ -128,7 +128,7 @@ def execute(self):
 `core/event_engine.py` 的 `FileWatcher._poll_loop` 需要改为 `async def`。这是当前唯一一个 import 失败的核心引擎。
 
 ### P3: 版本号余孽
-虽然 v6.39 → V0.1 已统一，但：
+虽然 V0.1 → V0.1 已统一，但：
 - `coordinator_data()` 中输出 `"coordinator_version": "3.0.0"` 不统一
 - 部分 docstring 仍有旧版本号残余
 
