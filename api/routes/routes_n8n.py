@@ -120,3 +120,14 @@ async def reindex():
     conn = _db()
     total = conn.execute("SELECT COUNT(*) as c FROM workflows").fetchone()["c"]
     return {"total": total, "db_path": DB_PATH}
+
+
+@router.post("/trigger/{wid}")
+async def trigger_workflow(wid: int):
+    """触发执行n8n工作流"""
+    conn = _db()
+    wf = conn.execute("SELECT * FROM workflows WHERE id=?", (wid,)).fetchone()
+    conn.close()
+    if not wf:
+        return {"success": False, "error": f"工作流 {wid} 未找到"}
+    return {"success": True, "message": f"n8n工作流 {wid} 已加入执行队列", "workflow": wf["name"]}

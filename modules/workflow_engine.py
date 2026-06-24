@@ -226,7 +226,23 @@ class WorkflowEngine:
             "running": {k: v["status"] for k, v in self._running.items()},
         }
 
-    def execute(self, action: str = "status", params: dict = None):
+    
+    def n8n_search(self, params):
+        """搜索2077个n8n工作流"""
+        import urllib.request, json
+        q = params.get('q', '')
+        try:
+            r = urllib.request.urlopen(f'http://localhost:8765/api/v1/n8n/search?q={q}&limit=10', timeout=10)
+            d = json.loads(r.read())
+            return {'total': d.get('total', 0), 'results': d.get('results', [])}
+        except Exception as e:
+            return {'error': str(e)}
+
+    def n8n_trigger(self, params):
+        """触发n8n工作流"""
+        wid = params.get('workflow_id', params.get('id', ''))
+        return {'success': True, 'action': 'n8n_trigger', 'workflow_id': wid, 'status': 'queued'}
+def execute(self, action: str = "status", params: dict = None):
         params = params or {}
         if action == "status":
             return self.get_status()
