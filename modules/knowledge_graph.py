@@ -1,650 +1,278 @@
 """
-AUTO-EVO-AI V0.1 — 生命周期策略模块
-Grade: A (生产级) | Category: 核心基础
-职责：管理模块/服务的完整生命周期，包括启动、健康检查、优雅关闭、依赖管理
+AUTO-EVO-AI V0.1 — 知识图谱持久化引擎
+Grade: A (生产级) | Category: 数据处理
+职责：SQLite持久化知识图谱 — 节点/边CRUD、关系查询、向量搜索、图遍历
 """
 
 __module_meta__ = {
-        "id": "knowledge-graph",
-        "name": "Knowledge Graph",
-        "version": "V0.1",
-        "group": "search",
-        "inputs": [
-            {
-                "name": "component_id",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "name",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "priority",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "dependencies",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "component_id_2",
-                "type": "string",
-                "required": True,
-                "description": ""
-            },
-            {
-                "name": "min_size",
-                "type": "string",
-                "required": True,
-                "description": ""
-            }
-        ],
-        "outputs": [
-            {
-                "name": "result",
-                "type": "dict",
-                "description": "执行结果"
-            },
-            {
-                "name": "result_2",
-                "type": "dict",
-                "description": "执行结果"
-            },
-            {
-                "name": "success",
-                "type": "bool",
-                "description": "是否成功"
-            }
-        ],
-        "triggers": [],
-        "depends_on": [],
-        "tags": [
-            "knowledge",
-            "manager"
-        ],
-        "grade": "B",
-        "description": "AUTO-EVO-AI V0.1 — 生命周期策略模块 Grade: A (生产级) | Category: 核心基础"
-    }
+    "id": "knowledge-graph",
+    "name": "Knowledge Graph",
+    "version": "V0.1",
+    "group": "developer",
+    "description": "SQLite持久化知识图谱 — 存储、查询、遍历知识节点与关系",
+    "grade": "A",
+}
 
 import os
-import asyncio
+import json
 import time
+import sqlite3
 import logging
-from typing import Any, Dict, List, Optional
+import hashlib
+from typing import Any, Optional
+from collections import defaultdict
 from datetime import datetime
-from enum import Enum
-from dataclasses import dataclass, field
 
-try:
-    from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from modules._base.tracing import trace_operation
-    from modules._base.metrics import MetricsCollector, metrics_collector
-    from modules._base.audit import AuditLogger
-except ImportError:
-    import sys
-
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from _base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
-    from _base.tracing import trace_operation
-    from _base.metrics import metrics_collector
-    from _base.audit import AuditLogger
 logger = logging.getLogger("knowledge_graph")
 
-class LifecycleState(Enum):
-    """生命周期状态"""
+class KGNode:
+    """知识图谱节点"""
+    def __init__(self, name: str, node_type: str = "concept", properties: dict = None):
+        self.id = hashlib.md5(f"{name}:{node_type}:{time.time_ns()}".encode()).hexdigest()[:12]
+        self.name = name
+        self.node_type = node_type
+        self.properties = properties or {}
+        self.created_at = datetime.now().isoformat()
+        self.updated_at = self.created_at
 
-    INITIALIZING = "initializing"
-    RUNNING = "running"
-    DEGRADED = "degraded"
-    STOPPING = "stopping"
-    STOPPED = "stopped"
-    FAILED = "failed"
+class KGRelation:
+    """知识图谱关系"""
+    def __init__(self, source_id: str, target_id: str, rel_type: str = "related_to", properties: dict = None):
+        self.id = hashlib.md5(f"{source_id}:{target_id}:{rel_type}".encode()).hexdigest()[:12]
+        self.source_id = source_id
+        self.target_id = target_id
+        self.rel_type = rel_type
+        self.properties = properties or {}
+        self.weight = 1.0
 
-class ShutdownPriority(Enum):
-    """关闭优先级"""
+class KnowledgeGraphManager:
+    """SQLite持久化知识图谱管理器"""
 
-    CRITICAL = 0  # 最先关闭：存储、数据库
-    HIGH = 1  # 高优先级：消息队列、缓存
-    NORMAL = 2  # 普通：业务模块
-    LOW = 3  # 低优先级：监控、日志
-    OPTIONAL = 4  # 最后关闭：清理任务
+    def __init__(self, db_path: Optional[str] = None):
+        if db_path is None:
+            db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'knowledge.db')
+        self._db_path = db_path
+        os.makedirs(os.path.dirname(self._db_path), exist_ok=True)
+        self._init_db()
+        self._cache = {}
 
-@dataclass
-class ManagedComponent:
-    """被管理的组件"""
-
-    component_id: str
-    name: str
-    state: LifecycleState = LifecycleState.INITIALIZING
-    priority: ShutdownPriority = ShutdownPriority.NORMAL
-    dependencies: list[str] = field(default_factory=list)
-    health_check_interval: int = 30
-    last_health_check: float = field(default_factory=time.time)
-    failure_count: int = 0
-    max_failures: int = 3
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-@dataclass
-class KnowledgeGraph:
-    """生命周期策略定义"""
-
-    policy_id: str
-    name: str
-    description: str = ""
-    # 启动策略
-    startup_order: list[str] = field(default_factory=list)
-    startup_timeout: int = 60
-    startup_retry_count: int = 3
-    # 健康检查策略
-    health_check_enabled: bool = True
-    health_check_interval: int = 30
-    health_check_timeout: int = 5
-    # 关闭策略
-    shutdown_timeout: int = 30
-    shutdown_force_timeout: int = 10
-    graceful_shutdown: bool = True
-    # 依赖策略
-    dependency_timeout: int = 30
-    fail_on_missing_dependency: bool = True
-
-class KnowledgeGraphManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
-    """生命周期策略管理器 - 生产级实现"""
-
-    def __init__(self):
-
-        super().__init__()
-        self._components: dict[str, ManagedComponent] = {}
-        self._policies: dict[str, KnowledgeGraph] = {}
-        self._state = LifecycleState.INITIALIZING
-        self._startup_time: float | None = None
-        self._shutdown_start_time: float | None = None
-        self._audit = AuditLogger()
-        self._metrics = metrics_collector
-
-    @trace_operation("lifecycle.initialize")
-    def initialize(self) -> dict[str, Any]:
-        """初始化"""
-        try:
-            pass
-            # 加载默认策略
-            self._load_default_policies()
-
-            # 注册核心组件
-            self._register_core_components()
-
-            self._state = LifecycleState.RUNNING
-            self._startup_time = time.time()
-
-            self._audit.log(
-                "lifecycle_initialized",
-                {
-                    "components": len(self._components),
-                    "policies": len(self._policies),
-                    "startup_time": self._startup_time,
-                },
+    def _init_db(self):
+        conn = sqlite3.connect(self._db_path)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS nodes (
+                id TEXT PRIMARY KEY, name TEXT, node_type TEXT,
+                properties TEXT, created_at TEXT, updated_at TEXT
             )
-
-            self.record_metric("lifecycle_initialized_total", 1)
-            logger.info(f"生命周期管理器初始化完成，注册组件: {len(self._components)}")
-            return {"success": True}
-
-        except Exception as e:
-            self._state = LifecycleState.FAILED
-            logger.error(f"生命周期管理器初始化失败: {e}")
-            self.record_metric("lifecycle_initialization_errors_total", 1)
-            return {"success": False, "error": str(e)}
-
-    def _load_default_policies(self):
-        """加载默认生命周期策略"""
-        # 核心服务策略
-        core_policy = KnowledgeGraph(
-            policy_id="policy-core-services",
-            name="核心服务策略",
-            description="数据库、缓存、消息队列等核心服务",
-            startup_order=["database", "cache", "message_queue"],
-            startup_timeout=120,
-            shutdown_timeout=60,
-        )
-        self._policies["policy-core-services"] = core_policy
-
-        # 业务模块策略
-        biz_policy = KnowledgeGraph(
-            policy_id="policy-business-modules",
-            name="业务模块策略",
-            description="业务功能模块的生命周期管理",
-            startup_order=["api", "worker", "scheduler"],
-            startup_timeout=60,
-            shutdown_timeout=30,
-        )
-        self._policies["policy-business-modules"] = biz_policy
-
-        # 监控日志策略
-        monitor_policy = KnowledgeGraph(
-            policy_id="policy-monitoring",
-            name="监控日志策略",
-            description="监控、日志、审计等辅助服务",
-            graceful_shutdown=True,
-            shutdown_timeout=15,
-        )
-        self._policies["policy-monitoring"] = monitor_policy
-
-    def _register_core_components(self):
-        """注册核心组件"""
-        components_to_register = [
-            ("database", "数据库", ShutdownPriority.CRITICAL),
-            ("cache", "缓存", ShutdownPriority.HIGH),
-            ("message_queue", "消息队列", ShutdownPriority.HIGH),
-            ("api_server", "API服务器", ShutdownPriority.NORMAL),
-            ("worker", "工作进程", ShutdownPriority.NORMAL),
-            ("scheduler", "调度器", ShutdownPriority.NORMAL),
-            ("monitor", "监控服务", ShutdownPriority.LOW),
-            ("audit", "审计服务", ShutdownPriority.LOW),
-        ]
-
-        for comp_id, name, priority in components_to_register:
-            self._components[comp_id] = ManagedComponent(
-                component_id=comp_id, name=name, state=LifecycleState.INITIALIZING, priority=priority
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS relations (
+                id TEXT PRIMARY KEY, source_id TEXT, target_id TEXT,
+                rel_type TEXT, properties TEXT, weight REAL DEFAULT 1.0
             )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_nodes_type ON nodes(node_type)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes(name)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_relations_src ON relations(source_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_relations_tgt ON relations(target_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_relations_type ON relations(rel_type)")
+        conn.commit()
+        conn.close()
 
-    @trace_operation("lifecycle.health_check")
-    def health_check(self) -> dict[str, Any]:
-        """健康检查"""
-        failed_components = []
-        degraded_components = []
+    def add_node(self, name: str, node_type: str = "concept", properties: dict = None) -> dict:
+        """添加节点"""
+        node = KGNode(name, node_type, properties)
+        conn = sqlite3.connect(self._db_path)
+        conn.execute(
+            "INSERT OR REPLACE INTO nodes VALUES (?,?,?,?,?,?)",
+            (node.id, node.name, node_type, json.dumps(properties or {}, ensure_ascii=False),
+             node.created_at, node.updated_at))
+        conn.commit()
+        conn.close()
+        return {"success": True, "node_id": node.id, "name": node.name}
 
-        for comp_id, comp in self._components.items():
-            # 检查组件健康状态
-            if comp.state == LifecycleState.FAILED:
-                failed_components.append(comp_id)
-            elif comp.failure_count > 0:
-                degraded_components.append(comp_id)
+    def add_edge(self, source_id: str, target_id: str, rel_type: str = "related_to", properties: dict = None) -> dict:
+        """添加关系边"""
+        if not self._node_exists(source_id):
+            return {"success": False, "error": f"源节点 {source_id} 不存在"}
+        if not self._node_exists(target_id):
+            return {"success": False, "error": f"目标节点 {target_id} 不存在"}
+        rel = KGRelation(source_id, target_id, rel_type, properties)
+        conn = sqlite3.connect(self._db_path)
+        conn.execute(
+            "INSERT OR REPLACE INTO relations VALUES (?,?,?,?,?,?)",
+            (rel.id, source_id, target_id, rel_type, json.dumps(properties or {}, ensure_ascii=False), rel.weight))
+        conn.commit()
+        conn.close()
+        return {"success": True, "relation_id": rel.id}
 
-            # 更新健康检查时间
-            comp.last_health_check = time.time()
+    def _node_exists(self, node_id: str) -> bool:
+        conn = sqlite3.connect(self._db_path)
+        c = conn.execute("SELECT 1 FROM nodes WHERE id = ?", (node_id,))
+        exists = c.fetchone() is not None
+        conn.close()
+        return exists
 
-        overall_status = "ok"
-        if failed_components:
-            overall_status = "error"
-        elif degraded_components:
-            overall_status = "degraded"
+    def get_node(self, node_id: str) -> dict:
+        """获取节点详情"""
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.execute("SELECT * FROM nodes WHERE id = ?", (node_id,))
+        row = c.fetchone()
+        conn.close()
+        if not row:
+            return {"success": False, "error": "节点不存在"}
+        d = dict(row)
+        d["properties"] = json.loads(d.get("properties", "{}"))
+        d["success"] = True
+        return d
 
-        return {
-            "healthy": overall_status == "ok",
-            "status": overall_status,
-            "module_id": "knowledge_graph",
-            "state": self._state.value,
-            "uptime_seconds": time.time() - (self._startup_time or time.time()),
-            "components": {
-                "total": len(self._components),
-                "running": sum(1 for c in self._components.values() if c.state == LifecycleState.RUNNING),
-                "failed": len(failed_components),
-                "degraded": len(degraded_components),
-            },
-            "policies": len(self._policies),
-            "failed_components": failed_components,
-            "degraded_components": degraded_components,
-            "last_check": datetime.now().isoformat(),
-        }
+    def query(self, keyword: str = "", node_type: str = "", limit: int = 50) -> dict:
+        """搜索节点"""
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        params = []
 
-    @trace_operation("lifecycle.shutdown")
-    async def shutdown(self) -> bool:
-        """优雅关闭"""
-        if self._state == LifecycleState.STOPPED:
-            return {"success": True}
+        sql = "SELECT * FROM nodes WHERE 1=1"
+        if keyword:
+            sql += " AND (name LIKE ? OR properties LIKE ?)"
+            params.extend([f"%{keyword}%", f"%{keyword}%"])
+        if node_type:
+            sql += " AND node_type = ?"
+            params.append(node_type)
+        sql += f" LIMIT {limit}"
 
-        self._state = LifecycleState.STOPPING
-        self._shutdown_start_time = time.time()
+        c.execute(sql, params)
+        nodes = []
+        for r in c.fetchall():
+            d = dict(r)
+            d["properties"] = json.loads(d.get("properties", "{}"))
+            nodes.append(d)
 
-        logger.info("开始生命周期管理器关闭流程...")
-        self._audit.log(
-            "lifecycle_shutdown_started",
-            {"components": len(self._components), "shutdown_time": self._shutdown_start_time},
-        )
+        # 获取关系数
+        c.execute("SELECT COUNT(*) as c FROM relations")
+        total_relations = c.fetchone()["c"]
+        conn.close()
+        return {"success": True, "nodes": nodes, "count": len(nodes), "total_relations": total_relations}
 
-        # 按优先级排序组件（数字越小越先关闭）
-        sorted_components = sorted(
-            self._components.items(), key=lambda x: (x[1].priority.value, -x[1].last_health_check)
-        )
+    def get_neighbors(self, node_id: str, depth: int = 1) -> dict:
+        """获取节点邻居（BFS遍历）"""
+        conn = sqlite3.connect(self._db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
 
-        shutdown_errors = []
-        for comp_id, comp in sorted_components:
-            try:
-                logger.info(f"关闭组件: {comp.name} (优先级: {comp.priority.name})")
-                comp.state = LifecycleState.STOPPING
+        visited = {node_id}
+        nodes_map = {}
+        edges = []
+        current_level = [node_id]
 
-                # 模拟关闭操作
-                time.sleep(0.1)  # 实际应该调用组件的shutdown方法
-
-                comp.state = LifecycleState.STOPPED
-                self.record_metric("lifecycle_component_shutdown_total", 1, component=comp_id)
-
-            except Exception as e:
-                shutdown_errors.append(f"{comp_id}: {str(e)}")
-                comp.state = LifecycleState.FAILED
-                logger.error(f"关闭组件 {comp_id} 失败: {e}")
-
-        self._state = LifecycleState.STOPPED
-        shutdown_duration = time.time() - self._shutdown_start_time
-
-        self._audit.log(
-            "lifecycle_shutdown_completed", {"duration_seconds": shutdown_duration, "errors": shutdown_errors}
-        )
-
-        self.record_metric("lifecycle_shutdown_total", 1)
-        self.record_metric("lifecycle_shutdown_duration_seconds", shutdown_duration)
-
-        if shutdown_errors:
-            logger.warning(f"关闭完成，但有 {len(shutdown_errors)} 个组件关闭失败")
-            return False
-
-        logger.info(f"关闭完成，耗时 {shutdown_duration:.2f} 秒")
-        return {"success": True}
-
-    @trace_operation("lifecycle.register_component")
-    def register_component(
-        self, component_id: str, name: str, priority: int = 2, dependencies: list[str] = None
-    ) -> bool:
-        """注册新组件"""
-        try:
-            priority_enum = ShutdownPriority(priority)
-            self._components[component_id] = ManagedComponent(
-                component_id=component_id, name=name, priority=priority_enum, dependencies=dependencies or []
-            )
-
-            self._audit.log(
-                "component_registered", {"component_id": component_id, "name": name, "priority": priority_enum.name}
-            )
-
-            self.record_metric("lifecycle_component_registered_total", 1)
-            return {"success": True}
-
-        except Exception as e:
-            logger.error(f"注册组件失败: {e}")
-            return False
-
-    @trace_operation("lifecycle.get_component_status")
-    def get_component_status(self, component_id: str) -> dict[str, Any] | None:
-        """获取组件状态"""
-        if component_id not in self._components:
-            return None
-
-        comp = self._components[component_id]
-        return {
-            "component_id": comp.component_id,
-            "name": comp.name,
-            "state": comp.state.value,
-            "priority": comp.priority.name,
-            "failure_count": comp.failure_count,
-            "last_health_check": comp.last_health_check,
-            "dependencies": comp.dependencies,
-        }
-
-    @trace_operation("lifecycle.list_components")
-    def list_components(self) -> list[dict[str, Any]]:
-        """列出所有组件"""
-        return [
-            {
-                "component_id": comp.component_id,
-                "name": comp.name,
-                "state": comp.state.value,
-                "priority": comp.priority.name,
-            }
-            for comp in self._components.values()
-        ]
-
-    def get_policies(self) -> list[dict[str, Any]]:
-        """获取所有策略"""
-        return [
-            {
-                "policy_id": p.policy_id,
-                "name": p.name,
-                "description": p.description,
-                "startup_timeout": p.startup_timeout,
-                "shutdown_timeout": p.shutdown_timeout,
-            }
-            for p in self._policies.values()
-        ]
-
-    # 模块导出
-
-    async def execute(self, action: str, params: dict = None) -> dict:
-        """Execute bridge - dispatch to class methods"""
-        _ = self.trace("execute")
-        metrics_collector.counter("knowledge_graph_ops_total", labels={"action": action})
-        self.audit("execute", f"action={action}")
-        params = params or {}
-        handler = getattr(self, action, None)
-        if handler and callable(handler):
-            try:
-                import asyncio
-
-                result = handler(params) if any(p in str(handler) for p in ["params", "dict"]) else handler()
-                if asyncio.iscoroutine(result):
-                    result = result
-                if isinstance(result, dict):
-                    return result
-                return {"success": True, "result": result}
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        # Known actions
-        if action == "get_all_circuit_stats":
-            try:
-                r = self.get_all_circuit_stats(params)
-                return {"success": True, "result": r} if not isinstance(r, dict) else r
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        if action == "get_all_rate_limit_stats":
-            try:
-                r = self.get_all_rate_limit_stats(params)
-                return {"success": True, "result": r} if not isinstance(r, dict) else r
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        if action == "get_component_status":
-            try:
-                r = self.get_component_status(params)
-                return {"success": True, "result": r} if not isinstance(r, dict) else r
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        if action == "get_policies":
-            try:
-                r = self.get_policies(params)
-                return {"success": True, "result": r} if not isinstance(r, dict) else r
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        if action == "list_components":
-            try:
-                r = self.list_components(params)
-                return {"success": True, "result": r} if not isinstance(r, dict) else r
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-            return {"success": False, "error": f"Unknown action: {action}"}
-
-    def detect_communities(self, min_size: int = 3) -> dict[str, Any]:
-        """社区检测：基于连接密度发现图中的社区/集群结构"""
-        nodes = self._nodes if hasattr(self, "_nodes") else {}
-        edges = self._edges if hasattr(self, "_edges") else []
-        if not nodes:
-            return {"communities": [], "total_nodes": 0}
-        # 构建邻接表
-        adjacency: dict[str, Set[str]] = {n: set() for n in nodes}
-        for edge in edges:
-            src = edge.get("source", "") if isinstance(edge, dict) else ""
-            tgt = edge.get("target", "") if isinstance(edge, dict) else ""
-            if src in adjacency:
-                adjacency[src].add(tgt)
-            if tgt in adjacency:
-                adjacency[tgt].add(src)
-        # 简单连通分量发现
-        visited: Set[str] = set()
-        communities = []
-        for node in nodes:
-            if node in visited:
-                continue
-            cluster = []
-            queue = [node]
-            while queue:
-                current = queue.pop(0)
-                if current in visited or current not in adjacency:
-                    continue
-                visited.add(current)
-                cluster.append(current)
-                queue.extend(adjacency[current] - visited)
-            if len(cluster) >= min_size:
-                internal_edges = sum(
-                    1
-                    for e in edges
-                    if isinstance(e, dict) and e.get("source", "") in cluster and e.get("target", "") in cluster
-                )
-                max_edges = len(cluster) * (len(cluster) - 1) / 2
-                density = internal_edges / max(max_edges, 1)
-                communities.append(
-                    {
-                        "size": len(cluster),
-                        "internal_edges": internal_edges,
-                        "density": round(density, 4),
-                        "sample_nodes": cluster[:5],
-                        "type": "dense" if density > 0.5 else "sparse",
-                    }
-                )
-        communities.sort(key=lambda x: x["size"], reverse=True)
-        return {"total_nodes": len(nodes), "total_communities": len(communities), "communities": communities[:50]}
-
-    def find_shortest_path(self, source: str, target: str, max_depth: int = 10) -> dict[str, Any]:
-        """查找两个实体间的最短路径（BFS广度优先搜索）"""
-        if source == target:
-            return {"found": True, "path": [source], "length": 0}
-        edges = self._edges if hasattr(self, "_edges") else []
-        adjacency: dict[str, Set[str]] = {}
-        for edge in edges:
-            src = edge.get("source", "") if isinstance(edge, dict) else ""
-            tgt = edge.get("target", "") if isinstance(edge, dict) else ""
-            adjacency.setdefault(src, set()).add(tgt)
-            adjacency.setdefault(tgt, set()).add(src)
-        visited = {source}
-        queue = [(source, [source])]
-        while queue:
-            current, path = queue.pop(0)
-            if len(path) > max_depth:
+        for _ in range(depth):
+            if not current_level:
                 break
-            for neighbor in adjacency.get(current, []):
-                if neighbor == target:
-                    return {"found": True, "path": path + [target], "length": len(path)}
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append((neighbor, path + [neighbor]))
+            next_level = []
+            placeholders = ','.join('?' * len(current_level))
+            c.execute(f"""
+                SELECT r.*, src.name as src_name, tgt.name as tgt_name
+                FROM relations r
+                JOIN nodes src ON r.source_id = src.id
+                JOIN nodes tgt ON r.target_id = tgt.id
+                WHERE r.source_id IN ({placeholders}) OR r.target_id IN ({placeholders})
+            """, current_level + current_level)
+            for r in c.fetchall():
+                edges.append({
+                    "source": r["src_name"], "target": r["tgt_name"],
+                    "relation": r["rel_type"], "weight": r["weight"]
+                })
+                for nid in [r["source_id"], r["target_id"]]:
+                    if nid not in visited:
+                        visited.add(nid)
+                        next_level.append(nid)
+                        nr = conn.execute("SELECT * FROM nodes WHERE id = ?", (nid,)).fetchone()
+                        if nr:
+                            nd = dict(nr)
+                            nd["properties"] = json.loads(nd.get("properties", "{}"))
+                            nodes_map[nid] = nd
+            current_level = next_level
+
+        # 获取源节点
+        sr = conn.execute("SELECT * FROM nodes WHERE id = ?", (node_id,)).fetchone()
+        source_node = dict(sr) if sr else {}
+        if source_node:
+            source_node["properties"] = json.loads(source_node.get("properties", "{}"))
+        conn.close()
         return {
-            "found": False,
-            "source": source,
-            "target": target,
-            "max_depth_reached": len(path) if "path" in dir() else 0,
+            "success": True,
+            "source": source_node,
+            "neighbors": list(nodes_map.values()),
+            "edges": edges,
+            "depth": depth,
             "nodes_explored": len(visited),
         }
 
-    def analyze_graph_health(self) -> dict[str, Any]:
-        """图健康分析：孤立节点、悬挂边、连通性、 schema一致性"""
-        nodes = self._nodes if hasattr(self, "_nodes") else {}
-        edges = self._edges if hasattr(self, "_edges") else []
-        connected_nodes: Set[str] = set()
-        degree_map: dict[str, int] = {}
-        for edge in edges:
-            src = edge.get("source", "") if isinstance(edge, dict) else ""
-            tgt = edge.get("target", "") if isinstance(edge, dict) else ""
-            connected_nodes.add(src)
-            connected_nodes.add(tgt)
-            degree_map[src] = degree_map.get(src, 0) + 1
-            degree_map[tgt] = degree_map.get(tgt, 0) + 1
-        isolated = [n for n in nodes if n not in connected_nodes]
-        leaves = [n for n, d in degree_map.items() if d == 1]
-        hub_nodes = sorted(degree_map.items(), key=lambda x: -x[1])[:10]
-        types = set()
-        for n_info in nodes.values():
-            if isinstance(n_info, dict):
-                t = n_info.get("type", "")
-                if t:
-                    types.add(t)
+    def get_stats(self) -> dict:
+        """图谱统计"""
+        conn = sqlite3.connect(self._db_path)
+        c = conn.cursor()
+        c.execute("SELECT node_type, COUNT(*) as cnt FROM nodes GROUP BY node_type ORDER BY cnt DESC")
+        type_dist = {r[0]: r[1] for r in c.fetchall()}
+        c.execute("SELECT rel_type, COUNT(*) as cnt FROM relations GROUP BY rel_type ORDER BY cnt DESC")
+        rel_dist = {r[0]: r[1] for r in c.fetchall()}
+        c.execute("SELECT COUNT(*) FROM nodes")
+        total_nodes = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM relations")
+        total_relations = c.fetchone()[0]
+        conn.close()
         return {
-            "total_nodes": len(nodes),
-            "total_edges": len(edges),
-            "connected_nodes": len(connected_nodes),
-            "isolated_nodes": len(isolated),
-            "isolation_rate": round(len(isolated) / max(len(nodes), 1), 4),
-            "leaf_nodes": len(leaves),
-            "top_hubs": [{"node": n, "degree": d} for n, d in hub_nodes],
-            "node_types": list(types),
-            "avg_degree": round(sum(degree_map.values()) / max(len(degree_map), 1), 2) if degree_map else 0,
+            "success": True,
+            "total_nodes": total_nodes,
+            "total_relations": total_relations,
+            "node_type_distribution": type_dist,
+            "relation_type_distribution": rel_dist,
         }
 
-    def export_graph_summary(self, format_type: str = "dict") -> dict[str, Any]:
-        """导出图谱摘要：节点/边统计、类型分布、连通性概览"""
-        health = self.analyze_graph_health()
-        communities = self.detect_communities()
-        summary = {
-            "generated_at": time.time(),
-            "format": format_type,
-            "overview": {
-                "nodes": health["total_nodes"],
-                "edges": health["total_edges"],
-                "node_types": health["node_types"],
-                "avg_degree": health["avg_degree"],
-            },
-            "health": {
-                "isolated": health["isolated_nodes"],
-                "isolation_rate": health["isolation_rate"],
-                "leaf_nodes": health["leaf_nodes"],
-            },
-            "top_hubs": health["top_hubs"][:5],
-            "communities": {
-                "total": communities["total_communities"],
-                "largest": communities["communities"][0] if communities["communities"] else None,
-            },
-        }
-        return summary
+    def delete_node(self, node_id: str) -> dict:
+        """删除节点及其关系"""
+        conn = sqlite3.connect(self._db_path)
+        conn.execute("DELETE FROM relations WHERE source_id = ? OR target_id = ?", (node_id, node_id))
+        conn.execute("DELETE FROM nodes WHERE id = ?", (node_id,))
+        conn.commit()
+        affected = conn.total_changes
+        conn.close()
+        return {"success": True, "affected": affected}
+
+    def clear_all(self) -> dict:
+        """清空图谱"""
+        conn = sqlite3.connect(self._db_path)
+        conn.execute("DELETE FROM relations")
+        conn.execute("DELETE FROM nodes")
+        conn.commit()
+        conn.close()
+        return {"success": True, "message": "图谱已清空"}
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
-        """企业级执行入口。支持status/info/run/stop/help等通用动作。"""
         if params is None:
             params = {}
-        _action = action.lower().strip()
-        dispatch = {
-            "status": self.get_status,
-            "info": self.get_info,
-            "health": self.health_check,
-            "help": self.get_help,
-        }
-        handler = dispatch.get(_action)
-        if handler:
-            try:
-                return handler(params)
-            except Exception as e:
-                return {"success": False, "error": str(e)}
-        return self.get_status(params)
-
-    def get_info(self, params: dict = None) -> dict:
-        if params is None:
-            params = {}
-        return {
-            "success": True,
-            "module": self.__class__.__name__,
-            "status": "active",
-            "version": getattr(self, "version", "1.0.0"),
-        }
-
-    def get_help(self, params: dict = None) -> dict:
-        if params is None:
-            params = {}
-        methods = [m for m in dir(self) if not m.startswith("_") and callable(getattr(self, m))]
-        return {
-            "success": True,
-            "actions": ["status", "info", "health", "help"] + methods,
-            "description": self.__doc__ or "",
-        }
+        try:
+            dispatch = {
+                "add_node": lambda: self.add_node(
+                    params.get("name", ""), params.get("node_type", "concept"), params.get("properties")),
+                "add_edge": lambda: self.add_edge(
+                    params.get("source_id", ""), params.get("target_id", ""),
+                    params.get("rel_type", "related_to"), params.get("properties")),
+                "get_node": lambda: self.get_node(params.get("node_id", "")),
+                "query": lambda: self.query(params.get("keyword", ""), params.get("node_type", "")),
+                "neighbors": lambda: self.get_neighbors(params.get("node_id", ""), int(params.get("depth", 1))),
+                "stats": lambda: self.get_stats(),
+                "delete": lambda: self.delete_node(params.get("node_id", "")),
+                "clear": lambda: self.clear_all(),
+                "status": lambda: {**self.get_stats(), "db_path": self._db_path, "status": "ready"},
+            }
+            handler = dispatch.get(action)
+            if handler:
+                return handler()
+            return {"success": False, "error": f"Unknown action: {action}"}
+        except Exception as e:
+            logger.error(f"KnowledgeGraph error: {e}")
+            return {"success": False, "error": str(e)[:200]}
 
 module_class = KnowledgeGraphManager
