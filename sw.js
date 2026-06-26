@@ -1,9 +1,9 @@
-// AUTO-EVO-AI V0.1 — Service Worker (535模块/16引擎/151+API)
-// PWA离线支持：缓存策略（Cache-First for static, Network-First for API）
+// AUTO-EVO-AI V0.1 — Service Worker (2026-06-25)
+// 修复：JS 改为 Network-First，缓存版本号 +1 强制手机刷新
 
-const CACHE_NAME = 'evo-ai-v0.1';
-const STATIC_CACHE = 'evo-ai-static-v0.1';
-const API_CACHE = 'evo-ai-api-v0.1';
+const CACHE_NAME = 'evo-ai-v0.4';
+const STATIC_CACHE = 'evo-ai-static-v0.3';
+const API_CACHE = 'evo-ai-api-v0.2';
 const MAX_API_CACHE = 100;
 
 // 需要预缓存的静态资源
@@ -45,7 +45,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     const isApi = url.pathname.startsWith('/api/');
-    const isStatic = url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)$/);
+    const isJS = url.pathname.match(/\.js(\?|$)/);
+    const isStatic = url.pathname.match(/\.(css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)$/);
     
     // API请求：Network-First + 短期缓存
     if (isApi) {
@@ -53,14 +54,20 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // 静态资源：Cache-First + 后台更新
+    // JS文件：Network-First（修复：必须走网络，避免缓存旧版JS导致功能失效）
+    if (isJS) {
+        event.respondWith(networkFirst(event.request, STATIC_CACHE, 0));
+        return;
+    }
+    
+    // 其他静态资源：Cache-First + 后台更新
     if (isStatic) {
         event.respondWith(cacheFirst(event.request, STATIC_CACHE));
         return;
     }
     
-    // Dashboard HTML：Stale-While-Revalidate
-    if (url.pathname === '/dashboard') {
+    // 主页面 & Dashboard：Stale-While-Revalidate
+    if (url.pathname === '/' || url.pathname === '/dashboard') {
         event.respondWith(staleWhileRevalidate(event.request, STATIC_CACHE));
         return;
     }
