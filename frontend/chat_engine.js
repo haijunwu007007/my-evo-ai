@@ -89,35 +89,43 @@ function startVoiceRecord(e){
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel')
   b.classList.add('recording');_voiceChunks=[]
   
-  // 检查是否已经拒绝过权限（华为等设备）
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    _fallbackRecord(b,l);return
+  // 先尝试标准 getUserMedia（电脑/部分安卓可用）
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    l.textContent='请说话'
+    var _gumTimeout=setTimeout(function(){
+      if(!_voiceReady){_fallbackRecord(b,l)}
+    },2000)
+    try{
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+        clearTimeout(_gumTimeout)
+        _voiceStream=s;_voiceReady=true
+        var mt=(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm')
+        _voiceRec=new MediaRecorder(s,{mimeType:mt})
+        _voiceRec.ondataavailable=function(ev){if(ev.data.size>0)_voiceChunks.push(ev.data)}
+        _voiceRec.start();l.textContent='松开'
+        if(_voiceReleased){_voiceRec.stop()}
+      }).catch(function(){
+        clearTimeout(_gumTimeout)
+        _fallbackRecord(b,l)
+      })
+      return
+    }catch(err){
+      clearTimeout(_gumTimeout)
+    }
   }
-  
-  l.textContent='请说话'
-  try{
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
-      _voiceStream=s;_voiceReady=true
-      var mt=(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm')
-      _voiceRec=new MediaRecorder(s,{mimeType:mt})
-      _voiceRec.ondataavailable=function(ev){if(ev.data.size>0)_voiceChunks.push(ev.data)}
-      _voiceRec.start();l.textContent='松开'
-    }).catch(function(){
-      // getUserMedia 失败 → 降级到系统原生录音
-      _fallbackRecord(b,l)
-    })
-  }catch(err){
-    _fallbackRecord(b,l)
-  }
+  // 华为/权限受限设备：直接走降级（弹出系统录音）
+  _fallbackRecord(b,l)
 }
-// 华为等设备降级方案：弹出系统原生录音界面
+// 华为等设备降级方案：弹出系统原生录音/选择录音文件界面
 var _fallbackInput=null
 function _fallbackRecord(b,l){
   b.classList.remove('recording');_voicing=false
-  l.textContent='打开录音...'
+  l.textContent='选择录音'
   if(!_fallbackInput){
     _fallbackInput=document.createElement('input')
-    _fallbackInput.type='file';_fallbackInput.accept='audio/*'
+    _fallbackInput.type='file'
+    _fallbackInput.accept='audio/*;capture=microphone'
+    _fallbackInput.setAttribute('capture','microphone')
     _fallbackInput.style.display='none'
     document.body.appendChild(_fallbackInput)
     _fallbackInput.onchange=function(){
@@ -133,20 +141,25 @@ function _fallbackRecord(b,l){
       }).catch(function(){l.textContent='重试';setTimeout(function(){l.textContent='🎤语音'},2000)})
     }
   }
+  l.textContent='🎤语音'
   setTimeout(function(){_fallbackInput.click()},100)
 }
 
-var _stopRetry=0
+var _voiceReleased=false
 function stopVoiceRecord(e){
   if(!_voicing&&!_retrying)return
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel'),i=document.getElementById('input')
+  _voiceReleased=true
   if(!_voiceReady){
-    if(_stopRetry>=3){_stopRetry=0;_fallbackRecord(b,l);return}
-    _retrying=true;_stopRetry++
-    if(!_voicing)_voicing=true
-    return setTimeout(function(){_retrying=false;stopVoiceRecord(e)},500)
+    // getUserMedia 还没返回（用户还没点允许或不支持）
+    // 不要放弃！继续等待 getUserMedia 完成
+    if(!_retrying){
+      _retrying=true
+      l.textContent='等待麦克风...'
+      setTimeout(function(){_retrying=false;stopVoiceRecord(e)},3000)
+    }
+    return
   }
-  _stopRetry=0
   _voicing=false;_retrying=false
   b.classList.remove('recording')
   if(!_voiceRec||_voiceRec.state==='inactive'){l.textContent='🎤语音';return}

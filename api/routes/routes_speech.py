@@ -20,14 +20,19 @@ def _get_whisper_model():
     global _whisper_model
     if _whisper_model is not None:
         return _whisper_model
-    try:
-        from faster_whisper import WhisperModel
-        logger.info("加载 Whisper %s 模型 (首次需下载~150MB)...", _WHISPER_MODEL_SIZE)
-        _whisper_model = WhisperModel(_WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
-        logger.info("Whisper %s 模型加载完成", _WHISPER_MODEL_SIZE)
-    except Exception as e:
-        logger.warning("Whisper 加载失败: %s，降级到云端引擎", e)
-        _whisper_model = False
+    # 首次：后台加载不阻塞，立即返回 False
+    _whisper_model = False
+    def _load():
+        global _whisper_model
+        try:
+            from faster_whisper import WhisperModel
+            logger.info("后台加载 Whisper %s 模型...", _WHISPER_MODEL_SIZE)
+            m = WhisperModel(_WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
+            _whisper_model = m
+            logger.info("Whisper %s 模型加载完成", _WHISPER_MODEL_SIZE)
+        except Exception as e:
+            logger.warning("Whisper 后台加载失败: %s，降级到云端引擎", e)
+    threading.Thread(target=_load, daemon=True).start()
     return _whisper_model
 
 def _whisper_recognize(wav_path: str) -> str:
@@ -194,10 +199,10 @@ async def recognize_speech(file: UploadFile = File(...)):
         except Exception as e:
             logger.warning("Whisper 失败: %s", e)
 
-        # 2) 百度ASR
-        text = _baidu_recognize(wav_data)
+        # 2) Google（中国可能超时，但比百度免费版可靠）
+        text = _google_recognize(wav_data)
         if text:
-            return {"success": True, "text": text, "provider": "baidu"}
+            return {"success": True, "text": text, "provider": "google"}
 
         # 3) Vosk
         text = _vosk_recognize(wav_data, sample_rate)
@@ -209,7 +214,7 @@ async def recognize_speech(file: UploadFile = File(...)):
         if text:
             return {"success": True, "text": text, "provider": "google"}
 
-        # 5) Sphinx
+        # 4) Sphinx
         text = _sphinx_recognize(wav_data)
         if text:
             return {"success": True, "text": text, "provider": "pocketsphinx"}

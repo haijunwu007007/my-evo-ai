@@ -1,7 +1,7 @@
 // AUTO-EVO-AI V0.1 — Service Worker (2026-06-25)
 // 修复：JS 改为 Network-First，缓存版本号 +1 强制手机刷新
 
-const CACHE_NAME = 'evo-ai-v0.5';
+const CACHE_NAME = 'evo-ai-v0.7';
 const STATIC_CACHE = 'evo-ai-static-v0.4';
 const API_CACHE = 'evo-ai-api-v0.3';
 const MAX_API_CACHE = 100;
