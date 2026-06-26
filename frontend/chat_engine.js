@@ -118,7 +118,6 @@ function _fallbackRecord(b,l){
   if(!_fallbackInput){
     _fallbackInput=document.createElement('input')
     _fallbackInput.type='file';_fallbackInput.accept='audio/*'
-    _fallbackInput.setAttribute('capture','user')
     _fallbackInput.style.display='none'
     document.body.appendChild(_fallbackInput)
     _fallbackInput.onchange=function(){
@@ -137,14 +136,17 @@ function _fallbackRecord(b,l){
   setTimeout(function(){_fallbackInput.click()},100)
 }
 
+var _stopRetry=0
 function stopVoiceRecord(e){
   if(!_voicing&&!_retrying)return
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel'),i=document.getElementById('input')
   if(!_voiceReady){
-    _retrying=true
+    if(_stopRetry>=3){_stopRetry=0;_fallbackRecord(b,l);return}
+    _retrying=true;_stopRetry++
     if(!_voicing)_voicing=true
     return setTimeout(function(){_retrying=false;stopVoiceRecord(e)},500)
   }
+  _stopRetry=0
   _voicing=false;_retrying=false
   b.classList.remove('recording')
   if(!_voiceRec||_voiceRec.state==='inactive'){l.textContent='🎤语音';return}
