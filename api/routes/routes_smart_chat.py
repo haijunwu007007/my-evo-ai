@@ -95,6 +95,25 @@ async def smart_chat(req: Req):
             if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
         except Exception:
             pass
+    # ── QuickTool 技能路由 ──
+    # 匹配 "技能名: 请求" 格式（如 "文档生成: 帮我写合同"）
+    if ":" in msg:
+        prefix, _, rest = msg.partition(":")
+        prefix = prefix.strip()
+        if len(prefix) >= 2 and len(prefix) <= 20:
+            try:
+                from api.routes.routes_skills import _SKILL_REGISTRY, SkillExecuteRequest
+                if prefix in _SKILL_REGISTRY:
+                    sk = _SKILL_REGISTRY[prefix]
+                    from api.routes.routes_skills import execute_skill as _do_skill
+                    sr = await _do_skill(prefix, SkillExecuteRequest(params={"query": rest.strip() or prefix, "prompt": msg}, context={"source": "quicktool"}))
+                    if sr.get("success") and sr.get("result"):
+                        txt = sr["result"]
+                        if isinstance(txt, dict): txt = txt.get("text") or txt.get("result") or txt.get("message") or str(txt)
+                        return {"success": True, "result": str(txt), "mode": "quicktool"}
+            except Exception:
+                pass
+
     # ── 智能工具路由层 ──
     try:
         from api.tools.tool_router import route_and_execute

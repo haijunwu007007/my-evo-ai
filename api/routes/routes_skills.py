@@ -276,7 +276,7 @@ def _bridge_gateway_as_skills():
 # 4. 初始化
 # ============================================================
 def init_skills():
-    """初始化所有技能（内置 + 外部 + MCP 桥接）"""
+    """初始化所有技能（内置 + 外部 + MCP 桥接 + QuickTool）"""
     _load_builtin_skills()
     _load_custom_skills()
     _scan_external_skills()
@@ -284,8 +284,15 @@ def init_skills():
     _bridge_connectors_as_skills()
     _bridge_mcpize_as_skills()
     _bridge_gateway_as_skills()
+    # 注册前端QuickTool按钮的中文/英文名
+    try:
+        import importlib
+        mod = importlib.import_module("skills.builtin.quicktool_router")
+        mod.register_quicktool_skills()
+    except Exception as _e:
+        logger.warning(f"[SKILL] 快速工具注册跳过: {_e}")
     count = len(_SKILL_REGISTRY)
-    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize + Gateway桥接）")
+    logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize + Gateway桥接 + QuickTool）")
     return count
 
 
