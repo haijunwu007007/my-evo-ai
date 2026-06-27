@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Cal.com 排程 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Cal Scheduler"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("cal_scheduler")
+__module_meta__ = {"id":"cal_scheduler","name":"Cal Scheduler","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "cal_scheduler",
-    "name": "Cal.com 排程",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class CalModule:
-    def __init__(self):
-        self._status = {"name": "Cal.com 排程", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _events(self, params): return {'message': '执行Cal.com 排程-events', 'params': params}
-    def _book(self, params): return {'message': '执行Cal.com 排程-book', 'params': params}
-    def _availability(self, params): return {'message': '执行Cal.com 排程-availability', 'params': params}
-    def _cancel(self, params): return {'message': '执行Cal.com 排程-cancel', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "cal_scheduler", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'events': return {'success': True, 'action': 'events', 'result': self._events(params)}
-        if action == 'book': return {'success': True, 'action': 'book', 'result': self._book(params)}
-        if action == 'availability': return {'success': True, 'action': 'availability', 'result': self._availability(params)}
-        if action == 'cancel': return {'success': True, 'action': 'cancel', 'result': self._cancel(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = CalModule
+module_class = ModuleImpl

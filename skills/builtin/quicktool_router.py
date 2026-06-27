@@ -178,6 +178,20 @@ def register_quicktool_skills():
 
     # 注册通用执行器
     _SKILL_HANDLERS["__quicktool__"] = _quicktool_handler
+    # 确保数学计算和PPT中文别名注册（从英文技能映射）
+    _alias_map = {"数学计算": "math-calculator", "PPT": "ppt-generator"}
+    for cn_name, eng_name in _alias_map.items():
+        if cn_name not in _SKILL_REGISTRY and eng_name in _SKILL_REGISTRY:
+            eng_s = _SKILL_REGISTRY[eng_name]
+            cn_s = SkillDefinition(
+                name=cn_name, version="1.0.0", description=eng_s.description,
+                author=eng_s.author, category=eng_s.category, icon=eng_s.icon,
+                tags=[cn_name, eng_name], handler=eng_s.handler
+            )
+            _SKILL_REGISTRY[cn_name] = cn_s
+            if eng_name in _SKILL_HANDLERS:
+                _SKILL_HANDLERS[cn_name] = _SKILL_HANDLERS[eng_name]
+            count += 1
     if count:
         logger.info(f"[QTSKILLS] 注册 {count} 个快速工具技能 + 通用LLM执行器")
     return count

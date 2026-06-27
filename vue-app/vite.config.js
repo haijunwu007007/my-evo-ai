@@ -4,5 +4,5 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: { port: 5173, proxy: { '/api': 'http://localhost:8765' } },
-  build: { outDir: '../frontend', emptyOutDir: true }
+  build: { outDir: '../frontend/dist', emptyOutDir: true }
 })

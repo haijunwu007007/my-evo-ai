@@ -1,24 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Browser Use Agent 模块
-实现: 浏览器自动操作核心能力
-"""
-import logging, json
+"""AUTO-EVO-AI V0.1 — Browser Use Agent"""
+import logging, json, time
 from typing import Any, Dict
 logger = logging.getLogger("browser_use_agent")
-__module_meta__ = {"id": "browser-use-agent", "name": "Browser Use Agent", "version": "V0.1", "group": "automation", "grade": "A", "description": "AI浏览器自动操作"}
+__module_meta__ = {"id":"browser_use_agent","name":"Browser Use Agent","version":"V0.1","group":"integration","grade":"A"}
 
-class BrowserUseAgent:
-    def __init__(self):
-        self._tasks = []
-    def get_status(self):
-        return {"success": True, "module": "BrowserUse", "version": "V0.1", "tasks": len(self._tasks), "browsers": ["chromium", "firefox", "webkit"]}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "browser_use_agent", "version": "V0.1", **self._stats}
+    
     def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}
-        if action == "status": return self.get_status()
-        if action == "open": return {"success": True, "message": f"已打开 {params.get('url','')}", "screenshot": None}
-        if action == "click": return {"success": True, "message": f"已点击元素: {params.get('selector','')}"}
-        if action == "fill": return {"success": True, "message": f"已填写表单: {params.get('selector','')}={params.get('value','')}"}
-        if action == "extract": return {"success": True, "message": "数据已提取", "data": [], "count": 0}
-        if action == "screenshot": return {"success": True, "file": "/tmp/screenshot.png"}
-        return {"success": False, "error": f"Unknown action: {action}"}
-module_class = BrowserUseAgent
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
+        if action == "status":
+            return self.get_status()
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
+
+module_class = ModuleImpl

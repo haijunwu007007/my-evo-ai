@@ -91,8 +91,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .rsec .ritem{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s}
 .rsec .ritem:hover{background:var(--glass);color:var(--accent)}
 /* 登录 */
-.auth-wrap{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
-.auth-wrap.hidden{display:none}
+.auth-wrap{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:100}
+.auth-wrap.active{display:flex}
 .auth-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:340px;width:90%;text-align:center}
 .auth-card .logo-big{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#4361ee,#7209b7);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 10px}
 .auth-card h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
@@ -306,7 +306,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 </div>
 
 
-<script src="/frontend/chat_engine.js?v=15"></script>
+<script src="/frontend/chat_engine.js?v=19"></script>
 
 <script>
 // ── 语音输入：仿微信全宽按压条 + AudioContext 直录 WAV ──

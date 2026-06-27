@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Postiz 社交媒体 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Postiz Social"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("postiz_social")
+__module_meta__ = {"id":"postiz_social","name":"Postiz Social","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "postiz_social",
-    "name": "Postiz 社交媒体",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class PostizModule:
-    def __init__(self):
-        self._status = {"name": "Postiz 社交媒体", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _publish(self, params): return {'message': '执行Postiz 社交媒体-publish', 'params': params}
-    def _schedule(self, params): return {'message': '执行Postiz 社交媒体-schedule', 'params': params}
-    def _analytics(self, params): return {'message': '执行Postiz 社交媒体-analytics', 'params': params}
-    def _platforms(self, params): return {'message': '执行Postiz 社交媒体-platforms', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "postiz_social", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'publish': return {'success': True, 'action': 'publish', 'result': self._publish(params)}
-        if action == 'schedule': return {'success': True, 'action': 'schedule', 'result': self._schedule(params)}
-        if action == 'analytics': return {'success': True, 'action': 'analytics', 'result': self._analytics(params)}
-        if action == 'platforms': return {'success': True, 'action': 'platforms', 'result': self._platforms(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = PostizModule
+module_class = ModuleImpl

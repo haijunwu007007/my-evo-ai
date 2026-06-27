@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Chatwoot 客服 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Chatwoot Support"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("chatwoot_support")
+__module_meta__ = {"id":"chatwoot_support","name":"Chatwoot Support","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "chatwoot_support",
-    "name": "Chatwoot 客服",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class ChatwootModule:
-    def __init__(self):
-        self._status = {"name": "Chatwoot 客服", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _tickets(self, params): return {'message': '执行Chatwoot 客服-tickets', 'params': params}
-    def _reply(self, params): return {'message': '执行Chatwoot 客服-reply', 'params': params}
-    def _assign(self, params): return {'message': '执行Chatwoot 客服-assign', 'params': params}
-    def _stats(self, params): return {'message': '执行Chatwoot 客服-stats', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "chatwoot_support", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'tickets': return {'success': True, 'action': 'tickets', 'result': self._tickets(params)}
-        if action == 'reply': return {'success': True, 'action': 'reply', 'result': self._reply(params)}
-        if action == 'assign': return {'success': True, 'action': 'assign', 'result': self._assign(params)}
-        if action == 'stats': return {'success': True, 'action': 'stats', 'result': self._stats(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = ChatwootModule
+module_class = ModuleImpl

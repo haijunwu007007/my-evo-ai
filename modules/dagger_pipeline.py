@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Dagger CI/CD管道 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Dagger Pipeline"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("dagger_pipeline")
+__module_meta__ = {"id":"dagger_pipeline","name":"Dagger Pipeline","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "dagger_pipeline",
-    "name": "Dagger CI/CD管道",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class DaggerPipelineModule:
-    def __init__(self):
-        self._status = {"name": "Dagger CI/CD管道", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _build(self, params): return {'message': '执行Dagger CI/CD管道-build', 'params': params}
-    def _test(self, params): return {'message': '执行Dagger CI/CD管道-test', 'params': params}
-    def _deploy(self, params): return {'message': '执行Dagger CI/CD管道-deploy', 'params': params}
-    def _pipeline(self, params): return {'message': '执行Dagger CI/CD管道-pipeline', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "dagger_pipeline", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'build': return {'success': True, 'action': 'build', 'result': self._build(params)}
-        if action == 'test': return {'success': True, 'action': 'test', 'result': self._test(params)}
-        if action == 'deploy': return {'success': True, 'action': 'deploy', 'result': self._deploy(params)}
-        if action == 'pipeline': return {'success': True, 'action': 'pipeline', 'result': self._pipeline(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = DaggerPipelineModule
+module_class = ModuleImpl

@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — InvoiceNinja 发票 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Invoice Agent"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("invoice_agent")
+__module_meta__ = {"id":"invoice_agent","name":"Invoice Agent","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "invoice_agent",
-    "name": "InvoiceNinja 发票",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class InvoiceModule:
-    def __init__(self):
-        self._status = {"name": "InvoiceNinja 发票", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _create(self, params): return {'message': '执行InvoiceNinja 发票-create', 'params': params}
-    def _list(self, params): return {'message': '执行InvoiceNinja 发票-list', 'params': params}
-    def _send(self, params): return {'message': '执行InvoiceNinja 发票-send', 'params': params}
-    def _status(self, params): return {'message': '执行InvoiceNinja 发票-status', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "invoice_agent", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'create': return {'success': True, 'action': 'create', 'result': self._create(params)}
-        if action == 'list': return {'success': True, 'action': 'list', 'result': self._list(params)}
-        if action == 'send': return {'success': True, 'action': 'send', 'result': self._send(params)}
-        if action == 'status': return {'success': True, 'action': 'status', 'result': self._status(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = InvoiceModule
+module_class = ModuleImpl

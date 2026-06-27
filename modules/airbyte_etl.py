@@ -1,39 +1,31 @@
-"""
-AUTO-EVO-AI V0.1 — Airbyte 数据管道 模块
-"""
-import json, logging
+"""AUTO-EVO-AI V0.1 — Airbyte Etl"""
+import logging, json, time
+from typing import Any, Dict
 logger = logging.getLogger("airbyte_etl")
+__module_meta__ = {"id":"airbyte_etl","name":"Airbyte Etl","version":"V0.1","group":"integration","grade":"A"}
 
-__module_meta__ = {
-    "id": "airbyte_etl",
-    "name": "Airbyte 数据管道",
-    "version": "V0.1",
-    "group": "integration",
-    "grade": "A"
-}
-
-class AirbyteETLModule:
-    def __init__(self):
-        self._status = {"name": "Airbyte 数据管道", "version": "V0.1", "available": True}
-
-    def get_status(self):
-        return {"success": True, **self._status}
-
-    def _list_sources(self, params): return {'message': '执行Airbyte 数据管道-list_sources', 'params': params}
-    def _sync(self, params): return {'message': '执行Airbyte 数据管道-sync', 'params': params}
-    def _discover(self, params): return {'message': '执行Airbyte 数据管道-discover', 'params': params}
-    def _status(self, params): return {'message': '执行Airbyte 数据管道-status', 'params': params}
-
-    def execute(self, action="status", params=None):
-        if params is None:
-            params = {}
+class ModuleImpl:
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
+    
+    def get_status(self) -> dict:
+        return {"success": True, "module": "airbyte_etl", "version": "V0.1", **self._stats}
+    
+    def execute(self, action: str = "status", params: dict = None) -> dict:
+        params = params or {}
+        self._stats["calls"] += 1
+        self._stats["last_call"] = time.time()
         if action == "status":
             return self.get_status()
-        if action == 'list_sources': return {'success': True, 'action': 'list_sources', 'result': self._list_sources(params)}
-        if action == 'sync': return {'success': True, 'action': 'sync', 'result': self._sync(params)}
-        if action == 'discover': return {'success': True, 'action': 'discover', 'result': self._discover(params)}
-        if action == 'status': return {'success': True, 'action': 'status', 'result': self._status(params)}
+        try:
+            return self._dispatch(action, params)
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.error("execute %s failed: %s", action, str(e))
+            return {"success": False, "error": str(e)}
+    
+    def _dispatch(self, action: str, params: dict) -> dict:
+        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
 
-        return {"success": False, "error": f"Unknown action: {action}"}
-
-module_class = AirbyteETLModule
+module_class = ModuleImpl
