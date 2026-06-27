@@ -114,17 +114,43 @@ async def smart_chat(req: Req):
             except Exception:
                 pass
 
-    # ── 智能工具路由层 ──
-    try:
-        from api.tools.tool_router import route_and_execute
-        result = route_and_execute(msg)
-        rtype = result.get("type", "chat")
-        output = result.get("data", "")
-        if rtype == "tool" or rtype == "direct":
-            return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
-    except Exception:
+    # ── 智能工具路由层（内部规划prompt跳过工具层，直接走LLM） ──
+    if msg.startswith("你是一个AI任务规划器") or msg.startswith("请用中文总结以下执行结果") or msg.startswith("你是一个技能执行专家"):
         pass
-    # ── 检查是否有可用的 API Key ──
+    else:
+        try:
+            from api.tools.tool_router import route_and_execute
+            result = route_and_execute(msg)
+            rtype = result.get("type", "chat")
+            output = result.get("data", "")
+            if rtype == "tool" or rtype == "direct":
+                return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
+        except Exception:
+            pass
+    # ── 自主任务路由（"帮我xxx" 自动进入多步骤Agent）──
+    _task_indicators = ["帮我", "做一个", "开发一个", "研究", "分析", "总结", "整理"]
+    if any(k in msg for k in _task_indicators):
+        try:
+            async with httpx.AsyncClient(timeout=120) as c:
+                ar = await c.post("http://127.0.0.1:8765/api/v1/agent/run",
+                    json={"task": msg, "context": req.context or ""})
+                ad = ar.json()
+                if ad.get("success"):
+                    return {"success": True, "result": ad.get("result", ""), "mode": "agent"}
+        except Exception:
+            pass
+
+    # ── 定时任务创建（"每天早上9点搜索xxx"）──
+    _temporal_indicators = ["每天", "每周", "每早", "每晚", "定时"]
+    if any(k in msg for k in _temporal_indicators):
+        try:
+            async with httpx.AsyncClient(timeout=15) as c:
+                ar = await c.post("http://127.0.0.1:8765/api/v1/scheduler/tasks",
+                    json={"name": msg[:30], "cron": "0 9 * * *", "action": "chat", "params": {"message": msg}})
+                if ar.json().get("success"):
+                    return {"success": True, "result": "✅ 已创建定时任务: " + msg[:40], "mode": "schedule"}
+        except Exception:
+            pass
     from api.agent_llm import _get_key as _llm_key
     _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")) or bool(_llm_key())
     if not _has_key:

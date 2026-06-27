@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>系统配置 - 密钥管理中心</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,sans-serif;background:#f5f5f8;color:#1a1a2e;padding:16px;max-width:1200px;margin:0 auto}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.header h1{margin:0;font-size:20px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .stats{font-size:13px;color:#6b7280}
+.header a{color:#4361ee;text-decoration:none;font-size:13px;padding:4px 12px;border-radius:6px;background:#fff;border:1px solid #e5e7eb}
+.search-bar{width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px;margin-bottom:16px;background:#fff;outline:none}
+.search-bar:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.1)}
+.cat{margin-bottom:12px;border-radius:12px;overflow:hidden;border:1px solid #e8eaed;background:#fff}
+.cat-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;background:#fff;user-select:none}
+.cat-hd:hover{background:#f8f9ff}
+.cat-hd .nm{font-weight:600;font-size:14px}
+.cat-hd .cnt{font-size:12px;color:#6b7280}
+.cat-hd .arrow{transition:transform .2s;color:#6b7280}
+.cat-hd.open .arrow{transform:rotate(180deg)}
+.cat-body{padding:0 16px 12px;display:none}
+.cat-body.open{display:block}
+.item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f4;gap:8px}
+.item:last-child{border:0}
+.item .nm{font-size:13px;white-space:nowrap}
+.item .nm small{color:#6b7280;font-size:11px;margin-left:6px}
+.item input{flex:1;max-width:400px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none}
+.item input:focus{border-color:#4361ee}
+.item .status{font-size:11px;padding:2px 8px;border-radius:4px}
+.item .status.ok{background:#dcfce7;color:#166534}
+.item .status.no{background:#fef3c7;color:#92400e}
+.item button{padding:5px 14px;border:0;border-radius:6px;font-size:12px;cursor:pointer;background:#4361ee;color:#fff;white-space:nowrap}
+.item button:disabled{opacity:.5;cursor:default}
+.item button.ok{background:#22c55e}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#4361ee;color:#fff;padding:10px 24px;border-radius:10px;font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:all .3s;opacity:0;pointer-events:none}
+.toast.show{opacity:1;pointer-events:auto}
+</style></head><body>
+<div class="header">
+  <h1>🔑 密钥管理中心</h1>
+  <span class="stats" id="stats">加载中...</span>
+  <a href="/">← 返回首页</a>
+</div>
+<input class="search-bar" id="search" placeholder="🔍 搜索服务名称..." oninput="render()">
+<div id="list"></div>
+<div class="toast" id="toast"></div>
+<script>
+var ALL = []
+var ENV = {}
+
+function load(){
+  Promise.all([
+    fetch('/api/v1/settings').then(r=>r.json()),
+    fetch('/api/v1/skills?category=外部集成').then(r=>r.json())
+  ]).then(function(res){
+    var envData = res[0]
+    var cats = envData.categories || {}
+    for(var ck in cats){
+      cats[ck].forEach(function(item){ ENV[item.key] = item.value || '' })
+    }
+    // Also auto-discover env vars from Gateway skills
+    var skills = res[1].skills || []
+    skills.forEach(function(sk){
+      var name = sk.name
+      if(name.startsWith('gateway:') || name.startsWith('conn:')){
+        var key = name.toUpperCase().replace(/[:\/-]/g, '_')
+        if(name.indexOf('github')>=0) key = 'GITHUB_TOKEN'
+        if(name.indexOf('slack')>=0) key = 'SLACK_TOKEN'
+        if(name.indexOf('aws')>=0) key = 'AWS_ACCESS_KEY_ID'
+        if(name.indexOf('openai')>=0) key = 'OPENAI_API_KEY'
+        ALL.push({name: sk.description || name, key: key, env_key: key, val: ENV[key] || ''})
+      }
+    })
+    // Remove duplicates
+    var seen={},uniq=[]
+    ALL.forEach(function(i){if(!seen[i.key]){seen[i.key]=1;uniq.push(i)}})
+    ALL=uniq
+    render()
+  })
+}
+
+function render(){
+  var q = document.getElementById('search').value.toLowerCase()
+  var items = q ? ALL.filter(function(i){return i.name.toLowerCase().indexOf(q)>=0||i.key.toLowerCase().indexOf(q)>=0}) : ALL
+  // Group by first letter/category
+  var groups={}
+  items.forEach(function(i){
+    var cat = '其他'
+    if(i.key.indexOf('AWS')>=0||i.key.indexOf('S3')>=0||i.key.indexOf('OSS')>=0) cat='☁️ 云服务'
+    else if(i.key.indexOf('OPENAI')>=0||i.key.indexOf('ANTHROPIC')>=0||i.key.indexOf('ZHIPU')>=0||i.key.indexOf('DEEPSEEK')>=0||i.key.indexOf('GEMINI')>=0) cat='🤖 LLM/AI'
+    else if(i.key.indexOf('GITHUB')>=0||i.key.indexOf('GITLAB')>=0) cat='💻 代码托管'
+    else if(i.key.indexOf('SLACK')>=0||i.key.indexOf('DISCORD')>=0||i.key.indexOf('TELEGRAM')>=0||i.key.indexOf('DINGTALK')>=0) cat='💬 通信'
+    else if(i.key.indexOf('SMTP')>=0||i.key.indexOf('SENDGRID')>=0||i.key.indexOf('MAIL')>=0) cat='📧 邮件'
+    else if(i.key.indexOf('STRIPE')>=0||i.key.indexOf('ALIPAY')>=0||i.key.indexOf('WECHAT')>=0) cat='💳 支付'
+    else if(i.key.indexOf('JIRA')>=0||i.key.indexOf('LINEAR')>=0||i.key.indexOf('ASANA')>=0||i.key.indexOf('NOTION')>=0) cat='📋 项目管理'
+    else if(i.key.indexOf('DOCKER')>=0||i.key.indexOf('K8S')>=0||i.key.indexOf('KUBERNETES')>=0) cat='🐳 容器'
+    else if(i.key.indexOf('GRAFANA')>=0||i.key.indexOf('DATADOG')>=0) cat='📊 监控'
+    else cat='🔌 其他集成'
+    if(!groups[cat]) groups[cat]={items:[],cnt:0,ok:0}
+    groups[cat].items.push(i)
+    groups[cat].cnt++
+    if(i.val) groups[cat].ok++
+  })
+  var html='',total=items.length,okCount=items.filter(function(i){return i.val}).length
+  document.getElementById('stats').textContent='已配置 '+okCount+'/'+total
+  for(var cat in groups){
+    var g=groups[cat],open=window['_open_'+cat]
+    html+='<div class="cat"><div class="cat-hd'+(open?' open':'')+'" onclick="toggle(\''+cat+'\')"><span class="nm">'+cat+'</span><span class="cnt">'+g.ok+'/'+g.cnt+'</span><span class="arrow">▼</span></div><div class="cat-body'+(open?' open':'')+'">'
+    g.items.forEach(function(i){
+      var ok=i.val?'ok':'no'
+      html+='<div class="item"><span class="nm">'+i.name+'<small>'+i.key+'</small></span><input id="inp_'+i.key+'" value="'+i.val+'" placeholder="输入 '+i.key+'..." oninput="onChange(\''+i.key+'\')"><span class="status '+ok+'">'+(ok==='ok'?'✅':'⏳')+'</span><button id="btn_'+i.key+'" onclick="save(\''+i.key+'\')" disabled>保存</button></div>'
+    })
+    html+='</div></div>'
+  }
+  document.getElementById('list').innerHTML=html
+}
+function toggle(cat){window['_open_'+cat]=!window['_open_'+cat];render()}
+function onChange(key){
+  var inp=document.getElementById('inp_'+key),btn=document.getElementById('btn_'+key)
+  if(inp) btn.disabled = !inp.value
+}
+function save(key){
+  var inp=document.getElementById('inp_'+key),btn=document.getElementById('btn_'+key)
+  if(!inp||!inp.value) return
+  btn.disabled=true;btn.textContent='保存中...'
+  fetch('/api/v1/settings/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,value:inp.value})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.success){
+      btn.textContent='✅';btn.className='ok'
+      ENV[key]=inp.value;render()
+      toast('✅ '+key+' 已配置')
+    } else {
+      btn.textContent='❌';toast('❌ 保存失败')
+      setTimeout(function(){btn.textContent='保存';btn.disabled=false},2000)
+    }
+  })
+  .catch(function(){btn.textContent='❌';setTimeout(function(){btn.textContent='保存';btn.disabled=false},2000)})
+}
+function toast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'
+  clearTimeout(t._t);t._t=setTimeout(function(){t.className='toast'},3000)
+}
+load()
+</script></body></html>

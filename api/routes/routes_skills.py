@@ -162,11 +162,11 @@ def _register_from_skill_md(skill_md: Path, name: str, source: str, handler_path
 
 
 def _scan_external_skills():
-    """扫描 ALL WorkBuddy 技能目录 → 自动发现标准技能"""
-    # 扫描目录列表（覆盖所有可能的技能来源）
+    """扫描 ALL 技能目录 → 自动发现标准技能（含独立副本）"""
     ext_dirs = [
         Path.home() / ".workbuddy" / "skills" / "auto-discovered",
         Path.home() / ".workbuddy" / "skills",
+        BASE_DIR / "skills" / "external",
     ]
 
     # 也扫描当前工作区的 .workbuddy/skills/

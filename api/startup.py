@@ -164,6 +164,7 @@ def _mount_vue_frontend():
             "agent-factory": "agentfactory.html",
             "soft-factory": "softfactory.html",
             "oss-distiller": "oss-distiller.html",
+            "settings": "settings.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)

@@ -10,7 +10,7 @@ def _get_key():
     ]:
         if src_val:
             return src_val
-    return "b52c6e6a225a41928354521392b19541.Yih7xNOORHmw0qYM"
+    return ""
 
 def _read_file_key(path, prefix=""):
     try:
