@@ -19,7 +19,7 @@ from api.infra import (
 @router.get("/api/v1/health")
 async def health_check():
     """系统健康检查端点"""
-    return {"status": "ok", "timestamp": time.time()}
+    return {"success": True, "timestamp": time.time()}
 
 
 @router.get("/metrics", include_in_schema=False)

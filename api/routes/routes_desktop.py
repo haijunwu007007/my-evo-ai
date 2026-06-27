@@ -9,20 +9,35 @@ _agent = DesktopAgent()
 
 @router.get("/api/v1/desktop/status")
 async def get_status():
-    return {"status": "ok", "cmds_allowed": _agent._allowed_cmds}
+    try:
+        return {"success": True, "cmds_allowed": _agent._allowed_cmds}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/desktop/exec")
 async def exec_cmd(cmd: str, cwd: str = ""):
-    return _agent.execute(cmd, cwd)
+    try:
+        return {"success": True, "result": _agent.execute(cmd, cwd)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/desktop/read")
 async def read_file(path: str):
-    return _agent.read_file(path)
+    try:
+        return {"success": True, "result": _agent.read_file(path)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/desktop/write")
 async def write_file(path: str, content: str):
-    return _agent.write_file(path, content)
+    try:
+        return {"success": True, "result": _agent.write_file(path, content)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/desktop/ls")
 async def list_dir(path: str = "."):
-    return _agent.list_dir(path)
+    try:
+        return {"success": True, "result": _agent.list_dir(path)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}

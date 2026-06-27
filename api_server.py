@@ -273,12 +273,9 @@ if __name__ == "__main__":
     reload = os.environ.get("EVO_RELOAD", "").lower() in ("1", "true", "yes")
     _frozen = getattr(sys, 'frozen', False)
 
-    # 启动时预热（warmup_modules 在 startup.py 中定义）
-    try:
-        from api.startup import warmup_modules as _warmup_fn
-        _warmup_fn()
-    except (ImportError, Exception):
-        pass
+    # 启动时预热 — warmup_modules 已由 lifespan 异步调用，此处无需重复执行
+    # 见 api/startup.py lifespan() 中 asyncio.create_task(warmup_modules())
+    pass
 
     auth_status = "已启用" if _API_KEY_ENABLED else "未启用"
     if os.environ.get("EVO_AUTH_ENABLED","true").lower()=="true":
@@ -314,4 +311,4 @@ if __name__ == "__main__":
         workers=_WORKER_COUNT,
     )
 
-# TODO: move routes to api/routes/
+# routes 已全部迁移到 api/routes/（自动发现注册）

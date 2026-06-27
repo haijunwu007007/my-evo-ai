@@ -31,7 +31,7 @@ def init_telemetry(service_name: str = "auto-evo-ai", version: str = "V0.1"):
         })
 
         provider = TracerProvider(resource=resource)
-        provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExtender()))
+        provider.add_span_processor(BatchSpanProcessor(_ConsoleSpanExtender()))
 
         trace.set_tracer_provider(provider)
 
@@ -52,7 +52,7 @@ def init_telemetry(service_name: str = "auto-evo-ai", version: str = "V0.1"):
         logger.warning(f"[OTEL] 初始化异常: {e}")
 
 
-class ConsoleSpanExtender:
+class _ConsoleSpanExtender:
     """增强的控制台 Span 导出器 — 比默认 ConsoleSpanExporter 更可读"""
     def __init__(self, delegate=None):
         if delegate is None:

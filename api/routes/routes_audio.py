@@ -95,10 +95,7 @@ def _get_audio_info(path: str) -> dict:
 
 
 def _transcribe_file(path: str, language: str = "zh-CN") -> dict:
-    """使用 SpeechRecognition 转写音频文件"""
-    import speech_recognition as sr
-
-    recognizer = sr.Recognizer()
+    """使用 Vosk 离线转写音频文件（不依赖 Google API）"""
     result = {
         "success": True,
         "path": path,
@@ -108,7 +105,7 @@ def _transcribe_file(path: str, language: str = "zh-CN") -> dict:
         "error": None,
     }
     try:
-        # 先转为 WAV（SpeechRecognition 需要）
+        # 先转为 WAV（16kHz, mono）
         wav_path = path.rsplit(".", 1)[0] + "_tmp.wav"
         if not path.endswith(".wav"):
             _convert_audio(path, wav_path)
@@ -116,27 +113,36 @@ def _transcribe_file(path: str, language: str = "zh-CN") -> dict:
         else:
             use_path = path
 
-        with sr.AudioFile(use_path) as source:
-            recognizer.adjust_for_ambient_noise(source, duration=1)
-            audio_data = recognizer.record(source)
-
-        # 尝试多个识别引擎
-        text = ""
-        engine_used = ""
+        # 用 Vosk 识别
+        import wave, json as _json
+        vosk_ok = False
         try:
-            text = recognizer.recognize_google(audio_data, language=language)
-            engine_used = "google"
-        except sr.UnknownValueError:
+            from routes_speech import _load_vosk
+            vosk_model = _load_vosk()
+            if vosk_model:
+                import vosk
+                with wave.open(use_path, "rb") as wf:
+                    pcm = wf.readframes(wf.getnframes())
+                rec = vosk.KaldiRecognizer(vosk_model, 16000)
+                if rec.AcceptWaveform(pcm):
+                    r = _json.loads(rec.Result())
+                    text = r.get("text", "").strip()
+                    if text:
+                        vosk_ok = True
+                if not vosk_ok:
+                    fr = _json.loads(rec.FinalResult())
+                    text = fr.get("text", "").strip()
+                    if text:
+                        vosk_ok = True
+                if vosk_ok:
+                    engine_used = "vosk"
+        except Exception:
+            text = ""
+            engine_used = "none"
+
+        if not vosk_ok:
             text = "[无法识别该音频内容]"
-            engine_used = "google"
-        except sr.RequestError:
-            # Google 不可用时尝试 Sphinx（离线）或使用 whisper 本地模型
-            try:
-                text = recognizer.recognize_sphinx(audio_data, language=language.split("-")[0])
-                engine_used = "sphinx"
-            except Exception:
-                text = f"[识别服务暂不可用，已保存音频文件] {path}"
-                engine_used = "none"
+            engine_used = "none"
 
         # 清理临时 WAV
         if os.path.exists(wav_path):

@@ -13,16 +13,28 @@ def _get():
 
 @router.get("/api/v1/multi-agent/status")
 async def get_status():
-    return {"status": "ok", "teams": 0, "roles": ["planner","coder","reviewer","operator","analyst","researcher"]}
+    try:
+        return {"success": True, "teams": 0, "roles": ["planner","coder","reviewer","operator","analyst","researcher"]}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/multi-agent/team")
 async def create_team(team_id: str, name: str, members: list):
-    return _get().create_team(team_id, name, members)
+    try:
+        return {"success": True, "result": _get().create_team(team_id, name, members)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/multi-agent/run")
 async def run_session(team_id: str, task: str):
-    return _get().run_session(team_id, task)
+    try:
+        return {"success": True, "result": _get().run_session(team_id, task)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.get("/api/v1/multi-agent/sessions")
 async def get_sessions(limit: int = 10):
-    return {"sessions": _get().get_sessions(limit)}
+    try:
+        return {"success": True, "sessions": _get().get_sessions(limit)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}

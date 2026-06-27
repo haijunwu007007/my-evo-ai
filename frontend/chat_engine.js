@@ -206,7 +206,34 @@ document.addEventListener('DOMContentLoaded',function(){var s=document.getElemen
   btn.addEventListener('touchcancel',function(e){cancelVoiceRecord(e)})
 })()
 
-async function checkLLM(){var b=document.getElementById('modelBadge');b.textContent='⏳ 检测...';try{var r=await fetch('/api/v1/llm/status',{signal:AbortSignal.timeout(5000)});var d=await r.json();if(d&&d.active&&d.active.length>0){b.textContent='🧠 '+d.active[0].name;document.getElementById('modelStatus').textContent='🧠 模型: '+d.active[0].name}else if(d&&d.providers){var a=d.providers.filter(function(p){return p.available});if(a.length>0){b.textContent='🧠 '+a[0].name;document.getElementById('modelStatus').textContent='🧠 模型: '+a[0].name}else{b.textContent='❌ 无模型';document.getElementById('modelStatus').textContent='❌ 无模型'}}else{b.textContent='❌ 无模型';document.getElementById('modelStatus').textContent='❌ 无模型'}}catch(e){b.textContent='❌ 检测失败';document.getElementById('modelStatus').textContent='❌ 检测失败'}}
+async function checkLLM(){
+  var b=document.getElementById('modelBadge');
+  var s=document.getElementById('modelStatus');
+  var last=localStorage.getItem('evo_last_model')||'';
+  b.textContent=last?'🧠 '+last:'⏳ 检测...';
+  if(s&&last)s.textContent='🧠 模型: '+last;
+  try{
+    var r=await fetch('/api/v1/llm/status',{signal:AbortSignal.timeout(8000)});
+    var d=await r.json();
+    var name='';
+    if(d&&d.active&&d.active.length>0){name=d.active[0].name}
+    else if(d&&d.providers){
+      var a=d.providers.filter(function(p){return p.available});
+      if(a.length>0)name=a[0].name;
+    }
+    if(name){
+      localStorage.setItem('evo_last_model',name);
+      b.textContent='🧠 '+name;
+      if(s)s.textContent='🧠 模型: '+name;
+    }else{
+      b.textContent=last?'🧠 '+last:'❌ 无模型';
+      if(s)s.textContent=last?'🧠 模型: '+last:'❌ 无模型';
+    }
+  }catch(e){
+    b.textContent=last?'🧠 '+last:'❌ 检测失败';
+    if(s)s.textContent=last?'🧠 模型: '+last:'❌ 检测失败';
+  }
+}
 
 var _LOGIN_TTL=86400000;var _loginTs=localStorage.getItem('evo_login_ts')
 if(_loginTs&&(Date.now()-parseInt(_loginTs)>_LOGIN_TTL)){localStorage.removeItem('evo_logged_in');localStorage.removeItem('evo_login_ts')}

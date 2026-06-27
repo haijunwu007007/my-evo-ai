@@ -306,7 +306,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 </div>
 
 
-<script src="/frontend/chat_engine.js?v=12"></script>
+<script src="/frontend/chat_engine.js?v=15"></script>
 
 <script>
 // ── 语音输入：仿微信全宽按压条 + AudioContext 直录 WAV ──
@@ -377,7 +377,9 @@ function voiceStop(e){
   document.getElementById('vbLabel').textContent='识别中...';
   var blob=_wavBlob(_vSamples,actualRate),fd=new FormData();
   fd.append('file',blob,'v.wav');
-  fetch('/api/v1/speech/recognize',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(j){
+  var ctrl=new AbortController();
+  setTimeout(function(){ctrl.abort()},25000); // 25s超时
+  fetch('/api/v1/speech/recognize',{method:'POST',body:fd,signal:ctrl.signal}).then(function(r){return r.json()}).then(function(j){
     switchToText();
     if(j.success&&j.text){document.getElementById('input').value=j.text;send()}
   }).catch(function(){switchToText()});

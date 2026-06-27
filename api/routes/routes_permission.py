@@ -40,8 +40,8 @@ async def rbac_status():
 
 @router.post("/api/v1/rbac/check")
 async def rbac_check(username: str, permission: str):
-    return {"ok": True, "username": username, "permission": permission}
+    return {"success": True, "username": username, "permission": permission}
 
 @router.post("/api/v1/rbac/assign")
 async def rbac_assign(username: str, role: str):
-    return {"ok": True, "username": username, "role": role}
+    return {"success": True, "username": username, "role": role}

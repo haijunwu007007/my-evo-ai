@@ -8,8 +8,9 @@ DEBUG = os.getenv('EVO_DEBUG', '0') == '1'
 """系统配置 — 集中管理硬编码值"""
 import os
 
-# 路径配置
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if '__file__' in dir() else r'D:\AUTO-EVO-AI-V0.1'
+# 路径配置 — 用环境变量 EVO_HOME 覆盖，无硬编码
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.environ.get('EVO_HOME', _PROJECT_ROOT) if os.path.isdir(os.environ.get('EVO_HOME', '')) else _PROJECT_ROOT
 MODULES_DIR = os.path.join(PROJECT_ROOT, 'modules')
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, 'frontend')
 API_DIR = os.path.join(PROJECT_ROOT, 'api', 'routes')

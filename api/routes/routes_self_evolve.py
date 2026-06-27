@@ -25,4 +25,4 @@ async def record_task(agent: str, task_type: str, prompt: str, result: str, dura
 @router.post("/api/v1/self-evolve/score")
 async def score_task(task_id: int, score: float, feedback: str = ""):
     _get().score(task_id, score, feedback)
-    return {"ok": True}
+    return {"success": True}

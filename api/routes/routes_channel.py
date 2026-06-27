@@ -13,17 +13,29 @@ def _get():
 
 @router.get("/api/v1/channel/status")
 async def get_status():
-    return {"status": "ok", "channels": _get().get_channels()}
+    try:
+        return {"success": True, "channels": _get().get_channels()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/channel/register")
 async def register_channel(name: str, channel_type: str, config: str = "{}"):
     import json
-    return _get().register(name, channel_type, json.loads(config))
+    try:
+        return {"success": True, "result": _get().register(name, channel_type, json.loads(config))}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.post("/api/v1/channel/send")
 async def send_message(channel: str, content: str):
-    return _get().send(channel, content)
+    try:
+        return {"success": True, "result": _get().send(channel, content)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.get("/api/v1/channel/history")
 async def get_history(channel: str = "", limit: int = 20):
-    return {"messages": _get().get_history(channel, limit)}
+    try:
+        return {"success": True, "messages": _get().get_history(channel, limit)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}

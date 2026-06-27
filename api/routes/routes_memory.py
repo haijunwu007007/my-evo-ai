@@ -18,7 +18,7 @@ async def get_status():
 @router.post("/api/v1/memory/add")
 async def add_node(node_id: str, title: str, content: str = "", parent: str = "", tags: str = ""):
     _get().add_node(node_id, title, content, "note", parent, tags)
-    return {"ok": True}
+    return {"success": True}
 
 @router.get("/api/v1/memory/search")
 async def search(query: str):

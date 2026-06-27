@@ -7,15 +7,18 @@ from __future__ import annotations
 
 import os
 import os
-# ── 加载 /etc/evo.env（系统环境变量配置） ──
-try:
-    with open("/etc/evo.env") as f:
-        for line in f:
-            line = line.strip()
-            if line and "=" in line and not line.startswith("#"):
-                k, v = line.split("=", 1)
-                os.environ[k.strip()] = v.strip()
-except: pass
+# ── 加载 evo.env（环境变量配置，支持 Windows 和 Linux） ──
+_EVO_ENV_PATHS = ["/etc/evo.env", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")]
+for _env_path in _EVO_ENV_PATHS:
+    try:
+        if os.path.isfile(_env_path):
+            with open(_env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and "=" in line and not line.startswith("#"):
+                        k, v = line.split("=", 1)
+                        os.environ[k.strip()] = v.strip()
+    except: pass
 
 import sys
 import time
@@ -173,7 +176,7 @@ def _mount_vue_frontend():
             return JSONResponse(status_code=404, content={"error": "chat.html not found"})
         logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
-        logger.warning("[VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build")
+        logger.info("[VUE] frontend/dist 不存在（可选，非必需）")
 
 
 def _cleanup_sqlite():
@@ -193,6 +196,12 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)")
     logger.info("=" * 60)
+    # 生产日志配置
+    try:
+        from core.production_logging import setup_production_logging
+        setup_production_logging()
+    except Exception:
+        pass
     # 环境变量检查
     _env_checks = [
         ("ZHIPU_API_KEY", "智谱 GLM-4 (LLM 对话)"),
