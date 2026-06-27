@@ -1,0 +1,1340 @@
+2026-06-27 10:32:20,188 [INFO] evo.excel-engine: excel_engine: openpyxl loaded, full Excel support enabled
+2026-06-27 10:32:23,953 [INFO] evo.modules: Scanned 577 files, registered 459 modules
+2026-06-27 10:32:23,956 [INFO] evo.client: [CLIENT] requests 已统一配置 (3重试/连接池/UA)
+2026-06-27 10:32:25,007 [INFO] evo.api: [SCALAR] API 文档已挂载: /scalar
+2026-06-27 10:32:25,156 [INFO] evo.api.a2a: [A2A] 默认 6 个 Agent 已注册
+2026-06-27 10:32:25,324 [WARNING] evo.routes: [ROUTES] routes_agent_s 导入失败: cannot import name 'check_available' from 'agent_s_bridge' (D:\AUTO-EVO-AI-V0.1\modules\agent_s_bridge.py)
+2026-06-27 10:32:25,390 [ERROR] astro_site: name 'true' is not defined
+2026-06-27 10:32:25,700 [ERROR] bookstack_kb: name 'true' is not defined
+2026-06-27 10:32:25,754 [WARNING] evo.routes: [ROUTES] routes_channel 导入失败: cannot import name 'ChannelAgent' from 'channel_agent' (D:\AUTO-EVO-AI-V0.1\modules\channel_agent.py)
+2026-06-27 10:32:25,968 [WARNING] evo.routes: [ROUTES] routes_code_review 导入失败: cannot import name 'get_reviewer' from 'code_review' (D:\AUTO-EVO-AI-V0.1\modules\code_review.py)
+2026-06-27 10:32:25,973 [WARNING] routes_codebase_memory: CodebaseMemory 模块加载失败: cannot import name 'CodebaseIndexer' from 'codebase_engine' (D:\AUTO-EVO-AI-V0.1\modules\codebase_engine.py)
+2026-06-27 10:32:26,023 [INFO] evo.api.connectors: [CONN] 内置连接器: 19 个
+2026-06-27 10:32:29,789 [WARNING] evo.routes: [ROUTES] routes_context 导入失败: cannot import name 'get_monitor' from 'context_monitor' (D:\AUTO-EVO-AI-V0.1\modules\context_monitor.py)
+2026-06-27 10:32:29,820 [ERROR] dagu_scheduler: name 'true' is not defined
+2026-06-27 10:32:29,855 [WARNING] evo.routes: [ROUTES] routes_desktop 导入失败: cannot import name 'DesktopAgent' from 'desktop_agent' (D:\AUTO-EVO-AI-V0.1\modules\desktop_agent.py)
+2026-06-27 10:32:29,867 [WARNING] evo.routes: [ROUTES] routes_diff 导入失败: cannot import name 'compare_text' from 'diff_viewer' (D:\AUTO-EVO-AI-V0.1\modules\diff_viewer.py)
+2026-06-27 10:32:29,903 [ERROR] docusaurus_site: name 'true' is not defined
+2026-06-27 10:32:30,054 [ERROR] formbricks_collect: name 'true' is not defined
+2026-06-27 10:32:30,064 [WARNING] freqtrade_agent: Freqtrade 加载失败: cannot import name 'FreqtradeModule' from 'freqtrade_agent' (D:\AUTO-EVO-AI-V0.1\modules\freqtrade_agent.py)
+2026-06-27 10:32:30,073 [INFO] evo.api.gateway: [GATEWAY] 从 integrations_db.json 加载 118 个集成模板
+2026-06-27 10:32:30,241 [ERROR] heyform_survey: name 'true' is not defined
+2026-06-27 10:32:30,290 [WARNING] evo.routes: [ROUTES] routes_hooks 导入失败: cannot import name 'get_hooks' from 'hooks' (D:\AUTO-EVO-AI-V0.1\modules\hooks.py)
+2026-06-27 10:32:30,531 [ERROR] hugo_blog: name 'true' is not defined
+2026-06-27 10:32:30,737 [WARNING] joyai_vl: JoyAI VL 加载失败: cannot import name 'JoyAIVLInteractionModule' from 'joyai_vl_interaction' (D:\AUTO-EVO-AI-V0.1\modules\joyai_vl_interaction.py)
+2026-06-27 10:32:32,371 [ERROR] matomo_analytics: name 'true' is not defined
+2026-06-27 10:32:32,386 [INFO] evo.api.mcp: [MCP] 内置服务器已注册 (8 个工具)
+2026-06-27 10:32:32,470 [WARNING] evo.routes: [ROUTES] routes_memory 导入失败: cannot import name 'MemoryTree' from 'memory_tree' (D:\AUTO-EVO-AI-V0.1\modules\memory_tree.py)
+2026-06-27 10:32:32,508 [ERROR] mintlify_docs: name 'true' is not defined
+2026-06-27 10:32:32,637 [WARNING] evo.routes: [ROUTES] routes_multi_agent 导入失败: cannot import name 'MultiAgentCoordinator' from 'multi_agent_coord' (D:\AUTO-EVO-AI-V0.1\modules\multi_agent_coord.py)
+2026-06-27 10:32:32,920 [ERROR] outline_wiki: name 'true' is not defined
+2026-06-27 10:32:32,936 [WARNING] evo.routes: [ROUTES] routes_permission 导入失败: cannot import name 'PermissionSandbox' from 'permission_sandbox' (D:\AUTO-EVO-AI-V0.1\modules\permission_sandbox.py)
+2026-06-27 10:32:32,944 [WARNING] evo.routes: [ROUTES] routes_plan 导入失败: cannot import name 'get_planner' from 'plan_mode' (D:\AUTO-EVO-AI-V0.1\modules\plan_mode.py)
+2026-06-27 10:32:32,950 [ERROR] plausible_analytics: name 'true' is not defined
+2026-06-27 10:32:33,084 [INFO] evo.scheduler: [Scheduler] 引擎初始化
+2026-06-27 10:32:33,085 [INFO] evo.api.scheduler: [ENGINE] SchedulerEngine 加载成功
+2026-06-27 10:32:33,103 [INFO] evo.events: [EventEngine] 初始化 | 规则: 0
+2026-06-27 10:32:33,104 [INFO] evo.api.scheduler: [ENGINE] EventEngine 加载成功
+2026-06-27 10:32:33,118 [INFO] core.pipeline_engine: [PIPELINE] 从 SQLite 恢复 0 条运行记录
+2026-06-27 10:32:33,119 [INFO] evo.api.scheduler: [ENGINE] PipelineEngine 加载成功
+2026-06-27 10:32:33,172 [WARNING] evo.routes: [ROUTES] routes_self_evolve 导入失败: cannot import name 'SelfEvolveLearner' from 'self_evolve' (D:\AUTO-EVO-AI-V0.1\modules\self_evolve.py)
+2026-06-27 10:32:33,234 [WARNING] evo.routes: [ROUTES] routes_services 导入失败: cannot import name 'process_webhook' from 'github_webhook' (D:\AUTO-EVO-AI-V0.1\modules\github_webhook.py)
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f50c' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 282, in init_skills
+    _scan_external_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 200, in _scan_external_skills
+    logger.info(f"  \U0001f50c 扫描到 {found} 个外部 Skill")
+Message: '  \U0001f50c 扫描到 129 个外部 Skill'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f50c' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 282, in init_skills
+    _scan_external_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 200, in _scan_external_skills
+    logger.info(f"  \U0001f50c 扫描到 {found} 个外部 Skill")
+Message: '  \U0001f50c 扫描到 129 个外部 Skill'
+Arguments: ()
+2026-06-27 10:32:33,348 [INFO] evo.api.skills:   \U0001f50c 扫描到 129 个外部 Skill
+2026-06-27 10:32:33,383 [INFO] evo.api.skills:   [BRIDGE] MCP 工具桥接为 Skill: 8 个
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f517' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 284, in init_skills
+    _bridge_connectors_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 236, in _bridge_connectors_as_skills
+    logger.info(f"  \U0001f517 连接器桥接: {count} 个技能")
+Message: '  \U0001f517 连接器桥接: 54 个技能'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f517' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 284, in init_skills
+    _bridge_connectors_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 236, in _bridge_connectors_as_skills
+    logger.info(f"  \U0001f517 连接器桥接: {count} 个技能")
+Message: '  \U0001f517 连接器桥接: 54 个技能'
+Arguments: ()
+2026-06-27 10:32:33,385 [INFO] evo.api.skills:   \U0001f517 连接器桥接: 54 个技能
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f9e9' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 285, in init_skills
+    _bridge_mcpize_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 253, in _bridge_mcpize_as_skills
+    logger.info(f"  \U0001f9e9 MCPize 桥接: {count} 个技能")
+Message: '  \U0001f9e9 MCPize 桥接: 15 个技能'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f9e9' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 285, in init_skills
+    _bridge_mcpize_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 253, in _bridge_mcpize_as_skills
+    logger.info(f"  \U0001f9e9 MCPize 桥接: {count} 个技能")
+Message: '  \U0001f9e9 MCPize 桥接: 15 个技能'
+Arguments: ()
+2026-06-27 10:32:33,407 [INFO] evo.api.skills:   \U0001f9e9 MCPize 桥接: 15 个技能
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f517' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 286, in init_skills
+    _bridge_gateway_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 270, in _bridge_gateway_as_skills
+    logger.info(f"  \U0001f517 Gateway 桥接: {count} 个技能")
+Message: '  \U0001f517 Gateway 桥接: 118 个技能'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f517' in position 39: illegal multibyte sequence
+Call stack:
+  File "D:\AUTO-EVO-AI-V0.1\api_server.py", line 124, in <module>
+    _router_count = register_all_routers(app)
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 47, in register_all_routers
+    for mod_name, router in discover_routers():
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\__init__.py", line 34, in discover_routers
+    mod = importlib.import_module(f"api.routes.{mod_name}")
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 291, in <module>
+    init_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 286, in init_skills
+    _bridge_gateway_as_skills()
+  File "D:\AUTO-EVO-AI-V0.1\api\routes\routes_skills.py", line 270, in _bridge_gateway_as_skills
+    logger.info(f"  \U0001f517 Gateway 桥接: {count} 个技能")
+Message: '  \U0001f517 Gateway 桥接: 118 个技能'
+Arguments: ()
+2026-06-27 10:32:33,438 [INFO] evo.api.skills:   \U0001f517 Gateway 桥接: 118 个技能
+2026-06-27 10:32:33,469 [INFO] evo.api.skills: [SKILL] 技能注册完毕: 343 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize + Gateway桥接）
+2026-06-27 10:32:33,500 [WARNING] evo.routes: [ROUTES] routes_slash 导入失败: cannot import name 'execute' from 'slash_commands' (D:\AUTO-EVO-AI-V0.1\modules\slash_commands.py)
+2026-06-27 10:32:33,570 [ERROR] temporal_workflow: name 'true' is not defined
+2026-06-27 10:32:33,602 [WARNING] evo.routes: [ROUTES] routes_tool_execute 导入失败: invalid syntax. Is this intended to be part of the string? (routes_tool_execute.py, line 32)
+2026-06-27 10:32:33,724 [INFO] evo.routes: [ROUTES] 批量注册 161 个路由模块
+2026-06-27 10:32:33,724 [INFO] evo.api: [ROUTES] 已注册 161 个路由模块
+D:\AUTO-EVO-AI-V0.1\api_server.py:279: RuntimeWarning: coroutine 'warmup_modules' was never awaited
+  _warmup_fn()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+INFO:     Started server process [16540]
+INFO:     Waiting for application startup.
+2026-06-27 10:32:33,864 [INFO] evo.api: ============================================================
+2026-06-27 10:32:33,866 [INFO] evo.api: AUTO-EVO-AI V0.1 API 服务器启动 (LAZY MODE)
+2026-06-27 10:32:33,867 [INFO] evo.api: ============================================================
+2026-06-27 10:32:33,867 [INFO] evo.api:   [OK] 智谱 GLM-4 (LLM 对话) — 已配置
+2026-06-27 10:32:33,869 [INFO] evo.api:   [WAIT] OpenAI (备用 LLM) — 未配置（不影响核心功能）
+2026-06-27 10:32:33,870 [INFO] evo.api:   [WAIT] Stability AI (图片生成) — 未配置（不影响核心功能）
+2026-06-27 10:32:33,870 [INFO] evo.api:   [WAIT] 邮件发送 — 未配置（不影响核心功能）
+2026-06-27 10:32:33,871 [INFO] evo.api:   [WAIT] 支付宝支付 — 未配置（不影响核心功能）
+2026-06-27 10:32:33,872 [INFO] evo.api: [COMPAT] builtins 兼容层已清理
+2026-06-27 10:32:34,049 [INFO] evo.telemetry: [OTEL] FastAPI 自动仪表化完成
+2026-06-27 10:32:34,050 [INFO] evo.telemetry: [OTEL] OpenTelemetry 初始化完成: auto-evo-ai vV0.1
+2026-06-27 10:32:34,068 [INFO] evo.api: [LAZY] 注册 537 个模块待按需加载
+2026-06-27 10:32:34,069 [INFO] evo.api: 已注册 537 个模块（lazy），已有 0 个已加载模块
+2026-06-27 10:32:34,070 [INFO] evo.api: [EAGER] 预热加载前 10 个核心模块...
+2026-06-27 10:32:34,071 [INFO] evo.api: [EAGER] 已加载 10 个模块
+2026-06-27 10:32:34,072 [INFO] evo.api: 启动耗时: 0.0s — 部分模块已预热，其余按需加载
+2026-06-27 10:32:34,073 [WARNING] evo.api: [VUE] frontend/dist 不存在，请先执行 cd frontend && npm run build
+2026-06-27 10:32:34,074 [INFO] evo.api: [ENGINES] 调度器/事件引擎/任务队列 已启动
+2026-06-27 10:32:34,083 [INFO] evo.scheduler: [Scheduler] 调度器已启动 | 活跃任务: 0
+2026-06-27 10:32:34,084 [INFO] evo.api.scheduler: [ENGINES] 调度器/事件引擎/任务队列 已启动
+2026-06-27 10:32:34,086 [INFO] evo.api.mcp: [MCP] 从 mcp.json 共发现 0 个外部 MCP 服务器
+2026-06-27 10:32:34,087 [INFO] evo.api.mcp: [MCP] 注册完毕: 1 个服务器, 8 个工具（内置 + 0 外部）
+INFO:     Application startup complete.
+2026-06-27 10:32:34,105 [INFO] evo.events: [FileWatcher] 已启动, 监听 0 个目录
+2026-06-27 10:32:34,121 [INFO] evo.events: [EventEngine] 已启动
+INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+2026-06-27 10:32:34,190 [INFO] evo.api.skills: [SKILL] 技能注册完毕: 343 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize + Gateway桥接）
+2026-06-27 10:32:34,602 [INFO] evo.api: [LAZY-LOAD] agent_hera -> AgentHera
+2026-06-27 10:32:34,607 [INFO] evo.: [] 模块  初始化完成
+2026-06-27 10:32:34,612 [INFO] evo.api: [LAZY-LOAD] agent_hermes -> AgentHermes
+2026-06-27 10:32:34,614 [INFO] evo.: [] 模块  初始化完成
+2026-06-27 10:32:34,615 [INFO] evo.api: [LAZY-LOAD] agent_iris -> AgentIris
+2026-06-27 10:32:34,620 [INFO] evo.api: [LAZY-LOAD] agent_market -> AgentMarket
+2026-06-27 10:32:34,622 [INFO] evo.: [] 模块  初始化完成
+2026-06-27 10:32:34,624 [INFO] agent_mas: MAS多智能体系统初始化完成
+2026-06-27 10:32:34,629 [INFO] evo.api: [LAZY-LOAD] agent_mas -> AgentMASManager
+2026-06-27 10:32:34,634 [INFO] agent_mas: MAS多智能体系统初始化完成
+2026-06-27 10:32:34,640 [INFO] agent_minerva: Minerva智能体初始化完成
+2026-06-27 10:32:34,641 [INFO] evo.api: [LAZY-LOAD] agent_minerva -> AgentMinervaManager
+2026-06-27 10:32:34,653 [INFO] agent_minerva: Minerva智能体初始化完成
+2026-06-27 10:32:34,655 [INFO] agent_nemesis: Nemesis智能体初始化完成
+2026-06-27 10:32:34,656 [INFO] evo.api: [LAZY-LOAD] agent_nemesis -> AgentNemesisManager
+2026-06-27 10:32:34,657 [INFO] agent_nemesis: Nemesis智能体初始化完成
+2026-06-27 10:32:34,663 [INFO] agent_phoebus: Phoebus智能体初始化完成 | 9路由 | 3限流规则
+2026-06-27 10:32:34,664 [INFO] evo.api: [LAZY-LOAD] agent_phoebus -> AgentPhoebusManager
+2026-06-27 10:32:34,666 [INFO] agent_phoebus: Phoebus智能体初始化完成 | 18路由 | 3限流规则
+2026-06-27 10:32:34,668 [INFO] agent_poseidon: Poseidon智能体初始化完成 | 5路由 | 8后端
+2026-06-27 10:32:34,669 [INFO] evo.api: [LAZY-LOAD] agent_poseidon -> AgentPoseidonManager
+2026-06-27 10:32:34,671 [INFO] agent_poseidon: Poseidon智能体初始化完成 | 5路由 | 8后端
+2026-06-27 10:32:34,832 [INFO] AgentResourceControl: HardwareMonitor 初始化完成，采样间隔: 1.0s
+2026-06-27 10:32:34,835 [INFO] AgentResourceControl: ResourceQuotaManager 初始化完成
+2026-06-27 10:32:34,837 [INFO] AgentResourceControl: LowPerfAdapter 初始化，性能模式: balanced
+2026-06-27 10:32:34,838 [INFO] AgentResourceControl: LoadBalancer 初始化完成，策略: resource_aware
+2026-06-27 10:32:34,839 [INFO] AgentResourceControl: AgentPool [轻量任务池] 初始化完成，最大容量: 1000000
+2026-06-27 10:32:34,840 [INFO] AgentResourceControl: AgentPool [重度开发池] 初始化完成，最大容量: 500000
+2026-06-27 10:32:34,844 [INFO] AgentResourceControl: AgentPool [运算池] 初始化完成，最大容量: 100000
+2026-06-27 10:32:34,847 [INFO] AgentResourceControl: 硬件监控已启动
+2026-06-27 10:32:34,849 [INFO] AgentResourceControl: AgentPool [轻量任务池] 已启动
+2026-06-27 10:32:34,852 [INFO] AgentResourceControl: AgentPool [重度开发池] 已启动
+2026-06-27 10:32:34,853 [INFO] AgentResourceControl: AgentPool [运算池] 已启动
+2026-06-27 10:32:34,855 [INFO] AgentResourceControl: AgentResourceController v6.28.0 初始化完成
+2026-06-27 10:32:34,856 [INFO] evo.api: [LAZY-LOAD] agent_resource_control -> AgentResourceController
+2026-06-27 10:32:34,863 [INFO] evo.evo.resource.agent: [evo.resource.agent] 模块 evo.resource.agent 初始化完成
+2026-06-27 10:32:34,865 [INFO] agent_themis: Themis智能体初始化完成
+2026-06-27 10:32:34,866 [INFO] evo.api: [LAZY-LOAD] agent_themis -> AgentThemisManager
+2026-06-27 10:32:34,868 [INFO] agent_themis: Themis智能体初始化完成
+2026-06-27 10:32:34,869 [INFO] evo.agentguard-sec: [agentguard-sec] 初始化Agent安全防护...
+2026-06-27 10:32:34,871 [INFO] evo.agentguard-sec: [agentguard-sec] Agent安全防护就绪
+2026-06-27 10:32:34,872 [INFO] evo.api: [LAZY-LOAD] agentguard_sec -> AgentGuardSec
+2026-06-27 10:32:34,874 [INFO] evo.agentguard-sec: [agentguard-sec] 初始化Agent安全防护...
+2026-06-27 10:32:34,875 [INFO] evo.agentguard-sec: [agentguard-sec] Agent安全防护就绪
+2026-06-27 10:32:34,879 [INFO] agentseek: AgentSeek初始化完成
+2026-06-27 10:32:34,880 [INFO] evo.api: [LAZY-LOAD] agentseek -> AgentseekManager
+2026-06-27 10:32:34,882 [INFO] agentseek: AgentSeek初始化完成
+2026-06-27 10:32:35,008 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.6%; 内存使用率偏高: 85.5%
+2026-06-27 10:32:35,012 [INFO] evo.api: [LAZY-LOAD] aiops_monitor -> AiopsMonitor
+2026-06-27 10:32:35,019 [INFO] evo.api: [LAZY-LOAD] airbyte_etl -> AirbyteETLModule
+2026-06-27 10:32:35,022 [INFO] evo.api: [LAZY-LOAD] alert_manager -> AlertManager
+2026-06-27 10:32:35,024 [INFO] ansible_runner: Ansible执行器初始化完成
+2026-06-27 10:32:35,030 [INFO] evo.api: [LAZY-LOAD] ansible_runner -> AnsibleRunnerManager
+2026-06-27 10:32:35,032 [INFO] ansible_runner: Ansible执行器初始化完成
+2026-06-27 10:32:35,034 [ERROR] api_cache: API缓存初始化失败: CacheRule() takes no arguments
+2026-06-27 10:32:35,035 [WARNING] evo.api: [LAZY-INIT] api_cache initialize异常: CacheRule() takes no arguments
+2026-06-27 10:32:35,036 [INFO] evo.api: [LAZY-LOAD] api_cache -> ApiCacheManager
+2026-06-27 10:32:35,037 [ERROR] api_cache: API缓存初始化失败: CacheRule() takes no arguments
+2026-06-27 10:32:35,038 [INFO] api_mock: API Mock服务初始化完成
+2026-06-27 10:32:35,040 [INFO] evo.api: [LAZY-LOAD] api_mock -> ApiMockManager
+2026-06-27 10:32:35,045 [INFO] api_mock: API Mock服务初始化完成
+2026-06-27 10:32:35,047 [INFO] api_rate_guard: API限流守卫初始化完成 | 8规则 | 3分级客户端
+2026-06-27 10:32:35,048 [INFO] evo.api: [LAZY-LOAD] api_rate_guard -> ApiRateGuardManager
+2026-06-27 10:32:35,051 [INFO] api_rate_guard: API限流守卫初始化完成 | 16规则 | 3分级客户端
+2026-06-27 10:32:35,052 [INFO] api_tester: API测试器初始化完成
+2026-06-27 10:32:35,053 [INFO] evo.api: [LAZY-LOAD] api_tester -> ApiTesterManager
+2026-06-27 10:32:35,055 [INFO] api_tester: API测试器初始化完成
+2026-06-27 10:32:35,057 [INFO] api_versioning: API版本管理初始化完成
+2026-06-27 10:32:35,062 [INFO] evo.api: [LAZY-LOAD] api_versioning -> ApiVersioningManager
+2026-06-27 10:32:35,064 [INFO] api_versioning: API版本管理初始化完成
+2026-06-27 10:32:35,065 [INFO] argocd_deploy: ArgoCD部署管理初始化完成
+2026-06-27 10:32:35,066 [INFO] evo.api: [LAZY-LOAD] argocd_deploy -> ArgocdDeployManager
+2026-06-27 10:32:35,068 [INFO] argocd_deploy: ArgoCD部署管理初始化完成
+2026-06-27 10:32:35,069 [INFO] evo.api: [LAZY-LOAD] atom_code -> AtomCode
+2026-06-27 10:32:35,071 [INFO] evo.atom_code: [atom_code] 模块 atom_code 初始化完成
+2026-06-27 10:32:35,072 [INFO] evo.api: [LAZY-LOAD] audio_transcription -> AudioTranscription
+2026-06-27 10:32:35,074 [INFO] evo.: [] 模块  初始化完成
+2026-06-27 10:32:35,077 [INFO] evo.audit-log: [audit-log] 初始化审计日志...
+2026-06-27 10:32:35,080 [INFO] evo.audit-log: [audit-log] 审计日志就绪
+2026-06-27 10:32:35,081 [INFO] evo.api: [LAZY-LOAD] audit_log -> AuditLog
+2026-06-27 10:32:35,083 [INFO] evo.audit-log: [audit-log] 初始化审计日志...
+2026-06-27 10:32:35,084 [INFO] evo.audit-log: [audit-log] 审计日志就绪
+2026-06-27 10:32:35,085 [INFO] auto_failover: 自动故障转移初始化完成
+2026-06-27 10:32:35,086 [INFO] evo.api: [LAZY-LOAD] auto_failover -> AutoFailoverManager
+2026-06-27 10:32:35,087 [INFO] auto_failover: 自动故障转移初始化完成
+2026-06-27 10:32:35,088 [INFO] auto_healing: 自动修复初始化完成
+2026-06-27 10:32:35,089 [INFO] evo.api: [LAZY-LOAD] auto_healing -> AutoHealingManager
+2026-06-27 10:32:35,094 [INFO] auto_healing: 自动修复初始化完成
+2026-06-27 10:32:35,097 [INFO] evo.api: [LAZY-LOAD] auto_research_loop -> AutoResearchLoop
+2026-06-27 10:32:35,099 [INFO] evo.auto-restart: [auto-restart] 初始化自动重启服务...
+2026-06-27 10:32:35,101 [WARNING] evo.api: [LAZY-INIT] auto_restart initialize异常: no running event loop
+2026-06-27 10:32:35,103 [INFO] evo.api: [LAZY-LOAD] auto_restart -> AutoRestart
+2026-06-27 10:32:35,105 [INFO] evo.auto-restart: [auto-restart] 初始化自动重启服务...
+2026-06-27 10:32:35,107 [INFO] auto_scale: 自动扩缩容初始化完成
+2026-06-27 10:32:35,108 [INFO] evo.api: [LAZY-LOAD] auto_scale -> AutoScaleManager
+2026-06-27 10:32:35,116 [INFO] auto_scale: 自动扩缩容初始化完成
+2026-06-27 10:32:35,117 [INFO] evo.api: [LAZY-LOAD] auto_summary -> AutoSummary
+2026-06-27 10:32:35,119 [INFO] evo.: [] 模块  初始化完成
+2026-06-27 10:32:35,120 [INFO] autogen_studio: AutoGen Studio 初始化完成: 5 智能体, 4 技能
+2026-06-27 10:32:35,121 [INFO] evo.api: [LAZY-LOAD] autogen_studio -> AutoGenStudioManager
+2026-06-27 10:32:35,123 [INFO] automation_hub: 自动化中心初始化完成，5 个内置模板
+2026-06-27 10:32:35,124 [INFO] evo.api: [LAZY-LOAD] automation_hub -> AutomationHub
+2026-06-27 10:32:35,133 [INFO] automation_hub: 自动化中心初始化完成，5 个内置模板
+2026-06-27 10:32:35,139 [INFO] autorecovery: 自动恢复管理器初始化完成, 预置计划: 6
+2026-06-27 10:32:35,144 [INFO] evo.api: [LAZY-LOAD] autorecovery -> AutoRecoveryManager
+2026-06-27 10:32:35,147 [INFO] autoskills: 自动技能管理器初始化完成, 技能数: 8
+2026-06-27 10:32:35,149 [INFO] evo.api: [LAZY-LOAD] autoskills -> AutoSkillsManager
+2026-06-27 10:32:35,152 [INFO] awesome_design_md: 设计文档管理器初始化完成, 模板数: 4
+2026-06-27 10:32:35,154 [INFO] evo.api: [LAZY-LOAD] awesome_design_md -> AwesomeDesignMdManager
+2026-06-27 10:32:35,156 [INFO] backup_checksum: 备份校验管理器初始化完成
+2026-06-27 10:32:35,157 [INFO] evo.api: [LAZY-LOAD] backup_checksum -> BackupChecksumManager
+2026-06-27 10:32:35,163 [INFO] evo.backup-engine: [backup-engine] 初始化备份引擎...
+2026-06-27 10:32:35,166 [INFO] evo.backup-engine: [backup-engine] 备份引擎就绪
+2026-06-27 10:32:35,167 [INFO] evo.api: [LAZY-LOAD] backup_engine -> BackupEngine
+2026-06-27 10:32:35,169 [INFO] evo.backup-engine: [backup-engine] 初始化备份引擎...
+2026-06-27 10:32:35,170 [INFO] evo.backup-engine: [backup-engine] 备份引擎就绪
+2026-06-27 10:32:35,172 [INFO] backup_manager: 备份管理初始化完成
+2026-06-27 10:32:35,173 [INFO] evo.api: [LAZY-LOAD] backup_manager -> BackupManager
+2026-06-27 10:32:35,178 [INFO] backup_manager: 备份管理初始化完成
+2026-06-27 10:32:35,179 [INFO] backup_redis: Redis备份管理器初始化完成, 连接: 2, 策略: 2
+2026-06-27 10:32:35,181 [INFO] evo.api: [LAZY-LOAD] backup_redis -> BackupRedisManager
+2026-06-27 10:32:35,183 [INFO] evo.api: [WARMUP] 35 模块预热成功 / 8 失败 / 50 尝试
+2026-06-27 10:32:36,172 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 85.7%; 内存使用率偏高: 85.8%
+2026-06-27 10:32:37,502 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.9%
+2026-06-27 10:32:39,754 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.7%
+2026-06-27 10:32:40,221 [INFO] backup_scheduler: [backup_scheduler] 初始化完成，加载 4 个备份策略
+2026-06-27 10:32:40,223 [INFO] evo.api: [LAZY-LOAD] backup_scheduler -> BackupSchedulerManager
+2026-06-27 10:32:40,228 [INFO] backup_verify: [backup_verify] 初始化完成，注册 3 个备份，4 条规则
+2026-06-27 10:32:40,230 [INFO] evo.api: [LAZY-LOAD] backup_verify -> BackupVerifyManager
+2026-06-27 10:32:40,249 [INFO] bettafish_forecast: 预测引擎初始化完成，注册模型: 4
+2026-06-27 10:32:40,253 [INFO] evo.api: [LAZY-LOAD] bettafish_forecast -> BettafishForecastManager
+2026-06-27 10:32:40,255 [INFO] big_key_detection: 大Key检测初始化完成
+2026-06-27 10:32:40,256 [INFO] evo.api: [LAZY-LOAD] big_key_detection -> BigKeyDetectionManager
+2026-06-27 10:32:40,262 [INFO] billion_group_os: 亿群OS初始化完成，部门: 7，员工: 6
+2026-06-27 10:32:40,264 [INFO] evo.api: [LAZY-LOAD] billion_group_os -> BillionGroupOSManager
+2026-06-27 10:32:40,268 [INFO] evo.api: [LAZY-LOAD] bird_twitter -> BirdTwitter
+2026-06-27 10:32:40,272 [INFO] evo.api: [LAZY-LOAD] bitmap_operations -> Bitmap
+2026-06-27 10:32:40,274 [INFO] block_device: 块设备管理初始化完成，设备: 4
+2026-06-27 10:32:40,277 [INFO] evo.api: [LAZY-LOAD] block_device -> BlockDeviceManager
+2026-06-27 10:32:40,280 [INFO] evo.api: [LAZY-LOAD] bloom_filter -> BloomFilterEngine
+2026-06-27 10:32:40,285 [INFO] blue_green: 蓝绿部署模块初始化完成
+2026-06-27 10:32:40,286 [INFO] evo.api: [LAZY-LOAD] blue_green -> BlueGreenManager
+2026-06-27 10:32:40,290 [INFO] evo.api: [LAZY-LOAD] bot_detection -> BotDetection
+2026-06-27 10:32:40,300 [INFO] browser_auto: 浏览器自动化模块初始化完成
+2026-06-27 10:32:40,319 [INFO] evo.api: [LAZY-LOAD] browser_auto -> BrowserAutoManager
+2026-06-27 10:32:40,323 [INFO] evo.api: [LAZY-LOAD] browser_use -> BrowserUse
+2026-06-27 10:32:40,338 [INFO] evo.api: [LAZY-LOAD] browser_use_agent -> BrowserUseAgent
+2026-06-27 10:32:40,347 [INFO] business_analyst: [business_analyst] 初始化完成 | KPI: 8 | 模型: 3
+2026-06-27 10:32:40,347 [INFO] evo.api: [LAZY-LOAD] business_analyst -> BusinessAnalystManager
+2026-06-27 10:32:40,350 [INFO] bytecodestudio: bytecodestudio initialized
+2026-06-27 10:32:40,351 [INFO] evo.api: [LAZY-LOAD] bytecodestudio -> BytecodeStudioManager
+2026-06-27 10:32:40,353 [INFO] evo.cache-engine: [cache-engine] 初始化多级缓存引擎...
+2026-06-27 10:32:40,373 [INFO] evo.cache-engine: [cache-engine] 缓存引擎就绪 (L1+L2)
+2026-06-27 10:32:40,374 [INFO] evo.api: [LAZY-LOAD] cache_engine -> CacheEngine
+2026-06-27 10:32:40,389 [INFO] evo.api: [LAZY-LOAD] cal_scheduler -> CalModule
+2026-06-27 10:32:40,407 [INFO] canary_release: canary_release initialized
+2026-06-27 10:32:40,413 [INFO] evo.api: [LAZY-LOAD] canary_release -> CanaryReleaseManager
+2026-06-27 10:32:40,416 [INFO] capacity_planner: capacity_planner initialized
+2026-06-27 10:32:40,417 [INFO] evo.api: [LAZY-LOAD] capacity_planner -> CapacityPlannerManager
+2026-06-27 10:32:40,419 [INFO] cdn_invalidate: cdn_invalidate initialized
+2026-06-27 10:32:40,420 [INFO] evo.api: [LAZY-LOAD] cdn_invalidate -> CDNInvalidateManager
+2026-06-27 10:32:40,422 [INFO] cdn_manager: [cdn_manager] 初始化完成，节点:8 源站:2 缓存规则:5
+2026-06-27 10:32:40,423 [INFO] evo.api: [LAZY-LOAD] cdn_manager -> CDNManager
+2026-06-27 10:32:40,424 [INFO] cerbos_permission: [cerbos_permission] 初始化完成，策略:10 角色:6 派生角色:2
+2026-06-27 10:32:40,435 [INFO] evo.api: [LAZY-LOAD] cerbos_permission -> CerbosPermissionManager
+2026-06-27 10:32:40,439 [INFO] evo.chaos_engine: [ChaosEngine] 初始化完成
+2026-06-27 10:32:40,440 [INFO] evo.api: [LAZY-LOAD] chaos_engine -> ChaosEngine
+2026-06-27 10:32:40,450 [INFO] chaos_engineering: [ChaosEngineering] 平台初始化完成
+2026-06-27 10:32:40,452 [INFO] chaos_engineering: [ChaosEngineering] 已加载 3 个SLO, 8 个故障模板
+2026-06-27 10:32:40,453 [INFO] evo.api: [LAZY-LOAD] chaos_engineering -> ChaosEngineeringManager
+2026-06-27 10:32:40,456 [INFO] evo.api: [LAZY-LOAD] chart_engine -> ChartEngine
+2026-06-27 10:32:40,466 [INFO] chatwise: [Chatwise] 智能对话管理初始化完成
+2026-06-27 10:32:40,468 [INFO] evo.api: [LAZY-LOAD] chatwise -> ChatwiseManager
+2026-06-27 10:32:40,471 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 477)
+2026-06-27 10:32:41,368 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.7%
+2026-06-27 10:32:42,581 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.8%
+2026-06-27 10:32:43,850 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 86.5%
+2026-06-27 10:32:45,001 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 87.5%; 内存使用率偏高: 86.6%
+2026-06-27 10:32:46,168 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 81.2%; 内存使用率偏高: 86.4%
+2026-06-27 10:32:47,333 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.4%
+2026-06-27 10:32:48,518 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 92.6%; 内存使用率偏高: 86.0%
+2026-06-27 10:32:49,669 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.2%
+2026-06-27 10:32:50,855 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.3%; 内存使用率偏高: 86.5%
+2026-06-27 10:32:52,049 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.6%
+2026-06-27 10:32:53,206 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.6%
+2026-06-27 10:32:54,388 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.5%
+2026-06-27 10:32:55,564 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.5%
+2026-06-27 10:32:56,722 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.5%
+2026-06-27 10:32:57,898 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 86.5%
+2026-06-27 10:32:59,079 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 80.6%; 内存使用率偏高: 80.7%
+2026-06-27 10:33:00,237 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 87.5%; 内存使用率偏高: 80.7%
+2026-06-27 10:33:01,423 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:33:02,588 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 80.6%
+2026-06-27 10:33:03,753 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:33:04,925 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.3%
+2026-06-27 10:33:06,090 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.2%
+2026-06-27 10:33:07,257 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.2%
+2026-06-27 10:33:08,412 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:09,573 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:10,479 [INFO] evo.api: [LAZY-LOAD] chatwoot_support -> ChatwootModule
+2026-06-27 10:33:10,482 [INFO] evo.cicd_pipeline: [CICDPipeline] 初始化完成: 0 pipelines
+2026-06-27 10:33:10,484 [INFO] evo.api: [LAZY-LOAD] cicd_pipeline -> CICDPipeline
+2026-06-27 10:33:10,487 [INFO] claw_gateway: [ClawGateway] 网关初始化: 5 路由, 5 上游
+2026-06-27 10:33:10,488 [INFO] evo.api: [LAZY-LOAD] claw_gateway -> ClawGatewayManager
+2026-06-27 10:33:10,494 [INFO] evo.cli_interface: CLIInterface initialized
+2026-06-27 10:33:10,495 [INFO] evo.api: [LAZY-LOAD] cli_interface -> CLIInterface
+2026-06-27 10:33:10,497 [INFO] clickhouse_olap: [ClickHouseOLAP] 初始化完成，连接: 3，表: 3
+2026-06-27 10:33:10,498 [INFO] evo.api: [LAZY-LOAD] clickhouse_olap -> ClickhouseOlapManager
+2026-06-27 10:33:10,500 [INFO] client_pool: [ClientPool] 初始化完成，池: 6，连接: 100
+2026-06-27 10:33:10,501 [INFO] evo.api: [LAZY-LOAD] client_pool -> ClientPoolManager
+2026-06-27 10:33:10,503 [INFO] clone_database: [CloneDB] 初始化完成，数据源: 3，计划: 2
+2026-06-27 10:33:10,504 [INFO] evo.api: [LAZY-LOAD] clone_database -> CloneDatabaseManager
+2026-06-27 10:33:10,510 [INFO] evo.tracing: 链路追踪器初始化完成
+2026-06-27 10:33:10,511 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527590.5110967}
+2026-06-27 10:33:10,512 [INFO] cluster_proxy: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:33:10,513 [INFO] evo.api: [LAZY-LOAD] cluster_proxy -> ClusterProxyManager
+2026-06-27 10:33:10,514 [INFO] evo.audit: [AUDIT] SYSTEM |  | initialized | {'shards': 8}
+2026-06-27 10:33:10,515 [INFO] cluster_shard: 分片管理器初始化完成，分片数: 8
+2026-06-27 10:33:10,515 [INFO] evo.api: [LAZY-LOAD] cluster_shard -> ClusterShardManager
+2026-06-27 10:33:10,517 [INFO] code_generator: 代码生成器初始化完成，5 个模板
+2026-06-27 10:33:10,518 [INFO] evo.api: [LAZY-LOAD] code_generator -> CodeGenerator
+2026-06-27 10:33:10,520 [INFO] evo.audit: [AUDIT] SYSTEM |  | initialized | {'rules': 12}
+2026-06-27 10:33:10,521 [INFO] code_quality: 代码质量管理器初始化完成，规则数: 12
+2026-06-27 10:33:10,521 [INFO] evo.api: [LAZY-LOAD] code_quality -> CodeQualityManager
+2026-06-27 10:33:10,526 [INFO] evo.code_sandbox: CodeSandbox initialized
+2026-06-27 10:33:10,526 [INFO] evo.api: [LAZY-LOAD] code_sandbox -> CodeSandbox
+2026-06-27 10:33:10,528 [INFO] evo.api: [LAZY-LOAD] code_template -> CodeTemplateManager
+2026-06-27 10:33:10,530 [INFO] evo.api: [LAZY-LOAD] code_understand -> CodeUnderstandManager
+2026-06-27 10:33:10,534 [INFO] evo.api: [LAZY-LOAD] command_stats -> CommandStatsManager
+2026-06-27 10:33:10,537 [INFO] evo.api: [LAZY-LOAD] compaction_topic -> CompactionTopicManager
+2026-06-27 10:33:10,539 [INFO] compliance_auditor: 合规审计器初始化完成，5 个策略
+2026-06-27 10:33:10,543 [INFO] evo.api: [LAZY-LOAD] compliance_auditor -> ComplianceAuditor
+2026-06-27 10:33:10,544 [INFO] composio_tools: Composio工具管理器初始化完成，预置工具: 7
+2026-06-27 10:33:10,545 [INFO] evo.api: [LAZY-LOAD] composio_tools -> ComposioToolsManager
+2026-06-27 10:33:10,547 [INFO] evo.api: [LAZY-LOAD] compress_algorithm -> CompressAlgorithmManager
+2026-06-27 10:33:10,549 [INFO] config_center: 配置中心初始化完成，命名空间: 5
+2026-06-27 10:33:10,550 [INFO] evo.api: [LAZY-LOAD] config_center -> ConfigCenterModule
+2026-06-27 10:33:10,551 [INFO] evo.config_manager: ConfigManager initialized
+2026-06-27 10:33:10,552 [INFO] evo.api: [LAZY-LOAD] config_manager -> ConfigManager
+2026-06-27 10:33:10,554 [INFO] config_reloader: 配置重载管理器初始化完成，配置源: 3
+2026-06-27 10:33:10,554 [INFO] evo.api: [LAZY-LOAD] config_reloader -> ConfigReloaderManager
+2026-06-27 10:33:10,555 [INFO] evo.config_service: [ConfigService] 初始化完成
+2026-06-27 10:33:10,556 [INFO] evo.api: [LAZY-LOAD] config_service -> ConfigService
+2026-06-27 10:33:10,559 [INFO] evo.api: [LAZY-LOAD] config_ui -> ConfigUIManager
+2026-06-27 10:33:10,561 [INFO] evo.api: [LAZY-LOAD] connection_draining -> ConnectionDrainingManager
+2026-06-27 10:33:10,563 [INFO] connection_pool: 连接池初始化完成
+2026-06-27 10:33:10,563 [INFO] evo.api: [LAZY-LOAD] connection_pool -> ConnectionPool
+2026-06-27 10:33:10,565 [INFO] evo.api: [LAZY-LOAD] consumer_group -> ConsumerGroupManager
+2026-06-27 10:33:10,566 [INFO] evo.api: [BULK-LOAD] 后台加载 30/30 模块 (剩余 447)
+2026-06-27 10:33:10,734 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:11,910 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.2%
+2026-06-27 10:33:13,053 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.3%
+2026-06-27 10:33:14,218 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:28,099 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:30,451 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.1%
+2026-06-27 10:33:38,529 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.4%
+2026-06-27 10:33:39,678 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.4%
+2026-06-27 10:33:40,576 [INFO] evo.api: [LAZY-LOAD] content_service -> ContentServiceManager
+2026-06-27 10:33:40,579 [INFO] evo.api: [LAZY-LOAD] coordination -> CoordinationManager
+2026-06-27 10:33:40,580 [INFO] evo.api: [LAZY-LOAD] copilotkit -> CopilotKitManager
+2026-06-27 10:33:40,582 [INFO] evo.api: [LAZY-LOAD] cors_manager -> CORSManager
+2026-06-27 10:33:40,584 [INFO] crewai_strategy: 已注册 5 个内置策略
+2026-06-27 10:33:40,585 [INFO] crewai_strategy: 已注册 5 个内置智能体
+2026-06-27 10:33:40,585 [WARNING] evo.api: [LAZY-INIT] crewai_strategy initialize异常: name 'audit_logger' is not defined
+2026-06-27 10:33:40,586 [INFO] evo.api: [LAZY-LOAD] crewai_strategy -> CrewAIStrategy
+2026-06-27 10:33:40,590 [INFO] evo.api: [LAZY-LOAD] cron_engine -> CronEngine
+2026-06-27 10:33:40,592 [INFO] evo.cron-scheduler: [cron-scheduler] 初始化定时调度器...
+2026-06-27 10:33:40,593 [WARNING] evo.api: [LAZY-INIT] cron_scheduler initialize异常: no running event loop
+2026-06-27 10:33:40,594 [INFO] evo.api: [LAZY-LOAD] cron_scheduler -> CronScheduler
+2026-06-27 10:33:40,596 [INFO] evo.api: [LAZY-LOAD] cross_platform_adapter -> CrossPlatformAdapterAnalyzer
+2026-06-27 10:33:40,598 [INFO] evo.api: [LAZY-LOAD] cross_region -> CrossRegionManager
+2026-06-27 10:33:40,600 [INFO] evo.api: [LAZY-LOAD] crypto_api -> CryptoApi
+2026-06-27 10:33:40,602 [INFO] evo.api: [LAZY-LOAD] cte_query -> CTEQuery
+2026-06-27 10:33:40,604 [WARNING] evo.api: [LAZY-INIT] customer_chatbot initialize异常: 'CustomerChatbotModule' object has no attribute 'audit'
+2026-06-27 10:33:40,607 [INFO] evo.api: [LAZY-LOAD] customer_chatbot -> CustomerChatbotModule
+2026-06-27 10:33:40,609 [INFO] evo.api: [LAZY-LOAD] daemon_controller -> DaemonController
+2026-06-27 10:33:40,611 [INFO] evo.api: [LAZY-LOAD] dagger_pipeline -> DaggerPipelineModule
+2026-06-27 10:33:40,614 [INFO] dashboard: 仪表盘管理初始化完成
+2026-06-27 10:33:40,615 [INFO] evo.api: [LAZY-LOAD] dashboard -> DashboardManager
+2026-06-27 10:33:40,616 [INFO] evo.data-analysis: 数据分析引擎就绪
+2026-06-27 10:33:40,617 [INFO] evo.api: [LAZY-LOAD] data_analysis -> DataAnalysis
+2026-06-27 10:33:40,619 [INFO] evo.api: [LAZY-LOAD] data_archival -> DataArchivalModule
+2026-06-27 10:33:40,621 [INFO] evo.data-catalog: DataCatalog initialized
+2026-06-27 10:33:40,622 [INFO] evo.api: [LAZY-LOAD] data_catalog -> DataCatalog
+2026-06-27 10:33:40,624 [WARNING] evo.api: [LAZY-INIT] data_lineage initialize异常: 'DataLineageManager' object has no attribute 'logger'
+2026-06-27 10:33:40,625 [INFO] evo.api: [LAZY-LOAD] data_lineage -> DataLineageManager
+2026-06-27 10:33:40,627 [INFO] evo.data-masking: [DataMasking] 引擎就绪, 7 内置规则
+2026-06-27 10:33:40,628 [INFO] evo.api: [LAZY-LOAD] data_masking -> DataMaskingEngine
+2026-06-27 10:33:40,630 [INFO] evo.api: [LAZY-LOAD] data_pipeline -> DataPipeline
+2026-06-27 10:33:40,632 [INFO] evo.api: [LAZY-LOAD] data_quality -> DataQuality
+2026-06-27 10:33:40,633 [INFO] data_scraping: 数据采集引擎初始化完成
+2026-06-27 10:33:40,634 [INFO] evo.api: [LAZY-LOAD] data_scraping -> DataScraping
+2026-06-27 10:33:40,636 [INFO] evo.data-sync: [data-sync] 初始化数据同步...
+2026-06-27 10:33:40,642 [INFO] evo.data-sync: [data-sync] 数据同步就绪
+2026-06-27 10:33:40,643 [INFO] evo.api: [LAZY-LOAD] data_sync -> DataSync
+2026-06-27 10:33:40,645 [INFO] data_validator: 数据验证器初始化完成
+2026-06-27 10:33:40,650 [INFO] evo.api: [LAZY-LOAD] data_validator -> DataValidator
+2026-06-27 10:33:40,652 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527620.6527727}
+2026-06-27 10:33:40,653 [INFO] data_visualizer: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:33:40,654 [INFO] evo.api: [LAZY-LOAD] data_visualizer -> DataVisualizerManager
+2026-06-27 10:33:40,658 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527620.6581614}
+2026-06-27 10:33:40,658 [INFO] data_watermark: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:33:40,659 [INFO] evo.api: [LAZY-LOAD] data_watermark -> DataWatermarkManager
+2026-06-27 10:33:40,660 [INFO] evo.api: [BULK-LOAD] 后台加载 29/30 模块 (剩余 417)
+2026-06-27 10:33:41,987 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%
+2026-06-27 10:33:49,108 [INFO] evo.database-client: [database-client] 初始化数据库客户端...
+2026-06-27 10:33:49,111 [INFO] evo.database-client: [database-client] 数据库客户端就绪 (sqlite)
+2026-06-27 10:33:49,112 [INFO] evo.api: [LAZY-LOAD] database_client -> DatabaseClient
+2026-06-27 10:33:49,113 [INFO] database_connector: 数据库连接器初始化完成
+2026-06-27 10:33:49,114 [INFO] evo.api: [LAZY-LOAD] database_connector -> DatabaseConnector
+2026-06-27 10:33:49,117 [INFO] database_manager: DatabaseManager initialized (sqlite3=available)
+2026-06-27 10:33:49,119 [INFO] evo.api: [LAZY-LOAD] database_manager -> DatabaseManager
+2026-06-27 10:33:49,124 [INFO] evo.api: [LAZY-LOAD] ddos_protection -> DDoSProtection
+2026-06-27 10:33:49,128 [INFO] evo.api: [LAZY-LOAD] dead_letter -> DeadLetter
+2026-06-27 10:33:49,132 [INFO] evo.api: [LAZY-LOAD] deadlock_detector -> DeadlockDetector
+2026-06-27 10:33:49,134 [INFO] evo.api: [LAZY-LOAD] debug_panel -> DebugPanel
+2026-06-27 10:33:49,136 [INFO] evo.api: [LAZY-LOAD] decision_engine -> DecisionEngine
+2026-06-27 10:33:49,139 [INFO] evo.api: [LAZY-LOAD] decision_tree -> DecisionTree
+2026-06-27 10:33:49,142 [INFO] evo.api: [LAZY-LOAD] deer_flow_engine -> DeerFlowEngine
+2026-06-27 10:33:50,037 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.1%
+2026-06-27 10:33:54,576 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.1%; 内存使用率偏高: 80.8%
+2026-06-27 10:33:55,839 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:33:56,987 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:33:58,126 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:33:59,295 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 80.6%
+2026-06-27 10:34:00,430 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:01,575 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:02,735 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.3%
+2026-06-27 10:34:03,931 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.8%
+2026-06-27 10:34:05,082 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 88.9%; 内存使用率偏高: 80.5%
+2026-06-27 10:34:06,230 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:07,400 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:08,531 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:09,695 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:10,673 [INFO] dependency_manager: 依赖管理器初始化完成
+2026-06-27 10:34:10,675 [INFO] evo.api: [LAZY-LOAD] dependency_manager -> DependencyManager
+2026-06-27 10:34:10,679 [INFO] dify: Dify管理器初始化完成，API: https://api.dify.ai/v1
+2026-06-27 10:34:10,680 [INFO] evo.api: [LAZY-LOAD] dify -> DifyManager
+2026-06-27 10:34:10,685 [INFO] evo.api: [LAZY-LOAD] distributed_counter -> DistributedCounter
+2026-06-27 10:34:10,693 [INFO] evo.api: [LAZY-LOAD] distributed_lock -> DistributedLock
+2026-06-27 10:34:10,696 [WARNING] evo.api: [LAZY-INIT] distributed_tracer initialize异常: 'DistributedTracer' object has no attribute '_max_traces'
+2026-06-27 10:34:10,698 [INFO] evo.api: [LAZY-LOAD] distributed_tracer -> DistributedTracer
+2026-06-27 10:34:10,700 [INFO] evo.api: [LAZY-LOAD] dns_manager -> DNSManager
+2026-06-27 10:34:10,703 [INFO] evo.dns_resolver: DnsResolver initialized
+2026-06-27 10:34:10,704 [INFO] evo.api: [LAZY-LOAD] dns_resolver -> DnsResolver
+2026-06-27 10:34:10,707 [INFO] doc_automation: 文档自动化初始化完成，5 个模板，输出目录: D:\AUTO-EVO-AI-V0.1\generated_docs
+2026-06-27 10:34:10,708 [INFO] evo.api: [LAZY-LOAD] doc_automation -> DocAutomation
+2026-06-27 10:34:10,711 [INFO] evo.api: [LAZY-LOAD] docker_deploy -> DockerDeploy
+2026-06-27 10:34:10,764 [INFO] evo.docker_manager: [DockerManager] 初始化完成
+2026-06-27 10:34:10,765 [INFO] evo.api: [LAZY-LOAD] docker_manager -> DockerManager
+2026-06-27 10:34:10,767 [INFO] evo.api: [LAZY-LOAD] docling_processor -> DoclingProcessorModule
+2026-06-27 10:34:10,769 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527650.769509}
+2026-06-27 10:34:10,770 [INFO] document_automation: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:34:10,771 [INFO] evo.api: [LAZY-LOAD] document_automation -> DocumentAutomationManager
+2026-06-27 10:34:10,773 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527650.7738876}
+2026-06-27 10:34:10,774 [INFO] document_qa: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:34:10,775 [INFO] evo.api: [LAZY-LOAD] document_qa -> DocumentQaManager
+2026-06-27 10:34:10,779 [INFO] evo.docx: [docx] initialized, HAS_DOCX=True, work_dir=D:\AUTO-EVO-AI-V0.1\modules\..\data\documents
+2026-06-27 10:34:10,779 [INFO] evo.api: [LAZY-LOAD] docx_processor -> DocxProcessor
+2026-06-27 10:34:10,782 [INFO] evo.api: [LAZY-LOAD] e2b_sandbox -> E2BSandbox
+2026-06-27 10:34:10,785 [INFO] evo.api: [LAZY-LOAD] elasticsearch_search -> ElasticsearchSearch
+2026-06-27 10:34:10,788 [INFO] evo.email-automation: [email-automation] 初始化邮件自动化...
+2026-06-27 10:34:10,789 [WARNING] evo.email-automation: [email-automation] 无运行中的事件循环，跳过后台任务创建
+2026-06-27 10:34:10,790 [INFO] evo.email-automation: [email-automation] 邮件自动化就绪
+2026-06-27 10:34:10,791 [INFO] evo.api: [LAZY-LOAD] email_automation -> EmailAutomation
+2026-06-27 10:34:10,793 [WARNING] evo.api: [LAZY-INIT] email_pro initialize异常: 'EmailProModule' object has no attribute 'audit'
+2026-06-27 10:34:10,795 [INFO] evo.api: [LAZY-LOAD] email_pro -> EmailProModule
+2026-06-27 10:34:10,824 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.8%
+2026-06-27 10:34:10,882 [INFO] encryption_service: 加密服务初始化完成，2 个密钥
+2026-06-27 10:34:10,883 [INFO] evo.api: [LAZY-LOAD] encryption_service -> EncryptionService
+2026-06-27 10:34:10,892 [INFO] evo.api: [LAZY-LOAD] entity_extraction -> EntityExtraction
+2026-06-27 10:34:10,894 [INFO] evo.api: [LAZY-LOAD] error_aggregator -> ErrorAggregator
+2026-06-27 10:34:10,895 [INFO] evo.api: [LAZY-LOAD] eve_learn -> EveLearnModule
+2026-06-27 10:34:10,897 [INFO] evo.api: [LAZY-LOAD] event_bus -> EventBus
+2026-06-27 10:34:10,899 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 377)
+2026-06-27 10:34:11,972 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:13,143 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 93.1%; 内存使用率偏高: 80.8%
+2026-06-27 10:34:14,305 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:14,471 [WARNING] routes_speech: [SPEECH] Vosk 模型目录不存在: C:\Users\吴海军\vosk_models\vosk-model-small-cn-0.22
+2026-06-27 10:34:15,455 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:15,735 [WARNING] routes_speech: [SPEECH] Vosk 模型目录不存在: C:\Users\吴海军\vosk_models\vosk-model-small-cn-0.22
+2026-06-27 10:34:16,591 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 88.0%; 内存使用率偏高: 80.5%
+2026-06-27 10:34:17,240 [WARNING] routes_speech: [SPEECH] Vosk 模型目录不存在: C:\Users\吴海军\vosk_models\vosk-model-small-cn-0.22
+2026-06-27 10:34:17,750 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:18,897 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:20,051 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:21,200 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:22,348 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:23,505 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.0%
+2026-06-27 10:34:24,658 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.9%
+2026-06-27 10:34:25,806 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.3%
+2026-06-27 10:34:26,947 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.4%
+2026-06-27 10:34:28,113 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.4%
+2026-06-27 10:34:29,272 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.5%
+2026-06-27 10:34:30,405 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 84.6%; 内存使用率偏高: 81.4%
+2026-06-27 10:34:31,561 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.2%; 内存使用率偏高: 81.4%
+2026-06-27 10:34:32,695 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.4%
+2026-06-27 10:34:33,836 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.1%
+2026-06-27 10:34:34,971 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.0%
+2026-06-27 10:34:36,109 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.9%
+2026-06-27 10:34:37,244 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.9%
+2026-06-27 10:34:38,384 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:39,514 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:40,646 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:40,906 [INFO] evo.api: [LAZY-LOAD] event_trigger -> EventTrigger
+2026-06-27 10:34:40,910 [INFO] evo.api: [LAZY-LOAD] everos_memory -> EverOSModule
+2026-06-27 10:34:40,913 [INFO] evo.api: [LAZY-LOAD] evo_adaptive -> EvoAdaptive
+2026-06-27 10:34:40,915 [INFO] evo.evo_backup: EvoBackup initialized
+2026-06-27 10:34:40,917 [INFO] evo.api: [LAZY-LOAD] evo_backup -> EvoBackup
+2026-06-27 10:34:40,920 [INFO] evo.api: [LAZY-LOAD] evo_ecology -> EvoEcology
+2026-06-27 10:34:40,922 [INFO] evo.api: [LAZY-LOAD] evo_monitor -> EvoMonitor
+2026-06-27 10:34:40,925 [INFO] evo.evo-nexus-core: [evo-nexus-core] 初始化自进化引擎...
+2026-06-27 10:34:41,774 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:42,910 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:44,055 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:45,187 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.7%
+2026-06-27 10:34:45,932 [WARNING] evo.api: [LAZY-INIT] evo_safety initialize异常: 'EvoSafety' object has no attribute 'audit'
+2026-06-27 10:34:45,938 [INFO] evo.api: [LAZY-LOAD] evo_safety -> EvoSafety
+2026-06-27 10:34:45,944 [INFO] evo.api: [LAZY-LOAD] exactly_once -> ExactlyOnceProcessor
+2026-06-27 10:34:45,955 [INFO] evo.excel-engine: ExcelEngine initialized (openpyxl=True)
+2026-06-27 10:34:45,957 [INFO] evo.api: [LAZY-LOAD] excel_engine -> ExcelEngine
+2026-06-27 10:34:45,960 [INFO] evo.excel: [excel-pro] initialized, HAS_OPENPYXL=True
+2026-06-27 10:34:45,961 [INFO] evo.api: [LAZY-LOAD] excel_pro -> ExcelPro
+2026-06-27 10:34:45,971 [INFO] experience_base: [ExperienceBase] 经验库初始化 (共 0 条经验)
+2026-06-27 10:34:45,974 [INFO] evo.api: [LAZY-LOAD] experience_base -> ExperienceBase
+2026-06-27 10:34:45,976 [WARNING] evo.api: [LAZY-INIT] experience_bridge initialize异常: 'ExperienceBridgeModule' object has no attribute 'audit'
+2026-06-27 10:34:45,978 [INFO] evo.api: [LAZY-LOAD] experience_bridge -> ExperienceBridgeModule
+2026-06-27 10:34:45,981 [INFO] export_engine: 导出引擎初始化完成，输出目录: D:\AUTO-EVO-AI-V0.1\exports
+2026-06-27 10:34:45,982 [INFO] evo.api: [LAZY-LOAD] export_engine -> ExportEngine
+2026-06-27 10:34:45,984 [WARNING] evo.api: [LAZY-INIT] fanout_queue initialize异常: 'FanoutQueueModule' object has no attribute 'audit'
+2026-06-27 10:34:45,996 [INFO] evo.api: [LAZY-LOAD] fanout_queue -> FanoutQueueModule
+2026-06-27 10:34:45,999 [INFO] evo.feature_flag: [FeatureFlag] 初始化完成, 0 flags
+2026-06-27 10:34:46,000 [INFO] evo.api: [LAZY-LOAD] feature_flag -> FeatureFlag
+2026-06-27 10:34:46,005 [INFO] evo.api: [LAZY-LOAD] feishu_notifier -> FeishuNotifier
+2026-06-27 10:34:46,008 [INFO] file_manager: 文件管理初始化完成
+2026-06-27 10:34:46,009 [INFO] evo.api: [LAZY-LOAD] file_manager -> FileManager
+2026-06-27 10:34:46,011 [INFO] evo.api: [LAZY-LOAD] file_ops -> FileOps
+2026-06-27 10:34:46,013 [WARNING] evo.api: [LAZY-INIT] file_system initialize异常: 'FileSystemModule' object has no attribute 'audit'
+2026-06-27 10:34:46,014 [INFO] evo.api: [LAZY-LOAD] file_system -> FileSystemModule
+2026-06-27 10:34:46,015 [INFO] evo.api: [LAZY-LOAD] finance_data -> FinanceData
+2026-06-27 10:34:46,016 [INFO] evo.api: [LAZY-LOAD] first_principles -> FirstPrinciples
+2026-06-27 10:34:46,017 [INFO] evo.first-run-setup: [FirstRunSetup] 设置向导就绪, 7 检查项
+2026-06-27 10:34:46,020 [INFO] evo.api: [LAZY-LOAD] first_run_setup -> FirstRunSetup
+2026-06-27 10:34:46,022 [INFO] evo.flow-engine: [flow-engine] 初始化工作流引擎...
+2026-06-27 10:34:46,024 [INFO] evo.flow-engine: [flow-engine] 工作流引擎初始化完成，已加载 2 个流程定义
+2026-06-27 10:34:46,025 [INFO] evo.api: [LAZY-LOAD] flow_engine -> FlowEngine
+2026-06-27 10:34:46,026 [INFO] evo.flowise: [flowise] 初始化可视化流程编排平台...
+2026-06-27 10:34:46,027 [INFO] evo.flowise: [flowise] 初始化完成，已加载 3 个模板
+2026-06-27 10:34:46,028 [INFO] evo.api: [LAZY-LOAD] flowise -> Flowise
+2026-06-27 10:34:46,030 [INFO] evo.api: [LAZY-LOAD] forex_api -> ForexAPI
+2026-06-27 10:34:46,031 [INFO] evo.api: [LAZY-LOAD] form_builder -> FormValidationEngine
+2026-06-27 10:34:46,033 [INFO] evo.api: [LAZY-LOAD] freqtrade_agent -> FreqtradeAgent
+2026-06-27 10:34:46,034 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 347)
+2026-06-27 10:34:46,319 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.8%
+2026-06-27 10:34:47,457 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 88.0%; 内存使用率偏高: 80.6%
+2026-06-27 10:34:48,583 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.6%
+2026-06-27 10:34:49,160 [INFO] evo.api: [LAZY-LOAD] ga4_analytics -> Ga4Analytics
+2026-06-27 10:34:49,165 [INFO] evo.api: [LAZY-LOAD] git_ops -> GitOps
+2026-06-27 10:34:49,167 [INFO] evo.api: [LAZY-LOAD] gitea_issue_sync -> GiteaIssueSync
+2026-06-27 10:34:49,172 [INFO] evo.api: [LAZY-LOAD] github_scanner -> GithubScanner
+2026-06-27 10:34:49,175 [WARNING] evo.api: [LAZY-INIT] gitlab_repo initialize异常: 'GitLabRepo' object has no attribute 'audit'
+2026-06-27 10:34:49,177 [INFO] evo.api: [LAZY-LOAD] gitlab_repo -> GitLabRepo
+2026-06-27 10:34:49,178 [INFO] evo.api: [LAZY-LOAD] gitmcp_converter -> GitMCPConverter
+2026-06-27 10:34:49,730 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 80.5%
+2026-06-27 10:34:51,226 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 80.9%
+2026-06-27 10:34:52,481 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 88.0%; 内存使用率偏高: 81.4%
+2026-06-27 10:34:53,631 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.7%; 内存使用率偏高: 82.4%
+2026-06-27 10:34:54,796 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.8%
+2026-06-27 10:34:55,960 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.8%
+2026-06-27 10:34:57,093 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 82.4%
+2026-06-27 10:34:58,231 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.6%
+2026-06-27 10:34:59,644 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 92.3%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:00,811 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.0%
+2026-06-27 10:35:01,954 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.3%
+2026-06-27 10:35:03,161 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 87.1%; 内存使用率偏高: 82.3%
+2026-06-27 10:35:04,374 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.3%
+2026-06-27 10:35:05,535 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.1%; 内存使用率偏高: 82.2%
+2026-06-27 10:35:06,754 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 83.8%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:07,895 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 82.7%
+2026-06-27 10:35:09,037 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.0%; 内存使用率偏高: 82.3%
+2026-06-27 10:35:10,177 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.4%
+2026-06-27 10:35:11,426 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 81.8%; 内存使用率偏高: 82.4%
+2026-06-27 10:35:12,578 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.6%
+2026-06-27 10:35:13,721 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.5%
+2026-06-27 10:35:15,306 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.5%
+2026-06-27 10:35:16,064 [INFO] goal_tracker: [GoalTracker] 目标追踪器初始化
+2026-06-27 10:35:16,067 [INFO] evo.api: [LAZY-LOAD] goal_tracker -> GoalTracker
+2026-06-27 10:35:16,076 [INFO] evo.api: [LAZY-LOAD] grafana_monitor -> GrafanaMonitorModule
+2026-06-27 10:35:16,079 [INFO] evo.api: [LAZY-LOAD] graph_engine -> GraphEngine
+2026-06-27 10:35:16,087 [INFO] evo.api: [LAZY-LOAD] graphify_index -> GraphifyIndex
+2026-06-27 10:35:16,090 [INFO] evo.api: [LAZY-LOAD] gsc_search -> GscSearch
+2026-06-27 10:35:16,093 [INFO] evo.api: [LAZY-LOAD] gstack_team -> GStackTeam
+2026-06-27 10:35:16,095 [INFO] evo.api: [LAZY-LOAD] headroom_compress -> HeadroomModule
+2026-06-27 10:35:16,097 [INFO] evo.api: [LAZY-LOAD] health_dashboard -> HealthDashboard
+2026-06-27 10:35:16,101 [INFO] health_monitor: 健康监控初始化完成
+2026-06-27 10:35:16,102 [INFO] evo.api: [LAZY-LOAD] health_monitor -> HealthMonitor
+2026-06-27 10:35:16,104 [INFO] evo.api: [LAZY-LOAD] health_ping -> HealthPing
+2026-06-27 10:35:16,109 [INFO] evo.api: [LAZY-LOAD] home_assistant -> HomeAssistantModule
+2026-06-27 10:35:16,111 [INFO] evo.api: [LAZY-LOAD] http_client -> HttpClient
+2026-06-27 10:35:16,114 [INFO] evo.api: [LAZY-LOAD] humanizer -> Humanizer
+2026-06-27 10:35:16,116 [INFO] evo.api: [LAZY-LOAD] hyper_extract -> HyperExtract
+2026-06-27 10:35:16,131 [INFO] evo.api: [LAZY-LOAD] hyperframes_video -> HyperframesVideo
+2026-06-27 10:35:16,139 [INFO] evo.idempotent: [idempotent] 初始化幂等保障...
+2026-06-27 10:35:16,237 [INFO] evo.idempotent: [idempotent] 幂等保障就绪
+2026-06-27 10:35:16,282 [INFO] evo.api: [LAZY-LOAD] idempotent -> Idempotent
+2026-06-27 10:35:16,323 [WARNING] evo.api: [LAZY-INIT] idempotent_msg initialize异常: 'IdempotentMsgHandler' object has no attribute 'trace'
+2026-06-27 10:35:16,335 [INFO] evo.api: [LAZY-LOAD] idempotent_msg -> IdempotentMsgHandler
+2026-06-27 10:35:16,686 [INFO] evo.api: [LAZY-LOAD] identity_manager -> IdentityManager
+2026-06-27 10:35:16,690 [WARNING] evo.api: [LAZY-INIT] image_understand initialize异常: 'ImageUnderstandModule' object has no attribute 'audit'
+2026-06-27 10:35:16,692 [INFO] evo.api: [LAZY-LOAD] image_understand -> ImageUnderstandModule
+2026-06-27 10:35:16,694 [INFO] evo.incident_manager: [IncidentManager] 初始化完成
+2026-06-27 10:35:16,695 [INFO] evo.api: [LAZY-LOAD] incident_manager -> IncidentManager
+2026-06-27 10:35:16,696 [INFO] evo.api: [LAZY-LOAD] incident_response -> IncidentResponseModule
+2026-06-27 10:35:16,700 [INFO] evo.incremental_backup: IncrementalBackup initialized
+2026-06-27 10:35:16,701 [INFO] evo.api: [LAZY-LOAD] incremental_backup -> IncrementalBackup
+2026-06-27 10:35:16,704 [WARNING] evo.api: [LAZY-INIT] index_advisor initialize异常: 'IndexAdvisor' object has no attribute 'audit'
+2026-06-27 10:35:16,706 [INFO] evo.api: [LAZY-LOAD] index_advisor -> IndexAdvisor
+2026-06-27 10:35:16,708 [WARNING] evo.api: [LAZY-INIT] infra_as_code initialize异常: 'InfraAsCode' object has no attribute 'audit'
+2026-06-27 10:35:16,710 [INFO] evo.api: [LAZY-LOAD] infra_as_code -> InfraAsCode
+2026-06-27 10:35:16,712 [INFO] evo.api: [BULK-LOAD] 后台加载 26/30 模块 (剩余 307)
+2026-06-27 10:35:17,048 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.2%
+2026-06-27 10:35:18,206 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.8%
+2026-06-27 10:35:19,443 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 85.1%; 内存使用率偏高: 82.8%
+2026-06-27 10:35:20,579 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.3%
+2026-06-27 10:35:21,738 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.3%
+2026-06-27 10:35:22,994 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 82.5%
+2026-06-27 10:35:24,143 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.9%
+2026-06-27 10:35:25,295 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 83.0%
+2026-06-27 10:35:26,433 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 90.9%; 内存使用率偏高: 82.8%
+2026-06-27 10:35:27,569 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.0%
+2026-06-27 10:35:29,173 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.2%
+2026-06-27 10:35:30,557 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:31,756 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.4%; 内存使用率偏高: 81.5%
+2026-06-27 10:35:32,890 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 81.4%
+2026-06-27 10:35:34,040 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.6%
+2026-06-27 10:35:35,178 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.8%; 内存使用率偏高: 82.2%
+2026-06-27 10:35:36,319 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.2%
+2026-06-27 10:35:37,461 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 81.6%
+2026-06-27 10:35:38,674 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 81.7%
+2026-06-27 10:35:39,903 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 85.7%; 内存使用率偏高: 81.8%
+2026-06-27 10:35:41,200 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.0%
+2026-06-27 10:35:42,538 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.1%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:43,839 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:45,021 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 84.6%; 内存使用率偏高: 82.2%
+2026-06-27 10:35:46,174 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:46,721 [WARNING] evo.api: [LAZY-INIT] instant_messaging initialize异常: 'InstantMessaging' object has no attribute 'audit'
+2026-06-27 10:35:46,723 [INFO] evo.api: [LAZY-LOAD] instant_messaging -> InstantMessaging
+2026-06-27 10:35:46,724 [INFO] evo.api: [LAZY-LOAD] invoice_agent -> InvoiceModule
+2026-06-27 10:35:46,726 [WARNING] evo.api: [LAZY-INIT] io_monitor initialize异常: 'IOMonitor' object has no attribute 'audit'
+2026-06-27 10:35:46,727 [INFO] evo.api: [LAZY-LOAD] io_monitor -> IOMonitor
+2026-06-27 10:35:46,736 [INFO] evo.api: [LAZY-LOAD] jenkins_ci -> JenkinsCIModule
+2026-06-27 10:35:46,738 [INFO] evo.api: [LAZY-LOAD] job_scheduler -> JobScheduler
+2026-06-27 10:35:46,740 [INFO] evo.api: [LAZY-LOAD] joyai_vl_interaction -> JoyAIVL
+2026-06-27 10:35:46,743 [INFO] json_store: Store file data/json_store.json not found, starting empty
+2026-06-27 10:35:46,747 [INFO] evo.api: [LAZY-LOAD] json_store -> JsonStore
+2026-06-27 10:35:46,752 [INFO] evo.jwt-token: [jwt-token] JWT令牌管理初始化完成 (access_ttl=3600s, refresh_ttl=2592000s)
+2026-06-27 10:35:46,754 [INFO] evo.api: [LAZY-LOAD] jwt_token -> JwtToken
+2026-06-27 10:35:46,758 [INFO] evo.api: [LAZY-LOAD] kafka_producer -> KafkaProducer
+2026-06-27 10:35:46,767 [INFO] evo.api: [LAZY-LOAD] key_insights -> KeyInsights
+2026-06-27 10:35:46,770 [INFO] keyword_extract: KeywordExtract initialized
+2026-06-27 10:35:46,772 [INFO] evo.api: [LAZY-LOAD] keyword_extract -> KeywordExtract
+2026-06-27 10:35:46,774 [INFO] knowledge_base: 知识库引擎初始化完成
+2026-06-27 10:35:46,775 [INFO] evo.api: [LAZY-LOAD] knowledge_base -> KnowledgeBase
+2026-06-27 10:35:46,781 [INFO] evo.api: [LAZY-LOAD] knowledge_graph -> KnowledgeGraphManager
+2026-06-27 10:35:47,347 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.7%; 内存使用率偏高: 82.2%
+2026-06-27 10:35:48,505 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.1%
+2026-06-27 10:35:49,188 [WARNING] evo.api: [LAZY-INIT] kv_cache initialize异常: 'KVCache' object has no attribute 'audit'
+2026-06-27 10:35:49,189 [INFO] evo.api: [LAZY-LOAD] kv_cache -> KVCache
+2026-06-27 10:35:49,191 [INFO] evo.api: [LAZY-LOAD] label_manager -> LabelManager
+2026-06-27 10:35:49,192 [INFO] evo.api: [LAZY-LOAD] langfuse_monitor -> LangfuseMonitor
+2026-06-27 10:35:49,194 [INFO] evo.api: [LAZY-LOAD] lead_catcher -> LeadCatcher
+2026-06-27 10:35:49,195 [INFO] evo.api: [LAZY-LOAD] libre_translate -> LibreTranslate
+2026-06-27 10:35:49,196 [INFO] evo.api: [LAZY-LOAD] lida_chart_gen -> LIDA
+2026-06-27 10:35:49,200 [WARNING] evo.api: [LAZY-INIT] lifecycle_policy initialize异常: name 'logger' is not defined
+2026-06-27 10:35:49,202 [INFO] evo.api: [LAZY-LOAD] lifecycle_policy -> LifecyclePolicyManager
+2026-06-27 10:35:49,205 [WARNING] evo.api: [LAZY-INIT] llamaparse initialize异常: 'LlamaParseEngine' object has no attribute 'audit'
+2026-06-27 10:35:49,206 [INFO] evo.api: [LAZY-LOAD] llamaparse -> LlamaParseEngine
+2026-06-27 10:35:50,109 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 98.6%; 内存使用率偏高: 83.7%
+2026-06-27 10:35:51,260 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.0%
+2026-06-27 10:35:51,794 [WARNING] evo.api: [LAZY-INIT] llm_agent_framework initialize异常: 'LlmAgentFrameworkModule' object has no attribute 'audit'
+2026-06-27 10:35:51,796 [INFO] evo.api: [LAZY-LOAD] llm_agent_framework -> LlmAgentFrameworkModule
+2026-06-27 10:35:51,801 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 277)
+2026-06-27 10:35:52,397 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.5%
+2026-06-27 10:35:53,555 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.9%
+2026-06-27 10:35:54,711 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.2%
+2026-06-27 10:35:56,610 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.4%
+2026-06-27 10:35:57,947 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.1%
+2026-06-27 10:36:00,268 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 97.3%; 内存使用率偏高: 83.1%
+2026-06-27 10:36:01,812 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.5%
+2026-06-27 10:36:03,354 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.8%
+2026-06-27 10:36:05,676 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.2%
+2026-06-27 10:36:06,887 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.4%
+2026-06-27 10:36:08,023 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.0%
+2026-06-27 10:36:09,290 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.3%
+2026-06-27 10:36:10,437 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.5%
+2026-06-27 10:36:11,574 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.7%; 内存使用率偏高: 84.5%
+2026-06-27 10:36:12,865 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.0%
+2026-06-27 10:36:14,041 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.0%
+2026-06-27 10:36:15,225 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.9%
+2026-06-27 10:36:16,422 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.1%
+2026-06-27 10:36:17,571 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 93.1%; 内存使用率偏高: 83.8%
+2026-06-27 10:36:18,840 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.6%
+2026-06-27 10:36:20,040 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.9%; 内存使用率偏高: 83.2%
+2026-06-27 10:36:21,188 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 82.7%
+2026-06-27 10:36:21,827 [INFO] evo.llm_litellm: [LiteLLM] 初始化完成，1 个 Provider
+2026-06-27 10:36:21,828 [INFO] evo.api: [LAZY-LOAD] llm_litellm -> LiteLLMWrapper
+2026-06-27 10:36:21,835 [WARNING] evo.api: [LAZY-INIT] load_balancer initialize异常: 'LoadBalancer' object has no attribute 'audit'
+2026-06-27 10:36:21,836 [INFO] evo.api: [LAZY-LOAD] load_balancer -> LoadBalancer
+2026-06-27 10:36:21,843 [WARNING] evo.api: [LAZY-INIT] local_monitor initialize异常: 'LocalMonitor' object has no attribute 'audit'
+2026-06-27 10:36:21,844 [INFO] evo.api: [LAZY-LOAD] local_monitor -> LocalMonitor
+2026-06-27 10:36:21,849 [INFO] log_analyzer: 日志分析引擎初始化完成
+2026-06-27 10:36:21,850 [INFO] evo.api: [LAZY-LOAD] log_analyzer -> LogAnalyzer
+2026-06-27 10:36:21,872 [INFO] log_collector: 日志采集模块初始化完成，源: 4
+2026-06-27 10:36:21,873 [INFO] evo.api: [LAZY-LOAD] log_collector -> LogCollectorModule
+2026-06-27 10:36:21,875 [INFO] evo.api: [LAZY-LOAD] log_manager -> LogManager
+2026-06-27 10:36:21,877 [WARNING] evo.api: [LAZY-INIT] loongclaw initialize异常: 'LoongClaw' object has no attribute 'audit'
+2026-06-27 10:36:21,878 [INFO] evo.api: [LAZY-LOAD] loongclaw -> LoongClaw
+2026-06-27 10:36:21,883 [INFO] evo.api: [LAZY-LOAD] loop_library_skill -> LoopLibrary
+2026-06-27 10:36:21,886 [WARNING] evo.api: [LAZY-INIT] lua_script initialize异常: 'LuaScriptEngine' object has no attribute 'trace'
+2026-06-27 10:36:21,887 [INFO] evo.api: [LAZY-LOAD] lua_script -> LuaScriptEngine
+2026-06-27 10:36:21,890 [WARNING] evo.api: [LAZY-INIT] m50_mobile_gateway initialize异常: 'MobileGateway' object has no attribute 'audit'
+2026-06-27 10:36:21,891 [INFO] evo.api: [LAZY-LOAD] m50_mobile_gateway -> MobileGateway
+2026-06-27 10:36:21,893 [INFO] evo.api: [LAZY-LOAD] m51_web_remote -> WebRemote
+2026-06-27 10:36:21,895 [WARNING] evo.api: [LAZY-INIT] m52_tunnel_manager initialize异常: 'TunnelManager' object has no attribute 'audit'
+2026-06-27 10:36:21,896 [INFO] evo.api: [LAZY-LOAD] m52_tunnel_manager -> TunnelManager
+2026-06-27 10:36:21,899 [INFO] evo.api: [LAZY-LOAD] m53_finance_data -> FinanceDataModule
+2026-06-27 10:36:21,902 [INFO] evo.browser-auto: [BrowserAuto] 引擎就绪, 驱动=Playwright, timeout=30000ms
+2026-06-27 10:36:21,903 [INFO] evo.api: [LAZY-LOAD] m54_browser_auto -> BrowserAutomationEngine
+2026-06-27 10:36:21,906 [WARNING] evo.api: [LAZY-INIT] m55_voice_notify initialize异常: 'VoiceNotifyEngine' object has no attribute 'audit'
+2026-06-27 10:36:21,907 [INFO] evo.api: [LAZY-LOAD] m55_voice_notify -> VoiceNotifyEngine
+2026-06-27 10:36:21,909 [INFO] evo.api: [LAZY-LOAD] mcp_bridge -> MCPBridge
+2026-06-27 10:36:21,912 [INFO] mcp_servers: MCP Servers Manager initialized
+2026-06-27 10:36:21,915 [INFO] evo.api: [LAZY-LOAD] mcp_servers -> MCPServersManager
+2026-06-27 10:36:21,919 [INFO] evo.vertical.media_content.agent: MediaContentAgent 初始化完成
+2026-06-27 10:36:21,921 [WARNING] evo.api: [LAZY-INIT] media_content_agent initialize异常: 'MediaContentAgent' object has no attribute 'audit'
+2026-06-27 10:36:21,922 [INFO] evo.api: [LAZY-LOAD] media_content_agent -> MediaContentAgent
+2026-06-27 10:36:21,923 [INFO] evo.api: [LAZY-LOAD] meeting_bot -> MeetingBot
+2026-06-27 10:36:21,925 [WARNING] evo.api: [LAZY-INIT] mem0_memory initialize异常: 'Mem0Memory' object has no attribute 'audit'
+2026-06-27 10:36:21,926 [INFO] evo.api: [LAZY-LOAD] mem0_memory -> Mem0Memory
+2026-06-27 10:36:21,928 [INFO] memgpt: MemGPT instance created
+2026-06-27 10:36:21,929 [WARNING] evo.api: [LAZY-INIT] memgpt initialize异常: 'MemGPT' object has no attribute 'audit'
+2026-06-27 10:36:21,931 [INFO] evo.api: [LAZY-LOAD] memgpt -> MemGPT
+2026-06-27 10:36:21,934 [INFO] memory_guard: MemoryGuard instance created
+2026-06-27 10:36:21,936 [WARNING] evo.api: [LAZY-INIT] memory_guard initialize异常: 'MemoryGuard' object has no attribute 'audit'
+2026-06-27 10:36:21,937 [INFO] evo.api: [LAZY-LOAD] memory_guard -> MemoryGuard
+2026-06-27 10:36:21,938 [INFO] memory_leak_detect: MemoryLeakDetector created
+2026-06-27 10:36:21,940 [WARNING] evo.api: [LAZY-INIT] memory_leak_detect initialize异常: 'MemoryLeakDetector' object has no attribute 'trace'
+2026-06-27 10:36:21,941 [INFO] evo.api: [LAZY-LOAD] memory_leak_detect -> MemoryLeakDetector
+2026-06-27 10:36:21,942 [INFO] memory_optimize: MemoryOptimizer created
+2026-06-27 10:36:21,944 [WARNING] evo.api: [LAZY-INIT] memory_optimize initialize异常: 'MemoryOptimizer' object has no attribute 'trace'
+2026-06-27 10:36:21,945 [INFO] evo.api: [LAZY-LOAD] memory_optimize -> MemoryOptimizer
+2026-06-27 10:36:21,953 [INFO] memos: Memos instance created
+2026-06-27 10:36:21,955 [WARNING] evo.api: [LAZY-INIT] memos initialize异常: 'Memos' object has no attribute 'audit'
+2026-06-27 10:36:21,956 [INFO] evo.api: [LAZY-LOAD] memos -> Memos
+2026-06-27 10:36:21,958 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 247)
+2026-06-27 10:36:22,327 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 82.7%
+2026-06-27 10:36:23,625 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.0%
+2026-06-27 10:36:24,853 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.0%
+2026-06-27 10:36:26,008 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.1%
+2026-06-27 10:36:27,227 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 83.0%
+2026-06-27 10:36:28,374 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.7%; 内存使用率偏高: 83.3%
+2026-06-27 10:36:30,121 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 94.8%; 内存使用率偏高: 83.8%
+2026-06-27 10:36:31,555 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.4%
+2026-06-27 10:36:32,892 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.8%
+2026-06-27 10:36:34,036 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 88.0%; 内存使用率偏高: 85.2%
+2026-06-27 10:36:35,184 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 92.0%; 内存使用率偏高: 85.5%
+2026-06-27 10:36:36,324 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 84.4%; 内存使用率偏高: 85.6%
+2026-06-27 10:36:37,500 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.5%
+2026-06-27 10:36:38,654 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.5%
+2026-06-27 10:36:39,793 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.4%
+2026-06-27 10:36:40,942 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.4%
+2026-06-27 10:36:42,087 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.7%; 内存使用率偏高: 85.1%
+2026-06-27 10:36:43,306 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.0%
+2026-06-27 10:36:44,441 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 84.0%; 内存使用率偏高: 85.0%
+2026-06-27 10:36:45,581 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.9%
+2026-06-27 10:36:46,738 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.9%
+2026-06-27 10:36:47,875 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.9%
+2026-06-27 10:36:49,015 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.9%
+2026-06-27 10:36:49,215 [INFO] mercury_core: MercuryCore created
+2026-06-27 10:36:49,219 [WARNING] evo.api: [LAZY-INIT] mercury_core initialize异常: 'MercuryCore' object has no attribute 'audit'
+2026-06-27 10:36:49,220 [INFO] evo.api: [LAZY-LOAD] mercury_core -> MercuryCore
+2026-06-27 10:36:49,223 [INFO] evo.api: [LAZY-LOAD] mercury_skills -> MercurySkillsModule
+2026-06-27 10:36:50,153 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.8%
+2026-06-27 10:36:51,303 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.8%
+2026-06-27 10:36:51,971 [INFO] message_queue: 消息队列初始化完成，Topics: 5
+2026-06-27 10:36:51,972 [INFO] evo.api: [LAZY-LOAD] message_queue -> MessageQueueModule
+2026-06-27 10:36:51,973 [WARNING] evo.api: [LAZY-INIT] message_trace initialize异常: 'MessageTraceModule' object has no attribute 'audit'
+2026-06-27 10:36:51,974 [INFO] evo.api: [LAZY-LOAD] message_trace -> MessageTraceModule
+2026-06-27 10:36:51,975 [INFO] evo.metric-collector: psutil可用
+2026-06-27 10:36:51,976 [INFO] evo.api: [LAZY-LOAD] metric_collector -> MetricCollector
+2026-06-27 10:36:51,977 [INFO] microservice_bus: MicroserviceBus created
+2026-06-27 10:36:51,981 [WARNING] evo.api: [LAZY-INIT] microservice_bus initialize异常: 'MicroserviceBus' object has no attribute 'audit'
+2026-06-27 10:36:51,983 [INFO] evo.api: [LAZY-LOAD] microservice_bus -> MicroserviceBus
+2026-06-27 10:36:51,987 [INFO] migration_tool: MigrationTool created
+2026-06-27 10:36:51,989 [WARNING] evo.api: [LAZY-INIT] migration_tool initialize异常: 'MigrationTool' object has no attribute 'audit'
+2026-06-27 10:36:51,991 [INFO] evo.api: [LAZY-LOAD] migration_tool -> MigrationTool
+2026-06-27 10:36:51,992 [INFO] milvus_vector: MilvusVector created
+2026-06-27 10:36:51,993 [WARNING] evo.api: [LAZY-INIT] milvus_vector initialize异常: 'MilvusVector' object has no attribute 'audit'
+2026-06-27 10:36:51,996 [INFO] evo.api: [LAZY-LOAD] milvus_vector -> MilvusVector
+2026-06-27 10:36:51,999 [INFO] mindmap_generator: MindmapGenerator created
+2026-06-27 10:36:52,001 [WARNING] evo.api: [LAZY-INIT] mindmap_generator initialize异常: 'MindmapGenerator' object has no attribute 'audit'
+2026-06-27 10:36:52,003 [INFO] evo.api: [LAZY-LOAD] mindmap_generator -> MindmapGenerator
+2026-06-27 10:36:52,005 [INFO] mirofish_analysis: MirofishAnalysis created
+2026-06-27 10:36:52,006 [WARNING] evo.api: [LAZY-INIT] mirofish_analysis initialize异常: 'MirofishAnalysis' object has no attribute 'audit'
+2026-06-27 10:36:52,007 [INFO] evo.api: [LAZY-LOAD] mirofish_analysis -> MirofishAnalysis
+2026-06-27 10:36:52,008 [INFO] mirror_maker: MirrorMaker created
+2026-06-27 10:36:52,009 [WARNING] evo.api: [LAZY-INIT] mirror_maker initialize异常: 'MirrorMaker' object has no attribute 'audit'
+2026-06-27 10:36:52,010 [INFO] evo.api: [LAZY-LOAD] mirror_maker -> MirrorMaker
+2026-06-27 10:36:52,012 [INFO] evo.api: [LAZY-LOAD] ml_intern -> MLIntern
+2026-06-27 10:36:52,016 [INFO] ml_pipeline: ML管道引擎初始化完成
+2026-06-27 10:36:52,017 [INFO] evo.api: [LAZY-LOAD] ml_pipeline -> MLPipeline
+2026-06-27 10:36:52,019 [INFO] mobile_gateway: MobileGateway created
+2026-06-27 10:36:52,020 [WARNING] evo.api: [LAZY-INIT] mobile_gateway initialize异常: 'MobileGateway' object has no attribute 'audit'
+2026-06-27 10:36:52,021 [INFO] evo.api: [LAZY-LOAD] mobile_gateway -> MobileGateway
+2026-06-27 10:36:52,030 [INFO] modal_manager: ModalManager created
+2026-06-27 10:36:52,032 [INFO] evo.api: [LAZY-LOAD] modal_manager -> ModalManager
+2026-06-27 10:36:52,036 [INFO] model_deployment: ModelDeployment created
+2026-06-27 10:36:52,037 [WARNING] evo.api: [LAZY-INIT] model_deployment initialize异常: 'ModelDeployment' object has no attribute 'audit'
+2026-06-27 10:36:52,039 [INFO] evo.api: [LAZY-LOAD] model_deployment -> ModelDeployment
+2026-06-27 10:36:52,042 [INFO] evo.api: [LAZY-LOAD] module_adapter -> UnifiedExecutor
+2026-06-27 10:36:52,454 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 92.3%; 内存使用率偏高: 84.9%
+2026-06-27 10:36:53,600 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.7%
+2026-06-27 10:36:54,085 [WARNING] evo.mongodb-nosql: MongoDB连接失败(localhost:27017: [WinError 10061] 由于目标计算机积极拒绝，无法连接。 (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 2.0s, Topology Description: <TopologyDescription id: 6a3f37441dba452777711b09, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] 由于目标计算机积极拒绝，无法连接。 (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>)，回退内存模式
+2026-06-27 10:36:54,087 [INFO] evo.api: [LAZY-LOAD] mongodb_nosql -> MongoDBNoSQL
+2026-06-27 10:36:54,089 [INFO] monthly_report: MonthlyReport created
+2026-06-27 10:36:54,089 [WARNING] evo.api: [LAZY-INIT] monthly_report initialize异常: 'MonthlyReport' object has no attribute 'trace'
+2026-06-27 10:36:54,090 [INFO] evo.api: [LAZY-LOAD] monthly_report -> MonthlyReport
+2026-06-27 10:36:54,092 [INFO] multica_team: MulticaTeam created
+2026-06-27 10:36:54,093 [WARNING] evo.api: [LAZY-INIT] multica_team initialize异常: 'MulticaTeam' object has no attribute 'audit'
+2026-06-27 10:36:54,096 [INFO] evo.api: [LAZY-LOAD] multica_team -> MulticaTeam
+2026-06-27 10:36:54,101 [WARNING] evo.api: [LAZY-INIT] multipart_upload initialize异常: 'MultipartUploadModule' object has no attribute 'audit'
+2026-06-27 10:36:54,103 [INFO] evo.api: [LAZY-LOAD] multipart_upload -> MultipartUploadModule
+2026-06-27 10:36:54,106 [INFO] n8n: N8N created
+2026-06-27 10:36:54,106 [WARNING] evo.api: [LAZY-INIT] n8n initialize异常: 'N8N' object has no attribute 'audit'
+2026-06-27 10:36:54,107 [INFO] evo.api: [LAZY-LOAD] n8n -> N8N
+2026-06-27 10:36:54,115 [INFO] evo.api: [LAZY-LOAD] n8n_workflow_db -> WorkflowDatabase
+2026-06-27 10:36:54,118 [INFO] neo4j_graph: Neo4jGraph created
+2026-06-27 10:36:54,120 [WARNING] evo.api: [LAZY-INIT] neo4j_graph initialize异常: 'Neo4jGraph' object has no attribute 'audit'
+2026-06-27 10:36:54,121 [INFO] evo.api: [LAZY-LOAD] neo4j_graph -> Neo4jGraph
+2026-06-27 10:36:54,123 [INFO] evo.api: [BULK-LOAD] 后台加载 27/30 模块 (剩余 214)
+2026-06-27 10:36:54,741 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.7%
+2026-06-27 10:36:55,897 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.7%
+2026-06-27 10:36:57,049 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.7%
+2026-06-27 10:36:58,200 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.7%
+2026-06-27 10:36:59,342 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:37:00,490 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:37:01,645 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:37:02,798 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:37:03,931 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:05,068 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:06,217 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 84.3%
+2026-06-27 10:37:07,406 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:08,540 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:09,693 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 80.8%; 内存使用率偏高: 84.3%
+2026-06-27 10:37:10,887 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:12,032 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:13,174 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:14,319 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:15,465 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.2%; 内存使用率偏高: 84.2%
+2026-06-27 10:37:16,603 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:17,738 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:18,887 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:20,033 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:21,176 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:22,316 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:23,456 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 85.2%; 内存使用率偏高: 84.2%
+2026-06-27 10:37:24,140 [INFO] network_healer: NetworkHealer created
+2026-06-27 10:37:24,150 [WARNING] evo.api: [LAZY-INIT] network_healer initialize异常: 'NetworkHealer' object has no attribute 'audit'
+2026-06-27 10:37:24,152 [INFO] evo.api: [LAZY-LOAD] network_healer -> NetworkHealer
+2026-06-27 10:37:24,153 [INFO] network_proxy: NetworkProxy created: mode=reverse, port=8080
+2026-06-27 10:37:24,156 [WARNING] evo.api: [LAZY-INIT] network_proxy initialize异常: 'NetworkProxy' object has no attribute 'audit'
+2026-06-27 10:37:24,156 [INFO] evo.api: [LAZY-LOAD] network_proxy -> NetworkProxy
+2026-06-27 10:37:24,158 [INFO] nlp_engine: NLP引擎初始化完成
+2026-06-27 10:37:24,161 [INFO] evo.api: [LAZY-LOAD] nlp_engine -> NLPEngine
+2026-06-27 10:37:24,165 [INFO] notification_center: NotificationCenter created
+2026-06-27 10:37:24,166 [WARNING] evo.api: [LAZY-INIT] notification_center initialize异常: 'NotificationCenter' object has no attribute 'audit'
+2026-06-27 10:37:24,167 [INFO] evo.api: [LAZY-LOAD] notification_center -> NotificationCenter
+2026-06-27 10:37:24,177 [INFO] notion_sync: NotionSync created: direction=bidirectional, strategy=latest_wins
+2026-06-27 10:37:24,203 [WARNING] evo.api: [LAZY-INIT] notion_sync initialize异常: 'NotionSync' object has no attribute 'audit'
+2026-06-27 10:37:24,207 [INFO] evo.api: [LAZY-LOAD] notion_sync -> NotionSync
+2026-06-27 10:37:24,215 [INFO] evo.api: [LAZY-LOAD] oauth_provider -> OAuthProvider
+2026-06-27 10:37:24,219 [INFO] obsidian_link: ObsidianLink created
+2026-06-27 10:37:24,222 [WARNING] evo.api: [LAZY-INIT] obsidian_link initialize异常: 'ObsidianLink' object has no attribute 'audit'
+2026-06-27 10:37:24,230 [INFO] evo.api: [LAZY-LOAD] obsidian_link -> ObsidianLink
+2026-06-27 10:37:24,237 [INFO] evo.api: [LAZY-LOAD] ocr_engine -> OcrEngineManager
+2026-06-27 10:37:24,240 [INFO] evo.api: [LAZY-LOAD] odysseus_agent -> OdysseusAgent
+2026-06-27 10:37:24,242 [INFO] offset_commit: OffsetCommit created: strategy=auto, mode=at_least_once
+2026-06-27 10:37:24,243 [WARNING] evo.api: [LAZY-INIT] offset_commit initialize异常: 'OffsetCommit' object has no attribute 'audit'
+2026-06-27 10:37:24,245 [INFO] evo.api: [LAZY-LOAD] offset_commit -> OffsetCommit
+2026-06-27 10:37:24,247 [INFO] evo.one_api_gateway: [ONE-API] 网关已连接: http://localhost:3000
+2026-06-27 10:37:24,248 [INFO] evo.api: [LAZY-LOAD] one_api_gateway -> OneApiGateway
+2026-06-27 10:37:24,250 [INFO] open_chronicle: OpenChronicle created
+2026-06-27 10:37:24,252 [WARNING] evo.api: [LAZY-INIT] open_chronicle initialize异常: 'OpenChronicle' object has no attribute 'audit'
+2026-06-27 10:37:24,253 [INFO] evo.api: [LAZY-LOAD] open_chronicle -> OpenChronicle
+2026-06-27 10:37:24,256 [WARNING] evo.api: [LAZY-INIT] openinterpreter initialize异常: 'OpenInterpreter' object has no attribute 'audit'
+2026-06-27 10:37:24,257 [INFO] evo.api: [LAZY-LOAD] openinterpreter -> OpenInterpreter
+2026-06-27 10:37:24,263 [INFO] evo.api: [LAZY-LOAD] outbox_pattern -> OutboxPattern
+2026-06-27 10:37:24,267 [WARNING] evo.api: [LAZY-INIT] output_formatter initialize异常: 'OutputFormatter' object has no attribute '_set_status'
+2026-06-27 10:37:24,269 [INFO] evo.api: [LAZY-LOAD] output_formatter -> OutputFormatter
+2026-06-27 10:37:24,275 [WARNING] evo.api: [LAZY-INIT] parallel_executor initialize异常: 'ParallelExecutor' object has no attribute '_set_status'
+2026-06-27 10:37:24,278 [INFO] evo.api: [LAZY-LOAD] parallel_executor -> ParallelExecutor
+2026-06-27 10:37:24,281 [INFO] evo.api: [LAZY-LOAD] payment_center -> PaymentCenter
+2026-06-27 10:37:24,283 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527844.2833447}
+2026-06-27 10:37:24,284 [INFO] pdf_report: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:37:24,285 [INFO] evo.api: [LAZY-LOAD] pdf_report -> PdfReportManager
+2026-06-27 10:37:24,288 [INFO] evo.pdf: [pdf-toolkit] initialized, PyPDF2=True, pdfplumber=True
+2026-06-27 10:37:24,297 [INFO] evo.api: [LAZY-LOAD] pdf_toolkit -> PdfToolkit
+2026-06-27 10:37:24,300 [INFO] evo.api: [LAZY-LOAD] perf_monitor -> PerfMonitor
+2026-06-27 10:37:24,302 [INFO] evo.api: [LAZY-LOAD] perf_profiler -> PerfProfiler
+2026-06-27 10:37:24,596 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:25,317 [WARNING] performance_optimizer: 系统指标采集失败: 'metrics_recorded'
+2026-06-27 10:37:25,731 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.1%
+2026-06-27 10:37:26,888 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.1%
+2026-06-27 10:37:28,033 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:29,169 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.1%
+2026-06-27 10:37:29,317 [INFO] evo.api: [LAZY-LOAD] permission_guard -> SafeShellExecutor
+2026-06-27 10:37:29,319 [INFO] evo.api: [LAZY-LOAD] permission_rbac -> PermissionRbac
+2026-06-27 10:37:29,321 [INFO] evo.api: [BULK-LOAD] 后台加载 25/30 模块 (剩余 184)
+2026-06-27 10:37:30,317 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.1%
+2026-06-27 10:37:31,508 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:32,651 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:33,787 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.2%
+2026-06-27 10:37:34,940 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.3%
+2026-06-27 10:37:36,083 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:37,221 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 84.6%; 内存使用率偏高: 84.3%
+2026-06-27 10:37:38,374 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:37:39,538 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 84.3%
+2026-06-27 10:37:40,720 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.6%
+2026-06-27 10:37:41,865 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:37:43,004 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 83.3%; 内存使用率偏高: 84.7%
+2026-06-27 10:37:44,151 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.8%
+2026-06-27 10:37:45,297 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 84.7%
+2026-06-27 10:37:46,455 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 93.5%; 内存使用率偏高: 84.8%
+2026-06-27 10:37:47,615 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.8%
+2026-06-27 10:37:48,784 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.6%; 内存使用率偏高: 84.8%
+2026-06-27 10:37:50,021 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 97.0%; 内存使用率偏高: 84.9%
+2026-06-27 10:37:51,218 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 93.5%; 内存使用率偏高: 84.9%
+2026-06-27 10:37:52,362 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.9%
+2026-06-27 10:37:53,585 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-27 10:37:54,251 [INFO] evo.api: [LAZY-LOAD] perplexica_search -> Perplexica
+2026-06-27 10:37:54,254 [INFO] evo.api: [LAZY-LOAD] pgvector -> PGVector
+2026-06-27 10:37:54,256 [INFO] evo.api: [LAZY-LOAD] pii_detection -> PIIDetection
+2026-06-27 10:37:54,262 [INFO] evo.api: [LAZY-LOAD] pinecone_managed -> PineconeManaged
+2026-06-27 10:37:54,297 [WARNING] evo.api: [LAZY-INIT] pipeline_batch initialize异常: 'PipelineBatchModule' object has no attribute 'audit'
+2026-06-27 10:37:54,298 [INFO] evo.api: [LAZY-LOAD] pipeline_batch -> PipelineBatchModule
+2026-06-27 10:37:54,300 [INFO] evo.api: [LAZY-LOAD] pitr_postgres -> PITRPostgres
+2026-06-27 10:37:54,316 [INFO] evo.api: [LAZY-LOAD] pixelle_video -> PixelleVideo
+2026-06-27 10:37:54,318 [INFO] evo.api: [LAZY-LOAD] plagiarism_check -> PlagiarismCheck
+2026-06-27 10:37:54,757 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.3%
+2026-06-27 10:37:56,022 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 85.4%
+2026-06-27 10:37:56,412 [WARNING] performance_optimizer: 系统指标采集失败: 'metrics_recorded'
+2026-06-27 10:37:57,202 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 93.1%; 内存使用率偏高: 85.5%
+2026-06-27 10:37:58,347 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.8%; 内存使用率偏高: 85.5%
+2026-06-27 10:37:59,335 [INFO] evo.api: [LAZY-LOAD] plugin_loader -> PluginLoader
+2026-06-27 10:37:59,338 [INFO] evo.api: [LAZY-LOAD] plugin_market -> PluginMarket
+2026-06-27 10:37:59,340 [INFO] evo.api: [LAZY-LOAD] point_time_recover -> PointTimeRecover
+2026-06-27 10:37:59,346 [INFO] evo.api: [LAZY-LOAD] pomodoro_timer -> PomodoroTimer
+2026-06-27 10:37:59,352 [INFO] evo.api: [LAZY-LOAD] postgres_db -> PostgresDB
+2026-06-27 10:37:59,357 [INFO] evo.api: [LAZY-LOAD] postiz_social -> PostizModule
+2026-06-27 10:37:59,378 [INFO] evo.ppt: [ppt] initialized, HAS_PPTX=True
+2026-06-27 10:37:59,381 [INFO] evo.api: [LAZY-LOAD] ppt_generator -> PptGenerator
+2026-06-27 10:37:59,388 [INFO] evo.api: [LAZY-LOAD] qdrant_vector -> QdrantVectorManager
+2026-06-27 10:37:59,390 [INFO] evo.api: [LAZY-LOAD] qodo_review -> QodoReviewModule
+2026-06-27 10:37:59,396 [INFO] evo.api: [LAZY-LOAD] query_cache -> QueryCacheModule
+2026-06-27 10:37:59,399 [INFO] evo.api: [LAZY-LOAD] rag_knowledge_engine -> RAGKnowledgeEngine
+2026-06-27 10:37:59,402 [INFO] evo.api: [LAZY-LOAD] rag_pipeline -> RagPipelineModule
+2026-06-27 10:37:59,404 [INFO] evo.api: [LAZY-LOAD] ragflow -> RAGFlowEngine
+2026-06-27 10:37:59,409 [INFO] rate_limiter: RateLimiter initialized (token-bucket + sliding-window)
+2026-06-27 10:37:59,411 [INFO] evo.api: [LAZY-LOAD] rate_limiter -> RateLimiter
+2026-06-27 10:37:59,525 [INFO] evo.api: [LAZY-LOAD] redis_cache -> RedisCacheModule
+2026-06-27 10:37:59,528 [INFO] evo.api: [LAZY-LOAD] reference_checker -> ReferenceChecker
+2026-06-27 10:37:59,530 [INFO] evo.api: [LAZY-LOAD] registry_center -> RegistryCenter
+2026-06-27 10:37:59,534 [INFO] evo.api: [LAZY-LOAD] replication_cross -> ReplicationCross
+2026-06-27 10:37:59,538 [INFO] evo.api: [LAZY-LOAD] repo_analyzer -> RepoAnalyzer
+2026-06-27 10:37:59,542 [INFO] evo.report-generator: ReportGenerator initialized
+2026-06-27 10:37:59,544 [INFO] evo.api: [LAZY-LOAD] report_generator -> ReportGenerator
+2026-06-27 10:37:59,547 [INFO] evo.api: [LAZY-LOAD] request_id -> RequestId
+2026-06-27 10:37:59,549 [INFO] evo.api: [LAZY-LOAD] request_tracing -> RequestTracing
+2026-06-27 10:37:59,552 [INFO] evo.api: [BULK-LOAD] 后台加载 25/30 模块 (剩余 144)
+2026-06-27 10:37:59,651 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.0%
+2026-06-27 10:38:00,819 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.0%
+2026-06-27 10:38:02,745 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-27 10:38:04,504 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-27 10:38:05,837 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-27 10:38:07,138 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.2%
+2026-06-27 10:38:08,666 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.1%
+2026-06-27 10:38:09,814 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 82.8%; 内存使用率偏高: 84.8%
+2026-06-27 10:38:11,065 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.5%
+2026-06-27 10:38:12,212 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.1%
+2026-06-27 10:38:13,363 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.9%
+2026-06-27 10:38:14,497 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 92.3%; 内存使用率偏高: 83.8%
+2026-06-27 10:38:15,635 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.8%
+2026-06-27 10:38:16,781 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.7%; 内存使用率偏高: 83.8%
+2026-06-27 10:38:17,926 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 83.7%
+2026-06-27 10:38:19,254 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.0%
+2026-06-27 10:38:20,398 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:38:21,537 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 87.5%; 内存使用率偏高: 84.3%
+2026-06-27 10:38:22,684 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.3%
+2026-06-27 10:38:23,922 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 97.0%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:25,084 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:38:26,315 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.3%
+2026-06-27 10:38:27,454 [WARNING] performance_optimizer: 系统指标采集失败: 'metrics_recorded'
+2026-06-27 10:38:27,454 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:38:28,596 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 91.7%; 内存使用率偏高: 84.3%
+2026-06-27 10:38:29,555 [WARNING] evo.api: [LAZY-INIT] resource_scheduler initialize异常: 'ResourceSchedulerModule' object has no attribute 'audit'
+2026-06-27 10:38:29,558 [INFO] evo.api: [LAZY-LOAD] resource_scheduler -> ResourceSchedulerModule
+2026-06-27 10:38:29,560 [WARNING] evo.api: [LAZY-INIT] resource_server initialize异常: name 'logger' is not defined
+2026-06-27 10:38:29,561 [INFO] evo.api: [LAZY-LOAD] resource_server -> ResourceServer
+2026-06-27 10:38:29,563 [INFO] evo.api: [LAZY-LOAD] rest_proxy -> RestProxy
+2026-06-27 10:38:29,565 [INFO] evo.api: [LAZY-LOAD] retention_policy -> RetentionPolicy
+2026-06-27 10:38:29,568 [INFO] evo.api: [LAZY-LOAD] reverse_proxy -> ReverseProxy
+2026-06-27 10:38:29,570 [INFO] evo.api: [LAZY-LOAD] rollback_manager -> RollbackManager
+2026-06-27 10:38:29,573 [INFO] evo.api: [LAZY-LOAD] rpa_control -> RpaControl
+2026-06-27 10:38:29,576 [INFO] evo.api: [LAZY-LOAD] rpa_controller -> RpaController
+2026-06-27 10:38:29,578 [INFO] evo.api: [LAZY-LOAD] saga_pattern -> SagaPattern
+2026-06-27 10:38:29,580 [INFO] evo.api: [LAZY-LOAD] sample_hello_plugin -> HelloPlugin
+2026-06-27 10:38:29,582 [INFO] evo.api: [LAZY-LOAD] scan_iterator -> ScanIterator
+2026-06-27 10:38:29,584 [INFO] evo.api: [LAZY-LOAD] scheduler_pro -> SchedulerPro
+2026-06-27 10:38:29,586 [INFO] evo.api: [LAZY-LOAD] schema_registry -> SchemaRegistry
+2026-06-27 10:38:29,588 [INFO] evo.api: [LAZY-LOAD] secret_manager -> SecretManager
+2026-06-27 10:38:29,591 [INFO] secret_vault: 密钥保险库初始化完成
+2026-06-27 10:38:29,592 [INFO] evo.api: [LAZY-LOAD] secret_vault -> SecretVault
+2026-06-27 10:38:29,594 [INFO] evo.: [] Unknown初始化完成
+2026-06-27 10:38:29,595 [INFO] evo.api: [LAZY-LOAD] security_scanner -> SecurityScanner
+2026-06-27 10:38:29,597 [INFO] evo.api: [LAZY-LOAD] semgrep_scanner -> Semgrep
+2026-06-27 10:38:29,599 [INFO] sentiment_analysis: 情感分析引擎初始化完成
+2026-06-27 10:38:29,600 [INFO] evo.api: [LAZY-LOAD] sentiment_analysis -> SentimentAnalysis
+2026-06-27 10:38:29,602 [INFO] evo.api: [LAZY-LOAD] sentinel_mode -> SentinelMode
+2026-06-27 10:38:29,604 [INFO] evo.api: [LAZY-LOAD] sentry_tracker -> SentryTrackerModule
+2026-06-27 10:38:29,606 [INFO] evo.api: [LAZY-LOAD] service_discovery -> ServiceDiscovery
+2026-06-27 10:38:29,609 [INFO] evo.api: [LAZY-LOAD] service_mesh -> ServiceMesh
+2026-06-27 10:38:29,611 [INFO] evo.api: [LAZY-LOAD] session_manager -> SessionManager
+2026-06-27 10:38:29,613 [INFO] evo.api: [LAZY-LOAD] session_resume -> SessionResumeModule
+2026-06-27 10:38:29,615 [INFO] evo.api: [LAZY-LOAD] sharding_proxy -> ShardingProxy
+2026-06-27 10:38:29,617 [INFO] evo.api: [BULK-LOAD] 后台加载 27/30 模块 (剩余 114)
+2026-06-27 10:38:29,732 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.3%
+2026-06-27 10:38:30,867 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.3%; 内存使用率偏高: 84.3%
+2026-06-27 10:38:32,001 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.0%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:33,136 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:34,275 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 89.3%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:35,431 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:36,566 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 95.8%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:37,703 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:38,859 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:39,999 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:41,134 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:42,271 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 96.0%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:43,408 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:44,542 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.4%
+2026-06-27 10:38:45,700 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:46,859 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:48,001 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:49,151 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:50,301 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:51,459 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.4%
+2026-06-27 10:38:52,587 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.5%
+2026-06-27 10:38:53,727 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.5%
+2026-06-27 10:38:54,353 [INFO] evo.api: [LAZY-LOAD] signed_url -> SignedUrl
+2026-06-27 10:38:54,364 [INFO] evo.api: [LAZY-LOAD] site_cloner_pipeline -> SiteClonerPipeline
+2026-06-27 10:38:54,368 [ERROR] sla_monitor: 生命周期管理器初始化失败: SlaMonitor.__init__() got an unexpected keyword argument 'priority_group'
+2026-06-27 10:38:54,370 [INFO] evo.api: [LAZY-LOAD] sla_monitor -> SlaMonitorManager
+2026-06-27 10:38:54,375 [INFO] evo.api: [LAZY-LOAD] slow_log -> SlowLog
+2026-06-27 10:38:54,380 [INFO] evo.api: [LAZY-LOAD] smart_scheduler -> SmartScheduler
+2026-06-27 10:38:54,383 [INFO] evo.api: [LAZY-LOAD] snapshot_volume -> SnapshotVolume
+2026-06-27 10:38:54,385 [INFO] evo.api: [LAZY-LOAD] sort_set -> SortSet
+2026-06-27 10:38:54,387 [INFO] evo.api: [LAZY-LOAD] soul_identity -> SoulIdentityManager
+2026-06-27 10:38:54,876 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.5%
+2026-06-27 10:38:56,015 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.5%
+2026-06-27 10:38:57,176 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.5%
+2026-06-27 10:38:58,318 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:38:58,468 [WARNING] performance_optimizer: 系统指标采集失败: 'metrics_recorded'
+2026-06-27 10:38:59,460 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:38:59,633 [INFO] evo.api: [LAZY-LOAD] sql_generator -> SqlGenerator
+2026-06-27 10:38:59,636 [INFO] evo.api: [LAZY-LOAD] sse_stream -> SseStream
+2026-06-27 10:38:59,639 [INFO] evo.api: [LAZY-LOAD] ssl_cert_manager -> SslCertManager
+2026-06-27 10:38:59,645 [INFO] evo.sso-auth: SSO初始化完成, 恢复会话: 0
+2026-06-27 10:38:59,645 [INFO] evo.api: [LAZY-LOAD] sso_auth -> SsoAuth
+2026-06-27 10:38:59,648 [INFO] evo.api: [LAZY-LOAD] state_machine -> StateMachine
+2026-06-27 10:38:59,650 [INFO] evo.api: [LAZY-LOAD] static_website -> StaticWebsite
+2026-06-27 10:38:59,865 [INFO] evo.api: [LAZY-LOAD] stock_api -> StockAPI
+2026-06-27 10:38:59,867 [INFO] evo.storage_encryption: 存储加密模块初始化完成
+2026-06-27 10:38:59,868 [INFO] evo.api: [LAZY-LOAD] storage_encryption -> StorageEncryptionModule
+2026-06-27 10:38:59,871 [INFO] evo.api: [LAZY-LOAD] stream_process -> StreamProcess
+2026-06-27 10:38:59,879 [INFO] evo.api: [LAZY-LOAD] stream_replay -> StreamReplay
+2026-06-27 10:38:59,883 [INFO] summarization_engine: 摘要生成引擎初始化完成
+2026-06-27 10:38:59,884 [INFO] evo.api: [LAZY-LOAD] summarization_engine -> SummarizationEngine
+2026-06-27 10:38:59,890 [INFO] supermemory: 超级记忆引擎初始化完成
+2026-06-27 10:38:59,892 [INFO] evo.api: [LAZY-LOAD] supermemory -> SuperMemory
+2026-06-27 10:38:59,894 [INFO] evo.api: [LAZY-LOAD] swot_analyzer -> SwotAnalyzer
+2026-06-27 10:38:59,896 [INFO] system_command: 系统命令执行器初始化完成
+2026-06-27 10:38:59,896 [INFO] evo.api: [LAZY-LOAD] system_command -> SystemCommand
+2026-06-27 10:39:00,085 [WARNING] evo.system_monitor: 告警触发: CPU > 75% (当前:83.3, 阈值:75)
+2026-06-27 10:39:00,094 [INFO] evo.system_monitor: 系统监控初始化完成, 告警规则: 7, DB: D:\AUTO-EVO-AI-V0.1\modules\..\data\sysmon.db
+2026-06-27 10:39:00,095 [INFO] evo.api: [LAZY-LOAD] system_monitor -> SystemMonitorModule
+2026-06-27 10:39:00,097 [INFO] evo.api: [LAZY-LOAD] table_partition -> TablePartition
+2026-06-27 10:39:00,100 [INFO] evo.api: [LAZY-LOAD] table_understand -> TableUnderstand
+2026-06-27 10:39:00,101 [WARNING] evo.system_monitor: 告警触发: 内存 > 80% (当前:84.6, 阈值:80)
+2026-06-27 10:39:00,101 [WARNING] evo.api: [LAZY-INIT] task_heatmap initialize异常: 'TaskHeatmap' object has no attribute 'audit'
+2026-06-27 10:39:00,102 [INFO] evo.api: [LAZY-LOAD] task_heatmap -> TaskHeatmap
+2026-06-27 10:39:00,106 [INFO] task_queue: 任务队列初始化完成
+2026-06-27 10:39:00,108 [INFO] evo.api: [LAZY-LOAD] task_queue -> TaskQueueModule
+2026-06-27 10:39:00,111 [INFO] evo.api: [LAZY-LOAD] telegram_bridge -> TelegramBridge
+2026-06-27 10:39:00,113 [INFO] template_registry: 加载 5 个内置模板
+2026-06-27 10:39:00,115 [INFO] template_registry: TemplateRegistry V0.1 初始化完成
+2026-06-27 10:39:00,116 [INFO] evo.api: [LAZY-LOAD] template_registry -> TemplateRegistry
+2026-06-27 10:39:00,118 [INFO] evo.api: [LAZY-LOAD] temporal_approval -> TemporalApproval
+2026-06-27 10:39:00,122 [INFO] evo.api: [LAZY-LOAD] terraform_iac -> TerraformIAC
+2026-06-27 10:39:00,126 [INFO] evo.audit: [AUDIT] SYSTEM |  | lifecycle_initialized | {'components': 8, 'policies': 3, 'startup_time': 1782527940.126458}
+2026-06-27 10:39:00,127 [INFO] text_summarize: 生命周期管理器初始化完成，注册组件: 8
+2026-06-27 10:39:00,128 [INFO] evo.api: [LAZY-LOAD] text_summarize -> TextSummarizeManager
+2026-06-27 10:39:00,130 [INFO] threat_detector: 威胁检测器初始化完成，10 条检测规则
+2026-06-27 10:39:00,130 [INFO] evo.api: [LAZY-LOAD] threat_detector -> ThreatDetector
+2026-06-27 10:39:00,132 [INFO] evo.api: [LAZY-LOAD] time_blocker -> TimeBlocker
+2026-06-27 10:39:00,133 [INFO] evo.api: [BULK-LOAD] 后台加载 28/30 模块 (剩余 74)
+2026-06-27 10:39:00,597 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:39:01,731 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:39:02,871 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:39:04,006 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:39:05,144 [WARNING] AgentResourceControl: 硬件告警: 内存使用率偏高: 84.6%
+2026-06-27 10:39:06,402 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.6%
+2026-06-27 10:39:07,564 [WARNING] AgentResourceControl: 硬件告警: CPU使用率偏高: 85.7%; 内存使用率偏高: 84.8%
+2026-06-27 10:39:08,811 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 84.8%
+2026-06-27 10:39:10,268 [WARNING] AgentResourceControl: 硬件告警: CPU使用率过高: 100.0%; 内存使用率偏高: 85.3%
+2026-06-27 10:39:10,551 [WARNING] evo.system_monitor: 告警触发: CPU > 90% (当前:100.0, 阈值:90)

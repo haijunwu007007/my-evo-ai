@@ -1,225 +1,155 @@
-"""
-AUTO-EVO-AI V0.1 — 语音识别路由 (Whisper 本地引擎版)
-引擎顺序：Whisper(本地) > 百度ASR > Vosk > Google > PocketSphinx
-"""
-import os, io, json, logging, tempfile, base64, uuid, atexit, threading
+"""语音识别路由 — 纯 Vosk 离线方案（不依赖 Google API）"""
+import os, io, json, logging, wave
 from fastapi import APIRouter, UploadFile, File
-import subprocess
 
 logger = logging.getLogger("routes_speech")
 router = APIRouter(prefix="/api/v1/speech", tags=["speech"])
 
-VOSK_MODEL_DIR = "/home/ubuntu/vosk_models"
+# ── Vosk 模型路径 ──
+_is_win = os.name == "nt"
+if _is_win:
+    VOSK_DIR = r"C:\vosk_model"
+else:
+    VOSK_DIR = "/home/ubuntu/vosk_models/vosk-model-small-cn-0.22"
+
 _vosk_model = None
+_vosk_loaded = False
 
-# ---------- Whisper 本地引擎 ----------
-_whisper_model = None
-_WHISPER_MODEL_SIZE = os.environ.get("WHISPER_MODEL", "tiny")
-
-def _get_whisper_model():
-    global _whisper_model
-    if _whisper_model is not None:
-        return _whisper_model
-    # 首次：后台加载不阻塞，立即返回 False
-    _whisper_model = False
-    def _load():
-        global _whisper_model
-        try:
-            from faster_whisper import WhisperModel
-            logger.info("后台加载 Whisper %s 模型...", _WHISPER_MODEL_SIZE)
-            m = WhisperModel(_WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
-            _whisper_model = m
-            logger.info("Whisper %s 模型加载完成", _WHISPER_MODEL_SIZE)
-        except Exception as e:
-            logger.warning("Whisper 后台加载失败: %s，降级到云端引擎", e)
-    threading.Thread(target=_load, daemon=True).start()
-    return _whisper_model
-
-def _whisper_recognize(wav_path: str) -> str:
-    model = _get_whisper_model()
-    if not model:
-        return ""
+def _load_vosk():
+    global _vosk_model, _vosk_loaded
+    if _vosk_loaded:
+        return _vosk_model
+    _vosk_loaded = True
+    if not os.path.isdir(VOSK_DIR):
+        logger.error(f"[SPEECH] Vosk 模型目录不存在: {VOSK_DIR}")
+        return None
     try:
-        segments, info = model.transcribe(wav_path, language="zh", beam_size=5)
-        text = "".join(seg.text for seg in segments).strip()
-        return text
+        import vosk
+        logger.info(f"[SPEECH] 加载 Vosk 模型: {VOSK_DIR}")
+        _vosk_model = vosk.Model(VOSK_DIR)
+        logger.info("[SPEECH] Vosk 模型加载成功")
     except Exception as e:
-        logger.warning("Whisper 转写失败: %s", e)
-        return ""
+        logger.error(f"[SPEECH] Vosk 加载失败: {e}", exc_info=True)
+    return _vosk_model
 
-def _preload_whisper():
-    try:
-        _get_whisper_model()
-    except Exception:
-        pass
-threading.Thread(target=_preload_whisper, daemon=True).start()
-
-# ---------- ffmpeg 转码 ----------
-def _wav_from_webm(webm_bytes):
-    try:
-        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as fin:
-            fin.write(webm_bytes)
-            webm_path = fin.name
-        wav_path = webm_path + ".wav"
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", webm_path,
-             "-ar", "16000", "-ac", "1", "-acodec", "pcm_s16le",
-             wav_path],
-            capture_output=True, timeout=30
-        )
-        with open(wav_path, "rb") as f:
-            wav_data = f.read()
-        os.unlink(webm_path)
-        if os.path.exists(wav_path):
-            os.unlink(wav_path)
-        return wav_data, 16000
-    except Exception as e:
-        logger.warning("转码失败: %s", e)
-        return None, 0
-
-# ---------- 百度ASR (兜底) ----------
-def _baidu_recognize(wav_data):
-    try:
-        import requests
-        ak, sk = "4E1BG9lTnlSeIf1NQFlrSUeG", "rB28R1UdbK6NsEzAVw2sVVrEbTNZIHp2"
-        r = requests.post(
-            "https://openapi.baidu.com/oauth/2.0/token",
-            params={"grant_type": "client_credentials", "client_id": ak, "client_secret": sk},
-            timeout=5
-        )
-        token = r.json().get("access_token", "")
-        if not token:
-            return ""
-        b64 = base64.b64encode(wav_data).decode()
-        body = {
-            "format": "wav", "rate": 16000, "channel": 1,
-            "cuid": "autoevoai", "token": token,
-            "speech": b64, "len": len(wav_data),
-            "dev_pid": 1537
-        }
-        r = requests.post("https://vop.baidu.com/server_api", json=body, timeout=15)
-        ret = r.json()
-        if ret.get("err_no") == 0:
-            return ret.get("result", [""])[0]
-        return ""
-    except Exception:
-        return ""
-
-# ---------- Google ----------
-def _google_recognize(wav_data):
-    try:
-        import speech_recognition as sr
-        r = sr.Recognizer()
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp:
-            tmp.write(wav_data); tmp.flush()
-            with sr.AudioFile(tmp.name) as src:
-                audio = r.record(src)
-            return r.recognize_google(audio, language="zh-CN")
-    except Exception:
-        return ""
-
-# ---------- PocketSphinx ----------
-def _sphinx_recognize(wav_data):
-    try:
-        import speech_recognition as sr
-        r = sr.Recognizer()
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp:
-            tmp.write(wav_data); tmp.flush()
-            with sr.AudioFile(tmp.name) as src:
-                audio = r.record(src)
-            return r.recognize_sphinx(audio)
-    except Exception:
-        return ""
-
-# ---------- Vosk ----------
-def _vosk_recognize(wav_data, sr=16000):
-    global _vosk_model
-    if _vosk_model is None:
-        try:
-            import vosk
-            if os.path.isdir(VOSK_MODEL_DIR):
-                for e in sorted(os.listdir(VOSK_MODEL_DIR)):
-                    p = os.path.join(VOSK_MODEL_DIR, e)
-                    if os.path.isdir(p):
-                        _vosk_model = vosk.Model(p); break
-        except Exception:
-            pass
-    if not _vosk_model:
-        return ""
-    try:
-        import vosk, wave
-        rec = vosk.KaldiRecognizer(_vosk_model, sr)
-        wf = wave.open(io.BytesIO(wav_data), 'rb')
-        data = wf.readframes(wf.getnframes()); wf.close()
-        if rec.AcceptWaveform(data):
-            return json.loads(rec.Result()).get("text","").strip()
-        return json.loads(rec.PartialResult()).get("partial","").strip()
-    except Exception:
-        return ""
-
-# ---------- API Endpoints ----------
 
 @router.get("/status")
-def speech_status():
-    m = _get_whisper_model()
-    providers = {"whisper": bool(m)}
-    providers["baidu"] = True
-    try:
-        import speech_recognition; providers["google"] = True
-    except ImportError: pass
-    try:
-        import vosk; providers["vosk"] = os.path.isdir(VOSK_MODEL_DIR)
-    except ImportError: pass
+def status():
+    m = _load_vosk()
     return {
-        "available": bool(m),
-        "providers": providers,
-        "active": "whisper" if m else "baidu"
+        "success": True,
+        "ok": bool(m),
+        "vosk": bool(m),
+        "vosk_dir": VOSK_DIR,
+        "vosk_dir_exists": os.path.isdir(VOSK_DIR),
+        "platform": "win" if _is_win else "linux",
     }
 
+
 @router.post("/recognize")
-async def recognize_speech(file: UploadFile = File(...)):
+async def recognize(file: UploadFile = File(...)):
     try:
         raw = await file.read()
         if not raw or len(raw) < 100:
-            return {"success": False, "text": "", "error": "音频过短"}
+            return {"success": False, "text": "", "error": "录音太短"}
 
-        wav_data, sample_rate = _wav_from_webm(raw)
-        if wav_data is None:
-            return {"success": False, "text": "", "error": "转码失败"}
+        # ── 从 WAV 提取 PCM ──
+        if raw[:4] != b"RIFF" or raw[8:12] != b"WAVE":
+            return {"success": False, "text": "", "error": "不是 WAV 格式"}
 
-        # 1) Whisper 本地引擎
+        pcm = None
         try:
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-                tmp.write(wav_data)
-                wav_path = tmp.name
-            text = _whisper_recognize(wav_path)
-            os.unlink(wav_path)
-            if text:
-                return {"success": True, "text": text, "provider": "whisper"}
+            with wave.open(io.BytesIO(raw), "rb") as wf:
+                channels = wf.getnchannels()
+                sampwidth = wf.getsampwidth()
+                framerate = wf.getframerate()
+                logger.info(f"[SPEECH] WAV: {channels}ch, {sampwidth*8}bit, {framerate}Hz, {wf.getnframes()} frames")
+                if sampwidth == 2 and channels == 1:
+                    pcm = wf.readframes(wf.getnframes())
+                elif sampwidth == 2 and channels > 1:
+                    # 多声道 → 取第一声道
+                    frames = wf.readframes(wf.getnframes())
+                    import array
+                    data = array.array('h', frames)
+                    mono = data[0::channels]
+                    pcm = bytes(mono)
+                elif sampwidth == 1:
+                    # 8bit → 转为 16bit
+                    frames = wf.readframes(wf.getnframes())
+                    import array
+                    data = array.array('B', frames)
+                    data16 = array.array('h', ( (b - 128) << 8 for b in data ))
+                    if channels > 1:
+                        data16 = data16[0::channels]
+                    pcm = bytes(data16)
+                else:
+                    return {"success": False, "text": "", "error": f"不支持的音频格式: {sampwidth*8}bit, {channels}ch"}
         except Exception as e:
-            logger.warning("Whisper 失败: %s", e)
+            return {"success": False, "text": "", "error": f"WAV 解析失败: {str(e)[:60]}"}
 
-        # 2) Google（中国可能超时，但比百度免费版可靠）
-        text = _google_recognize(wav_data)
-        if text:
-            return {"success": True, "text": text, "provider": "google"}
+        if not pcm or len(pcm) < 2000:
+            return {"success": False, "text": "", "error": "PCM 数据无效或太短"}
 
-        # 3) Vosk
-        text = _vosk_recognize(wav_data, sample_rate)
-        if text:
-            return {"success": True, "text": text, "provider": "vosk"}
+        logger.info(f"[SPEECH] PCM 长度: {len(pcm)} bytes")
 
-        # 4) Google
-        text = _google_recognize(wav_data)
-        if text:
-            return {"success": True, "text": text, "provider": "google"}
+        # ── Vosk 识别（分块处理 + FinalResult）──
+        m = _load_vosk()
+        if not m:
+            return {"success": False, "text": "", "error": f"Vosk 模型未加载（目录: {VOSK_DIR}，存在: {os.path.isdir(VOSK_DIR)}）"}
 
-        # 4) Sphinx
-        text = _sphinx_recognize(wav_data)
-        if text:
-            return {"success": True, "text": text, "provider": "pocketsphinx"}
+        import vosk
+        rec = vosk.KaldiRecognizer(m, 16000)
+        # 设置单词级别信息（非必须，但可提升短句识别）
+        try:
+            rec.SetWords(True)
+        except Exception:
+            pass
 
-        return {"success": False, "text": "", "error": "识别失败，请重试"}
+        # 分块处理，每块 4000 个采样点（约 0.25s）
+        CHUNK = 8000  # bytes = 4000 samples * 2 bytes
+        texts = []
+        for i in range(0, len(pcm), CHUNK):
+            chunk = pcm[i:i + CHUNK]
+            if rec.AcceptWaveform(chunk):
+                try:
+                    r = json.loads(rec.Result())
+                    t = r.get("text", "").strip()
+                    if t:
+                        texts.append(t)
+                except Exception:
+                    pass
 
+        # 获取最终结果（关键！FinalResult 包含最后一段未返回的文字）
+        try:
+            final = json.loads(rec.FinalResult())
+            t = final.get("text", "").strip()
+            if t:
+                texts.append(t)
+        except Exception:
+            pass
+
+        # 尝试所有片段
+        full_text = " ".join(texts).strip()
+        if full_text:
+            return {"success": True, "text": full_text, "engine": "vosk"}
+
+        # 最后尝试：一次性处理全部 PCM（兜底）
+        try:
+            rec2 = vosk.KaldiRecognizer(m, 16000)
+            if rec2.AcceptWaveform(pcm):
+                r = json.loads(rec2.Result())
+                t = r.get("text", "").strip()
+                if t:
+                    return {"success": True, "text": t, "engine": "vosk"}
+            fr = json.loads(rec2.FinalResult())
+            t = fr.get("text", "").strip()
+            if t:
+                return {"success": True, "text": t, "engine": "vosk"}
+        except Exception:
+            pass
+
+        return {"success": False, "text": "", "error": "Vosk 未识别到文字"}
     except Exception as e:
-        return {"success": False, "text": "", "error": str(e)[:200]}
+        import traceback
+        logger.error(f"[SPEECH] 识别异常: {e}\n{traceback.format_exc()}")
+        return {"success": False, "text": "", "error": str(e)[:100]}

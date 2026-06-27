@@ -1,0 +1,15 @@
+import paramiko,time,os,urllib.request,ssl,json
+ssh=paramiko.SSHClient();ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('122.51.144.227',22,'ubuntu','Hj711201',timeout=30)
+sftp=ssh.open_sftp()
+sftp.put(r'D:\AUTO-EVO-AI-V0.1\frontend\chat.html','/home/ubuntu/my-evo-ai/frontend/chat.html')
+print('chat.html:',os.path.getsize(r'D:\AUTO-EVO-AI-V0.1\frontend\chat.html'))
+sftp.close()
+ssh.exec_command('sudo systemctl restart evo.service',timeout=15);time.sleep(10)
+ctx=ssl.create_default_context();ctx.check_hostname=False;ctx.verify_mode=ssl.CERT_NONE
+r=urllib.request.urlopen('https://autoevoai.com/',timeout=15,context=ctx)
+h=r.read().decode()
+print(f'Root: {len(h)} bytes, sbtn={h.count("sbtn")}, voiceOverlay={h.count("voiceOverlay")}')
+r2=urllib.request.urlopen('https://autoevoai.com/api/status',timeout=15,context=ctx)
+print('API:',json.loads(r2.read()).get('status'))
+ssh.close()

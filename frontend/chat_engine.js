@@ -44,13 +44,15 @@ async function doRegister(){
 }
 function doLogout(){localStorage.removeItem('evo_logged_in');document.getElementById('authWrap').classList.remove('hidden');document.getElementById('appMain').style.display='none'}
 function _renderMd(t){return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,function(m,a,s){return '<img src="'+s.replace(/["<>']/g,'')+'" alt="'+a.replace(/["<>']/g,'')+'" style="max-width:100%;border-radius:8px;margin:4px 0">'}).replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,t,h){return '<a href="'+h.replace(/["<>'` ]/g,'')+'" target="_blank" rel="noopener">'+t.replace(/["<>']/g,'')+'</a>'})}
-function addMsg(t,r){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
+function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
 function showLoading(){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
 function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
+var _sendLock=false
 async function send(){
-  try{var input=document.getElementById('input');var text=input.value.trim();if(!text&&attachFiles.length===0)return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');addMsg(ft,'user');CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
+  if(_sendLock)return;_sendLock=true
+  try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();if(!text&&(!attachFiles||attachFiles.length===0))return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
     // 先尝试智能任务分解
     var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
     var td=await tr.json()
@@ -61,12 +63,13 @@ async function send(){
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');return};var sd=await sr.json();hideLoading()
     if(sd&&sd.success){var rt=sd.result||'(空)'
-      if(rt.includes('【模块调用】')||rt.includes('execute_module')||rt.includes('引擎:')){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';var l=document.createElement('div');l.className='msg-label';l.textContent='AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=rt.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/【模块调用】/g,'<span style="color:var(--accent);font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:var(--accent2)">引擎:</span>');d.appendChild(l);d.appendChild(b);m.appendChild(d)}else{addMsg(rt,'bot')};CTX.push({role:'assistant',content:sd.result})
+      if(rt.includes('【模块调用】')||rt.includes('execute_module')||rt.includes('引擎:')){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';var l=document.createElement('div');l.className='msg-label';l.textContent='AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=rt.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/【模块调用】/g,'<span style="color:var(--accent);font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:var(--accent2)">引擎:</span>');d.appendChild(l);d.appendChild(b);m.appendChild(d)}else{addMsg(rt,'bot')};if(!CTX)CTX=[];CTX.push({role:'assistant',content:sd.result})
     }else{addMsg('系统: '+(sd&&sd.detail||'未知错误'),'bot')}
   }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}
-  setTimeout(backToVoice,500)
+  _sendLock=false
+  try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
-function clearHistory(){if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];CTX=[];localStorage.removeItem('evo_chat_history');document.getElementById('messages').innerHTML=''}
+function clearHistory(){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];try{CTX=[]}catch(e){};localStorage.removeItem('evo_chat_history');var m=document.getElementById('messages');if(m)m.innerHTML=''}
 function showArchives(){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');if(a.length===0){alert('暂无历史对话');return};var list='';for(var i=0;i<a.length;i++){list+=(i+1)+'. '+a[i].time+' ('+a[i].messages.length+'条)\n'};var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list);if(idx===null)return;var n=parseInt(idx)-1;if(n>=0&&n<a.length){CHAT=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));restoreHistory()}}
 function showDashboard(){window.location.href='/dashboard'}
 function showEnterprise(){window.location.href='/enterprise.html'}
@@ -75,57 +78,50 @@ function openHub(){window.location.href='/hub'}
 // 语音 - 双通道：Web Speech API + MediaRecorder降级
 var _voicing=false,_voiceWebSpeech=null,_voiceMediaRec=null,_voiceStream=null,_voiceChunks=[];
 function switchToText(){
-  document.getElementById('voiceMic').style.display='none';document.getElementById('kbdBtn').style.display='none'
-  document.getElementById('voiceBackBtn').style.display=''
-  document.getElementById('input').style.display='';document.getElementById('input').focus()
+  var el;
+  el=document.getElementById('voiceBar');if(el)el.classList.add('hidden');
+  el=document.getElementById('textInputRow');if(el)el.style.display='flex';
 }
 function backToVoice(){
-  document.getElementById('voiceMic').style.display='';document.getElementById('kbdBtn').style.display=''
-  document.getElementById('voiceBackBtn').style.display='none'
-  document.getElementById('input').style.display='none'
+  var el;
+  el=document.getElementById('voiceBar');if(el)el.classList.add('hidden');
+  el=document.getElementById('textInputRow');if(el)el.style.display='flex';
 }
 function startVoiceRecord(e){
   if(_voicing)return;_voicing=true
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel')
   b.classList.add('recording');_voiceChunks=[]
   
-  // 先尝试标准 getUserMedia（电脑/部分安卓可用）
-  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    l.textContent='请说话'
-    var _gumTimeout=setTimeout(function(){
-      if(!_voiceReady){_fallbackRecord(b,l)}
-    },2000)
-    try{
-      navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
-        clearTimeout(_gumTimeout)
-        _voiceStream=s;_voiceReady=true
-        var mt=(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm')
-        _voiceRec=new MediaRecorder(s,{mimeType:mt})
-        _voiceRec.ondataavailable=function(ev){if(ev.data.size>0)_voiceChunks.push(ev.data)}
-        _voiceRec.start();l.textContent='松开'
-        if(_voiceReleased){_voiceRec.stop()}
-      }).catch(function(){
-        clearTimeout(_gumTimeout)
-        _fallbackRecord(b,l)
-      })
-      return
-    }catch(err){
-      clearTimeout(_gumTimeout)
-    }
+  // 检查是否已经拒绝过权限（华为等设备）
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    _fallbackRecord(b,l);return
   }
-  // 华为/权限受限设备：直接走降级（弹出系统录音）
-  _fallbackRecord(b,l)
+  
+  l.textContent='请说话'
+  try{
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+      _voiceStream=s;_voiceReady=true
+      var mt=(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm')
+      _voiceRec=new MediaRecorder(s,{mimeType:mt})
+      _voiceRec.ondataavailable=function(ev){if(ev.data.size>0)_voiceChunks.push(ev.data)}
+      _voiceRec.start();l.textContent='松开'
+    }).catch(function(){
+      // getUserMedia 失败 → 降级到系统原生录音
+      _fallbackRecord(b,l)
+    })
+  }catch(err){
+    _fallbackRecord(b,l)
+  }
 }
-// 华为等设备降级方案：弹出系统原生录音/选择录音文件界面
+// 华为等设备降级方案：弹出系统原生录音界面
 var _fallbackInput=null
 function _fallbackRecord(b,l){
   b.classList.remove('recording');_voicing=false
-  l.textContent='选择录音'
+  l.textContent='打开录音...'
   if(!_fallbackInput){
     _fallbackInput=document.createElement('input')
-    _fallbackInput.type='file'
-    _fallbackInput.accept='audio/*;capture=microphone'
-    _fallbackInput.setAttribute('capture','microphone')
+    _fallbackInput.type='file';_fallbackInput.accept='audio/*'
+    _fallbackInput.setAttribute('capture','user')
     _fallbackInput.style.display='none'
     document.body.appendChild(_fallbackInput)
     _fallbackInput.onchange=function(){
@@ -141,24 +137,16 @@ function _fallbackRecord(b,l){
       }).catch(function(){l.textContent='重试';setTimeout(function(){l.textContent='🎤语音'},2000)})
     }
   }
-  l.textContent='🎤语音'
   setTimeout(function(){_fallbackInput.click()},100)
 }
 
-var _voiceReleased=false
 function stopVoiceRecord(e){
   if(!_voicing&&!_retrying)return
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel'),i=document.getElementById('input')
-  _voiceReleased=true
   if(!_voiceReady){
-    // getUserMedia 还没返回（用户还没点允许或不支持）
-    // 不要放弃！继续等待 getUserMedia 完成
-    if(!_retrying){
-      _retrying=true
-      l.textContent='等待麦克风...'
-      setTimeout(function(){_retrying=false;stopVoiceRecord(e)},3000)
-    }
-    return
+    _retrying=true
+    if(!_voicing)_voicing=true
+    return setTimeout(function(){_retrying=false;stopVoiceRecord(e)},500)
   }
   _voicing=false;_retrying=false
   b.classList.remove('recording')
@@ -223,6 +211,6 @@ async function checkLLM(){var b=document.getElementById('modelBadge');b.textCont
 var _LOGIN_TTL=86400000;var _loginTs=localStorage.getItem('evo_login_ts')
 if(_loginTs&&(Date.now()-parseInt(_loginTs)>_LOGIN_TTL)){localStorage.removeItem('evo_logged_in');localStorage.removeItem('evo_login_ts')}
 if(localStorage.getItem('evo_logged_in')){document.getElementById('authWrap').classList.add('hidden');document.getElementById('appMain').style.display='flex';document.getElementById('greeting').textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'');restoreHistory();_checkExpert();setTimeout(function(){checkLLM()},1000)}
-function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return;var x=JSON.parse(e);if(!x||!x.name||!x.dept||Date.now()-x.ts>3600000){localStorage.removeItem('evo_active_expert');return};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（来自 '+x.dept+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';CTX.push({role:'system',content:sys});addMsg('🎯 已激活专家: '+x.name+'（'+x.dept+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}}}catch(ee){}
+function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return;var x=JSON.parse(e);if(!x||!x.name||!x.dept||Date.now()-x.ts>3600000){localStorage.removeItem('evo_active_expert');return};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（来自 '+x.dept+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(e){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(e){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+x.dept+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}}}catch(ee){}
 }
 

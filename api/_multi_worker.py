@@ -4,7 +4,7 @@ from functools import wraps
 import threading
 
 # Worker 配置
-WORKERS = int(os.environ.get("EVO_WORKERS", "4"))
+WORKERS = int(os.environ.get("EVO_WORKERS", "1"))
 TIMEOUT_SECONDS = int(os.environ.get("EVO_TOOL_TIMEOUT", "60"))
 
 class WorkerManager:

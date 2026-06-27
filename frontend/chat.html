@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
 <link rel="manifest" href="/manifest.json">
+
 <title>AUTO-EVO-AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -52,7 +53,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .input-row input::placeholder{color:var(--text3)}
 .input-row button{width:32px;height:32px;border-radius:7px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 .input-row button:hover{opacity:.9}
-.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:14px;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:8px;height:36px;transition:all .2s;white-space:nowrap;cursor:pointer;display:flex;align-items:center;flex:1;justify-content:center}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}.input-row button.mic:active{background:#e74c3c;color:#fff;transform:scale(0.97)!important}.input-row button.mic.recording{background:#e74c3c;color:#fff;border-color:#e74c3c;animation:micPulse .8s infinite}@keyframes micPulse{0%{box-shadow:0 0 6px rgba(231,76,60,.4)}50%{box-shadow:0 0 14px rgba(231,76,60,.7)}100%{box-shadow:0 0 6px rgba(231,76,60,.4)}}
+.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:0;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:8px;height:32px;width:32px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* 语音条 - 仿微信 */
+.voice-bar{display:flex;align-items:center;justify-content:center;height:42px;border-radius:8px;background:var(--bg);border:1px solid var(--border);cursor:pointer;user-select:none;position:relative;transition:all .15s;touch-action:manipulation}.voice-bar.hidden{display:none}.voice-bar:active{background:#e74c3c;transform:scale(0.99)}.voice-bar.recording{background:#e74c3c;border-color:#e74c3c;animation:vPulse .8s infinite}@keyframes vPulse{0%{box-shadow:0 0 6px rgba(231,76,60,.4)}50%{box-shadow:0 0 14px rgba(231,76,60,.7)}100%{box-shadow:0 0 6px rgba(231,76,60,.4)}}.voice-bar .vb-label{font-size:14px;font-weight:500;color:var(--text2);pointer-events:none}.voice-bar.recording .vb-label{color:#fff}.voice-bar .vb-cancel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--text3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}.voice-bar .vb-cancel:hover{background:rgba(0,0,0,.15);color:var(--text)}
 /* 右侧面板 - WorkBuddy 风格 */
 .right-panel{width:260px;border-left:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;flex-shrink:0;position:relative;transition:width .25s ease}.right-panel.hidden{width:0;min-width:0;border-left:none;overflow:visible}.right-panel.hidden .right-header,.right-panel.hidden .right-content{display:none}
 .right-toggle-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:48px;border-radius:0 8px 8px 0;border:1px solid var(--border);border-left:none;background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);z-index:5;transition:all .2s;box-shadow:2px 0 8px rgba(0,0,0,.08);right:auto;left:-24px}.right-toggle-btn:hover{color:var(--accent);background:var(--glass)}.right-panel.hidden .right-toggle-btn{left:-24px;border-radius:0 8px 8px 0}.right-toggle-btn::before{content:'▶'}div.right-panel:not(.hidden) .right-toggle-btn::before{content:'◀'}
@@ -237,24 +240,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
           <div id="cat_data" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'nocodb_manage')">📊 NocoDB管理</span><span class="tool-chip" onclick="quickTool(this,'grist_analyze')">📋 Grist分析</span></div>
           <div id="cat_comm" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'novu_notify')">📢 Novu通知</span><span class="tool-chip" onclick="quickTool(this,'gitea_git')">📦 Gitea代码</span><span class="tool-chip" onclick="quickTool(this,'wikijs_wiki')">📚 Wiki知识</span><span class="tool-chip" onclick="quickTool(this,'bookstack_wiki')">📚 BookStack百科</span><span class="tool-chip" onclick="quickTool(this,'projectsend_files')">📁 文件分享</span><span class="tool-chip" onclick="quickTool(this,'freshrss_read')">📰 RSS阅读</span><span class="tool-chip" onclick="quickTool(this,'listmonk_send')">📧 邮件营销</span></div>
           <div id="cat_biz" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'plane_project')">📋 项目管理</span><span class="tool-chip" onclick="quickTool(this,'openproject_mgmt')">📋 项目管理</span><span class="tool-chip" onclick="quickTool(this,'cal_schedule')">📅 日程调度</span><span class="tool-chip" onclick="quickTool(this,'keycloak_auth')">🔐 身份认证</span><span class="tool-chip" onclick="quickTool(this,'odoo_manage')">🏢 Odoo管理</span><span class="tool-chip" onclick="quickTool(this,'erpclaw_manage')">🏭 ERP管理</span></div>
-          <div id="cat_ops" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'opentofu_apply')">🏗 部署编排</span><span class="tool-chip" onclick="quickTool(this,'ansible_run')">⚙ 自动化运维</span><span class="tool-chip" onclick="quickTool(this,'strapi_cms')">📄 内容管理</span><span class="tool-chip" onclick="quickTool(this,'directus_api')">🗄 数据API</span><span class="tool-chip" onclick="quickTool(this,'coolify_deploy')">🚀 一键部署</span></div>
-          <div id="cat_monitor" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'meilisearch_search')">🔍 全文搜索</span><span class="tool-chip" onclick="quickTool(this,'minio_storage')">💾 对象存储</span><span class="tool-chip" onclick="quickTool(this,'uptime_kuma')">📊 站点监控</span><span class="tool-chip" onclick="quickTool(this,'oneuptime_monitor')">📊 全面监控</span><span class="tool-chip" onclick="quickTool(this,'signoz_apm')">📊 APM链路</span><span class="tool-chip" onclick="quickTool(this,'wazuh_siem')">🛡 安全监控</span><span class="tool-chip" onclick="quickTool(this,'nats_mq')">🔄 消息队列</span><span class="tool-chip" onclick="quickTool(this,'rabbitmq_broker')">🔄 消息代理</span><span class="tool-chip" onclick="quickTool(this,'mlflow_track')">📈 实验追踪</span><span class="tool-chip" onclick="quickTool(this,'langfuse_observe')">👁 LLM观测</span><span class="tool-chip" onclick="quickTool(this,'hoppscotch_test')">🧪 API测试</span><span class="tool-chip" onclick="quickTool(this,'mermaid_chart')">🗺 流程图</span><span class="tool-chip" onclick="quickTool(this,'keploy_test')">🧪 AI测试</span></div>
-          <div id="cat_life" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'rustdesk_connect')">🖥 远程桌面</span><span class="tool-chip" onclick="quickTool(this,'docuseal_sign')">✍ 电子签名</span><span class="tool-chip" onclick="quickTool(this,'homeassistant_control')">🏠 智能家居</span><span class="tool-chip" onclick="quickTool(this,'vaultwarden_manage')">🔐 密码管理</span><span class="tool-chip" onclick="quickTool(this,'appsmith_build')">🛠 低代码构建</span><span class="tool-chip" onclick="quickTool(this,'airbyte_sync')">🔄 数据同步</span><span class="tool-chip" onclick="quickTool(this,'nocobase_build')">🏗 低代码平台</span></div>
-          <div id="cat_search" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browseract_extract')">🕷 反爬提取</span><span class="tool-chip" onclick="quickTool(this,'codemem_index')">🧠 代码知识</span><span class="tool-chip" onclick="quickTool(this,'reach_search')">🌐 全网搜索</span><span class="tool-chip" onclick="quickTool(this,'anime_animate')">✨ 页面动效</span></div>
-          <div id="cat_other" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browser_use_task')">🌐 浏览器任务</span><span class="tool-chip" onclick="quickTool(this,'codemem_query')">🧠 知识查询</span><span class="tool-chip" onclick="quickTool(this,'gpt_research')">📊 GPT研究</span><span class="tool-chip" onclick="quickTool(this,'openhands_generate')">🏗 自主生成</span><span class="tool-chip" onclick="quickTool(this,'letta_message')">🧠 记忆管理</span><span class="tool-chip" onclick="quickTool(this,'composio_execute')">🔧 工具集成</span><span class="tool-chip" onclick="quickTool(this,'self_evolving_analyze')">🧬 自进化分析</span><span class="tool-chip" onclick="quickTool(this,'moltron_learn')">📚 技能学习</span><span class="tool-chip" onclick="quickTool(this,'accomplish_desktop')">🖥 桌面自动化</span><span class="tool-chip" onclick="quickTool(this,'toolbench_discover')">🔌 API发现</span><span class="tool-chip" onclick="quickTool(this,'markitdown_convert')">📄 文档转MD</span><span class="tool-chip" onclick="quickTool(this,'scrapegraphai_scrape')">🕷 AI爬虫</span><span class="tool-chip" onclick="quickTool(this,'interpreter_execute')">💻 代码执行</span><span class="tool-chip" onclick="quickTool(this,'s2c_generate')">🎨 截图转代码</span><span class="tool-chip" onclick="quickTool(this,'pra_review')">🔍 PR审查</span><span class="tool-chip" onclick="quickTool(this,'qodo_testgen')">🧪 测试生成</span><span class="tool-chip" onclick="quickTool(this,'aider_edit')">✏ AI编辑</span><span class="tool-chip" onclick="quickTool(this,'openclaw_connect')">📱 消息平台</span><span class="tool-chip" onclick="quickTool(this,'tts_speak')">🔊 语音合成</span><span class="tool-chip" onclick="quickTool(this,'chatdev_run')">🤖 多智能体</span><span class="tool-chip" onclick="quickTool(this,'autogpt_run')">🧠 自主任务</span><span class="tool-chip" onclick="quickTool(this,'swe_fix')">🛠 修复Issue</span><span class="tool-chip" onclick="quickTool(this,'gptpilot_build')">🏗 生成项目</span><span class="tool-chip" onclick="quickTool(this,'text2sql_query')">🗃 自然查库</span><span class="tool-chip" onclick="quickTool(this,'bolt_generate')">⚡ 生成应用</span><span class="tool-chip" onclick="quickTool(this,'agenteval_benchmark')">📊 Agent评测</span><span class="tool-chip" onclick="quickTool(this,'openmontage_generate_script')">🎬 视频脚本</span><span class="tool-chip" onclick="quickTool(this,'lida_visualize')">📈 可视化</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_image')">📝 图片OCR</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_pdf')">📄 PDF识别</span><span class="tool-chip" onclick="quickTool(this,'zen_scan')">🔒 安全扫描</span><span class="tool-chip" onclick="quickTool(this,'shannon_audit')">🔐 代码审计</span><span class="tool-chip" onclick="quickTool(this,'legal_review_contract')">⚖ 合同审查</span><span class="tool-chip" onclick="quickTool(this,'twenty_create_contact')">👤 CRM联系人</span><span class="tool-chip" onclick="quickTool(this,'invoice_create')">🧾 开发票</span><span class="tool-chip" onclick="quickTool(this,'chatwoot_create_ticket')">🎫 创建工单</span><span class="tool-chip" onclick="quickTool(this,'postiz_create_post')">📱 发社媒</span><span class="tool-chip" onclick="quickTool(this,'mautic_send_email')">📧 营销邮件</span><span class="tool-chip" onclick="quickTool(this,'superset_create_chart')">📊 BI图表</span><span class="tool-chip" onclick="quickTool(this,'heyform_create_survey')">📋 创建问卷</span><span class="tool-chip" onclick="quickTool(this,'docetl_extract')">📂 文档提取</span><span class="tool-chip" onclick="quickTool(this,'accord_create_contract')">📝 法律协议</span><span class="tool-chip" onclick="quickTool(this,'claude_code_generate')">💻 Claude写代码</span><span class="tool-chip" onclick="quickTool(this,'frappe_hr_employee')">🏢 查员工</span><span class="tool-chip" onclick="quickTool(this,'dataease_create_dashboard')">📉 仪表盘</span><span class="tool-chip" onclick="quickTool(this,'invoice_track_expense')">💳 记费用</span><span class="tool-chip" onclick="quickTool(this,'graphify_index')">🧠 代码图谱</span><span class="tool-chip" onclick="quickTool(this,'hyper_extract')">🔬 知识提取</span><span class="tool-chip" onclick="quickTool(this,'kg_query')">📊 知识库</span><span class="tool-chip" onclick="quickTool(this,'eve_learn')">🔮 EVE架构</span><span class="tool-chip" onclick="quickTool(this,'openmontage_video')">🎥 视频制作</span><span class="tool-chip" onclick="quickTool(this,'palmier_mcp')">✂ MCP编辑</span></div>
+          <div id="cat_ops" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'opentofu_apply')">🏗️ 部署编排</span><span class="tool-chip" onclick="quickTool(this,'ansible_run')">⚙️ 自动化运维</span><span class="tool-chip" onclick="quickTool(this,'strapi_cms')">📄 内容管理</span><span class="tool-chip" onclick="quickTool(this,'directus_api')">🗄️ 数据API</span><span class="tool-chip" onclick="quickTool(this,'coolify_deploy')">🚀 一键部署</span></div>
+          <div id="cat_monitor" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'meilisearch_search')">🔍 全文搜索</span><span class="tool-chip" onclick="quickTool(this,'minio_storage')">💾 对象存储</span><span class="tool-chip" onclick="quickTool(this,'uptime_kuma')">📊 站点监控</span><span class="tool-chip" onclick="quickTool(this,'oneuptime_monitor')">📊 全面监控</span><span class="tool-chip" onclick="quickTool(this,'signoz_apm')">📊 APM链路</span><span class="tool-chip" onclick="quickTool(this,'wazuh_siem')">🛡️ 安全监控</span><span class="tool-chip" onclick="quickTool(this,'nats_mq')">🔄 消息队列</span><span class="tool-chip" onclick="quickTool(this,'rabbitmq_broker')">🔄 消息代理</span><span class="tool-chip" onclick="quickTool(this,'mlflow_track')">📈 实验追踪</span><span class="tool-chip" onclick="quickTool(this,'langfuse_observe')">👁️ LLM观测</span><span class="tool-chip" onclick="quickTool(this,'hoppscotch_test')">🧪 API测试</span><span class="tool-chip" onclick="quickTool(this,'mermaid_chart')">🗺️ 流程图</span><span class="tool-chip" onclick="quickTool(this,'keploy_test')">🧪 AI测试</span></div>
+          <div id="cat_life" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'rustdesk_connect')">🖥️ 远程桌面</span><span class="tool-chip" onclick="quickTool(this,'docuseal_sign')">✍️ 电子签名</span><span class="tool-chip" onclick="quickTool(this,'homeassistant_control')">🏠 智能家居</span><span class="tool-chip" onclick="quickTool(this,'vaultwarden_manage')">🔐 密码管理</span><span class="tool-chip" onclick="quickTool(this,'appsmith_build')">🛠️ 低代码构建</span><span class="tool-chip" onclick="quickTool(this,'airbyte_sync')">🔄 数据同步</span><span class="tool-chip" onclick="quickTool(this,'nocobase_build')">🏗️ 低代码平台</span></div>
+          <div id="cat_search" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browseract_extract')">🕷️ 反爬提取</span><span class="tool-chip" onclick="quickTool(this,'codemem_index')">🧠 代码知识</span><span class="tool-chip" onclick="quickTool(this,'reach_search')">🌐 全网搜索</span><span class="tool-chip" onclick="quickTool(this,'anime_animate')">✨ 页面动效</span></div>
+          <div id="cat_other" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browser_use_task')">🌐 浏览器任务</span><span class="tool-chip" onclick="quickTool(this,'codemem_query')">🧠 知识查询</span><span class="tool-chip" onclick="quickTool(this,'gpt_research')">📊 GPT研究</span><span class="tool-chip" onclick="quickTool(this,'openhands_generate')">🏗️ 自主生成</span><span class="tool-chip" onclick="quickTool(this,'letta_message')">🧠 记忆管理</span><span class="tool-chip" onclick="quickTool(this,'composio_execute')">🔧 工具集成</span><span class="tool-chip" onclick="quickTool(this,'self_evolving_analyze')">🧬 自进化分析</span><span class="tool-chip" onclick="quickTool(this,'moltron_learn')">📚 技能学习</span><span class="tool-chip" onclick="quickTool(this,'accomplish_desktop')">🖥️ 桌面自动化</span><span class="tool-chip" onclick="quickTool(this,'toolbench_discover')">🔌 API发现</span><span class="tool-chip" onclick="quickTool(this,'markitdown_convert')">📄 文档转MD</span><span class="tool-chip" onclick="quickTool(this,'scrapegraphai_scrape')">🕷️ AI爬虫</span><span class="tool-chip" onclick="quickTool(this,'interpreter_execute')">💻 代码执行</span><span class="tool-chip" onclick="quickTool(this,'s2c_generate')">🎨 截图转代码</span><span class="tool-chip" onclick="quickTool(this,'pra_review')">🔍 PR审查</span><span class="tool-chip" onclick="quickTool(this,'qodo_testgen')">🧪 测试生成</span><span class="tool-chip" onclick="quickTool(this,'aider_edit')">✏️ AI编辑</span><span class="tool-chip" onclick="quickTool(this,'openclaw_connect')">📱 消息平台</span><span class="tool-chip" onclick="quickTool(this,'tts_speak')">🔊 语音合成</span><span class="tool-chip" onclick="quickTool(this,'chatdev_run')">🤖 多智能体</span><span class="tool-chip" onclick="quickTool(this,'autogpt_run')">🧠 自主任务</span><span class="tool-chip" onclick="quickTool(this,'swe_fix')">🛠️ 修复Issue</span><span class="tool-chip" onclick="quickTool(this,'gptpilot_build')">🏗️ 生成项目</span><span class="tool-chip" onclick="quickTool(this,'text2sql_query')">🗃️ 自然查库</span><span class="tool-chip" onclick="quickTool(this,'bolt_generate')">⚡ 生成应用</span><span class="tool-chip" onclick="quickTool(this,'agenteval_benchmark')">📊 Agent评测</span><span class="tool-chip" onclick="quickTool(this,'openmontage_generate_script')">🎬 视频脚本</span><span class="tool-chip" onclick="quickTool(this,'lida_visualize')">📈 可视化</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_image')">📝 图片OCR</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_pdf')">📄 PDF识别</span><span class="tool-chip" onclick="quickTool(this,'zen_scan')">🔒 安全扫描</span><span class="tool-chip" onclick="quickTool(this,'shannon_audit')">🔐 代码审计</span><span class="tool-chip" onclick="quickTool(this,'legal_review_contract')">⚖️ 合同审查</span><span class="tool-chip" onclick="quickTool(this,'twenty_create_contact')">👤 CRM联系人</span><span class="tool-chip" onclick="quickTool(this,'invoice_create')">🧾 开发票</span><span class="tool-chip" onclick="quickTool(this,'chatwoot_create_ticket')">🎫 创建工单</span><span class="tool-chip" onclick="quickTool(this,'postiz_create_post')">📱 发社媒</span><span class="tool-chip" onclick="quickTool(this,'mautic_send_email')">📧 营销邮件</span><span class="tool-chip" onclick="quickTool(this,'superset_create_chart')">📊 BI图表</span><span class="tool-chip" onclick="quickTool(this,'heyform_create_survey')">📋 创建问卷</span><span class="tool-chip" onclick="quickTool(this,'docetl_extract')">📂 文档提取</span><span class="tool-chip" onclick="quickTool(this,'accord_create_contract')">📝 法律协议</span><span class="tool-chip" onclick="quickTool(this,'claude_code_generate')">💻 Claude写代码</span><span class="tool-chip" onclick="quickTool(this,'frappe_hr_employee')">🏢 查员工</span><span class="tool-chip" onclick="quickTool(this,'dataease_create_dashboard')">📉 仪表盘</span><span class="tool-chip" onclick="quickTool(this,'invoice_track_expense')">💳 记费用</span><span class="tool-chip" onclick="quickTool(this,'graphify_index')">🧠 代码图谱</span><span class="tool-chip" onclick="quickTool(this,'hyper_extract')">🔬 知识提取</span><span class="tool-chip" onclick="quickTool(this,'kg_query')">📊 知识库</span><span class="tool-chip" onclick="quickTool(this,'eve_learn')">🔮 EVE架构</span><span class="tool-chip" onclick="quickTool(this,'openmontage_video')">🎥 视频制作</span><span class="tool-chip" onclick="quickTool(this,'palmier_mcp')">✂️ MCP编辑</span></div>
         </div>
         <!-- 输入区 -->
-        <div class="input-area">
+        <div class="input-area" id="inputArea">
           <div class="attach-bar" id="attachBar"></div>
           <input id="fileInput" type="file" multiple style="display:none" onchange="handleFiles(this)">
-          <div class="input-row">
-            <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="上传文件/拍照">📎</button>
-            <input id="input" placeholder="输入你想做的事..." style="display:none;flex:1" onkeydown="if(event.key==='Enter'){send();backToVoice()}">
-            <button class="kbd-btn" id="kbdBtn" onclick="switchToText()" title="键盘输入">⌨</button>
-            <button class="mic" id="voiceMic"><span id="voiceLabel">🎤语音</span></button>
-            <button class="kbd-btn" id="voiceBackBtn" style="display:none" onclick="backToVoice()" title="语音输入">🎤</button>
-
+          <!-- 文字输入模式 -->
+          <div class="input-row" id="textInputRow">
+            <button onclick="document.getElementById('fileInput').click()" title="上传文件/拍照">📎</button>
+            <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter'){send()}">
+            <button class="mic" id="voiceToggleBtn" onclick="switchToVoice()" title="语音输入">🎤</button>
             <button onclick="send()">➤</button>
+          </div>
+          <!-- 语音输入模式（仿微信：全宽按压条） -->
+          <div class="voice-bar hidden" id="voiceBar" ontouchstart="voiceStart(event)" onmousedown="voiceStart(event)" ontouchend="voiceStop(event)" onmouseup="voiceStop(event)" ontouchcancel="voiceCancel(event)" onmouseleave="voiceCancel(event)">
+            <span class="vb-label" id="vbLabel">按住 说话</span>
+            <span class="vb-cancel" id="vbCancelBtn" onclick="switchToText()">✕</span>
           </div>
         </div>
       </div>
@@ -299,7 +305,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
   </div>
 </div>
 
-<script src="/frontend/chat_engine.js?v=8"></script>
 
+<script src="/frontend/chat_engine.js?v=12"></script>
+
+<script>
+// ── 语音输入：仿微信全宽按压条 + AudioContext 直录 WAV ──
+var _vStream=null,_vCtx=null,_vNode=null,_vSamples=[];
+
+function switchToVoice(){
+  document.getElementById('textInputRow').style.display='none';
+  document.getElementById('voiceBar').classList.remove('hidden');
+  document.getElementById('vbLabel').textContent='按住 说话';
+}
+function switchToText(){
+  document.getElementById('voiceBar').classList.add('hidden');
+  document.getElementById('voiceBar').classList.remove('recording');
+  document.getElementById('textInputRow').style.display='flex';
+  _cleanVoice();
+}
+
+// ── 重采样：sourceRate → 16000 ──
+function _resample(src,srcRate){
+  if(srcRate==16000)return src;
+  var ratio=srcRate/16000,len=Math.round(src.length/ratio),out=new Float32Array(len);
+  for(var i=0;i<len;i++){
+    var idx=i*ratio,fi=Math.floor(idx),frac=idx-fi;
+    out[i]=src[fi]*(1-frac)+(src[fi+1]||0)*frac;
+  }
+  return out;
+}
+
+function _wavBlob(samples,sr){
+  samples=_resample(samples,sr);sr=16000;
+  var l=samples.length,buf=new ArrayBuffer(44+l*2),v=new DataView(buf);
+  function wS(p,s){for(var i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))}
+  wS(0,'RIFF');v.setUint32(4,36+l*2,true);wS(8,'WAVE');
+  wS(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);
+  v.setUint16(32,2,true);v.setUint16(34,16,true);
+  wS(36,'data');v.setUint32(40,l*2,true);
+  for(var i=0;i<l;i++){var s=Math.max(-1,Math.min(1,samples[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7FFF,true)}
+  return new Blob([buf],{type:'audio/wav'})
+}
+
+function voiceStart(e){
+  e.preventDefault();
+  var vb=document.getElementById('voiceBar');
+  vb.classList.add('recording');
+  document.getElementById('vbLabel').textContent='松开 结束';
+  _vSamples=[];
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){_voiceFail();return}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    _vStream=s;
+    _vCtx=new(window.AudioContext||window.webkitAudioContext)();
+    var src=_vCtx.createMediaStreamSource(s);
+    _vNode=_vCtx.createScriptProcessor(4096,1,1);
+    _vNode.onaudioprocess=function(ev){var d=ev.inputBuffer.getChannelData(0);for(var i=0;i<d.length;i++)_vSamples.push(d[i])};
+    src.connect(_vNode);_vNode.connect(_vCtx.destination);
+  }).catch(function(){_voiceFail()});
+}
+
+function voiceStop(e){
+  var vb=document.getElementById('voiceBar');
+  vb.classList.remove('recording');
+  if(!_vStream||!_vCtx){switchToText();return}
+  if(_vNode){_vNode.disconnect();_vNode=null}
+  var actualRate=_vCtx.sampleRate;
+  _vCtx.close();_vCtx=null;
+  if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
+  if(_vSamples.length<1600){switchToText();return}
+  document.getElementById('vbLabel').textContent='识别中...';
+  var blob=_wavBlob(_vSamples,actualRate),fd=new FormData();
+  fd.append('file',blob,'v.wav');
+  fetch('/api/v1/speech/recognize',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(j){
+    switchToText();
+    if(j.success&&j.text){document.getElementById('input').value=j.text;send()}
+  }).catch(function(){switchToText()});
+}
+
+function voiceCancel(e){switchToText()}
+function _cleanVoice(){
+  _vSamples=[];
+  if(_vNode){try{_vNode.disconnect()}catch(ex){}_vNode=null}
+  if(_vCtx){try{_vCtx.close()}catch(ex){}_vCtx=null}
+  if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
+}
+function _voiceFail(){switchToText();alert('请在浏览器设置中允许麦克风权限');}
+</script>
 </body>
 </html>
