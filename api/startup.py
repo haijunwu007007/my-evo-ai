@@ -155,6 +155,12 @@ def _mount_vue_frontend():
             "n8n": "n8n.html",
             "agents": "agents.html",
             "sandbox": "sandbox.html",
+            "claw": "claw.html",
+            "hermes": "hermes.html",
+            "human": "human.html",
+            "experts": "experts.html",
+            "skills": "skills.html",
+            "plugins": "plugins.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)

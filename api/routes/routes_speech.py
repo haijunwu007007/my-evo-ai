@@ -6,7 +6,10 @@ logger = logging.getLogger("routes_speech")
 router = APIRouter(prefix="/api/v1/speech", tags=["speech"])
 
 _is_win = os.name == "nt"
-VOSK_DIR = r"C:\vosk_model"
+if _is_win:
+    VOSK_DIR = r"C:\vosk_model"
+else:
+    VOSK_DIR = "/home/ubuntu/vosk_models/vosk-model-small-cn-0.22"
 _WORKER = os.path.join(os.path.dirname(__file__), "_vosk_worker.py")
 
 
