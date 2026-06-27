@@ -288,8 +288,6 @@ def init_skills():
     logger.info(f"[SKILL] 技能注册完毕: {count} 个技能（内置 + 外部 + MCP桥接 + 连接器桥接 + MCPize + Gateway桥接）")
     return count
 
-init_skills()
-
 
 # ============================================================
 # 5. API 端点

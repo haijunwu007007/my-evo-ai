@@ -6,7 +6,6 @@ AUTO-EVO-AI V0.1 — API 启动/后台任务层
 from __future__ import annotations
 
 import os
-import os
 # ── 加载 evo.env（环境变量配置，支持 Windows 和 Linux） ──
 _EVO_ENV_PATHS = ["/etc/evo.env", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")]
 for _env_path in _EVO_ENV_PATHS:
@@ -127,22 +126,18 @@ def _mount_vue_frontend():
 
         # 非 API/App 路径兜底 + 特定文件覆盖
         _OVERRIDE = {
-            "enterprise.html": "enterprise.html",
             "cli": "cli.html",
-            "monitor": "dashboard.html",
+            "monitor": "monitor.html",
             "company": "company.html",
             "tools": "tools.html",
             "enterprise": "enterprise.html",
             "deploy": "deploy.html",
             "canvas": "canvas.html",
-            "workflow": "workflow.html",
-            "deploy": "deploy.html",
             "automations": "automations.html",
             "hub": "hub.html",
             "video": "video.html",
             "register": "register.html",
             "login": "login.html",
-            "monitor": "monitor.html",
             "capabilities": "capabilities.html",
             "codebase": "codebase.html",
             "self-evolve": "self_evolve.html",
@@ -150,17 +145,25 @@ def _mount_vue_frontend():
             "memory": "memory.html",
             "multi-agent": "multi_agent.html",
             "desktop": "desktop.html",
-            "rbac": "rbac.html",
             "channel": "channel.html",
             "n8n": "n8n.html",
             "agents": "agents.html",
-            "sandbox": "sandbox.html",
             "claw": "claw.html",
             "hermes": "hermes.html",
             "human": "human.html",
             "experts": "experts.html",
             "skills": "skills.html",
             "plugins": "plugins.html",
+            "fork": "ForkStudio.html",
+            "compose": "ComposeCanvas.html",
+            "docs": "docs.html",
+            "review": "review.html",
+            "hooks": "hooks.html",
+            "copilot": "copilot.html",
+            "tutorial": "tutorial.html",
+            "agent-factory": "agentfactory.html",
+            "soft-factory": "softfactory.html",
+            "oss-distiller": "oss-distiller.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)
