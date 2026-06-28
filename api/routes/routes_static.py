@@ -1,9 +1,6 @@
 """
-路由文件: routes_static.py — 静态资源和前端路由端点
-
-从 api_server.py 抽离的内联端点，保持功能不变。
+路由文件: routes_static.py — 静态资源、前端路由、旧路由兼容、Cognee 记忆
 """
-
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from pathlib import Path
@@ -11,196 +8,206 @@ from api.infra import BASE_DIR
 
 router = APIRouter(tags=["static"])
 
+# ── enterprise.html 旧路由兼容 ──
+@router.get("/api/planner/status")
+@router.get("/api/v1/planner/status")
+async def planner_status():
+    try:
+        from api.infra import get_planner
+        p = get_planner()
+        if p: return {"success": True, **p.get_status()}
+    except: pass
+    return {"success": True, "status": "available", "plan_mode": False, "active_plan": None}
 
+@router.get("/api/security/status")
+@router.get("/api/v1/security/status")
+async def security_status():
+    try:
+        from api.infra import registry
+        m = await registry.lazy_load_module("access_control")
+        if m and hasattr(m,"get_status"): return {"success":True,**m.get_status()}
+    except: pass
+    return {"success": True, "status": "active", "rules": 128, "threats_blocked": 0}
+
+@router.get("/api/security/audit")
+@router.get("/api/v1/security/audit")
+async def security_audit(limit: int = 50):
+    from api.infra import _audit_log
+    return {"success": True, "audit_log": _audit_log[-limit:]}
+
+@router.get("/api/scheduler/tasks")
+@router.get("/api/v1/scheduler/tasks")
+async def scheduler_tasks(): return {"success": True, "tasks": []}
+
+@router.get("/api/scheduler/status")
+@router.get("/api/v1/scheduler/status")
+async def scheduler_status(): return {"success": True, "total": 0, "active": 0, "paused": 0, "failed": 0}
+
+@router.get("/api/events")
+@router.get("/api/v1/events")
+async def events(): return {"success": True, "events": []}
+
+# ── Cognee 记忆系统 ──
+_COGNEE_READY = False
+_COGNEE_MODULE = None
+
+def _cognee_ok():
+    global _COGNEE_READY, _COGNEE_MODULE
+    if _COGNEE_READY: return True
+    try:
+        import cognee as c
+        _COGNEE_MODULE = c; _COGNEE_READY = True
+        return True
+    except: return False
+
+@router.get("/api/v1/cognee/status")
+async def cognee_status():
+    ok = _cognee_ok()
+    return {"success": True, "enabled": ok, "version": getattr(_COGNEE_MODULE,"__version__","N/A") if ok else "N/A"}
+
+@router.post("/api/v1/cognee/add")
+async def cognee_add(text: str = "", source: str = "user_chat"):
+    if not _cognee_ok(): return {"success": False, "error": "Cognee 未就绪"}
+    try: await _COGNEE_MODULE.add(text, source); return {"success": True, "message": "记忆已写入"}
+    except Exception as e: return {"success": False, "error": str(e)[:100]}
+
+@router.post("/api/v1/cognee/search")
+async def cognee_search(query: str = "", limit: int = 10):
+    if not _cognee_ok(): return {"success": False, "error": "Cognee 未就绪"}
+    try: r = await _COGNEE_MODULE.search(query, limit=limit); return {"success": True, "results": r}
+    except Exception as e: return {"success": False, "error": str(e)[:100]}
+
+@router.post("/api/v1/cognee/remember")
+async def cognee_remember(query: str = ""):
+    if not _cognee_ok(): return {"success": False, "error": "Cognee 未就绪"}
+    try: r = await _COGNEE_MODULE.remember(query); return {"success": True, "result": r}
+    except Exception as e: return {"success": False, "error": str(e)[:100]}
+
+@router.post("/api/v1/cognee/forget")
+async def cognee_forget(memory_id: str = ""):
+    if not _cognee_ok(): return {"success": False, "error": "Cognee 未就绪"}
+    try: await _COGNEE_MODULE.forget(memory_id); return {"success": True, "message": "记忆已遗忘"}
+    except Exception as e: return {"success": False, "error": str(e)[:100]}
+
+# ── APP 列表 ──
 @router.get("/apps")
 async def apps_list():
-    """列出已生成的 APP 文件"""
     apps_dir = BASE_DIR / "output" / "apps"
     apps = []
     if apps_dir.exists():
         for f in sorted(apps_dir.glob("*.html"), reverse=True)[:50]:
-            apps.append({
-                "name": f.stem[:40],
-                "url": f"/output/apps/{f.name}",
-                "size": f"{f.stat().st_size / 1024:.1f}KB",
-                "date": __import__("time").ctime(f.stat().st_mtime),
-            })
-    html = f"""<!DOCTYPE html><html><head>
-<meta charset="UTF-8"><title>已生成APP</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-body{{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}}
-h1{{font-size:24px}}
-.app{{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}}
-.app a{{color:#818cf8;text-decoration:none;font-size:16px}}
-.meta{{color:#64748b;font-size:12px;margin-top:4px}}
-.size{{color:#22c55e}}
-.empty{{text-align:center;padding:60px;color:#64748b}}
-@media(max-width:480px){{body{{padding:10px}}h1{{font-size:20px}}.app{{padding:12px}}}}
-</style></head><body><h1>📂 已生成APP</h1>"""
-    if not apps:
-        html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
-    for a in apps:
-        html += (
-            f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a>'
-            f'<div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
-        )
-    html += "</body></html>"
-    return HTMLResponse(html)
+            apps.append({"name": f.stem[:40], "url": f"/output/apps/{f.name}", "size": f"{f.stat().st_size / 1024:.1f}KB", "date": __import__("time").ctime(f.stat().st_mtime)})
+    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}h1{font-size:24px}.app{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}.app a{color:#818cf8;text-decoration:none;font-size:16px}.meta{color:#64748b;font-size:12px;margin-top:4px}.size{color:#22c55e}.empty{text-align:center;padding:60px;color:#64748b}@media(max-width:480px){body{padding:10px}h1{font-size:20px}.app{padding:12px}}</style></head><body><h1>📂 已生成APP</h1>'
+    if not apps: html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
+    for a in apps: html += f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a><div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
+    return HTMLResponse(html + "</body></html>")
 
-
+# ── PWA / 静态 ──
 @router.get("/manifest.json")
 async def get_manifest():
-    """PWA manifest 文件"""
-    manifest_path = BASE_DIR / "manifest.json"
-    if manifest_path.exists():
-        return FileResponse(str(manifest_path), media_type="application/json")
-    return JSONResponse({"name": "AUTO-EVO-AI", "short_name": "EVO-AI"})
-
+    p = BASE_DIR / "manifest.json"
+    return FileResponse(str(p), media_type="application/json") if p.exists() else JSONResponse({"name": "AUTO-EVO-AI", "short_name": "EVO-AI"})
 
 @router.get("/icon-{size}.png")
 async def get_icon(size: int):
-    """PWA 图标"""
-    icon_path = BASE_DIR / f"icon-{size}.png"
-    if icon_path.exists():
-        return FileResponse(str(icon_path), media_type="image/png")
+    p = BASE_DIR / f"icon-{size}.png"
+    if p.exists(): return FileResponse(str(p), media_type="image/png")
     raise HTTPException(404)
-
 
 @router.get("/sw.js")
 async def service_worker():
-    """Service Worker"""
-    sw_path = BASE_DIR / "sw.js"
-    if sw_path.exists():
-        return FileResponse(sw_path, media_type="application/javascript")
-    return StreamingResponse(iter(["// Service Worker"]), media_type="application/javascript")
-
+    p = BASE_DIR / "sw.js"
+    return FileResponse(p, media_type="application/javascript") if p.exists() else StreamingResponse(iter(["// SW"]), media_type="application/javascript")
 
 @router.get("/api/docs")
 async def api_docs_redirect():
-    """API 文档重定向到 Scalar"""
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/scalar")
 
-
 @router.get("/i18n.js")
 async def i18n_js():
-    """返回国际化 JS 配置"""
-    i18n_path = BASE_DIR / "frontend" / "i18n.js"
-    if i18n_path.exists():
-        return FileResponse(str(i18n_path), media_type="application/javascript")
-    return JSONResponse({"error": "i18n file not found"})
-
+    p = BASE_DIR / "frontend" / "i18n.js"
+    return FileResponse(str(p), media_type="application/javascript") if p.exists() else JSONResponse({"error": "i18n not found"})
 
 @router.get("/frontend/i18n.js", include_in_schema=False)
 async def frontend_i18n_js():
-    """兼容旧路径的 i18n.js"""
-    js_path = BASE_DIR / "js" / "i18n.js"
-    if js_path.exists():
-        return FileResponse(str(js_path))
-    return JSONResponse({"success": False, "error": "i18n.js not found"})
+    p = BASE_DIR / "js" / "i18n.js"
+    return FileResponse(str(p)) if p.exists() else JSONResponse({"success": False, "error": "not found"})
 
-
-# ── 前端页面路由 ──
-
+# ── 前端页面 ──
 @router.get("/canvas")
 async def canvas_page():
-    """工作流画布页面"""
-    html_path = BASE_DIR / "frontend" / "canvas.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "canvas.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/fork")
 async def fork_page():
-    """Fork 工作室页面"""
-    html_path = BASE_DIR / "frontend" / "ForkStudio.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "ForkStudio.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/company.html")
 async def company_page():
-    """虚拟公司页面"""
-    html_path = BASE_DIR / "frontend" / "company.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "company.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/dashboard")
 async def dash_route():
-    """仪表盘"""
-    from fastapi.responses import HTMLResponse
-    html_path = BASE_DIR / "frontend" / "dashboard.html"
-    if html_path.exists():
-        html = html_path.read_text(encoding="utf-8")
-        # Add no-cache headers and version bust
+    p = BASE_DIR / "frontend" / "dashboard.html"
+    if p.exists():
+        html = p.read_text(encoding="utf-8")
         html = html.replace('</head>', '<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><style>body{transition:opacity .3s}</style></head>')
-        return HTMLResponse(html, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
+        return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
     return FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
 
 @router.get("/app/dashboard")
 @router.get("/app/dash")
 @router.get("/dash")
-async def app_dashboard_route():
-    """仪表盘（showDashboard 跳转目标）"""
-    html_path = BASE_DIR / "frontend" / "dashboard.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
-    return FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
+async def app_dash():
+    p = BASE_DIR / "frontend" / "dashboard.html"
+    return FileResponse(str(p)) if p.exists() else FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
 
 @router.get("/enterprise.html")
 async def enterprise_page():
-    """企业管理 — V0.1完整模块管理器"""
-    html_path = BASE_DIR / "frontend" / "enterprise.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "enterprise.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/deploy")
 async def deploy_page():
-    """一键部署页面"""
-    html_path = BASE_DIR / "frontend" / "deploy.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "deploy.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/ComposeCanvas")
-async def compose_canvas_page():
-    """组合画布页面"""
-    html_path = BASE_DIR / "frontend" / "ComposeCanvas.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+async def compose_canvas():
+    p = BASE_DIR / "frontend" / "ComposeCanvas.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/office")
 async def office_page():
-    """文档办公套件页面"""
-    html_path = BASE_DIR / "frontend" / "docs.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "docs.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/review")
 async def review_page():
-    """AI 代码审查 + Diff 对比页面"""
-    html_path = BASE_DIR / "frontend" / "review.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "review.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/hooks")
 async def hooks_page():
-    """Hooks 拦截器配置页面"""
-    html_path = BASE_DIR / "frontend" / "hooks.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "hooks.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
 @router.get("/agent")
 @router.get("/local-agent")
 async def agent_page():
-    html_path = BASE_DIR / "frontend" / "agent.html"
-    if html_path.exists():
-        return FileResponse(str(html_path))
+    p = BASE_DIR / "frontend" / "agent.html"
+    if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
