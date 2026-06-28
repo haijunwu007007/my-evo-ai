@@ -37,11 +37,13 @@ def call_llm(messages, tools=None, key="", timeout=None):
                '-d', payload,
                '--connect-timeout', str(timeout or 15),
                '--max-time', str(timeout or 30)]
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=(timeout or 30) + 5)
-        import sys; print(f"=== CURL EXIT={r.returncode} STDOUT={r.stdout[:200] if r.stdout else 'EMPTY'} STDERR={r.stderr[:200] if r.stderr else 'NONE'} ===", file=sys.stderr)
-        if r.returncode == 0 and r.stdout:
+        r = subprocess.run(cmd, capture_output=True, timeout=(timeout or 30) + 5)
+        stdout = r.stdout.decode('utf-8', errors='replace') if r.stdout else ''
+        stderr = r.stderr.decode('utf-8', errors='replace') if r.stderr else ''
+        import sys; print(f"=== CURL EXIT={r.returncode} STDOUT={stdout[:200]} STDERR={stderr[:200]} ===", file=sys.stderr)
+        if r.returncode == 0 and stdout:
             try:
-                data = json.loads(r.stdout)
+                data = json.loads(stdout)
                 content = data.get("choices",[{}])[0].get("message",{}).get("content","")
                 tc = data.get("choices",[{}])[0].get("message",{}).get("tool_calls",[])
                 result = (content, tc) if content else ("", tc) if tc else (None, None)

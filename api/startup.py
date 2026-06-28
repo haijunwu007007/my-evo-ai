@@ -125,14 +125,13 @@ def _mount_vue_frontend():
             logger.warning("[WORKFLOW] 未找到 workflow HTML (routes_new_features 未加载)")
 
         # 非 API/App 路径兜底 + 特定文件覆盖
+        # 非 API 路径兜底 — 仅保留 routes_static.py 未覆盖的路径
+        # routes_static.py 已覆盖: /canvas /fork /dashboard /deploy /company /enterprise
+        #                        /ComposeCanvas /office /review /hooks /agent /local-agent
         _OVERRIDE = {
             "cli": "cli.html",
             "monitor": "monitor.html",
-            "company": "company.html",
             "tools": "tools.html",
-            "enterprise": "enterprise.html",
-            "deploy": "deploy.html",
-            "canvas": "canvas.html",
             "automations": "automations.html",
             "hub": "hub.html",
             "video": "video.html",
@@ -154,11 +153,6 @@ def _mount_vue_frontend():
             "experts": "experts.html",
             "skills": "skills.html",
             "plugins": "plugins.html",
-            "fork": "ForkStudio.html",
-            "compose": "ComposeCanvas.html",
-            "docs": "docs.html",
-            "review": "review.html",
-            "hooks": "hooks.html",
             "copilot": "copilot.html",
             "tutorial": "tutorial.html",
             "agent-factory": "agentfactory.html",

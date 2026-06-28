@@ -528,7 +528,7 @@ app = FastAPI(
 - **系统协调**: v3.0 协调器支持自主决策循环
 - **实时推送**: WebSocket 推送模块状态和事件
 """,
-    version="0.1.0",
+    version="V0.1",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
