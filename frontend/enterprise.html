@@ -2626,7 +2626,7 @@
 
         function showPage(id) {
 
-            if (id === 'billion-group-os') { openBillionGroupOS(); return; }
+            if (id === 'billion-group-os') { showBillionOSModal(); return; }
 
             if (id === 'coordination') { openV3Panel(); return; }
             if (id === 'pipeline-studio') { openPipelineStudio(); return; }
@@ -5052,6 +5052,11 @@
     window.v3FindModules = v3FindModules;
     window.v3ExecuteTask = v3ExecuteTask;
     window.v3TestExecute = v3TestExecute;
+    window.openConfigCenter = openConfigCenter;
+    window.openSchedulerPanel = openSchedulerPanel;
+    window.openEventEngine = openEventEngine;
+    window.openTaskQueue = openTaskQueue;
+    window.openWSMonitor = openWSMonitor;
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -7763,6 +7768,38 @@ window.addEventListener('offline', () => {
     WSRealtime.updateStatus('disconnected');
     WSRealtime.showToast(I18N.t('status.offline'), '', 'warning');
 });
+
+function showBillionOSModal() {
+    var items = [
+        ['\uD83E\uDDE0','\u5168\u6A21\u5757\u534F\u8C03\u4E2D\u5FC3','coordination'],
+        ['\uD83D\uDD17','\u6A21\u5757\u7BA1\u7EBF\u5F15\u64CE','pipeline-studio'],
+        ['\u2699\uFE0F','\u7EDF\u4E00\u914D\u7F6E\u4E2D\u5FC3','config-center'],
+        ['\u23F0','\u5B9A\u65F6\u8C03\u5EA6\u5668','scheduler-panel'],
+        ['\u26A1','\u4E8B\u4EF6\u9A71\u52A8\u5F15\u64CE','event-engine'],
+        ['\uD83D\uDCEC','\u4EFB\u52A1\u961F\u5217','task-queue'],
+        ['\uD83D\uDCE1','\u5B9E\u65F6\u63A8\u9001\u76D1\u63A7','ws-monitor'],
+    ];
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    var h = '<div style="background:var(--card,rgba(25,25,45,0.96));border-radius:16px;padding:30px;min-width:580px;max-width:780px;max-height:80vh;overflow-y:auto;border:1px solid var(--border,rgba(255,255,255,0.08));box-shadow:0 20px 60px rgba(0,0,0,0.4);">';
+    h += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;"><span style="font-size:24px;">\uD83C\uDFDB\uFE0F</span><div><h2 style="margin:0;font-size:20px;">BILLION GROUP OS</h2><p style="margin:4px 0 0;font-size:12px;color:var(--muted,rgba(255,255,255,0.45));">\u4F01\u4E1A\u64CD\u4F5C\u7CFB\u7EDF \u2014 \u5168\u6A21\u5757\u534F\u540C\u7BA1\u7406\u5E73\u53F0</p></div></div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        h += '<div class=\"billion-btn\" data-bid=\"' + item[2] + '\" style="background:rgba(255,255,255,0.04);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s;border:1px solid transparent;"><div style="font-size:28px;margin-bottom:8px;">' + item[0] + '</div><div style="font-size:13px;font-weight:600;">' + item[1] + '</div></div>';
+    }
+    h += '</div></div>';
+    overlay.innerHTML = h;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(ev) {
+        var btn = ev.target.closest('.billion-btn');
+        if (!btn) return;
+        var bid = btn.getAttribute('data-bid');
+        overlay.remove();
+        setTimeout(function() { showPage(bid); }, 50);
+    });
+}
 </script>
 
 </html>
