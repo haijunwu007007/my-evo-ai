@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>录屏学习</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f8;color:#1e293b;min-height:100vh}
+.header{background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:600}
+.header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
+.container{max-width:800px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card h3{font-size:14px;margin-bottom:10px}
+.btn{background:#4361ee;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn-sm{font-size:12px;padding:6px 12px}
+.btn-green{background:#10b981}
+.btn-orange{background:#f59e0b}
+.btn-red{background:#ef4444}
+input,textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-bottom:8px}
+textarea{resize:vertical;min-height:60px;font-family:monospace}
+.demo-item{padding:10px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.demo-item:last-child{border:0}
+.recording{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.status{font-size:12px;padding:2px 8px;border-radius:10px;background:#e8f5e9;color:#2e7d32}
+.status-idle{background:#f3f4f6;color:#6b7280}
+</style>
+<div class=header><h1>🎬 录屏学习</h1><a href=/>← 返回首页</a></div>
+<div class=container>
+<div class=card id=statusBar><h3>📊 系统状态</h3><div id=stats>加载中...</div></div>
+<div class=card><h3>🆕 创建新演示</h3>
+<input id=demoName placeholder="输入演示名称（如：如何创建数据库表）"><br>
+<button class=btn onclick=createDemo()>开始录制</button>
+</div>
+<div class=card><h3>📋 已有演示</h3><div id=demoList>加载中...</div></div>
+</div>
+<script>
+const BASE='';let POLL=null
+async function api(method,path,data){
+  const r=await fetch(BASE+path,{method:method||'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null})
+  return r.json()
+}
+async function loadStats(){
+  const d=await api('GET','/api/v1/learn/status')
+  document.getElementById('stats').innerHTML=`演示: ${d.demonstrations||0} / 录制: ${d.recordings||0} / 引擎: ${d.engine||'ready'}`
+}
+async function loadDemos(){
+  const d=await api('GET','/api/v1/learn/list')
+  const list=document.getElementById('demoList')
+  const items=d.demonstrations||d.demos||[]
+  if(!items.length){list.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">暂无演示，点击上方创建</div>';return}
+  list.innerHTML=items.map(di=>{
+    const isRec=di.status==='recording'
+    return `<div class="demo-item"><span>${isRec?'🔴':'✅'} <b>${di.name||di.id}</b><br><small>${di.status||'ready'} ${di.created_at?new Date(di.created_at).toLocaleString():''}</small></span>
+    <span>${isRec?'<span class="recording" style="color:#ef4444;font-size:12px">● 录制中</span>':
+    '<button class="btn btn-sm btn-green" onclick="analyze(\''+di.id+'\')">分析</button>'}
+    <button class="btn btn-sm btn-red" onclick="delDemo(\''+di.id+'\')" style="margin-left:4px">删除</button></span></div>`
+  }).join('')
+}
+async function createDemo(){
+  const name=document.getElementById('demoName').value||'未命名演示'
+  const d=await api('POST','/api/v1/learn/demo/create',{name})
+  if(d.success){
+    document.getElementById('demoName').value=''
+    await loadDemos()
+    if(d.demo_id){
+      const r2=await api('POST','/api/v1/learn/record',{demo_id:d.demo_id})
+      alert('录制已开始！完成操作后请点击"停止录制"')
+    }
+  }else{alert('创建失败: '+(d.error||'未知错误'))}
+}
+async function analyze(id){
+  const d=await api('POST','/api/v1/learn/analyze/'+id)
+  if(d.success)alert('分析完成！'+(d.skill_code?'已生成技能代码':'分析报告已生成'))
+  else alert('分析失败: '+(d.error||''))
+  await loadDemos()
+}
+async function delDemo(id){
+  if(!confirm('确定删除？'))return
+  const d=await api('DELETE','/api/v1/learn/demo/'+id)
+  if(d.success)await loadDemos()
+}
+loadStats();loadDemos()
+</script>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>LOOP 循环工程</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f8;color:#1e293b;min-height:100vh}
+.header{background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:600}
+.header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
+.container{max-width:800px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:#4361ee;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn-sm{font-size:12px;padding:6px 12px}
+.btn-green{background:#10b981}
+.btn-orange{background:#f59e0b}
+.btn-red{background:#ef4444}
+input,textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-bottom:8px}
+textarea{resize:vertical;min-height:80px;font-family:monospace}
+.loop-item{padding:10px;border-bottom:1px solid #f0f0f0}
+.loop-item:last-child{border:0}
+.loop-id{font-size:12px;color:#94a3b8}
+.loop-status{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#e8f5e9;color:#2e7d32}
+.loop-status-running{background:#fff3e0;color:#e65100}
+.loop-status-error{background:#ffebee;color:#c62828}
+.phase{display:inline-block;font-size:11px;padding:2px 6px;border-radius:4px;margin:2px}
+.phase-done{background:#e8f5e9;color:#2e7d32}
+.phase-active{background:#fff3e0;color:#e65100;animation:pulse 1.5s infinite}
+.phase-pending{background:#f3f4f6;color:#6b7280}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.log-area{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.6;max-height:200px;overflow:auto;white-space:pre-wrap}
+</style>
+<div class=header><h1>🔄 LOOP 循环工程</h1><a href=/>← 返回首页</a></div>
+<div class=container>
+<div class=card><h3>📊 引擎状态</h3><div id=stats>加载中...</div></div>
+<div class=card><h3>🆕 创建新循环</h3>
+<input id=goalInput placeholder="输入目标（如：搜索AI最新动态并生成报告）">
+<textarea id=stepsInput placeholder="可选：指定步骤（每行一步，留空则LLM自动规划）" rows=4></textarea>
+<button class=btn onclick=createLoop()>创建并运行</button>
+</div>
+<div class=card><h3>📋 循环列表</h3><div id=loopList>加载中...</div></div>
+<div class=card id=logCard style="display:none"><h3>📝 执行日志 <button class="btn btn-sm btn-red" onclick=document.getElementById('logCard').style.display='none'>关闭</button></h3>
+<div class=log-area id=logArea></div></div>
+</div>
+<script>
+const BASE=''
+async function api(method,path,data){
+  const r=await fetch(BASE+path,{method:method||'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null})
+  return r.json()
+}
+async function loadStats(){
+  const d=await api('GET','/api/v1/loop/engine/status')
+  document.getElementById('stats').innerHTML=`<span>活跃循环: ${d.active_loops||0} | 已完成: ${d.completed_loops||d.total_completed||0} | 引擎: ${d.engine||'active'}</span>`
+}
+async function loadLoops(){
+  const d=await api('GET','/api/v1/loop/list')
+  const items=d.loops||d.results||[]
+  const list=document.getElementById('loopList')
+  if(!items.length){list.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">暂无循环</div>';return}
+  list.innerHTML=items.map(l=>{
+    const status=l.status||'pending'
+    const scls=status==='running'?'loop-status-running':status==='error'?'loop-status-error':''
+    const phases=(l.phases||l.steps||[]).map((p,i)=>{
+      const pstatus=p.status||'pending'
+      const pcls=pstatus==='done'||pstatus==='completed'?'phase-done':pstatus==='running'||pstatus==='active'?'phase-active':'phase-pending'
+      return `<span class="phase ${pcls}">${p.name||'步骤'+(i+1)}</span>`
+    }).join('')
+    return `<div class="loop-item"><span><span class="loop-status ${scls}">${status}</span> <b>${l.goal||l.name||l.id}</b><br>
+    <div style="margin:6px 0">${phases}</div>
+    <div class="loop-id">${l.id} | 迭代: ${l.iteration||l.iteration_count||0} | ${l.created_at?new Date(l.created_at).toLocaleString():''}</div></span>
+    <span>${status==='running'?'':`<button class="btn btn-sm btn-orange" onclick=runLoop('${l.id}')>运行</button>`}
+    <button class="btn btn-sm" onclick=viewLog('${l.id}')>日志</button></span></div>`
+  }).join('')
+}
+async function createLoop(){
+  const goal=document.getElementById('goalInput').value
+  if(!goal){alert('请输入目标');return}
+  const steps=document.getElementById('stepsInput').value.split('\n').filter(Boolean)
+  const d=await api('POST','/api/v1/loop/create',{goal,steps:steps.length?steps:undefined})
+  if(d.loop_id||d.id){
+    document.getElementById('goalInput').value='';document.getElementById('stepsInput').value=''
+    const id=d.loop_id||d.id
+    const r2=await api('POST','/api/v1/loop/run/'+id)
+    await loadLoops();await loadStats()
+    if(r2.success)alert('循环已启动！')
+  }else alert('创建失败: '+(d.error||''))
+}
+async function runLoop(id){
+  const d=await api('POST','/api/v1/loop/run/'+id)
+  if(d.success){await loadLoops();await loadStats()}
+  else alert('运行失败')
+}
+async function viewLog(id){
+  const d=await api('GET','/api/v1/loop/status/'+id)
+  document.getElementById('logCard').style.display='block'
+  document.getElementById('logArea').textContent=JSON.stringify(d.result||d.log||d,null,2)
+}
+loadStats();loadLoops()
+</script>
+</html>

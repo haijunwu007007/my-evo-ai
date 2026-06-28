@@ -211,3 +211,21 @@ async def agent_page():
     p = BASE_DIR / "frontend" / "agent.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
+
+@router.get("/learn")
+async def learn_page():
+    p = BASE_DIR / "frontend" / "learn.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/loop")
+async def loop_page():
+    p = BASE_DIR / "frontend" / "loop.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/cognee")
+async def cognee_page():
+    p = BASE_DIR / "frontend" / "cognee.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)

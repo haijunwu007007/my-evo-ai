@@ -168,7 +168,24 @@ async def smart_chat(req: Req):
                     return {"success": True, "result": "✅ 已创建定时任务: " + msg[:40], "mode": "schedule"}
         except Exception:
             pass
-    # ── 通用问答直达：不调LLM也能回答的问题 ──
+    # ── Cognee 记忆增强 ──
+    try:
+        from api.routes.routes_cognee import _init_cognee, cognee_chat
+        if _init_cognee():
+            try:
+                import asyncio
+                mem_result = await asyncio.wait_for(
+                    cognee_chat(msg),
+                    timeout=8
+                )
+                if isinstance(mem_result, dict) and mem_result.get("memories_found", 0) > 0:
+                    msg = mem_result["reply"] + "\n\n---\n" + msg
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # ── 通用问答直达 ──
     _faq_keywords = ["做什么","什么功能","能做什么","能力","你会什么","help"]
     if any(k in msg.lower() for k in _faq_keywords):
         return {"success": True, "result": "🤖 **AUTO-EVO-AI 能力清单**\n\n💬 **对话** 直接聊天问答\n📄 **文档** 说「帮我写合同/报告」\n📊 **PPT** 说「PPT: 主题」\n📗 **Excel** 说「帮我做表格」\n🔍 **搜索** 说「搜索: xxx」\n🧮 **计算** 说「数学计算: 2+3*4」\n🌐 **翻译** 说「翻译: 你好」\n🎤 **语音** 按住🎤说话\n🧠 **专家** 点👥选领域专家\n📅 **定时** 说「每天早上9点搜索xxx」\n📋 **日报** 说「生成日报」\n🛠️ **457个技能** 全可用\n🔌 **本地代理** `/agent` 控制本机\n\n🔑 外部服务（GitHub/Slack/钉钉等）去 `⚙️ 配置` 配Key\n\n还有问题直接打字问！", "mode": "capabilities"}

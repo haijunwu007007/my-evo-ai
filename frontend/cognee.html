@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Cognee 记忆系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f8;color:#1e293b;min-height:100vh}
+.header{background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:600}
+.header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
+.container{max-width:800px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between}
+.btn{background:#4361ee;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn-sm{font-size:12px;padding:6px 12px}
+.btn-green{background:#10b981}
+.btn-red{background:#ef4444}
+input,textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-bottom:8px}
+textarea{resize:vertical;min-height:60px;font-family:monospace}
+.mem-item{padding:10px;border-bottom:1px solid #f0f0f0}
+.mem-item:last-child{border:0}
+.mem-text{font-size:13px;margin-bottom:4px}
+.mem-meta{font-size:11px;color:#94a3b8}
+.tag{display:inline-block;background:#e0e7ff;color:#4361ee;font-size:11px;padding:2px 6px;border-radius:4px;margin:2px}
+.search-box{display:flex;gap:8px;align-items:center}
+.search-box input{flex:1;margin:0}
+</style>
+<div class=header><h1>🧠 Cognee 记忆系统</h1><a href=/>← 返回首页</a></div>
+<div class=container>
+<div class=card><h3>📊 记忆统计</h3><div id=stats>加载中...</div></div>
+<div class=card><h3>💾 存储记忆</h3>
+<input id=memoText placeholder="输入要记住的内容...">
+<input id=memoTags placeholder="标签（逗号分隔，如：工作,项目A）">
+<button class=btn onclick=saveMemo()>保存记忆</button>
+</div>
+<div class=card><h3>🔍 搜索记忆</h3>
+<div class=search-box><input id=searchQ placeholder="输入搜索关键词..." oninput=searchMemos()>
+<button class="btn btn-sm" onclick=document.getElementById('searchQ').value='';searchMemos()>清除</button></div>
+</div>
+<div class=card><div id=memoList><div style="color:#94a3b8;padding:20px;text-align:center">输入关键词开始搜索</div></div></div>
+</div>
+<script>
+const BASE=''
+async function api(method,path,data){
+  const r=await fetch(BASE+path,{method:method||'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null})
+  return r.json()
+}
+async function loadStats(){
+  const d=await api('GET','/api/v1/cognee/stats')
+  document.getElementById('stats').innerHTML=`<span>记忆: ${d.memories||d.total_memories||0} | 技能: ${d.skills||0} | 状态: ${d.status||d.engine||'ready'}</span>
+  <button class="btn btn-sm btn-green" onclick=saveMemoDemo()>添加示例记忆</button>`
+}
+async function saveMemo(){
+  const text=document.getElementById('memoText').value
+  if(!text){alert('请输入记忆内容');return}
+  const tags=document.getElementById('memoTags').value.split(',').map(t=>t.trim()).filter(Boolean)
+  const d=await api('POST','/api/v1/cognee/remember',{text,tags})
+  if(d.success){
+    document.getElementById('memoText').value='';document.getElementById('memoTags').value=''
+    await loadStats();await searchMemos()
+  }else alert('保存失败')
+}
+async function saveMemoDemo(){
+  const demos=['今天和团队讨论了一个新项目方案','学习了Python异步编程的使用方法','客户反馈了关于产品性能的意见','计划下周发布新版本']
+  const t=demos[Math.floor(Math.random()*demos.length)]
+  document.getElementById('memoText').value=t
+  await saveMemo()
+}
+async function searchMemos(){
+  const q=document.getElementById('searchQ').value.trim()
+  if(!q){document.getElementById('memoList').innerHTML='<div style="color:#94a3b8;padding:20px;text-align:center">输入关键词开始搜索</div>';return}
+  const d=await api('POST','/api/v1/cognee/recall',{query:q,limit:20})
+  const items=d.memories||d.results||[]
+  const list=document.getElementById('memolist')
+  if(!items.length){list.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">未找到相关记忆</div>';return}
+  list.innerHTML=items.map(m=>`<div class="mem-item"><div class="mem-text">${m.text||m.content||m}</div>
+  <div class="mem-meta">${m.tags?JSON.stringify(m.tags):''} ${m.created_at?new Date(m.created_at).toLocaleString():''}</div></div>`).join('')
+}
+loadStats()
+</script>
+</html>

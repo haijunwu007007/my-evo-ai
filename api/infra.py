@@ -30,10 +30,6 @@ from collections import defaultdict
 # ── 统一路径（从共享模块计算 BASE_DIR + sys.path.insert）──
 from api._paths import BASE_DIR, _ORIGINAL_BASE
 
-# ── 向后兼容层（替代 builtins 注入 hack）──
-from modules._base.compat import inject_compat
-inject_compat()
-
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -421,9 +417,7 @@ class ModuleRegistry:
                 except ImportError:
                     pass
         mod_key = f"{mod_dir}.{name}"
-        from modules._base.compat import CompatContext
-        with CompatContext():
-            mod = importlib.import_module(mod_key)
+        mod = importlib.import_module(mod_key)
         main_class = getattr(mod, 'module_class', None)
         if not main_class or not isinstance(main_class, type):
             main_class = None

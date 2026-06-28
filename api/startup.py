@@ -220,14 +220,6 @@ async def lifespan(app: FastAPI):
         else:
             logger.info(f"  [WAIT] {_env_desc} — 未配置（不影响核心功能）")
 
-    # 清理 builtins 兼容层（仅清理 modules._base.compat 注入的）
-    try:
-        from modules._base.compat import cleanup_compat
-        cleanup_compat()
-        logger.info("[COMPAT] builtins 兼容层已清理")
-    except Exception:
-        pass
-
     # 初始化可观测性
     try:
         from core.telemetry import init_telemetry
@@ -277,6 +269,18 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(hot_reload_task())
     asyncio.create_task(warmup_modules())
 
+    # 注册 Cognee 记忆系统路由
+    try:
+        from api.routes.routes_static import router as _static_router
+        from fastapi import APIRouter
+        for _r in _static_router.routes:
+            _p = getattr(_r, 'path', '')
+            if 'cognee' in _p.lower():
+                app.routes.append(_r)
+        logger.info("[COGNEE] 记忆系统路由已注册")
+    except Exception as _e:
+        logger.warning(f"[COGNEE] 注册异常: {_e}")
+
     # 扫描外部 MCP 服务器（异步，不阻塞启动）
     try:
         from api.routes.routes_mcp import scan_external_mcp_servers as _mcp_scan
@@ -309,14 +313,6 @@ async def lifespan(app: FastAPI):
         logger.info("[SHUTDOWN] 所有引擎已停止")
     except Exception as e:
         logger.warning(f"[SHUTDOWN] 引擎停止异常: {e}")
-
-    # 清理 builtins 兼容层
-    try:
-        from modules._base.compat import cleanup_compat
-        cleanup_compat()
-        logger.info("[SHUTDOWN] builtins 兼容层已清理")
-    except Exception:
-        pass
 
     # 关闭SQLite连接
     _cleanup_sqlite()

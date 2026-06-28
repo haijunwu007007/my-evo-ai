@@ -1,15 +1,9 @@
 """
-AUTO-EVO-AI V0.1 — 向后兼容层
-=============================
-职责：为部分未正确 import 基类的模块提供运行时兼容性。
-     这些模块的 class 声明中直接引用了 CircuitBreakerMixin、
-     RateLimiterMixin 等名称，但 file-level import 缺失。
-     本模块通过 builtins 注入提供回退，确保模块加载不报错。
-
-长期目标：逐步修复这些模块使其正确 import，然后移除本文件。
-当前状态：142 个桩模块使用自动生成模板，不需要此兼容层；
-          部分企业级模块正确 import 了 Mixin；
-          仅极少数模块依赖此贯穿机制维持运行。
+AUTO-EVO-AI V0.1 — 兼容层（已废弃）
+===================================
+2026-06-28: 审计确认 427 个引用 Mixin 的模块全部有正确的 import 语句，
+           `inject_compat()` 是死代码。已从 infra.py 与 startup.py 中移除。
+           本文件保留作为兜底，不主动使用。
 """
 
 import builtins as _builtins
