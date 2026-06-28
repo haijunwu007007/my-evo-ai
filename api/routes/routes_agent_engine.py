@@ -172,14 +172,17 @@ async def agent_run(req: AgentRunRequest):
         # ── 3. 依次执行（每步限时20s）──
         results = []
         for i, step in enumerate(steps):
-            _AGENT_TASKS[task_id]["status"] = f"执行步骤 {i+1}/{len(steps)}"
-            _AGENT_TASKS[task_id]["progress"] = int((i / len(steps)) * 100)
-
             tool = step.get("tool", "chat")
             action = step.get("action", task)
+            _tool_display = {"search":"🔍 搜索","chat":"💬 AI回答","web_crawler":"🕷️ 抓取","code":"💻 代码","translate":"🌐 翻译","ppt":"📊 PPT","document":"📄 文档生成","excel":"📗 表格","github":"🔥 GitHub"}
+            ft = _tool_display.get(tool, tool)
+            _AGENT_TASKS[task_id]["status"] = f"步骤 {i+1}/{len(steps)}: {ft} → {action[:40]}"
+            _AGENT_TASKS[task_id]["progress"] = int((i / len(steps)) * 100)
 
             step_result = await _execute_step(tool, action, task)
-            results.append({"step": i+1, "tool": tool, "action": action, "result": str(step_result)[:500]})
+            _tool_display = {"search":"🔍 搜索","chat":"💬 AI回答","web_crawler":"🕷️ 网页抓取","code":"💻 代码生成","translate":"🌐 翻译","ppt":"📊 演示文稿","document":"📄 文档生成","excel":"📗 电子表格","github":"🔥 GitHub热门"}
+            friendly_tool = _tool_display.get(tool, f"⚙️ {tool}")
+            results.append({"step": i+1, "tool": tool, "action": action, "result": str(step_result)[:500], "display": f"{friendly_tool}: {action}"})
 
         _AGENT_TASKS[task_id]["status"] = "completed"
         _AGENT_TASKS[task_id]["progress"] = 100
@@ -194,7 +197,13 @@ async def agent_run(req: AgentRunRequest):
             summary = sr.json().get("result", "执行完成")
 
         _AGENT_TASKS[task_id]["result"] = summary
-        return {"success": True, "task_id": task_id, "result": summary}
+        # 生成用户友好的进度描述
+        _tool_names = {"search":"🔍 搜索","chat":"💬 AI总结","web_crawler":"🕷️ 抓取","code":"💻 代码","translate":"🌐 翻译","ppt":"📊 PPT","document":"📄 文档","excel":"📗 表格","github":"🔥 GitHub"}
+        progress_text = ""
+        for i, s in enumerate(steps):
+            tn = _tool_names.get(s.get("tool",""), s.get("tool",""))
+            progress_text += f"**步骤 {i+1}**: {tn} → {s.get('action','')[:50]}\n"
+        return {"success": True, "task_id": task_id, "steps": steps, "result": summary, "details": results, "progress": progress_text}
 
     except asyncio.TimeoutError:
         _AGENT_TASKS[task_id]["status"] = "timeout"
