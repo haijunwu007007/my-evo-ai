@@ -158,7 +158,7 @@ async def record_auto_step(demo_id: str):
 
     if demo_id not in _active_recordings:
         # 首次调用: 启动 Playwright + 分析任务
-        result = await _auto_record(demo_id, demo["name"], demo.get("description", ""))
+        result = await _auto_record(demo_id, demo["name"], demo["description"] or "")
         if not result.get("success"):
             return result
         _active_recordings[demo_id] = {"session": result, "started": time.time()}
@@ -284,7 +284,7 @@ async def generate_skill(demo_id: str):
     skill_dir.mkdir(parents=True, exist_ok=True)
 
     # 先生成 skill_code (如果还没生成)
-    skill_code = demo.get("skill_code") or ""
+    skill_code = demo["skill_code"] or "" if demo["skill_code"] else ""
 
     steps_text = "\n".join([
         f"{r['order_num']}. [{r['action']}] selector='{r['selector']}' value='{r['value'][:60]}' url='{r['url'][:80]}'"
