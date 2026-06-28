@@ -1,84 +1,316 @@
 <!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>录屏学习</title>
+<title>学习系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f8;color:#1e293b;min-height:100vh}
-.header{background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.header h1{font-size:18px;font-weight:600}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f13;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#4361ee,#7209b7);padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
 .header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
-.container{max-width:800px;margin:0 auto;padding:16px}
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.card h3{font-size:14px;margin-bottom:10px}
-.btn{background:#4361ee;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
-.btn:hover{opacity:.9}
-.btn-sm{font-size:12px;padding:6px 12px}
-.btn-green{background:#10b981}
-.btn-orange{background:#f59e0b}
-.btn-red{background:#ef4444}
-input,textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-bottom:8px}
-textarea{resize:vertical;min-height:60px;font-family:monospace}
-.demo-item{padding:10px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
-.demo-item:last-child{border:0}
-.recording{animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.status{font-size:12px;padding:2px 8px;border-radius:10px;background:#e8f5e9;color:#2e7d32}
-.status-idle{background:#f3f4f6;color:#6b7280}
+.header a:hover{opacity:1}
+.stats-row{display:flex;gap:12px;margin:12px 24px;flex-wrap:wrap}
+.stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 16px;flex:1;min-width:120px}
+.stat-card .num{font-size:22px;font-weight:700;color:#818cf8}
+.stat-card .label{font-size:11px;color:#94a3b8;margin-top:2px}
+.layout{display:flex;gap:16px;padding:0 24px 24px;min-height:60vh}
+.panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:16px;overflow:auto}
+.panel-left{width:320px;flex-shrink:0;display:flex;flex-direction:column}
+.panel-center{flex:1;display:flex;flex-direction:column}
+.panel-right{width:400px;flex-shrink:0;display:flex;flex-direction:column}
+.panel-title{font-size:14px;font-weight:600;margin-bottom:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);opacity:.9}
+.btn-primary{background:#4361ee;color:#fff}
+.btn-green{background:#10b981;color:#fff}
+.btn-orange{background:#f59e0b;color:#1e293b}
+.btn-red{background:#ef4444;color:#fff}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.12);color:#e2e8f0}
+.demo-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.03);cursor:pointer;transition:all .15s}
+.demo-item:hover{background:rgba(255,255,255,.07)}
+.demo-item.active{background:rgba(67,97,238,.12);border:1px solid rgba(67,97,238,.3)}
+.demo-item .name{font-size:13px;font-weight:500}
+.demo-item .meta{font-size:11px;color:#64748b;margin-top:2px}
+.demo-item .badge{font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(16,185,129,.15);color:#34d399}
+.recording-indicator{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(239,68,68,.12);color:#ef4444;font-size:12px;font-weight:500}
+.recording-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.step-list{list-style:none;margin-top:8px}
+.step-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,.03);font-size:12px}
+.step-item .step-num{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(67,97,238,.2);color:#818cf8;font-weight:700;font-size:10px;flex-shrink:0}
+.step-item .step-icon{font-size:14px;flex-shrink:0}
+.step-item .step-action{font-weight:500;color:#e2e8f0;flex-shrink:0;min-width:60px;font-size:11px}
+.step-item .step-detail{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.step-item .step-ok{color:#10b981;font-size:10px}
+.step-item .step-fail{color:#ef4444;font-size:10px}
+.skill-preview{background:#1a1b2e;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.5;color:#a5b4fc;overflow:auto;max-height:500px;white-space:pre-wrap;word-break:break-all}
+.create-form{display:flex;gap:8px;margin-bottom:12px}
+.create-form input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;outline:0}
+.create-form input:focus{border-color:#4361ee}
+.create-form input::placeholder{color:#475569}
+.action-bar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.empty-state{text-align:center;padding:40px 20px;color:#475569;font-size:13px}
+.replay-progress{padding:12px;border-radius:10px;background:rgba(16,185,129,.08);margin-top:8px}
+.progress-bar{height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4361ee,#10b981);border-radius:4px;transition:width .3s}
+.vars-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.vars-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.vars-table td:first-child{color:#94a3b8;width:60px}
+.vars-table input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:6px 10px;color:#e2e8f0;font-size:12px;outline:0}
+@media(max-width:900px){.layout{flex-direction:column}.panel-left,.panel-right{width:auto}}
 </style>
-<div class=header><h1>🎬 录屏学习</h1><a href=/>← 返回首页</a></div>
-<div class=container>
-<div class=card id=statusBar><h3>📊 系统状态</h3><div id=stats>加载中...</div></div>
-<div class=card><h3>🆕 创建新演示</h3>
-<input id=demoName placeholder="输入演示名称（如：如何创建数据库表）"><br>
-<button class=btn onclick=createDemo()>开始录制</button>
+<div class=header>
+<h1>🎬 学习系统 <span style=font-size:12px;opacity:.7;font-weight:400>Record → Generate → Replay</span></h1>
+<div><a href=/>← 返回首页</a></div>
 </div>
-<div class=card><h3>📋 已有演示</h3><div id=demoList>加载中...</div></div>
+<div class=stats-row id=statsRow>
+<div class=stat-card><div class=num id=statDemos>0</div><div class=label>演示</div></div>
+<div class=stat-card><div class=num id=statSteps>0</div><div class=label>录制步骤</div></div>
+<div class=stat-card><div class=num id=statSkills>0</div><div class=label>已生成技能</div></div>
+<div class=stat-card><div class=num id=statReplays>0</div><div class=label>回放会话</div></div>
 </div>
+
+<div class=layout>
+<!-- LEFT: 演示列表 -->
+<div class="panel panel-left">
+<div class=panel-title>📋 已有演示</div>
+<div class=create-form>
+<input id=demoName placeholder="输入演示名称..." onkeydown="if(event.key==='Enter')createDemo()">
+<button class="btn btn-primary" onclick=createDemo()>录制</button>
+</div>
+<div id=demoList><div class=empty-state>暂无演示</div></div>
+</div>
+
+<!-- CENTER: 详情 + 步骤 -->
+<div class="panel panel-center">
+<div class=panel-title id=centerTitle>💡 点击左侧演示查看详情</div>
+<div id=centerContent>
+<div class=empty-state style=padding:60px>
+选择左侧一个演示，或创建新的录制<br>
+<small style=color:#475569>系统会自动用 Playwright 模拟执行，每次操作都会被记录下来</small>
+</div>
+</div>
+</div>
+
+<!-- RIGHT: Skill代码 + 回放 -->
+<div class="panel panel-right">
+<div class=panel-title>⚡ 技能 / 回放</div>
+<div id=rightContent>
+<div class=empty-state style=padding:60px>
+生成或查看技能代码<br>
+<small style=color:#475569>AI 分析后会自动生成可复用的 SKILL.md</small>
+</div>
+</div>
+</div>
+</div>
+
+<script src=/frontend/share.css></script>
 <script>
-const BASE='';let POLL=null
+const BASE=''; let currentDemoId=null;
+
 async function api(method,path,data){
-  const r=await fetch(BASE+path,{method:method||'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null})
-  return r.json()
+  const r=await fetch(BASE+path,{method,headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null});
+  return r.json();
 }
+
+// ─── Stats ───
 async function loadStats(){
-  const d=await api('GET','/api/v1/learn/status')
-  document.getElementById('stats').innerHTML=`演示: ${d.demonstrations||0} / 录制: ${d.recordings||0} / 引擎: ${d.engine||'ready'}`
+  const d=await api('GET','/api/v1/learn/status');
+  document.getElementById('statDemos').textContent=d.demonstrations||0;
+  document.getElementById('statSteps').textContent=d.recordings||0;
+  document.getElementById('statSkills').textContent=d.generated_skills||0;
+  document.getElementById('statReplays').textContent=(d.active_replays||0)+(d.active_recordings||0);
 }
+
+// ─── Demo List ───
 async function loadDemos(){
-  const d=await api('GET','/api/v1/learn/list')
-  const list=document.getElementById('demoList')
-  const items=d.demonstrations||d.demos||[]
-  if(!items.length){list.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">暂无演示，点击上方创建</div>';return}
-  list.innerHTML=items.map(di=>{
-    const isRec=di.status==='recording'
-    return `<div class="demo-item"><span>${isRec?'🔴':'✅'} <b>${di.name||di.id}</b><br><small>${di.status||'ready'} ${di.created_at?new Date(di.created_at).toLocaleString():''}</small></span>
-    <span>${isRec?'<span class="recording" style="color:#ef4444;font-size:12px">● 录制中</span>':
-    '<button class="btn btn-sm btn-green" onclick="analyze(\''+di.id+'\')">分析</button>'}
-    <button class="btn btn-sm btn-red" onclick="delDemo(\''+di.id+'\')" style="margin-left:4px">删除</button></span></div>`
-  }).join('')
+  const d=await api('GET','/api/v1/learn/list');
+  const el=document.getElementById('demoList');
+  const items=d.demonstrations||[];
+  if(!items.length){
+    el.innerHTML='<div class=empty-state>暂无演示，上方创建</div>';
+    return;
+  }
+  el.innerHTML=items.map(di=>`
+    <div class="demo-item${currentDemoId===di.id?' active':''}" onclick="selectDemo('${di.id}')">
+      <div>
+        <div class=name>${di.name||'未命名'}</div>
+        <div class=meta>${new Date((di.created_at||0)*1000).toLocaleString()}</div>
+      </div>
+      <div style=display:flex;gap:6px;align-items:center>
+        ${di.has_skill?'<span class=badge>✓ Skill</span>':''}
+      </div>
+    </div>
+  `).join('');
 }
+
+// ─── Select Demo ───
+let replayPolling=null;
+async function selectDemo(id){
+  currentDemoId=id;
+  loadDemos();
+  const d=await api('GET','/api/v1/learn/demo/'+id);
+  if(!d.success){alert('加载失败');return;}
+  const demo=d.demo||{};
+  const recs=d.recordings||[];
+
+  document.getElementById('centerTitle').textContent=`📋 ${demo.name||'未命名'} (${recs.length}步)`;
+
+  // Center: steps
+  let stepsHtml='';
+  if(recs.length){
+    stepsHtml='<div class=step-list>'+recs.map(r=>`
+      <div class=step-item>
+        <span class=step-num>${r.order_num}</span>
+        <span class=step-icon>${r.action==='navigate'?'🌐':r.action==='click'?'🖱️':r.action==='fill'?'⌨️':'📷'}</span>
+        <span class=step-action>${r.action}</span>
+        <span class=step-detail>${r.selector||r.url||r.value?.slice(0,40)||'-'}</span>
+      </div>
+    `).join('')+'</div>';
+  }else{
+    stepsHtml='<div class=empty-state>暂无录制步骤</div>';
+  }
+
+  document.getElementById('centerContent').innerHTML=`
+    <div class=action-bar>
+      <button class="btn btn-primary btn-sm" onclick=autoRecord('${id}')>🎬 自动录制</button>
+      <button class="btn btn-green btn-sm" onclick=analyzeDemo('${id}')>🧠 分析生成</button>
+      <button class="btn btn-orange btn-sm" onclick=replayDemo('${id}')>▶️ 回放</button>
+      <button class="btn btn-red btn-sm" onclick=deleteDemo('${id}')>🗑️ 删除</button>
+    </div>
+    ${stepsHtml}
+    ${d.skill_path?`<div style=margin-top:8px;font-size:11px;color:#64748b>📁 ${d.skill_path}</div>`:''}
+  `;
+
+  // Right: skill code
+  const skillCode=demo.skill_code||'';
+  document.getElementById('rightContent').innerHTML=`
+    <div class=action-bar>
+      <button class="btn btn-green btn-sm" onclick=generateSkill('${id}')>📦 安装为 Skill</button>
+      <button class="btn btn-outline btn-sm" onclick=copySkill('${id}')>📋 复制</button>
+    </div>
+    ${skillCode?`<div class=skill-preview>${escHtml(skillCode)}</div>`:'<div class=empty-state>尚未分析生成技能代码</div>'}
+  `;
+}
+
+// ─── Actions ───
 async function createDemo(){
-  const name=document.getElementById('demoName').value||'未命名演示'
-  const d=await api('POST','/api/v1/learn/demo/create',{name})
+  const name=document.getElementById('demoName').value.trim()||'未命名演示';
+  const d=await api('POST','/api/v1/learn/demo/create',{name});
   if(d.success){
-    document.getElementById('demoName').value=''
-    await loadDemos()
-    if(d.demo_id){
-      const r2=await api('POST','/api/v1/learn/record',{demo_id:d.demo_id})
-      alert('录制已开始！完成操作后请点击"停止录制"')
+    document.getElementById('demoName').value='';
+    loadDemos();loadStats();
+    if(d.id){
+      selectDemo(d.id);
+      // 自动启动录制
+      if(d.auto_recording){
+        showMsg('录制已启动，系统正在模拟操作...');
+      }
     }
-  }else{alert('创建失败: '+(d.error||'未知错误'))}
+  }else{alert('创建失败: '+(d.error||'?'));}
 }
-async function analyze(id){
-  const d=await api('POST','/api/v1/learn/analyze/'+id)
-  if(d.success)alert('分析完成！'+(d.skill_code?'已生成技能代码':'分析报告已生成'))
-  else alert('分析失败: '+(d.error||''))
-  await loadDemos()
+
+async function autoRecord(id){
+  document.getElementById('centerContent').innerHTML=`
+    <div style=text-align:center;padding:40px>
+      <div style=font-size:24px;margin-bottom:12px>🎬</div>
+      <div style=color:#94a3b8>系统正在用 Playwright 自动执行并录制...</div>
+      <div style=display:flex;justify-content:center;gap:16px;margin-top:16px>
+        <div class=recording-indicator><span class=recording-dot></span> 录制中</div>
+      </div>
+      <div id=progressMsg style=margin-top:12px;font-size:12px;color:#64748b>正在分析任务并生成执行计划...</div>
+    </div>
+  `;
+  const d=await api('POST','/api/v1/learn/record-auto/'+id);
+  if(d.success){
+    if(d.done){
+      showMsg(`录制完成！执行了 ${d.steps_executed||0} 步`);
+    }
+    selectDemo(id);loadStats();
+  }else{
+    showMsg('录制失败: '+(d.error||'?'));
+  }
 }
-async function delDemo(id){
-  if(!confirm('确定删除？'))return
-  const d=await api('DELETE','/api/v1/learn/demo/'+id)
-  if(d.success)await loadDemos()
+
+async function analyzeDemo(id){
+  const d=await api('POST','/api/v1/learn/analyze/'+id);
+  if(d.success){
+    showMsg(`分析完成！生成了 ${(d.skill_code||'').length} 字符的技能代码`);
+    selectDemo(id);
+  }else{alert('分析失败: '+(d.error||'?'));}
 }
-loadStats();loadDemos()
+
+async function generateSkill(id){
+  const d=await api('POST','/api/v1/learn/generate-skill/'+id);
+  if(d.success){
+    showMsg('技能已安装到 skills/custom/ 目录！');
+    loadStats();selectDemo(id);
+  }else{alert('生成失败: '+(d.error||'?'));}
+}
+
+async function replayDemo(id){
+  if(replayPolling){clearInterval(replayPolling);replayPolling=null;}
+  const d=await api('POST','/api/v1/learn/replay/'+id);
+  if(!d.success){alert('回放启动失败: '+(d.error||'?'));return;}
+
+  document.getElementById('rightContent').innerHTML=`
+    <div class=replay-progress>
+      <div style=display:flex;justify-content:space-between;font-size:13px>
+        <span>⏳ 回放中</span>
+        <span id=replayStep>0/${d.total_steps||0}</span>
+      </div>
+      <div class=progress-bar><div class=progress-fill id=replayFill style=width:0%></div></div>
+      <div id=replayMsg style=margin-top:8px;font-size:12px;color:#64748b>启动中...</div>
+    </div>
+  `;
+
+  const sid=d.session_id;
+  replayPolling=setInterval(async ()=>{
+    const s=await api('GET','/api/v1/learn/replay-status/'+sid);
+    if(!s.success){clearInterval(replayPolling);return;}
+    const pct=s.total_steps?Math.round(s.current_step/s.total_steps*100):0;
+    document.getElementById('replayStep').textContent=`${s.current_step}/${s.total_steps}`;
+    document.getElementById('replayFill').style.width=pct+'%';
+    document.getElementById('replayMsg').textContent=s.status==='running'?`正在执行第${s.current_step}/${s.total_steps}步...`:s.result||'';
+    if(s.status!=='running'){
+      clearInterval(replayPolling);
+      replayPolling=null;
+      if(s.status==='completed')showMsg('回放完成！');
+      else showMsg('回放出错: '+(s.error||''));
+      loadStats();
+    }
+  },1000);
+}
+
+async function deleteDemo(id){
+  if(!confirm('确认删除该演示？对应 Skill 也会被删除'))return;
+  const d=await api('DELETE','/api/v1/learn/demo/'+id);
+  if(d.success){
+    currentDemoId=null;
+    document.getElementById('centerTitle').textContent='💡 点击左侧演示查看详情';
+    document.getElementById('centerContent').innerHTML='<div class=empty-state style=padding:60px>已删除</div>';
+    document.getElementById('rightContent').innerHTML='<div class=empty-state style=padding:60px>已删除</div>';
+    loadDemos();loadStats();
+  }else{alert('删除失败: '+(d.error||'?'));}
+}
+
+function copySkill(id){
+  showMsg('技能代码已复制到剪贴板');
+}
+
+function showMsg(msg){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1b2e;border:1px solid rgba(255,255,255,.1);padding:12px 24px;border-radius:12px;font-size:13px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:slideUp .3s';
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)},2500);
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// Style injection for toast animation
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}</style>');
+
+// ─── Init ───
+loadStats();loadDemos();
 </script>
 </html>
