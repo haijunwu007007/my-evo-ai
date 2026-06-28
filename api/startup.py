@@ -159,6 +159,7 @@ def _mount_vue_frontend():
             "soft-factory": "softfactory.html",
             "oss-distiller": "oss-distiller.html",
             "settings": "settings.html",
+            "enterprise": "enterprise.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)

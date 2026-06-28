@@ -169,6 +169,7 @@ async def app_dash():
     p = BASE_DIR / "frontend" / "dashboard.html"
     return FileResponse(str(p)) if p.exists() else FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
 
+@router.get("/enterprise")
 @router.get("/enterprise.html")
 async def enterprise_page():
     p = BASE_DIR / "frontend" / "enterprise.html"
