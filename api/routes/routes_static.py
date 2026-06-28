@@ -196,3 +196,11 @@ async def hooks_page():
     if html_path.exists():
         return FileResponse(str(html_path))
     raise HTTPException(404)
+
+@router.get("/agent")
+@router.get("/local-agent")
+async def agent_page():
+    html_path = BASE_DIR / "frontend" / "agent.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    raise HTTPException(404)

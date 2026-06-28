@@ -54,6 +54,43 @@ var _sendLock=false
 async function send(){
   if(_sendLock)return;_sendLock=true
   try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();if(!text&&(!attachFiles||attachFiles.length===0))return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
+    // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
+    var _localExec = {
+      screenshot: function(){return new Promise(function(resolve){
+        if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){resolve('截图不可用');return}
+        navigator.mediaDevices.getDisplayMedia({video:{mediaSource:'screen'}}).then(function(s){
+          var v=document.createElement('video');v.srcObject=s;v.play()
+          setTimeout(function(){
+            var c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight
+            c.getContext('2d').drawImage(v,0,0);s.getTracks().forEach(function(t){t.stop()})
+            resolve('截图成功（数据已获取）')
+          },500)
+        }).catch(function(){resolve('截图被取消')})
+      })},
+      fileOpen: function(){return new Promise(function(resolve){
+        var inp=document.createElement('input');inp.type='file';inp.multiple=true
+        inp.onchange=function(){var n=inp.files.length;resolve('已选择 '+n+' 个文件')}
+        inp.click()
+      })},
+      openUrl: function(url){window.open(url,'_blank');return '已打开: '+url},
+      clipboard: function(text){navigator.clipboard.writeText(text).then(function(){resolve('已复制到剪贴板')}).catch(function(){resolve('复制失败')})},
+      notify: function(msg){if(Notification.permission==='granted'){new Notification('AUTO-EVO-AI',{body:msg})}else{alert(msg)}}
+    }
+    // ── 浏览器本地直连命令（不经过服务器，直接操作本地浏览器）──
+    var lower = text.toLowerCase()
+    if(lower.startsWith('打开 ')||lower.startsWith('打开http')||lower.startsWith('打开www')||lower.startsWith('打开https')){
+      var url = text.replace(/^打开\s*/,'').trim()
+      if(!url.startsWith('http')) url='https://'+url
+      _localExec.openUrl(url);addMsg('🌐 '+_localExec.openUrl(url),'bot');hideLoading();return
+    }
+    if(lower.indexOf('截图')>=0||lower.indexOf('截屏')>=0){
+      _localExec.screenshot().then(function(r){addMsg('🖥️ '+r,'bot');hideLoading()})
+      return
+    }
+    if(lower.indexOf('上传')>=0||lower.indexOf('文件')>=0||lower.indexOf('选择文件')>=0){
+      _localExec.fileOpen().then(function(r){addMsg('📁 '+r,'bot');hideLoading()})
+      return
+    }
     // 先尝试智能任务分解
     var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
     var td=await tr.json()
