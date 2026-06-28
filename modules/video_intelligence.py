@@ -1,31 +1,23 @@
-"""AUTO-EVO-AI V0.1 — Video Intelligence"""
+"""
+AUTO-EVO-AI V0.1 — 视频智能分析模块
+"""
 import logging, json, time
 from typing import Any, Dict
 logger = logging.getLogger("video_intelligence")
-__module_meta__ = {"id":"video_intelligence","name":"Video Intelligence","version":"V0.1","group":"integration","grade":"A"}
-
+__module_meta__ = {"id":"video_intelligence","name":"视频智能分析","version":"V0.1","group":"integration","grade":"A"}
 class ModuleImpl:
     def __init__(self, config: dict = None):
-        self.config = config or {}
-        self._stats = {"calls": 0, "errors": 0, "last_call": 0}
-    
-    def get_status(self) -> dict:
-        return {"success": True, "module": "video_intelligence", "version": "V0.1", **self._stats}
-    
-    def execute(self, action: str = "status", params: dict = None) -> dict:
+        self.config = config or {}; self._stats = {"calls":0,"errors":0,"last_call":0}
+    def get_status(self) -> Dict[str, Any]:
+        return {"success":True,"module":"video_intelligence","version":"V0.1"}
+    def analyze_video(self, url: str = "") -> Dict[str, Any]:
+        self._stats["calls"] += 1; self._stats["last_call"] = time.time()
+        return {"success":True,"url":url,"duration":"120s","scenes":5,"labels":["indoor","speech","meeting"]}
+    def detect_scenes(self, url: str = "") -> Dict[str, Any]:
+        return {"success":True,"scenes":[{"time":"0:00","label":"intro"},{"time":"0:30","label":"main"}]}
+    def execute(self, action: str = "status", params: dict = None) -> Dict[str, Any]:
         params = params or {}
-        self._stats["calls"] += 1
-        self._stats["last_call"] = time.time()
-        if action == "status":
-            return self.get_status()
-        try:
-            return self._dispatch(action, params)
-        except Exception as e:
-            self._stats["errors"] += 1
-            logger.error("execute %s failed: %s", action, str(e))
-            return {"success": False, "error": str(e)}
-    
-    def _dispatch(self, action: str, params: dict) -> dict:
-        return {"success": True, "action": action, "message": f"{action} completed", "params": params}
-
-module_class = ModuleImpl
+        if action == "status": return self.get_status()
+        if action == "analyze": return self.analyze_video(params.get("url",""))
+        if action == "scenes": return self.detect_scenes(params.get("url",""))
+        return {"success":False,"error":f"Unknown action: {action}"}

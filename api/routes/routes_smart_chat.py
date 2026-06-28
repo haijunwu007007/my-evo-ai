@@ -88,6 +88,23 @@ async def smart_chat(req: Req):
     for keyword, (mode, result) in DIRECT_ROUTES.items():
         if keyword in msg:
             return {"success": True, "result": result, "mode": mode}
+    # ── 热点/最新/热搜 直接走搜索，不走浏览器自动化 ──
+    if any(k in msg for k in ("热点", "热搜", "最新", "热门")):
+        try:
+            from skills.builtin.search_web import execute as _search
+            sq = msg
+            for k in ("查看", "今日", "百度", "热点", "热搜", "最新", "热门", "什么", "的"):
+                sq = sq.replace(k, "")
+            sq = sq.strip() or "今日热点"
+            r = _search({"query": "2026年6月28日" + sq, "count": 10})
+            items = r.get("results", [])
+            if items:
+                txt = "🔍 **搜索: " + sq + "**\n\n"
+                for i, item in enumerate(items[:8]):
+                    txt += str(i+1) + ". " + item.get("title", "")[:60] + "\n  " + item.get("url", "") + "\n"
+                return {"success": True, "result": txt, "mode": "search"}
+        except Exception:
+            pass
     if ("PPT" in msg or "做一份" in msg) and "app_" not in msg:
         try:
             from api.routes.routes_pptx import generate_presentation
@@ -151,14 +168,24 @@ async def smart_chat(req: Req):
                     return {"success": True, "result": "✅ 已创建定时任务: " + msg[:40], "mode": "schedule"}
         except Exception:
             pass
+    # ── 通用问答直达：不调LLM也能回答的问题 ──
+    _faq_keywords = ["做什么","什么功能","能做什么","能力","你会什么","help"]
+    if any(k in msg.lower() for k in _faq_keywords):
+        return {"success": True, "result": "🤖 **AUTO-EVO-AI 能力清单**\n\n💬 **对话** 直接聊天问答\n📄 **文档** 说「帮我写合同/报告」\n📊 **PPT** 说「PPT: 主题」\n📗 **Excel** 说「帮我做表格」\n🔍 **搜索** 说「搜索: xxx」\n🧮 **计算** 说「数学计算: 2+3*4」\n🌐 **翻译** 说「翻译: 你好」\n🎤 **语音** 按住🎤说话\n🧠 **专家** 点👥选领域专家\n📅 **定时** 说「每天早上9点搜索xxx」\n📋 **日报** 说「生成日报」\n🛠️ **457个技能** 全可用\n🔌 **本地代理** `/agent` 控制本机\n\n🔑 外部服务（GitHub/Slack/钉钉等）去 `⚙️ 配置` 配Key\n\n还有问题直接打字问！", "mode": "capabilities"}
     from api.agent_llm import _get_key as _llm_key
     _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")) or bool(_llm_key())
     if not _has_key:
         return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求", "mode": "no_key"}
     from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
-    result = await asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context)
-    return result
+    try:
+        result = await asyncio.wait_for(
+            asyncio.to_thread(engine, req.message, req.api_key, req.lang, req.context),
+            timeout=25
+        )
+        return result
+    except asyncio.TimeoutError:
+        return {"success": True, "result": "⏳ LLM 响应超时，请稍后再试。\n\n你也可以试试：\n- 说「能力列表」查看系统功能\n- 直接说「搜索: xxx」「帮我写xxx」「PPT: xxx」\n- 这些不依赖LLM，立即响应", "mode": "timeout"}
 
 def register_routes(app):
     """兼容性入口：挂载router到app"""
