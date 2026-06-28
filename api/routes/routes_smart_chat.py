@@ -1,199 +1,181 @@
-"""智能体路由 — 纯LLM驱动，0硬编码路由，0写死数据源"""
-
+"""智能体路由 — ReAct 架构：Thought → Action → Observe"""
 from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from pathlib import Path
-import os, json, asyncio, httpx
+import os, json, asyncio
 from core.logging_config import get_logger
 logger = get_logger("evo.api.smart")
 router = APIRouter()
-
 BASE = Path(__file__).resolve().parent.parent.parent
 
 class Req(BaseModel):
     message: str; api_key: Optional[str] = ""; lang: Optional[str] = "zh-CN"; context: Optional[list] = []
 
-# ── 热点数据源注册表（唯一写数据源的地方）──
-_HOT_SOURCES = [
-    ("baidu",  "https://api.vvhan.com/api/hotlist?type=baiduHot", "json"),
-    ("weibo",  "https://api.vvhan.com/api/hotlist?type=weiboHot", "json"),
-    ("douyin", "https://api.vvhan.com/api/hotlist?type=douyinHot", "json"),
-    ("zhihu",  "https://api.vvhan.com/api/hotlist?type=zhihuHot", "json"),
-    ("bili",   "https://api.vvhan.com/api/hotlist?type=biliHot", "json"),
-    ("tieba",  "https://api.vvhan.com/api/hotlist?type=tiebaHot", "json"),
-    ("toutiao","https://api.vvhan.com/api/hotlist?type=toutiaoHot", "json"),
-    ("tencent","https://api.vvhan.com/api/hotlist?type=qqHot", "json"),
-]
-_HOT_NAMES = {"baidu":"百度","weibo":"微博","douyin":"抖音","zhihu":"知乎","bili":"B站","tieba":"贴吧","toutiao":"头条","tencent":"腾讯"}
+# ── 意图分类模板（ReAct风格：先思考再行动）──
+_INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSON。不要加额外解释。
 
-async def _fetch_hot(platform: str) -> str | None:
-    """通用热点抓取 — 所有平台统一方式"""
-    import urllib.request, json
-    for name, url, fmt in _HOT_SOURCES:
-        if platform and platform not in name and name not in platform:
+规则：
+- intent: chat/hot/search/create/help
+  - chat: 普通聊天、问答、写作、解释、建议、闲聊、天气、情感、角色扮演、系统介绍
+  - hot: 查热点/热搜/热榜/头条/新闻/大事/新鲜事（如果提到具体平台，platform填平台名）
+  - search: 明确说搜索xx、查找xx、搜一下xx、查一下xx（想找具体信息）
+  - create: 生成文档/PPT/Excel/合同/报告/代码/文章/方案
+  - help: 问系统能做什么、有什么功能、怎么使用、能力列表
+- platform: 如果intent=hot且用户提到具体平台(百度/微博/抖音/知乎/B站/头条/腾讯/贴吧/小红书)，填平台名。否则""
+- topic: 搜索主题或热点话题
+- thought: 你分析用户意图的原因（一句话）
+
+例1: q=今日百度热点 → {"intent":"hot","platform":"百度","topic":"","thought":"用户想查看百度热搜"}
+例2: q=抖音热搜 → {"intent":"hot","platform":"抖音","topic":"","thought":"用户想看抖音热点"}
+例3: q=腾讯微博今日热点 → {"intent":"hot","platform":"微博","topic":"","thought":"用户提到腾讯微博，其实是微博平台"}
+例4: q=知乎热榜 → {"intent":"hot","platform":"知乎","topic":"","thought":"用户想看知乎热门话题"}
+例5: q=今天有什么新闻 → {"intent":"hot","platform":"","topic":"新闻","thought":"用户想看通用新闻热点"}
+例6: q=最近有什么大事 → {"intent":"hot","platform":"","topic":"大事","thought":"用户想了解近期重要事件"}
+例7: q=B站热搜 → {"intent":"hot","platform":"B站","topic":"","thought":"B站弹幕网的热搜"}
+例8: q=小红书热门 → {"intent":"hot","platform":"小红书","topic":"","thought":"小红书的热门内容"}
+例9: q=搜索 python教程 → {"intent":"search","platform":"","topic":"python教程","thought":"用户明确说搜索"}
+例10: q=帮我查一下北京的天气 → {"intent":"search","platform":"","topic":"北京天气","thought":"用户要查具体信息"}
+例11: q=搜一下人工智能最新动态 → {"intent":"search","platform":"","topic":"人工智能最新动态","thought":"用户用\"搜一下\"关键词"}
+例12: q=本系统可以做什么 → {"intent":"help","platform":"","topic":"","thought":"用户问系统功能"}
+例13: q=你会什么 → {"intent":"help","platform":"","topic":"","thought":"用户想知道AI的能力"}
+例14: q=如何使用这个系统 → {"intent":"help","platform":"","topic":"","thought":"用户问使用方式"}
+例15: q=你好 → {"intent":"chat","platform":"","topic":"","thought":"普通打招呼"}
+例16: q=帮我写一份合同 → {"intent":"create","platform":"","topic":"合同","thought":"用户要生成文档"}
+例17: q=做个PPT → {"intent":"create","platform":"","topic":"PPT","thought":"用户要生成PPT"}
+例18: q=今天天气怎么样 → {"intent":"chat","platform":"","topic":"","thought":"闲聊类问题，LLM直接回答"}
+例19: q=我心情不好 → {"intent":"chat","platform":"","topic":"","thought":"情感支持类对话"}
+例20: q=帮我分析一下这个数据 → {"intent":"chat","platform":"","topic":"","thought":"用户需要分析，走LLM"}
+例21: q=系统的架构是怎样的 → {"intent":"chat","platform":"","topic":"","thought":"用户问系统技术细节"}
+例22: q=中午吃什么 → {"intent":"chat","platform":"","topic":"","thought":"闲聊建议类"}
+例23: q=杭州亚运会 → {"intent":"chat","platform":"","topic":"","thought":"不含搜索/热点关键词，走LLM回答"}
+例24: q=王宝强新电影 → {"intent":"chat","platform":"","topic":"","thought":"不含明确搜索词，LLM直接回答"}
+例25: q=给我讲个笑话 → {"intent":"chat","platform":"","topic":"","thought":"娱乐聊天"}
+例26: q=你是用什么模型 → {"intent":"chat","platform":"","topic":"","thought":"用户问AI的技术背景"}
+例27: q=李子柒现在怎么样了 → {"intent":"chat","platform":"","topic":"","thought":"关于个人的问题"}
+例28: q=帮我做一个Excel表格 → {"intent":"create","platform":"","topic":"Excel表格","thought":"用户要生成Excel"}
+例29: q=生成季度报告 → {"intent":"create","platform":"","topic":"季度报告","thought":"用户要生成报告"}
+例30: q=写一段Python代码 → {"intent":"create","platform":"","topic":"Python代码","thought":"用户要生成代码"}
+例31: q=请帮我查询今日头条热点 → {"intent":"hot","platform":"头条","topic":"","thought":"用户明确说今日头条"}
+例32: q=贴吧热榜 → {"intent":"hot","platform":"贴吧","topic":"","thought":"贴吧的热门帖子"}
+例33: q=网易新闻热点 → {"intent":"hot","platform":"网易","topic":"","thought":"网易新闻热榜"}
+例34: q=有什么新鲜事 → {"intent":"hot","platform":"","topic":"新鲜事","thought":"用户想看近期发生的事"}
+例35: q=hacker news hot → {"intent":"hot","platform":"Hacker News","topic":"","thought":"英文技术社区热点"}
+例36: q=reddit热门 → {"intent":"hot","platform":"Reddit","topic":"","thought":"Reddit热门话题"}
+
+现在分析: q="""
+
+
+# ── 系统能力描述（LLM回复时用来介绍自己）──
+_SYSTEM_CAPABILITIES = """**我能做什么：**
+1. 💬 **聊天问答** — 任何问题直接问，我直接回答
+2. 🔍 **搜索信息** — 说"搜索: xxx"或"帮我查一下xxx"
+3. 🔥 **热搜热点** — 说"今日xx热点"（百度/微博/抖音/知乎/B站/头条等）
+4. 📄 **生成文档** — PPT/Excel/合同/报告/代码，说"帮我做一个xxx"
+5. 🎤 **语音输入** — 按住🎤说话，自动识别
+6. 🧠 **记忆功能** — 说"记住xxx"或"回忆xxx"
+7. 📅 **定时任务** — 说"每天早上9点xxx"
+8. 🛠️ **系统诊断** — 说"查看系统状态"
+9. 👥 **266位专家** — 点左侧专家列表，切换角色对话
+10. 📊 **数据分析** / 🐳 **Docker操作** / 🌐 **翻译翻译**
+
+**直接说你想要什么，我来搞定。**"""
+
+
+async def _classify_intent(msg: str):
+    """ReAct 阶段1: 智能意图分类（Thought）"""
+    from api.agent_llm import call_llm
+    prompt = _INTENT_PROMPT + msg[:120]
+    for _ in range(2):
+        try:
+            text, _ = call_llm([{"role": "user", "content": prompt}], timeout=8)
+            if not text:
+                continue
+            # 提取JSON
+            cleaned = text.strip()
+            if "```json" in cleaned:
+                cleaned = cleaned.split("```json")[1].split("```")[0]
+            elif "```" in cleaned:
+                cleaned = cleaned.split("```")[1].split("```")[0]
+            d = json.loads(cleaned)
+            itype = d.get("intent", "chat")
+            platform = d.get("platform", "")
+            topic = d.get("topic", "")
+            thought = d.get("thought", "")
+            logger.info(f"[INTENT] {msg[:40]} -> {itype} platform={platform} topic={topic} thought={thought}")
+            return itype, platform, topic
+        except Exception as e:
+            logger.warning(f"[INTENT] retry: {e}")
             continue
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                raw = resp.read().decode("utf-8","replace")
-            if fmt == "json":
-                d = json.loads(raw)
-                if d.get("success") and d.get("data"):
-                    titles = [x.get("title","") for x in d["data"] if x.get("title")]
-                    n = _HOT_NAMES.get(name, name)
-                    txt = f"🔥 **{n}热搜**\n\n"
-                    for i, t in enumerate(titles[:30]): txt += f"**{i+1}.** {t}\n"
-                    return txt
-            elif fmt == "baidu_html":
-                import re as _re
-                items = _re.findall(r'"word":"([^"]+)"', raw) or _re.findall(r'"title":"([^"]+)"', raw)[:30]
-                if items:
-                    txt = "🔥 **百度热搜**\n\n"
-                    seen=set(); c=0
-                    for t in items:
-                        t=t.strip()
-                        if t and len(t)>2 and t not in seen: seen.add(t); c+=1; txt+=f"**{c}.** {t}\n"
-                        if c>=30: break
-                    return txt
-        except: pass
-        if platform: break  # 指定平台只试一次
-    return None
+    # 兜底：chat
+    logger.info(f"[INTENT] fallback chat for: {msg[:40]}")
+    return "chat", "", ""
 
-async def _try_all_hot() -> str | None:
-    """全量轮询，返回第一个成功的"""
-    for name, _, _ in _HOT_SOURCES:
-        r = await _fetch_hot(name)
-        if r: return r
-    return None
 
-async def _llm_chat(msg: str) -> str | None:
-    """LLM智能聊天——理解+执行"""
-    from api.agent_core import create_engine
-    eng = create_engine(BASE, BASE/"output", BASE/"output"/"tools", BASE/"data"/"agent_memory.db")
-    for attempt in range(3):
-        r = await asyncio.to_thread(eng, msg, "", "zh-CN", [])
-        if isinstance(r, dict):
-            result = r.get("result","") or ""
-            if result: return result
-            mode = r.get("mode","")
-            if mode in ("direct","no_key","timeout"): break
-    return None
-
-async def _execute_source(source: str, topic: str) -> str | None:
-    """执行数据源获取 - 所有数据源统一入口"""
-    source_lower = source.lower().replace(" ","").replace("_","")
+async def _execute_search(query: str, count: int = 8):
+    """执行搜索"""
+    from skills.builtin.search_web import execute as _search
     try:
-        import urllib.request, re
-        # 百度热搜
-        if "baidu" in source_lower or "百度" in source_lower or not source_lower:
-            req = urllib.request.Request("https://top.baidu.com/board?tab=realtime",
-                headers={"User-Agent":"Mozilla/5.0","Cookie":"PSTM=0"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                html = resp.read().decode("utf-8","replace")
-            items = re.findall(r'"word":"([^"]+)"', html) or re.findall(r'"title":"([^"]+)"', html)[:30]
-            if items:
-                txt = "🔥 **百度热搜**\n\n"
-                seen=set(); c=0
-                for t in items:
-                    t=t.strip()
-                    if t and len(t)>2 and t not in seen: seen.add(t); c+=1; txt+=f"**{c}.** {t}\n"
-                    if c>=30: break
-                return txt
-        # 其他数据源
-        for name, cfg in [("weibo","https://api.vvhan.com/api/hotlist?type=weiboHot"),
-                           ("zhihu","https://api.vvhan.com/api/hotlist?type=zhihuHot"),
-                           ("douyin","https://api.vvhan.com/api/hotlist?type=douyinHot"),
-                           ("bilibili","https://api.vvhan.com/api/hotlist?type=biliHot"),
-                           ("tieba","https://api.vvhan.com/api/hotlist?type=tiebaHot"),
-                           ("toutiao","https://api.vvhan.com/api/hotlist?type=toutiaoHot"),
-                           ("tencent","https://api.vvhan.com/api/hotlist?type=qqHot")]:
-            if name in source_lower:
-                req2 = urllib.request.Request(cfg, headers={"User-Agent":"Mozilla/5.0"})
-                with urllib.request.urlopen(req2, timeout=10) as resp2:
-                    d = json.loads(resp2.read().decode("utf-8","replace"))
-                if d.get("success") and d.get("data"):
-                    titles = [x.get("title","") for x in d["data"] if x.get("title")]
-                    names = {"weibo":"微博","zhihu":"知乎","douyin":"抖音","bilibili":"B站","tieba":"贴吧","toutiao":"头条","tencent":"腾讯"}
-                    n = names.get(name, name)
-                    txt = f"🔥 **{n}热搜**\n\n"
-                    for i, t in enumerate(titles[:30]): txt += f"**{i+1}.** {t}\n"
-                    return txt
-    except Exception:
-        pass
-    # 所有源都失败时提示
+        r = _search({"query": query, "count": count})
+        items = r.get("results", [])
+        if items:
+            txt = f"🔍 **搜索结果：{query[:30]}**\n\n"
+            seen = set()
+            for i, item in enumerate(items[:count]):
+                t = item.get("title", "")[:60]
+                u = item.get("url", "")
+                if t and t not in seen:
+                    seen.add(t)
+                    txt += f"**{i+1}.** [{t}]({u})\n"
+            return txt
+    except Exception as e:
+        logger.warning(f"[SEARCH] error: {e}")
     return None
 
-async def _try_hot_fallback(source: str) -> str | None:
-    """尝试所有可能的数据源，只要有一个成功就返回"""
-    sources = [
-        ("baidu", "https://top.baidu.com/board?tab=realtime", "baidu"),
-        ("weibo", "https://api.vvhan.com/api/hotlist?type=weiboHot", "weibo"),
-        ("douyin", "https://api.vvhan.com/api/hotlist?type=douyinHot", "douyin"),
-        ("zhihu", "https://api.vvhan.com/api/hotlist?type=zhihuHot", "zhihu"),
-        ("bili", "https://api.vvhan.com/api/hotlist?type=biliHot", "bili"),
-        ("toutiao", "https://api.vvhan.com/api/hotlist?type=toutiaoHot", "toutiao"),
-        ("tencent", "https://api.vvhan.com/api/hotlist?type=qqHot", "qq"),
-    ]
-    import urllib.request, json
-    names = {"baidu":"百度","weibo":"微博","douyin":"抖音","zhihu":"知乎","bili":"B站","toutiao":"头条","tencent":"腾讯"}
-    # 先试指定源
-    for name, url, _ in sources:
-        if name in source.lower() or source.lower() in name:
-            try:
-                if name == "baidu":
-                    import re
-                    req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0","Cookie":"PSTM=0"})
-                    with urllib.request.urlopen(req, timeout=10) as resp:
-                        html = resp.read().decode("utf-8","replace")
-                    items = re.findall(r'"word":"([^"]+)"', html) or re.findall(r'"title":"([^"]+)"', html)[:30]
-                    if items:
-                        txt = f"🔥 **{names[name]}热搜**\n\n"
-                        seen=set(); c=0
-                        for t in items:
-                            t=t.strip()
-                            if t and len(t)>2 and t not in seen: seen.add(t); c+=1; txt+=f"**{c}.** {t}\n"
-                            if c>=30: break
-                        return txt
-                else:
-                    req2 = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-                    with urllib.request.urlopen(req2, timeout=10) as resp2:
-                        d = json.loads(resp2.read().decode("utf-8","replace"))
-                    if d.get("success") and d.get("data"):
-                        titles = [x.get("title","") for x in d["data"] if x.get("title")]
-                        txt = f"🔥 **{names[name]}热搜**\n\n"
-                        for i, t in enumerate(titles[:30]): txt += f"**{i+1}.** {t}\n"
-                        return txt
-            except: pass
-    # 指定源失败 → 全量轮询，返回第一个成功的
-    for name, url, _ in sources:
-        try:
-            if name == "baidu":
-                import re
-                req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0","Cookie":"PSTM=0"})
-                with urllib.request.urlopen(req, timeout=8) as resp:
-                    html = resp.read().decode("utf-8","replace")
-                items = re.findall(r'"word":"([^"]+)"', html) or re.findall(r'"title":"([^"]+)"', html)[:30]
-                if items:
-                    txt = f"🔥 **{names[name]}热搜**\n\n"
-                    seen=set(); c=0
-                    for t in items:
-                        t=t.strip()
-                        if t and len(t)>2 and t not in seen: seen.add(t); c+=1; txt+=f"**{c}.** {t}\n"
-                        if c>=30: break
-                    return txt
-            else:
-                req2 = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-                with urllib.request.urlopen(req2, timeout=8) as resp2:
-                    d = json.loads(resp2.read().decode("utf-8","replace"))
-                if d.get("success") and d.get("data"):
-                    titles = [x.get("title","") for x in d["data"] if x.get("title")]
-                    txt = f"🔥 **{names[name]}热搜**\n\n"
-                    for i, t in enumerate(titles[:30]): txt += f"**{i+1}.** {t}\n"
-                    return txt
-        except: pass
+
+async def _answer_hot(msg: str, platform: str, topic: str):
+    """处理热点查询 — 先用LLM回答，搜索兜底"""
+    # 先用LLM回答
+    from api.agent_llm import call_llm
+    try:
+        platform_desc = platform if platform else "今天的"
+        sp = f"用户问: {msg}。请列出{platform_desc}的热点话题5-8条，每条用数字开头。不用搜索，直接按你知道的列出来。不要加\"根据我的知识库\"这类话。"
+        content, _ = call_llm([{"role": "user", "content": sp}], timeout=15)
+        if content:
+            lines = [l.strip() for l in content.split("\n") if l.strip()]
+            hot_lines = [l for l in lines if any(c.isdigit() for c in l[:4])]
+            if hot_lines:
+                tag = platform if platform else "今日"
+                txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
+                return txt
+    except:
+        pass
+
+    # 搜索兜底
+    search_query = f"{platform or ''} {topic or '热点'} 今日热搜最新"
+    result = await _execute_search(search_query.strip())
+    if result:
+        return result
+
     return None
+
+
+async def _try_llm_chat(msg: str, system_hint: str = ""):
+    """LLM直接回答"""
+    from api.agent_llm import call_llm
+    try:
+        if system_hint:
+            prompt = f"{system_hint}\n\n用户: {msg}\n回答:"
+        else:
+            prompt = f"用户: {msg}\n\n请直接回答，简洁、有用。"
+        content, _ = call_llm([{"role": "user", "content": prompt}], timeout=20)
+        if content and len(content) > 3:
+            return content
+    except:
+        pass
+    return None
+
 
 @router.post("/api/v1/smart")
 async def smart_chat(req: Req):
@@ -201,89 +183,73 @@ async def smart_chat(req: Req):
     if not msg:
         return {"success": True, "result": "请说点什么"}
 
-    # 1) LLM分析意图
-    from api.agent_llm import call_llm, _get_key
-    key = _get_key()
-    intent_prompt = "分析意图，只返回JSON: {\"intent\":\"hot/search/chat\",\"platform\":\"数据源\",\"topic\":\"主题\"}。如果用户想查热点/热搜/热榜/头条/新闻→intent=hot。如果涉及特定平台(百度/微博/抖音/B站/知乎/头条/腾讯/贴吧)→platform设为平台名。用户: " + msg
-    intent_text, _ = call_llm([{"role":"user","content":intent_prompt}], key=key, timeout=8)
-    intent = {"intent":"chat","platform":"","topic":""}
-    if intent_text:
-        try:
-            import re as _re2
-            cleaned = intent_text.strip()
-            if "```json" in cleaned: cleaned = cleaned.split("```json")[1].split("```")[0]
-            elif "```" in cleaned: cleaned = cleaned.split("```")[1].split("```")[0]
-            intent = json.loads(cleaned)
-        except: pass
+    # ── ReAct 阶段1: Thought（意图分类）──
+    itype, platform, topic = await _classify_intent(msg)
+    logger.info(f"[ROUTE] {itype} p={platform} t={topic}")
 
-    itype = intent.get("intent","chat")
-    platform = intent.get("platform","")
-    topic = intent.get("topic","")
+    # ── ReAct 阶段2: Action（执行）──
 
-    # 2) 热点 → 通用热点头
+    # hot: 热点查询
     if itype == "hot":
-        r = await _fetch_hot(platform)
-        if r: return {"success": True, "result": r}
-        r2 = await _try_all_hot()
-        if r2: return {"success": True, "result": r2}
-        return {"success": True, "result": "所有热点暂时不可用，试试直接问问题"}
+        result = await _answer_hot(msg, platform, topic)
+        if result:
+            return {"success": True, "result": result}
+        # 兜底：LLM试一下
+        fallback = await _try_llm_chat(msg, "用户想查热点。列出你知道的热点话题，5条左右。")
+        if fallback:
+            return {"success": True, "result": fallback}
+        return {"success": True, "result": "暂无热点数据，稍后再试"}
 
-    # 3) 搜索 → Bing
+    # search: 搜索
     if itype == "search":
-        try:
-            from skills.builtin.search_web import execute as _sw
-            r = _sw({"query": topic or msg, "count": 8})
-            items = r.get("results", [])
-            if items:
-                txt = f"🔍 **{topic or msg}**\n\n"
-                for i, item in enumerate(items[:8]):
-                    t = item.get("title","")[:60]
-                    u = item.get("url","")
-                    txt += f"**{i+1}.** [{t}]({u})\n" if u else f"**{i+1}.** {t}\n"
-                return {"success": True, "result": txt}
-        except: pass
+        result = await _execute_search(topic or msg)
+        if result:
+            return {"success": True, "result": result}
+        # 搜索失败→LLM
+        fallback = await _try_llm_chat(msg)
+        if fallback:
+            return {"success": True, "result": fallback}
+        return {"success": True, "result": "搜索超时，稍后再试"}
 
-    # 4) chat → LLM引擎理解+执行
-    result = await _llm_chat(msg)
+    # help: 系统能力
+    if itype == "help":
+        return {"success": True, "result": _SYSTEM_CAPABILITIES}
+
+    # create: 生成文档/代码
+    if itype == "create":
+        from api.agent_core import create_engine
+        eng = create_engine(BASE, BASE/"output", BASE/"output"/"tools", BASE/"data"/"agent_memory.db")
+        try:
+            r = await asyncio.to_thread(eng, msg, "", "zh-CN", [])
+            if isinstance(r, dict):
+                result = r.get("result", "") or ""
+                if result:
+                    return {"success": True, "result": result}
+        except:
+            pass
+        # 降级到LLM
+        fallback = await _try_llm_chat(msg)
+        if fallback:
+            return {"success": True, "result": fallback}
+        return {"success": True, "result": "处理中..."}
+
+    # chat: LLM直接回答
+    result = await _try_llm_chat(msg)
     if result:
         return {"success": True, "result": result}
+    # 超时再试
+    result = await _try_llm_chat(msg)
+    if result:
+        return {"success": True, "result": result}
+    return {"success": True, "result": "正在思考中..."}
 
-    # 5) 最兜底
-    text, _ = call_llm([{"role":"user","content":msg}], key=key)
-    if text:
-        return {"success": True, "result": text}
-    return {"success": True, "result": "处理完成"} 
 
 @router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
-    """流式输出"""
-    msg = req.message or ""
-    from api.agent_llm import call_llm_stream
+    return await smart_chat(req)
 
-    async def gen():
-        yield json.dumps({"type":"start"}, ensure_ascii=False) + "\n"
-        try:
-            # 先用 LLM 引擎
-            r = await _llm_chat(msg)
-            if r:
-                for i in range(0, len(r), 20):
-                    yield json.dumps({"type":"chunk","text":r[i:i+20]}, ensure_ascii=False) + "\n"
-                yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
-                return
-        except: pass
-        for chunk in call_llm_stream([{"role":"user","content":msg}]):
-            if chunk == "__DONE__":
-                yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
-                return
-            yield json.dumps({"type":"chunk","text":chunk}, ensure_ascii=False) + "\n"
-        yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
-    return StreamingResponse(gen(), media_type="application/x-ndjson")
 
 @router.get("/api/v1/llm/status")
 async def llm_status():
     from api.agent_llm import get_active_model
     return get_active_model()
-
-def register_routes(app):
-    app.include_router(router)
-setup_smart_chat_routes = register_routes
