@@ -6,7 +6,7 @@ logger = logging.getLogger("bookstack_kb")
 router = APIRouter(prefix="/api/v1/bookstack-kb", tags=["bookstack_kb"])
 
 try:
-    from modules.bookstack_kb import BookstackKb
+    from modules.bookstack_kb import ModuleImpl as BookstackKb
     _mod = BookstackKb()
 except Exception as e:
     _mod = None

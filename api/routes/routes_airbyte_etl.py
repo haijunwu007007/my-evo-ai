@@ -9,8 +9,8 @@ logger = logging.getLogger("airbyte_etl")
 router = APIRouter(prefix="/api/v1/airbyte-etl", tags=["airbyte_etl"])
 
 try:
-    from modules.airbyte_etl import AirbyteETLModule
-    _module = AirbyteETLModule()
+    from modules.airbyte_etl import ModuleImpl
+    _module = ModuleImpl()
     _available = True
 except Exception as e:
     _module = None

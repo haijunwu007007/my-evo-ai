@@ -6,7 +6,7 @@ logger = logging.getLogger("hugo_blog")
 router = APIRouter(prefix="/api/v1/hugo-blog", tags=["hugo_blog"])
 
 try:
-    from modules.hugo_blog import HugoBlog
+    from modules.hugo_blog import ModuleImpl as HugoBlog
     _mod = HugoBlog()
 except Exception as e:
     _mod = None

@@ -9,7 +9,7 @@ logger = logging.getLogger("docling_processor")
 router = APIRouter(prefix="/api/v1/docling-processor", tags=["docling_processor"])
 
 try:
-    from modules.docling_processor import DoclingProcessorModule
+    from modules.docling_processor import ModuleImpl as DoclingProcessorModule
     _module = DoclingProcessorModule()
     _available = True
 except Exception as e:

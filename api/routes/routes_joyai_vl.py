@@ -10,7 +10,7 @@ logger = logging.getLogger("joyai_vl")
 router = APIRouter(prefix="/api/v1/joyai-vl", tags=["joyai_vl"])
 
 try:
-    from modules.joyai_vl_interaction import JoyAIVLInteractionModule
+    from modules.joyai_vl_interaction import ModuleImpl as JoyAIVLInteractionModule
     _module = JoyAIVLInteractionModule()
     _available = True
 except Exception as e:

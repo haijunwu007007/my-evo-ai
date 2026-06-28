@@ -3,7 +3,7 @@ from fastapi import APIRouter
 logger = logging.getLogger("home_assistant")
 router = APIRouter(prefix="/api/v1/home-assistant", tags=["home_assistant"])
 try:
-    from modules.home_assistant import HomeAssistantModule
+    from modules.home_assistant import ModuleImpl as HomeAssistantModule
     _mod = HomeAssistantModule()
     _avail = True
 except Exception as e:

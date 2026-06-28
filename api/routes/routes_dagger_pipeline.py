@@ -9,7 +9,7 @@ logger = logging.getLogger("dagger_pipeline")
 router = APIRouter(prefix="/api/v1/dagger-pipeline", tags=["dagger_pipeline"])
 
 try:
-    from modules.dagger_pipeline import DaggerPipelineModule
+    from modules.dagger_pipeline import ModuleImpl as DaggerPipelineModule
     _module = DaggerPipelineModule()
     _available = True
 except Exception as e:

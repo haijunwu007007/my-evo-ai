@@ -9,7 +9,7 @@ logger = logging.getLogger("sentry_tracker")
 router = APIRouter(prefix="/api/v1/sentry-tracker", tags=["sentry_tracker"])
 
 try:
-    from modules.sentry_tracker import SentryTrackerModule
+    from modules.sentry_tracker import ModuleImpl as SentryTrackerModule
     _module = SentryTrackerModule()
     _available = True
 except Exception as e:

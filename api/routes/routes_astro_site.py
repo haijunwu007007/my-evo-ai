@@ -6,7 +6,7 @@ logger = logging.getLogger("astro_site")
 router = APIRouter(prefix="/api/v1/astro-site", tags=["astro_site"])
 
 try:
-    from modules.astro_site import AstroSite
+    from modules.astro_site import ModuleImpl as AstroSite
     _mod = AstroSite()
 except Exception as e:
     _mod = None

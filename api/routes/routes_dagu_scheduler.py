@@ -6,7 +6,7 @@ logger = logging.getLogger("dagu_scheduler")
 router = APIRouter(prefix="/api/v1/dagu-scheduler", tags=["dagu_scheduler"])
 
 try:
-    from modules.dagu_scheduler import DaguScheduler
+    from modules.dagu_scheduler import ModuleImpl as DaguScheduler
     _mod = DaguScheduler()
 except Exception as e:
     _mod = None

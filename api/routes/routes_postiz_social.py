@@ -9,7 +9,7 @@ logger = logging.getLogger("postiz_social")
 router = APIRouter(prefix="/api/v1/postiz-social", tags=["postiz_social"])
 
 try:
-    from modules.postiz_social import PostizModule
+    from modules.postiz_social import ModuleImpl as PostizModule
     _module = PostizModule()
     _available = True
 except Exception as e:
