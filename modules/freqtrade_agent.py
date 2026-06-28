@@ -6,7 +6,7 @@ from typing import Any, Dict
 logger = logging.getLogger("freqtrade_agent")
 __module_meta__ = {"id":"freqtrade_agent","name":"Freqtrade 交易","version":"V0.1","group":"integration","grade":"A"}
 
-class ModuleImpl:
+class FreqtradeModule:
     def __init__(self, config: dict = None):
         self.config = config or {}
         self._stats = {"calls":0,"errors":0,"last_call":0}

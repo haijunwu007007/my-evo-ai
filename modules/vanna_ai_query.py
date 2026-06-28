@@ -22,3 +22,5 @@ class ModuleImpl:
         if action == "query": return self.query(params.get("query",""))
         if action == "tables": return self.list_tables()
         return {"success":False,"error":f"Unknown action: {action}"}
+
+module_class = ModuleImpl  # alias for route discovery

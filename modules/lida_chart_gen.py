@@ -21,4 +21,7 @@ class ModuleImpl:
         if action == "status": return self.get_status()
         if action == "generate": return self.generate_chart(params.get("data_desc",""), params.get("chart_type","bar"))
         if action == "types": return self.list_chart_types()
+        if action == "analyze": return self.generate_chart(params.get("data","") or params.get("data_desc",""), params.get("chart_type","bar"))
         return {"success":False,"error":f"Unknown action: {action}"}
+
+module_class = ModuleImpl  # alias for route discovery

@@ -6,7 +6,7 @@ from typing import Any, Dict
 logger = logging.getLogger("formbricks_collect")
 __module_meta__ = {"id":"formbricks_collect","name":"Formbricks 反馈收集","version":"V0.1","group":"integration","grade":"A"}
 
-class ModuleImpl:
+class FormbricksCollect:
     def __init__(self, config: dict = None):
         self.config = config or {}
         self._stats = {"calls":0,"errors":0,"last_call":0}
@@ -30,6 +30,7 @@ class ModuleImpl:
         params = params or {}
         if action == "status": return self.get_status()
         if action == "list": return self.list_surveys()
+        if action == "surveys": return self.list_surveys()
         if action == "create": return self.create_survey(params.get("name","New Survey"), params.get("questions"))
         if action == "responses": return self.get_responses(params.get("survey_id",1))
         return {"success":False,"error":f"Unknown action: {action}"}

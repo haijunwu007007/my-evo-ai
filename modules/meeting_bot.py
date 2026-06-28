@@ -27,3 +27,5 @@ class ModuleImpl:
         if action == "list": return self.list_meetings()
         if action == "transcribe": return self.transcribe(params.get("audio",""))
         return {"success":False,"error":f"Unknown action: {action}"}
+
+module_class = ModuleImpl  # alias for route discovery

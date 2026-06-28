@@ -5,7 +5,7 @@ import logging, json, time
 from typing import Any, Dict
 logger = logging.getLogger("video_intelligence")
 __module_meta__ = {"id":"video_intelligence","name":"视频智能分析","version":"V0.1","group":"integration","grade":"A"}
-class ModuleImpl:
+class VideoIntelligenceModule:
     def __init__(self, config: dict = None):
         self.config = config or {}; self._stats = {"calls":0,"errors":0,"last_call":0}
     def get_status(self) -> Dict[str, Any]:

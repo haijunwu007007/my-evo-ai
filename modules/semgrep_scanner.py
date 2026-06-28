@@ -22,3 +22,5 @@ class ModuleImpl:
         if action == "scan": return self.scan(params.get("path",""), params.get("rules",""))
         if action == "rules": return self.list_rules()
         return {"success":False,"error":f"Unknown action: {action}"}
+
+module_class = ModuleImpl  # alias for route discovery

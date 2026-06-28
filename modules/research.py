@@ -5,7 +5,7 @@ import logging, json, time, datetime
 from typing import Any, Dict
 logger = logging.getLogger("research")
 __module_meta__ = {"id":"research","name":"Research 研究","version":"V0.1","group":"integration","grade":"A"}
-class ModuleImpl:
+class AutoResearchLoop:
     def __init__(self, config: dict = None):
         self.config = config or {}; self._stats = {"calls":0,"errors":0,"last_call":0}
         self._topics = ["AI技术","机器学习","深度学习","自然语言处理","计算机视觉"]

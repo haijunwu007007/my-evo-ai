@@ -22,3 +22,5 @@ class ModuleImpl:
         if action == "translate": return self.translate(params.get("text",""), params.get("target","en"))
         if action == "languages": return self.list_languages()
         return {"success":False,"error":f"Unknown action: {action}"}
+
+module_class = ModuleImpl  # alias for route discovery

@@ -5,7 +5,7 @@ import logging, json, time
 from typing import Any, Dict
 logger = logging.getLogger("qodo_review")
 __module_meta__ = {"id":"qodo_review","name":"Qodo 代码审查","version":"V0.1","group":"integration","grade":"A"}
-class ModuleImpl:
+class QodoReviewModule:
     def __init__(self, config: dict = None):
         self.config = config or {}; self._stats = {"calls":0,"errors":0,"last_call":0}
         self._reviews = []

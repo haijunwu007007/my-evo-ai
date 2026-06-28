@@ -5,7 +5,7 @@ import logging, json, time
 from typing import Any, Dict
 logger = logging.getLogger("heyform_survey")
 __module_meta__ = {"id":"heyform_survey","name":"HeyForm 问卷","version":"V0.1","group":"integration","grade":"A"}
-class ModuleImpl:
+class HeyformSurvey:
     def __init__(self, config: dict = None):
         self.config = config or {}; self._stats = {"calls":0,"errors":0,"last_call":0}
         self._surveys = [{"id":1,"title":"用户满意度","responses":23},{"id":2,"title":"产品反馈","responses":12}]
@@ -24,4 +24,5 @@ class ModuleImpl:
         if action == "status": return self.get_status()
         if action == "create": return self.create_survey(params.get("title","New"), params.get("questions"))
         if action == "list": return self.list_surveys()
+        if action == "forms": return self.list_surveys()
         return {"success":False,"error":f"Unknown action: {action}"}
