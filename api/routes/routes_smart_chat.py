@@ -17,12 +17,13 @@ class Req(BaseModel):
 _INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSON。不要加额外解释。
 
 规则：
-- intent: chat/hot/search/create/help
+- intent: chat/hot/search/create/help/calculate
   - chat: 普通聊天、问答、写作、解释、建议、闲聊、天气、情感、角色扮演、系统介绍
   - hot: 查热点/热搜/热榜/头条/新闻/大事/新鲜事（如果提到具体平台，platform填平台名）
   - search: 明确说搜索xx、查找xx、搜一下xx、查一下xx（想找具体信息）
   - create: 生成文档/PPT/Excel/合同/报告/代码/文章/方案
   - help: 问系统能做什么、有什么功能、怎么使用、能力列表
+  - calculate: 数学计算、算术、运算、数字计算（含数字和运算符的表达式计算）
 - platform: 如果intent=hot且用户提到具体平台(百度/微博/抖音/知乎/B站/头条/腾讯/贴吧/小红书)，填平台名。否则""
 - topic: 搜索主题或热点话题
 - thought: 你分析用户意图的原因（一句话）
@@ -63,6 +64,10 @@ _INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSO
 例34: q=有什么新鲜事 → {"intent":"hot","platform":"","topic":"新鲜事","thought":"用户想看近期发生的事"}
 例35: q=hacker news hot → {"intent":"hot","platform":"Hacker News","topic":"","thought":"英文技术社区热点"}
 例36: q=reddit热门 → {"intent":"hot","platform":"Reddit","topic":"","thought":"Reddit热门话题"}
+例37: q=数学计算: 2+3*4 → {"intent":"calculate","expression":"2+3*4","thought":"用户要求数学计算"}
+例38: q=100/5+3等于多少 → {"intent":"calculate","expression":"100/5+3","thought":"用户问算术题"}
+例39: q=计算 1024*768 → {"intent":"calculate","expression":"1024*768","thought":"用户要求做乘法"}
+例40: q=(15+3)*2-10 → {"intent":"calculate","expression":"(15+3)*2-10","thought":"用户给了一个数学表达式"}
 
 现在分析: q="""
 
@@ -103,14 +108,15 @@ async def _classify_intent(msg: str):
             platform = d.get("platform", "")
             topic = d.get("topic", "")
             thought = d.get("thought", "")
-            logger.info(f"[INTENT] {msg[:40]} -> {itype} platform={platform} topic={topic} thought={thought}")
-            return itype, platform, topic
+            expression = d.get("expression", "")
+            logger.info(f"[INTENT] {msg[:40]} -> {itype} platform={platform} topic={topic} expression={expression[:20]} thought={thought}")
+            return itype, platform, topic, expression
         except Exception as e:
             logger.warning(f"[INTENT] retry: {e}")
             continue
     # 兜底：chat
-    logger.info(f"[INTENT] fallback chat for: {msg[:40]}")
-    return "chat", "", ""
+            logger.info(f"[INTENT] fallback chat for: {msg[:40]}")
+    return "chat", "", "", ""
 
 
 async def _execute_search(query: str, count: int = 8):
@@ -184,8 +190,8 @@ async def smart_chat(req: Req):
         return {"success": True, "result": "请说点什么"}
 
     # ── ReAct 阶段1: Thought（意图分类）──
-    itype, platform, topic = await _classify_intent(msg)
-    logger.info(f"[ROUTE] {itype} p={platform} t={topic}")
+    itype, platform, topic, expression = await _classify_intent(msg)
+    logger.info(f"[ROUTE] {itype} p={platform} t={topic} e={expression[:20]}")
 
     # ── ReAct 阶段2: Action（执行）──
 
@@ -214,6 +220,42 @@ async def smart_chat(req: Req):
     # help: 系统能力
     if itype == "help":
         return {"success": True, "result": _SYSTEM_CAPABILITIES}
+
+    # calculate: 数学计算
+    if itype == "calculate":
+        expr = (expression or topic or msg).strip()
+        import re as _re_calc
+        clean = ''.join(_re_calc.findall(r'[\d+\-*/().% ]+', expr)).strip()
+        if not clean or len(clean) < 2:
+            nums = _re_calc.findall(r'[\d+\-*/().% ]+', msg)
+            clean = max(nums, key=len).strip() if nums else ""
+        # 只去空格，括号必须保留
+        clean = clean.strip()
+        if len(clean) >= 2:
+            try:
+                ns = {"__builtins__": {}}; exec(compile(f"_r={clean}", "", "exec"), ns)
+                val = ns.get("_r")
+                if isinstance(val, (int, float)):
+                    return {"success": True, "result": f"📐 **{clean} = {val}**"}
+            except Exception as _ce:
+                logger.warning(f"[CALC] exec fail: {_ce}")
+            try:
+                import ast, operator
+                ops = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+                       ast.Div: operator.truediv, ast.Pow: operator.pow, ast.Mod: operator.mod}
+                def _se(n):
+                    if isinstance(n, ast.Constant): return n.value
+                    if isinstance(n, ast.BinOp): return ops[type(n.op)](_se(n.left), _se(n.right))
+                    if isinstance(n, ast.UnaryOp): return operator.neg(_se(n.operand))
+                    raise ValueError
+                val = _se(ast.parse(clean, mode='eval').body)
+                return {"success": True, "result": f"📐 **{clean} = {val}**"}
+            except Exception as _ce:
+                logger.warning(f"[CALC] ast fail: {_ce}")
+        fallback = await _try_llm_chat(f"计算一下: {expr}")
+        if fallback:
+            return {"success": True, "result": fallback}
+        return {"success": True, "result": f"📐 {expr} 无法计算"}
 
     # create: 生成文档/代码
     if itype == "create":
