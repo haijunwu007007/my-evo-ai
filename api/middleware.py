@@ -253,7 +253,7 @@ async def security_middleware(request: Request, call_next):
         logger.error(f"[MIDDLEWARE] 未捕获异常: {path} - {error_msg}\n{tb[:2000]}")
         return JSONResponse(
             status_code=500,
-            content={"success": False, "detail": "服务器内部错误", "error": error_msg[:500], "path": path},
+            content={"success": False, "detail": "服务器内部错误"},
         )
     finally:
         from api.infra import _record_audit

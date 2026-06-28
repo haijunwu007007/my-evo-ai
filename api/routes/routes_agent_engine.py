@@ -59,8 +59,6 @@ def _scan_external_skills():
                 catalog.append({
                     "name": skill_dir.name,
                     "description": desc[:200],
-                    "skill_md_content": md_content[:3000],
-                    "source_dir": str(skill_dir),
                     "stars": stars,
                     "category": category,
                 })
@@ -196,7 +194,7 @@ async def agent_run(req: AgentRunRequest):
             summary = sr.json().get("result", "执行完成")
 
         _AGENT_TASKS[task_id]["result"] = summary
-        return {"success": True, "task_id": task_id, "steps": steps, "result": summary, "details": results}
+        return {"success": True, "task_id": task_id, "result": summary}
 
     except asyncio.TimeoutError:
         _AGENT_TASKS[task_id]["status"] = "timeout"

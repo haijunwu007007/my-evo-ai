@@ -43,4 +43,6 @@ def execute(params, context=None):
         content = extractor.get_text()[:5000]
         return {"title": title, "content": content}
     except Exception as e:
-        return {"title": "", "content": "", "error": f"抓取失败：{e}"}
+        logger = __import__('logging').getLogger('evo.crawler')
+        logger.warning(f"抓取失败: {e}")
+        return {"title": "", "content": "", "error": "抓取失败，请检查URL后重试"}

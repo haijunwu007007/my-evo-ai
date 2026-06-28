@@ -53,7 +53,7 @@ async def agent_s_execute(req: ExecuteRequest):
         return result
     except Exception as e:
         logger.error("[AgentS] 执行失败: %s", e)
-        return {"success": False, "error": f"执行异常: {e}"}
+        return {"success": False, "error": "执行异常，请检查指令后重试"}
 
 
 @router.post("/api/v1/agent-s/screenshot")

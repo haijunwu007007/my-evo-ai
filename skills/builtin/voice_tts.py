@@ -36,6 +36,8 @@ def execute(params, context=None):
         gTTS(text=text[:500], lang=lang[:2], slow=False).save(fp)
         return {"file_path": fp}
     except ImportError:
-        return {"file_path": "", "error": "edge-tts 和 gTTS 均未安装，请执行 pip install edge-tts"}
+        return {"file_path": "", "error": "TTS 模块未安装，无法生成语音"}
     except Exception as e:
-        return {"file_path": "", "error": f"TTS 生成失败：{e}"}
+        logger = __import__('logging').getLogger('evo.tts')
+        logger.warning(f"TTS生成失败: {e}")
+        return {"file_path": "", "error": "语音合成失败，请稍后重试"}

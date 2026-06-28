@@ -206,4 +206,6 @@ def _quicktool_handler(params: dict, context: dict = None) -> dict:
         text, _ = call_llm([{"role": "user", "content": sp}])
         return {"text": text or "处理完成", "mode": "llm"}
     except Exception as e:
-        return {"text": f"收到请求：{query[:100]}。请补充更多细节。", "error": str(e)[:50], "mode": "fallback"}
+        logger = __import__('logging').getLogger('evo.quicktool')
+        logger.warning(f"QuickTool执行失败: {e}")
+        return {"text": f"收到请求：{query[:100]}。请补充更多细节。", "mode": "fallback"}

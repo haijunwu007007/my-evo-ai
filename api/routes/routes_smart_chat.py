@@ -22,8 +22,7 @@ DIRECT_ROUTES = {
     "老婆跳井": ("app", "✅ **老婆跳井**\n[📄 打开](/wife_well.html)"),
     "狼吃娃": ("app", "✅ **狼吃娃**\n[📄 打开](/wolf)"),
     "贪吃蛇": ("app", "✅ **贪吃蛇**\n[📄 打开](/snake)"),
-    "打飞机": ("app", "✅ **打飞机**\n[📄 打开](/shooter)"),
-}
+    "打飞机": ("app", "✅ **打飞机**\n[📄 打开](/shooter)")}
 
 # 需要工具调用的关键词（匹配到这些词走完整agent_core管道或Agent引擎）
 _TOOL_KEYWORDS = [
@@ -67,6 +66,15 @@ def _needs_tools(msg: str) -> bool:
     lower = msg.lower()
     return any(kw.lower() in lower for kw in _TOOL_KEYWORDS)
 
+def _strip_internal(resp: dict) -> dict:
+    """去除内部mode字段再返回给用户"""
+    if isinstance(resp, dict):
+        resp.pop("mode", None)
+        resp.pop("details", None)
+        resp.pop("steps", None)
+        resp.pop("tool_calls", None)
+    return resp
+
 @router.post("/api/v1/smart")
 async def smart_chat(req: Req):
     msg = (req.message or "").strip()
@@ -81,35 +89,63 @@ async def smart_chat(req: Req):
                             json={"task": msg, "context": req.context or ""})
                         ad = ar.json()
                         if ad.get("success"):
-                            return {"success": True, "result": ad.get("result", ""),
-                                    "mode": "agent_engine", "details": ad.get("details", [])}
+                            return {"success": True, "result": ad.get("result", "")}
                 except Exception:
                     pass
     for keyword, (mode, result) in DIRECT_ROUTES.items():
         if keyword in msg:
-            return {"success": True, "result": result, "mode": mode}
-    # ── 热点/最新/热搜 直接走搜索，不走浏览器自动化 ──
+            return {"success": True, "result": result}
+    # ── 热点/最新/热搜 → 直连百度热搜榜 ──
     if any(k in msg for k in ("热点", "热搜", "最新", "热门")):
         try:
-            from skills.builtin.search_web import execute as _search
-            sq = msg
-            for k in ("查看", "今日", "百度", "热点", "热搜", "最新", "热门", "什么", "的"):
-                sq = sq.replace(k, "")
-            sq = sq.strip() or "今日热点"
-            r = _search({"query": "2026年6月28日" + sq, "count": 10})
-            items = r.get("results", [])
-            if items:
-                txt = "🔍 **搜索: " + sq + "**\n\n"
-                for i, item in enumerate(items[:8]):
-                    txt += str(i+1) + ". " + item.get("title", "")[:60] + "\n  " + item.get("url", "") + "\n"
-                return {"success": True, "result": txt, "mode": "search"}
+            import urllib.request, re
+            req = urllib.request.Request("https://top.baidu.com/board?tab=realtime",
+                headers={"User-Agent":"Mozilla/5.0","Cookie":"PSTM=0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                html = resp.read().decode("utf-8", errors="replace")
+            # 提取热搜词
+            hot_items = re.findall(r'"word":"([^"]+)"', html)
+            if not hot_items:
+                hot_items = re.findall(r'"query":"([^"]+)"', html)
+            if hot_items:
+                txt = "🔥 **百度今日热搜**\n\n"
+                cnt = 0
+                for item in hot_items:
+                    title = item.strip()
+                    if not title or len(title) < 2: continue
+                    cnt += 1
+                    txt += f"**{cnt}.** {title}\n"
+                    if cnt >= 30: break
+                if cnt >= 3:
+                    return {"success": True, "result": txt}
         except Exception:
             pass
+        # 兜底搜索
+        try:
+            from skills.builtin.search_web import execute as _search
+            r = _search({"query": "今日热点 新闻", "count": 10})
+            items = r.get("results", [])
+            if items:
+                txt = "🔥 **今日热点**\n\n"
+                seen = set(); cnt = 0
+                for item in items:
+                    url = item.get("url","")
+                    if url in seen: continue
+                    seen.add(url)
+                    title = item.get("title","").strip()[:60]
+                    if not title or len(title) < 4: continue
+                    cnt += 1
+                    txt += f"**{cnt}.** [{title}]({url})\n\n"
+                    if cnt >= 8: break
+                return {"success": True, "result": txt}
+        except Exception:
+            pass
+        return {"success": True, "result": "⚠️ 搜索暂时不可用"}
     if ("PPT" in msg or "做一份" in msg) and "app_" not in msg:
         try:
             from api.routes.routes_pptx import generate_presentation
             r = generate_presentation(msg.replace("做一份","").replace("PPT","").strip() or "主题")
-            if r["success"]: return {"success":True,"result":r["result"],"mode":"ppt"}
+            if r["success"]: return {"success":True,"result":r["result"]}
         except Exception:
             pass
     # ── QuickTool 技能路由 ──
@@ -127,9 +163,24 @@ async def smart_chat(req: Req):
                     if sr.get("success") and sr.get("result"):
                         txt = sr["result"]
                         if isinstance(txt, dict): txt = txt.get("text") or txt.get("result") or txt.get("message") or str(txt)
-                        return {"success": True, "result": str(txt), "mode": "quicktool"}
+                        return {"success": True, "result": str(txt)}
             except Exception:
                 pass
+
+    # ── 意图引擎V2：通用搜索/其他已知意图 ──
+    if "搜索" in msg and "热门" not in msg and "热点" not in msg:
+        from skills.builtin.search_web import execute as _sw
+        sq = re.sub(r'^(搜索|查一下|帮我搜)\s*[:：]?\s*', '', msg, flags=re.IGNORECASE).strip()
+        if not sq: sq = msg
+        r = _sw({"query": sq, "count": 8})
+        items = r.get("results", [])
+        if items:
+            txt = f"🔍 **{sq[:30]}**\n\n"
+            for i, it in enumerate(items[:8]):
+                t = (it.get("title","") or "")[:60]
+                u = (it.get("url","") or "")
+                txt += f"**{i+1}.** [{t}]({u})\n"
+            return {"success": True, "result": txt}
 
     # ── 智能工具路由层（内部规划prompt跳过工具层，直接走LLM） ──
     if msg.startswith("你是一个AI任务规划器") or msg.startswith("请用中文总结以下执行结果") or msg.startswith("你是一个技能执行专家"):
@@ -141,7 +192,7 @@ async def smart_chat(req: Req):
             rtype = result.get("type", "chat")
             output = result.get("data", "")
             if rtype == "tool" or rtype == "direct":
-                return {"success": True, "result": output, "mode": rtype, "tool": result.get("name","")}
+                return {"success": True, "result": output, "tool": result.get("name","")}
         except Exception:
             pass
     # ── 自主任务路由（"帮我xxx" 自动进入多步骤Agent）──
@@ -153,7 +204,7 @@ async def smart_chat(req: Req):
                     json={"task": msg, "context": req.context or ""})
                 ad = ar.json()
                 if ad.get("success"):
-                    return {"success": True, "result": ad.get("result", ""), "mode": "agent"}
+                    return {"success": True, "result": ad.get("result", "")}
         except Exception:
             pass
 
@@ -165,7 +216,7 @@ async def smart_chat(req: Req):
                 ar = await c.post("http://127.0.0.1:8765/api/v1/scheduler/tasks",
                     json={"name": msg[:30], "cron": "0 9 * * *", "action": "chat", "params": {"message": msg}})
                 if ar.json().get("success"):
-                    return {"success": True, "result": "✅ 已创建定时任务: " + msg[:40], "mode": "schedule"}
+                    return {"success": True, "result": "✅ 已创建定时任务: " + msg[:40]}
         except Exception:
             pass
     # ── Cognee 记忆增强 ──
@@ -173,7 +224,6 @@ async def smart_chat(req: Req):
         from api.routes.routes_cognee import _init_cognee, cognee_chat
         if _init_cognee():
             try:
-                import asyncio
                 mem_result = await asyncio.wait_for(
                     cognee_chat(msg),
                     timeout=8
@@ -188,11 +238,11 @@ async def smart_chat(req: Req):
     # ── 通用问答直达 ──
     _faq_keywords = ["做什么","什么功能","能做什么","能力","你会什么","help"]
     if any(k in msg.lower() for k in _faq_keywords):
-        return {"success": True, "result": "🤖 **AUTO-EVO-AI 能力清单**\n\n💬 **对话** 直接聊天问答\n📄 **文档** 说「帮我写合同/报告」\n📊 **PPT** 说「PPT: 主题」\n📗 **Excel** 说「帮我做表格」\n🔍 **搜索** 说「搜索: xxx」\n🧮 **计算** 说「数学计算: 2+3*4」\n🌐 **翻译** 说「翻译: 你好」\n🎤 **语音** 按住🎤说话\n🧠 **专家** 点👥选领域专家\n📅 **定时** 说「每天早上9点搜索xxx」\n📋 **日报** 说「生成日报」\n🛠️ **457个技能** 全可用\n🔌 **本地代理** `/agent` 控制本机\n\n🔑 外部服务（GitHub/Slack/钉钉等）去 `⚙️ 配置` 配Key\n\n还有问题直接打字问！", "mode": "capabilities"}
+        return {"success": True, "result": "🤖 **AUTO-EVO-AI 能力清单**\n\n💬 **对话** 直接聊天问答\n📄 **文档** 说「帮我写合同/报告」\n📊 **PPT** 说「PPT: 主题」\n📗 **Excel** 说「帮我做表格」\n🔍 **搜索** 说「搜索: xxx」\n🧮 **计算** 说「数学计算: 2+3*4」\n🌐 **翻译** 说「翻译: 你好」\n🎤 **语音** 按住🎤说话\n🧠 **专家** 点👥选领域专家\n📅 **定时** 说「每天早上9点搜索xxx」\n📋 **日报** 说「生成日报」\n🛠️ **457个技能** 全可用\n🔌 **本地代理** `/agent` 控制本机\n\n🔑 外部服务（GitHub/Slack/钉钉等）去 `⚙️ 配置` 配Key\n\n还有问题直接打字问！"}
     from api.agent_llm import _get_key as _llm_key
     _has_key = any(os.environ.get(k) for k in ("OPENAI_API_KEY", "ZHIPU_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")) or bool(_llm_key())
     if not _has_key:
-        return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求", "mode": "no_key"}
+        return {"success": True, "result": "⚠️ 系统尚未配置 API Key。\n\n请在 `.env` 文件中设置至少一个 LLM API Key（如 `ZHIPU_API_KEY`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`），然后重启服务。\n\n当前支持的直达命令：\n- 「系统怎么样」- 查看系统状态\n- 「游戏」- 查看小游戏列表\n- 直接发送文件生成请求"}
     from api.agent_core import create_engine
     engine = create_engine(BASE, OUT, TOOLS_DIR, MEM_DB)
     try:
@@ -202,7 +252,7 @@ async def smart_chat(req: Req):
         )
         return result
     except asyncio.TimeoutError:
-        return {"success": True, "result": "⏳ LLM 响应超时，请稍后再试。\n\n你也可以试试：\n- 说「能力列表」查看系统功能\n- 直接说「搜索: xxx」「帮我写xxx」「PPT: xxx」\n- 这些不依赖LLM，立即响应", "mode": "timeout"}
+        return {"success": True, "result": "⏳ LLM 响应超时，请稍后再试。\n\n你也可以试试：\n- 说「能力列表」查看系统功能\n- 直接说「搜索: xxx」「帮我写xxx」「PPT: xxx」\n- 这些不依赖LLM，立即响应"}
 
 def register_routes(app):
     """兼容性入口：挂载router到app"""
@@ -242,11 +292,11 @@ async def smart_stream(req: Req):
                         yield json.dumps({"type":"chunk","text":text[i:i+chunk_size]}, ensure_ascii=False) + "\n"
                     yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
                 else:
-                    err_text = result.get("detail", result.get("result", "处理失败")) if isinstance(result, dict) else str(result)
-                    yield json.dumps({"type":"chunk","text":str(err_text)}, ensure_ascii=False) + "\n"
+                    err_text = "处理失败，请稍后重试"
+                    yield json.dumps({"type":"chunk","text":err_text}, ensure_ascii=False) + "\n"
                     yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
-            except Exception as e:
-                yield json.dumps({"type":"chunk","text":f"处理出错: {e}"}, ensure_ascii=False) + "\n"
+            except Exception:
+                yield json.dumps({"type":"chunk","text":"处理出错，请稍后重试"}, ensure_ascii=False) + "\n"
                 yield json.dumps({"type":"done"}, ensure_ascii=False) + "\n"
         return StreamingResponse(tool_gen(), media_type="application/x-ndjson")
     

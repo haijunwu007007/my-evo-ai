@@ -255,8 +255,10 @@ async def module_health(name: str):
 
 
 @router.get("/api/v1/modules/{name}/code")
-async def module_source_code(name: str, lines: int = 100):
-    """Module Source Code - GET /api/v1/modules/{name}/code"""
+async def module_source_code(name: str, lines: int = 100, token: str = ""):
+    """Module Source Code - GET /api/v1/modules/{name}/code（需传管理员token）"""
+    if token != os.environ.get("EVO_ADMIN_KEY", ""):
+        return {"success": False, "error": "需要管理员token"}
     mod = registry.modules.get(name)
     if not mod:
         mod = await registry.lazy_load_module(name)
@@ -275,11 +277,11 @@ async def module_source_code(name: str, lines: int = 100):
             total = len(all_lines)
             code = "\n".join(all_lines[:lines])
             return {
-                "success": True, "module": name, "file": src_file,
-                "total_lines": total, "shown_lines": min(total, lines), "code": code,
+                "success": True, "module": name,
+                "total_lines": total, "shown_lines": min(total, lines),
             }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        except Exception:
+            return {"success": False, "error": "获取代码失败"}
 
     try:
         target = mod if not inspect.ismodule(mod) else type(mod)
@@ -288,10 +290,9 @@ async def module_source_code(name: str, lines: int = 100):
         return {
             "success": True, "module": name, "total_lines": len(lines_list),
             "shown_lines": min(len(lines_list), lines),
-            "code": "\n".join(lines_list[:lines]),
         }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    except Exception:
+        return {"success": False, "error": "获取代码失败"}
 
 
 @router.get("/api/v1/modules/{name}")

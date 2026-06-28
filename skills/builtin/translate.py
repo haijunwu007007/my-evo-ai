@@ -27,4 +27,6 @@ def execute(params, context=None):
         result, _ = call_llm([{"role": "user", "content": sp}])
         return {"translated": result.strip() if result else ""}
     except Exception as e:
-        return {"translated": "", "error": f"翻译失败：{e}"}
+        logger = logging.getLogger("evo.translate")
+        logger.warning(f"翻译失败: {e}")
+        return {"translated": "", "error": "翻译失败，请稍后重试"}
