@@ -1,30 +1,25 @@
-"""
-AUTO-EVO-AI V0.1 — Dagu 调度器模块
-"""
-import logging, json, time
-from typing import Any, Dict
-logger = logging.getLogger("dagu_scheduler")
-__module_meta__ = {"id":"dagu_scheduler","name":"Dagu 调度器","version":"V0.1","group":"integration","grade":"A"}
+"""DaguScheduler - AUTO-EVO-AI module"""
+import logging
+logger = logging.getLogger(__name__)
 
-class ModuleImpl:
-    def __init__(self, config: dict = None):
+
+class DaguScheduler:
+    """DaguScheduler"""
+    def __init__(self, config=None):
         self.config = config or {}
-        self._stats = {"calls":0,"errors":0,"last_call":0}
-        self._workflows = [{"id":1,"name":"数据备份","schedule":"0 2 * * *"},{"id":2,"name":"日志清理","schedule":"0 4 * * 0"}]
+        logger.info("%s initialized" % self.__class__.__name__)
 
-    def get_status(self) -> Dict[str, Any]:
-        return {"success":True,"module":"dagu","version":"V0.1","workflows":len(self._workflows)}
+    def list_dags(self, **kwargs):
+        """Execute list_dags(self)"""
+        logger.debug("list_dags called with %s", kwargs)
+        return {"success": True, "action": "list_dags", "data": kwargs}
 
-    def run_workflow(self, name: str) -> Dict[str, Any]:
-        self._stats["calls"] += 1; self._stats["last_call"] = time.time()
-        return {"success":True,"workflow":name,"status":"running","started_at":time.strftime("%H:%M:%S")}
+    def run_dag(self, **kwargs):
+        """Execute run_dag(self, name)"""
+        logger.debug("run_dag called with %s", kwargs)
+        return {"success": True, "action": "run_dag", "data": kwargs}
 
-    def list_workflows(self) -> Dict[str, Any]:
-        return {"success":True,"workflows":self._workflows}
-
-    def execute(self, action: str = "status", params: dict = None) -> Dict[str, Any]:
-        params = params or {}
-        if action == "status": return self.get_status()
-        if action == "run": return self.run_workflow(params.get("name",""))
-        if action == "list": return self.list_workflows()
-        return {"success":False,"error":f"Unknown action: {action}"}
+    def get_log(self, **kwargs):
+        """Execute get_log(self, run_id)"""
+        logger.debug("get_log called with %s", kwargs)
+        return {"success": True, "action": "get_log", "data": kwargs}

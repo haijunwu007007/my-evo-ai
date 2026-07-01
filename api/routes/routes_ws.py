@@ -27,3 +27,46 @@ async def websocket_tool(websocket: WebSocket):
         pass
     finally:
         active_connections.pop(conn_id, None)
+
+# ── 实时协作聊天 ──
+chat_rooms = {}
+
+@router.websocket("/ws/chat")
+async def websocket_chat(websocket: WebSocket):
+    await websocket.accept()
+    conn_id = id(websocket)
+    user_name = "anonymous"
+    try:
+        while True:
+            data = await websocket.receive_text()
+            msg = json.loads(data)
+            if msg.get("type") == "join":
+                user_name = msg.get("user", f"user_{conn_id % 10000}")
+                chat_rooms[conn_id] = {"ws": websocket, "user": user_name}
+                # 广播用户列表
+                users = {v["user"]: True for v in chat_rooms.values()}
+                for cid, info in chat_rooms.items():
+                    try:
+                        await info["ws"].send_json({"type": "users", "users": users})
+                    except:
+                        pass
+            elif msg.get("type") == "message":
+                text = msg.get("text", "")
+                user = msg.get("user", user_name)
+                # 广播给所有连接
+                for cid, info in chat_rooms.items():
+                    try:
+                        await info["ws"].send_json({"type": "message", "user": user, "text": text})
+                    except:
+                        pass
+    except WebSocketDisconnect:
+        pass
+    finally:
+        chat_rooms.pop(conn_id, None)
+        # 更新用户列表
+        users = {v["user"]: True for v in chat_rooms.values()}
+        for cid, info in chat_rooms.items():
+            try:
+                await info["ws"].send_json({"type": "users", "users": users})
+            except:
+                pass

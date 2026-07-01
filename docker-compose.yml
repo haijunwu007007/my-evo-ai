@@ -1,72 +1,21 @@
-version: "3.8"
+version: '3.8'
+
 services:
-  # ── 基础工具 ──
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: evo-portainer
-    ports: ["9000:9000"]
-    volumes: ["/var/run/docker.sock:/var/run/docker.sock", "portainer_data:/data"]
+  evo-api:
+    build: .
+    container_name: evo-api
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./evo-data:/app/data
+      - ./evo-config:/app/config
+    environment:
+      - TZ=Asia/Shanghai
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     restart: unless-stopped
-    profiles: [core]
-
-  gitea:
-    image: gitea/gitea:latest
-    container_name: evo-gitea
-    ports: ["3000:3000", "222:22"]
-    volumes: ["gitea_data:/data"]
-    restart: unless-stopped
-    profiles: [core]
-
-  metabase:
-    image: metabase/metabase:latest
-    container_name: evo-metabase
-    ports: ["3001:3000"]
-    restart: unless-stopped
-    profiles: [analytics]
-
-  nocodb:
-    image: nocodb/nocodb:latest
-    container_name: evo-nocodb
-    ports: ["8080:8080"]
-    volumes: ["nocodb_data:/usr/app/data"]
-    restart: unless-stopped
-    profiles: [database]
-
-  # ── AI 工具 ──
-  dify:
-    image: langgenius/dify-web:latest
-    container_name: evo-dify
-    ports: ["3002:3000"]
-    restart: unless-stopped
-    profiles: [ai]
-
-  # ── 媒体 ──
-  jellyfin:
-    image: jellyfin/jellyfin:latest
-    container_name: evo-jellyfin
-    ports: ["8096:8096"]
-    volumes: ["jellyfin_data:/config", "jellyfin_media:/media"]
-    restart: unless-stopped
-    profiles: [media]
-
-  immich:
-    image: immich/server:latest
-    container_name: evo-immich
-    ports: ["2283:3001"]
-    volumes: ["immich_data:/usr/src/app/upload"]
-    restart: unless-stopped
-    profiles: [media]
-
-  # ── 开发工具 ──
-  code-server:
-    image: lscr.io/linuxserver/code-server:latest
-    container_name: evo-code-server
-    ports: ["8443:8443"]
-    environment: [PASSWORD=admin, SUDO_PASSWORD=admin]
-    volumes: ["code_data:/config", "${HOME}/projects:/home/coder/projects"]
-    restart: unless-stopped
-    profiles: [dev]
-
-volumes:
-  portainer_data: gitea_data: nocodb_data:
-  jellyfin_data: jellyfin_media: immich_data: code_data:
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8765/api/v1/status', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

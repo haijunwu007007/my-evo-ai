@@ -1,0 +1,18 @@
+3:路由已拆分到 api/routes/routes_*.py（含 routes_static.py 静态资源）
+29:from fastapi.responses import FileResponse, JSONResponse
+30:from fastapi.staticfiles import StaticFiles
+106:    async def scalar_html():
+121:# ── 批量注册路由模块（自动发现 api/routes/routes_*.py + hub_static.py）──
+140:static_dir = BASE_DIR / "static"
+141:if static_dir.exists():
+142:    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+144:frontend_static = BASE_DIR / "frontend" / "static"
+145:if frontend_static.exists():
+146:    app.mount("/frontend/static", StaticFiles(directory=str(frontend_static)), name="frontend_static")
+156:frontend_dir = BASE_DIR / "frontend"
+157:if frontend_dir.exists():
+158:    app.mount("/frontend", StaticFiles(directory=str(frontend_dir)), name="frontend")
+206:    from fastapi.responses import FileResponse
+208:    chat_path = BASE_DIR / "frontend" / "chat.html"
+210:        return FileResponse(str(chat_path))
+261:#   routes_static.py — 静态资源 (manifest/icon/sw/docs/i18n)

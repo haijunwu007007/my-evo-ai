@@ -1,0 +1,6 @@
+10:function setLocale(c){localStorage.setItem('evo_locale',c);window.location.reload()}
+75:      openUrl: function(url){window.open(url,'_blank');return '已打开: '+url},
+112:function showDashboard(){window.location.href='/dashboard'}
+113:function showEnterprise(){window.location.href='/enterprise.html'}
+114:function showVirtualCompany(){window.location.href='/company.html'}
+115:function openHub(){window.location.href='/hub'}

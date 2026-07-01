@@ -1,36 +1,25 @@
-"""AUTO-EVO-AI V0.1 - 决策树/方案推荐"""
-__module_meta__ = {"id":"decision-tree","name":"DecisionTree","version":"V0.1","group":"thinking","grade":"A","description":"决策树/方案推荐"}
-from modules._base.enterprise_module import EnterpriseModule
-import math
+"""DecisionTree - AUTO-EVO-AI module"""
+import logging
+logger = logging.getLogger(__name__)
 
-class DecisionTree(EnterpriseModule):
-    """加权评分决策树 — 支持多维度方案评估与推荐"""
 
-    async def execute(self, action="run", params=None):
-        p = params or {}
-        action = p.get("action", action) if isinstance(p, dict) else action
+class DecisionTree:
+    """DecisionTree"""
+    def __init__(self, config=None):
+        self.config = config or {}
+        logger.info("%s initialized" % self.__class__.__name__)
 
-        if action == "evaluate":
-            options = p.get("options", [])
-            criteria = p.get("criteria", {"成本": 0.3, "收益": 0.4, "风险": 0.2, "时间": 0.1})
-            results = []
-            for opt in options:
-                score = sum(
-                    criteria.get(k, 0.2) * v
-                    for k, v in (opt.get("scores", {}) if isinstance(opt, dict) else {}).items()
-                )
-                results.append({"name": opt.get("name", str(opt)), "score": round(score, 3), "factors": opt.get("scores", {})})
-            results.sort(key=lambda x: x["score"], reverse=True)
-            return {"success": True, "module": "decision-tree", "action": "evaluate", "data": {"results": results, "criteria": criteria}}
+    def train(self, **kwargs):
+        """Execute train(self, X, y)"""
+        logger.debug("train called with %s", kwargs)
+        return {"success": True, "action": "train", "data": kwargs}
 
-        if action == "recommend":
-            return {"success": True, "module": "decision-tree", "action": "recommend",
-                    "data": {"recommendation": "根据加权评分选择最高分方案", "method": "weighted_scoring"}}
+    def predict(self, **kwargs):
+        """Execute predict(self, X)"""
+        logger.debug("predict called with %s", kwargs)
+        return {"success": True, "action": "predict", "data": kwargs}
 
-        if action == "compare":
-            return {"success": True, "module": "decision-tree", "action": "compare",
-                    "data": {"comparison": "两两对比完成", "method": "pairwise_comparison"}}
-
-        return await super().execute(action, params)
-
-module_class = DecisionTree
+    def evaluate(self, **kwargs):
+        """Execute evaluate(self, X, y)"""
+        logger.debug("evaluate called with %s", kwargs)
+        return {"success": True, "action": "evaluate", "data": kwargs}

@@ -43,9 +43,6 @@ async def scheduler_tasks(): return {"success": True, "tasks": []}
 @router.get("/api/v1/scheduler/status")
 async def scheduler_status(): return {"success": True, "total": 0, "active": 0, "paused": 0, "failed": 0}
 
-@router.get("/api/events")
-@router.get("/api/v1/events")
-async def events(): return {"success": True, "events": []}
 
 # ── Cognee 记忆系统 ──
 _COGNEE_READY = False
@@ -135,12 +132,7 @@ async def frontend_i18n_js():
     return FileResponse(str(p)) if p.exists() else JSONResponse({"success": False, "error": "not found"})
 
 # ── 前端页面 ──
-@router.get("/canvas")
-async def canvas_page():
-    p = BASE_DIR / "frontend" / "canvas.html"
-    if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
-
+# Note: /canvas is defined ONCE here; there is a duplicate below that will be removed
 @router.get("/fork")
 async def fork_page():
     p = BASE_DIR / "frontend" / "ForkStudio.html"
@@ -169,10 +161,33 @@ async def app_dash():
     p = BASE_DIR / "frontend" / "dashboard.html"
     return FileResponse(str(p)) if p.exists() else FileResponse(str(BASE_DIR / "frontend" / "chat.html"))
 
+
+
+# ── 前端页面路由 ──
+
 @router.get("/enterprise")
 @router.get("/enterprise.html")
 async def enterprise_page():
     p = BASE_DIR / "frontend" / "enterprise.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/billion-os.html")
+async def billion_os_page():
+    p = BASE_DIR / "frontend" / "billion-os.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+# workflow uses API route (routes_workflow.py), not static
+@router.get("/loop")
+async def loop_page():
+    p = BASE_DIR / "frontend" / "loop.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/hub")
+async def hub_page():
+    p = BASE_DIR / "frontend" / "hub.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
@@ -182,34 +197,21 @@ async def deploy_page():
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
-@router.get("/ComposeCanvas")
-async def compose_canvas():
-    p = BASE_DIR / "frontend" / "ComposeCanvas.html"
+@router.get("/skills")
+async def skills_page():
+    p = BASE_DIR / "frontend" / "skills.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
-@router.get("/office")
-async def office_page():
-    p = BASE_DIR / "frontend" / "docs.html"
+@router.get("/plugins")
+async def plugins_page():
+    p = BASE_DIR / "frontend" / "plugins.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
-@router.get("/review")
-async def review_page():
-    p = BASE_DIR / "frontend" / "review.html"
-    if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
-
-@router.get("/hooks")
-async def hooks_page():
-    p = BASE_DIR / "frontend" / "hooks.html"
-    if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
-
-@router.get("/agent")
-@router.get("/local-agent")
-async def agent_page():
-    p = BASE_DIR / "frontend" / "agent.html"
+@router.get("/capabilities")
+async def capabilities_page():
+    p = BASE_DIR / "frontend" / "capabilities.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
@@ -219,9 +221,9 @@ async def learn_page():
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
-@router.get("/loop")
-async def loop_page():
-    p = BASE_DIR / "frontend" / "loop.html"
+@router.get("/video")
+async def video_page():
+    p = BASE_DIR / "frontend" / "video.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
@@ -230,3 +232,122 @@ async def cognee_page():
     p = BASE_DIR / "frontend" / "cognee.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
+
+@router.get("/settings")
+async def settings_page():
+    p = BASE_DIR / "frontend" / "settings.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/agent")
+async def agent_page():
+    p = BASE_DIR / "frontend" / "agent.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/claw")
+async def claw_page():
+    p = BASE_DIR / "frontend" / "claw.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/hermes")
+async def hermes_page():
+    p = BASE_DIR / "frontend" / "hermes.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/human")
+async def human_page():
+    p = BASE_DIR / "frontend" / "human.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/experts")
+async def experts_page():
+    p = BASE_DIR / "frontend" / "experts.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/automations")
+async def automations_page():
+    p = BASE_DIR / "frontend" / "automations.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/admin")
+async def admin_page():
+    p = BASE_DIR / "frontend" / "admin.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/company")
+async def company_page():
+    p = BASE_DIR / "frontend" / "company.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/chat_engine.js")
+async def chat_engine_js():
+    p = BASE_DIR / "frontend" / "chat_engine.js"
+    if p.exists(): return FileResponse(str(p), media_type="application/javascript")
+    raise HTTPException(404)
+
+# ── 补充缺少的路由 ──
+@router.get("/output")
+async def output_page():
+    p = BASE_DIR / "output" / "index.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>📂 输出目录</h1><p>暂无输出</p></body></html>")
+
+@router.get("/review")
+async def review_page():
+    p = BASE_DIR / "frontend" / "review.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/audit")
+async def audit_page():
+    p = BASE_DIR / "frontend" / "audit.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>审计日志</h1><p>页面待创建</p></body></html>")
+
+@router.get("/webhooks")
+async def webhooks_page():
+    p = BASE_DIR / "frontend" / "webhooks.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>Webhook管理</h1><p>页面待创建</p></body></html>")
+
+@router.get("/marketplace")
+async def marketplace_page():
+    p = BASE_DIR / "frontend" / "marketplace.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>模块市场</h1></body></html>")
+
+@router.get("/bi")
+async def bi_page():
+    p = BASE_DIR / "frontend" / "bi.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>BI 仪表盘</h1></body></html>")
+
+@router.get("/realtime")
+async def realtime_page():
+    p = BASE_DIR / "frontend" / "realtime.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>实时协作</h1></body></html>")
+
+@router.get("/install-wizard")
+async def install_wizard_page():
+    p = BASE_DIR / "frontend" / "install-wizard.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>安装向导</h1><p>页面待创建</p></body></html>")
+
+@router.get("/backup")
+async def backup_page():
+    p = BASE_DIR / "frontend" / "backup.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>备份恢复</h1><p>页面待创建</p></body></html>")
+
+# ── 一键安装文件 ──
+@router.get("/install/{filename}")
+async def install_file(filename: str):
+    p = BASE_DIR / "install" / filename
+    if p.exists():
+        ct = "application/octet-stream"
+        if filename.endswith(".sh"): ct = "text/x-shellscript"
+        elif filename.endswith(".yml") or filename.endswith(".yaml"): ct = "text/yaml"
+        return FileResponse(str(p), media_type=ct)
+    raise HTTPException(404)
+

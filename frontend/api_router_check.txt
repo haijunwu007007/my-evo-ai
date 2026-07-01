@@ -1,0 +1,31 @@
+3:路由已拆分到 api/routes/routes_*.py（含 routes_static.py 静态资源）
+30:from fastapi.staticfiles import StaticFiles
+90:# ── 加载中间件（副作用：注册 @app.middleware）──
+105:    @app.get("/scalar", include_in_schema=False)
+108:            openapi_url=app.openapi_url,
+116:from api.profiler import router as profiler_router
+118:app.include_router(profiler_router)
+121:# ── 批量注册路由模块（自动发现 api/routes/routes_*.py + hub_static.py）──
+123:from api.routes import register_all_routers
+124:_router_count = register_all_routers(app)
+125:logger.info("[ROUTES] 已注册 %d 个路由模块", _router_count)
+133:        if hasattr(_mod, 'router'):
+134:            app.include_router(_mod.router, prefix="/api/ext")
+140:static_dir = BASE_DIR / "static"
+141:if static_dir.exists():
+142:    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+144:frontend_static = BASE_DIR / "frontend" / "static"
+145:if frontend_static.exists():
+146:    app.mount("/frontend/static", StaticFiles(directory=str(frontend_static)), name="frontend_static")
+150:    app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+154:    app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
+158:    app.mount("/frontend", StaticFiles(directory=str(frontend_dir)), name="frontend")
+169:@app.exception_handler(404)
+176:@app.exception_handler(HTTPException)
+183:@app.exception_handler(Exception)
+193:@app.exception_handler(RequestValidationError)
+204:@app.get("/")
+213:@app.get("/api/status")
+214:@app.get("/api/v1/status")
+245:@app.get("/api/v1/version")
+261:#   routes_static.py — 静态资源 (manifest/icon/sw/docs/i18n)

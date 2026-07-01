@@ -1,0 +1,28 @@
+184:    <div class="logo" onclick="window.location.href='/'">⚡</div>
+186:    <button class="sbtn" onclick="window.location.href='/enterprise.html'"><span class="sicon">📊</span> 模块总览</button>
+188:    <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🤖</span> Agent 工作台</button>
+189:    <button class="sbtn" onclick="window.location.href='/claw'" style="padding-left:28px;font-size:10px"><span class="sicon">🕹️</span> Claw</button>
+190:    <button class="sbtn" onclick="window.location.href='/hermes'" style="padding-left:28px;font-size:10px"><span class="sicon">🏛️</span> Hermes</button>
+191:    <button class="sbtn" onclick="window.location.href='/human'" style="padding-left:28px;font-size:10px"><span class="sicon">🙋</span> Human</button>
+192:    <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">👥</span> 专家</button>
+195:    <button class="sbtn" onclick="window.open('/billion-os.html','_blank')"><span class="sicon">🏛️</span> BILLION GROUP OS</button>
+196:    <button class="sbtn" onclick="window.location.href='/admin'"><span class="sicon">⚙️</span> 企业管理</button>
+198:    <button class="sbtn" onclick="window.location.href='/canvas'"><span class="sicon">🎨</span> 编排画布</button>
+199:    <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
+200:    <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
+201:    <button class="sbtn" onclick="window.location.href='/loop'"><span class="sicon">🔄</span> 循环</button>
+203:    <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
+204:    <button class="sbtn" onclick="window.location.href='/deploy'"><span class="sicon">🚀</span> 一键部署</button>
+205:    <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🧩</span> 扩展市场</button>
+207:    <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
+208:    <button class="sbtn" onclick="window.location.href='/learn'"><span class="sicon">📖</span> 学习</button>
+209:    <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
+211:    <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
+213:    <button class="sbtn" onclick="window.location.href='/settings'"><span class="sicon">⚙️</span> 系统设置</button>
+214:    <button class="sbtn" onclick="window.open('/agent','_blank')"><span class="sicon">🔌</span> 本地代理</button>
+294:            <div class="ritem" onclick="window.location.href='/admin'">📂 文件管理</div>
+295:            <div class="ritem" onclick="window.location.href='/apps'">📱 已生成APP</div>
+296:            <div class="ritem" onclick="window.location.href='/output'">📂 输出目录</div>
+301:            <div class="ritem" onclick="window.location.href='/review'">🔍 版本差异</div>
+305:            <div class="ritem" onclick="window.location.href='/dashboard'">📊 系统状态</div>
+370:    _vCtx=new(window.AudioContext||window.webkitAudioContext)();

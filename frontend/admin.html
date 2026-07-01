@@ -47,6 +47,24 @@ button{padding:8px 16px;border:none;border-radius:6px;background:var(--accent);c
 button:hover{opacity:.9}
 button.danger{background:#e74c3c}
 .success{color:#00b894}.warn{color:#fdcb6e}.error{color:#e74c3c}
+
+@media(max-width:768px){
+  .admin-sidebar{width:50px;font-size:0}
+  .admin-sidebar .sicon{font-size:16px}
+  .admin-main{margin-left:50px}
+  .admin-tabs{flex-wrap:wrap}
+  .admin-tabs .tab{padding:6px 10px;font-size:11px}
+  .admin-panel{padding:10px}
+  .admin-header{flex-direction:column;gap:6px}
+  .admin-header h1{font-size:16px}
+  .admin-card{padding:10px}
+  table{font-size:11px}
+  .admin-table-wrap{overflow-x:auto}
+  input,select,button{font-size:13px!important}
+  .admin-stats{flex-wrap:wrap}
+  .admin-stat{flex:1 1 45%;min-width:0}
+}
+
 </style>
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
@@ -351,8 +369,10 @@ async function installSkill(id,name){try{var r=await fetch(API+'/skills/market/i
 #fcInput:focus{outline:none;border-color:var(--accent)}
 .mermaid svg{max-width:100%;height:auto}
 </style>
+<script>
+var API = '';  // same-origin API
 // 显示tab
-function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv();if(name=='lowcode')lcRender();if(name=='flowchart')setTimeout(fcRender,100)}
+function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='modules')loadModules();if(name=='llm')loadLlm();if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv();if(name=='lowcode')lcRender();if(name=='flowchart')setTimeout(fcRender,100)}
 // 仪表盘
 async function loadStats(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('stats').innerHTML='<div class=stat><div class=num>'+s.modules_total+'</div><div class=label>模块</div></div><div class=stat><div class=num>456</div><div class=label>技能</div></div><div class=stat><div class=num>101</div><div class=label>集成</div></div><div class=stat><div class=num>'+s.api_version+'</div><div class=label>版本</div></div>'}catch(e){document.getElementById('stats').innerHTML='<p>加载失败</p>'}}
 loadStats()
@@ -400,5 +420,49 @@ function openEnv(key,label,ph){var v=prompt('输入 '+label+' ('+key+'):\n'+(ph?
 async function loadModules(){try{var s=await(await fetch(API+'/status')).json();var html='<p>模块总数: '+s.modules_total+'</p>';for(var i=0;i<20;i++)html+='<div class=card><h3>模块 '+(i+1)+'</h3><p>系统模块 - lazy按需加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){}}
 // LLM
 async function loadLlm(){document.getElementById('llmStatus').innerHTML='<p>ZHIPU_API_KEY: '+(localStorage.getItem('evo_api_key')?'<span class=success>已配置</span>':'<span class=warn>未配置</span>')+'</p><p>配置方式：在聊天页面输入API Key即可</p>'}
+// === window exports for onclick ===
+window.showTab=showTab;window.loadStats=loadStats;window.loadModules=loadModules;window.loadLlm=loadLlm;
+window.loadTasks=loadTasks;window.createTask=createTask;window.deleteTask=deleteTask;
+window.loadFiles=loadFiles;window.uploadFiles=uploadFiles;
+window.loadUsers=loadUsers;window.createUser=createUser;window.deleteUser=deleteUser;
+window.loadPlugins=loadPlugins;window.loadPayment=loadPayment;window.loadQuota=loadQuota;
+window.loadTokens=loadTokens;window.createToken=createToken;
+window.uploadRag=uploadRag;window.loadSkills=loadSkills;window.searchSkills=searchSkills;
+window.loadGateway=loadGateway;window.openGw=openGw;window.gwSave=gwSave;window.gwTest=gwTest;
+window.loadEnv=loadEnv;window.openEnv=openEnv;
+window.lcRender=lcRender;window.lcSelect=lcSelect;window.lcProps=lcProps;
+window.lcPreview=lcPreview;window.lcExport=lcExport;
+window.fcRender=fcRender;window.fcSave=fcSave;window.fcInsert=fcInsert;
+window.installSkill=installSkill;
 </script>
-</body></html>
+
+<script>
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');
+  if(!el)return;
+  var act=el.getAttribute('data-act');
+  if(act==='home'){window.location.href='/'}
+  else if(act==='tab'){var t=el.getAttribute('data-tab');if(t)window.showTab(t)}
+  else if(act==='fn'){var fn=el.getAttribute('data-fn');if(fn&&window[fn])window[fn]()}
+  else if(act==='themes'){window.toggleTheme()}
+});
+document.addEventListener('touchstart',function(){},{passive:true});
+
+
+// Mobile fix: trigger native onclick via click()
+document.addEventListener('touchstart',function(e){
+  var el=e.target.closest('[onclick]');
+  if(!el||e._evo)return;
+  e._evo=true;
+  el.click();
+},{passive:true});
+document.querySelectorAll('[onclick]').forEach(function(el){
+  el.style.touchAction='manipulation';
+  el.style.cursor='pointer';
+});
+
+// Mobile touch fix
+document.addEventListener('touchstart',function(e){var el=e.target.closest('[onclick]');if(!el||e._evo)return;e._evo=true;el.click();},{passive:true});
+</script>
+</body>
+</html></html>

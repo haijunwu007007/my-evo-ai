@@ -5,8 +5,9 @@ __pycache__
 _archive
 node_modules
 .env
-*.md
 tests
 scripts
-frontend
 .github
+*.md
+!README.md
+**/__pycache__
