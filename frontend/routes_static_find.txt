@@ -1,0 +1,2 @@
+/home/ubuntu/my-evo-ai/api/routes/__pycache__/routes_static.cpython-310.pyc
+/home/ubuntu/my-evo-ai/api/routes/routes_static.py

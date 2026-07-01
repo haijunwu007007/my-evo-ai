@@ -132,7 +132,12 @@ async def frontend_i18n_js():
     return FileResponse(str(p)) if p.exists() else JSONResponse({"success": False, "error": "not found"})
 
 # ── 前端页面 ──
-# Note: /canvas is defined ONCE here; there is a duplicate below that will be removed
+@router.get("/canvas")
+async def canvas_page():
+    p = BASE_DIR / "frontend" / "canvas.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
 @router.get("/fork")
 async def fork_page():
     p = BASE_DIR / "frontend" / "ForkStudio.html"
@@ -174,7 +179,13 @@ async def enterprise_page():
 
 @router.get("/billion-os.html")
 async def billion_os_page():
-    p = BASE_DIR / "frontend" / "billion-os.html"
+    p = Path("/home/ubuntu/my-evo-ai/frontend/billion-os.html")
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/canvas")
+async def canvas_page():
+    p = BASE_DIR / "frontend" / "canvas.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
@@ -285,96 +296,5 @@ async def admin_page():
 async def company_page():
     p = BASE_DIR / "frontend" / "company.html"
     if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
-
-@router.get("/chat_engine.js")
-async def chat_engine_js():
-    p = BASE_DIR / "frontend" / "chat_engine.js"
-    if p.exists(): return FileResponse(str(p), media_type="application/javascript")
-    raise HTTPException(404)
-
-# ── 补充缺少的路由 ──
-@router.get("/output")
-async def output_page():
-    p = BASE_DIR / "output" / "index.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>📂 输出目录</h1><p>暂无输出</p></body></html>")
-
-@router.get("/review")
-async def review_page():
-    p = BASE_DIR / "frontend" / "review.html"
-    if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
-
-@router.get("/audit")
-async def audit_page():
-    p = BASE_DIR / "frontend" / "audit.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>审计日志</h1><p>页面待创建</p></body></html>")
-
-@router.get("/webhooks")
-async def webhooks_page():
-    p = BASE_DIR / "frontend" / "webhooks.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>Webhook管理</h1><p>页面待创建</p></body></html>")
-
-@router.get("/marketplace")
-async def marketplace_page():
-    p = BASE_DIR / "frontend" / "marketplace.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>模块市场</h1></body></html>")
-
-@router.get("/bi")
-async def bi_page():
-    p = BASE_DIR / "frontend" / "bi.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>BI 仪表盘</h1></body></html>")
-
-@router.get("/editor")
-async def editor_page():
-    p = BASE_DIR / "frontend" / "editor.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>在线文档编辑器</h1></body></html>")
-
-@router.get("/realtime")
-async def realtime_page():
-    p = BASE_DIR / "frontend" / "realtime.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>实时协作</h1></body></html>")
-
-@router.get("/install-wizard")
-async def install_wizard_page():
-    p = BASE_DIR / "frontend" / "install-wizard.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>安装向导</h1><p>页面待创建</p></body></html>")
-
-@router.get("/backup")
-async def backup_page():
-    p = BASE_DIR / "frontend" / "backup.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>备份恢复</h1><p>页面待创建</p></body></html>")
-
-# ── 一键安装文件 ──
-@router.get("/install/{filename}")
-async def install_file(filename: str):
-    p = BASE_DIR / "install" / filename
-    if p.exists():
-        ct = "application/octet-stream"
-        if filename.endswith(".sh"): ct = "text/x-shellscript"
-        elif filename.endswith(".yml") or filename.endswith(".yaml"): ct = "text/yaml"
-        return FileResponse(str(p), media_type=ct)
-    raise HTTPException(404)
-
-# ── 新页面路由 ──
-@router.get("/marketplace")
-async def marketplace_page():
-    p = BASE_DIR / "frontend" / "marketplace.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>模块市场</h1></body></html>")
-
-@router.get("/bi")
-async def bi_page():
-    p = BASE_DIR / "frontend" / "bi.html"
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>BI 仪表盘</h1></body></html>")
-
-@router.get("/sdk/{filepath:path}")
-async def sdk_file(filepath: str):
-    p = BASE_DIR / "sdk" / filepath
-    if p.exists() and p.is_file():
-        ct = "application/octet-stream"
-        if filepath.endswith(".py"): ct = "text/x-python"
-        elif filepath.endswith(".js"): ct = "application/javascript"
-        elif filepath.endswith(".md"): ct = "text/markdown"
-        return FileResponse(str(p), media_type=ct)
     raise HTTPException(404)
 

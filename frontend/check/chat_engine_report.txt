@@ -1,0 +1,48 @@
+=== First 5 lines ===
+'\r\n'
+"var _LOCALE=localStorage.getItem('evo_locale')||'zh-CN'\r\n"
+'var _TR={\r\n'
+"  'zh-CN':{auth_btn:'🚀 进入系统',input_placeholder:'输入你想做的事...',greeting:'你好，{name}！输入你想做的事'},\r\n"
+"  'en':{auth_btn:'🚀 Enter',input_placeholder:'What do you want to do...',greeting:'Hello {name}! Wha"
+=== Total size: 28362B ===
+=== Last 500 chars ===
+"）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+x.dept+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}};return true}catch(ee){return false}\r\n}\r\n\r\n"
+=== Function defs ===
+function __
+function setLocale
+function handleFiles
+function removeAttach
+function renderAttachBar
+function getAttachInfo
+function quickTool
+function needsTool
+function doRegister
+function doLogout
+function _renderMd
+function addMsg
+function showLoading
+function hideLoading
+function restoreHistory
+function send
+function clearHistory
+function showArchives
+function showDashboard
+function showEnterprise
+function showVirtualCompany
+function openHub
+function switchToText
+function backToVoice
+function startVoiceRecord
+function _fallbackRecord
+function stopVoiceRecord
+function cancelVoiceRecord
+function toggleRightPanel
+function toggleSidebarMobile
+function toggleCategory
+function _updateActiveTab
+function filterTools
+function toggleTheme
+function checkLLM
+function _checkExpert
+=== IIFE check ===
+230:(function(){var t=localStorage.getItem('evo_theme');document.getElementById('themeBtn').innerHTML=t==='dark'?'<span class=\"sicon\">🌓</span> 深色':'<span class=\"sicon\">🌙</span> 浅色';if(t==='dark')document.body.classList.add('dark')})()

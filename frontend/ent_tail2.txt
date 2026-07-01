@@ -1,0 +1,15 @@
+window.toggleAutopilot = toggleAutopilot;
+window.toggleGroup = toggleGroup;
+window.toggleSidebar = toggleSidebar;
+window.toggleTheme = toggleTheme;
+window.wakeAllAgents = wakeAllAgents;
+window.showBillionOSModal = showBillionOSModal;
+
+// === auto-generated window exports for onclick ===
+;
+
+</script>
+
+</html>
+
+

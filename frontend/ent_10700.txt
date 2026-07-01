@@ -1,0 +1,21 @@
+
+// ═══════════════════════════════════════════════════════════════
+// 启动
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);`;
+    container.appendChild(script);
+    // Also re-run init after DOM render
+    setTimeout(function() {
+        if (typeof init === 'function') init();
+    }, 100);
+}</script>`;
+    container.appendChild(closeBtn);
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+    
+    // Now inject and execute the BGOS script
+    var script = document.createElement('script');
+    script.textContent = `(function() {
+        
+// ═══════════════════════════════════════════════════════════════
+// 全局状态

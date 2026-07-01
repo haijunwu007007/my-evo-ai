@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="/manifest.json">
+
+<title>AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f5f5f8;--card:#fff;--sidebar:#f0f0f4;--sidebar-hover:#e4e6ed;--sidebar-active:#eef0f8;--sidebar-text:#1a1a2e;--sidebar-text2:#6b7280;--sidebar-accent:#4361ee;--text:#1a1a2e;--text2:#6b7280;--text3:#9ca3af;--input-bg:#fff;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#f0f2f8;--border:#e8eaed;--glass:rgba(255,255,255,.7);--glow:rgba(67,97,238,.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;height:100vh;overflow:hidden}
+/* 左侧边栏 - 浅色+文字标签 */
+.sidebar{width:120px;background:var(--sidebar);display:flex;flex-direction:column;padding:4px 0;overflow-y:auto;flex-shrink:0;z-index:10;scrollbar-width:none;border-right:1px solid var(--border)}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar .logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#4361ee,#7209b7);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;margin:0 auto 4px;flex-shrink:0}
+.sidebar .sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:var(--sidebar-text2);font-size:11px;cursor:pointer;transition:all .15s;text-align:left;white-space:nowrap}
+.sidebar .sbtn .sicon{font-size:13px;width:20px;text-align:center;flex-shrink:0}
+.sidebar .sbtn:hover{background:var(--sidebar-hover);color:var(--sidebar-text)}
+.sidebar .sbtn.active{background:var(--sidebar-active);color:var(--sidebar-accent);font-weight:600}
+.sidebar .sbtn.active .sicon{filter:none}
+.sidebar .spacer{flex:0 0 4px}
+.sidebar .divider{height:1px;background:var(--border);margin:4px 10px}
+/* 主区域 */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+/* 顶栏 */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card);height:44px}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-left h1{font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.model-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer}
+.topbar-right{display:flex;align-items:center;gap:4px}
+.topbar-right span{font-size:11px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .2s}
+.topbar-right span:hover{background:var(--glass);color:var(--accent)}
+/* 内容区 - 模仿 WorkBuddy 双栏 */
+.content-flex{flex:1;display:flex;overflow:hidden}
+.left-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+/* 对话区 */
+.messages{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin}
+.msg{display:flex;flex-direction:column;animation:fadeIn .35s ease-out}
+.msg.user{align-items:flex-end}
+.msg.bot{align-items:flex-start}
+.msg-bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.msg.user .msg-bubble{background:var(--user-msg);color:#fff;border-bottom-right-radius:4px}
+.msg.bot .msg-bubble{background:var(--ai-msg);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg-label{font-size:10px;color:var(--text3);margin-bottom:2px;font-weight:500}
+/* 底部输入区 */
+.input-area{flex-shrink:0;padding:8px 16px 12px}
+.input-row{display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:2px 2px 2px 12px;transition:all .2s}
+.input-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.input-row input{flex:1;border:none;outline:none;padding:8px 0;font-size:14px;background:transparent;color:var(--text)}
+.input-row input::placeholder{color:var(--text3)}
+.input-row button{width:32px;height:32px;border-radius:7px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.input-row button:hover{opacity:.9}
+.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:0;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:8px;height:32px;width:32px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* 语音条 - 仿微信 */
+.voice-bar{display:flex;align-items:center;justify-content:center;height:42px;border-radius:8px;background:var(--bg);border:1px solid var(--border);cursor:pointer;user-select:none;position:relative;transition:all .15s;touch-action:manipulation}.voice-bar.hidden{display:none}.voice-bar:active{background:#e74c3c;transform:scale(0.99)}.voice-bar.recording{background:#e74c3c;border-color:#e74c3c;animation:vPulse .8s infinite}@keyframes vPulse{0%{box-shadow:0 0 6px rgba(231,76,60,.4)}50%{box-shadow:0 0 14px rgba(231,76,60,.7)}100%{box-shadow:0 0 6px rgba(231,76,60,.4)}}.voice-bar .vb-label{font-size:14px;font-weight:500;color:var(--text2);pointer-events:none}.voice-bar.recording .vb-label{color:#fff}.voice-bar .vb-cancel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--text3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}.voice-bar .vb-cancel:hover{background:rgba(0,0,0,.15);color:var(--text)}
+/* 右侧面板 - WorkBuddy 风格 */
+.right-panel{width:260px;border-left:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;flex-shrink:0;position:relative;transition:width .25s ease}.right-panel.hidden{width:0;min-width:0;border-left:none;overflow:visible}.right-panel.hidden .right-header,.right-panel.hidden .right-content{display:none}
+.right-toggle-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:48px;border-radius:0 8px 8px 0;border:1px solid var(--border);border-left:none;background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);z-index:5;transition:all .2s;box-shadow:2px 0 8px rgba(0,0,0,.08);right:auto;left:-24px}.right-toggle-btn:hover{color:var(--accent);background:var(--glass)}.right-panel.hidden .right-toggle-btn{left:-24px;border-radius:0 8px 8px 0}.right-toggle-btn::before{content:'▶'}div.right-panel:not(.hidden) .right-toggle-btn::before{content:'◀'}
+.right-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.right-header h3{font-size:12px;font-weight:600;color:var(--text2)}
+.right-header span{cursor:pointer;font-size:14px;color:var(--text3)}
+.attach-bar{display:flex;gap:4px;padding:2px 0;flex-wrap:wrap}.attach-bar:empty{display:none}
+.attach-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:5px;font-size:10px;background:var(--glass);border:1px solid var(--border);color:var(--text2)}.attach-chip .del{color:var(--text3);cursor:pointer;margin-left:2px;font-size:11px}.attach-chip .del:hover{color:#e74c3c}
+.attach-btn{font-size:16px;padding:0 6px;background:none;border:none;cursor:pointer;opacity:.6;flex-shrink:0}.attach-btn:hover{opacity:1}
+.right-content{flex:1;overflow-y:auto;padding:8px}
+/* 搜索框 - 卡片样式 */
+.search-card{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;margin-bottom:8px}
+.search-card input{flex:1;border:none;outline:none;padding:4px 0;font-size:12px;background:transparent;color:var(--text)}
+.search-card input::placeholder{color:var(--text3)}
+.search-card .srch-btn{width:24px;height:24px;border-radius:5px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.search-card .srch-count{font-size:10px;color:var(--text3);white-space:nowrap}
+/* 分类按钮 - 同 WorkBuddy 风格标签 */
+.cat-strip{display:flex;gap:4px;overflow-x:auto;padding:4px 0;scrollbar-width:none;white-space:nowrap;margin-bottom:6px}
+.cat-strip::-webkit-scrollbar{display:none}
+.cat-strip .cat-tab{flex-shrink:0;padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text2);cursor:pointer;background:var(--bg);border:1px solid var(--border);transition:all .2s;user-select:none;touch-action:pan-x}
+.cat-strip .cat-tab:hover{border-color:var(--accent);color:var(--accent)}
+.cat-strip .cat-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* 工具区 - WorkBuddy 卡片风格 */
+.tools-section{padding:0}
+.cat-body{display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;animation:catSlideIn .2s ease-out;margin-bottom:8px}
+@keyframes catSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.tool-chip.clicked{background:var(--accent)!important;color:#fff!important;transform:scale(.95);transition:all .1s}.tool-chip{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:6px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tool-chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(67,97,238,.05)}
+.tool-chip:active{transform:scale(.96)}
+/* 右侧面板内容 */
+.rsec{margin-bottom:12px}
+.rsec h4{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.rsec .ritem{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s}
+.rsec .ritem:hover{background:var(--glass);color:var(--accent)}
+/* 登录 */
+.auth-wrap{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:100}
+.auth-wrap.active{display:flex}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:340px;width:90%;text-align:center}
+.auth-card .logo-big{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#4361ee,#7209b7);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 10px}
+.auth-card h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.auth-card p{font-size:11px;color:var(--text3);margin-bottom:16px}
+.auth-card .field{margin-bottom:10px;text-align:left}
+.auth-card .field label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px}
+.auth-card .field input{width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:13px;outline:none}
+.auth-card .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.auth-card .btn{width:100%;padding:10px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.auth-card .btn:hover{opacity:.9}
+.lang-select select{padding:3px 8px;border-radius:5px;font-size:11px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer}
+/* 问候 */
+.greeting{font-size:12px;color:var(--text3);padding:2px 16px;text-align:center;flex-shrink:0}
+/* 提示 */
+.tip-bar{display:flex;gap:6px;padding:4px 0;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.tip-bar span{flex-shrink:0;padding:3px 10px;border-radius:12px;font-size:11px;background:var(--glass);border:1px solid var(--border);color:var(--text3);cursor:pointer}
+.tip-bar span:hover{color:var(--accent);border-color:var(--accent)}
+/* 微交互 */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.loading-dots{display:inline-flex;gap:4px;padding:6px 0}
+.loading-dots span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1.4s infinite ease-in-out both}
+.loading-dots span:nth-child(1){animation-delay:-.32s}
+.loading-dots span:nth-child(2){animation-delay:-.16s}
+@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+/* 滚轮滑动 */
+.cat-strip,.tip-bar{touch-action:pan-x}
+.cat-strip:hover,.tip-bar:hover{cursor:grab}
+/* 移动端响应式 */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:transform .25s;width:180px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.3);display:none}
+  .sidebar-overlay.show{display:block}
+  .right-panel{position:fixed;right:0;top:0;height:100vh;z-index:80;width:260px;box-shadow:-4px 0 20px rgba(0,0,0,.12)}
+  .topbar{padding:6px 10px;height:40px}
+  .topbar-left h1{font-size:13px}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:16px;cursor:pointer;flex-shrink:0}
+  .hamburger:hover{background:var(--glass)}
+  .main{flex:1}
+  .messages{padding:6px 10px}
+  .greeting{margin:0 0 8px}
+  .greeting p{font-size:13px}
+  .cat-strip{gap:3px;padding:6px 4px;margin:2px 0}
+  .cat-strip .cat-tab{padding:4px 8px;font-size:10px}
+  .tools-section{padding:2px 0}
+  .tools-section .cat-body{gap:3px;padding:4px}
+  .tool-chip{padding:4px 8px;font-size:10px}
+  .input-area{padding:6px 10px 10px}
+  .input-row input{font-size:14px;padding:8px 0}
+  .input-row button{width:34px;height:34px}
+  .attach-bar{padding:2px 10px}
+  .msg-bubble{max-width:92%;font-size:13px}
+  .auth-card{padding:20px;max-width:100%}
+  .right-toggle-btn{display:flex;z-index:81}
+}
+@media(min-width:769px){
+  .hamburger{display:none}
+  .sidebar-overlay{display:none!important}
+}
+</style>
+  <link rel="stylesheet" href="/frontend/share.css">
+</head>
+<body>
+
+<!-- 登录 -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <div class="logo-big">⚡</div>
+    <h2>AUTO-EVO-AI</h2>
+    <p>生产力级 AI 自动化编排系统</p>
+    <div class="lang-select" style="margin-bottom:12px"><select id="langSelAuth" onchange="setLocale(this.value)">
+<option value="zh-CN">🇨🇳 中文</option>
+<option value="en">🇬🇧 English</option>
+<option value="ja">🇯🇵 日本語</option>
+<option value="ko">🇰🇷 한국어</option>
+</select></div>
+    <div class="field"><label>用户名</label><input id="regUser" placeholder="你的名字" value="admin"></div>
+    <div class="field"><label>密码（可选）</label><input id="regPass" type="password" placeholder="留空即可"></div>
+    <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
+    <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
+  </div>
+</div>
+
+<!-- 主应用 -->
+<div class="app" id="appMain" style="display:none">
+  <!-- 左侧导航 - 核心页面 + WorkBuddy功能 -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="logo" onclick="window.location.href='/'">⚡</div>
+    <button class="sbtn active" id="sChat"><span class="sicon">💬</span> 对话</button>
+    <button class="sbtn" onclick="window.location.href='/enterprise.html'"><span class="sicon">📊</span> 模块总览</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🤖</span> Agent 工作台</button>
+    <button class="sbtn" onclick="window.location.href='/claw'" style="padding-left:28px;font-size:10px"><span class="sicon">🕹️</span> Claw</button>
+    <button class="sbtn" onclick="window.location.href='/hermes'" style="padding-left:28px;font-size:10px"><span class="sicon">🏛️</span> Hermes</button>
+    <button class="sbtn" onclick="window.location.href='/human'" style="padding-left:28px;font-size:10px"><span class="sicon">🙋</span> Human</button>
+    <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">👥</span> 专家</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="showVirtualCompany()"><span class="sicon">🏢</span> 虚拟公司</button>
+    <button class="sbtn" onclick="window.open('/billion-os.html','_blank')"><span class="sicon">🏛️</span> BILLION GROUP OS</button>
+    <button class="sbtn" onclick="window.location.href='/admin'"><span class="sicon">⚙️</span> 企业管理</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/canvas'"><span class="sicon">🎨</span> 编排画布</button>
+    <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
+    <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
+    <button class="sbtn" onclick="window.location.href='/loop'"><span class="sicon">🔄</span> 循环</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
+    <button class="sbtn" onclick="window.location.href='/deploy'"><span class="sicon">🚀</span> 一键部署</button>
+    <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🧩</span> 扩展市场</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
+    <button class="sbtn" onclick="window.location.href='/learn'"><span class="sicon">📖</span> 学习</button>
+    <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
+    <div class="divider"></div>
+    <button class="sbtn" onclick="window.location.href='/settings'"><span class="sicon">⚙️</span> 系统设置</button>
+    <button class="sbtn" onclick="window.open('/agent','_blank')"><span class="sicon">🔌</span> 本地代理</button>
+    <div class="spacer"></div>
+    <div class="divider"></div>
+    <button class="sbtn" id="themeBtn" onclick="toggleTheme()"><span class="sicon">🌙</span> 浅色</button>
+    <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
+  </div><div class="main" id="mainContent">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="hamburger" id="hamburgerBtn" onclick="toggleSidebarMobile()">☰</span>
+        <h1>AUTO-EVO-AI</h1>
+        <span class="model-badge" id="modelBadge" onclick="checkLLM()">🧠 检测中</span>
+      </div>
+      <div class="topbar-right">
+        <span onclick="clearHistory()">🔄 新对话</span>
+        <span onclick="showArchives()">📋 历史</span>
+      </div>
+    </div>
+    <!-- 双栏内容 -->
+    <div class="content-flex">
+      <div class="left-panel">
+        <div class="greeting" id="greeting">你好，admin！输入你想做的事</div>
+        <div class="messages" id="messages"></div>
+        <!-- 工具区 -->
+        <div class="tools-section" style="flex-shrink:0;padding:0 16px">
+          <div class="cat-strip" id="catStrip">
+            <span class="cat-tab" onclick="toggleCategory('cat_doc')">📋 文档/办公</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_data')">📊 数据/分析</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_comm')">📱 通信/协作</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_biz')">🏢 企业/管理</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_ops')">🚀 部署/运维</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_monitor')">🔧 监控/工具</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_life')">🏠 智能/生活</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_search')">🌐 搜索/集成</span>
+            <span class="cat-tab" onclick="toggleCategory('cat_other')">📦 其他</span>
+          </div>
+          <div id="cat_doc" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'docx_processor')">📄 文档生成</span><span class="tool-chip" onclick="quickTool(this,'excel_pro')">📊 电子表格</span><span class="tool-chip" onclick="quickTool(this,'ppt_generator')">📽️ 演示文稿</span><span class="tool-chip" onclick="quickTool(this,'pdf_toolkit')">📃 PDF处理</span><span class="tool-chip" onclick="quickTool(this,'code_review')">🔍 代码审查</span><span class="tool-chip" onclick="quickTool(this,'scriberr_transcribe')">🎤 音频转录</span><span class="tool-chip" onclick="quickTool(this,'legal_review_contract')">⚖️ 合同审查</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_image')">🖼️ OCR识别</span><span class="tool-chip" onclick="quickTool(this,'lida_visualize')">📈 数据图表</span><span class="tool-chip" onclick="quickTool(this,'mermaid_chart')">🗺️ 流程图</span></div>
+          <div id="cat_data" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'nocodb_manage')">📊 NocoDB管理</span><span class="tool-chip" onclick="quickTool(this,'grist_analyze')">📋 Grist分析</span></div>
+          <div id="cat_comm" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'novu_notify')">📢 Novu通知</span><span class="tool-chip" onclick="quickTool(this,'gitea_git')">📦 Gitea代码</span><span class="tool-chip" onclick="quickTool(this,'wikijs_wiki')">📚 Wiki知识</span><span class="tool-chip" onclick="quickTool(this,'bookstack_wiki')">📚 BookStack百科</span><span class="tool-chip" onclick="quickTool(this,'projectsend_files')">📁 文件分享</span><span class="tool-chip" onclick="quickTool(this,'freshrss_read')">📰 RSS阅读</span><span class="tool-chip" onclick="quickTool(this,'listmonk_send')">📧 邮件营销</span></div>
+          <div id="cat_biz" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'plane_project')">📋 项目管理</span><span class="tool-chip" onclick="quickTool(this,'openproject_mgmt')">📋 项目管理</span><span class="tool-chip" onclick="quickTool(this,'cal_schedule')">📅 日程调度</span><span class="tool-chip" onclick="quickTool(this,'keycloak_auth')">🔐 身份认证</span><span class="tool-chip" onclick="quickTool(this,'odoo_manage')">🏢 Odoo管理</span><span class="tool-chip" onclick="quickTool(this,'erpclaw_manage')">🏭 ERP管理</span></div>
+          <div id="cat_ops" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'opentofu_apply')">🏗️ 部署编排</span><span class="tool-chip" onclick="quickTool(this,'ansible_run')">⚙️ 自动化运维</span><span class="tool-chip" onclick="quickTool(this,'strapi_cms')">📄 内容管理</span><span class="tool-chip" onclick="quickTool(this,'directus_api')">🗄️ 数据API</span><span class="tool-chip" onclick="quickTool(this,'coolify_deploy')">🚀 一键部署</span></div>
+          <div id="cat_monitor" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'meilisearch_search')">🔍 全文搜索</span><span class="tool-chip" onclick="quickTool(this,'minio_storage')">💾 对象存储</span><span class="tool-chip" onclick="quickTool(this,'uptime_kuma')">📊 站点监控</span><span class="tool-chip" onclick="quickTool(this,'oneuptime_monitor')">📊 全面监控</span><span class="tool-chip" onclick="quickTool(this,'signoz_apm')">📊 APM链路</span><span class="tool-chip" onclick="quickTool(this,'wazuh_siem')">🛡️ 安全监控</span><span class="tool-chip" onclick="quickTool(this,'nats_mq')">🔄 消息队列</span><span class="tool-chip" onclick="quickTool(this,'rabbitmq_broker')">🔄 消息代理</span><span class="tool-chip" onclick="quickTool(this,'mlflow_track')">📈 实验追踪</span><span class="tool-chip" onclick="quickTool(this,'langfuse_observe')">👁️ LLM观测</span><span class="tool-chip" onclick="quickTool(this,'hoppscotch_test')">🧪 API测试</span><span class="tool-chip" onclick="quickTool(this,'mermaid_chart')">🗺️ 流程图</span><span class="tool-chip" onclick="quickTool(this,'keploy_test')">🧪 AI测试</span></div>
+          <div id="cat_life" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'rustdesk_connect')">🖥️ 远程桌面</span><span class="tool-chip" onclick="quickTool(this,'docuseal_sign')">✍️ 电子签名</span><span class="tool-chip" onclick="quickTool(this,'homeassistant_control')">🏠 智能家居</span><span class="tool-chip" onclick="quickTool(this,'vaultwarden_manage')">🔐 密码管理</span><span class="tool-chip" onclick="quickTool(this,'appsmith_build')">🛠️ 低代码构建</span><span class="tool-chip" onclick="quickTool(this,'airbyte_sync')">🔄 数据同步</span><span class="tool-chip" onclick="quickTool(this,'nocobase_build')">🏗️ 低代码平台</span></div>
+          <div id="cat_search" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browseract_extract')">🕷️ 反爬提取</span><span class="tool-chip" onclick="quickTool(this,'codemem_index')">🧠 代码知识</span><span class="tool-chip" onclick="quickTool(this,'reach_search')">🌐 全网搜索</span><span class="tool-chip" onclick="quickTool(this,'anime_animate')">✨ 页面动效</span></div>
+          <div id="cat_other" class="cat-body" style="display:none"><span class="tool-chip" onclick="quickTool(this,'browser_use_task')">🌐 浏览器任务</span><span class="tool-chip" onclick="quickTool(this,'codemem_query')">🧠 知识查询</span><span class="tool-chip" onclick="quickTool(this,'gpt_research')">📊 GPT研究</span><span class="tool-chip" onclick="quickTool(this,'openhands_generate')">🏗️ 自主生成</span><span class="tool-chip" onclick="quickTool(this,'letta_message')">🧠 记忆管理</span><span class="tool-chip" onclick="quickTool(this,'composio_execute')">🔧 工具集成</span><span class="tool-chip" onclick="quickTool(this,'self_evolving_analyze')">🧬 自进化分析</span><span class="tool-chip" onclick="quickTool(this,'moltron_learn')">📚 技能学习</span><span class="tool-chip" onclick="quickTool(this,'accomplish_desktop')">🖥️ 桌面自动化</span><span class="tool-chip" onclick="quickTool(this,'toolbench_discover')">🔌 API发现</span><span class="tool-chip" onclick="quickTool(this,'markitdown_convert')">📄 文档转MD</span><span class="tool-chip" onclick="quickTool(this,'scrapegraphai_scrape')">🕷️ AI爬虫</span><span class="tool-chip" onclick="quickTool(this,'interpreter_execute')">💻 代码执行</span><span class="tool-chip" onclick="quickTool(this,'s2c_generate')">🎨 截图转代码</span><span class="tool-chip" onclick="quickTool(this,'pra_review')">🔍 PR审查</span><span class="tool-chip" onclick="quickTool(this,'qodo_testgen')">🧪 测试生成</span><span class="tool-chip" onclick="quickTool(this,'aider_edit')">✏️ AI编辑</span><span class="tool-chip" onclick="quickTool(this,'openclaw_connect')">📱 消息平台</span><span class="tool-chip" onclick="quickTool(this,'tts_speak')">🔊 语音合成</span><span class="tool-chip" onclick="quickTool(this,'chatdev_run')">🤖 多智能体</span><span class="tool-chip" onclick="quickTool(this,'autogpt_run')">🧠 自主任务</span><span class="tool-chip" onclick="quickTool(this,'swe_fix')">🛠️ 修复Issue</span><span class="tool-chip" onclick="quickTool(this,'gptpilot_build')">🏗️ 生成项目</span><span class="tool-chip" onclick="quickTool(this,'text2sql_query')">🗃️ 自然查库</span><span class="tool-chip" onclick="quickTool(this,'bolt_generate')">⚡ 生成应用</span><span class="tool-chip" onclick="quickTool(this,'agenteval_benchmark')">📊 Agent评测</span><span class="tool-chip" onclick="quickTool(this,'openmontage_generate_script')">🎬 视频脚本</span><span class="tool-chip" onclick="quickTool(this,'lida_visualize')">📈 可视化</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_image')">📝 图片OCR</span><span class="tool-chip" onclick="quickTool(this,'paddleocr_pdf')">📄 PDF识别</span><span class="tool-chip" onclick="quickTool(this,'zen_scan')">🔒 安全扫描</span><span class="tool-chip" onclick="quickTool(this,'shannon_audit')">🔐 代码审计</span><span class="tool-chip" onclick="quickTool(this,'legal_review_contract')">⚖️ 合同审查</span><span class="tool-chip" onclick="quickTool(this,'twenty_create_contact')">👤 CRM联系人</span><span class="tool-chip" onclick="quickTool(this,'invoice_create')">🧾 开发票</span><span class="tool-chip" onclick="quickTool(this,'chatwoot_create_ticket')">🎫 创建工单</span><span class="tool-chip" onclick="quickTool(this,'postiz_create_post')">📱 发社媒</span><span class="tool-chip" onclick="quickTool(this,'mautic_send_email')">📧 营销邮件</span><span class="tool-chip" onclick="quickTool(this,'superset_create_chart')">📊 BI图表</span><span class="tool-chip" onclick="quickTool(this,'heyform_create_survey')">📋 创建问卷</span><span class="tool-chip" onclick="quickTool(this,'docetl_extract')">📂 文档提取</span><span class="tool-chip" onclick="quickTool(this,'accord_create_contract')">📝 法律协议</span><span class="tool-chip" onclick="quickTool(this,'claude_code_generate')">💻 Claude写代码</span><span class="tool-chip" onclick="quickTool(this,'frappe_hr_employee')">🏢 查员工</span><span class="tool-chip" onclick="quickTool(this,'dataease_create_dashboard')">📉 仪表盘</span><span class="tool-chip" onclick="quickTool(this,'invoice_track_expense')">💳 记费用</span><span class="tool-chip" onclick="quickTool(this,'graphify_index')">🧠 代码图谱</span><span class="tool-chip" onclick="quickTool(this,'hyper_extract')">🔬 知识提取</span><span class="tool-chip" onclick="quickTool(this,'kg_query')">📊 知识库</span><span class="tool-chip" onclick="quickTool(this,'eve_learn')">🔮 EVE架构</span><span class="tool-chip" onclick="quickTool(this,'openmontage_video')">🎥 视频制作</span><span class="tool-chip" onclick="quickTool(this,'palmier_mcp')">✂️ MCP编辑</span></div>
+        </div>
+        <!-- 输入区 -->
+        <div class="input-area" id="inputArea">
+          <div class="attach-bar" id="attachBar"></div>
+          <input id="fileInput" type="file" multiple style="display:none" onchange="handleFiles(this)">
+          <!-- 文字输入模式 -->
+          <div class="input-row" id="textInputRow">
+            <button onclick="document.getElementById('fileInput').click()" title="上传文件/拍照">📎</button>
+            <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter'){send()}">
+            <button class="mic" id="voiceToggleBtn" onclick="switchToVoice()" title="语音输入">🎤</button>
+            <button onclick="send()">➤</button>
+          </div>
+          <!-- 语音输入模式（仿微信：全宽按压条） -->
+          <div class="voice-bar hidden" id="voiceBar" ontouchstart="voiceStart(event)" onmousedown="voiceStart(event)" ontouchend="voiceStop(event)" onmouseup="voiceStop(event)" ontouchcancel="voiceCancel(event)" onmouseleave="voiceCancel(event)">
+            <span class="vb-label" id="vbLabel">按住 说话</span>
+            <span class="vb-cancel" id="vbCancelBtn" onclick="switchToText()">✕</span>
+          </div>
+        </div>
+      </div>
+      <!-- 右侧面板 - WorkBuddy风格 -->
+      <div class="right-panel hidden" id="rightPanel">
+        <div class="right-header">
+          <h3>📦 快捷面板</h3>
+        </div>
+        <div class="right-toggle-btn" id="rightToggleBtn" onclick="toggleRightPanel()"></div>
+        <div class="right-content">
+          <div class="rsec">
+            <h4>🎯 产物</h4>
+            <div class="ritem" onclick="quickTool(this,'docx_processor')">📄 文档</div>
+            <div class="ritem" onclick="quickTool(this,'excel_pro')">📊 数据表格</div>
+            <div class="ritem" onclick="quickTool(this,'ppt_generator')">📽️ PPT</div>
+            <div class="ritem" onclick="quickTool(this,'mermaid_chart')">🗺️ 流程图</div>
+            <div class="ritem" onclick="quickTool(this,'code_review')">🔍 代码审查</div>
+          </div>
+          <div class="rsec">
+            <h4>📁 全部文件</h4>
+            <div class="ritem" onclick="window.location.href='/admin'">📂 文件管理</div>
+            <div class="ritem" onclick="window.location.href='/apps'">📱 已生成APP</div>
+            <div class="ritem" onclick="window.location.href='/output'">📂 输出目录</div>
+          </div>
+          <div class="rsec">
+            <h4>📝 变更</h4>
+            <div class="ritem" onclick="showArchives()">📋 对话历史</div>
+            <div class="ritem" onclick="window.location.href='/review'">🔍 版本差异</div>
+          </div>
+          <div class="rsec">
+            <h4>👁️ 预览</h4>
+            <div class="ritem" onclick="window.location.href='/dashboard'">📊 系统状态</div>
+          </div>
+          <div class="rsec">
+            <h4>🤖 系统</h4>
+            <div class="ritem" id="modelStatus" onclick="checkLLM()">🧠 模型: 检测中</div>
+            <div class="ritem">⚡ 94个工具就绪</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="/frontend/chat_engine.js?v=21"></script>
+
+<script>
+// ── 语音输入：仿微信全宽按压条 + AudioContext 直录 WAV ──
+var _vStream=null,_vCtx=null,_vNode=null,_vSamples=[];
+
+function switchToVoice(){
+  document.getElementById('textInputRow').style.display='none';
+  document.getElementById('voiceBar').classList.remove('hidden');
+  document.getElementById('vbLabel').textContent='按住 说话';
+}
+function switchToText(){
+  document.getElementById('voiceBar').classList.add('hidden');
+  document.getElementById('voiceBar').classList.remove('recording');
+  document.getElementById('textInputRow').style.display='flex';
+  _cleanVoice();
+}
+
+// ── 重采样：sourceRate → 16000 ──
+function _resample(src,srcRate){
+  if(srcRate==16000)return src;
+  var ratio=srcRate/16000,len=Math.round(src.length/ratio),out=new Float32Array(len);
+  for(var i=0;i<len;i++){
+    var idx=i*ratio,fi=Math.floor(idx),frac=idx-fi;
+    out[i]=src[fi]*(1-frac)+(src[fi+1]||0)*frac;
+  }
+  return out;
+}
+
+function _wavBlob(samples,sr){
+  samples=_resample(samples,sr);sr=16000;
+  var l=samples.length,buf=new ArrayBuffer(44+l*2),v=new DataView(buf);
+  function wS(p,s){for(var i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))}
+  wS(0,'RIFF');v.setUint32(4,36+l*2,true);wS(8,'WAVE');
+  wS(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);
+  v.setUint16(32,2,true);v.setUint16(34,16,true);
+  wS(36,'data');v.setUint32(40,l*2,true);
+  for(var i=0;i<l;i++){var s=Math.max(-1,Math.min(1,samples[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7FFF,true)}
+  return new Blob([buf],{type:'audio/wav'})
+}
+
+function voiceStart(e){
+  e.preventDefault();
+  var vb=document.getElementById('voiceBar');
+  vb.classList.add('recording');
+  document.getElementById('vbLabel').textContent='松开 结束';
+  _vSamples=[];
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){_voiceFail();return}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    _vStream=s;
+    _vCtx=new(window.AudioContext||window.webkitAudioContext)();
+    var src=_vCtx.createMediaStreamSource(s);
+    _vNode=_vCtx.createScriptProcessor(4096,1,1);
+    _vNode.onaudioprocess=function(ev){var d=ev.inputBuffer.getChannelData(0);for(var i=0;i<d.length;i++)_vSamples.push(d[i])};
+    src.connect(_vNode);_vNode.connect(_vCtx.destination);
+  }).catch(function(){_voiceFail()});
+}
+
+function voiceStop(e){
+  var vb=document.getElementById('voiceBar');
+  vb.classList.remove('recording');
+  if(!_vStream||!_vCtx){switchToText();return}
+  if(_vNode){_vNode.disconnect();_vNode=null}
+  var actualRate=_vCtx.sampleRate;
+  _vCtx.close();_vCtx=null;
+  if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
+  if(_vSamples.length<1600){switchToText();return}
+  document.getElementById('vbLabel').textContent='识别中...';
+  var blob=_wavBlob(_vSamples,actualRate),fd=new FormData();
+  fd.append('file',blob,'v.wav');
+  var ctrl=new AbortController();
+  setTimeout(function(){ctrl.abort()},25000); // 25s超时
+  fetch('/api/v1/speech/recognize',{method:'POST',body:fd,signal:ctrl.signal}).then(function(r){return r.json()}).then(function(j){
+    switchToText();
+    if(j.success&&j.text){document.getElementById('input').value=j.text;send()}
+  }).catch(function(){switchToText()});
+}
+
+function voiceCancel(e){switchToText()}
+function _cleanVoice(){
+  _vSamples=[];
+  if(_vNode){try{_vNode.disconnect()}catch(ex){}_vNode=null}
+  if(_vCtx){try{_vCtx.close()}catch(ex){}_vCtx=null}
+  if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
+}
+function _voiceFail(){switchToText();alert('请在浏览器设置中允许麦克风权限');}
+</script>
+</body>
+</html>
