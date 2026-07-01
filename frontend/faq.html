@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>帮助中心 - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f5f5f8;--card:#fff;--text:#1a1a2e;--text2:#6b7280;--text3:#9ca3af;--accent:#4361ee;--border:#e8eaed}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,sans-serif;background:var(--bg);color:var(--text);padding:20px;max-width:800px;margin:0 auto}
+h1{font-size:22px;margin-bottom:16px}
+.q{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer}
+.q:hover{border-color:var(--accent)}
+.q .title{font-size:14px;font-weight:600}
+.q .body{font-size:13px;color:var(--text2);margin-top:6px;display:none}
+.q.open .body{display:block}
+@media(max-width:768px){body{padding:10px}h1{font-size:18px}}
+</style></head><body>
+<h1>帮助中心</h1>
+<div class="q open" onclick="this.classList.toggle('open')"><div class="title">如何开始使用？</div><div class="body">点击进入系统，首次使用会弹出引导弹窗，选择你的身份和用途，系统会自动配置推荐功能。你也可以直接输入你想做的事，比如"写合同""做表格"。</div></div>
+<div class="q" onclick="this.classList.toggle('open')"><div class="title">对话里能做什么？</div><div class="body">写文档、做表格、画流程图、审代码、做PPT、截图转代码、数据分析和各种AI自动化任务。也可以点快捷卡片直接触发。</div></div>
+<div class="q" onclick="this.classList.toggle('open')"><div class="title">什么是模块？</div><div class="body">模块是系统的功能单元。进入工作台可以看到7大分类共583个模块。每个模块都有独立功能。</div></div>
+<div class="q" onclick="this.classList.toggle('open')"><div class="title">如何配通知？</div><div class="body">首次引导中可以选择通知方式（微信/钉钉/邮件/Telegram/短信）。后续可在管理中心修改。</div></div>
+<div class="q" onclick="this.classList.toggle('open')"><div class="title">多用户怎么用？</div><div class="body">注册后系统支持多账号共享。管理员可以在用户管理页面添加/编辑/删除用户。</div></div>
+<div class="q" onclick="this.classList.toggle('open')"><div class="title">系统装在哪里？</div><div class="body">当前为公网版本。如需私有部署，可使用一键安装脚本 curl -s https://autoevoai.com/install/install.sh | bash</div></div>
+<script>document.querySelectorAll('.q:first-child').forEach(function(e){e.classList.add('open')})</script>
+</body></html>

@@ -197,6 +197,22 @@ async def deploy_page():
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
+@router.get("/users")
+async def users_page():
+    p = BASE_DIR / "frontend" / "users.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>用户管理</h1></body></html>")
+
+@router.get("/faq")
+async def faq_page():
+    p = BASE_DIR / "frontend" / "faq.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>帮助中心</h1></body></html>")
+
+@router.get("/api-test")
+async def api_test_page():
+    p = BASE_DIR / "frontend" / "api-test.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>API测试</h1></body></html>")
+
+
 @router.get("/skills")
 async def skills_page():
     p = BASE_DIR / "frontend" / "skills.html"

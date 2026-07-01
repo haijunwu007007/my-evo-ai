@@ -207,7 +207,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
     <div class="field"><label>用户名</label><input id="regUser" placeholder="你的名字" value="admin"></div>
     <div class="field"><label>密码（可选）</label><input id="regPass" type="password" placeholder="留空即可"></div>
     <div class="field"><label>API Key（可选）</label><input id="regKey" placeholder="OpenAI / 其他 LLM Key"></div>
-    <button class="btn" id="regBtn" onclick="doRegister()">🚀 进入系统</button>
+    <button class="btn" id="regBtn" onclick="doRegister()">进入系统</button>
+    <div style="margin-top:8px;font-size:11px;color:var(--text3);display:flex;gap:12px;justify-content:center"><span onclick="alert('请重置密码功能待实现')" style="cursor:pointer">忘记密码？</span><span id="demoBtn" onclick="demoMode()" style="cursor:pointer;color:var(--accent)">演示模式</span></div>
   </div>
 </div>
 
@@ -742,6 +743,16 @@ function _cleanVoice(){
   if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
 }
 function _voiceFail(){switchToText();alert('请在浏览器设置中允许麦克风权限');}
+
+
+function demoMode(){
+  localStorage.setItem('evo_demo','true');
+  localStorage.setItem('evo_onboard_done','true');
+  document.getElementById('regUser').value='demo';
+  document.getElementById('regPass').value='demo123';
+  doRegister();
+}
+
 </script>
 </body>
 </html>

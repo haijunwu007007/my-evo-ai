@@ -1,0 +1,1 @@
+# 模块开发指南\n\n## 创建模块\n1. 在 modules/ 目录下创建 .py 文件\n2. 定义 Module 类\n3. 实现必要的接口方法\n4. 重启系统自动发现\n\n## 模块结构\n```python\nclass MyModule:\n    def __init__(self):\n        self.name = \"my_module\"\n    def execute(self):\n        return {\"status\": \"ok\"}\n```\n

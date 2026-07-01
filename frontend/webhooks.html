@@ -133,4 +133,23 @@ function delHook(i){
 }
 
 loadHooks();
+
+function testWebhook(i){
+  var w=_hooks[i];
+  var resultDiv=document.getElementById('testResult');
+  if(!resultDiv){
+    resultDiv=document.createElement('div');
+    resultDiv.id='testResult';
+    resultDiv.style.cssText='position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid #e8eaed;border-radius:8px;padding:12px;z-index:200;max-width:350px;box-shadow:0 4px 20px rgba(0,0,0,.12)';
+    resultDiv.innerHTML='<div style="font-size:12px;font-weight:600;margin-bottom:6px">Webhook 测试结果</div><div id="testBody" style="font-size:11px;color:#6b7280">发送中...</div><button onclick="this.parentElement.remove()" style="margin-top:6px;font-size:10px;border:none;background:transparent;color:#9ca3af;cursor:pointer">关闭</button>';
+    document.body.appendChild(resultDiv);
+  }
+  document.getElementById('testBody').textContent='发送 POST '+w.url+' ...';
+  fetch('/api/v1/webhooks/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:w.name,url:w.url,event:w.event||'*'})}).then(function(r){return r.json()}).then(function(j){
+    document.getElementById('testBody').textContent='状态: '+(j.status||j.success?'成功':'失败')+' | '+(j.message||JSON.stringify(j).slice(0,80));
+  }).catch(function(){
+    document.getElementById('testBody').textContent='网络错误（可能Webhook API未实现）';
+  });
+}
+
 </script></body></html>
