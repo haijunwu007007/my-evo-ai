@@ -47,6 +47,21 @@ var items = [];
 
 function load(){
   Promise.all([
+    // SMTP 邮箱配置
+    var smtpCard = document.createElement('div');
+    smtpCard.className = 'card';
+    smtpCard.innerHTML = '<h3>📧 邮箱配置 (SMTP)</h3><p style="font-size:12px;color:#6b7280;margin-bottom:8px">用于发送团队邀请、通知等</p>' +
+      '<div class="field"><label>SMTP 服务器</label><input id="smtp_host" placeholder="smtp.qq.com"></div>' +
+      '<div class="field"><label>端口</label><input id="smtp_port" placeholder="587"></div>' +
+      '<div class="field"><label>邮箱账号</label><input id="smtp_user" placeholder="your@email.com"></div>' +
+      '<div class="field"><label>密码/授权码</label><input id="smtp_pass" type="password" placeholder="SMTP 授权码"></div>' +
+      '<div class="field"><label>发件地址（可选）</label><input id="smtp_from" placeholder="留空则用邮箱账号"></div>' +
+      '<div class="field" style="display:flex;gap:6px;align-items:end">' +
+      '<input id="smtp_test_to" placeholder="输入测试邮箱" style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--border);font-size:12px">' +
+      '<button class="btn2" onclick="testSmtp()">📨 测试</button></div>' +
+      '<div style="display:flex;gap:6px;margin-top:8px"><button class="btn" onclick="saveSmtp()">💾 保存配置</button></div>';
+    document.getElementById('main').insertBefore(smtpCard, document.getElementById('main').firstChild);
+
     fetch('/api/v1/skills').then(function(r){return r.json()}),
     fetch('/api/v1/settings').then(function(r){return r.json()})
   ]).then(function(res){
@@ -128,6 +143,30 @@ function showToast(msg){
   clearTimeout(t._t); t._t = setTimeout(function(){t.classList.remove('show')},3000)
 }
 
-load();
+// SMTP config
+function loadSmtp(){
+  fetch('/api/v1/email/config').then(function(r){return r.json()}).then(function(j){
+    if(j.host){
+      document.getElementById('smtp_host').value=j.host||'';
+      document.getElementById('smtp_port').value=j.port||'587';
+      document.getElementById('smtp_user').value=j.user||'';
+      document.getElementById('smtp_from').value=j.from_addr||'';
+    }
+  }).catch(function(){})
+}
+function saveSmtp(){
+  var data={host:document.getElementById('smtp_host').value,port:parseInt(document.getElementById('smtp_port').value)||587,user:document.getElementById('smtp_user').value,password:document.getElementById('smtp_pass').value,from_addr:document.getElementById('smtp_from').value};
+  fetch('/api/v1/email/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json()}).then(function(j){
+    alert(j.success?'SMTP 配置已保存':'保存失败: '+j.error);
+  }).catch(function(){alert('保存失败')});
+}
+function testSmtp(){
+  var to=document.getElementById('smtp_test_to').value;
+  if(!to){alert('请输入测试邮箱');return}
+  fetch('/api/v1/email/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:to})}).then(function(r){return r.json()}).then(function(j){
+    alert(j.success?'测试邮件已发送！请检查 '+to:'发送失败: '+j.error);
+  }).catch(function(){alert('发送失败')});
+}
+loadSmtp();
 </script>
 </body></html>

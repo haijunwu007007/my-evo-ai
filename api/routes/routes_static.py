@@ -346,6 +346,21 @@ async def editor_page():
     p = BASE_DIR / "frontend" / "editor.html"
     return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>在线文档编辑器</h1></body></html>")
 
+@router.get("/api-keys")
+async def api_keys_page():
+    p = BASE_DIR / "frontend" / "api-keys.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>API Key管理</h1></body></html>")
+
+@router.get("/team")
+async def team_page():
+    p = BASE_DIR / "frontend" / "team.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>团队工作台</h1></body></html>")
+
+@router.get("/tutorial")
+async def tutorial_page():
+    p = BASE_DIR / "frontend" / "tutorial.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>快速入门</h1></body></html>")
+
 @router.get("/realtime")
 async def realtime_page():
     p = BASE_DIR / "frontend" / "realtime.html"
