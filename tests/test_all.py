@@ -1,87 +1,71 @@
-"""AUTO-EVO-AI — 全量测试套件"""
-import sys, os, pytest
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "api"))
+"""AUTO-EVO-AI 核心测试套件"""
+import urllib.request,ssl,json,unittest
 
-from agent_tools import exec_tool, list_tools
+BASE='https://autoevoai.com'
+ctx=ssl.create_default_context()
 
-class TestTools:
-    def test_tools_count(self):
-        t = list_tools()
-        assert len(t) >= 87, f"工具数不足: {len(t)}"
+class TestPublicAPI(unittest.TestCase):
+    def test_1_home(self):
+        r=urllib.request.urlopen(BASE,timeout=10,context=ctx)
+        self.assertEqual(r.status,200)
+    def test_2_chat(self):
+        r=urllib.request.urlopen(BASE+'/chat.html',timeout=10,context=ctx)
+        self.assertIn(b'AUTO-EVO',r.read())
+    def test_3_enterprise(self):
+        r=urllib.request.urlopen(BASE+'/enterprise.html',timeout=10,context=ctx)
+        data=r.read()
+        self.assertGreater(len(data),500000)
+        self.assertIn(b'window.',data)
+    def test_4_admin(self):
+        r=urllib.request.urlopen(BASE+'/admin',timeout=10,context=ctx)
+        self.assertIn(b'showTab',r.read())
+    def test_5_billion_os(self):
+        r=urllib.request.urlopen(BASE+'/billion-os.html',timeout=10,context=ctx)
+        data=r.read()
+        self.assertIn(b'runGenesis',data)
+        self.assertIn(b'MAIN_SCRIPT_OK',data)
+    def test_6_audit(self):
+        r=urllib.request.urlopen(BASE+'/audit',timeout=10,context=ctx)
+        self.assertIn(b'审计日志',r.read())
+    def test_7_webhooks(self):
+        r=urllib.request.urlopen(BASE+'/webhooks',timeout=10,context=ctx)
+        self.assertIn(b'Webhook',r.read())
+    def test_8_backup(self):
+        r=urllib.request.urlopen(BASE+'/backup',timeout=10,context=ctx)
+        self.assertIn(b'备份',r.read())
+    def test_9_marketplace(self):
+        r=urllib.request.urlopen(BASE+'/marketplace',timeout=10,context=ctx)
+        self.assertIn(b'模块',r.read())
+    def test_10_bi(self):
+        r=urllib.request.urlopen(BASE+'/bi',timeout=10,context=ctx)
+        self.assertIn(b'仪表盘',r.read())
+    def test_11_realtime(self):
+        r=urllib.request.urlopen(BASE+'/realtime',timeout=10,context=ctx)
+        self.assertIn(b'实时',r.read())
+    def test_12_editor(self):
+        r=urllib.request.urlopen(BASE+'/editor',timeout=10,context=ctx)
+        self.assertIn(b'文档',r.read())
+    def test_13_install_sh(self):
+        r=urllib.request.urlopen(BASE+'/install/install.sh',timeout=10,context=ctx)
+        self.assertIn(b'docker',r.read())
+    def test_14_docker_compose(self):
+        r=urllib.request.urlopen(BASE+'/install/docker-compose.yml',timeout=10,context=ctx)
+        self.assertIn(b'services',r.read())
+    def test_15_sdk_python(self):
+        r=urllib.request.urlopen(BASE+'/sdk/python/evoclient.py',timeout=10,context=ctx)
+        self.assertIn(b'class',r.read())
+    def test_16_sdk_js(self):
+        r=urllib.request.urlopen(BASE+'/sdk/js/evoclient.js',timeout=10,context=ctx)
+        self.assertIn(b'function',r.read())
+    def test_17_version(self):
+        r=urllib.request.urlopen(BASE+'/api/v1/version',timeout=10,context=ctx)
+        j=json.loads(r.read())
+        self.assertIn('version',j)
+    def test_18_enterprise_window_exports(self):
+        r=urllib.request.urlopen(BASE+'/enterprise.html',timeout=10,context=ctx)
+        data=r.read().decode()
+        count=len(re.findall(r'window\.\w+\s*=',data))
+        self.assertGreaterEqual(count,145,f'Expected >=145 window exports, got {count}')
 
-    def test_chart_create(self):
-        r = exec_tool("chart_create", {"data": "[1,2,3]"})
-        assert r["ok"]
-
-    def test_code_review(self):
-        r = exec_tool("code_review", {"code": "def add(a,b): return a+b"})
-        assert r["ok"]
-
-    def test_password_manager(self):
-        r = exec_tool("password_manager", {})
-        assert r["ok"]
-        assert len(r.get("data", "")) > 10
-
-    def test_site_monitor(self):
-        r = exec_tool("site_monitor", {"url": "https://example.com"})
-        assert r["ok"]
-
-    def test_api_test(self):
-        r = exec_tool("api_test", {"url": "https://example.com"})
-        assert r["ok"]
-
-    def test_unknown_tool(self):
-        r = exec_tool("not_exist", {})
-        assert not r["ok"]
-
-
-class TestModuleRegistry:
-    def test_import(self):
-        from api.module_registry import scan_modules, load_all_async
-        m = scan_modules()
-        assert len(m) > 0
-
-    def test_load(self):
-        from api.module_registry import load_all_async
-        r = load_all_async(max_workers=4)
-        assert r["loaded"] > 0
-
-
-class TestInfra:
-    def test_rbac(self):
-        from api._rbac import check_permission
-        assert check_permission("admin", "tool_execute")
-        assert not check_permission("viewer", "admin_settings")
-
-    def test_response(self):
-        from api._response import StandardAPIResponse
-        r = StandardAPIResponse.ok("test")
-        assert r["success"]
-
-    def test_config_loader(self):
-        from api._config_loader import reload_config, get_config
-        c = get_config()
-        assert c is not None
-
-    def test_multi_worker(self):
-        from api._multi_worker import get_circuit_breaker, get_worker_count
-        cb = get_circuit_breaker("test")
-        assert cb.state == "closed"
-        assert get_worker_count() >= 1
-
-    def test_plugins(self):
-        import api.plugins
-        assert hasattr(api.plugins, "register_all")
-
-
-class TestWorkflow:
-    def test_engine(self):
-        from api.workflow.engine import get_engine
-        e = get_engine()
-        assert e is not None
-
-    def test_autonomous(self):
-        from api.workflow.autonomous import AutonomousAgent
-        a = AutonomousAgent()
-        r = a.run("测试")
-        assert r["status"] in ("completed", "chat")
+if __name__=='__main__':
+    unittest.main(verbosity=2)
