@@ -209,6 +209,9 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 async def root():
     from fastapi.responses import FileResponse
     from api.infra import BASE_DIR
+    idx_path = BASE_DIR / "frontend" / "index.html"
+    if idx_path.exists():
+        return FileResponse(str(idx_path))
     chat_path = BASE_DIR / "frontend" / "chat.html"
     if chat_path.exists():
         return FileResponse(str(chat_path))
