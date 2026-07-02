@@ -31,16 +31,17 @@ function quickTool(el, name){
   inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}
 }
 function toolbarFilter(cat){
-  var all=document.querySelectorAll('#tbTools .tool-chip');
-  var tabs=document.querySelectorAll('#tbCats .cat-tab');
+  var bodies=document.querySelectorAll('.cat-body');
+  var tabs=document.querySelectorAll('.cat-tab');
   tabs.forEach(function(t){t.classList.remove('active')});
   var activeTab=document.getElementById('tbf_'+(cat==='all'?'all':cat));
   if(activeTab)activeTab.classList.add('active');
-  all.forEach(function(t){
-    if(cat==='all'||t.getAttribute('data-cat')===cat){
-      t.style.display='inline-flex'
+  bodies.forEach(function(b){
+    var bc=b.getAttribute('data-cat')||'';
+    if(cat==='all'||bc===cat){
+      b.style.display='';
     }else{
-      t.style.display='none'
+      b.style.display='none';
     }
   });
 }
