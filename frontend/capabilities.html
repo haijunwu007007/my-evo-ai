@@ -42,5 +42,13 @@ fetch('/api/v1/modules/stats').then(function(r){return r.json()}).then(function(
   var el=document.querySelector('.item .st');
   if(el)el.textContent=st+'模块';
 }).catch(function(){});
+
+
+// === AUTO-EVO-AI window exports ===
+window.loadCapabilities = loadCapabilities;
+window.getCapabilityDetail = getCapabilityDetail;
+window.toggleCapability = toggleCapability;
+window.searchCapabilities = searchCapabilities;
+
 </script>
 </body></html>

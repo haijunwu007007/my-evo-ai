@@ -1,5 +1,5 @@
 """智能体 — 核心引擎（记忆+工具+并发+规格+记忆系统）"""
-import os, json, time, re, sqlite3, threading, importlib, subprocess
+import os, json, time, re, sqlite3, threading, importlib
 from pathlib import Path
 try:
     from api.agent_tools import exec_tool
@@ -101,159 +101,43 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
         except: return ""
 
     def _inline_call_llm(messages, key=""):
-        """内联 call_llm — 直接 curl 调智谱 GLM-4-Flash，忽略传入的 key 参数"""
-        api_key = ""
-        for env_var in ['ZHIPU_API_KEY','OPENAI_API_KEY']:
-            api_key = os.environ.get(env_var,"")
-            if api_key: break
-        if not api_key:
-            try:
-                with open('/etc/evo.env') as f:
-                    for line in f:
-                        if 'ZHIPU_API_KEY=' in line:
-                            api_key = line.split('=',1)[1].strip()
-                            break
-            except: pass
-        if not api_key:
-            api_key = 'b52c6e6a225a41928354521392b19541.Yih7xNOORHmw0qYM'
-        if not api_key:
+        """内联 call_llm — 统一走 LLMPool（自动故障转移/多Provider支持）"""
+        from api.agent_llm import call_llm as _pool_call
+        if not messages:
             return (None, None)
         try:
-            payload = json.dumps({"model":"GLM-4-Flash","messages":messages,"max_tokens":8192})
-            cmd = ['curl','-s','-X','POST','https://open.bigmodel.cn/api/paas/v4/chat/completions',
-                   '-H',f'Authorization: Bearer {api_key}','-H','Content-Type: application/json',
-                   '-d',payload,'--connect-timeout','15','--max-time','30']
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=35)
-            if r.returncode == 0 and r.stdout:
-                data = json.loads(r.stdout)
-                content = data.get("choices",[{}])[0].get("message",{}).get("content","")
-                tc = data.get("choices",[{}])[0].get("message",{}).get("tool_calls",[])
-                return (content, tc) if content else (None, None)
-        except: pass
+            # 提取最后一条用户消息
+            user_msg = ""
+            for m in reversed(messages):
+                if isinstance(m, dict) and m.get("role") == "user":
+                    user_msg = m.get("content", "")
+                    break
+            if not user_msg:
+                user_msg = messages[-1].get("content", "") if isinstance(messages[-1], dict) else ""
+            if not user_msg:
+                # 拼接所有消息
+                parts = []
+                for m in messages:
+                    if isinstance(m, dict):
+                        c = m.get("content", "")
+                        if c:
+                            parts.append(f"{m.get('role','')}: {c}")
+                user_msg = "\n".join(parts)
+
+            # 当前版本 LLMPool.chat_sync 不支持 tools 参数，只返回纯文本
+            content, _ = _pool_call(messages, key=key)
+            if content:
+                return (content, None)
+        except Exception:
+            pass
         return (None, None)
 
     def get_tools():
-        bt = [
-            {"type":"function","function":{"name":"read_file","description":"读取任意文件","parameters":{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]}}},
-            {"type":"function","function":{"name":"list_modules","description":"列出系统所有模块","parameters":{"type":"object","properties":{}}}},
-            {"type":"function","function":{"name":"search_modules","description":"按中文关键词搜索模块","parameters":{"type":"object","properties":{"keyword":{"type":"string"}},"required":["keyword"]}}},
-            {"type":"function","function":{"name":"module_info","description":"查看模块详细信息","parameters":{"type":"object","properties":{"module":{"type":"string"}},"required":["module"]}}},
-            {"type":"function","function":{"name":"get_module_demo","description":"获取模块调用示例","parameters":{"type":"object","properties":{"module":{"type":"string"}},"required":["module"]}}},
-            {"type":"function","function":{"name":"execute_module","description":"调用系统模块执行任务","parameters":{"type":"object","properties":{"module":{"type":"string"},"action":{"type":"string"},"params":{"type":"string"}},"required":["module","action"]}}},
-            {"type":"function","function":{"name":"file_write","description":"写文件","parameters":{"type":"object","properties":{"name":{"type":"string"},"content":{"type":"string"},"type":{"type":"string","enum":["html","python","text","json","tool"]}},"required":["name","content"]}}},
-            {"type":"function","function":{"name":"register_tool","description":"注册.py为工具","parameters":{"type":"object","properties":{"name":{"type":"string"},"filepath":{"type":"string"}},"required":["name","filepath"]}}},
-            {"type":"function","function":{"name":"create_task","description":"创建定时任务","parameters":{"type":"object","properties":{"name":{"type":"string"},"schedule":{"type":"string"},"action":{"type":"string"},"params":{"type":"string"}},"required":["name","schedule","action"]}}},
-            {"type":"function","function":{"name":"list_tools","description":"列出所有工具","parameters":{"type":"object","properties":{}}}},
-            {"type":"function","function":{"name":"draw_image","description":"AI画图","parameters":{"type":"object","properties":{"prompt":{"type":"string"}},"required":["prompt"]}}},
-            {"type":"function","function":{"name":"web_search","description":"搜索信息","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}}},
-            # ===== 2026-06-08 新增集成工具 =====
-            {"type":"function","function":{"name":"browser_use_task","description":"🌐 浏览器自动化：AI自动操控浏览器完成登录/填表/抓取/发帖等任务。参数task传入自然语言描述。","parameters":{"type":"object","properties":{"task":{"type":"string"}},"required":["task"]}}},
-            {"type":"function","function":{"name":"gpt_research","description":"📊 自主研究：自动搜索→抓取→生成带引用的研究报告。参数query传入研究问题。","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}}},
-            {"type":"function","function":{"name":"openhands_generate","description":"🏗️ 全栈项目生成：生成前端+后端+数据库+测试的完整项目。参数description传入项目描述，project_type可选fullstack/frontend/backend/api。","parameters":{"type":"object","properties":{"description":{"type":"string"},"project_type":{"type":"string"}},"required":["description"]}}},
-            {"type":"function","function":{"name":"letta_message","description":"🧠 Letta记忆：发送消息到操作系统级记忆系统，支持无限上下文。参数message传入消息。","parameters":{"type":"object","properties":{"message":{"type":"string"}},"required":["message"]}}},
-            {"type":"function","function":{"name":"composio_execute","description":"🔧 Composio工具：执行200+外部工具（GitHub/Slack/Gmail等）。参数app_name传应用名，action_name传操作名，params传参数。","parameters":{"type":"object","properties":{"app_name":{"type":"string"},"action_name":{"type":"string"},"params":{"type":"string"}},"required":["app_name","action_name"]}}},
-            {"type":"function","function":{"name":"self_evolving_analyze","description":"🧬 自进化分析：分析代码库，找出潜在改进点（bug/优化/重构/功能）。参数repo_path可选，默认当前目录。","parameters":{"type":"object","properties":{"repo_path":{"type":"string"}}}}},
-            {"type":"function","function":{"name":"moltron_learn","description":"📚 Moltron技能学习：学习新技能并写入Skills.md。参数skill_name传技能名，skill_description传描述。","parameters":{"type":"object","properties":{"skill_name":{"type":"string"},"skill_description":{"type":"string"}},"required":["skill_name","skill_description"]}}},
-            {"type":"function","function":{"name":"accomplish_desktop","description":"🖥️ 桌面自动化：执行桌面自动化工作流（键鼠操作/截图/应用启动）。参数workflow传入步骤列表。","parameters":{"type":"object","properties":{"workflow":{"type":"string"}}}}},
-            {"type":"function","function":{"name":"toolbench_discover","description":"🔌 ToolBench API发现：从12万+API注册表中发现可以调用的外部API。参数query搜索关键词，category过滤类别，action可选search/register/stats/detail。","parameters":{"type":"object","properties":{"query":{"type":"string"},"category":{"type":"string"},"action":{"type":"string"},"api_name":{"type":"string"}}}}},
-            # ===== 2026-06-09 新增16个集成工具 =====
-            {"type":"function","function":{"name":"markitdown_convert","description":"📄 文档转Markdown：将PDF/Word/Excel/PPT/图片转为Markdown格式，供LLM读取。参数file_path传文件路径。","parameters":{"type":"object","properties":{"file_path":{"type":"string"},"text":{"type":"string"},"file_type":{"type":"string"}}}}},
-            {"type":"function","function":{"name":"scrapegraphai_scrape","description":"🕷️ AI智能爬虫：一句话描述让AI自动爬取网页结构化数据。参数url传网址，prompt传提取内容描述。","parameters":{"type":"object","properties":{"url":{"type":"string"},"prompt":{"type":"string"}},"required":["url"]}}},
-            {"type":"function","function":{"name":"interpreter_execute","description":"💻 电脑控制：用自然语言控制电脑（读写文件/运行代码/操作系统）。参数command传描述。","parameters":{"type":"object","properties":{"command":{"type":"string"},"language":{"type":"string"}},"required":["command"]}}},
-            {"type":"function","function":{"name":"s2c_generate","description":"🎨 截图转代码：上传截图/设计稿直接生成前端代码（Vue/React/HTML）。参数image_path传图片路径，stack选技术栈。","parameters":{"type":"object","properties":{"image_path":{"type":"string"},"image_url":{"type":"string"},"stack":{"type":"string"}}}}},
-            {"type":"function","function":{"name":"pra_review","description":"🔍 PR代码审查：AI自动审查GitHub PR，提供行级反馈和修复建议。参数pr_url传PR链接，repo传仓库，pr_number传编号。","parameters":{"type":"object","properties":{"pr_url":{"type":"string"},"repo":{"type":"string"},"pr_number":{"type":"integer"}}}}},
-            {"type":"function","function":{"name":"qodo_testgen","description":"🧪 自动生成测试：给源码自动生成单元测试。参数source_path传文件路径，framework选pytest/unittest/jest。","parameters":{"type":"object","properties":{"source_path":{"type":"string"},"source_code":{"type":"string"},"framework":{"type":"string"}}}}},
-            {"type":"function","function":{"name":"aider_edit","description":"✏️ AI代码编辑：用自然语言描述修改意见，AI自动修改代码文件。参数file_path传文件，instruction传修改描述。","parameters":{"type":"object","properties":{"file_path":{"type":"string"},"instruction":{"type":"string"}},"required":["file_path","instruction"]}}},
-            {"type":"function","function":{"name":"openclaw_connect","description":"📱 消息平台桥接：连接OpenClaw到Telegram/WhatsApp/Slack/Discord等20+平台。参数platform平台名，bot_token传Token。","parameters":{"type":"object","properties":{"platform":{"type":"string"},"bot_token":{"type":"string"}},"required":["platform"]}}},
-            {"type":"function","function":{"name":"openclaw_send","description":"📤 发送消息：通过已桥接的OpenClaw平台发送消息。参数platform平台，recipient接收者，message内容。","parameters":{"type":"object","properties":{"platform":{"type":"string"},"recipient":{"type":"string"},"message":{"type":"string"}},"required":["platform","recipient","message"]}}},
-            {"type":"function","function":{"name":"tts_speak","description":"🔊 语音合成：文本转语音。参数text传文字，voice选音色，emotion选情绪。","parameters":{"type":"object","properties":{"text":{"type":"string"},"voice":{"type":"string"},"emotion":{"type":"string"}},"required":["text"]}}},
-            {"type":"function","function":{"name":"chatdev_run","description":"🤖 ChatDev多智能体：自动组建智能体团队完成任务。参数task传任务描述。","parameters":{"type":"object","properties":{"task":{"type":"string"}},"required":["task"]}}},
-            {"type":"function","function":{"name":"openmanus_run","description":"🦾 OpenManus通用Agent：运行通用AI Agent任务。参数task传任务描述。","parameters":{"type":"object","properties":{"task":{"type":"string"}},"required":["task"]}}},
-            {"type":"function","function":{"name":"autogpt_run","description":"🧠 AutoGPT自主Agent：长期自主执行任务（计划→执行→评估循环）。参数goal传目标。","parameters":{"type":"object","properties":{"goal":{"type":"string"},"max_steps":{"type":"integer"}},"required":["goal"]}}},
-            {"type":"function","function":{"name":"agenteval_benchmark","description":"📊 Agent评测：自动评测Agent性能（准确率/响应时间/通过率）。无参数自动运行。","parameters":{"type":"object","properties":{}}}},
-            {"type":"function","function":{"name":"swe_fix","description":"🛠️ SWE-agent：自动分析和修复GitHub Issue。参数repo传仓库，issue_number传Issue编号。","parameters":{"type":"object","properties":{"repo":{"type":"string"},"issue_number":{"type":"integer"}},"required":["repo","issue_number"]}}},
-            {"type":"function","function":{"name":"gptpilot_build","description":"🏗️ GPT-Pilot：从需求生成完整项目（多个代码文件）。参数description传项目描述。","parameters":{"type":"object","properties":{"description":{"type":"string"}},"required":["description"]}}},
-            {"type":"function","function":{"name":"text2sql_query","description":"🗃️ 自然语言查数据库：用中文描述直接查数据库出结果。参数question传问题，connection传连接名。","parameters":{"type":"object","properties":{"question":{"type":"string"},"connection":{"type":"string"}},"required":["question"]}}},
-            {"type":"function","function":{"name":"bolt_generate","description":"⚡ Bolt.new：一句话生成完整Web应用。参数prompt传应用描述，framework选框架。","parameters":{"type":"object","properties":{"prompt":{"type":"string"},"framework":{"type":"string"}},"required":["prompt"]}}},
-            {"type":"function","function":{"name":"agentk8s_deploy","description":"☸️ K8s部署：生成Agent的Kubernetes部署清单。参数agent_name传名称。","parameters":{"type":"object","properties":{"agent_name":{"type":"string"}}}}},
-            # ===== 2026-06-09 第3轮22个集成工具 =====
-            {"type":"function","function":{"name":"openmontage_generate_script","description":"🎬 视频脚本生成：OpenMontage AI视频制作。参数topic传主题，style选风格(documentary/storytelling/tutorial/promotion/vlog)。","parameters":{"type":"object","properties":{"topic":{"type":"string"},"style":{"type":"string"},"duration":{"type":"integer"}},"required":["topic"]}}},
-            {"type":"function","function":{"name":"openmontage_search_materials","description":"🎞️ 视频素材搜索：搜索OpenMontage可用视频素材。参数keywords传搜索词(逗号分隔)。","parameters":{"type":"object","properties":{"keywords":{"type":"string"}},"required":["keywords"]}}},
-            {"type":"function","function":{"name":"lida_visualize","description":"📈 LIDA数据可视化：自然语言描述→自动生成图表。参数data_description传数据描述，goal传可视化目标，chart_type可指定类型(bar/line/scatter/pie)。","parameters":{"type":"object","properties":{"data_description":{"type":"string"},"goal":{"type":"string"},"chart_type":{"type":"string"}},"required":["data_description","goal"]}}},
-            {"type":"function","function":{"name":"lida_explore","description":"🔬 探索性数据分析：自动分析CSV数据文件并生成多角度图表。参数data_file_path传文件路径。","parameters":{"type":"object","properties":{"data_file_path":{"type":"string"}},"required":["data_file_path"]}}},
-            {"type":"function","function":{"name":"paddleocr_image","description":"📝 OCR图片文字识别：从图片中提取文字（支持中英文）。参数image_path传图片路径，lang选语言(ch/en)。","parameters":{"type":"object","properties":{"image_path":{"type":"string"},"lang":{"type":"string"}},"required":["image_path"]}}},
-            {"type":"function","function":{"name":"paddleocr_pdf","description":"📄 OCR PDF识别：从PDF中提取文字（逐页）。参数pdf_path传文件路径。","parameters":{"type":"object","properties":{"pdf_path":{"type":"string"}},"required":["pdf_path"]}}},
-            {"type":"function","function":{"name":"zen_scan","description":"🔒 安全漏洞扫描：对目标进行安全扫描发现潜在风险。参数target传域名/IP，scan_type选扫描模式(quick/full)。","parameters":{"type":"object","properties":{"target":{"type":"string"},"scan_type":{"type":"string"}},"required":["target"]}}},
-            {"type":"function","function":{"name":"zen_report","description":"📋 安全报告生成：生成安全评估总结报告。参数target传扫描目标。","parameters":{"type":"object","properties":{"target":{"type":"string"}},"required":["target"]}}},
-            {"type":"function","function":{"name":"shannon_audit","description":"🔐 代码安全审计：用Semgrep自动审计源码安全漏洞。参数source_path传源码目录路径。","parameters":{"type":"object","properties":{"source_path":{"type":"string"}},"required":["source_path"]}}},
-            {"type":"function","function":{"name":"openant_scan","description":"🛡️ 漏洞发现扫描：LLM驱动的Web安全扫描（Headers/Cookie/HSTS检查）。参数target传目标URL。","parameters":{"type":"object","properties":{"target":{"type":"string"}},"required":["target"]}}},
-            {"type":"function","function":{"name":"legal_review_contract","description":"⚖️ 合同条款审查：AI自动审查合同条款（免责/仲裁/违约责任等）。参数contract_text传合同文本。","parameters":{"type":"object","properties":{"contract_text":{"type":"string"}},"required":["contract_text"]}}},
-            {"type":"function","function":{"name":"legal_analyze_compliance","description":"📜 合规性分析：检查文档是否符合法规要求(个保法等)。参数document_text传文档内容，standard传合规标准。","parameters":{"type":"object","properties":{"document_text":{"type":"string"},"standard":{"type":"string"}},"required":["document_text"]}}},
-            {"type":"function","function":{"name":"twenty_create_contact","description":"👤 CRM创建联系人：在Twenty CRM中创建客户联系人。参数name传姓名，email传邮箱。","parameters":{"type":"object","properties":{"name":{"type":"string"},"email":{"type":"string"}},"required":["name"]}}},
-            {"type":"function","function":{"name":"twenty_create_deal","description":"💰 CRM创建交易：在Twenty CRM中创建销售机会。参数name传交易名，amount传金额。","parameters":{"type":"object","properties":{"name":{"type":"string"},"amount":{"type":"number"}},"required":["name","amount"]}}},
-            {"type":"function","function":{"name":"frappe_hr_employee","description":"🏢 HR员工查询：查询Frappe HR系统员工信息。参数employee_id传员工编号。","parameters":{"type":"object","properties":{"employee_id":{"type":"string"}},"required":["employee_id"]}}},
-            {"type":"function","function":{"name":"frappe_hr_leave","description":"📅 HR请假申请：提交请假申请。参数employee_id员工号，start_date开始日期，end_date结束日期。","parameters":{"type":"object","properties":{"employee_id":{"type":"string"},"start_date":{"type":"string"},"end_date":{"type":"string"}},"required":["employee_id","start_date","end_date"]}}},
-            {"type":"function","function":{"name":"invoice_create","description":"🧾 创建发票：在Invoice Ninja创建发票。参数client传客户名，amount传金额。","parameters":{"type":"object","properties":{"client":{"type":"string"},"amount":{"type":"number"}},"required":["client","amount"]}}},
-            {"type":"function","function":{"name":"invoice_track_expense","description":"💳 记录费用：追踪记录业务费用。参数description传描述，amount传金额。","parameters":{"type":"object","properties":{"description":{"type":"string"},"amount":{"type":"number"}},"required":["description","amount"]}}},
-            {"type":"function","function":{"name":"chatwoot_create_ticket","description":"🎫 创建客服工单：在Chatwoot中创建支持工单。参数subject传标题。","parameters":{"type":"object","properties":{"subject":{"type":"string"},"description":{"type":"string"},"customer_email":{"type":"string"}},"required":["subject"]}}},
-            {"type":"function","function":{"name":"chatwoot_reply_ticket","description":"💬 回复工单：回复Chatwoot客服工单。参数ticket_id传工单ID，message传回复内容。","parameters":{"type":"object","properties":{"ticket_id":{"type":"string"},"message":{"type":"string"}},"required":["ticket_id","message"]}}},
-            {"type":"function","function":{"name":"postiz_create_post","description":"📱 社交媒体发帖：通过Postiz发布到Twitter/Discord等平台。参数content传内容，platforms传平台数组。","parameters":{"type":"object","properties":{"content":{"type":"string"},"platforms":{"type":"string"}},"required":["content"]}}},
-            {"type":"function","function":{"name":"mautic_send_email","description":"📧 营销邮件发送：通过Mautic发送营销邮件。参数subject传主题，content传内容。","parameters":{"type":"object","properties":{"subject":{"type":"string"},"content":{"type":"string"}},"required":["subject","content"]}}},
-            {"type":"function","function":{"name":"superset_create_chart","description":"📊 Superset图表创建：在Apache Superset中创建可视化图表。参数dataset传数据集，chart_type图表类型(bar/line/pie/table)。","parameters":{"type":"object","properties":{"dataset":{"type":"string"},"chart_type":{"type":"string"}},"required":["dataset"]}}},
-            {"type":"function","function":{"name":"dataease_create_dashboard","description":"📉 DataEase仪表盘：创建中文BI仪表盘。参数name传名称。","parameters":{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}}},
-            {"type":"function","function":{"name":"heyform_create_survey","description":"📋 创建问卷调查：用HeyForm创建问卷/反馈表单。参数title传标题。","parameters":{"type":"object","properties":{"title":{"type":"string"}},"required":["title"]}}},
-            {"type":"function","function":{"name":"docetl_extract","description":"📂 文档ETL提取：批量提取文档内容（支持多种格式）。参数file_paths传文件路径数组。","parameters":{"type":"object","properties":{"file_paths":{"type":"string"}},"required":["file_paths"]}}},
-            {"type":"function","function":{"name":"accord_create_contract","description":"📝 创建法律协议：创建标准法律协议/合同。参数template传模板名(generic/nda/sla/employment)。","parameters":{"type":"object","properties":{"template":{"type":"string"}},"required":["template"]}}},
-            {"type":"function","function":{"name":"claude_code_generate","description":"💻 Claude Code生成代码：调用Claude Code API生成高质量代码。参数prompt传需求描述，language传编程语言。","parameters":{"type":"object","properties":{"prompt":{"type":"string"},"language":{"type":"string"}},"required":["prompt"]}}},
-            {"type":"function","function":{"name":"plane_project","description":"📋 项目管理：在Plane中创建/管理项目（开源Jira替代）。参数name传项目名，description传描述。","parameters":{"type":"object","properties":{"name":{"type":"string"},"description":{"type":"string"}},"required":["name"]}}},
-            {"type":"function","function":{"name":"openproject_mgmt","description":"📋 企业项目管理：OpenProject创建/管理项目（甘特图/成本/工时）。参数name传项目名。","parameters":{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}}},
-            {"type":"function","function":{"name":"cal_schedule","description":"📅 日程调度：Cal.com自动安排会议/预订。参数title传标题，duration传分钟数，invitees传参会者。","parameters":{"type":"object","properties":{"title":{"type":"string"},"duration":{"type":"integer"},"invitees":{"type":"string"}},"required":["title"]}}},
-            {"type":"function","function":{"name":"novu_notify","description":"📢 统一通知：通过Novu发送Email/SMS/推送通知。参数channel传通道(email/sms/push)，to传接收者，content传内容。","parameters":{"type":"object","properties":{"channel":{"type":"string"},"to":{"type":"string"},"content":{"type":"string"}},"required":["channel","to","content"]}}},
-            {"type":"function","function":{"name":"keycloak_auth","description":"🔐 身份认证：Keycloak用户认证/SSO登录。参数username传用户名，password传密码。","parameters":{"type":"object","properties":{"username":{"type":"string"},"password":{"type":"string"}},"required":["username","password"]}}},
-            {"type":"function","function":{"name":"meilisearch_search","description":"🔍 全文搜索：Meilisearch毫秒级搜索（支持中文）。参数query传搜索词，index传索引名。","parameters":{"type":"object","properties":{"query":{"type":"string"},"index":{"type":"string"}},"required":["query"]}}},
-            {"type":"function","function":{"name":"minio_storage","description":"💾 对象存储：MinIO S3存储文件管理。参数action传操作(create_bucket/upload/list/delete)，bucket传桶名，file_path传文件。","parameters":{"type":"object","properties":{"action":{"type":"string"},"bucket":{"type":"string"},"file_path":{"type":"string"}},"required":["action","bucket"]}}},
-            {"type":"function","function":{"name":"opentofu_apply","description":"🏗️ IaC基础设施：OpenTofu声明式云资源管理。参数config传配置JSON。","parameters":{"type":"object","properties":{"config":{"type":"string"}},"required":["config"]}}},
-            {"type":"function","function":{"name":"ansible_run","description":"⚙️ 配置管理：Ansible Playbook生成执行。参数playbook传任务描述，inventory传主机列表。","parameters":{"type":"object","properties":{"playbook":{"type":"string"},"inventory":{"type":"string"}},"required":["playbook"]}}},
-            {"type":"function","function":{"name":"strapi_cms","description":"📄 CMS内容管理：Strapi Headless CMS内容创建。参数content_type传内容类型，data传JSON数据。","parameters":{"type":"object","properties":{"content_type":{"type":"string"},"data":{"type":"string"}},"required":["content_type","data"]}}},
-            {"type":"function","function":{"name":"directus_api","description":"🗄️ 数据平台：Directus自动为SQL数据库生成API。参数collection传集合名。","parameters":{"type":"object","properties":{"collection":{"type":"string"}},"required":["collection"]}}},
-            {"type":"function","function":{"name":"uptime_kuma","description":"📊 站点监控：Uptime Kuma监控站点状态（80+协议）。参数target传监控目标URL，type传协议(http/ping/port/dns)。","parameters":{"type":"object","properties":{"target":{"type":"string"},"type":{"type":"string"}},"required":["target"]}}},
-            {"type":"function","function":{"name":"oneuptime_monitor","description":"📊 一体化可观测：OneUptime监控+告警+事件管理。参数monitor_type传监控类型(website/server/api)。","parameters":{"type":"object","properties":{"monitor_type":{"type":"string"}},"required":["monitor_type"]}}},
-            {"type":"function","function":{"name":"signoz_apm","description":"📊 APM性能监控：SigNoz追踪+指标+日志。参数service传服务名。","parameters":{"type":"object","properties":{"service":{"type":"string"}},"required":["service"]}}},
-            {"type":"function","function":{"name":"wazuh_siem","description":"🛡️ 安全监控：Wazuh SIEM/XDR入侵检测。参数action传操作(scan/status/report)。","parameters":{"type":"object","properties":{"action":{"type":"string"}},"required":["action"]}}},
-            {"type":"function","function":{"name":"nats_mq","description":"🔄 消息队列：NATS轻量级事件总线。参数subject传主题，message传消息内容。","parameters":{"type":"object","properties":{"subject":{"type":"string"},"message":{"type":"string"}},"required":["subject","message"]}}},
-            {"type":"function","function":{"name":"rabbitmq_broker","description":"🔄 消息代理：RabbitMQ企业级消息管理。参数action传操作(create_queue/send/consume)，queue传队列名。","parameters":{"type":"object","properties":{"action":{"type":"string"},"queue":{"type":"string"},"message":{"type":"string"}},"required":["action","queue"]}}},
-            {"type":"function","function":{"name":"gitea_git","description":"📦 Git仓库管理：Gitea自托管Git（仓库/PR/CI/CD）。参数action传操作(create_repo/create_pr/run_ci)，repo传仓库名。","parameters":{"type":"object","properties":{"action":{"type":"string"},"repo":{"type":"string"}},"required":["action","repo"]}}},
-            {"type":"function","function":{"name":"wikijs_wiki","description":"📚 Wiki知识管理：Wiki.js创建/编辑页面。参数title传标题，content传内容。","parameters":{"type":"object","properties":{"title":{"type":"string"},"content":{"type":"string"}},"required":["title","content"]}}},
-            {"type":"function","function":{"name":"bookstack_wiki","description":"📚 BookStack文档系统：书架→章节→页面管理。参数action传操作(create_shelf/create_book/create_page)，name传名称。","parameters":{"type":"object","properties":{"action":{"type":"string"},"name":{"type":"string"},"content":{"type":"string"}},"required":["action","name"]}}},
-            {"type":"function","function":{"name":"projectsend_files","description":"📁 安全文件共享：ProjectSend上传/分享文件。参数action传操作(upload/share/list)，file_path传文件路径。","parameters":{"type":"object","properties":{"action":{"type":"string"},"file_path":{"type":"string"}},"required":["action"]}}},
-        ]
+        """返回工具列表（112+内置工具 + 动态生成的自定义工具）"""
+        from api.agent_tools_defs import BUILTIN_TOOLS
+        bt = list(BUILTIN_TOOLS)
         for tname in _GENERATED_TOOLS:
             bt.append({"type":"function","function":{"name":f"tool_{tname}","description":f"自定义工具: {tname}","parameters":{"type":"object","properties":{"params":{"type":"string"}}}}})
-            # ===== 第5轮新增20个集成工具 =====
-            {"type": "function", "function": {"name": "odoo_manage", "description": "🏢 Odoo ERP：管理会计/库存/采购/销售/制造/HR模块", "parameters": {"type": "object", "properties": {"module": {"type": "string", "description": "操作模块"}, "action": {"type": "string", "description": "操作类型"}}, "required": ["module"]}}},
-            {"type": "function", "function": {"name": "erpclaw_manage", "description": "🏭 ERPClaw AI-ERP：14行业46模块AI原生ERP", "parameters": {"type": "object", "properties": {"module": {"type": "string", "description": "模块"}, "industry": {"type": "string", "description": "行业"}}, "required": ["module", "industry"]}}},
-            {"type": "function", "function": {"name": "coolify_deploy", "description": "🚀 Coolify PaaS：自托管部署应用和数据库", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "deploy/status"}}, "required": ["app_name"]}}},
-            {"type": "function", "function": {"name": "rustdesk_connect", "description": "🖥️ RustDesk远程桌面：远程控制电脑", "parameters": {"type": "object", "properties": {"target": {"type": "string", "description": "目标机器"}, "action": {"type": "string", "description": "connect/status"}}, "required": ["target"]}}},
-            {"type": "function", "function": {"name": "docuseal_sign", "description": "✍️ DocuSeal电子签名：在线文档签署", "parameters": {"type": "object", "properties": {"document": {"type": "string", "description": "文档"}, "signers": {"type": "string", "description": "签署人"}}, "required": ["document", "signers"]}}},
-            {"type": "function", "function": {"name": "homeassistant_control", "description": "🏠 智能家居：控制IoT设备/灯光/传感器/自动化场景", "parameters": {"type": "object", "properties": {"device": {"type": "string", "description": "设备"}, "action": {"type": "string", "description": "操作"}, "state": {"type": "string", "description": "状态"}}, "required": ["device"]}}},
-            {"type": "function", "function": {"name": "vaultwarden_manage", "description": "🔐 密码管理：安全存储和检索密码凭证", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "list/create/get"}, "site": {"type": "string", "description": "网站"}}, "required": ["site"]}}},
-            {"type": "function", "function": {"name": "nocodb_manage", "description": "📊 NocoDB数据表：数据库→电子表格可视化管理", "parameters": {"type": "object", "properties": {"table": {"type": "string", "description": "表名"}, "action": {"type": "string", "description": "list/create/query"}}, "required": ["table"]}}},
-            {"type": "function", "function": {"name": "appsmith_build", "description": "🛠️ Appsmith低代码：拖拽式构建内部管理工具", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "create/edit"}}, "required": ["app_name"]}}},
-            {"type": "function", "function": {"name": "airbyte_sync", "description": "🔄 Airbyte ETL：数据采集/清洗/同步管道", "parameters": {"type": "object", "properties": {"source": {"type": "string", "description": "数据源"}, "destination": {"type": "string", "description": "目标"}, "action": {"type": "string", "description": "sync/status"}}, "required": ["source", "destination"]}}},
-            {"type": "function", "function": {"name": "mlflow_track", "description": "📈 MLflow MLOps：AI模型训练/部署/追踪", "parameters": {"type": "object", "properties": {"experiment": {"type": "string", "description": "实验名"}, "action": {"type": "string", "description": "log/list/compare"}}, "required": ["experiment"]}}},
-            {"type": "function", "function": {"name": "langfuse_observe", "description": "👁️ Langfuse LLM可观测：Prompt管理/评估/追踪", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "trace/score/prompt"}, "project": {"type": "string", "description": "项目"}}, "required": ["project"]}}},
-            {"type": "function", "function": {"name": "hoppscotch_test", "description": "🧪 Hoppscotch API测试：API调试/Mock/回归测试", "parameters": {"type": "object", "properties": {"endpoint": {"type": "string", "description": "API地址"}, "method": {"type": "string", "description": "HTTP方法"}, "body": {"type": "string", "description": "请求体"}}, "required": ["endpoint", "method"]}}},
-            {"type": "function", "function": {"name": "grist_analyze", "description": "📋 Grist电子表格：关系型数据分析/Python公式", "parameters": {"type": "object", "properties": {"table": {"type": "string", "description": "表名"}, "action": {"type": "string", "description": "analyze/query/formula"}}, "required": ["table"]}}},
-            {"type": "function", "function": {"name": "freshrss_read", "description": "📰 FreshRSS聚合：RSS订阅/信息采集/资讯监控", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "read/search/subscribe"}, "feed": {"type": "string", "description": "RSS源"}}, "required": ["feed"]}}},
-            {"type": "function", "function": {"name": "listmonk_send", "description": "📧 Listmonk邮件：邮件列表/Newsletter/营销邮件", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "send/list/create"}, "list_id": {"type": "string", "description": "列表ID"}}, "required": ["list_id"]}}},
-            {"type": "function", "function": {"name": "mermaid_chart", "description": "🗺️ Mermaid图表：文本→流程图/架构图/时序图", "parameters": {"type": "object", "properties": {"chart_type": {"type": "string", "description": "flow/sequence/class/er"}, "description": {"type": "string", "description": "描述"}}, "required": ["chart_type"]}}},
-            {"type": "function", "function": {"name": "nocobase_build", "description": "🏗️ NocoBase低代码：AI+低代码快速构建业务应用", "parameters": {"type": "object", "properties": {"app_name": {"type": "string", "description": "应用名"}, "action": {"type": "string", "description": "create/schema/query"}}, "required": ["app_name"]}}},
-            {"type": "function", "function": {"name": "scriberr_transcribe", "description": "🎤 音频转录：AI将音频/会议转录为文字", "parameters": {"type": "object", "properties": {"audio_path": {"type": "string", "description": "音频路径"}, "action": {"type": "string", "description": "transcribe/list"}}, "required": ["audio_path"]}}},
-            {"type": "function", "function": {"name": "keploy_test", "description": "🧪 Keploy AI测试：自动生成API回归测试", "parameters": {"type": "object", "properties": {"action": {"type": "string", "description": "record/test/report"}, "endpoint": {"type": "string", "description": "API地址"}}, "required": ["endpoint"]}}},
-            # ===== 并发多Agent + 自进化 =====
-            {"type": "function", "function": {"name": "concurrent_run", "description": "🧵 并发多Agent：同时运行多个Agent并行协作完成任务", "parameters": {"type": "object", "properties": {"task_name": {"type": "string", "description": "任务名"}, "details": {"type": "string", "description": "任务详情"}, "mode": {"type": "string", "description": "team(团队协作)/parallel(并行独立)"}}, "required": ["task_name"]}}},
-            {"type": "function", "function": {"name": "yoyo_scan", "description": "🧬 自进化扫描：自动分析代码库质量和潜在改进点", "parameters": {"type": "object", "properties": {"scope": {"type": "string", "description": "扫描范围: auto/api/agents/modules"}}, "required": []}}},
-            {"type": "function", "function": {"name": "yoyo_history", "description": "📊 自进化历史：查看自进化系统的优化记录", "parameters": {"type": "object", "properties": {"limit": {"type": "integer", "description": "返回条数"}}, "required": []}}},
         return bt
 
     def _generate_page(msg, title):

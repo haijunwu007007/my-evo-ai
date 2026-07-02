@@ -27,7 +27,7 @@
 - 8 个桩模块升级为真实桥接（autonomous_agent / grafana_monitor 等）
 - 12 个桩模块升级为实用模块（resilience / bot_handler 等）
 - 24 个纯空壳模块删除（blockchain_web3 / three_d_ar 等）
-- `modules/` 降至 535 个模块（已无空壳），所有留存模块均有真实 dispatch 逻辑
+- `modules/` 降至 546 个模块（已无空壳），所有留存模块均有真实 dispatch 逻辑
 
 ### 架构
 - api_server: 468→345 行精简

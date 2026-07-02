@@ -1,66 +1,107 @@
-"""LLM调用层 — 使用 curl 子进程（最可靠）"""
-import os, json, subprocess
+"""LLM调用层 — 统一使用 core.llm_gateway.LLMPool（单例）
 
-def _get_key():
-    """获取 ZHIPU_API_KEY，优先级：环境变量 > /etc/evo.env > /etc/evo/env > 硬编码"""
-    for src_name, src_val in [
-        ("environ", os.environ.get("ZHIPU_API_KEY")),
-        ("etc/evo.env", _read_file_key("/etc/evo.env")),
-        ("etc/evo/env", _read_file_key("/etc/evo/env", prefix="Environment=")),
-    ]:
-        if src_val:
-            return src_val
-    return ""
+此模块所有函数委托给 LLMPool 全局实例，无需维护自己的 Provider 逻辑。
+通过 config.yaml / 环境变量自动完成 Provider 配置。
+"""
+from __future__ import annotations
 
-def _read_file_key(path, prefix=""):
-    try:
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith(prefix + "ZHIPU_API_KEY="):
-                    return line.split("=", 1)[1].strip()
-    except: pass
-    return ""
+from core.llm_gateway import get_llm_pool
+from core.logging_config import get_logger
+
+logger = get_logger("evo.api.agent_llm")
+_pool = None
+
+
+def _get_pool():
+    """获取全局 LLMPool 单例"""
+    global _pool
+    if _pool is None:
+        _pool = get_llm_pool()
+    return _pool
+
 
 def call_llm(messages, tools=None, key="", timeout=None):
-    # 不管传什么 key，都强制用 _get_key 的保底逻辑
-    effective_key = key or _get_key()
-    api_key = effective_key or _get_key()
-    if not api_key:
-        return ("LLM不可用，请检查API配置或稍后重试", [])
+    """调用 LLM，返回 (content, tool_calls)
+    
+    保持与原有 call_llm() 完全兼容的接口签名。
+    messages: list[dict] — [{"role": "user", "content": "..."}]
+    tools: 暂不通过 LLMPool 传递 tools 参数
+    key: 忽略，LLMPool 自动从环境变量/配置文件获取密钥
+    timeout: 超时秒数
+    returns: (content_str, []) 或 ("", [])
+    """
     try:
-        payload = json.dumps({"model": "GLM-4-Flash", "messages": messages, "max_tokens": 8192})
-        cmd = ['curl', '-s', '-X', 'POST',
-               'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-               '-H', f'Authorization: Bearer {api_key}',
-               '-H', 'Content-Type: application/json',
-               '-d', payload,
-               '--connect-timeout', str(timeout or 15),
-               '--max-time', str(timeout or 30)]
-        r = subprocess.run(cmd, capture_output=True, timeout=(timeout or 30) + 5)
-        stdout = r.stdout.decode('utf-8', errors='replace') if r.stdout else ''
-        stderr = r.stderr.decode('utf-8', errors='replace') if r.stderr else ''
-        import sys; print(f"=== CURL EXIT={r.returncode} STDOUT={stdout[:200]} STDERR={stderr[:200]} ===", file=sys.stderr)
-        if r.returncode == 0 and stdout:
-            try:
-                data = json.loads(stdout)
-                content = data.get("choices",[{}])[0].get("message",{}).get("content","")
-                tc = data.get("choices",[{}])[0].get("message",{}).get("tool_calls",[])
-                result = (content, tc) if content else ("", tc) if tc else (None, None)
-                import sys; print(f"=== CALL_LLM RETURN: content_len={len(content) if content else 0}, has_tc={bool(tc)}, return={result[0][:30] if result[0] else 'NONE'} ===", file=sys.stderr)
-                return result
-            except json.JSONDecodeError:
-                return ("", [])
-        return ("", [])
+        pool = _get_pool()
+        if pool is None:
+            return ("LLM不可用：LLMPool 未初始化", [])
+
+        # 提取最后一条用户消息作为 prompt
+        prompt = ""
+        system_prompt = ""
+        for msg in messages or []:
+            if not isinstance(msg, dict):
+                continue
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role == "system":
+                system_prompt = content
+            elif role == "user":
+                prompt = content
+
+        if not prompt:
+            # 把所有消息拼接
+            prompt = "\n".join(
+                m.get("content", "") for m in (messages or []) if isinstance(m, dict)
+            )
+
+        result = pool.chat_sync(
+            prompt=prompt,
+            system_prompt=system_prompt or "",
+            temperature=0.7,
+        )
+
+        if result and result.get("success"):
+            content = result.get("response", "")
+            logger.info(
+                "[LLM] chat_sync 成功: len=%d model=%s",
+                len(content),
+                result.get("model", "?"),
+            )
+            return (content, [])
+        else:
+            err = result.get("error", "未知错误") if result else "LLMPool 无返回"
+            logger.warning("[LLM] chat_sync 失败: %s", err)
+            return ("", [])
+
     except Exception as e:
+        logger.error("[LLM] call_llm 异常: %s", e)
         return ("", [])
+
 
 def call_llm_stream(messages, key=""):
+    """流式调用（简化版：先非流式获取，按字符 yield）"""
     text, _ = call_llm(messages, key=key)
     if text:
-        for i in range(0, len(text), 5):
-            yield text[i:i+5]
-    yield "__DONE__"
+        for ch in text:
+            yield ch
+    else:
+        yield ""
 
-def get_active_model(api_key="") -> dict:
-    return {"providers": [{"name":"GLM-4-Flash","model":"GLM-4-Flash","priority":100,"task_type":"free","available":bool(_get_key()),"in_cooldown":False,"fail_count":0}]}
+
+def get_active_model():
+    """返回当前活跃的模型信息"""
+    try:
+        pool = _get_pool()
+        if pool is None:
+            return {"provider": "", "model": "", "active": False}
+        providers = pool.list_providers()
+        default_provider = next((p for p in providers if p.get("is_default")), providers[0] if providers else {})
+        return {
+            "provider": default_provider.get("name", ""),
+            "model": pool._default_model if hasattr(pool, "_default_model") else "",
+            "models": pool.list_models() if hasattr(pool, "list_models") else [],
+            "active": bool(providers),
+        }
+    except Exception as e:
+        logger.warning("[LLM] get_active_model 异常: %s", e)
+        return {"provider": "", "model": "", "active": False}

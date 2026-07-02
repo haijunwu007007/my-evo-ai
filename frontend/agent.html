@@ -37,5 +37,14 @@ p{font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.6}
 function open_home(){window.location.href='/'}
 document.getElementById('agtStart').textContent = '⏳ 正在连接...'
 initAgent()
+
+
+// === AUTO-EVO-AI window exports ===
+window.connectAgent = connectAgent;
+window.loadAgents = loadAgents;
+window.disconnectAgent = disconnectAgent;
+window.getAgentStatus = getAgentStatus;
+window.sendCommand = sendCommand;
+
 </script>
 </body></html>

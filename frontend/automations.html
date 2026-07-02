@@ -153,6 +153,15 @@ async function runHeal(){
   }catch(e){alert('修复触发失败: '+e.message)}
 }
 loadStatus()
+
+
+// === AUTO-EVO-AI window exports ===
+window.loadAutomations = loadAutomations;
+window.createAutomation = createAutomation;
+window.editAutomation = editAutomation;
+window.deleteAutomation = deleteAutomation;
+window.toggleAutomation = toggleAutomation;
+
 </script>
 </body>
 </html>

@@ -6,7 +6,7 @@ var _TR={
   'ja':{auth_btn:'🚀 入る',input_placeholder:'何をしたいですか...',greeting:'{name}さん！何をしますか？'},
   'ko':{auth_btn:'🚀 입장',input_placeholder:'원하는 것을 입력하세요...',greeting:'{name}님! 무엇을 할까요?'}
 }
-function __(k){var t=_TR[_LOCALE]||_TR['zh-CN'];return t[k]||k}
+if(!window.__){function __(k){var t=_TR[_LOCALE]||_TR['zh-CN'];return t[k]||k}}
 function setLocale(c){localStorage.setItem('evo_locale',c);window.location.reload()}
 
 var _TOOL_HINTS={"docx_processor":"帮我生成一份文档，主题是：","excel_pro":"帮我创建一个电子表格，包含：","ppt_generator":"帮我生成一份演示文稿，主题是：","pdf_toolkit":"帮我处理这个PDF文件：","code_review":"帮我审查这段代码：","browser_use_task":"帮我用浏览器自动化完成一个任务：","browseract_extract":"帮我用反爬提取这个网页内容：","codemem_query":"帮我查询代码库知识（codebase-memory-mcp）：","gpt_research":"请帮我做一个深度研究：","openhands_generate":"帮我生成一个全栈项目：","letta_message":"记住以下信息到长期记忆：","composio_execute":"使用外部工具执行：","self_evolving_analyze":"帮我分析当前代码库的改进点","moltron_learn":"学习一个新技能：","accomplish_desktop":"执行桌面自动化工作流：","toolbench_discover":"帮我发现可用的外部API：","markitdown_convert":"帮我转换这个文档为Markdown：","scrapegraphai_scrape":"帮我爬取这个网站的数据：","interpreter_execute":"帮我执行这个电脑操作：","s2c_generate":"帮我从截图生成代码：","pra_review":"帮我审查这个PR：","qodo_testgen":"帮我给这个文件生成测试：","aider_edit":"帮我修改这个代码文件：","openclaw_connect":"帮我连接消息平台：","tts_speak":"帮我转换成语音：","chatdev_run":"帮我用多智能体团队完成任务：","autogpt_run":"帮我自主执行这个目标：","agenteval_benchmark":"帮我评测Agent性能：","swe_fix":"帮我分析修复这个Issue：","gptpilot_build":"帮我从需求生成项目：","text2sql_query":"帮我查询数据库：","bolt_generate":"帮我生成Web应用：","openmontage_generate_script":"帮我生成一个视频脚本，主题是：","lida_visualize":"帮我分析数据并生成可视化图表：","paddleocr_image":"帮我识别这张图片中的文字：","paddleocr_pdf":"帮我识别PDF中的文字：","zen_scan":"帮我扫描这个网站的安全漏洞：","shannon_audit":"帮我审计这个目录的代码安全：","legal_review_contract":"帮我审查这份合同：","twenty_create_contact":"帮我在CRM创建一个联系人：","invoice_create":"帮我创建一张发票：","chatwoot_create_ticket":"帮我创建一个客服工单：","postiz_create_post":"帮我在社交媒体发帖：","mautic_send_email":"帮我发送营销邮件：","superset_create_chart":"帮我在Superset创建图表：","dataease_create_dashboard":"帮我创建DataEase仪表盘：","heyform_create_survey":"帮我创建一个问卷调查：","docetl_extract":"帮我提取文档内容：","accord_create_contract":"帮我创建一份协议：","claude_code_generate":"帮我用Claude Code生成代码：","odoo_manage":"帮我管理ERP：","erpclaw_manage":"帮我用AI-ERP管理业务：","coolify_deploy":"帮我在PaaS上部署应用：","rustdesk_connect":"帮我远程连接电脑：","docuseal_sign":"帮我发送电子签名：","homeassistant_control":"帮我控制智能家居设备：","vaultwarden_manage":"帮我管理密码/凭证：","nocodb_manage":"帮我管理数据表格：","appsmith_build":"帮我用低代码构建管理工具：","airbyte_sync":"帮我同步数据管道：","mlflow_track":"帮我追踪AI模型训练：","langfuse_observe":"帮我监控LLM应用：","hoppscotch_test":"帮我测试API：","grist_analyze":"帮我分析电子表格数据：","freshrss_read":"帮我读取RSS资讯：","listmonk_send":"帮我发送邮件：","mermaid_chart":"帮我生成流程图：","nocobase_build":"帮我用低代码构建业务应用：","scriberr_transcribe":"帮我转录音频：","keploy_test":"帮我自动生成API测试：","browseract_extract":"帮我用browseract提取这个网站数据：","codemem_index":"帮我索引这个代码库（codebase-memory-mcp）：","reach_search":"帮我搜索全网信息：","anime_animate":"帮我给这个页面添加动效：","graphify_index":"帮我分析代码库生成知识图谱：","hyper_extract":"帮我从文本提取结构化知识：","kg_query":"帮我查询知识图谱：","headroom_compress":"帮我压缩上下文减少Token消耗：","graphiti_knowledge":"帮我升级知识图谱为时间感知引擎：","mercury_skills":"帮我管理工具权限和Token预算：","aiviz_diagram":"帮我用AI生成专业图表：","opendev_agents":"帮我用并行Agent完成任务：","kilocode_model":"帮我切换AI模型执行：","timesfm_forecast":"帮我做时间序列预测：","eve_learn":"帮我学习 EVE Agent 架构（Vercel filesystem-first）：","openmontage_video":"帮我用 OpenMontage 生成视频：","palmier_mcp":"帮我学习 Palmier Pro MCP 视频编辑："}
@@ -29,6 +29,20 @@ function quickTool(el, name){
   inp.value=el.textContent.trim()+': ';inp.focus()
   var isEnter=function(e){if(e.key==='Enter')send()}
   inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}
+}
+function toolbarFilter(cat){
+  var all=document.querySelectorAll('#tbTools .tool-chip');
+  var tabs=document.querySelectorAll('#tbCats .cat-tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  var activeTab=document.getElementById('tbf_'+(cat==='all'?'all':cat));
+  if(activeTab)activeTab.classList.add('active');
+  all.forEach(function(t){
+    if(cat==='all'||t.getAttribute('data-cat')===cat){
+      t.style.display='inline-flex'
+    }else{
+      t.style.display='none'
+    }
+  });
 }
 function needsTool(msg){var l=msg.toLowerCase();for(var i=0;i<_TOOL_KEYWORDS.length;i++){if(l.indexOf(_TOOL_KEYWORDS[i].toLowerCase())>=0)return true}return false}
 
@@ -214,14 +228,7 @@ function cancelVoiceRecord(e){
 function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 
-var _activeCat=null
-function toggleCategory(id){
-  var el=document.getElementById(id);if(!el)return
-  if(_activeCat===id){el.style.display='none';_activeCat=null;_updateActiveTab(null);return}
-  if(_activeCat){var p=document.getElementById(_activeCat);if(p)p.style.display='none'}
-  el.style.display='flex';_activeCat=id;_updateActiveTab(id)
-}
-function _updateActiveTab(id){var tabs=document.querySelectorAll('.cat-strip .cat-tab');for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',id&&tabs[i].getAttribute('onclick').indexOf(id)>=0)}}
+
 function filterTools(q){
   var tabs=document.querySelectorAll('.cat-strip .cat-tab'),bodies=document.querySelectorAll('.tools-section .cat-body')
   q=q.toLowerCase().trim()
@@ -231,8 +238,6 @@ function filterTools(q){
 }
 (function(){var t=localStorage.getItem('evo_theme');document.getElementById('themeBtn').innerHTML=t==='dark'?'<span class=\"sicon\">🌓</span> 深色':'<span class=\"sicon\">🌙</span> 浅色';if(t==='dark')document.body.classList.add('dark')})()
 function toggleTheme(){var b=document.body;b.classList.toggle('dark');var d=b.classList.contains('dark');localStorage.setItem('evo_theme',d?'dark':'light');document.getElementById('themeBtn').innerHTML=d?'<span class="sicon">🌓</span> 深色':'<span class="sicon">🌙</span> 浅色'}
-
-document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('catStrip');if(s)s.addEventListener('wheel',function(e){if(e.deltaY!==0){this.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false})})
 
 // 语音按钮事件绑定（鼠标 + 触摸）
 ;(function(){

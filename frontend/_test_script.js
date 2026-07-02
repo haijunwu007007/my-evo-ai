@@ -10,7 +10,7 @@ var _TR = {
   'ru': {title:'⚡ AUTO-EVO-AI', subtitle:'Платформа ИИ', auth_heading:'🔐 Начать', auth_user:'Пользователь', auth_user_placeholder:'Ваше имя', auth_pass:'Пароль', auth_pass_placeholder:'Опционально', auth_key:'API Key', auth_key_placeholder:'OpenAI / другой LLM', auth_btn:'🚀 Войти', greeting:'Здравствуйте, {name}!', tab_chat:'💬 Чат', tab_dashboard:'📊 Панель', tab_business:'🏢 Управление', input_placeholder:'Введите...', logout:'🔓 Выйти', new_chat:'🔄 Новый', archives:'📋 История'},
   'ar': {title:'⚡ AUTO-EVO-AI', subtitle:'منصة الذكاء', auth_heading:'🔐 ابدأ', auth_user:'المستخدم', auth_user_placeholder:'اسمك', auth_pass:'كلمة المرور', auth_pass_placeholder:'اختياري', auth_key:'مفتاح API', auth_key_placeholder:'OpenAI / LLM آخر', auth_btn:'🚀 دخول', greeting:'{name}! مرحباً', tab_chat:'💬 محادثة', tab_dashboard:'📊 لوحة', tab_business:'🏢 إدارة', input_placeholder:'اكتب...', logout:'🔓 خروج', new_chat:'🔄 جديد', archives:'📋 سجل'}
 }
-function __(k){var t=_TR[_LOCALE]||_TR['zh-CN']; return t[k]||k}
+if(!window.__){function __(k){var t=_TR[_LOCALE]||_TR['zh-CN']; return t[k]||k}}
 function setLocale(c){
   localStorage.setItem('evo_locale',c)
   window.location.reload()

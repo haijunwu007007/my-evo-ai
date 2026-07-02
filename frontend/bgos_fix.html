@@ -502,7 +502,8 @@ body {
 .animate-slide-in { animation: slideIn 0.3s ease; }
 
 /* 响应式 */
-
+@media (max-width: 1024px) {
+  .sidebar { width: 64px; }
   .sidebar-item span:not(.icon) { display: none; }
   .sidebar-title { display: none; }
   .sidebar-section { padding: 8px; }
@@ -510,14 +511,18 @@ body {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-
+@media (max-width: 640px) {
+  .top-nav { display: none; }
   .stats-grid { grid-template-columns: 1fr; }
 }
-
-
-
-
-
+</style>
+<div id="js-debug" style="display:none">JS_NOT_RUNNING</div>
+<div id="js-check" style="position:fixed;bottom:10px;right:10px;background:#ff4444;color:white;padding:5px 10px;border-radius:5px;z-index:99999;font-size:12px;display:none">JS: ?</div>
+<script>
+// JS check - runs immediately to confirm script executes
+document.getElementById('js-debug').textContent = 'JS_OK';
+// If this doesn't change, the entire script block never executed
+</script>
 
 </head>
 <body>
@@ -636,6 +641,9 @@ body {
     </div>
 
     <div class="sidebar-footer">
+      <button class="sidebar-item" onclick="window.location.href='/'" style="margin-bottom:8px;background:rgba(59,130,246,0.08);color:var(--accent-primary)">
+        <span class="icon" onclick="window.location.href='/'" style="cursor:pointer">&#127968;</span><span onclick="window.location.href='/'" style="cursor:pointer">返回 AUTO-EVO-AI</span>
+      </button>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span>BILLION GROUP OS v6.0</span>
         <span class="tag tag-success">运行中</span>
@@ -1398,15 +1406,10 @@ const AGENT_ROLES = ['CEO','CTO','CFO','COO','产品经理','架构师','程序�
 function runGenesis() { runGenesisFromModal(); }
 
 function init() {
-  try {
-    applyTheme(BGOS.theme);
-    loadData();
-    updateDashboard();
-    logAudit('system', '系统启动', 'success');
-  } catch(e) {
-    console.error('BGOS init error:', e);
-    document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#fff;background:#0a0e17;min-height:100vh"><h1 style="color:#ef4444">系统初始化失败</h1><p style="color:#9ca3af;margin-top:16px">' + e.message + '</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer">重新加载</button></div>';
-  }
+  applyTheme(BGOS.theme);
+  loadData();
+  updateDashboard();
+  logAudit('system', '系统启动', 'success');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2168,79 +2171,39 @@ window.createHumanFromModal=createHumanFromModal;
 window.createTaskFromModal=createTaskFromModal;
 window.runGenesisFromModal=runGenesisFromModal;
 
-// 手机更多面板
-function showMobileMore() {
-  var overlay = document.getElementById('mobile-more-overlay');
-  var panel = document.getElementById('mobile-more-panel');
-  if (overlay) { overlay.style.display = 'block'; }
-  if (panel) { panel.style.display = 'block'; }
-}
-function hideMobileMore() {
-  var overlay = document.getElementById('mobile-more-overlay');
-  var panel = document.getElementById('mobile-more-panel');
-  if (overlay) { overlay.style.display = 'none'; }
-  if (panel) { panel.style.display = 'none'; }
-}
-window.showMobileMore = showMobileMore;
-window.hideMobileMore = hideMobileMore;
 
+// === DIAGNOSTIC: main script executed ===
+document.getElementById('js-debug').textContent = 'MAIN_SCRIPT_OK';
 </script>
 
+
+<script>
+// Global click handler for mobile compatibility - replaces direct onclick
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');
+  if(!el)return;
+  var act=el.getAttribute('data-act');
+  if(act==='home'){window.location.href='/'}
+  else if(act==='switch'){var pg=el.getAttribute('data-page');if(pg)window.switchSidebar(pg)}
+  else if(act==='modal'){var m=el.getAttribute('data-modal');if(m)window.showModal(m)}
+  else if(act==='fn'){var fn=el.getAttribute('data-fn');if(fn&&window[fn])window[fn]()}
+  else if(act==='themes'){window.toggleTheme()}
+});
+// Also add touch-action
+// Mobile fix: trigger native onclick via click()
+document.addEventListener('touchstart',function(e){
+  var el=e.target.closest('[onclick]');
+  if(!el)return;
+  try{var m=el.getAttribute('onclick').match(/^([a-zA-Z_]\w*)/);if(m&&typeof window[m[1]]==='function'){window[m[1]]()}}catch(ex){} // triggers the native onclick handler
+},{passive:true});
+// Ensure all onclick elements respond to touch
+document.querySelectorAll('[onclick]').forEach(function(el){
+  el.style.touchAction='manipulation';
+  el.style.cursor='pointer';
+
+
+
+</script>
 </body>
 </html>
-/* ═══ 手机端优化 ═══ */
-
-  .sidebar-item { padding: 8px 4px !important; font-size: 10px; }
-  .sidebar-item span:not(.icon) { display: none; }
-  .sidebar-title, .sidebar-section { display: none; }
-  .main-content { margin-left: 56px !important; }
-  .top-header .logo-sub { display: none; }
-  .top-nav { gap: 2px; }
-  .top-nav-item { padding: 6px 8px; font-size: 12px; }
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  .two-col, .three-col { grid-template-columns: 1fr; }
-}
-
-  .top-nav-item { font-size: 11px; padding: 4px 6px; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .sidebar { width: 44px !important; }
-  .sidebar-item { font-size: 8px; padding: 6px 2px !important; }
-  .main-content { margin-left: 44px !important; padding: 8px; }
-  .content-card { padding: 10px; }
-  h1 { font-size: 18px; }
-  h2 { font-size: 15px; }
-  h3 { font-size: 13px; }
-}
-
-
-<style>
-/* ===== 响应式适配 ===== */
-@media (max-width: 1024px) {
-  .sidebar { width: 64px; }
-  .sidebar-item span:not(.icon) { display: none; }
-  .sidebar-title { display: none; }
-  .sidebar-section { padding: 8px; }
-  .two-col, .three-col { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 768px) {
-  .sidebar { width: 56px; }
-  .sidebar-item { padding: 8px 4px; font-size: 11px; }
-  .main-content { margin-left: 56px; }
-  .content-card { padding: 12px; }
-  .top-nav { flex-wrap: wrap; }
-  .top-nav-item { font-size: 12px; padding: 6px 8px; }
-}
-
-@media (max-width: 480px) {
-  .sidebar { width: 48px; }
-  .sidebar-item { font-size: 9px; padding: 6px 2px; }
-  .main-content { margin-left: 48px; padding: 8px; }
-  .content-card { padding: 8px; }
-  h1 { font-size: 20px; }
-  h2 { font-size: 16px; }
-  h3 { font-size: 14px; }
-  .stats-grid { grid-template-columns: 1fr; }
-}
-</style>
+</html>

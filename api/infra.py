@@ -49,6 +49,8 @@ from api.infra_models import (ModuleCallRequest, ExecuteRequest,
     PlannerChatRequest, PlannerTaskRequest, EmailConfigRequest,
     NotificationRequest, LLMChatRequest, LLMProviderRequest,
     DocReportRequest, DocPresentationRequest)
+from api.infra_audit import _audit_log, _record_audit
+from api.infra_categories import _MODULE_CATEGORY_RULES, _CATEGORY_OTHER, classify_module
 
 
 # ════════════════════════════════════════════════════════════
@@ -149,61 +151,8 @@ class RateLimiter:
 rate_limiter = RateLimiter(max_requests=200, window_seconds=60)
 
 
-# ════════════════════════════════════════════════════════════
-# 审计日志
-# ════════════════════════════════════════════════════════════
-_audit_log: list[dict] = []
-_MAX_AUDIT = 1000
-
-
-def _record_audit(method: str, path: str, client_ip: str, status: int, latency_ms: float, error: str = ""):
-    entry = {
-        "timestamp": datetime.now().isoformat(),
-        "method": method, "path": path,
-        "client_ip": client_ip, "status": status,
-        "latency_ms": round(latency_ms, 1),
-        "error": error[:200] if error else "",
-    }
-    _audit_log.append(entry)
-    if len(_audit_log) > _MAX_AUDIT:
-        _audit_log.pop(0)
-
-
-# ════════════════════════════════════════════════════════════
-# 模块分类
-# ════════════════════════════════════════════════════════════
-_MODULE_CATEGORY_RULES = [
-    (["agent_", "agent-"], "agent"),
-    (["api_", "api-"], "api"),
-    (["cache_", "cache-"], "cache"),
-    (["security_", "sec_", "waf_", "firewall_"], "security"),
-    (["log_", "audit_"], "logging"),
-    (["db_", "database_", "sql_", "redis_", "mongo_"], "database"),
-    (["auth_", "oauth_", "jwt_", "token_"], "auth"),
-    (["metric_", "monitor_", "perf_", "trace_"], "monitor"),
-    (["notify_", "push_", "email_", "sms_", "message_"], "notification"),
-    (["backup_", "recovery_", "restore_", "snapshot_"], "backup"),
-    (["config_", "setting_", "env_", "feature_"], "config"),
-    (["task_", "job_", "scheduler_", "cron_", "workflow_"], "task"),
-    (["queue_", "mq_", "broker_", "kafka_", "rabbit_"], "messaging"),
-    (["search_", "index_", "rag_", "embedding_"], "search"),
-    (["encrypt_", "crypto_", "ssl_", "cert_", "key_", "secret_"], "crypto"),
-    (["network_", "dns_", "proxy_", "cdn_", "tunnel_"], "network"),
-    (["file_", "storage_", "disk_", "oss_", "s3_"], "storage"),
-    (["data_", "etl_", "pipeline_"], "data"),
-    (["ml_", "ai_", "model_", "train_", "nlp_"], "ai"),
-    (["test_", "lint_", "quality_", "bench_"], "testing"),
-]
-_CATEGORY_OTHER = "system"
-
-
-def classify_module(name: str) -> str:
-    nl = name.lower()
-    for prefixes, cat in _MODULE_CATEGORY_RULES:
-        for p in prefixes:
-            if nl.startswith(p):
-                return cat
-    return _CATEGORY_OTHER
+# 审计日志 + 模块分类已拆分到 infra_audit.py / infra_categories.py
+# 通过上方 import 保持向后兼容
 
 
 # ════════════════════════════════════════════════════════════

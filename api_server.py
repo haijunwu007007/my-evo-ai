@@ -157,6 +157,10 @@ frontend_dir = BASE_DIR / "frontend"
 if frontend_dir.exists():
     app.mount("/frontend", StaticFiles(directory=str(frontend_dir)), name="frontend")
 
+uploads_dir = BASE_DIR / "uploads"
+if uploads_dir.exists():
+    app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
 
 # ═══════════════════════════════════════════════════════
 # 全局异常处理 — 统一 JSON 响应格式
@@ -208,6 +212,19 @@ async def root():
     chat_path = BASE_DIR / "frontend" / "chat.html"
     if chat_path.exists():
         return FileResponse(str(chat_path))
+
+
+@app.get("/{path:path}")
+async def serve_static_html(path: str):
+    """兜底：frontend/ 下的任意 .html 文件自动可访问"""
+    from fastapi.responses import FileResponse
+    from api.infra import BASE_DIR
+    if path.endswith(".html"):
+        fp = BASE_DIR / "frontend" / path
+        if fp.exists() and fp.is_file():
+            return FileResponse(str(fp))
+    from fastapi import HTTPException
+    raise HTTPException(status_code=404, detail="Not Found")
 
 
 @app.get("/api/status")

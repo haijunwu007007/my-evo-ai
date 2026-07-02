@@ -819,18 +819,7 @@ async def llm_session_history(session_id: str, last_n: int = 20):
 
 @router.post("/api/v1/llm/chat")
 async def llm_chat(req: LLMChatRequest):
-    import httpx, json
-    async with httpx.AsyncClient(timeout=120) as client:
-        try:
-            body = {"model":"Qwen3.6-35B-Q4_K_M","messages":[{"role":"user","content":req.prompt}],"max_tokens":2000}
-            r = await client.post("http://127.0.0.1:5999/v1/chat/completions", json=body)
-            data = r.json()
-            msg = data.get("choices",[{}])[0].get("message",{}).get("content","")
-            return {"success":True,"data":{"choices":[{"message":{"content":msg}}]}}
-        except Exception as e:
-            return {"success":False,"error":str(e)}
-
-    """LLM对话 — SSE流式"""
+    """LLM对话 — SSE流式（通过 LLMPool 流式调用）"""
     import asyncio
     pool = get_llm_pool()
     messages = []

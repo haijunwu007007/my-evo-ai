@@ -425,5 +425,14 @@ async function loadMods(){
 }
 loadMods();loadProjects();loadComboList()
 </script>
-<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
+<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()
+
+// === AUTO-EVO-AI window exports ===
+window.showCanvas = showCanvas;
+window.drawFlow = drawFlow;
+window.addNode = addNode;
+window.removeNode = removeNode;
+window.exportCanvas = exportCanvas;
+
+</script>
 </body></html>

@@ -91,5 +91,14 @@ async function loadVideos(){
 }
 loadStatus();loadVideos()
 </script>
-<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
+<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()
+
+// === AUTO-EVO-AI window exports ===
+window.createVideo = createVideo;
+window.loadVideos = loadVideos;
+window.getVideoStatus = getVideoStatus;
+window.deleteVideo = deleteVideo;
+window.listTemplates = listTemplates;
+
+</script>
 </body></html>

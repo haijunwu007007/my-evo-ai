@@ -88,8 +88,8 @@ button.danger{background:#e74c3c}
   <a onclick="showTab('lowcode')">🛠️ 低代码</a>
   <a onclick="showTab('flowchart')">🗺️ 流程图</a>
   <a href="/review">🔍 代码审查</a>
-  <a onclick="showTab('office')">📋 办公套件</a>
-  <a onclick="showTab('hooks')">🪝 Hooks配置</a>
+  <a href="/office">📋 办公套件</a>
+  <a href="/hooks">🪝 Hooks配置</a>
   <a onclick="showTab('env')">🔧 配置</a>
   <a href="/">← 返回</a>
 </div>
@@ -166,10 +166,6 @@ docker-compose up -d metabase    # BI分析</pre></div>
   <input id="envFilter" placeholder="筛选..." oninput="loadEnv()" style="width:300px;margin-bottom:12px">
   <div id="envCats"></div>
 </div>
-
-<div id="tab-office" class="tab-content" style="display:none"><h2>📋 办公套件</h2><div id="officeContent"><p>加载中...</p></div></div>
-
-<div id="tab-hooks" class="tab-content" style="display:none"><h2>🪝 Hooks配置</h2><div id="hooksContent"><p>加载中...</p></div></div>
 
 <div id="tab-lowcode" class="tab-content" style="display:none">
   <h2>🛠️ 低代码平台</h2>
@@ -374,9 +370,9 @@ async function installSkill(id,name){try{var r=await fetch(API+'/skills/market/i
 .mermaid svg{max-width:100%;height:auto}
 </style>
 <script>
-var API = '/api';  // Nginx proxy prefix
+var API = '';  // same-origin API
 // 显示tab
-function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='modules')loadModules();if(name=='llm')loadLlm();if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv();if(name=='office')loadOffice();if(name=='hooks')loadHooks();if(name=='lowcode')lcRender();if(name=='flowchart')setTimeout(fcRender,100)}
+function showTab(name){document.querySelectorAll('.tab-content').forEach(function(e){e.style.display='none'});var el=document.getElementById('tab-'+name);if(el)el.style.display='block';document.querySelectorAll('.sidebar a').forEach(function(a){a.classList.remove('active')});document.querySelector('.sidebar a[onclick*="'+name+'"]')&&document.querySelector('.sidebar a[onclick*="'+name+'"]').classList.add('active');if(name=='modules')loadModules();if(name=='llm')loadLlm();if(name=='tasks')loadTasks();if(name=='files')loadFiles();if(name=='users')loadUsers();if(name=='plugins')loadPlugins();if(name=='payment')loadPayment();if(name=='quota')loadQuota();if(name=='devtokens')loadTokens();if(name=='skills')loadSkills();if(name=='gateway')loadGateway();if(name=='env')loadEnv();if(name=='lowcode')lcRender();if(name=='flowchart')setTimeout(fcRender,100)}
 // 仪表盘
 async function loadStats(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('stats').innerHTML='<div class=stat><div class=num>'+s.modules_total+'</div><div class=label>模块</div></div><div class=stat><div class=num>456</div><div class=label>技能</div></div><div class=stat><div class=num>101</div><div class=label>集成</div></div><div class=stat><div class=num>'+s.api_version+'</div><div class=label>版本</div></div>'}catch(e){document.getElementById('stats').innerHTML='<p>加载失败</p>'}}
 loadStats()
@@ -411,22 +407,12 @@ async function loadSkills(){var q=document.getElementById('skillSearch').value||
 function searchSkills(){loadSkills()}
 // 网关
 var _gwSlug = ''
-async function loadGateway(){var q=document.getElementById('gwSearch').value||'';try{var r=await fetch(API+'/gateway/tools/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(t){html+='<tr><td>'+(t.icon?t.icon:'🔌')+' '+(t.name||'')+'</td><td>'+t.auth_type+'</td><td class="'+(t.enabled?'success':'warn')+'">'+(t.enabled?'✅ 已启用':'⏸ 未启用')+'</td><td><button onclick="openGw(\''+t.slug+'\',\''+t.name+'\',\''+t.auth_type+'\')">⚙️</button></td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){}}
+async function loadGateway(){var q=document.getElementById('gwSearch').value||'';try{var r=await fetch(API+'/gateway/tools/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(t){html+='<tr><td>'+(t.icon?t.icon:'🔌')+' '+(t.name||'')+'</td><td>'+t.auth_type+'</td><td class='+(t.enabled?'success'>✅ 已启用':'warn'>⏸ 未启用')+'</td><td><button onclick="openGw(\''+t.slug+'\',\''+t.name+'\',\''+t.auth_type+'\')">⚙️</button></td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){}}
 function openGw(slug,name,type){_gwSlug=slug;document.getElementById('gwModalTitle').textContent='🌐 配置 '+name;var fields='';if(type=='api_key'){fields='<label>API Key</label><input id="gwKey" placeholder="sk-..." style="width:100%">'}else if(type=='basic'){fields='<label>用户名</label><input id="gwUser" placeholder="user" style="width:100%"><label>密码</label><input id="gwPass" type="password" style="width:100%">'}else if(type=='oauth2'){fields='<label>Client ID</label><input id="gwCid" style="width:100%"><label>Client Secret</label><input id="gwCs" type="password" style="width:100%">'}else{fields='<label>API Key</label><input id="gwKey" style="width:100%">'}
 fields+='<div id="gwTestResult" style="margin-top:8px;font-size:12px"></div>'
 document.getElementById('gwModalBody').innerHTML=fields;document.getElementById('gwModal').style.display='flex'}
 async function gwSave(){try{var body={};if(document.getElementById('gwKey'))body.api_key=document.getElementById('gwKey').value;if(document.getElementById('gwUser'))body.username=document.getElementById('gwUser').value;if(document.getElementById('gwPass'))body.password=document.getElementById('gwPass').value;if(document.getElementById('gwCid'))body.client_id=document.getElementById('gwCid').value;if(document.getElementById('gwCs'))body.client_secret=document.getElementById('gwCs').value;var r=await fetch(API+'/gateway/tools/'+_gwSlug+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var d=await r.json();alert(d.result||'已保存');document.getElementById('gwModal').style.display='none';loadGateway()}catch(e){alert('保存失败: '+e.message)}}
 async function gwTest(){if(!_gwSlug)return;document.getElementById('gwTestResult').textContent='⏳ 测试中...';try{var r=await fetch(API+'/gateway/tools/'+_gwSlug+'/test',{method:'POST'});var d=await r.json();document.getElementById('gwTestResult').textContent=d.result||(d.success?'✅ 成功':'❌ 失败')}catch(e){document.getElementById('gwTestResult').textContent='❌ '+e.message}}
-// 办公套件
-async function loadOffice(){try{var r=await fetch(API+'/files');var d=await r.json();var items=d.files||d||[];var html='<div style=margin:16px 0><button onclick=officeCreate() style=margin-right:8px>📄 新建文档</button><button onclick=officeUpload()>📎 上传文件</button></div>';html+='<table><thead><tr><th>文件</th><th>大小</th><th>操作</th></tr></thead><tbody>';if(items.length){items.forEach(function(f){html+='<tr><td>'+(f.name||f.filename||'?')+'</td><td>'+(f.size||'')+'</td><td><button onclick="officeOpen(\''+(f.name||'')+'\')">打开</button></td></tr>'})}else{html+='<tr><td colspan=3 style=color:var(--text2)>暂无文档</td></tr>'}html+='</tbody></table>';document.getElementById('officeContent').innerHTML=html}catch(e){document.getElementById('officeContent').innerHTML='<p>办公套件功能可通过 /chat 页面使用</p>'}}
-function officeCreate(){var n=prompt('文档名称:');if(n&&n.trim()){var c=prompt('初始内容:');alert('文档 "'+n.trim()+'" 创建请求已提交，请前往 /chat 页面操作')}}
-function officeUpload(){prompt('粘贴文件URL:');alert('文件上传请求已提交，请前往 /chat 页面操作')}
-function officeOpen(n){alert('正在打开: '+n+'，请前往 /chat 页面查看')}
-// Hooks
-async function loadHooks(){try{var r=await fetch(API+'/hooks/list');var d=await r.json();var items=d.hooks||[];if(!items.length){document.getElementById('hooksContent').innerHTML='<p style=color:var(--text2)>暂无 Hook 配置</p><button onclick=hookCreate() style=margin-top:12px>➕ 创建 Hook</button>';return}var html='<table><thead><tr><th>名称</th><th>事件</th><th>URL</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(h){html+='<tr><td>'+(h.name||'')+'</td><td>'+(h.event||'')+'</td><td>'+(h.url||'')+'</td><td class='+(h.enabled?'success">✅ 已启用':'warn">⏸ 已禁用')+'</td><td><button onclick="hookToggle(\''+(h.id||'')+'\')">切换</button><button onclick="hookDelete(\''+(h.id||'')+'\')" class=danger>删除</button></td></tr>'});html+='</tbody></table>';document.getElementById('hooksContent').innerHTML=html}catch(e){document.getElementById('hooksContent').innerHTML='<p>Hook 功能未启用（后端需要 /api/hooks/list 端点）</p>'}}
-function hookCreate(){var n=prompt('Hook 名称:');if(!n)return;var e=prompt('事件 (如 push/deploy):');var u=prompt('回调 URL:');if(!u)return;fetch(API+'/hooks/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,event:e,url:u})}).then(function(r){return r.json()}).then(function(){alert('Hook 已创建');loadHooks()}).catch(function(e){alert('创建失败: '+e.message)})}
-function hookToggle(id){fetch(API+'/hooks/list/'+id+'/toggle',{method:'POST'}).then(function(r){return r.json()}).then(function(){loadHooks()}).catch(function(e){alert('操作失败: '+e.message)})}
-function hookDelete(id){if(!confirm('确认删除?'))return;fetch(API+'/hooks/list/'+id,{method:'DELETE'}).then(function(r){return r.json()}).then(function(){loadHooks()}).catch(function(e){alert('删除失败: '+e.message)})}
 // 环境配置
 async function loadEnv(){var f=document.getElementById('envFilter').value||'';try{var r=await fetch(API+'/settings');var d=await r.json();var cats=d.categories||{};var html='';var catNames={'llm':'🤖 AI服务','devops':'🛠️ DevOps工具','comm':'📡 通信通知','storage':'💾 存储服务'};Object.keys(cats).forEach(function(cat){var items=cats[cat];if(f&&!cat.includes(f)&&!items.some(function(i){return i.key.includes(f)||i.label.includes(f)}))return;html+='<h3 style="margin:16px 0 8px">'+ (catNames[cat]||cat) +'</h3><table><thead><tr><th>配置项</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(i){html+='<tr><td>'+i.label+'<br><small style="color:var(--text2)">'+i.doc+'</small></td><td>'+(i.configured?'<span class=success>✅ 已配置</span>':'<span class=warn>⏳ 未配置</span>')+'</td><td>'+(i.configured?'':'<button onclick="openEnv(\''+i.key+'\',\''+i.label+'\',\''+(i.placeholder||'')+'\')">⚙️</button>')+'</td></tr>'});html+='</tbody></table>'});document.getElementById('envCats').innerHTML=html||'<p style="color:var(--text2)">无匹配项</p>'}catch(e){document.getElementById('envCats').innerHTML='<p>加载失败: '+e.message+'</p>'}}
 function openEnv(key,label,ph){var v=prompt('输入 '+label+' ('+key+'):\n'+(ph?'例如: '+ph:''));if(v!==null&&v!==''){fetch(API+'/settings/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,value:v})}).then(function(r){return r.json()}).then(function(d){alert(d.result||'已保存');loadEnv()}).catch(function(e){alert('保存失败')})}}
@@ -443,8 +429,6 @@ window.loadPlugins=loadPlugins;window.loadPayment=loadPayment;window.loadQuota=l
 window.loadTokens=loadTokens;window.createToken=createToken;
 window.uploadRag=uploadRag;window.loadSkills=loadSkills;window.searchSkills=searchSkills;
 window.loadGateway=loadGateway;window.openGw=openGw;window.gwSave=gwSave;window.gwTest=gwTest;
-window.loadOffice=loadOffice;window.officeCreate=officeCreate;window.officeUpload=officeUpload;window.officeOpen=officeOpen;
-window.loadHooks=loadHooks;window.hookCreate=hookCreate;window.hookToggle=hookToggle;window.hookDelete=hookDelete;
 window.loadEnv=loadEnv;window.openEnv=openEnv;
 window.lcRender=lcRender;window.lcSelect=lcSelect;window.lcProps=lcProps;
 window.lcPreview=lcPreview;window.lcExport=lcExport;
@@ -462,6 +446,17 @@ document.addEventListener('click',function(e){
   else if(act==='fn'){var fn=el.getAttribute('data-fn');if(fn&&window[fn])window[fn]()}
   else if(act==='themes'){window.toggleTheme()}
 });
+
+
+  var el=e.target.closest('[onclick]');
+  el.click();
+},{passive:true});
+  el.style.touchAction='manipulation';
+  el.style.cursor='pointer';
+});
+
+
+
 </script>
 </body>
-</html>
+</html></html>

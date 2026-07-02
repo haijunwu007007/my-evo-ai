@@ -40,3 +40,20 @@ async def test_email(req: Request):
     from core.email_sender import send_email
     result = send_email(to, 'AUTO-EVO-AI Test Email', '<h2>Test OK</h2><p>Your SMTP config is working.</p>')
     return JSONResponse(result)
+
+
+@router.post("/api/v1/email/send")
+async def send_email_api(req: Request):
+    """发送邮件（也可被聊天调用）"""
+    data = await req.json()
+    to = data.get('to', '')
+    subject = data.get('subject', 'AUTO-EVO-AI 消息')
+    body = data.get('body', '')
+    if not to:
+        return JSONResponse({"success": False, "error": "收件人地址不能为空"})
+    try:
+        from core.email_sender import send_email as _send
+        result = _send(to, subject, body)
+        return JSONResponse({"success": True, "result": result})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
