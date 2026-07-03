@@ -55,8 +55,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .msg.bot .msg-bubble{background:var(--ai-msg);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg-label{font-size:10px;color:var(--text3);margin-bottom:2px;font-weight:500}
 /* 底部输入区 */
-.input-area{flex-shrink:0;padding:8px 16px 12px}
+.input-area{flex-shrink:0;padding:8px 0 12px}
 .input-row{display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:2px 2px 2px 12px;transition:all .2s}
+@media(min-width:768px){.input-row input{font-size:15px;padding:10px 0}}
+@media(max-width:767px){.input-area{padding:6px 6px 10px}}
 .input-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
 .input-row input{flex:1;border:none;outline:none;padding:8px 0;font-size:14px;background:transparent;color:var(--text)}
 .input-row input::placeholder{color:var(--text3)}
@@ -461,6 +463,10 @@ function checkOnboard() {
         🤖 AI & Agent <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_ai">
+        <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家</button>
+        <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🔗</span> Open Claw</button>
+        <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Open Human</button>
+        <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes Agent</button>
         <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🦾</span> Agent 集群</button>
         <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能 & 扩展</button>
         <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
@@ -595,8 +601,7 @@ function checkOnboard() {
     </div>
   </div>
 
-
-</div>
+      
 
 
 <script>function quickFill(t){var inp=document.getElementById("input");if(inp){inp.value=t;inp.focus();inp.dispatchEvent(new Event("input"))}}</script>
