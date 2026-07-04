@@ -43,7 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .topbar-right span{font-size:15px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .2s}
 .topbar-right span:hover{background:var(--glass);color:var(--accent)}
 /* 内容区 */
-.content-flex{flex:1;display:flex;overflow:hidden}
+.content-flex{flex:1;display:flex;overflow:hidden;position:relative}
 .left-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 对话区 */
 .messages{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin}
@@ -55,20 +55,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .msg.bot .msg-bubble{background:var(--ai-msg);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg-label{font-size:14px;color:var(--text3);margin-bottom:2px;font-weight:500}
 /* 底部输入区 */
-.input-area{flex-shrink:0;padding:8px 0 12px;width:100%}
-.input-row{display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:0;padding:2px 0;transition:all .2s}
+.input-area{flex-shrink:0;padding:8px 16px 12px;width:100%}
+.input-row{display:flex;gap:2px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:0;padding:2px 0;transition:all .2s;width:100%}
+.input-row input{flex:1 1 auto;min-width:0;width:auto}
 .input-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
-.input-row input{flex:1;border:none;outline:none;padding:8px 0;font-size:14px;background:transparent;color:var(--text)}
+.input-row input{flex:1 1 auto;min-width:0;border:none;outline:none;padding:8px 0;font-size:14px;background:transparent;color:var(--text)}
 .input-row input::placeholder{color:var(--text3)}
-.input-row button{width:32px;height:32px;border-radius:7px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.input-row button{width:24px;height:32px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
 .input-row button:hover{opacity:.9}
-.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:0;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:8px;height:32px;width:32px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:0;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:6px;height:32px;width:24px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 /* 语音条 */
 .voice-bar{display:flex;align-items:center;justify-content:center;height:42px;border-radius:8px;background:var(--bg);border:1px solid var(--border);cursor:pointer;user-select:none;position:relative;transition:all .15s;touch-action:manipulation}.voice-bar.hidden{display:none}.voice-bar:active{background:#e74c3c;transform:scale(0.99)}.voice-bar.recording{background:#e74c3c;border-color:#e74c3c;animation:vPulse .8s infinite}@keyframes vPulse{0%{box-shadow:0 0 6px rgba(231,76,60,.4)}50%{box-shadow:0 0 14px rgba(231,76,60,.7)}100%{box-shadow:0 0 6px rgba(231,76,60,.4)}}.voice-bar .vb-label{font-size:14px;font-weight:500;color:var(--text2);pointer-events:none}.voice-bar.recording .vb-label{color:#fff}.voice-bar .vb-cancel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--text3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}.voice-bar .vb-cancel:hover{background:rgba(0,0,0,.15);color:var(--text)}
 /* 右侧面板 */
-.right-panel{width:260px;border-left:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;flex-shrink:0;position:relative;transition:width .25s ease}.right-panel.hidden{width:0;min-width:0;border-left:none;overflow:visible}.right-panel.hidden .right-header,.right-panel.hidden .right-content{display:none}
+.right-panel{width:260px;border-left:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s ease}.right-panel.hidden{width:0;min-width:0;border-left:none;overflow:hidden}.right-panel.hidden .right-header,.right-panel.hidden .right-content{display:none}
 .right-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
-.right-header h3{font-size:16px;font-weight:600;color:var(--text2)}
+.right-toggle-btn{position:absolute;top:50%;transform:translateY(-50%);width:16px;height:48px;background:var(--card);border:1px solid var(--border);border-right:none;border-radius:8px 0 0 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);z-index:10;transition:right .25s ease;right:-8px}.right-toggle-btn:hover{color:var(--accent)}.right-toggle-btn::after{content:"◀"}.right-panel-visible .right-toggle-btn{right:260px}.right-panel-visible .right-toggle-btn::after{content:"▶"}.right-header h3{font-size:16px;font-weight:600;color:var(--text2)}
 .right-header span{cursor:pointer;font-size:14px;color:var(--text3)}
 .attach-bar{display:flex;gap:4px;padding:2px 0;flex-wrap:wrap}.attach-bar:empty{display:none}
 .attach-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:5px;font-size:14px;background:var(--glass);border:1px solid var(--border);color:var(--text2)}.attach-chip .del{color:var(--text3);cursor:pointer;margin-left:2px;font-size:15px}.attach-chip .del:hover{color:#e74c3c}
@@ -599,8 +600,8 @@ function checkOnboard() {
             <div class="ritem">⚡ 94个工具就绪</div>
           </div>
         </div>
-        <div class="right-toggle-btn" id="rightToggleBtn" onclick="toggleRightPanel()"></div>
       </div>
+      <div class="right-toggle-btn" id="rightToggleBtn" onclick="toggleRightPanel()"></div>
     </div>
         <!-- 输入区 -->
         <div class="input-area" id="inputArea">
@@ -629,6 +630,18 @@ function toggleSGroup(btn){
     var arrow=btn.querySelector('.arrow');
     if(arrow)arrow.classList.toggle('open');
   }
+}
+
+// 右侧面板展开/折叠
+function toggleRightPanel(){
+  var panel=document.getElementById('rightPanel');
+  var btn=document.getElementById('rightToggleBtn');
+  panel.classList.toggle('hidden');
+  var parent=panel.parentElement;
+  parent.classList.toggle('right-panel-visible');
+  // 清除JS内联样式，让CSS类控制位置
+  btn.style.right='';
+  // 箭头方向通过CSS伪类控制
 }
 </script>
 
