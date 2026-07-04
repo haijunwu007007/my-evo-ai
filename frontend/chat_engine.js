@@ -68,7 +68,9 @@ function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
 var _sendLock=false
-async function send(){
+async function loadExpert(){quickFill("帮我找一个专家：");document.getElementById("input")?.focus()}
+
+function send(){
   if(_sendLock)return;_sendLock=true
   try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();if(!text&&(!attachFiles||attachFiles.length===0))return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
     // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
