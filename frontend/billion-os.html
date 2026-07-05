@@ -410,14 +410,14 @@ body {
 
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 
-.modal {
+.modal, .modal-content {
   background: var(--bg-card); border: 1px solid var(--border-color);
   border-radius: var(--card-radius); width: 90%; max-width: 600px;
   max-height: 90vh; overflow-y: auto;
   transform: scale(0.95); transition: transform 0.2s ease;
 }
 
-.modal-overlay.active .modal { transform: scale(1); }
+.modal-overlay.active .modal-content { transform: scale(1); }
 
 .modal-header {
   padding: 20px; border-bottom: 1px solid var(--border-color);
@@ -513,11 +513,7 @@ body {
 
   .stats-grid { grid-template-columns: 1fr; }
 }
-
-
-
-
-
+</style>
 
 </head>
 <body>
@@ -789,7 +785,7 @@ body {
       <div class="page-header">
         <h1 class="page-title">&#9889; 一键创世中心</h1>
         <div class="page-actions">
-          <button class="btn btn-primary" onclick="runGenesis()">立即创世</button>
+          <button class="btn btn-primary" onclick="showModal('genesis-wizard')">立即创世</button>
         </div>
       </div>
 
@@ -1351,7 +1347,7 @@ body {
 <!-- ═══════════════════════════════════════════════════════════════
      模态框 / 弹窗
      ═══════════════════════════════════════════════════════════════ -->
-<div class="modal" id="modal-overlay" onclick="closeModal()">
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3 class="modal-title" id="modal-title">标题</h3>
@@ -2183,36 +2179,7 @@ function hideMobileMore() {
 }
 window.showMobileMore = showMobileMore;
 window.hideMobileMore = hideMobileMore;
-
 </script>
-
-</body>
-</html>
-/* ═══ 手机端优化 ═══ */
-
-  .sidebar-item { padding: 8px 4px !important; font-size: 10px; }
-  .sidebar-item span:not(.icon) { display: none; }
-  .sidebar-title, .sidebar-section { display: none; }
-  .main-content { margin-left: 56px !important; }
-  .top-header .logo-sub { display: none; }
-  .top-nav { gap: 2px; }
-  .top-nav-item { padding: 6px 8px; font-size: 12px; }
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  .two-col, .three-col { grid-template-columns: 1fr; }
-}
-
-  .top-nav-item { font-size: 11px; padding: 4px 6px; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .sidebar { width: 44px !important; }
-  .sidebar-item { font-size: 8px; padding: 6px 2px !important; }
-  .main-content { margin-left: 44px !important; padding: 8px; }
-  .content-card { padding: 10px; }
-  h1 { font-size: 18px; }
-  h2 { font-size: 15px; }
-  h3 { font-size: 13px; }
-}
-
-
 <style>
 /* ===== 响应式适配 ===== */
 @media (max-width: 1024px) {
@@ -2244,3 +2211,6 @@ window.hideMobileMore = hideMobileMore;
   .stats-grid { grid-template-columns: 1fr; }
 }
 </style>
+
+</body>
+</html>
