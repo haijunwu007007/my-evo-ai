@@ -257,29 +257,26 @@ function toggleTheme(){var b=document.body;b.classList.toggle('dark');var d=b.cl
 async function checkLLM(){
   var b=document.getElementById('modelBadge');
   var s=document.getElementById('modelStatus');
-  var last=localStorage.getItem('evo_last_model')||'';
-  b.textContent=last?'🧠 '+last:'⏳ 检测...';
-  if(s&&last)s.textContent='🧠 模型: '+last;
+  var htmlModel=b.getAttribute('data-model');
+  if(htmlModel){
+    b.textContent='🧠 '+htmlModel;
+    if(s)s.textContent='🧠 模型: '+htmlModel;
+  }else{
+    b.textContent='⏳ 检测...';
+    if(s)s.textContent='⏳ 检测中';
+  }
   try{
-    var r=await fetch('/api/v1/llm/status',{signal:AbortSignal.timeout(8000)});
+    var c=new AbortController();setTimeout(function(){c.abort()},8000);
+    var r=await fetch('/api/v1/llm/status',{signal:c.signal,cache:'no-store'});
     var d=await r.json();
-    var name='';
-    if(d&&d.active&&d.active.length>0){name=d.active[0].name}
-    else if(d&&d.providers){
-      var a=d.providers.filter(function(p){return p.available});
-      if(a.length>0)name=a[0].name;
-    }
-    if(name){
+    if(d&&d.model){
+      var name=d.provider?d.provider+'/'+d.model:d.model;
       localStorage.setItem('evo_last_model',name);
       b.textContent='🧠 '+name;
       if(s)s.textContent='🧠 模型: '+name;
-    }else{
-      b.textContent=last?'🧠 '+last:'❌ 无模型';
-      if(s)s.textContent=last?'🧠 模型: '+last:'❌ 无模型';
     }
   }catch(e){
-    b.textContent=last?'🧠 '+last:'❌ 检测失败';
-    if(s)s.textContent=last?'🧠 模型: '+last:'❌ 检测失败';
+    if(!htmlModel){b.textContent='🧠 '+htmlModel}
   }
 }
 
