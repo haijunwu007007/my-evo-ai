@@ -114,16 +114,6 @@ def _mount_vue_frontend():
                 return _nocache(FileResponse(str(wolf_html), media_type="text/html"))
             logger.info("[WOLF] 狼吃娃游戏已挂载: /wolf")
 
-        try:
-            from api.routes.routes_new_features import _WORKFLOW_HTML
-            @app.get("/workflow", include_in_schema=False)
-            async def serve_workflow():
-                from fastapi.responses import HTMLResponse
-                return HTMLResponse(_WORKFLOW_HTML)
-            logger.info("[WORKFLOW] 可视化画布已挂载: /workflow")
-        except ImportError:
-            logger.warning("[WORKFLOW] 未找到 workflow HTML (routes_new_features 未加载)")
-
         # 非 API/App 路径兜底 + 特定文件覆盖
         # 非 API 路径兜底 — 仅保留 routes_static.py 未覆盖的路径
         # routes_static.py 已覆盖: /canvas /fork /dashboard /deploy /company /enterprise
@@ -160,6 +150,7 @@ def _mount_vue_frontend():
             "oss-distiller": "oss-distiller.html",
             "settings": "settings.html",
             "enterprise": "enterprise.html",
+            "workflow": "canvas.html",
         }
 
         @app.get("/{path:path}", include_in_schema=False)
@@ -179,7 +170,7 @@ def _mount_vue_frontend():
                 resp.headers["Expires"] = "0"
                 return resp
             return JSONResponse(status_code=404, content={"error": "chat.html not found"})
-        logger.info(f"[VUE] SPA 已挂载: {vue_dist} -> /app /*")
+        logger.info("[VUE] SPA 已挂载: {vue_dist} -> /app /*")
     else:
         logger.info("[VUE] frontend/dist 不存在（可选，非必需）")
 
@@ -303,6 +294,31 @@ async def lifespan(app: FastAPI):
             time.sleep(2)
             webbrowser.open('http://localhost:8765/dashboard')
         threading.Thread(target=open_browser, daemon=True).start()
+
+    # 直接追加路由到 app.routes（确保一定生效）
+    try:
+        from fastapi.routing import APIRoute
+        from fastapi.responses import FileResponse, JSONResponse
+        from starlette.routing import Route
+        _wf_path = str(BASE_DIR / "frontend" / "canvas.html")
+        async def _wf_handler(_request):
+            if __import__('os').path.exists(_wf_path):
+                return FileResponse(_wf_path)
+            return JSONResponse({"error": "canvas.html not found", "path": _wf_path})
+        _route = Route("/workflow", endpoint=_wf_handler)
+        app.routes.insert(0, _route)
+        logger.info(f"[WF] /workflow → canvas.html (直接追加, count={len(app.routes)})")
+    except Exception as e:
+        logger.warning(f"[WF] error: {e}", exc_info=True)
+    
+    try:
+        from starlette.routing import Route
+        async def _ping_handler(_request):
+            from fastapi.responses import JSONResponse
+            return JSONResponse({"ok": True})
+        app.routes.insert(0, Route("/__ping__", endpoint=_ping_handler))
+    except Exception as e:
+        logger.warning(f"[PING] error: {e}")
 
     yield  # 应用在此处运行
 
