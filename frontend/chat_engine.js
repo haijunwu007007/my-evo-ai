@@ -26,9 +26,8 @@ function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=
 function quickTool(el, name){
   el.classList.add('clicked');setTimeout(function(){el.classList.remove('clicked')},300)
   var inp=document.getElementById('input')
-  inp.value=el.textContent.trim()+': ';inp.focus()
-  var isEnter=function(e){if(e.key==='Enter')send()}
-  inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}
+  var hint=(typeof _TOOL_HINTS!=='undefined'&&_TOOL_HINTS[name])||el.textContent.trim()+': '
+  inp.value=hint;inp.focus()
 }
 function toolbarFilter(cat){
   var bodies=document.querySelectorAll('.cat-body');
@@ -280,7 +279,7 @@ async function checkLLM(){
   }
 }
 
-document.getElementById('appMain').style.display='flex';if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')}restoreHistory();setTimeout(function(){checkLLM()},1000)
-function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return false;var x=JSON.parse(e);if(!x||!x.name){return false};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（'+x.dept+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+x.dept+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=function(){inp.value='';inp.onkeydown=isEnter}};return true}catch(ee){return false}
+document.getElementById('appMain').style.display='flex';try{var _sp=new URLSearchParams(window.location.search);var _en=_sp.get('expert');if(_en){var _ii=document.getElementById('input');if(_ii){_ii.value=_en+'：';_ii.focus()};var _ct=document.getElementById('greeting');if(_ct)_ct.textContent='🎯 已激活专家: '+_en;var _dp=_sp.get('dept')||'';var _sys='你现在是 '+_en+'（'+_dp+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){};CTX.push({role:'system',content:_sys});try{CHAT=CHAT||[]}catch(ex){};CHAT=CHAT||[];addMsg('🎯 已激活专家: '+_en+'（'+_dp+'）','bot');var _se=_sp.get('_')||'';window.history.replaceState({},'','/')}else{try{var _ee=JSON.parse(localStorage.getItem('evo_active_expert')||'{}');if(_ee&&_ee.name){var _ii=document.getElementById('input');if(_ii){_ii.value=_ee.name+'：';_ii.focus()}};localStorage.removeItem('evo_active_expert')}catch(_ex){}};if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')};restoreHistory();setTimeout(function(){checkLLM()},1000)
+function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return false;var x=JSON.parse(e);if(!x||!x.name){localStorage.removeItem('evo_active_expert');return false};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（'+(x.dept||'')+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+(x.dept||'')+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=isEnter;alert('_checkExpert: 已设值 '+x.name)};return true}catch(ee){alert('_checkExpert错误: '+ee);return false}
 }
 

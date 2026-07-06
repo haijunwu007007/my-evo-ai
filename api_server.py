@@ -206,15 +206,33 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 # ═══════════════════════════════════════════════════════
 
 @app.get("/")
-async def root():
-    from fastapi.responses import FileResponse
+async def root(request: Request = None):
+    from fastapi.responses import FileResponse, HTMLResponse
     from api.infra import BASE_DIR
+    import html as _pyhtml
+    # / 路由由 lifespan 的 _mount_vue_frontend 覆盖，此处只做兜底
+    chat_path = BASE_DIR / "frontend" / "chat.html"
+    # Server-side expert injection (most reliable approach)
+    if request and request.query_params and request.query_params.get("expert"):
+        expert = request.query_params.get("expert", "")
+        dept = request.query_params.get("dept", "")
+        if chat_path.exists():
+            html = chat_path.read_text(encoding="utf-8")
+            safe_name = _pyhtml.escape(expert)
+            safe_dept = _pyhtml.escape(dept)
+            script = f"""<script>document.addEventListener("DOMContentLoaded",function(){{
+var i=document.getElementById("input");if(i){{i.value="{safe_name}：";i.focus()}}
+var g=document.getElementById("greeting");if(g)g.textContent="🎯 已激活专家: {safe_name}"
+var sys="你现在是 {safe_name}（{safe_dept}）。你是这个领域的专家，请始终保持这个角色身份回答问题。"
+try{{CTX=CTX||[]}}catch(ex){{}};CTX.push({{role:"system",content:sys}})
+try{{CHAT=CHAT||[]}}catch(ex){{}};addMsg("🎯 已激活专家: {safe_name}（{safe_dept}）","bot")
+window.history.replaceState({{}},"","/")}})</script></body>"""
+            return HTMLResponse(html.replace("</body>", script))
+    if chat_path.exists():
+        return FileResponse(str(chat_path))
     idx_path = BASE_DIR / "frontend" / "index.html"
     if idx_path.exists():
         return FileResponse(str(idx_path))
-    chat_path = BASE_DIR / "frontend" / "chat.html"
-    if chat_path.exists():
-        return FileResponse(str(chat_path))
 
 
 @app.get("/{path:path}")

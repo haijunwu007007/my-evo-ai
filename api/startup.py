@@ -47,7 +47,7 @@ async def _probe_ollama():
 def _mount_vue_frontend():
     """挂载 Vue 3 SPA (/app) + 旧版 Dashboard (/dashboard)"""
     from fastapi.staticfiles import StaticFiles
-    from fastapi.responses import FileResponse, JSONResponse
+    from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
     from pathlib import Path
 
     vue_dist = BASE_DIR / "frontend" / "dist"
@@ -85,9 +85,28 @@ def _mount_vue_frontend():
         # 根路径 → 简易聊天界面（普通用户入口）
         chat_html = frontend_dir / "chat.html"
         if chat_html.exists():
+            from fastapi import Request
+            import html as pyhtml
             @app.get("/", include_in_schema=False)
-            async def _chat_root():
-                return _nocache(FileResponse(str(chat_html), media_type="text/html"))
+            async def _chat_root(request: Request = None):
+                expert = dept = ""
+                if request and request.query_params:
+                    expert = request.query_params.get("expert", "")
+                    dept = request.query_params.get("dept", "")
+                if not expert:
+                    return _nocache(FileResponse(str(chat_html), media_type="text/html"))
+                # Server-side expert injection - most reliable approach
+                html = chat_html.read_text(encoding="utf-8")
+                safe_name = pyhtml.escape(expert)
+                safe_dept = pyhtml.escape(dept)
+                script = f"""<script>document.addEventListener("DOMContentLoaded",function(){{
+var i=document.getElementById("input");if(i){{i.value="{safe_name}：";i.focus()}}
+var g=document.getElementById("greeting");if(g)g.textContent="🎯 已激活专家: {safe_name}"
+var sys="你现在是 {safe_name}（{safe_dept}）。你是这个领域的专家，请始终保持这个角色身份回答问题。"
+try{{CTX=CTX||[]}}catch(ex){{}};CTX.push({{role:"system",content:sys}})
+try{{CHAT=CHAT||[]}}catch(ex){{}};addMsg("🎯 已激活专家: {safe_name}（{safe_dept}）","bot")
+window.history.replaceState({{}},"","/")}})</script></body>"""
+                return HTMLResponse(html.replace("</body>", script))
             logger.info(f"[CHAT] 聊天界面已挂载: /")
 
         # 商业版管理后台

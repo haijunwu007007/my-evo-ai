@@ -129,8 +129,7 @@ var DEPTS=[
 function rd(){var d=document.getElementById('deptList');d.innerHTML='';for(var i=0;i<DEPTS.length;i++){var dept=DEPTS[i];var h='<div class="dept"><div class="dept-head" onclick="toggleDept('+i+')"><span class="arrow">▶</span>'+dept.name+'<span class="count">'+dept.agents.length+'个</span></div><div id="d'+i+'" class="dept-body">';for(var j=0;j<dept.agents.length;j++){var a=dept.agents[j];h+='<span class="agent" onclick="activateExpert(this,\''+a[1]+'\',\''+dept.name+'\')"><span class="ico">'+a[0]+'</span> '+a[1]+'</span>'}h+='</div></div>';d.innerHTML+=h}}
 function toggleDept(i){var h=document.getElementById('d'+i);h.classList.toggle('open');var p=h.previousElementSibling;p.classList.toggle('open')}
 function activateExpert(el,name,dept){
-  localStorage.setItem('evo_active_expert',JSON.stringify({name:name,dept:dept,ts:Date.now()}))
-  window.location.href='/'
+  window.location.href='/?expert='+encodeURIComponent(name)+'&dept='+encodeURIComponent(dept)
 }
 function filterExperts(q){q=(q||'').toLowerCase().trim()
   for(var i=0;i<DEPTS.length;i++){var body=document.getElementById('d'+i),head=body.previousElementSibling;if(!q){body.classList.remove('open');head.classList.remove('open');continue}

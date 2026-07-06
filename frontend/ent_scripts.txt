@@ -1,7 +1,0 @@
-1 3335     </script>
-2 6996 </script>
-3 7039     </script>
-4 7469 </script>
-6 9943 </script>
-6 10700 }</script>`;
-6 12309 </script>
