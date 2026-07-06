@@ -18,6 +18,18 @@ p{font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.6}
 .footer a{color:#4361ee;text-decoration:none}
 </style>  <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
+
+<!-- 系统顶栏 -->
+<div class="topbar" style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card)">
+  <div style="display:flex;align-items:center;gap:8px">
+    <a href="/" class="back-btn" onclick="event.preventDefault();window.location.href=document.referrer||'/'">← 返回</a>
+    <h1 class="grad-title" style="font-size:15px;margin:0">🔌 本地代理</h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px">
+    <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="toggleTheme()">🌓</span>
+  </div>
+</div>
+
 <div class="card">
   <div class="logo">⚡</div>
   <h1>🔌 本地代理</h1>

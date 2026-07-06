@@ -190,7 +190,7 @@ async def apps_list():
 
             apps.append({"name": f.stem[:40], "url": f"/output/apps/{f.name}", "size": f"{f.stat().st_size / 1024:.1f}KB", "date": __import__("time").ctime(f.stat().st_mtime)})
 
-    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;max-width:800px;margin:0 auto;padding:20px}h1{font-size:24px}.app{background:#1a1a2e;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #2d2d4a}.app a{color:#818cf8;text-decoration:none;font-size:16px}.meta{color:#64748b;font-size:12px;margin-top:4px}.size{color:#22c55e}.empty{text-align:center;padding:60px;color:#64748b}@media(max-width:480px){body{padding:10px}h1{font-size:20px}.app{padding:12px}}</style></head><body><h1>📂 已生成APP</h1>'
+    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/frontend/share.css"><body style="max-width:800px;margin:0 auto;padding:20px"><h1 class="grad-title" style="font-size:22px;margin-bottom:16px">📂 已生成APP</h1>'
 
     if not apps: html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
 
@@ -366,6 +366,7 @@ async def enterprise_page():
 
 
 
+@router.get("/billion-os")
 @router.get("/billion-os.html")
 
 async def billion_os_page():
@@ -653,7 +654,7 @@ async def output_page():
 
     p = BASE_DIR / "output" / "index.html"
 
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>📂 输出目录</h1><p>暂无输出</p></body></html>")
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/frontend/share.css\"></head><body style=\"display:flex;align-items:center;justify-content:center;min-height:100vh\"><div class=\"card\" style=\"text-align:center;padding:40px\"><h2>📂 输出目录</h2><p style=\"margin-top:12px\">暂无输出</p></div></body></html>")
 
 
 

@@ -1,20 +1,21 @@
 <!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Cognee 记忆系统</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f8;color:#1e293b;min-height:100vh}
-.header{background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--accent),#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:18px;font-weight:600}
 .header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
 .container{max-width:800px;margin:0 auto;padding:16px}
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between}
-.btn{background:#4361ee;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.btn{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer}
 .btn:hover{opacity:.9}
 .btn-sm{font-size:12px;padding:6px 12px}
 .btn-green{background:#10b981}
 .btn-red{background:#ef4444}
-input,textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-bottom:8px}
+input,textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;margin-bottom:8px;background:var(--card);color:var(--text)}
 textarea{resize:vertical;min-height:60px;font-family:monospace}
 .mem-item{padding:10px;border-bottom:1px solid #f0f0f0}
 .mem-item:last-child{border:0}
@@ -24,6 +25,15 @@ textarea{resize:vertical;min-height:60px;font-family:monospace}
 .search-box{display:flex;gap:8px;align-items:center}
 .search-box input{flex:1;margin:0}
 </style>
+<div class="app">
+<div class="topbar">
+    <div class="topbar-left">
+      <a href="/" style="text-decoration:none;color:inherit"><strong>⚡ AUTO-EVO-AI</strong></a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-path">Cognee 记忆系统</span>
+    </div>
+  </div>
+  <div class="main" style="flex:1">
 <div class=header><h1>🧠 Cognee 记忆系统</h1><a href=/>← 返回首页</a></div>
 <div class=container>
 <div class=card><h3>📊 记忆统计</h3><div id=stats>加载中...</div></div>
@@ -86,4 +96,6 @@ window.deleteMemory = deleteMemory;
 window.clearMemories = clearMemories;
 
 </script>
+  </div>
+</div>
 </html>

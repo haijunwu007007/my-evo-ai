@@ -522,6 +522,7 @@ _WORKFLOW_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="/frontend/share.css">
 <title>Workflow - AUTO-EVO-AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -568,7 +569,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e
 .toast.error{background:#e63946}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style></head>
-<body>
+<body class="theme-auto">
 <div class="toolbar">
   <h2>🎨 Workflow</h2>
   <input id="wfName" placeholder="Workflow 名称" value="未命名流程">
