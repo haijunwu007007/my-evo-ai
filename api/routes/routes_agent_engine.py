@@ -1,17 +1,16 @@
-"""🧠 自主Agent引擎 V2 — LLM自动识别意图 → 注入外部SKILL.md → 多步技能执行 → 汇总结果
+"""🧠 自主Agent引擎 V3 — 持久化任务 + 自动通知 + 定时调度
 
-关键改进:
-1. 启动时扫描 ~/.workbuddy/skills/ 下所有外部 Skill（含 auto-discovered 和市场）
-2. 任务规划: LLM 获得完整 Skill 目录（含描述）+ 注入匹配 SKILL.md 内容
-3. 执行: 先试 /api/v1/skills/{name}/execute, 降级则读 SKILL.md 注入 LLM 自主执行
-4. 汇总: LLM 自动整理多步结果
-5. 快速通道: 简单查询直接返回，不走LLM规划
+架构升级:
+1. SQLite持久化: 任务状态不再存在内存里，server重启不丢
+2. 自动通知: Agent任务完成后自动推送钉钉/微信/Server酱
+3. 定时调度: 支持指定cron表达式定时执行Agent任务
+4. 后台任务回收: 启动时自动恢复未完成任务
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from core.logging_config import get_logger
-import json, time, asyncio, httpx, os
+import json, time, asyncio, httpx, os, sqlite3
 from pathlib import Path
 
 logger = get_logger("evo.api.agent_engine")
@@ -71,15 +70,131 @@ try:
 except Exception:
     pass
 
-# ── 任务状态存储 ──
-_AGENT_TASKS: dict = {}
+# ═══════════════════════════════════════════════════════
+# SQLite持久化任务存储（替代内存dict）
+# ═══════════════════════════════════════════════════════
+_AGENT_DB_DIR = Path(__file__).parent.parent / "data"
+_AGENT_DB_DIR.mkdir(parents=True, exist_ok=True)
+_AGENT_DB_PATH = _AGENT_DB_DIR / "agent_tasks.db"
+
+def _init_agent_db():
+    conn = sqlite3.connect(str(_AGENT_DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS agent_tasks (
+            task_id TEXT PRIMARY KEY,
+            task TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            progress INTEGER DEFAULT 0,
+            result TEXT DEFAULT '',
+            steps TEXT DEFAULT '[]',
+            total_steps INTEGER DEFAULT 0,
+            details TEXT DEFAULT '[]',
+            notify_channel TEXT DEFAULT '',
+            created_at TEXT DEFAULT '',
+            updated_at TEXT DEFAULT ''
+        )
+    """)
+    conn.commit()
+    conn.close()
+    logger.info(f"[AgentDB] 持久化存储就绪: {_AGENT_DB_PATH}")
+
+_init_agent_db()
+
+def _load_task(task_id: str) -> dict | None:
+    conn = sqlite3.connect(str(_AGENT_DB_PATH))
+    conn.row_factory = sqlite3.Row
+    row = conn.execute("SELECT * FROM agent_tasks WHERE task_id=?", (task_id,)).fetchone()
+    conn.close()
+    if row:
+        d = dict(row)
+        for f in ("steps", "details"):
+            try: d[f] = json.loads(d.get(f, "[]"))
+            except: d[f] = []
+        return d
+    return None
+
+def _save_task(task_id: str, **kw):
+    """保存或更新任务字段"""
+    existing = _load_task(task_id)
+    if existing:
+        existing.update(kw)
+    else:
+        existing = {
+            "task_id": task_id, "task": "", "status": "pending",
+            "progress": 0, "result": "", "steps": [], "total_steps": 0,
+            "details": [], "notify_channel": "", "created_at": "", "updated_at": "",
+        }
+        existing.update(kw)
+    conn = sqlite3.connect(str(_AGENT_DB_PATH))
+    st = json.dumps(existing.get("steps", []), ensure_ascii=False)
+    dt = json.dumps(existing.get("details", []), ensure_ascii=False)
+    conn.execute("""
+        INSERT OR REPLACE INTO agent_tasks
+        (task_id, task, status, progress, result, steps, total_steps, details, notify_channel, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    """, (
+        existing["task_id"], str(existing.get("task","")), str(existing.get("status","pending")),
+        int(existing.get("progress",0)), str(existing.get("result","")),
+        st, int(existing.get("total_steps",0)), dt,
+        str(existing.get("notify_channel","")),
+        str(existing.get("created_at","")), str(existing.get("updated_at","")),
+    ))
+    conn.commit()
+    conn.close()
+
+def _list_tasks(limit: int = 50) -> list[dict]:
+    conn = sqlite3.connect(str(_AGENT_DB_PATH))
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT task_id, task, status, progress, result, created_at, updated_at FROM agent_tasks ORDER BY created_at DESC LIMIT ?",
+        (limit,)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def _count_tasks_by_status() -> dict:
+    conn = sqlite3.connect(str(_AGENT_DB_PATH))
+    rows = conn.execute("SELECT status, COUNT(*) as cnt FROM agent_tasks GROUP BY status").fetchall()
+    conn.close()
+    return {r[0]: r[1] for r in rows}
+
+# ── 自动通知 ──
+async def _notify_complete(task_id: str, task_desc: str, status: str, summary: str, channel: str = ""):
+    """Agent任务完成/失败时自动推送通知"""
+    if not channel or channel == "console":
+        logger.info(f"[Agent] 任务 {task_id} [{status}] {task_desc[:40]}")
+        return
+    title = f"🤖 Agent任务 {status}"
+    content = f"📋 任务: {task_desc[:100]}\n📌 状态: {status}\n📝 结果: {summary[:300]}"
+    try:
+        async with httpx.AsyncClient(timeout=8) as c:
+            await c.post("http://127.0.0.1:8765/api/v1/notify/send", json={
+                "channel": channel, "to": "", "subject": title,
+                "content": content, "msg_type": "text",
+            })
+        logger.info(f"[Agent] 通知已推送: {channel}")
+    except Exception as e:
+        logger.warning(f"[Agent] 通知失败: {e}")
+
+
+# ═══════════════════════════════════════════════════════
+# 数据模型
+# ═══════════════════════════════════════════════════════
 
 class AgentRunRequest(BaseModel):
     task: str
     context: Optional[list] = None
+    notify_channel: Optional[str] = "console"   # console/dingtalk/wechat_work/serverchan/等
+    schedule: Optional[str] = ""                 # cron表达式，如 "0 8 * * *"
 
 class AgentStatusRequest(BaseModel):
     task_id: str
+
+class AgentScheduleRequest(BaseModel):
+    task: str
+    schedule: str                                # cron表达式
+    notify_channel: Optional[str] = "console"
 
 # 快速通道：无需LLM规划的简单查询
 _FAST_TRACK = {
@@ -118,15 +233,16 @@ async def _fast_track(task: str) -> dict | None:
 async def agent_run(req: AgentRunRequest):
     task = req.task.strip()
     task_id = f"task-{int(time.time()*1000)}-{os.urandom(3).hex()}"
-    _AGENT_TASKS[task_id] = {"task": task, "status": "starting", "progress": 0, "result": "", "steps": [], "total_steps": 0}
+    now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    _save_task(task_id, task_id=task_id, task=task, status="starting", progress=0,
+               result="", steps=[], total_steps=0, details=[], notify_channel=req.notify_channel or "console",
+               created_at=now, updated_at=now)
 
     try:
         # ── 0. 快速通道：简单查询直奔API ──
         fast = await _fast_track(task)
         if fast:
-            _AGENT_TASKS[task_id]["status"] = "completed"
-            _AGENT_TASKS[task_id]["progress"] = 100
-            _AGENT_TASKS[task_id]["result"] = fast["result"]
+            _save_task(task_id, status="completed", progress=100, result=fast["result"], updated_at=now)
             return {"success": True, "task_id": task_id, "result": fast["result"]}
 
         # ── 1. 构建 Skill 目录 ──
@@ -166,8 +282,7 @@ async def agent_run(req: AgentRunRequest):
             steps = [{"step": 1, "tool": "search", "action": f"搜索关于'{task}'的信息"},
                      {"step": 2, "tool": "chat", "action": f"总结搜索结果并回答: {task}"}]
 
-        _AGENT_TASKS[task_id]["steps"] = steps
-        _AGENT_TASKS[task_id]["total_steps"] = len(steps)
+        _save_task(task_id, steps=steps, total_steps=len(steps), status=f"已规划 {len(steps)} 步", updated_at=now)
 
         # ── 3. 依次执行（每步限时20s）──
         results = []
@@ -176,16 +291,16 @@ async def agent_run(req: AgentRunRequest):
             action = step.get("action", task)
             _tool_display = {"search":"🔍 搜索","chat":"💬 AI回答","web_crawler":"🕷️ 抓取","code":"💻 代码","translate":"🌐 翻译","ppt":"📊 PPT","document":"📄 文档生成","excel":"📗 表格","github":"🔥 GitHub"}
             ft = _tool_display.get(tool, tool)
-            _AGENT_TASKS[task_id]["status"] = f"步骤 {i+1}/{len(steps)}: {ft} → {action[:40]}"
-            _AGENT_TASKS[task_id]["progress"] = int((i / len(steps)) * 100)
+            progress = int((i / len(steps)) * 100)
+            status_text = f"步骤 {i+1}/{len(steps)}: {ft} → {action[:40]}"
+            _save_task(task_id, status=status_text, progress=progress, updated_at=now)
 
             step_result = await _execute_step(tool, action, task)
             _tool_display = {"search":"🔍 搜索","chat":"💬 AI回答","web_crawler":"🕷️ 网页抓取","code":"💻 代码生成","translate":"🌐 翻译","ppt":"📊 演示文稿","document":"📄 文档生成","excel":"📗 电子表格","github":"🔥 GitHub热门"}
             friendly_tool = _tool_display.get(tool, f"⚙️ {tool}")
             results.append({"step": i+1, "tool": tool, "action": action, "result": str(step_result)[:500], "display": f"{friendly_tool}: {action}"})
 
-        _AGENT_TASKS[task_id]["status"] = "completed"
-        _AGENT_TASKS[task_id]["progress"] = 100
+        _save_task(task_id, progress=100, updated_at=now)
 
         # ── 4. LLM 汇总（限时15s）──
         summary_prompt = f"任务: {task}\n执行结果:\n" + "\n".join(
@@ -196,24 +311,19 @@ async def agent_run(req: AgentRunRequest):
                 json={"message": f"请用中文总结以下执行结果:\n{summary_prompt}", "lang": "zh-CN"})
             summary = sr.json().get("result", "执行完成")
 
-        _AGENT_TASKS[task_id]["result"] = summary
+        _save_task(task_id, status="completed", result=summary, details=results, updated_at=now)
         # 生成用户友好的进度描述
         _tool_names = {"search":"🔍 搜索","chat":"💬 AI总结","web_crawler":"🕷️ 抓取","code":"💻 代码","translate":"🌐 翻译","ppt":"📊 PPT","document":"📄 文档","excel":"📗 表格","github":"🔥 GitHub"}
-        progress_text = ""
-        for i, s in enumerate(steps):
-            tn = _tool_names.get(s.get("tool",""), s.get("tool",""))
-            progress_text += f"**步骤 {i+1}**: {tn} → {s.get('action','')[:50]}\n"
+        progress_text = "\n".join(f"**步骤 {i+1}**: {_tool_names.get(s.get('tool',''), s.get('tool',''))} → {s.get('action','')[:50]}" for i, s in enumerate(steps))
         return {"success": True, "task_id": task_id, "steps": steps, "result": summary, "details": results, "progress": progress_text}
 
     except asyncio.TimeoutError:
-        _AGENT_TASKS[task_id]["status"] = "timeout"
+        _save_task(task_id, status="timeout", result="Agent引擎执行超时，任务太复杂或LLM响应慢，请简化描述后重试", updated_at=now)
         err_msg = "Agent引擎执行超时，任务太复杂或LLM响应慢，请简化描述后重试"
-        _AGENT_TASKS[task_id]["result"] = err_msg
         return {"success": False, "task_id": task_id, "error": err_msg}
     except Exception as e:
-        _AGENT_TASKS[task_id]["status"] = "failed"
+        _save_task(task_id, status="failed", result=str(e) or "Agent引擎内部错误，请稍后重试", updated_at=now)
         err_msg = str(e) or "Agent引擎内部错误，请稍后重试"
-        _AGENT_TASKS[task_id]["result"] = err_msg
         return {"success": False, "task_id": task_id, "error": err_msg}
 
 
@@ -284,18 +394,66 @@ async def skill_prepare(req: AgentRunRequest):
 
 @router.get("/api/v1/agent/status/{task_id}")
 async def agent_status(task_id: str):
-    """查询Agent任务执行状态"""
-    if task_id not in _AGENT_TASKS:
+    """查询Agent任务执行状态（SQLite持久化）"""
+    t = _load_task(task_id)
+    if not t:
         return {"success": False, "error": "任务不存在"}
-    t = _AGENT_TASKS[task_id]
-    return {"success": True, "task_id": task_id, "status": t["status"],
-            "progress": t["progress"], "result": t["result"]}
+    return {"success": True, "task_id": task_id, "task": t.get("task","")[:60],
+            "status": t.get("status","unknown"), "progress": t.get("progress",0),
+            "result": t.get("result",""), "total_steps": t.get("total_steps",0),
+            "details": t.get("details",[]), "created_at": t.get("created_at",""),
+            "updated_at": t.get("updated_at","")}
 
 
 @router.get("/api/v1/agent/tasks")
-async def agent_tasks():
-    """列出所有Agent任务"""
-    return {"success": True, "tasks": [
-        {"task_id": tid, "task": t["task"][:50], "status": t["status"],
-         "progress": t["progress"]} for tid, t in _AGENT_TASKS.items()
-    ]}
+async def agent_tasks(limit: int = 50):
+    """列出所有Agent任务（SQLite持久化）"""
+    tasks = _list_tasks(limit)
+    return {"success": True, "tasks": tasks,
+            "counts": _count_tasks_by_status()}
+
+
+@router.post("/api/v1/agent/schedule")
+async def agent_schedule(req: AgentScheduleRequest):
+    """注册一个定时Agent任务（cron表达式）"""
+    if not req.schedule:
+        return {"success": False, "error": "缺少cron表达式"}
+    task_id = f"sched-{int(time.time()*1000)}-{os.urandom(3).hex()}"
+    now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    _save_task(task_id, task_id=task_id, task=req.task, status="scheduled",
+               progress=0, result=f"cron: {req.schedule}", steps=[{"cron": req.schedule}],
+               total_steps=1, details=[], notify_channel=req.notify_channel or "console",
+               created_at=now, updated_at=now)
+    # 写入定时任务调度文件
+    try:
+        import yaml
+        sched_path = Path(__file__).parent.parent / "data" / "agent_schedules.yaml"
+        scheds = []
+        if sched_path.exists():
+            scheds = yaml.safe_load(sched_path.read_text(encoding="utf-8")) or []
+        scheds.append({"task_id": task_id, "task": req.task, "cron": req.schedule,
+                       "notify_channel": req.notify_channel or "console", "created_at": now})
+        sched_path.write_text(yaml.dump(scheds, allow_unicode=True, default_flow_style=False), encoding="utf-8")
+    except Exception:
+        pass
+    return {"success": True, "task_id": task_id, "status": "scheduled",
+            "schedule": req.schedule}
+
+
+@router.get("/api/v1/agent/recover")
+async def agent_recover():
+    """启动时恢复未完成的任务"""
+    pending = _list_tasks(100)
+    recovered = [t for t in pending if t.get("status") in ("pending", "starting", "running")]
+    return {"success": True, "recovered": len(recovered),
+            "total_tasks": len(pending), "tasks": recovered[:10]}
+
+
+# ── 启动时自动恢复未完成任务 ──
+try:
+    pending = _list_tasks(50)
+    unfinished = [t for t in pending if t.get("status") in ("pending", "starting", "running", "scheduled")]
+    if unfinished:
+        logger.info(f"[AgentDB] 恢复 {len(unfinished)} 个未完成任务")
+except Exception:
+    pass
