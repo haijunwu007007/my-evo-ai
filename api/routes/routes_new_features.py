@@ -527,6 +527,8 @@ _WORKFLOW_HTML = """<!DOCTYPE html>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e0;overflow:hidden;height:100vh}
+.back-btn{position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)}
+.back-btn:hover{background:rgba(255,255,255,.15)}
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#16213e;border-bottom:1px solid #2a2a4a}
 .toolbar h2{font-size:16px;margin-right:20px;color:#4361ee}
 .toolbar button{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px}
@@ -570,6 +572,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style></head>
 <body class="theme-auto">
+<a class="back-btn" href="/" style="position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)">⬅ 返回</a>
 <div class="toolbar">
   <h2>🎨 Workflow</h2>
   <input id="wfName" placeholder="Workflow 名称" value="未命名流程">
