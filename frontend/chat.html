@@ -555,7 +555,7 @@ function checkOnboard() {
       <div class="topbar-left">
         <span class="hamburger" id="hamburgerBtn" onclick="toggleSidebarMobile()">☰</span>
         <h1>AUTO-EVO-AI</h1>
-        <span class="model-badge" id="modelBadge" onclick="checkLLM()">🧠 检测中</span>
+        <span class="model-badge" id="modelBadge" data-model="zhipu/glm-4-flash" onclick="checkLLM()">🧠 zhipu/glm-4-flash</span>
       </div>
       <div class="topbar-right">
         <span onclick="clearHistory()">🔄 新对话</span>
@@ -663,7 +663,7 @@ function quickTool(el,action){
   var inp=document.getElementById("input");
   if(inp){inp.value="使用 "+action;inp.focus();inp.setSelectionRange(100,100)}
 }</script>
-<script src="/frontend/chat_engine.js?v=27"></script>
+<script src="/frontend/chat_engine.js?v=43"></script>
 
 <script>
 // 侧边栏折叠分组（每个分组独立记忆）

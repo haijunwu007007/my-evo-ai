@@ -337,9 +337,20 @@ async def app_dash():
 
 @router.get("/canvas")
 async def canvas_page():
-    p = Path("/home/ubuntu/my-evo-ai/frontend/ComposeCanvas.html")
+    p = BASE_DIR / "frontend" / "canvas.html"
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
+
+@router.get("/workflow")
+async def workflow_page():
+    try:
+        from api.routes.routes_new_features import _WORKFLOW_HTML
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(_WORKFLOW_HTML)
+    except Exception:
+        p = BASE_DIR / "frontend" / "canvas.html"
+        if p.exists(): return FileResponse(str(p))
+        raise HTTPException(404)
 
 @router.get("/enterprise")
 
