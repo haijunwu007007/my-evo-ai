@@ -189,17 +189,36 @@ async def _try_llm_chat(msg: str, system_hint: str = ""):
     return None
 
 
-# N8N工作流匹配函数（中英关键词→搜索+链接）
-_n8n_cn_en = {'邮件':'email','通知':'notify alert','推送':'push send','审批':'approval review','同步':'sync','采集':'collect','定时':'schedule cron','监控':'monitor alert','告警':'alert','数据':'data','报表':'report','备份':'backup','模板':'template','自动化':'auto','流程':'flow','工作流':'workflow','n8n':'n8n'}
+# N8N工作流匹配函数（只有用户主动问n8n才显示链接）
+_n8n_keywords = ['n8n','编辑器','工作流模板','浏览模板','/n8n-browse']
 
 async def _append_n8n_links(msg: str, reply: str) -> str:
-    """如果消息涉及工作流关键词，追加N8N链接"""
-    if not any(k in msg for k in _n8n_cn_en):
-        return reply
-    # 直接显示N8N引擎链接（不依赖API搜索，稳定可靠）
-    reply += "\n\n---\n📋 **N8N 自动化引擎**"
-    reply += "\n  ➤ 浏览全部 2077+ 工作流模板：[/n8n-browse](https://autoevoai.com/n8n-browse)"
-    reply += "\n  ➤ 一键运行：**[n8n Editor](https://autoevoai.com:18000/)**"
+    """直接查询SQLite数据库显示匹配模板数（不走HTTP，稳定可靠）"""
+    import sqlite3, os
+    _db_path = os.environ.get('N8N_BASE', '/home/ubuntu/n8n-workflows/n8n-workflows-main') + '/workflows.db'
+    _cn_en = {'邮件':'email','通知':'notification','推送':'webhook','审批':'approval',
+              '监控':'alert','报表':'report','备份':'backup','表单':'form','登录':'login',
+              '爬虫':'crawl','短信':'sms','翻译':'translate','客服':'slack','定时':'cron'}
+    _kw = [k for k in _cn_en if k in msg]
+    if _kw:
+        try:
+            conn = sqlite3.connect(_db_path)
+            q = _cn_en[_kw[0]]
+            total = conn.execute("SELECT COUNT(*) as c FROM workflows WHERE name LIKE ? OR filename LIKE ?", ('%'+q+'%','%'+q+'%')).fetchone()[0]
+            rows = conn.execute("SELECT name FROM workflows WHERE name LIKE ? OR filename LIKE ? ORDER BY nodes DESC LIMIT 3", ('%'+q+'%','%'+q+'%')).fetchall()
+            conn.close()
+            if total > 0:
+                names = [r[0][:40] for r in rows if r[0]]
+                tip = f"\n\n 系统中有 {total} 个相关自动化模板"
+                if names:
+                    tip += f"\n  例如：{'、'.join(names)}"
+                reply += tip
+        except:
+            pass
+    # 高级用户：明确提到n8n/编辑器时显示链接
+    if any(k in msg for k in ['n8n','编辑','浏览模板']):
+        extra = f"\n  [浏览全部模板](https://autoevoai.com/n8n-browse) | [打开编辑器](https://autoevoai.com/api/v1/n8n/editor)"
+        reply += extra
     return reply
 
 
@@ -241,7 +260,8 @@ async def smart_chat(req: Req):
 
     # help: 系统能力
     if itype == "help":
-        return {"success": True, "result": _SYSTEM_CAPABILITIES}
+        result = await _append_n8n_links(msg, _SYSTEM_CAPABILITIES)
+        return {"success": True, "result": result}
 
     # calculate: 数学计算
     if itype == "calculate":
