@@ -4,7 +4,7 @@ from starlette.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from pathlib import Path
-import os, json, asyncio
+import os, json, asyncio, httpx
 from core.logging_config import get_logger
 logger = get_logger("evo.api.smart")
 router = APIRouter()
@@ -316,6 +316,24 @@ async def smart_chat(req: Req):
     # chat: LLM直接回答
     result = await _try_llm_chat(msg)
     if result:
+        # N8N工作流匹配（任何结果后都尝试）
+        _n8n_keys = ['工作流','自动化','邮件','通知','推送','审批','流程','同步','采集','定时','监控','告警','数据','报表','备份','模板']
+        if any(k in msg for k in _n8n_keys):
+            try:
+                from urllib.parse import quote as _n8n_quote
+                _n8n_url = f"http://127.0.0.1:8765/api/v1/n8n/search?q={_n8n_quote(msg[:30])}&limit=5"
+                async with httpx.AsyncClient(timeout=6) as _n8n_c:
+                    _n8n_resp = await _n8n_c.get(_n8n_url)
+                    _n8n_data = _n8n_resp.json()
+                _n8n_results = _n8n_data.get("results", [])
+                if _n8n_results:
+                    result += "\n\n🔗 **已匹配到以下 N8N 工作流模板：**"
+                    for _w in _n8n_results[:5]:
+                        _name = _w.get("name","")[:60]
+                        result += f"\n  • {_name}"
+                    result += "\n\n> 打开 /n8n-browse 浏览全部 2077+ 个工作流模板，或 /n8n 使用 n8n Editor-UI"
+            except Exception:
+                pass
         return {"success": True, "result": result}
     # 超时再试
     result = await _try_llm_chat(msg)

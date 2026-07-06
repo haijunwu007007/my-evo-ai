@@ -1,203 +1,121 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta name="description" content="n8n 工作流搜索与集成，2077 个预制工作流模板">
-<meta property="og:title" content="AUTO-EVO-AI">
-<meta property="og:description" content="n8n 工作流搜索与集成，2077 个预制工作流模板">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
-
+<!DOCTYPE html><html lang="zh-CN"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>工作流 - AUTO-EVO-AI V0.1</title>
+<title>N8N工作流 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-body{background:var(--bg);color:var(--text);min-height:100vh}
-
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e17;color:#e6edf3;min-height:100vh}
-.header{background:rgba(13,17,23,.8);border-bottom:1px solid rgba(255,255,255,.06);padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.header h1{font-size:18px;color:#58a6ff}
-.search-bar{display:flex;gap:8px;flex:1;min-width:200px}
-.search-bar input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;color:#e6edf3;font-size:14px;outline:none}
-.search-bar input:focus{border-color:#58a6ff}
-.search-bar button{background:#238636;border:none;border-radius:8px;padding:8px 18px;color:#fff;font-size:14px;cursor:pointer}
-.search-bar button:hover{background:#2ea043}
-.stats{display:flex;gap:12px;padding:12px 24px;flex-wrap:wrap}
-.stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 20px;font-size:13px}
-.stat b{font-size:20px;color:#58a6ff;display:block}
-.container{display:flex;gap:16px;padding:0 24px 24px;min-height:60vh}
-.categories{width:200px;flex-shrink:0}
-.categories h3{font-size:13px;color:#8b949e;margin-bottom:8px}
-.cat{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:6px;padding:5px 10px;color:#8b949e;font-size:12px;cursor:pointer;margin-bottom:2px}
-.cat:hover,.cat.active{background:rgba(88,166,255,.1);border-color:rgba(88,166,255,.2);color:#58a6ff}
-.results{flex:1}
-.result-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .2s}
-.result-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
-.result-item h4{font-size:14px;color:#e6edf3;margin-bottom:4px}
-.result-item .meta{font-size:11px;color:#8b949e;display:flex;gap:12px;flex-wrap:wrap}
-.detail-panel{width:380px;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;overflow-y:auto;max-height:75vh;display:none}
-.detail-panel.open{display:block}
-.detail-panel h3{font-size:15px;color:#58a6ff;margin-bottom:8px}
-.detail-panel .row{font-size:12px;color:#8b949e;margin-bottom:4px}
-.detail-panel .row span{color:#e6edf3}
-.detail-panel pre{background:rgba(0,0,0,.3);border-radius:6px;padding:10px;font-size:10px;overflow:auto;max-height:400px;color:#8b949e;margin-top:8px}
-.pagination{display:flex;gap:6px;justify-content:center;padding:12px 0;flex-wrap:wrap}
-.pagination button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 12px;color:#8b949e;font-size:12px;cursor:pointer}
-.pagination button:hover{background:rgba(88,166,255,.15);color:#58a6ff}
-.pagination button.cur{background:#58a6ff;color:#fff;border-color:#58a6ff}
-.empty{text-align:center;padding:60px 20px;color:#8b949e}
-.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.tag{background:rgba(88,166,255,.1);border-radius:4px;padding:1px 6px;font-size:10px;color:#58a6ff}
-.inactive{opacity:.5}
-@media(max-width:768px){.container{flex-direction:column}.categories{width:100%;display:flex;gap:4px;flex-wrap:wrap}.detail-panel{width:100%}}
-</style>
-
-
-
-
-  <link rel="stylesheet" href="/frontend/share.css">
-</head>
-<body>
-<div class="header">
-  <h1>n8n 工作流库</h1>
-  <div class="search-bar">
-    <input id="q" placeholder="搜索工作流..." onkeydown="if(event.key==='Enter')search()">
-    <button onclick="search()">搜索</button>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);padding:0}
+.topbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);background:var(--card)}
+.content{max-width:1200px;margin:0 auto;padding:20px}
+h1{font-size:22px;margin-bottom:4px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stats .s{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;flex:1;min-width:80px}
+.stats .s .n{font-size:22px;font-weight:700;color:var(--accent)}
+.stats .s .l{font-size:11px;color:var(--text2)}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar input{flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;min-width:200px}
+.filter-bar select{padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;transition:all .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(67,97,238,.1)}
+.card h3{font-size:13px;margin-bottom:4px}
+.card .meta{font-size:10px;color:var(--text3);margin-bottom:4px}
+.card .desc{font-size:11px;color:var(--text2);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{background:#eef0f8;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:4px}
+.actions button{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);font-size:11px;cursor:pointer;margin-right:4px}
+.actions button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pagination{display:flex;gap:8px;justify-content:center;margin:20px 0;flex-wrap:wrap}
+.pagination button{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer}
+.pagination button:hover{background:var(--accent);color:#fff}
+.pagination .page-info{padding:6px 0;font-size:12px;color:var(--text3)}
+.loading{padding:60px;text-align:center;color:var(--text3)}
+.empty{text-align:center;padding:60px;color:var(--text3)}
+.category-list{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.category-list span{padding:3px 10px;border-radius:12px;font-size:11px;cursor:pointer;background:var(--sidebar);border:1px solid var(--border);color:var(--text2)}
+.category-list span:hover,.category-list span.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style></head><body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
+    <h1 style="font-size:15px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">N8N 工作流库</h1>
   </div>
-  <button onclick="showRaw='!'+showRaw;renderRaw()" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;color:#8b949e;font-size:12px;cursor:pointer">🔍 搜索</button>
 </div>
-
+<div class="content">
+<h1>🔄 N8N 工作流库 <span style="font-size:14px;color:var(--text3)" id="totalCount">加载中...</span></h1>
+<div class="sub">2077+ 个预制工作流模板，覆盖 1653+ 集成</div>
 <div class="stats" id="stats"></div>
-
-<div class="container">
-  <div class="categories" id="cats"></div>
-  <div class="results" id="results"></div>
-  <div class="detail-panel" id="detail"></div>
+<div class="filter-bar">
+  <input id="search" placeholder="搜索工作流名称..." oninput="searchWorkflows()">
+  <select id="catFilter" onchange="searchWorkflows()"><option value="">全部分类</option></select>
+  <button onclick="searchWorkflows()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer">🔍 搜索</button>
 </div>
-
+<div class="category-list" id="categoryList"></div>
+<div class="grid" id="grid"><div class="loading">正在加载工作流列表...</div></div>
 <div class="pagination" id="pagination"></div>
-
+</div>
 <script>
-let allData = []
-let currentQuery = ''
-let page = 0
-const PAGE = 25
-let showRaw = ''
-
-async function loadStatus(){
-  try{
-    var r = await fetch('/api/v1/n8n/status')
-    var d = await r.json()
-    document.getElementById('stats').innerHTML = '<div class=stat><b>'+d.total+'</b>工作流总数</div>' +
-      '<div class=stat><b>'+d.total_nodes+'</b>总节点</div>' +
-      '<div class=stat><b>'+(d.unique_integrations||'100+')+'</b>集成数</div>' +
-      '<div class=stat><b>'+(d.complexity.high||0)+'</b>高复杂度</div>' +
-      '<div class=stat><b>'+(d.complexity.medium||0)+'</b>中复杂度</div>'
-  }catch(e){}
+var _page=1,_total=0,_query='',_cat='';
+function loadStatus(){
+  fetch('/api/v1/n8n/status').then(function(r){return r.json()}).then(function(d){
+    var h='<div class="s"><div class="n">'+d.total+'</div><div class="l">工作流总数</div></div>';
+    h+='<div class="s"><div class="n">'+d.unique_integrations+'</div><div class="l">集成数</div></div>';
+    h+='<div class="s"><div class="n">'+(d.total_nodes/1000).toFixed(1)+'K</div><div class="l">节点总数</div></div>';
+    document.getElementById('stats').innerHTML=h;
+    document.getElementById('totalCount').textContent=d.total+' 个工作流';
+  });
+  fetch('/api/v1/n8n/categories').then(function(r){return r.json()}).then(function(d){
+    var cats=d.categories||[];
+    var html='<span class="active" onclick="filterCat(\'\')">全部</span>';
+    cats.slice(0,40).forEach(function(c){html+='<span onclick="filterCat(\''+c+'\')">'+c+'</span>'});
+    document.getElementById('categoryList').innerHTML=html;
+    var sel=document.getElementById('catFilter');
+    cats.forEach(function(c){sel.innerHTML+='<option value="'+c+'">'+c+'</option>'});
+  });
 }
-
-async function loadCats(){
-  try{
-    var r = await fetch('/api/v1/n8n/categories')
-    var d = await r.json()
-    var h = '<h3>分类</h3><button class="cat active" onclick="filterCat(\'\')">全部</button>'
-    d.categories.forEach(function(c){
-      h += '<button class="cat" onclick="filterCat(\''+c+'\')">'+c+'</button>'
-    })
-    document.getElementById('cats').innerHTML = h
-  }catch(e){}
+function filterCat(cat){_cat=cat;_page=1;document.querySelectorAll('#categoryList span').forEach(function(s){s.classList.remove('active')});event.target.classList.add('active');searchWorkflows()}
+function searchWorkflows(){
+  _query=document.getElementById('search').value;
+  _page=1;fetchWorkflows();
 }
-
-async function search(){
-  var q = document.getElementById('q').value.trim()
-  currentQuery = q
-  page = 0
-  await doSearch(q)
+function fetchWorkflows(){
+  document.getElementById('grid').innerHTML='<div class="loading">正在搜索...</div>';
+  var url='/api/v1/n8n/search?q='+encodeURIComponent(_query)+'&page='+_page+'&limit=24';
+  if(_cat)url+='&cat='+encodeURIComponent(_cat);
+  fetch(url).then(function(r){return r.json()}).then(function(d){
+    _total=d.total||0;
+    var items=d.results||[];
+    if(!items.length){document.getElementById('grid').innerHTML='<div class="empty">无匹配工作流</div>';renderPage();return}
+    var h='';
+    items.forEach(function(w){
+      var n=w.name||w.filename||'unknown';
+      h+='<div class="card"><h3>'+n.slice(0,80)+'</h3>';
+      h+='<div class="meta">'+w.filename.split('/').slice(0,2).join(' > ')+'</div>';
+      h+='<div class="actions"><button onclick="viewWorkflow('+w.id+')">🔍 查看</button>';
+      h+='<button onclick="useWorkflow(\''+n.replace(/'/g,'')+'\')">⚡ 使用</button></div></div>';
+    });
+    document.getElementById('grid').innerHTML=h;
+    renderPage();
+  }).catch(function(){document.getElementById('grid').innerHTML='<div class="empty">加载失败</div>'});
 }
-
-async function doSearch(q){
-  try{
-    var url = '/api/v1/n8n/search?q='+encodeURIComponent(q||'')+'&limit=999999'
-    var r = await fetch(url)
-    var d = await r.json()
-    allData = d.results || []
-    renderPage()
-  }catch(e){
-    document.getElementById('results').innerHTML = '<div class=empty>搜索失败</div>'
-  }
-}
-
-function filterCat(catName){
-  document.querySelectorAll('.cat').forEach(function(b){b.className='cat'})
-  event.target.className='cat active'
-  if(catName){
-    doSearch(''); // reset to full
-    setTimeout(function(){
-      allData = allData.filter(function(w){return w.integrations && w.integrations.indexOf(catName)>=0})
-      renderPage()
-    },200)
-  }else{
-    doSearch('')
-  }
-}
-
 function renderPage(){
-  var start = page * PAGE
-  var items = allData.slice(start, start + PAGE)
-  var totalPages = Math.ceil(allData.length / PAGE)
-  var h = items.length ? '' : '<div class=empty>没有找到匹配的工作流</div>'
-  items.forEach(function(w){
-    var name = w.name || w.filename.split('/').pop().replace('.json','')
-    var active = w.active !== false ? '' : ' inactive'
-    var tags = ''
-    if(w.integrations && Array.isArray(w.integrations)){
-      tags = '<div class=tags>' + w.integrations.slice(0,6).map(function(t){return '<span class=tag>'+t+'</span>'}).join('') + '</div>'
-    }
-    h += '<div class="result-item'+active+'" onclick="showDetail('+w.id+')">' +
-      '<h4>' + name.slice(0,80) + '</h4>' +
-      '<div class=meta><span>'+w.trigger+'</span><span>'+w.complexity+'</span><span>'+w.nodes+'节点</span><span>'+w.filename+'</span></div>' +
-      tags + '</div>'
-  })
-  document.getElementById('results').innerHTML = h
-  // pagination
-  var ph = ''
-  if(totalPages > 1){
-    for(var i=0;i<totalPages&&i<20;i++){
-      var c = i===page ? 'cur' : ''
-      ph += '<button class="'+c+'" onclick="goPage('+i+')">'+(i+1)+'</button>'
-    }
-  }
-  document.getElementById('pagination').innerHTML = ph
+  var pages=Math.ceil(_total/24);
+  var h='<span class="page-info">共 '+_total+' 个，第 '+_page+'/'+pages+' 页</span>';
+  if(_page>1)h+='<button onclick="gotoPage('+(_page-1)+')">← 上一页</button>';
+  if(_page<pages)h+='<button onclick="gotoPage('+(_page+1)+')">下一页 →</button>';
+  document.getElementById('pagination').innerHTML=h;
 }
-
-function goPage(p){page=p;renderPage()}
-
-async function showDetail(id){
-  try{
-    var r = await fetch('/api/v1/n8n/workflow/'+id)
-    var d = await r.json()
-    var p = document.getElementById('detail')
-    if(!d.success){p.innerHTML='<div class=row>未找到</div>';p.className='detail-panel open';return}
-    p.innerHTML = '<h3>'+(d.name||d.filename)+'</h3>' +
-      '<div class=row>📄 文件: <span>'+d.filename+'</span></div>' +
-      '<div class=row>⚡ 触发: <span>'+d.trigger+'</span></div>' +
-      '<div class=row>📊 复杂度: <span>'+d.complexity+'</span></div>' +
-      '<div class=row>🔗 节点: <span>'+d.nodes+'个</span></div>' +
-      '<div class=row>🏷️ 集成: <span>'+(d.integrations||'-')+'</span></div>'
-    if(showRaw.startsWith('!')){
-      p.innerHTML += '<pre>' + JSON.stringify(d.raw||{},null,2).slice(0,3000) + '</pre>'
-    }
-    p.className = 'detail-panel open'
-  }catch(e){}
+function gotoPage(p){_page=p;fetchWorkflows()}
+function useWorkflow(name){
+  try{localStorage.setItem('evo_n8n_workflow',JSON.stringify({name:name}))}catch(e){}
+  window.location.href='/?'+Date.now();
 }
-
-function renderRaw(){}
-
-loadStatus()
-loadCats()
-doSearch('')
-</script>
-
-<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>
-</body>
-</html>
+function viewWorkflow(id){
+  fetch('/api/v1/n8n/search?limit=1&page=1&q='+id).then(function(r){return r.json()}).then(function(d){
+    var w=d.results&&d.results[0];
+    if(w)alert('📋 '+w.name+'\n文件: '+w.filename);
+    else alert('未找到');
+  });
+}
+loadStatus();fetchWorkflows();
+</script></body></html>

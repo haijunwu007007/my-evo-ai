@@ -103,9 +103,9 @@ function filterSkills(){
 }
 
 function execSkill(name){
-  fetch('/api/v1/skills/'+name+'/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
-    .then(function(r){return r.json()}).then(function(j){alert(JSON.stringify(j).slice(0,100))})
-    .catch(function(){alert('执行失败: '+name)});
+  // 跳转到主页并填入技能名到输入框
+  localStorage.setItem('evo_skill_name', name);
+  window.location.href = '/';
 }
 
 function skillDetail(name){

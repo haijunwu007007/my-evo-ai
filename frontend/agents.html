@@ -71,7 +71,8 @@ function loadAgents(){
     fetch('/api/v1/agents/registry').then(function(r){return r.json().catch(function(){return {}})}),
     fetch('/api/v1/modules').then(function(r){return r.json().catch(function(){return {}})})
   ]).then(function(results){
-    var agentList = results[0].agents || results[0].data || [];
+    var raw = results[0].agents || results[0].data || [];
+    var agentList = Array.isArray(raw) ? raw : Object.values(raw);
     var modules = results[1].modules || results[1].data || [];
     
     // Merge: show modules as agents if no registry data

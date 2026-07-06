@@ -341,6 +341,12 @@ async def canvas_page():
     if p.exists(): return FileResponse(str(p))
     raise HTTPException(404)
 
+@router.get("/n8n-browse")
+async def n8n_browse_page():
+    p = BASE_DIR / "frontend" / "n8n.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
 @router.get("/workflow")
 async def workflow_page():
     try:
