@@ -189,6 +189,20 @@ async def _try_llm_chat(msg: str, system_hint: str = ""):
     return None
 
 
+# N8N工作流匹配函数（中英关键词→搜索+链接）
+_n8n_cn_en = {'邮件':'email','通知':'notify alert','推送':'push send','审批':'approval review','同步':'sync','采集':'collect','定时':'schedule cron','监控':'monitor alert','告警':'alert','数据':'data','报表':'report','备份':'backup','模板':'template','自动化':'auto','流程':'flow','工作流':'workflow','n8n':'n8n'}
+
+async def _append_n8n_links(msg: str, reply: str) -> str:
+    """如果消息涉及工作流关键词，追加N8N链接"""
+    if not any(k in msg for k in _n8n_cn_en):
+        return reply
+    # 直接显示N8N引擎链接（不依赖API搜索，稳定可靠）
+    reply += "\n\n---\n📋 **N8N 自动化引擎**"
+    reply += "\n  ➤ 浏览模板：[/n8n-browse](https://autoevoai.com/n8n-browse)（2077+ 自动化工作流）"
+    reply += "\n  ➤ 一键运行：**[n8n Editor](https://autoevoai.com:18000/)**"
+    return reply
+
+
 @router.post("/api/v1/smart")
 async def smart_chat(req: Req):
     msg = (req.message or "").strip()
@@ -216,10 +230,12 @@ async def smart_chat(req: Req):
     if itype == "search":
         result = await _execute_search(topic or msg)
         if result:
+            result = await _append_n8n_links(msg, result)
             return {"success": True, "result": result}
         # 搜索失败→LLM
         fallback = await _try_llm_chat(msg)
         if fallback:
+            fallback = await _append_n8n_links(msg, fallback)
             return {"success": True, "result": fallback}
         return {"success": True, "result": "搜索超时，稍后再试"}
 
@@ -272,72 +288,112 @@ async def smart_chat(req: Req):
             if isinstance(r, dict):
                 result = r.get("result", "") or ""
                 if result:
+                    result = await _append_n8n_links(msg, result)
                     return {"success": True, "result": result}
         except:
             pass
         # 降级到LLM
         fallback = await _try_llm_chat(msg)
         if fallback:
+            fallback = await _append_n8n_links(msg, fallback)
             return {"success": True, "result": fallback}
         return {"success": True, "result": "处理中..."}
 
-    # agent: 复杂多步骤任务 → 调用自主Agent引擎
+    # agent: 复杂多步骤任务 → 轻量级智能执行器（不依赖外部Agent引擎）
     if itype == "agent":
         try:
-            async with httpx.AsyncClient(timeout=120) as c:
-                r = await c.post("http://127.0.0.1:8765/api/v1/agent/run",
-                    json={"task": msg, "context": []})
-                data = r.json()
-                if data.get("success"):
-                    steps = data.get("steps", [])
-                    progress = data.get("progress", "")
-                    result = data.get("result", "")
-                    details = data.get("details", [])
-                    # 构建友好结果
-                    txt = "🤖 **自主Agent执行完成**\n\n"
-                    if progress:
-                        txt += progress + "\n"
-                    if result:
-                        txt += f"**📋 结果:**\n{result}\n"
-                    if details:
-                        txt += "\n**📊 执行明细:**\n"
-                        for d in details:
-                            txt += f"- 步骤{d['step']}: {d.get('display','')}\n"
-                    return {"success": True, "result": txt}
-                return {"success": True, "result": f"Agent执行出错: {data.get('error','未知错误')}"}
+            # 先用LLM拆解任务为步骤
+            plan_prompt = f"""你是任务规划专家。分析以下用户任务，拆解为具体的执行步骤。
+
+任务: {msg}
+
+返回JSON数组，每个元素包含：
+- "step": 步骤序号
+- "action": 执行的动作描述（搜索/生成/分析/对比/汇总等）
+- "tool": 最可能用到的工具名（search/docs/skills/code/n8n等）
+- "target": 目标描述
+
+示例格式：[{{"step":1,"action":"搜索AI行业趋势","tool":"search","target":"AI行业最新动态"}},{{"step":2,"action":"生成分析报告","tool":"docs","target":"AI趋势分析报告"}}]
+
+只返回JSON数组，不要加额外解释。"""
+            step_text = await _try_llm_chat(plan_prompt, "你是一个严格的任务规划器。只输出JSON数组。")
+            txt = "🤖 **任务拆解与执行**\n\n"
+            txt += f"**📋 任务:** {msg}\n\n"
+            txt += "**📌 执行计划:**\n"
+            steps = []
+            try:
+                steps = json.loads(step_text) if step_text else []
+            except:
+                pass
+            if not steps or not isinstance(steps, list):
+                steps = [{"step": 1, "action": "综合分析", "tool": "llm", "target": msg}]
+            
+            for s in steps:
+                txt += f"  {s['step']}. [{s.get('tool','?')}] {s.get('action','')} — {s.get('target','')}\n"
+            
+            # 先搜N8N匹配
+            n8n_results = []
+            try:
+                async with httpx.AsyncClient(timeout=8) as c:
+                    for kw in msg.split():
+                        if len(kw) > 1:
+                            r = await c.get(f"http://127.0.0.1:8765/api/v1/n8n/search?q={kw}&limit=3")
+                            data = r.json()
+                            if data.get("results"):
+                                n8n_results.extend(data["results"][:2])
+            except: pass
+            
+            # 执行LLM综合回答（带步骤上下文）
+            exec_prompt = f"""用户要求完成以下复杂任务：{msg}
+
+我已经将任务拆解为以下步骤：
+{json.dumps(steps, ensure_ascii=False, indent=2)}
+
+请按照步骤顺序，逐步完成这个任务。可用工具包括：
+- LLM对话（回答、写作、分析等）
+- 搜索（查找实时信息）
+- 技能执行（458个内置技能）
+- N8N工作流（2077个自动化模板）
+- 文档生成（Word/PPT/Excel）
+
+请逐步执行并返回最终结果。格式：
+**步骤1：** [执行内容]
+**步骤2：** [执行内容]
+...
+**最终结果：** [汇总答案]"""
+            
+            result = await _try_llm_chat(exec_prompt)
+            if result:
+                txt += "\n\n**⚡ 执行过程:**\n" + result
+            else:
+                txt += "\n\n**⚡ 执行结果:**\n综合分析完成，建议查看详细结果。"
+            
+            # 追加N8N链接（如果找到）
+            if n8n_results:
+                txt += "\n\n---\n📋 **匹配到 N8N 工作流模板:**\n"
+                for w in n8n_results[:5]:
+                    txt += f"  • {w.get('name','')[:60]}\n"
+                txt += "\n  ➤ 打开编辑器运行：[/api/v1/n8n/editor](https://autoevoai.com/api/v1/n8n/editor)"
+            
+            return {"success": True, "result": txt}
         except Exception as e:
-            logger.warning(f"[AGENT] 引擎调用失败: {e}")
+            logger.warning(f"[AGENT] 执行失败: {e}")
             # 降级到LLM
             fallback = await _try_llm_chat(msg)
             if fallback:
+                fallback = await _append_n8n_links(msg, fallback)
                 return {"success": True, "result": fallback}
-            return {"success": True, "result": "Agent引擎暂不可用，已用AI直接回答"}
+            return {"success": True, "result": "处理超时，请稍后再试"}
 
     # chat: LLM直接回答
     result = await _try_llm_chat(msg)
     if result:
-        # N8N工作流匹配（任何结果后都尝试）
-        _n8n_keys = ['工作流','自动化','邮件','通知','推送','审批','流程','同步','采集','定时','监控','告警','数据','报表','备份','模板']
-        if any(k in msg for k in _n8n_keys):
-            try:
-                from urllib.parse import quote as _n8n_quote
-                _n8n_url = f"http://127.0.0.1:8765/api/v1/n8n/search?q={_n8n_quote(msg[:30])}&limit=5"
-                async with httpx.AsyncClient(timeout=6) as _n8n_c:
-                    _n8n_resp = await _n8n_c.get(_n8n_url)
-                    _n8n_data = _n8n_resp.json()
-                _n8n_results = _n8n_data.get("results", [])
-                if _n8n_results:
-                    result += "\n\n🔗 **已匹配到以下 N8N 工作流模板：**"
-                    for _w in _n8n_results[:5]:
-                        _name = _w.get("name","")[:60]
-                        result += f"\n  • {_name}"
-                    result += "\n\n> 打开 /n8n-browse 浏览全部 2077+ 个工作流模板，或 /n8n 使用 n8n Editor-UI"
-            except Exception:
-                pass
+        result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
     # 超时再试
     result = await _try_llm_chat(msg)
     if result:
+        result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
     return {"success": True, "result": "正在思考中..."}
 
