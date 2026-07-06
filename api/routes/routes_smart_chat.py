@@ -17,13 +17,14 @@ class Req(BaseModel):
 _INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSON。不要加额外解释。
 
 规则：
-- intent: chat/hot/search/create/help/calculate
+- intent: chat/hot/search/create/help/calculate/agent
   - chat: 普通聊天、问答、写作、解释、建议、闲聊、天气、情感、角色扮演、系统介绍
   - hot: 查热点/热搜/热榜/头条/新闻/大事/新鲜事（如果提到具体平台，platform填平台名）
   - search: 明确说搜索xx、查找xx、搜一下xx、查一下xx（想找具体信息）
   - create: 生成文档/PPT/Excel/合同/报告/代码/文章/方案
   - help: 问系统能做什么、有什么功能、怎么使用、能力列表
   - calculate: 数学计算、算术、运算、数字计算（含数字和运算符的表达式计算）
+  - agent: 多步骤复杂任务，需要调用多个工具/技能才能完成，如"先搜索XXX再生成YYY"、"查一下XXX并整理成PPT"、"搜索XXX和YYY对比分析后出报告"、"帮我XXX然后再YYY最后ZZZ"
 - platform: 如果intent=hot且用户提到具体平台(百度/微博/抖音/知乎/B站/头条/腾讯/贴吧/小红书)，填平台名。否则""
 - topic: 搜索主题或热点话题
 - thought: 你分析用户意图的原因（一句话）
@@ -68,6 +69,11 @@ _INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSO
 例38: q=100/5+3等于多少 → {"intent":"calculate","expression":"100/5+3","thought":"用户问算术题"}
 例39: q=计算 1024*768 → {"intent":"calculate","expression":"1024*768","thought":"用户要求做乘法"}
 例40: q=(15+3)*2-10 → {"intent":"calculate","expression":"(15+3)*2-10","thought":"用户给了一个数学表达式"}
+例41: q=搜索AI行业趋势并生成一份分析报告 → {"intent":"agent","topic":"AI行业趋势报告","thought":"用户要搜索后再生成报告，多步骤复杂任务"}
+例42: q=查一下今天的热点新闻，然后整理成PPT → {"intent":"agent","topic":"热点新闻PPT","thought":"先搜索热点再生成PPT，需要多步执行"}
+例43: q=搜索2024年最佳AI工具，对比分析，出一份Excel表格 → {"intent":"agent","topic":"AI工具对比Excel","thought":"搜索+对比+出表格，三步复杂任务"}
+例44: q=帮我搜索最近的科技新闻，用中英文总结，然后发到我的邮箱 → {"intent":"agent","topic":"科技新闻邮件","thought":"搜索+翻译+邮件，多工具调用"}
+例45: q=搜索python和javascript的性能对比，然后生成一份报告 → {"intent":"agent","topic":"语言对比报告","thought":"搜索+报告生成，两步复杂任务"}
 
 现在分析: q="""
 
@@ -274,6 +280,38 @@ async def smart_chat(req: Req):
         if fallback:
             return {"success": True, "result": fallback}
         return {"success": True, "result": "处理中..."}
+
+    # agent: 复杂多步骤任务 → 调用自主Agent引擎
+    if itype == "agent":
+        try:
+            async with httpx.AsyncClient(timeout=120) as c:
+                r = await c.post("http://127.0.0.1:8765/api/v1/agent/run",
+                    json={"task": msg, "context": []})
+                data = r.json()
+                if data.get("success"):
+                    steps = data.get("steps", [])
+                    progress = data.get("progress", "")
+                    result = data.get("result", "")
+                    details = data.get("details", [])
+                    # 构建友好结果
+                    txt = "🤖 **自主Agent执行完成**\n\n"
+                    if progress:
+                        txt += progress + "\n"
+                    if result:
+                        txt += f"**📋 结果:**\n{result}\n"
+                    if details:
+                        txt += "\n**📊 执行明细:**\n"
+                        for d in details:
+                            txt += f"- 步骤{d['step']}: {d.get('display','')}\n"
+                    return {"success": True, "result": txt}
+                return {"success": True, "result": f"Agent执行出错: {data.get('error','未知错误')}"}
+        except Exception as e:
+            logger.warning(f"[AGENT] 引擎调用失败: {e}")
+            # 降级到LLM
+            fallback = await _try_llm_chat(msg)
+            if fallback:
+                return {"success": True, "result": fallback}
+            return {"success": True, "result": "Agent引擎暂不可用，已用AI直接回答"}
 
     # chat: LLM直接回答
     result = await _try_llm_chat(msg)
