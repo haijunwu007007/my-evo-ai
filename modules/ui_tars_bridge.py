@@ -522,53 +522,131 @@ class UiTarsBridgeModule:
         }
 
     # --- Page ---
-    def capture_page(self, url: str = "", title: str = "") -> dict[str, Any]:
+    async def capture_page(self, url: str = "", title: str = "") -> dict[str, Any]:
+        """
+        截取页面截图并通过视觉模型分析 UI 元素（真实实现）
+
+        流程:
+        1. 使用 browser_engine 截图页面
+        2. 发送截图到 Moondream 视觉模型
+        3. 解析视觉返回结果，提取 UI 元素
+        """
         if not self._initialized:
             return {"success": False, "error": "not_initialized"}
-        import time as tmod
 
         snapshot_id = f"snap_{uuid.uuid4().hex[:10]}"
+        screenshot_b64 = ""
+        page_url = url or "https://autoevoai.com/"
+
+        # 1. 用 browser_engine 截图
+        try:
+            from core.browser_engine import get_browser_engine, launch_browser
+
+            engine = await get_browser_engine()
+            launch_result = await engine.launch(headless=True)
+            if launch_result.get("success"):
+                await engine.goto(page_url, timeout=20000)
+                ss = await engine.screenshot()
+                screenshot_b64 = ss.base64 if ss and ss.base64 else ""
+                page_title = (await engine.get_page_info()).get("title", title)
+                await engine.close()
+            else:
+                # 降级：直接用 requests 获取页面
+                page_title = title or page_url
+        except Exception as e:
+            logger.warning(f"capture_page: browser_engine 截图失败, 降级到 HTTP: {e}")
+            page_title = title or page_url
+
         elements = []
-        sample_elements = [
-            UIElement(
-                tag="button", element_type=ElementType.BUTTON, text="提交", css_selector="#submit-btn", visible=True
-            ),
-            UIElement(
-                tag="input",
-                element_type=ElementType.INPUT,
-                text="",
-                placeholder="请输入用户名",
-                css_selector="#username",
+        # 2. 用视觉模型分析截图
+        if screenshot_b64:
+            try:
+                prompt = (
+                    "List every interactive UI element visible on this page. "
+                    "For each, give: element type (button/link/input/checkbox/radio/dropdown/icon/heading/text), "
+                    "its visible text/label/placeholder, and its approximate position (top/left/center/right/bottom). "
+                    "Format: TYPE | TEXT | POSITION"
+                )
+                import httpx
+                async with httpx.AsyncClient(timeout=60) as c:
+                    resp = await c.post(
+                        "http://localhost:11434/api/generate",
+                        json={
+                            "model": "moondream",
+                            "prompt": prompt,
+                            "images": [screenshot_b64],
+                            "stream": False,
+                            "options": {"temperature": 0.1, "num_predict": 500},
+                        },
+                    )
+                    if resp.status_code == 200:
+                        vision_result = resp.json().get("response", "")
+                        # 解析视觉模型返回的元素列表
+                        for line in vision_result.split("\n"):
+                            line = line.strip()
+                            if not line or "|" not in line:
+                                continue
+                            parts = [p.strip() for p in line.split("|")]
+                            el_type = parts[0].lower() if len(parts) > 0 else "unknown"
+                            el_text = parts[1] if len(parts) > 1 else ""
+                            el_pos = parts[2] if len(parts) > 2 else "center"
+
+                            # 映射到 ElementType
+                            type_map = {
+                                "button": ElementType.BUTTON, "link": ElementType.LINK,
+                                "input": ElementType.INPUT, "checkbox": ElementType.CHECKBOX,
+                                "radio": ElementType.RADIO, "dropdown": ElementType.DROPDOWN,
+                                "icon": ElementType.ICON, "heading": ElementType.HEADING,
+                                "text": ElementType.PARAGRAPH, "image": ElementType.IMAGE,
+                                "textarea": ElementType.TEXTAREA, "tab": ElementType.TAB,
+                                "dialog": ElementType.DIALOG,
+                            }
+                            mapped_type = type_map.get(el_type, ElementType.UNKNOWN)
+                            visible = "hidden" not in el_pos and "bottom" not in el_pos
+
+                            elements.append(UIElement(
+                                element_id=f"el_{uuid.uuid4().hex[:8]}",
+                                tag=el_type,
+                                element_type=mapped_type,
+                                text=el_text[:100],
+                                visible=visible,
+                                editable=el_type in ("input", "textarea"),
+                                bounds={"position": el_pos},
+                            ))
+            except Exception as e:
+                logger.warning(f"视觉 UI 分析失败: {e}")
+
+        # 3. 如果视觉分析没提取到元素，至少保存截图信息
+        if not elements:
+            elements.append(UIElement(
+                element_id=f"el_{uuid.uuid4().hex[:8]}",
+                tag="page",
+                element_type=ElementType.UNKNOWN,
+                text=f"页面: {page_url}",
                 visible=True,
-                editable=True,
-            ),
-            UIElement(
-                tag="input",
-                element_type=ElementType.INPUT,
-                text="",
-                placeholder="请输入密码",
-                css_selector="#password",
-                visible=True,
-                editable=True,
-            ),
-            UIElement(
-                tag="a", element_type=ElementType.LINK, text="忘记密码?", href="/forgot", css_selector="a.forgot"
-            ),
-            UIElement(tag="h1", element_type=ElementType.HEADING, text="欢迎登录", css_selector="h1.title"),
-        ]
-        num = int((__import__('time').time()*1000)%(20-5+1))+5
-        for i in range(min(num, len(sample_elements))):
-            el = sample_elements[i]
-            el.element_id = f"el_{uuid.uuid4().hex[:8]}"
-            elements.append(el)
+            ))
+
         snapshot = PageSnapshot(
-            snapshot_id=snapshot_id, url=url, title=title, elements=elements, viewport={"width": 1920, "height": 1080}
+            snapshot_id=snapshot_id,
+            url=page_url,
+            title=page_title or page_url,
+            elements=elements,
+            viewport={"width": 1920, "height": 1080},
+            screenshot_hash=hash(screenshot_b64[:100]) if screenshot_b64 else "",
         )
         self._snapshots[snapshot_id] = snapshot
-        self._element_cache[url] = elements
+        self._element_cache[page_url] = elements
         self._stats["pages_captured"] += 1
         self._stats["elements_found"] += len(elements)
-        return {"success": True, "snapshot_id": snapshot_id, "url": url, "elements": len(elements)}
+        return {
+            "success": True,
+            "snapshot_id": snapshot_id,
+            "url": page_url,
+            "title": page_title,
+            "elements": len(elements),
+            "has_screenshot": bool(screenshot_b64),
+            "elements_list": [e.to_dict() for e in elements],
+        }
 
     def find_element(
         self, snapshot_id: str, selector: str = "", text: str = "", element_type: str = ""

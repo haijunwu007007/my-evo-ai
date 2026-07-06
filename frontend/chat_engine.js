@@ -43,12 +43,30 @@ function handleFiles(el){
         r.readAsDataURL(file);
       })(f,idx);
     }
+    // 自动视频理解
+    else if(f.type&&f.type.startsWith('video/')){
+      var vidx=attachFiles.length-1;
+      visionDescs[vidx]='[视频分析中...]';
+      renderAttachBar();
+      (function(file,fi){
+        var fd=new FormData();
+        fd.append('file',file);
+        fd.append('prompt','请详细描述这个视频的内容，包括画面中的物体、人物、场景、动作等');
+        fetch('/api/v1/video-intelligence/analyze',{method:'POST',body:fd})
+          .then(function(r){return r.json()})
+          .then(function(d){
+            if(d.success&&d.description){visionDescs[fi]=d.description.slice(0,200);renderAttachBar()}
+            else{visionDescs[fi]='[视频分析失败]'}
+          })
+          .catch(function(){visionDescs[fi]='[视频分析失败]'});
+      })(f,vidx);
+    }
   }
   el.value='';
   renderAttachBar();
 }
 function removeAttach(idx){attachFiles.splice(idx,1);delete visionDescs[idx];renderAttachBar()}
-function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';var desc=visionDescs[i];if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,12)+(desc?'<span style="font-size:10px;color:#4361ee;margin-left:4px">'+desc.slice(0,18)+'...</span>':'')+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
+function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';var desc=visionDescs[i];if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(mp4|avi|mov|mkv|webm|flv)$/i))ico='🎬';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,12)+(desc?'<span style="font-size:10px;color:#4361ee;margin-left:4px">'+desc.slice(0,18)+'...</span>':'')+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
 function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=[];for(var i=0;i<attachFiles.length;i++){var n=attachFiles[i].name||'file';var d=visionDescs[i];if(d){a.push(n+' ('+d.slice(0,80)+')')}else{a.push(n)}}return'[已上传文件: '+a.join('; ')+']'}
 function quickTool(el, name){
   el.classList.add('clicked');setTimeout(function(){el.classList.remove('clicked')},300)
