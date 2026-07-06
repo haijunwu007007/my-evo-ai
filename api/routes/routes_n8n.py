@@ -38,7 +38,7 @@ async def _ensure_cookie() -> str:
         try:
             async with httpx.AsyncClient(timeout=10) as c:
                 r = await c.post(N8N_HOST + "/rest/login",
-                    json={"emailOrLdapLoginId": "admin@evo.local", "password": "Admin123!"})
+                    json={"email": "admin@evo.local", "password": "Admin123!"})
                 if r.status_code == 200:
                     cookie = r.headers.get("set-cookie", "")
                     N8N_COOKIE = cookie.split(";")[0] if cookie else ""
