@@ -63,13 +63,20 @@ h1{font-size:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px;just
 <script>
 var _agents = [];
 
+function fetchWithTimeout(url, ms){
+  return Promise.race([
+    fetch(url).then(function(r){return r.json().catch(function(){return {}})}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},ms)})
+  ]).catch(function(){return {}});
+}
+
 function loadAgents(){
   document.getElementById('grid').innerHTML = '<div class="loading">正在加载...</div>';
   
-  // Try registry first, fallback to modules
+  // Try registry first, fallback to modules (with 5s timeout to prevent hang)
   Promise.all([
-    fetch('/api/v1/agents/registry').then(function(r){return r.json().catch(function(){return {}})}),
-    fetch('/api/v1/modules').then(function(r){return r.json().catch(function(){return {}})})
+    fetchWithTimeout('/api/v1/agents/registry', 5000),
+    fetchWithTimeout('/api/v1/modules', 5000)
   ]).then(function(results){
     var raw = results[0].agents || results[0].data || [];
     var agentList = Array.isArray(raw) ? raw : Object.values(raw);

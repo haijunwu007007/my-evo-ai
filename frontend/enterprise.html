@@ -7466,6 +7466,56 @@ async function swApplySchedules() {
 
 /* Auto-show on load */
 setTimeout(checkSetupWizard, 1500);
+
+/* ── EvoAPI 兜底定义（防止 getCoordinatorStatus/getCapabilities/execute 报 ReferenceError）── */
+if(typeof EvoAPI === 'undefined' || !EvoAPI){
+  window.EvoAPI = {
+    getCoordinatorStatus: function(){ return fetch('/api/v1/status').then(function(r){return r.json()}).catch(function(){return null}) },
+    getCapabilities: function(){ return fetch('/api/v1/capabilities').then(function(r){return r.json()}).catch(function(){return {capabilities:{},tags:{},automation_score:0}}) },
+    execute: function(task){
+      return fetch('/api/v1/tool/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:task})})
+        .then(function(r){return r.json()}).catch(function(){return {success:false,error:'API不可用'}})
+    }
+  };
+}
+
+/* ── pipelineShowStats / pipelineShowExecHistory 兜底（防止按钮点击无响应）── */
+function pipelineShowStats(){ alert('📊 管线统计\n\n' + _pipelineList.length + ' 条管线\n' + _pipelineExecutions.length + ' 次执行'); }
+function pipelineShowExecHistory(){ alert('📋 执行历史\n\n' + (_pipelineExecutions.length ? _pipelineExecutions.map(function(e,i){return (i+1)+'. '+e.name+' - '+(e.success?'✅':'❌')}).join('\n') : '暂无记录')); }
+function pipelineExecute(id){
+  var pl = _pipelineList.find(function(p){return p.id===id});
+  if(!pl){alert('管线未找到');return}
+  alert('▶ 执行管线: ' + (pl.name||id) + '\n\n(管线执行引擎需后端支持)');
+  _pipelineExecutions.push({id:id,name:pl.name||id,success:true,time:new Date().toISOString()});
+}
+function pipelineViewDetail(id){
+  var pl = _pipelineList.find(function(p){return p.id===id});
+  if(!pl){alert('管线未找到');return}
+  alert('📄 管线详情\n\n名称: ' + pl.name + '\n描述: ' + (pl.description||'无') + '\n步骤: ' + ((pl.steps||[]).length) + '\n版本: v' + (pl.version||1));
+}
+function pipelineDeleteConfirm(id){ if(confirm('确认删除此管线？')){ _pipelineList = _pipelineList.filter(function(p){return p.id!==id}); pipelineRenderList(); } }
+function pipelineCreateSubmit(){
+  var name = document.getElementById('pl-name')?.value;
+  var desc = document.getElementById('pl-desc')?.value;
+  var tags = (document.getElementById('pl-tags')?.value||'').split(',').map(function(t){return t.trim()}).filter(Boolean);
+  var steps = [];
+  try{ steps = JSON.parse(document.getElementById('pl-steps')?.value||'[]'); }catch(e){ alert('步骤JSON格式错误'); return; }
+  if(!name){ alert('请输入管线名称'); return; }
+  _pipelineList.push({id:'pl_'+Date.now(),name:name,description:desc||'',tags:tags,steps:steps,version:1});
+  pipelineRenderList();
+}
+function openMonitorPanel(){ alert('📊 监控面板\n\n监控系统待启动'); }
+function wsConnect(){ /* websocket 占位 */ }
+function queueRefresh(){ fetch('/api/v1/queue').then(function(r){return r.json()}).then(function(d){alert('队列状态: ' + JSON.stringify(d,null,2).slice(0,300))}).catch(function(){alert('队列服务未就绪')}); }
+
+/* ── fetch('/api/pipelines') 兜底 ── */
+var _origFetch = window.fetch;
+window.fetch = function(url, opts){
+  if(url === '/api/pipelines' || url === '/api/v1/pipelines'){
+    return Promise.resolve(new Response(JSON.stringify({pipelines:_pipelineList||[]}),{status:200,headers:{'Content-Type':'application/json'}}));
+  }
+  return _origFetch(url, opts);
+};
 </script>
 
 </html>

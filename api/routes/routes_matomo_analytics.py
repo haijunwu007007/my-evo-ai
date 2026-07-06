@@ -6,7 +6,7 @@ logger = logging.getLogger("matomo_analytics")
 router = APIRouter(prefix="/api/v1/matomo-analytics", tags=["matomo_analytics"])
 
 try:
-    from modules.matomo_analytics import ModuleImpl as MatomoAnalytics
+    from modules.matomo_analytics import MatomoAnalytics as MatomoAnalytics
     _mod = MatomoAnalytics()
 except Exception as e:
     _mod = None

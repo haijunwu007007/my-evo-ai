@@ -25,7 +25,8 @@ form input,form select{padding:7px 10px;border-radius:6px;border:1px solid var(-
 .empty{text-align:center;padding:60px;color:var(--text3)}
 .loading{padding:40px;text-align:center;color:var(--text3)}
 @media(max-width:768px){body{padding:10px}h1{font-size:18px}th,td{padding:6px 8px;font-size:12px}}
-</style></head><body>
+</style><link rel="stylesheet" href="/frontend/share.css">
+</head><body>
 <h1>用户管理 <span style="font-size:14px;color:var(--text3)" id="totalUsers">加载中...</span> <button class="btn" onclick="showAdd()">+ 添加用户</button></h1>
 <table><thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
 <tbody id="userList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody></table>

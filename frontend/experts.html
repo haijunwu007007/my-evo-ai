@@ -151,4 +151,6 @@ function filterExperts(q){q=(q||'').toLowerCase().trim()
   }
 }
 rd();
+var _navQ=localStorage.getItem('evo_nav_query');
+if(_navQ){localStorage.removeItem('evo_nav_query');setTimeout(function(){filterExperts(_navQ);var inp=document.getElementById('searchExpert');if(inp)inp.value=_navQ},100)}
 </script></body></html>

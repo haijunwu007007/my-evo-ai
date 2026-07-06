@@ -128,6 +128,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .loading-dots span:nth-child(1){animation-delay:-.32s}
 .loading-dots span:nth-child(2){animation-delay:-.16s}
 @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+/* 欢迎引导 */
+.welcome-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:8px;animation:fadeIn .5s ease-out}
+.welcome-wrap h2{font-size:20px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome-wrap .sub{font-size:14px;color:var(--text3);text-align:center;max-width:460px;line-height:1.5}
+.welcome-caps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:500px;margin-top:8px}
+.welcome-cap{padding:6px 12px;border-radius:10px;background:var(--glass);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);transition:all .15s}
+.welcome-cap:hover{border-color:var(--accent);color:var(--accent);background:rgba(67,97,238,.06)}
+/* 输入建议浮层 */
+.input-suggest{position:absolute;bottom:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.08);max-height:200px;overflow-y:auto;display:none;z-index:50}
+.input-suggest.show{display:block}
+.input-suggest .si{padding:8px 12px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .1s}
+.input-suggest .si:hover,.input-suggest .si.active{background:var(--glass);color:var(--accent);font-weight:500}
+.input-suggest .si .sibadge{font-size:10px;padding:1px 5px;border-radius:4px;background:var(--accent);color:#fff;margin-left:auto}
+/* 操作历史浮层 */
+.history-mini{position:absolute;top:100%;right:0;width:260px;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.1);display:none;z-index:50;max-height:300px;overflow-y:auto}
+.history-mini.show{display:block}
+.history-mini .hi{padding:6px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px;cursor:pointer}
+.history-mini .hi:hover{background:var(--glass)}
 .cat-strip,.tip-bar{touch-action:pan-x}
 .cat-strip:hover,.tip-bar:hover{cursor:grab}
 /* 移动端 */
@@ -560,13 +578,14 @@ function checkOnboard() {
       <div class="topbar-right">
         <span onclick="clearHistory()">🔄 新对话</span>
         <span onclick="showArchives()">📋 历史</span>
+        <span onclick="showHistory()">📜 操作</span>
       
 </div>
     </div>
     <!-- 双栏内容 -->
     <div class="content-flex">
       <div class="left-panel">
-        <div class="messages" id="messages"></div>
+        <div class="messages" id="messages"><div class="welcome-wrap" id="welcomeWrap"><h2>👋 欢迎使用 AUTO-EVO-AI</h2><div class="sub" id="welcomeSub">直接输入需求，让 AI 帮你完成</div><div class="welcome-caps" id="welcomeCaps"></div></div></div>
         <!-- 工具区 -->
         <div class="tools-section" id="toolsSection">
           <div class="cat-strip" id="catStrip">
@@ -622,17 +641,17 @@ function checkOnboard() {
           </div>
           <div class="rsec">
             <h4>🤖 系统</h4>
-            <div class="ritem" id="modelStatus" onclick="checkLLM()">🧠 模型: 检测中</div>
-            <div class="ritem">⚡ 94个工具就绪</div>
+            <div class="ritem" id="modelStatus" onclick="checkLLM()">🧠 模型: zhipu/glm-4-flash</div>
+            <div class="ritem" id="toolCount">⚡ 计算中...</div>
           </div>
         </div>
       </div>
       <div class="right-toggle-btn" id="rightToggleBtn" onclick="toggleRightPanel()"></div>
     </div>
         <!-- 输入区 -->
-        <div class="input-area" id="inputArea">
+        <div class="input-area" id="inputArea"><div class="input-suggest" id="inputSuggest"></div>
           <div class="input-row" id="textInputRow"><input id="fileInput" type="file" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this)"><button onclick="document.getElementById('fileInput').click()" title="上传文件/拍照/录像">📎</button>
-            <input id="input" placeholder="输入你想做的事..." onkeydown="if(event.key==='Enter'){send()}" style="color:#000!important;background:#fff!important">
+            <input id="input" placeholder="输入你想做的事..." oninput="suggestInput(this.value)" onkeydown="if(event.key==='Enter'){send()}" style="color:#000!important;background:#fff!important">
             <button class="mic" id="voiceToggleBtn" onclick="switchToVoice()" title="语音输入">🎤</button>
             <button onclick="send()">➤</button>
           </div>
@@ -685,7 +704,7 @@ function quickTool(el,action){
   }catch(e){}
 })();
 </script>
-<script src="/frontend/chat_engine.js?v=62"></script>
+<script src="/frontend/chat_engine.js?v=63"></script>
 
 <script>
 // 侧边栏折叠分组（每个分组独立记忆）

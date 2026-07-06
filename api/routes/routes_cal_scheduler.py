@@ -9,7 +9,7 @@ logger = logging.getLogger("cal_scheduler")
 router = APIRouter(prefix="/api/v1/cal-scheduler", tags=["cal_scheduler"])
 
 try:
-    from modules.cal_scheduler import ModuleImpl as CalModule
+    from modules.cal_scheduler import CalendarScheduler as CalModule
     _module = CalModule()
     _available = True
 except Exception as e:

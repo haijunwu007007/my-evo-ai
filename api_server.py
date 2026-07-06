@@ -235,18 +235,10 @@ window.history.replaceState({{}},"","/")}})</script></body>"""
         return FileResponse(str(idx_path))
 
 
-@app.get("/{path:path}")
-async def serve_static_html(path: str):
-    """兜底：frontend/ 下的任意 .html 文件自动可访问"""
-    from fastapi.responses import FileResponse
-    from api.infra import BASE_DIR
-    if path.endswith(".html"):
-        fp = BASE_DIR / "frontend" / path
-        if fp.exists() and fp.is_file():
-            return FileResponse(str(fp))
-    from fastapi import HTTPException
-    raise HTTPException(status_code=404, detail="Not Found")
 
+# ═══════════════════════════════════════════════════════
+# API 状态 / 版本端点（必须在 /{path:path} 兜底路由之前注册）
+# ═══════════════════════════════════════════════════════
 
 @app.get("/api/status")
 @app.get("/api/v1/status")
@@ -290,6 +282,19 @@ async def get_version():
     except Exception:
         pass
     return {"success": True, "version": VERSION, "build": VERSION_BUILD, "modules": _mod_count}
+
+
+@app.get("/{path:path}")
+async def serve_static_html(path: str):
+    """兜底：frontend/ 下的任意 .html 文件自动可访问"""
+    from fastapi.responses import FileResponse
+    from api.infra import BASE_DIR
+    if path.endswith(".html"):
+        fp = BASE_DIR / "frontend" / path
+        if fp.exists() and fp.is_file():
+            return FileResponse(str(fp))
+    from fastapi import HTTPException
+    raise HTTPException(status_code=404, detail="Not Found")
 
 
 # ═══════════════════════════════════════════════════════

@@ -1,11 +1,27 @@
 """One-shot deploy - write entire file in a single command"""
-import json, urllib.request, sys, time, base64
+import json, urllib.request, sys, time, base64, os
 
 H = 'https://autoevoai.com'
+BASE = r'D:\AUTO-EVO-AI-V0.1'
 FILES = [
-    ('/home/ubuntu/my-evo-ai/frontend/chat_engine.js', 'D:/AUTO-EVO-AI-V0.1/frontend/chat_engine.js'),
-    ('/home/ubuntu/my-evo-ai/frontend/chat.html', 'D:/AUTO-EVO-AI-V0.1/frontend/chat.html'),
-    ('/home/ubuntu/my-evo-ai/frontend/experts.html', 'D:/AUTO-EVO-AI-V0.1/frontend/experts.html'),
+    # frontend pages
+    ('/home/ubuntu/my-evo-ai/frontend/chat_engine.js',     os.path.join(BASE, 'frontend/chat_engine.js')),
+    ('/home/ubuntu/my-evo-ai/frontend/chat.html',           os.path.join(BASE, 'frontend/chat.html')),
+    ('/home/ubuntu/my-evo-ai/frontend/experts.html',        os.path.join(BASE, 'frontend/experts.html')),
+    ('/home/ubuntu/my-evo-ai/frontend/agents.html',         os.path.join(BASE, 'frontend/agents.html')),
+    ('/home/ubuntu/my-evo-ai/frontend/skills.html',         os.path.join(BASE, 'frontend/skills.html')),
+    ('/home/ubuntu/my-evo-ai/frontend/apps.html',           os.path.join(BASE, 'frontend/apps.html')),
+    # new API routes
+    ('/home/ubuntu/my-evo-ai/api/routes/routes_apps.py',    os.path.join(BASE, 'api/routes/routes_apps.py')),
+    ('/home/ubuntu/my-evo-ai/api/routes/routes_smart_chat.py', os.path.join(BASE, 'api/routes/routes_smart_chat.py')),
+    ('/home/ubuntu/my-evo-ai/api/routes/routes_learn.py',   os.path.join(BASE, 'api/routes/routes_learn.py')),
+    ('/home/ubuntu/my-evo-ai/api/routes/routes_task_orchestrate.py', os.path.join(BASE, 'api/routes/routes_task_orchestrate.py')),
+    # main server (has /api/v1/version, /api/v1/status endpoints)
+    ('/home/ubuntu/my-evo-ai/api_server.py',                os.path.join(BASE, 'api_server.py')),
+    # overview API
+    ('/home/ubuntu/my-evo-ai/api/routes/routes_overview.py', os.path.join(BASE, 'api/routes/routes_overview.py')),
+    # shared CSS
+    ('/home/ubuntu/my-evo-ai/frontend/share.css',           os.path.join(BASE, 'frontend/share.css')),
 ]
 
 def run(cmd):
@@ -28,8 +44,8 @@ for remote, local in FILES:
         print(f'  FAIL: {r.get("stderr","")[:200]}')
 
 print()
-print('=== Verify server ===')
-r = run("python3 -c \"import os; print('JS:', os.path.getsize('/home/ubuntu/my-evo-ai/frontend/chat_engine.js')); print('HTML:', os.path.getsize('/home/ubuntu/my-evo-ai/frontend/chat.html'))\"")
+print('=== Verify server files ===')
+r = run("python3 -c \"import os; files = ['frontend/agents.html','frontend/skills.html','frontend/apps.html','api/routes/routes_apps.py','api_server.py']; base='/home/ubuntu/my-evo-ai/'; [print(f, os.path.getsize(base+f)) for f in files]\"")
 print(r.get('stdout',''))
 
 print('=== Atomic restart ===')
@@ -37,9 +53,35 @@ r = run("python3 -c \"import subprocess, os; subprocess.Popen(['nohup','bash','-
 print(f'Restart: {r.get("stdout","")[:200]}')
 
 time.sleep(14)
-r = urllib.request.urlopen(H+'/frontend/chat_engine.js', timeout=10)
-js = r.read()
-print(f'JS served: {len(js)} bytes')
-print(f'URLSearchParams: {b"URLSearchParams" in js}')
-print(f'replaceState: {b"replaceState" in js}')
-# check omitted - verify in next step
+print('=== Verify new endpoints ===')
+try:
+    r = urllib.request.urlopen(H+'/api/v1/apps/list', timeout=10)
+    print(f'  /api/v1/apps/list: {r.status} ({len(r.read())} bytes)')
+except Exception as e:
+    print(f'  /api/v1/apps/list: FAIL {e}')
+try:
+    r = urllib.request.urlopen(H+'/api/v1/version', timeout=10)
+    print(f'  /api/v1/version: {r.status} ({r.read().decode()[:100]})')
+except Exception as e:
+    print(f'  /api/v1/version: FAIL {e}')
+try:
+    r = urllib.request.urlopen(H+'/apps', timeout=10)
+    print(f'  /apps: {r.status} ({len(r.read())} bytes)')
+except Exception as e:
+    print(f'  /apps: FAIL {e}')
+try:
+    import urllib.parse
+    r = urllib.request.urlopen(urllib.request.Request(H+'/api/v1/smart', data=json.dumps({"message":"hello"}).encode(), headers={'Content-Type':'application/json'}), timeout=10)
+    print(f'  /api/v1/smart: {r.status} ({len(r.read())} bytes)')
+except Exception as e:
+    print(f'  /api/v1/smart: FAIL {e}')
+try:
+    r = urllib.request.urlopen(H+'/api/v1/learn', timeout=10)
+    print(f'  /api/v1/learn: {r.status} ({len(r.read())} bytes)')
+except Exception as e:
+    print(f'  /api/v1/learn: FAIL {e}')
+try:
+    r = urllib.request.urlopen(urllib.request.Request(H+'/api/v1/task/orchestrate', data=json.dumps({"task":"test"}).encode(), headers={'Content-Type':'application/json'}), timeout=10)
+    print(f'  /api/v1/task/orchestrate: {r.status} ({len(r.read())} bytes)')
+except Exception as e:
+    print(f'  /api/v1/task/orchestrate: FAIL {e}')

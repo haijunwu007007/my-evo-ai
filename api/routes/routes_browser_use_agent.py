@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 router = APIRouter(prefix="/api/v1/browser-use-agent",tags=["browser_use_agent"])
 try:
-    from modules.browser_use_agent import module_class
+    from modules.browser_use_agent import BrowserUseAgent as module_class
     _m=module_class()
 except Exception as e:
     _m=None

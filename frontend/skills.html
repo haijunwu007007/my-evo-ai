@@ -49,12 +49,19 @@ h1{font-size:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px;just
 <script>
 var _skills = [];
 
+function fetchWithTimeout(url, ms){
+  return Promise.race([
+    fetch(url).then(function(r){return r.json().catch(function(){return {}})}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},ms)})
+  ]).catch(function(){return {}});
+}
+
 function loadSkills(){
   Promise.all([
-    fetch('/api/v1/skills').then(function(r){return r.json().catch(function(){return {}})}),
-    fetch('/api/v1/skills-platform/list').then(function(r){return r.json().catch(function(){return {}})}),
-    fetch('/api/v1/cognee/skills').then(function(r){return r.json().catch(function(){return {}})}),
-    fetch('/api/v1/mercury/skills').then(function(r){return r.json().catch(function(){return {}})})
+    fetchWithTimeout('/api/v1/skills', 5000),
+    fetchWithTimeout('/api/v1/skills-platform/list', 5000).then(function(r){return r}),
+    fetchWithTimeout('/api/v1/cognee/skills', 5000),
+    fetchWithTimeout('/api/v1/mercury/skills', 5000)
   ]).then(function(results){
     var all = [];
     results.forEach(function(r){

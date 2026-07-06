@@ -9,7 +9,7 @@ logger = logging.getLogger("grafana_monitor")
 router = APIRouter(prefix="/api/v1/grafana-monitor", tags=["grafana_monitor"])
 
 try:
-    from modules.grafana_monitor import ModuleImpl as GrafanaMonitorModule
+    from modules.grafana_monitor import GrafanaMonitor as GrafanaMonitorModule
     _module = GrafanaMonitorModule()
     _available = True
 except Exception as e:

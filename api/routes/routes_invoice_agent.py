@@ -9,7 +9,7 @@ logger = logging.getLogger("invoice_agent")
 router = APIRouter(prefix="/api/v1/invoice-agent", tags=["invoice_agent"])
 
 try:
-    from modules.invoice_agent import ModuleImpl as InvoiceModule
+    from modules.invoice_agent import InvoiceAgent as InvoiceModule
     _module = InvoiceModule()
     _available = True
 except Exception as e:

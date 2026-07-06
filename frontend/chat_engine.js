@@ -153,6 +153,12 @@ function send(){
 }
 function doSend(text,ai){
   if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
+  // 操作记录
+  logHistory('发送消息',text.slice(0,60));
+  // 隐藏欢迎
+  var ww=document.getElementById('welcomeWrap');if(ww&&ww.parentNode)ww.style.display='none';
+  // 隐藏建议
+  var is=document.getElementById('inputSuggest');if(is)is.classList.remove('show');
     // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
     var _localExec = {
       screenshot: function(){return new Promise(function(resolve){
@@ -188,6 +194,37 @@ function doSend(text,ai){
     }
     if(lower.indexOf('上传')>=0||lower.indexOf('文件')>=0||lower.indexOf('选择文件')>=0){
       _localExec.fileOpen().then(function(r){addMsg('📁 '+r,'bot');hideLoading()})
+      return
+    }
+    // ── 页面导航意图（关键词精确匹配，不干扰聊天）──
+    // 匹配优先级：精确关键词 > 常规聊天
+    var navPatterns = [
+      {keys:['找我','找专家','专家系统','找一下'], path:'/experts', label:'🧠 专家中心', passCtx:true},
+      {keys:['帮我学','教我','学习知识','学技能','学技术','培训','教程','学习平台'], path:'/learn.html', label:'📖 学习中心'},
+      {keys:['工作流','编排','工作流程','编排任务'], path:'/canvas.html', label:'🔄 工作流画布'},
+      {keys:['循环','自动循环','循环任务'], path:'/loop.html', label:'⭕ 循环中心'},
+      {keys:['系统设置','设置页','管理后台'], path:'/admin', label:'⚙️ 管理后台'},
+      {keys:['监控','健康检查','系统状态','仪表盘'], path:'/dashboard', label:'📊 监控面板'},
+      {keys:['技能','工具市场','技能中心'], path:'/skills.html', label:'🛠️ 技能中心'},
+      {keys:['记忆','知识库','cognee'], path:'/cognee.html', label:'🧠 知识图谱'},
+      {keys:['Apps','已生成','应用列表','apps'], path:'/apps.html', label:'📦 应用列表'},
+      {keys:['Agent','智能体','集群'], path:'/agents.html', label:'🤖 Agent集群'},
+    ];
+    var matched = null;
+    for(var ni=0;ni<navPatterns.length;ni++){
+      var p=navPatterns[ni];
+      for(var ki=0;ki<p.keys.length;ki++){
+        if(lower.indexOf(p.keys[ki].toLowerCase())>=0){
+          matched = p; break;
+        }
+      }
+      if(matched) break;
+    }
+    if(matched){
+      if(matched.passCtx) localStorage.setItem('evo_nav_query',text);
+      addMsg('🔀 '+matched.label+' 页面正在打开...','bot');
+      hideLoading();
+      setTimeout(function(){window.location.href=matched.path},600);
       return
     }
     // 先尝试智能任务分解
@@ -309,10 +346,22 @@ function cancelVoiceRecord(e){
   _voiceChunks=[]
 }
 function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
-function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
+function toggleSidebarMobile(){var s=document.getElementById('sidebar'),o=document.getElementById('sidebarOverlay');if(!s||!o)return;s.classList.toggle('open');o.classList.toggle('show');if(o.classList.contains('show')){o.ontouchstart=function(e){e.preventDefault();toggleSidebarMobile()}}}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed')}
+function toggleSGroup(el){if(!el)return;var b=el.nextElementSibling;if(b){b.classList.toggle('collapsed');var a=el.querySelector('.arrow');if(a)a.classList.toggle('open')}}
 
 
-function filterTools(q){
+function countTools(){
+  var chips=document.querySelectorAll('.tool-chip');
+  var count=0;
+  for(var i=0;i<chips.length;i++){
+    // 去重：只计数可见区域内的唯一工具名
+    var text=chips[i].textContent.trim();
+    if(text)count++;
+  }
+  var el=document.getElementById('toolCount');
+  if(el)el.textContent='⚡ '+count+'个工具就绪';
+}
   var tabs=document.querySelectorAll('.cat-strip .cat-tab'),bodies=document.querySelectorAll('.tools-section .cat-body')
   q=q.toLowerCase().trim()
   if(!q){for(var i=0;i<bodies.length;i++){bodies[i].style.display='none'}for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('active')}_activeCat=null;document.getElementById('toolCount').textContent='';return}
@@ -337,30 +386,126 @@ function toggleTheme(){var b=document.body;b.classList.toggle('dark');var d=b.cl
 async function checkLLM(){
   var b=document.getElementById('modelBadge');
   var s=document.getElementById('modelStatus');
-  var htmlModel=b.getAttribute('data-model');
+  var htmlModel=(b?b.getAttribute('data-model'):'')||localStorage.getItem('evo_last_model')||'';
+  // 立刻显示已知的模型名，不等异步
   if(htmlModel){
-    b.textContent='🧠 '+htmlModel;
+    if(b)b.textContent='🧠 '+htmlModel;
     if(s)s.textContent='🧠 模型: '+htmlModel;
   }else{
-    b.textContent='⏳ 检测...';
-    if(s)s.textContent='⏳ 检测中';
+    if(b)b.textContent='⏳ 检测...';
+    if(s)s.textContent='⏳ 模型检测中...';
   }
   try{
     var c=new AbortController();setTimeout(function(){c.abort()},8000);
     var r=await fetch('/api/v1/llm/status',{signal:c.signal,cache:'no-store'});
     var d=await r.json();
     if(d&&d.model){
-      var name=d.provider?d.provider+'/'+d.model:d.model;
+      var name=(d.provider?d.provider+'/':'')+d.model;
       localStorage.setItem('evo_last_model',name);
-      b.textContent='🧠 '+name;
+      if(b)b.textContent='🧠 '+name;
       if(s)s.textContent='🧠 模型: '+name;
     }
   }catch(e){
-    if(!htmlModel){b.textContent='🧠 '+htmlModel}
+    // 失败时回退：如果有已知模型就保持显示，没有才显示"检测中"
+    if(s&&!htmlModel)s.textContent='🧠 模型: 连接失败';
   }
 }
 
-document.getElementById('appMain').style.display='flex';try{var _sp=new URLSearchParams(window.location.search);var _en=_sp.get('expert');if(_en){var _ii=document.getElementById('input');if(_ii){_ii.value=_en+'：';_ii.focus()};var _ct=document.getElementById('greeting');if(_ct)_ct.textContent='🎯 已激活专家: '+_en;var _dp=_sp.get('dept')||'';var _sys='你现在是 '+_en+'（'+_dp+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){};CTX.push({role:'system',content:_sys});try{CHAT=CHAT||[]}catch(ex){};CHAT=CHAT||[];addMsg('🎯 已激活专家: '+_en+'（'+_dp+'）','bot');var _se=_sp.get('_')||'';window.history.replaceState({},'','/')}else{try{var _ee=JSON.parse(localStorage.getItem('evo_active_expert')||'{}');if(_ee&&_ee.name){var _ii=document.getElementById('input');if(_ii){_ii.value=_ee.name+'：';_ii.focus()}};localStorage.removeItem('evo_active_expert')}catch(_ex){}};if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')};restoreHistory();setTimeout(function(){checkLLM()},1000)
+document.getElementById('appMain').style.display='flex';try{var _sp=new URLSearchParams(window.location.search);var _en=_sp.get('expert');if(_en){var _ii=document.getElementById('input');if(_ii){_ii.value=_en+'：';_ii.focus()};var _ct=document.getElementById('greeting');if(_ct)_ct.textContent='🎯 已激活专家: '+_en;var _dp=_sp.get('dept')||'';var _sys='你现在是 '+_en+'（'+_dp+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){};CTX.push({role:'system',content:_sys});try{CHAT=CHAT||[]}catch(ex){};CHAT=CHAT||[];addMsg('🎯 已激活专家: '+_en+'（'+_dp+'）','bot');var _se=_sp.get('_')||'';window.history.replaceState({},'','/')}else{try{var _ee=JSON.parse(localStorage.getItem('evo_active_expert')||'{}');if(_ee&&_ee.name){var _ii=document.getElementById('input');if(_ii){_ii.value=_ee.name+'：';_ii.focus()}};localStorage.removeItem('evo_active_expert')}catch(_ex){}};if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')};restoreHistory();setTimeout(function(){checkLLM()},500);setTimeout(countTools,600)
 function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return false;var x=JSON.parse(e);if(!x||!x.name){localStorage.removeItem('evo_active_expert');return false};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（'+(x.dept||'')+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+(x.dept||'')+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=isEnter;alert('_checkExpert: 已设值 '+x.name)};return true}catch(ee){alert('_checkExpert错误: '+ee);return false}
 }
+// ── 1. 欢迎引导 — 加载系统能力概览 ──
+function welcomeInit(){
+  var w=document.getElementById('welcomeCaps');
+  if(!w)return;
+  fetch('/api/v1/overview').then(function(r){return r.json()}).then(function(d){
+    if(!d.success||!d.capabilities) return;
+    var caps=d.capabilities;
+    var h='';var sub=document.getElementById('welcomeSub');
+    if(sub)sub.textContent='试试输入以下内容，或直接在输入框问任何问题：';
+    caps.forEach(function(c){
+      h+='<div class="welcome-cap" onclick="quickFill(\''+c.name.replace(/'/g,"\\'")+'\')">'+(c.icon||'')+' '+c.name+'</div>';
+    });
+    w.innerHTML=h;
+  }).catch(function(){});
+}
+// ── 2. 输入建议（打字时弹出） ──
+var _SUGGEST_DATA=[
+  {icon:'💬',label:'普通聊天',desc:'直接输入问题'},
+  {icon:'🔍',label:'联网搜索',desc:'输入"搜索xxx"'},
+  {icon:'🧠',label:'找专家',desc:'输入"帮我找个专家"'},
+  {icon:'📚',label:'学习知识',desc:'输入"教我学xxx"'},
+  {icon:'🔄',label:'创建工作流',desc:'输入"创建一个工作流"'},
+  {icon:'⭕',label:'循环任务',desc:'输入"每天做xxx"'},
+  {icon:'🛠️',label:'技能 & 工具',desc:'输入"帮我写Python"'},
+  {icon:'📊',label:'监控面板',desc:'输入"查看系统状态"'},
+  {icon:'💻',label:'生成代码',desc:'输入"写一个爬虫"'},
+  {icon:'🎨',label:'AI画图',desc:'输入"画一只猫"'}
+];
+function suggestInput(val){
+  var s=document.getElementById('inputSuggest');
+  if(!s)return;
+  var q=val.trim().toLowerCase();
+  if(!q||q.length<2){s.classList.remove('show');s.innerHTML='';return}
+  // 检查是否匹配导航意图
+  var navHints=[
+    {k:['找','专家','找一下'],badge:'🧠 专家'},
+    {k:['学','教','培训','教程'],badge:'📚 学习'},
+    {k:['工作流','编排'],badge:'🔄 工作流'},
+    {k:['循环','定时','每天','每周'],badge:'⭕ 循环'},
+    {k:['设置','管理后台','配置'],badge:'⚙️ 设置'},
+    {k:['监控','状态','仪表盘','健康'],badge:'📊 监控'},
+    {k:['skill','工具','技能'],badge:'🛠️ 技能'},
+    {k:['记忆','知识库'],badge:'🧠 记忆'},
+    {k:['画','图片','图片'],badge:'🎨 画图'},
+    {k:['写','代码','程序','脚本'],badge:'💻 代码'},
+    {k:['搜索','查','找一下'],badge:'🔍 搜索'},
+    {k:['翻译'],badge:'🌐 翻译'},
+  ];
+  var html='';
+  for(var i=0;i<navHints.length;i++){
+    var h=navHints[i];
+    for(var ki=0;ki<h.k.length;ki++){
+      if(q.indexOf(h.k[ki])>=0){
+        html+='<div class="si" onclick="document.getElementById(\'input\').value=this.textContent.trim();this.parentElement.classList.remove(\'show\');document.getElementById(\'input\').focus()"><span>'+h.badge+'</span><span class="sibadge">推荐</span></div>';
+        break;
+      }
+    }
+  }
+  // 也显示通用建议
+  if(!html){
+    _SUGGEST_DATA.forEach(function(si){
+      if(si.label.toLowerCase().indexOf(q)>=0||si.desc.toLowerCase().indexOf(q)>=0){
+        html+='<div class="si" onclick="document.getElementById(\'input\').value=\''+si.label+'\';this.parentElement.classList.remove(\'show\');document.getElementById(\'input\').focus()">'+si.icon+' '+si.desc+'<span class="sibadge">试试</span></div>';
+      }
+    });
+  }
+  if(html){
+    s.innerHTML=html;
+    s.classList.add('show');
+  }else{
+    s.classList.remove('show');
+  }
+}
+// ── 3. 操作历史跟踪 ──
+function logHistory(action, detail){
+  try{
+    var h=JSON.parse(localStorage.getItem('evo_op_history')||'[]');
+    h.unshift({act:action,detail:detail||'',time:new Date().toLocaleString()});
+    if(h.length>50)h.length=50;
+    localStorage.setItem('evo_op_history',JSON.stringify(h));
+  }catch(e){}
+}
+function showHistory(){
+  var h=JSON.parse(localStorage.getItem('evo_op_history')||'[]');
+  if(h.length===0){alert('暂无操作历史');return}
+  var list='';
+  for(var i=0;i<Math.min(h.length,20);i++){
+    list+=(i+1)+'. ['+h[i].time+'] '+h[i].act+(h[i].detail?' - '+h[i].detail:'')+'\n';
+  }
+  alert(list);
+}
+
+// ── 4. 初始化欢迎引导 ──
+setTimeout(welcomeInit,800);
 

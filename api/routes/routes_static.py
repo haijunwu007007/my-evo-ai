@@ -831,26 +831,6 @@ async def install_file(filename: str):
 
 # ── 新页面路由 ──
 
-@router.get("/marketplace")
-
-async def marketplace_page():
-
-    p = BASE_DIR / "frontend" / "marketplace.html"
-
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>模块市场</h1></body></html>")
-
-
-
-@router.get("/bi")
-
-async def bi_page():
-
-    p = BASE_DIR / "frontend" / "bi.html"
-
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>BI 仪表盘</h1></body></html>")
-
-
-
 @router.get("/sdk/{filepath:path}")
 
 async def sdk_file(filepath: str):
