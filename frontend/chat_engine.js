@@ -18,11 +18,38 @@ _TOOL_HINTS["cloner_generate"]="帮我用5阶段管道生成网站，规格："
 _TOOL_HINTS["odysseus_start"]="帮我创建长运行Agent任务，目标："
 _TOOL_HINTS["research_start"]="帮我启动自动研究循环，主题："
 var _TOOL_KEYWORDS = [...new Set(["plane_project","openproject_mgmt","cal_schedule","novu_notify","keycloak_auth","meilisearch_search","minio_storage","opentofu_apply","ansible_run","strapi_cms","directus_api","uptime_kuma","oneuptime_monitor","signoz_apm","wazuh_siem","nats_mq","rabbitmq_broker","gitea_git","wikijs_wiki","bookstack_wiki","projectsend_files","odoo_manage","erpclaw_manage","coolify_deploy","rustdesk_connect","docuseal_sign","homeassistant_control","vaultwarden_manage","nocodb_manage","appsmith_build","airbyte_sync","mlflow_track","langfuse_observe","hoppscotch_test","grist_analyze","freshrss_read","listmonk_send","mermaid_chart","nocobase_build","scriberr_transcribe","keploy_test","浏览器","自动化","研究","全栈","生成项目","记忆","composio","外部工具","分析代码","进化","学习技能","桌面","API发现","抓取","爬取","代码审查","测试","编辑代码","语音","多智能体","智能体团队","自主","issue","数据库","部署","k8s","视频","数据可视化","ocr","安全扫描","漏洞","合同","crm","发票","工单","客服","社交媒体","营销","bi","表单","法律","claude"])]
-var attachFiles=[];
-function handleFiles(el){for(var i=0;i<el.files.length;i++)attachFiles.push(el.files[i]);renderAttachBar();el.value=''}
-function removeAttach(idx){attachFiles.splice(idx,1);renderAttachBar()}
-function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,18)+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
-function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=[];for(var i=0;i<attachFiles.length;i++)a.push(attachFiles[i].name);return'[已上传文件: '+a.join(', ')+']'}
+var attachFiles=[];var visionDescs={};
+function handleFiles(el){
+  for(var i=0;i<el.files.length;i++){
+    var f=el.files[i];
+    attachFiles.push(f);
+    // 自动视觉理解图片
+    if(f.type&&f.type.startsWith('image/')){
+      var idx=attachFiles.length-1;
+      visionDescs[idx]='[图片识别中...]';
+      renderAttachBar();
+      (function(file,fi){
+        var r=new FileReader();
+        r.onload=function(e){
+          var b64=e.target.result.split(',')[1];
+          fetch('/api/v1/vision/understand',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_base64:b64,prompt:'请详细描述这张图片的内容，包括物体、场景、文字、颜色等关键信息'})})
+            .then(function(r){return r.json()})
+            .then(function(d){
+              if(d.success&&d.description){visionDescs[fi]=d.description;renderAttachBar()}
+              else{visionDescs[fi]='[图片识别失败]'}
+            })
+            .catch(function(){visionDescs[fi]='[图片识别失败]'});
+        };
+        r.readAsDataURL(file);
+      })(f,idx);
+    }
+  }
+  el.value='';
+  renderAttachBar();
+}
+function removeAttach(idx){attachFiles.splice(idx,1);delete visionDescs[idx];renderAttachBar()}
+function renderAttachBar(){var bar=document.getElementById('attachBar');if(!bar)return;if(!attachFiles||attachFiles.length===0){bar.innerHTML='';return}var h='';for(var i=0;i<attachFiles.length;i++){var f=attachFiles[i]||{},n=f.name||'file',ico='📄';var desc=visionDescs[i];if(n.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))ico='🖼️';else if(n.match(/\.(pdf)$/i))ico='📃';else if(n.match(/\.(xlsx|xls|csv)$/i))ico='📊';else if(n.match(/\.(doc|docx)$/i))ico='📝';else if(n.match(/\.(py|js|ts|html|css|java|go|rs)$/i))ico='💻';else if(n.match(/\.(zip|rar|tar|gz)$/i))ico='📦';h+='<span class="attach-chip">'+ico+' '+n.slice(0,12)+(desc?'<span style="font-size:10px;color:#4361ee;margin-left:4px">'+desc.slice(0,18)+'...</span>':'')+'<span class="del" onclick="removeAttach('+i+')">✕</span></span>'}bar.innerHTML=h}
+function getAttachInfo(){if(!attachFiles||attachFiles.length===0)return'';var a=[];for(var i=0;i<attachFiles.length;i++){var n=attachFiles[i].name||'file';var d=visionDescs[i];if(d){a.push(n+' ('+d.slice(0,80)+')')}else{a.push(n)}}return'[已上传文件: '+a.join('; ')+']'}
 function quickTool(el, name){
   el.classList.add('clicked');setTimeout(function(){el.classList.remove('clicked')},300)
   var inp=document.getElementById('input')
