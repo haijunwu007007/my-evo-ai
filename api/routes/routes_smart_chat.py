@@ -198,7 +198,7 @@ async def _append_n8n_links(msg: str, reply: str) -> str:
         return reply
     # 直接显示N8N引擎链接（不依赖API搜索，稳定可靠）
     reply += "\n\n---\n📋 **N8N 自动化引擎**"
-    reply += "\n  ➤ 浏览模板：[/n8n-browse](https://autoevoai.com/n8n-browse)（2077+ 自动化工作流）"
+    reply += "\n  ➤ 浏览全部 2077+ 工作流模板：[/n8n-browse](https://autoevoai.com/n8n-browse)"
     reply += "\n  ➤ 一键运行：**[n8n Editor](https://autoevoai.com:18000/)**"
     return reply
 
