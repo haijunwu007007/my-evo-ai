@@ -69,9 +69,45 @@ function restoreHistory(){var m=document.getElementById('messages');m.innerHTML=
 var _sendLock=false
 async function loadExpert(){quickFill("帮我找一个专家：");document.getElementById("input")?.focus()}
 
+async function processAttachments(){
+  if(!attachFiles||attachFiles.length===0) return null;
+  var parts=[];
+  for(var i=0;i<attachFiles.length;i++){
+    var f=attachFiles[i];var n=(f.name||'').toLowerCase();
+    var ext=n.split('.').pop();
+    // 图片 → OCR
+    if(['jpg','jpeg','png','gif','webp','bmp','tiff'].indexOf(ext)>=0){
+      try{
+        var fd=new FormData();fd.append('file',f,n);
+        var r=await fetch('/api/v1/ocr/recognize',{method:'POST',body:fd});
+        var d=await r.json();
+        if(d.success&&d.text){parts.push('[📄 图片识别: '+n+']\n'+d.text.slice(0,500));
+        }else{parts.push('[🖼️ 图片: '+n+']')}
+      }catch(e){parts.push('[🖼️ 图片: '+n+']')}
+    }
+    // 音频 → 转写
+    else if(['wav','mp3','flac','ogg','m4a','aac','webm'].indexOf(ext)>=0){
+      try{
+        var fd2=new FormData();fd2.append('file',f,n);
+        var r2=await fetch('/api/v1/audio/transcribe',{method:'POST',body:fd2});
+        var d2=await r2.json();
+        if(d2.success&&d2.result&&d2.result.text){parts.push('[🎤 音频转写: '+n+']\n'+d2.result.text.slice(0,500));
+        }else{parts.push('[🎵 音频: '+n+']')}
+      }catch(e){parts.push('[🎵 音频: '+n+']')}
+    }
+    // 其他文件
+    else{parts.push('[📎 '+n+']')}
+  }
+  return parts.join('\n\n');
+}
+
 function send(){
   if(_sendLock)return;_sendLock=true
-  try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();if(!text&&(!attachFiles||attachFiles.length===0))return;input.value='';var ai=getAttachInfo(),ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
+  try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;input.value='';var ai=null;if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
+  }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+}
+function doSend(text,ai){
+  if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
     // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
     var _localExec = {
       screenshot: function(){return new Promise(function(resolve){
