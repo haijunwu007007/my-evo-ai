@@ -1,60 +1,98 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
 <meta name="description" content="系统所有功能模块与技能一览，覆盖 500+ 模块">
-<meta property="og:title" content="AUTO-EVO-AI">
-<meta property="og:description" content="系统所有功能模块与技能一览，覆盖 500+ 模块">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>能力中心 - AUTO-EVO-AI V0.1</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-
-/* light theme */
-:root{--bg:#f5f5f8;--bg2:#f0f0f4;--card:#fff;--text:#1a1a2e;--text2:#6b7280;--border:#e8eaed;--accent:#4361ee}
-body{background:var(--bg);color:var(--text)}
-
-
-body{background:var(--bg);color:var(--text);min-height:100vh}
-*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none}.hdr .n a:hover,.hdr .n a.a{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:900px;margin:0 auto;padding:20px 16px}h2{font-size:18px;margin-bottom:14px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px}.item{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .25s;text-decoration:none;color:inherit}.item:hover{transform:translateY(-3px);border-color:rgba(67,97,238,.5);box-shadow:0 8px 24px rgba(0,0,0,.2)}.item .ico{font-size:28px;margin-bottom:6px}.item .nm{font-size:13px;font-weight:600}.item .st{font-size:10px;padding:2px 8px;border-radius:6px;display:inline-block;margin-top:6px}.st-on{background:rgba(16,185,129,.15);color:#10b981}.st-off{background:rgba(239,68,68,.15);color:#ef4444}.st-wip{background:rgba(245,158,11,.15);color:#f59e0b}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:20px}
-</style>
-
-
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
+.c{max-width:960px;margin:0 auto;padding:16px}
+h2{font-size:16px;margin-bottom:12px;background:linear-gradient(135deg,var(--text),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.search-box{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;margin-bottom:14px;outline:none}
+.search-box:focus{border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.item:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.item .ico{font-size:28px;margin-bottom:4px}
+.item .nm{font-size:12px;font-weight:600;margin-bottom:4px}
+.item .st{font-size:10px;padding:2px 8px;border-radius:6px;display:inline-block}
+.st-on{background:var(--success-bg,#10b98122);color:#10b981}
+.st-off{background:var(--error-bg,#ef444422);color:#ef4444}
+.st-wip{background:var(--warn-bg,#f59e0b22);color:#f59e0b}
+/* modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:999;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:24px;max-width:420px;width:90%;position:relative}
+.modal .close{position:absolute;top:12px;right:14px;cursor:pointer;font-size:18px;opacity:.6}
+.modal .close:hover{opacity:1}
+.modal .m-ico{font-size:40px;text-align:center;margin-bottom:8px}
+.modal .m-nm{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.modal .m-st{text-align:center;margin-bottom:10px}
+.modal .m-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.modal .m-btn{padding:8px 20px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:12px;margin-right:6px}
+.modal .m-btn:hover{opacity:.85}
+.modal .m-btn.s{background:var(--border);color:var(--text)}
+.ft{text-align:center;padding:16px;font-size:10px;color:var(--text2)}
+</style></head><body>
 <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
-  <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px">
     <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
-    <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
+    <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">能力中心</h1>
   </div>
 </div>
-<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/capabilities" class="a">能力中心</a></div></div>
 <div class="c">
-<h2>🧠 能力中心 — 8大 AI Agent 能力</h2>
-<div class="grid">
-<a href="/codebase" class="item"><div class="ico">🖥️</div><div class="nm">Codebase理解</div><div class="st st-on">已就绪</div></a>
-<a href="/self-evolve" class="item"><div class="ico">🧬</div><div class="nm">自进化学习</div><div class="st st-on">已就绪</div></a>
-<a href="/permission" class="item"><div class="ico">🔐</div><div class="nm">权限沙箱</div><div class="st st-on">已就绪</div></a>
-<a href="/memory" class="item"><div class="ico">🧠</div><div class="nm">持久记忆树</div><div class="st st-on">已加载</div></a>
-<a href="/multi-agent" class="item"><div class="ico">🤖</div><div class="nm">多Agent协作</div><div class="st st-on">6角色</div></a>
-<a href="/desktop" class="item"><div class="ico">💻</div><div class="nm">桌面客户端</div><div class="st st-ok">PWA就绪</div></a>
-<a href="/rbac" class="item"><div class="ico">🛡️</div><div class="nm">角色权限</div><div class="st st-on">已就绪</div></a>
-<a href="/channel" class="item"><div class="ico">📱</div><div class="nm">多渠道Agent</div><div class="st st-ok">Web就绪</div></a>
-</div></div>
+<h2>🧠 8大核心能力 · 点击查看详情</h2>
+<input class="search-box" id="searchCap" placeholder="搜索能力..." oninput="searchCapabilities(this.value)">
+<div class="grid" id="capGrid"></div>
+</div>
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalBody"></div></div>
 <div class="ft">AUTO-EVO-AI · 能力中心</div>
 <script>
-(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()
-// 动态状态更新
-fetch('/api/v1/modules/stats').then(function(r){return r.json()}).then(function(d){
-  var st=d.modules_total||d.total||0;
-  var el=document.querySelector('.item .st');
-  if(el)el.textContent=st+'模块';
-}).catch(function(){});
+var CAPS = [
+  {ico:"🖥️",name:"Codebase理解",st:"已就绪",cls:"st-on",desc:"基于AI的代码库智能理解与分析。支持代码搜索、结构解析、依赖分析、文档生成、代码审查等功能，帮助开发者快速理解和维护大型代码库。"},
+  {ico:"🧬",name:"自进化学习",st:"已就绪",cls:"st-on",desc:"系统自我进化的核心能力。通过持续学习用户行为模式、工作习惯和反馈，自动优化决策逻辑、提升执行效率，越用越聪明。"},
+  {ico:"🔐",name:"权限沙箱",st:"已就绪",cls:"st-on",desc:"安全隔离的执行环境。所有Agent操作在沙箱中运行，支持多级权限控制、资源隔离、操作审计、安全策略热更新。"},
+  {ico:"🧠",name:"持久记忆树",st:"已加载",cls:"st-on",desc:"长期记忆管理系统。基于知识图谱的持久化记忆，支持语义检索、关联推理、经验沉淀、跨会话上下文保持。"},
+  {ico:"🤖",name:"多Agent协作",st:"6角色",cls:"st-on",desc:"多智能体团队的协同工作框架。支持6种专业Agent角色（策划/编程/审查/运营/分析/研究），任务自动分发、结果汇总。"},
+  {ico:"💻",name:"桌面客户端",st:"PWA就绪",cls:"st-on",desc:"PWA桌面应用支持。可安装到桌面、离线访问、消息推送提醒，让系统像本地应用一样运行。"},
+  {ico:"🛡️",name:"角色权限",st:"已就绪",cls:"st-on",desc:"细粒度的角色权限管理。支持RBAC模型、自定义角色、资源级权限控制、审批流程、操作审计溯源。"},
+  {ico:"📱",name:"多渠道Agent",st:"Web就绪",cls:"st-on",desc:"多渠道统一接入Agent。支持Web/微信/钉钉/飞书/Telegram/Slack/邮件等渠道，统一消息处理和任务路由。"}
+];
 
+function renderCaps(list){
+  var g=document.getElementById('capGrid');
+  g.innerHTML=list.map(function(c){return '<div class="item" onclick="showCap(\''+c.name+'\')"><div class="ico">'+c.ico+'</div><div class="nm">'+c.name+'</div><div class="st '+c.cls+'">'+c.st+'</div></div>'}).join('');
+}
 
-// === AUTO-EVO-AI window exports ===
-window.loadCapabilities = loadCapabilities;
-window.getCapabilityDetail = getCapabilityDetail;
-window.toggleCapability = toggleCapability;
-window.searchCapabilities = searchCapabilities;
+function showCap(name){
+  var c=CAPS.find(function(x){return x.name===name});
+  if(!c)return;
+  document.getElementById('modalBody').innerHTML=
+    '<span class="close" onclick="closeModal()">✕</span>'+
+    '<div class="m-ico">'+c.ico+'</div>'+
+    '<div class="m-nm">'+c.name+'</div>'+
+    '<div class="m-st"><span class="st '+c.cls+'">'+c.st+'</span></div>'+
+    '<div class="m-desc">'+c.desc+'</div>'+
+    '<div style="text-align:center"><button class="m-btn" onclick="closeModal();document.getElementById(\'searchCap\').focus()">了解详情</button></div>';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+document.getElementById('modalOverlay').onclick=function(e){if(e.target===this)closeModal()};
 
+function searchCapabilities(q){
+  q=(q||'').toLowerCase();
+  var f=q?CAPS.filter(function(c){return c.name.includes(q)||c.desc.includes(q)}):CAPS;
+  renderCaps(f);
+}
+
+renderCaps(CAPS);
+(function(){var t=localStorage.getItem('evo_theme');if(t==='light')document.body.classList.add('light')})();
+
+// EXPORTS
+window.loadCapabilities=function(){renderCaps(CAPS)};
+window.getCapabilityDetail=function(n){var c=CAPS.find(function(x){return x.name===n});return c||null};
+window.toggleCapability=function(){showToast('能力状态切换','info')};
+window.searchCapabilities=searchCapabilities;
+function showToast(m,t){var d=document.createElement('div');d.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;background:'+(t==='error'?'#ef4444':'#10b981')+';color:#fff;z-index:9999;font-size:13px';d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove()},2500)}
 </script>
 </body></html>

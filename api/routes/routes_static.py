@@ -190,13 +190,14 @@ async def apps_list():
 
             apps.append({"name": f.stem[:40], "url": f"/output/apps/{f.name}", "size": f"{f.stat().st_size / 1024:.1f}KB", "date": __import__("time").ctime(f.stat().st_mtime)})
 
-    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/frontend/share.css"><body style="max-width:800px;margin:0 auto;padding:20px"><h1 class="grad-title" style="font-size:22px;margin-bottom:16px">📂 已生成APP</h1>'
+    topbar = '<div class="topbar"><button class="topbar-back" onclick="window.location.href=\'/\'">← 返回</button><span class="topbar-title">📂 已生成APP</span></div>'
+    html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>已生成APP</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/frontend/share.css"><body style="max-width:800px;margin:0 auto;padding:0">' + topbar + '<div style="padding:20px"><h1 class="grad-title" style="font-size:22px;margin-bottom:16px">📂 已生成APP</h1>'
 
     if not apps: html += '<div class="empty">还没有APP<br>试试说"开发一个任务管理系统"</div>'
 
     for a in apps: html += f'<div class="app"><a href="{a["url"]}" target="_blank">{a["name"]}</a><div class="meta"><span class="size">{a["size"]}</span> · {a["date"]}</div></div>'
 
-    return HTMLResponse(html + "</body></html>")
+    return HTMLResponse(html + "</div></body></html>")
 
 
 
@@ -660,7 +661,27 @@ async def output_page():
 
     p = BASE_DIR / "output" / "index.html"
 
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/frontend/share.css\"></head><body style=\"display:flex;align-items:center;justify-content:center;min-height:100vh\"><div class=\"card\" style=\"text-align:center;padding:40px\"><h2>📂 输出目录</h2><p style=\"margin-top:12px\">暂无输出</p></div></body></html>")
+    if p.exists(): return FileResponse(str(p))
+
+    topbar = '<div class="topbar"><button class="topbar-back" onclick="window.location.href=\'/\'">← 返回</button><span class="topbar-title">📂 输出目录</span></div>'
+
+    html = """<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>输出目录 - AUTO-EVO-AI</title><link rel="stylesheet" href="/frontend/share.css"><style>
+body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
+.c{max-width:600px;margin:60px auto;padding:20px;text-align:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px}
+.ico{font-size:48px;margin-bottom:12px}
+h2{font-size:18px;margin-bottom:8px}
+p{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.hint{display:inline-block;padding:6px 14px;background:var(--accent);color:#fff;border-radius:8px;font-size:12px;text-decoration:none}
+.hint:hover{opacity:.85}
+</style></head><body>""" + topbar + """
+<div class="c"><div class="card">
+<div class="ico">📂</div><h2>输出目录</h2>
+<p>系统生成的文件、报告、截图等都在这里。<br>还没生成任何输出内容。</p>
+<a class="hint" href="/">💬 去聊天框试试说"生成一份报告"</a>
+</div></div></body></html>"""
+
+    return HTMLResponse(html)
 
 
 
