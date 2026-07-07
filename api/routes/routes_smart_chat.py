@@ -74,6 +74,30 @@ _INFO_QUERIES = {
     "agent列表": "/api/v1/agents",
     "技能列表": "/api/v1/skills",
     "有哪些技能": "/api/v1/skills",
+    # 扩展查询
+    "用户列表": "/api/v1/users/list",
+    "所有用户": "/api/v1/users/list",
+    "查看用户列表": "/api/v1/users/list",
+    "定时任务": "/api/v1/scheduler/tasks",
+    "调度任务": "/api/v1/scheduler/tasks",
+    "查看定时任务": "/api/v1/scheduler/tasks",
+    "所有定时任务": "/api/v1/scheduler/tasks",
+    "事件规则": "/api/v1/events/rules",
+    "管线列表": "/api/v1/pipelines",
+    "所有管线": "/api/v1/pipelines",
+    "队列任务": "/api/v1/queue/tasks",
+    "工作流模板": "/api/v1/templates",
+    "所有模板": "/api/v1/templates",
+    "系统诊断": "/api/v1/diagnosis/system",
+    "系统指标": "/api/v1/system/metrics",
+    "实时监测": "/api/v1/monitor/realtime",
+    "监测数据": "/api/v1/monitor/realtime",
+    "记忆统计": "/api/v1/cognee/stats",
+    "记忆状态": "/api/v1/cognee/status",
+    "配置列表": "/api/v1/config",
+    "所有配置": "/api/v1/config",
+    "认证配置": "/api/v1/auth/config",
+    "健康状态": "/api/v1/health",
 }
 
 async def _execute_info_query(msg: str) -> str | None:
@@ -88,6 +112,109 @@ async def _execute_info_query(msg: str) -> str | None:
                     return json.dumps(data, ensure_ascii=False, indent=2)[:2000]
             except Exception as e:
                 return f"查询失败: {e}"
+    return None
+
+# ── 动作执行映射（匹配关键词→调API→返回结果，不依赖LLM）──
+# 每个动作: (关键词列表, HTTP方法, API路径, 参数字段提取函数)
+# _raw: 取关键词后的全部文本, _name: 取下一段文本作为字段值
+_ACTION_MAP = [
+    # ── 用户管理 ──
+    (["创建用户", "注册用户", "添加用户", "新增用户"], "POST", "/api/v1/user/register",
+     lambda msg: {"username": _extract_after(msg), "password": "123456"}),
+
+    # ── 记忆/知识 ──
+    (["记住", "请记住", "帮我记住", "保存记忆"], "POST", "/api/v1/cognee/remember",
+     lambda msg: {"content": _extract_after(msg), "tags": ["chat"], "source": "chat", "importance": 1}),
+    (["回忆", "搜索记忆", "查找记忆", "查询记忆"], "POST", "/api/v1/cognee/recall",
+     lambda msg: {"query": _extract_after(msg) or "最近", "limit": 10}),
+    (["忘记", "删除记忆"], "POST", "/api/v1/cognee/forget",
+     lambda msg: {"mid": _extract_after(msg)}),
+    (["学习技能"], "POST", "/api/v1/cognee/skills/learn",
+     lambda msg: {"name": _extract_after(msg)}),
+
+    # ── 定时任务 ──
+    (["创建定时任务", "添加定时任务", "设置定时"], "POST", "/api/v1/scheduler/tasks",
+     lambda msg: {"name": _extract_after(msg) or "任务", "target_type": "module", "target_id": "system", "cron": "0 8 * * *", "interval_seconds": 86400}),
+
+    # ── 队列任务 ──
+    (["创建队列任务", "添加队列任务", "加入队列"], "POST", "/api/v1/queue/tasks",
+     lambda msg: {"name": _extract_after(msg) or "任务", "type": "execute", "target": "system"}),
+
+    # ── 管线 ──
+    (["创建管线", "创建流水线", "创建管道"], "POST", "/api/v1/pipelines",
+     lambda msg: {"name": _extract_after(msg) or "流水线", "description": "", "steps": []}),
+
+    # ── 事件规则 ──
+    (["创建规则", "添加规则", "创建事件规则"], "POST", "/api/v1/events/rules",
+     lambda msg: {"name": _extract_after(msg) or "规则", "pattern": "*", "action": "notify"}),
+
+    # ── 配置操作 ──
+    (["修改配置", "设置配置", "更新配置"], "PUT", "/api/v1/config/",
+     lambda msg: {"value": _extract_after(msg)}),
+    (["保存配置", "应用配置"], "POST", "/api/v1/config/save",
+     lambda _: {}),
+    (["重载配置", "重新加载配置"], "POST", "/api/v1/config/reload",
+     lambda _: {}),
+
+    # ── 记忆树 ──
+    (["添加记忆节点", "创建记忆节点"], "POST", "/api/v1/memory/add",
+     lambda msg: {"node_id": f"node_{int(time.time())}", "title": _extract_after(msg), "content": _extract_after(msg)}),
+
+    # ── 模板 ──
+    (["应用模板", "使用模板"], "POST", "/api/v1/templates/github_trending/apply",
+     lambda _: {}),
+
+    # ── 调度任务操作 ──
+    (["触发任务", "立即执行"], "POST", "/api/v1/scheduler/tasks/_trigger",
+     lambda msg: {"task_id": _extract_after(msg)}),
+]
+
+def _extract_after(msg: str) -> str:
+    """提取关键词后剩余的文本"""
+    # 先试探"帮/请/给我"等前缀
+    for prefix in ["请帮我", "帮我", "请", "给我", "我要"]:
+        if prefix in msg:
+            # 取关键词后面的部分
+            rest = ""
+            for kw_group in _ACTION_MAP:
+                for kw in kw_group[0]:
+                    if kw in msg:
+                        rest = msg.split(kw, 1)[-1].strip()
+                        break
+                if rest:
+                    break
+            if rest:
+                rest = rest.replace(prefix, "").strip()
+                return rest
+    return ""
+
+async def _execute_action(msg: str) -> str | None:
+    """执行动作 — 匹配关键词→调API→返回结果，不依赖LLM"""
+    import httpx
+    lower = msg.lower()
+    for keywords, method, url, body_fn in _ACTION_MAP:
+        for kw in keywords:
+            if kw in lower or kw in msg:
+                body = body_fn(msg)
+                try:
+                    async with httpx.AsyncClient(timeout=10, base_url="http://127.0.0.1:8765") as c:
+                        if method == "POST":
+                            r = await c.post(url, json=body)
+                        elif method == "PUT":
+                            r = await c.put(url, json=body)
+                        elif method == "DELETE":
+                            r = await c.delete(url)
+                        else:
+                            r = await c.get(url)
+                        data = r.json() if r.status_code in (200, 201) else {"error": f"HTTP {r.status_code}"}
+                        result = json.dumps(data, ensure_ascii=False)[:1000]
+                        # 格式化输出
+                        if data.get("success"):
+                            kw_name = kw[:8]
+                            return f"✅ **{kw_name}...** 成功\n{result[:400]}"
+                        return f"❌ **{kw[:8]}...** 失败\n{result[:400]}"
+                except Exception as e:
+                    return f"❌ **{kw[:8]}...** 请求失败: {e}"
     return None
 
 async def _match_navigation(msg: str) -> str | None:
@@ -332,6 +459,11 @@ async def smart_chat(req: Req):
         except:
             pass
         return {"success": True, "result": info_result[:1000]}
+
+    # ── 优先级0c: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）──
+    action_result = await _execute_action(msg)
+    if action_result:
+        return {"success": True, "result": action_result}
 
     # ── ReAct 阶段1: Thought（意图分类）──
     itype, platform, topic, expression = await _classify_intent(msg)
