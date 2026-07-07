@@ -13,6 +13,92 @@ BASE = Path(__file__).resolve().parent.parent.parent
 class Req(BaseModel):
     message: str; api_key: Optional[str] = ""; lang: Optional[str] = "zh-CN"; context: Optional[list] = []
 
+# ── 导航路由映射（不依赖LLM，直接跳转到对应管理页面）──
+_NAVIGATION_MAP = [
+    # 管理中心
+    (["用户管理","用户列表","管理用户","查看用户","权限管理","角色管理","添加用户","删除用户"], "/admin#"),
+    (["管理中心","管理后台","系统管理","后台管理","打开管理"], "/admin"),
+    # 工作流
+    (["工作流","编排","流程编排","工作流编排","创建流程","编辑工作流"], "/canvas"),
+    (["自动化","自动化流程","自动任务","创建自动化"], "/automations"),
+    # 智能体 & 专家
+    (["智能体","agent","智能助理","AI助手","查看agent","多智能体","agent团队"], "/agents"),
+    (["专家","专家库","找专家","领域专家","行业专家","激活专家"], "/experts"),
+    (["技能","扩展","技能列表","查看技能","skill","skills"], "/skills"),
+    (["openclaw","claw","消息平台","连接平台"], "/claw"),
+    (["hermes","信息搜集"], "/hermes"),
+    (["human","桌面伴侣"], "/human"),
+    # 部署 & 发布
+    (["部署","发布","上线","部署应用","部署服务","发布应用"], "/deploy"),
+    (["视频","视频生成","做视频","制作视频","生成视频"], "/video"),
+    # 数据 & 知识
+    (["记忆","知识库","记忆库","cognee","知识图谱","回忆"], "/cognee"),
+    (["学习","教程","learn","学习中心"], "/learn"),
+    (["开源","中心","市场","hub","开源项目","发现项目"], "/hub"),
+    # 开发 & 画布
+    (["画布","canvas","编排画布","可视化编排"], "/canvas"),
+    (["循环","loop","循环任务","工作流循环"], "/loop"),
+    # 代码 & 审查
+    (["代码审查","code review","审查代码","review","版本差异","diff"], "/review"),
+    (["应用","应用列表","已生成","我的应用","查看应用"], "/apps"),
+    # 系统
+    (["设置","配置","系统设置","偏好设置","参数配置","修改配置"], "/settings"),
+    (["监控","仪表盘","dashboard","系统状态","查看状态","运行状态"], "/dashboard"),
+    (["能力","能力中心","capabilities","系统能力"], "/capabilities"),
+    # 企业
+    (["企业","enterprise","集团os","billion","集团操作系统"], "/enterprise.html"),
+    (["公司","虚拟公司","company","公司管理"], "/company.html"),
+    (["n8n","工作流引擎","n8n模板","模板库"], "/n8n"),
+    # 其他
+    (["工具","工具箱","tool","tools"], "/tools"),
+    (["通知","通知配置","消息通知","推送配置"], "/settings"),
+    (["安装向导","首次设置","初始化"], "/install-wizard"),
+    (["插件","插件列表","plugin"], "/plugins"),
+    (["API","API管理","接口管理","api密钥"], "/api-keys"),
+    (["审计","审计日志","操作日志","log","日志记录"], "/audit"),
+    (["备份","备份管理","数据备份","恢复"], "/backup"),
+]
+
+# ── 直接信息查询（不依赖LLM，直接查API）──
+_INFO_QUERIES = {
+    "模块列表": "/api/v1/modules",
+    "所有模块": "/api/v1/modules",
+    "有哪些模块": "/api/v1/modules",
+    "版本信息": "/api/v1/version",
+    "系统版本": "/api/v1/version",
+    "系统状态": "/api/v1/status",
+    "健康检查": "/api/v1/health",
+    "运行状态": "/api/v1/status",
+    "有哪些智能体": "/api/v1/agents",
+    "智能体列表": "/api/v1/agents",
+    "agent列表": "/api/v1/agents",
+    "技能列表": "/api/v1/skills",
+    "有哪些技能": "/api/v1/skills",
+}
+
+async def _execute_info_query(msg: str) -> str | None:
+    """直查信息查询 — 不依赖LLM"""
+    import httpx
+    for keyword, path in _INFO_QUERIES.items():
+        if keyword in msg:
+            try:
+                async with httpx.AsyncClient(timeout=8, base_url="http://127.0.0.1:8765") as c:
+                    r = await c.get(path)
+                    data = r.json() if r.status_code == 200 else {"error": f"{r.status_code}"}
+                    return json.dumps(data, ensure_ascii=False, indent=2)[:2000]
+            except Exception as e:
+                return f"查询失败: {e}"
+    return None
+
+async def _match_navigation(msg: str) -> str | None:
+    """匹配导航路由 — 关键词匹配返回页面URL"""
+    lower = msg.lower()
+    for keywords, url in _NAVIGATION_MAP:
+        for kw in keywords:
+            if kw in lower:
+                return url
+    return None
+
 # ── 意图分类模板（ReAct风格：先思考再行动）──
 _INTENT_PROMPT = """你是智能路由分析器。分析用户问题，返回JSON。不要加额外解释。
 
@@ -227,6 +313,25 @@ async def smart_chat(req: Req):
     msg = (req.message or "").strip()
     if not msg:
         return {"success": True, "result": "请说点什么"}
+
+    # ── 优先级0: 导航路由匹配（不依赖LLM，直接跳转）──
+    nav_url = await _match_navigation(msg)
+    if nav_url:
+        name = nav_url.split("/")[-1].replace(".html","").replace("-"," ")
+        logger.info(f"[NAV] {msg[:30]} -> {nav_url}")
+        return {"success": True, "result": f"📌 正在打开 **{name}**...", "redirect": nav_url}
+
+    # ── 优先级0b: 直接信息查询（不依赖LLM，直查API）──
+    info_result = await _execute_info_query(msg)
+    if info_result:
+        from api.agent_llm import call_llm as _llm_shorten
+        try:
+            short, _ = _llm_shorten([{"role":"user","content":f"用简洁中文总结以下系统信息（不超过100字）：{info_result[:1500]}"}], timeout=8)
+            if short and len(short) > 5:
+                return {"success": True, "result": short}
+        except:
+            pass
+        return {"success": True, "result": info_result[:1000]}
 
     # ── ReAct 阶段1: Thought（意图分类）──
     itype, platform, topic, expression = await _classify_intent(msg)
