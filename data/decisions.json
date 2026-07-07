@@ -1,0 +1,1 @@
+[{"time": 1783440878.325551, "context": {"priority": "critical", "type": "alert", "urgency": 9}, "decision": {"decision": "escalate", "reason": "高优先级或紧急性任务需人工介入", "suggested_action": "通知管理员"}}, {"time": 1783440878.3270423, "context": {"priority": "normal", "type": "data"}, "decision": {"decision": "auto_process", "confidence": 0.9, "action": "自动执行数据分析"}}]

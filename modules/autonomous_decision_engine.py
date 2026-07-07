@@ -1,7 +1,10 @@
 """
-AUTO-EVO-AI V0.1 — 自主决策引擎 模块（已填充）
+AUTO-EVO-AI V0.1 — 自主决策引擎 模块
+基于规则和优先级的轻量级决策引擎，用于任务分级、路由选择和自动升级
 """
-import json, logging
+import json, logging, os, time
+from pathlib import Path
+
 logger = logging.getLogger("autonomous_decision_engine")
 
 __module_meta__ = {
@@ -12,19 +15,60 @@ __module_meta__ = {
     "grade": "A"
 }
 
+_BASE = Path(__file__).resolve().parent.parent
+_DECISIONS_FILE = _BASE / "data" / "decisions.json"
+
 class AutonomousDecisionEngine:
     def __init__(self):
         self._name = "自主决策引擎"
         self._ready = True
+        self._decisions = self._load()
+
+    def _load(self) -> list:
+        try:
+            if _DECISIONS_FILE.exists():
+                return json.loads(_DECISIONS_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        return []
+
+    def _save(self):
+        try:
+            _DECISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            _DECISIONS_FILE.write_text(json.dumps(self._decisions[-100:], ensure_ascii=False), encoding="utf-8")
+        except Exception as e:
+            logger.warning(f"[ADE] save error: {e}")
 
     def decide(self, context: dict) -> dict:
         priority = context.get("priority", "normal")
-        if priority == "critical": return {"decision": "escalate", "reason": "高优先级任务需要人工介入"}
-        return {"decision": "auto_process", "confidence": 0.87}
+        task_type = context.get("type", "general")
+        urgency = context.get("urgency", 0)
+        now = time.time()
+
+        if priority == "critical" or urgency > 8:
+            decision = {"decision": "escalate", "reason": "高优先级或紧急性任务需人工介入", "suggested_action": "通知管理员"}
+        elif priority == "high" or urgency > 5:
+            decision = {"decision": "semi_auto", "reason": "建议半自动处理", "auto_first": True}
+        elif task_type == "monitor":
+            decision = {"decision": "auto_process", "confidence": 0.95, "action": "自动处理监控事件"}
+        elif task_type == "data":
+            decision = {"decision": "auto_process", "confidence": 0.90, "action": "自动执行数据分析"}
+        else:
+            decision = {"decision": "auto_process", "confidence": 0.87, "action": "常规自动处理"}
+
+        record = {"time": now, "context": context, "decision": decision}
+        self._decisions.append(record)
+        self._save()
+        return decision
+
     def execute(self, action="status", params=None):
         params = params or {}
-        if action == "decide": return self.decide(params.get("context", {}))
+        if action == "decide":
+            return self.decide(params.get("context", {}))
+        if action == "history":
+            return {"success": True, "total": len(self._decisions), "records": self._decisions[-20:]}
         return self.get_status()
-    def get_status(self):
-        return {"success": True, "module": "decision_engine", "version": "V0.1"}
 
+    def get_status(self):
+        return {"success": True, "module": "decision_engine", "version": "V0.1",
+                "total_decisions": len(self._decisions), "ready": self._ready}
