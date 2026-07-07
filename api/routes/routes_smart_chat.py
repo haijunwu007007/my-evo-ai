@@ -170,23 +170,22 @@ _ACTION_MAP = [
 ]
 
 def _extract_after(msg: str) -> str:
-    """提取关键词后剩余的文本"""
-    # 先试探"帮/请/给我"等前缀
-    for prefix in ["请帮我", "帮我", "请", "给我", "我要"]:
-        if prefix in msg:
-            # 取关键词后面的部分
-            rest = ""
-            for kw_group in _ACTION_MAP:
-                for kw in kw_group[0]:
-                    if kw in msg:
-                        rest = msg.split(kw, 1)[-1].strip()
-                        break
-                if rest:
-                    break
-            if rest:
-                rest = rest.replace(prefix, "").strip()
-                return rest
-    return ""
+    """提取最后一个匹配关键词后面剩余的文本（去除前缀助词）"""
+    # 先找到最后出现的匹配关键词
+    rest = msg
+    for kw_group in _ACTION_MAP:
+        for kw in kw_group[0]:
+            if kw in msg:
+                rest = msg.split(kw, 1)[-1].strip()
+                break
+    # 去除前缀助词
+    for prefix in ["请帮我", "帮我", "请", "给我", "我要", "把", "将"]:
+        if rest.startswith(prefix):
+            rest = rest[len(prefix):].strip()
+    # 如果以"的、"结尾则去掉
+    if rest.endswith("的"):
+        rest = rest[:-1].strip()
+    return rest
 
 async def _execute_action(msg: str) -> str | None:
     """执行动作 — 匹配关键词→调API→返回结果，不依赖LLM"""
@@ -441,14 +440,13 @@ async def smart_chat(req: Req):
     if not msg:
         return {"success": True, "result": "请说点什么"}
 
-    # ── 优先级0: 导航路由匹配（不依赖LLM，直接跳转）──
-    nav_url = await _match_navigation(msg)
-    if nav_url:
-        name = nav_url.split("/")[-1].replace(".html","").replace("-"," ")
-        logger.info(f"[NAV] {msg[:30]} -> {nav_url}")
-        return {"success": True, "result": f"📌 正在打开 **{name}**...", "redirect": nav_url}
+    # ── 优先级0: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）
+    #    必须在导航之前，确保"创建用户"/"记住"/"回忆"等不走跳转
+    action_result = await _execute_action(msg)
+    if action_result:
+        return {"success": True, "result": action_result}
 
-    # ── 优先级0b: 直接信息查询（不依赖LLM，直查API）──
+    # ── 优先级1: 直接信息查询（不依赖LLM，直查API）──
     info_result = await _execute_info_query(msg)
     if info_result:
         from api.agent_llm import call_llm as _llm_shorten
@@ -460,12 +458,14 @@ async def smart_chat(req: Req):
             pass
         return {"success": True, "result": info_result[:1000]}
 
-    # ── 优先级0c: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）──
-    action_result = await _execute_action(msg)
-    if action_result:
-        return {"success": True, "result": action_result}
+    # ── 优先级2: 导航路由匹配（不依赖LLM，直接跳转）──
+    nav_url = await _match_navigation(msg)
+    if nav_url:
+        name = nav_url.split("/")[-1].replace(".html","").replace("-"," ")
+        logger.info(f"[NAV] {msg[:30]} -> {nav_url}")
+        return {"success": True, "result": f"正在打开 **{name}**...", "redirect": nav_url}
 
-    # ── ReAct 阶段1: Thought（意图分类）──
+    # ── 优先级3: ReAct 阶段1: Thought（意图分类）──
     itype, platform, topic, expression = await _classify_intent(msg)
     logger.info(f"[ROUTE] {itype} p={platform} t={topic} e={expression[:20]}")
 
