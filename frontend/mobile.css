@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════
    AUTO-EVO-AI V0.1 — 手机端通用适配
    通过 share.css @import 应用到所有页面
-   覆盖：侧边栏/字体/触摸目标/间距
+   注意：不使用 !important，避免覆盖页面内联样式
    ═══════════════════════════════════════════════════ */
 
 /* 全局触摸优化 */
@@ -11,103 +11,93 @@ body{-webkit-text-size-adjust:100%}
 /* ── 手机（480px 以下） ── */
 @media(max-width:480px){
   /* 侧边栏 → 浮动抽屉 */
-  .sidebar{position:fixed!important;left:-240px!important;top:0!important;bottom:0!important;width:220px!important;z-index:100!important;transform:none!important;transition:left .25s ease!important;box-shadow:2px 0 12px rgba(0,0,0,.15)!important}
-  .sidebar.open{left:0!important}
+  .sidebar{position:fixed;left:-240px;top:0;bottom:0;width:220px;z-index:100;transition:left .25s ease;box-shadow:2px 0 12px rgba(0,0,0,.15)}
+  .sidebar.open{left:0}
   .sidebar-overlay{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.35);display:none}
   .sidebar-overlay.show{display:block}
 
   /* ☰ 按钮 */
-  .hamburger{display:inline-flex!important;align-items:center;justify-content:center;width:32px;height:32px;border:none;background:transparent;color:#6b7280;font-size:18px;cursor:pointer;border-radius:6px;flex-shrink:0;touch-action:manipulation;padding:0}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;background:transparent;color:#6b7280;font-size:18px;cursor:pointer;border-radius:6px;flex-shrink:0;touch-action:manipulation;padding:0}
   .hamburger:hover{background:#e4e6ed}
   .hamburger:active{background:#d0d2da}
 
   /* 顶栏缩紧 */
-  .topbar{padding:4px 8px!important;height:38px!important;gap:4px}
+  .topbar{padding:4px 8px;height:38px;gap:4px}
   .topbar-left{gap:4px}
-  .topbar-left h1,.topbar-left .grad-title{font-size:13px!important}
+  .topbar-left h1,.topbar-left .grad-title{font-size:13px}
   .topbar-right{clear:none}
   .topbar-right button,.topbar-btn{width:30px;height:30px;font-size:13px}
 
   /* 内容区缩紧 */
-  .content{padding:8px 10px!important}
-  body{padding:0 8px!important}
-  .c{padding:8px 10px!important}
-  .row{padding:0!important}
-  .header{padding:4px 0!important;gap:6px!important}
+  .content{padding:8px 10px}
+  .c{padding:8px 10px}
+  .row{padding:0}
+  .header{padding:4px 0;gap:6px}
 
   /* 卡片缩紧 */
-  .card{padding:10px!important;border-radius:8px!important;margin-bottom:8px!important}
-  .gc{padding:8px!important}
-  .gc .gicon{font-size:20px!important}
-  .gc .gname{font-size:12px!important}
-  .gc .gdesc{font-size:10px!important}
+  .card{padding:10px;border-radius:8px;margin-bottom:8px}
+  .gc{padding:8px}
+  .gc .gicon{font-size:20px}
+  .gc .gname{font-size:12px}
+  .gc .gdesc{font-size:10px}
 
   /* 网格自适应 */
-  .grid{gap:4px!important;padding:4px!important;grid-template-columns:repeat(2,1fr)!important}
+  .grid{gap:4px;padding:4px;grid-template-columns:repeat(2,1fr)}
 
-  /* 按钮/输入框触摸目标 ≥36px */
+  /* 按钮/输入框触摸目标 */
   button,a.button,.btn,.sbtn,.tool-chip,.action,.chp,.agent,select{
-    min-height:36px!important;padding:6px 10px!important;font-size:13px!important}
-  .sbtn .sicon{font-size:14px!important;width:22px!important}
-  .topbar-right button{min-height:30px!important}
-  input,select,textarea{font-size:16px!important}
-  .search-box,.search-bar{padding:8px 10px!important;font-size:14px!important}
-  input[type="text"],input[type="search"],input[type="email"],input[type="password"]{
-    font-size:16px!important;padding:8px 10px!important}
+    min-height:36px;padding:6px 10px;font-size:13px}
+  .sbtn .sicon{font-size:14px;width:22px}
+  input,select,textarea{font-size:16px}
+  .search-box,.search-bar{padding:8px 10px;font-size:14px}
 
   /* 统计卡片 */
-  .stat-card{padding:8px!important}
-  .stat-card .snum{font-size:18px!important}
-  .stat-card .slabel{font-size:9px!important}
+  .stat-card{padding:8px}
+  .stat-card .snum{font-size:18px}
+  .stat-card .slabel{font-size:9px}
 
   /* 模态框全宽 */
   .modal,.modal-overlay>*,.overlay>*,[class*="dialog"]{
-    width:94%!important;max-width:94%!important;padding:14px!important;left:3%!important}
-  .modal .close{top:8px!important;right:10px!important;font-size:16px!important}
-
-  /* 隐藏非关键装饰 */
-  .stats,.header .stats,.ft{font-size:9px!important}
+    width:94%;max-width:94%;padding:14px;left:3%}
+  .modal .close{top:8px;right:10px;font-size:16px}
 
   /* 空状态 */
-  .empty,.loading{padding:20px 10px!important;font-size:13px!important}
+  .empty,.loading{padding:20px 10px;font-size:13px}
 
   /* 文本字号 */
-  h1,h2{font-size:15px!important}
-  h3{font-size:13px!important}
-  h4{font-size:12px!important}
-  p,li,label,span{font-size:12px!important}
+  h1,h2{font-size:15px}
+  h3{font-size:13px}
+  h4{font-size:12px}
+  p,li,label,span{font-size:12px}
 
   /* 通用触摸优化 */
   a,button,.btn,[onclick]{touch-action:manipulation}
-  *{-webkit-overflow-scrolling:touch}
-  html,body{overflow-x:hidden;width:100%}
   table,.table{display:block;overflow-x:auto}
 }
 
 /* ── 平板/大屏手机（768px 以下） ── */
 @media(max-width:768px){
-  .sidebar{position:fixed!important;left:-240px!important;top:0!important;bottom:0!important;width:220px!important;z-index:100!important;transform:none!important;transition:left .25s ease!important;box-shadow:2px 0 12px rgba(0,0,0,.12)!important}
-  .sidebar.open{left:0!important}
+  .sidebar{position:fixed;left:-240px;top:0;bottom:0;width:220px;z-index:100;transition:left .25s ease;box-shadow:2px 0 12px rgba(0,0,0,.12)}
+  .sidebar.open{left:0}
   .sidebar-overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.3)}
   .sidebar-overlay.show{display:block}
-  .hamburger{display:inline-flex!important}
-  html,body{overflow-x:hidden;width:100%}
-  .card,.gc,.msg,pre,code,img,video,iframe,svg,canvas{max-width:100%!important}
-  .grid{grid-template-columns:repeat(2,1fr)!important}
-  .stat-grid{grid-template-columns:repeat(2,1fr)!important}
-  .topbar{padding:4px 10px!important;height:40px!important}
-  .topbar-left h1{font-size:14px!important}
-  .content{padding:10px 12px!important}
-  .card{padding:12px!important;margin-bottom:10px!important}
-  .c{padding:10px 12px!important}
-  input,select,textarea{font-size:16px!important}
+  .hamburger{display:inline-flex}
+  .card,.gc,.msg,pre,code,img,video,iframe,svg,canvas{max-width:100%}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .topbar{padding:4px 10px;height:40px}
+  .topbar-left h1{font-size:14px}
+  .content{padding:10px 12px}
+  .card{padding:12px;margin-bottom:10px}
+  .c{padding:10px 12px}
+  input,select,textarea{font-size:16px}
   body{-webkit-text-size-adjust:100%}
   a,button,.btn,[onclick]{touch-action:manipulation}
 }
 
 /* ── 桌面恢复 ── */
 @media(min-width:769px){
-  .hamburger{display:none!important}
-  .sidebar-overlay{display:none!important}
-  .sidebar{position:relative!important;left:auto!important;top:auto!important;bottom:auto!important;width:120px!important;transform:none!important;box-shadow:none!important;border-right:1px solid var(--border)!important}
+  .hamburger{display:none}
+  .sidebar-overlay{display:none}
+  .sidebar{position:relative;left:auto;top:auto;bottom:auto;width:120px;transform:none;box-shadow:none;border-right:1px solid var(--border)}
 }
