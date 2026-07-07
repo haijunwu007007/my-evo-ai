@@ -7,7 +7,23 @@
 """
 
 from __future__ import annotations
-import os, sys, json, time, asyncio, importlib
+
+# ── 最优先加载 .env 环境变量（在任何其他导入之前）──
+import os
+_env_paths = ["/etc/evo.env", os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")]
+for _p in _env_paths:
+    try:
+        if os.path.isfile(_p):
+            with open(_p) as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and "=" in _line and not _line.startswith("#"):
+                        _k, _v = _line.split("=", 1)
+                        os.environ[_k.strip()] = _v.strip()
+    except:
+        pass
+
+import sys, json, time, asyncio, importlib
 from typing import Any
 from datetime import datetime
 from pathlib import Path
@@ -191,7 +207,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"[FATAL] {request.method} {request.url.path}: {exc}\n{tb[:2000]}")
     return JSONResponse(
         status_code=500,
-        content=_error_response(500, "internal_error", "服务器内部错误", str(exc)[:500]),
+        content=_error_response(500, "internal_error", f"服务器内部错误: {exc}", f"{tb[:500]}"),
     )
 
 @app.exception_handler(RequestValidationError)

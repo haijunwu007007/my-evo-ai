@@ -308,11 +308,37 @@ _SYSTEM_CAPABILITIES = """**我能做什么：**
 
 async def _classify_intent(msg: str):
     """ReAct 阶段1: 智能意图分类（Thought）"""
+    # ── 关键词快速通道（不依赖LLM，命中直接返回）──
+    _lower = msg.lower()
+    _create_kw = ["生成","创建","做一份","做ppt","五子棋","时钟","网页","应用","游戏",
+                  "开发","写一个","做一个","帮我做","帮我写","帮我生成","帮我创建",
+                  "html","代码","报告","合同","方案","excel","表格","演示文稿",
+                  "画图","画画","画一个","图片","海报","logo"]
+    for _kw in _create_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 关键词快速通道: create ({_kw})")
+            return "create", "", "", ""
+    _hot_kw = ["热搜","热点","热榜","头条","今天有什么新闻","新鲜事","有什么大事"]
+    for _kw in _hot_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 关键词快速通道: hot ({_kw})")
+            return "hot", "", "", ""
+    _calc_kw = ["等于多少","计算","数学","加减乘除","算术"]
+    for _kw in _calc_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 关键词快速通道: calculate ({_kw})")
+            return "calculate", "", "", ""
+    _search_kw = ["搜索","查找","搜一下","查一下","搜搜"]
+    for _kw in _search_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 关键词快速通道: search ({_kw})")
+            return "search", "", "", ""
+
     from api.agent_llm import call_llm
     prompt = _INTENT_PROMPT + msg[:120]
     for _ in range(2):
         try:
-            text, _ = call_llm([{"role": "user", "content": prompt}], timeout=8)
+            text, _ = call_llm([{"role": "user", "content": prompt}], timeout=15)
             if not text:
                 continue
             # 提取JSON
@@ -442,8 +468,13 @@ async def smart_chat(req: Req):
 
     # ── 优先级0: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）
     #    必须在导航之前，确保"创建用户"/"记住"/"回忆"等不走跳转
-    action_result = await _execute_action(msg)
+    try:
+        action_result = await _execute_action(msg)
+    except Exception as _ae:
+        logger.warning(f"[SMART-ACTION] _execute_action error: {_ae}")
+        action_result = None
     if action_result:
+        return {"success": True, "result": action_result}
         return {"success": True, "result": action_result}
 
     # ── 优先级1: 直接信息查询（不依赖LLM，直查API）──
@@ -536,25 +567,44 @@ async def smart_chat(req: Req):
             return {"success": True, "result": fallback}
         return {"success": True, "result": f"📐 {expr} 无法计算"}
 
-    # create: 生成文档/代码
+    # create: 生成文档/代码 — 异步超时重试，直接输出HTML
     if itype == "create":
-        from api.agent_core import create_engine
-        eng = create_engine(BASE, BASE/"output", BASE/"output"/"tools", BASE/"data"/"agent_memory.db")
-        try:
-            r = await asyncio.to_thread(eng, msg, "", "zh-CN", [])
-            if isinstance(r, dict):
-                result = r.get("result", "") or ""
-                if result:
-                    result = await _append_n8n_links(msg, result)
-                    return {"success": True, "result": result}
-        except:
-            pass
-        # 降级到LLM
-        fallback = await _try_llm_chat(msg)
-        if fallback:
-            fallback = await _append_n8n_links(msg, fallback)
-            return {"success": True, "result": fallback}
-        return {"success": True, "result": "处理中..."}
+        from api.agent_llm import call_llm as _create_llm
+        import re as _re_html
+        import time as _time
+        import concurrent.futures as _cf
+        import asyncio as _asyncio2
+        # 先用LLM直接生成 — 用run_in_executor避免阻塞uvicorn事件循环
+        _prompt = f"{msg}\n\n请输出完整的HTML代码放在```html```标签中，包含CSS和JavaScript，可直接运行。不要输出markdown说明，只输出代码。"
+        _created_html = None
+        # 尝试2次（LLM可能慢）
+        _loop = _asyncio2.get_event_loop()
+        for _attempt in range(2):
+            try:
+                _content, _ = await _loop.run_in_executor(None, _create_llm, [{"role":"user","content":_prompt}], None, "", 90)
+                if _content and len(_content) > 100:
+                    _match = _re_html.search(r'```html\s*(.*?)\s*```', _content, _re_html.DOTALL)
+                    if _match:
+                        _created_html = _match.group(1).strip()
+                        break
+                    if '<html' in _content.lower() or '<!DOCTYPE' in _content:
+                        _created_html = _content.strip()
+                        break
+            except Exception:
+                pass
+            await _asyncio2.sleep(0.5)
+        if _created_html and len(_created_html) > 200:
+            _fn = f"app_{int(_time.time())}.html"
+            _fp = BASE / "output" / "apps" / _fn
+            _fp.parent.mkdir(parents=True, exist_ok=True)
+            _fp.write_text(_created_html, encoding="utf-8")
+            _url = f"/output/apps/{_fn}"
+            _title = msg[:30]
+            _result = f"✅ **{_title}**\n[📄 预览]({_url})"
+            _result = await _append_n8n_links(msg, _result)
+            return {"success": True, "result": _result}
+        # LLM未生成HTML → 直接返回清晰提示，不走agent_core降级
+        return {"success": True, "result": f"⏳ 正在为您生成「{msg[:40]}」...\nLLM 响应较慢，请稍后刷新页面查看结果，或直接输入更具体的需求。"}
 
     # agent: 复杂多步骤任务 → 轻量级智能执行器（不依赖外部Agent引擎）
     if itype == "agent":
