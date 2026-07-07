@@ -99,6 +99,8 @@ _INFO_QUERIES = {
     "版本信息": "/api/v1/version",
     "系统版本": "/api/v1/version",
     "系统状态": "/api/v1/status",
+    "系统怎么样": "/api/v1/status",
+    "系统如何": "/api/v1/status",
     "健康检查": "/api/v1/health",
     "运行状态": "/api/v1/status",
     "有哪些智能体": "/api/v1/agents",
@@ -592,7 +594,78 @@ async def smart_chat(req: Req):
     if not msg:
         return {"success": True, "result": "请说点什么"}
 
-    # ── 优先级0: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）
+    # ── 优先级0: 多步复合指令解析 ──
+    #    把"帮我生成一个时钟HTML，然后记住它，最后打开应用列表"拆成三步逐一执行
+    _multi_separators = (
+        "，然后", "，再", "，接着", "，之后", "，最后", "，接下来",
+        "。然后", "。再", "。接着", "。之后", "。最后", "。接下来",
+        "并且", "同时", "；然后", "；再", "；接着", "；之后", "；最后",
+    )
+    _multi_parts = [msg]
+    for _sep in _multi_separators:
+        _new_parts = []
+        for _part in _multi_parts:
+            _split_rest = _part
+            _sep_found = False
+            for _s in [_sep]:
+                if _s in _split_rest:
+                    _before, _after = _split_rest.split(_s, 1)
+                    if _before.strip():
+                        _new_parts.append(_before.strip())
+                    if _after.strip():
+                        _new_parts.append(_after.strip())
+                    _sep_found = True
+                    break
+            if not _sep_found:
+                _new_parts.append(_part)
+        _multi_parts = _new_parts
+
+    # 如果拆出多步（≥2），按顺序执行每步，聚合结果
+    if len(_multi_parts) >= 2:
+        _multi_results = []
+        _multi_has_error = False
+        for _i, _part in enumerate(_multi_parts):
+            if not _part.strip():
+                continue
+            # 用已有执行引擎处理每步（action → info → nav → create → LLM）
+            _step_req = Req(
+                message=_part.strip(),
+                api_key=req.api_key,
+                lang=req.lang,
+                context=[],
+            )
+            try:
+                _step_resp = await _execute_single(_step_req)
+            except Exception as _se:
+                _step_resp = {"success": True, "result": f"⚠️ 步骤{_i+1}异常: {_se}"}
+            _step_text = str(_step_resp.get("result", "无返回"))
+            _step_text = _step_text[:500]
+            _step_url = _step_resp.get("redirect", "")
+            if _step_text.startswith("✅") or _step_text.startswith("📐") or _step_text.startswith("🔍"):
+                _icon = "✅"
+            elif _step_url:
+                _icon = "🔗"
+                _step_text = f"跳转到{_step_url}"
+            elif _step_text.startswith("❌"):
+                _icon = "❌"
+                _multi_has_error = True
+            else:
+                _icon = "📌"
+            _multi_results.append(f"  **步骤{_i+1}:** {_icon} {_step_text}")
+            # 如果是导航，也执行跳转（取最后一步导航）
+        _combined = f"📋 **多步指令完成**\n\n" + "\n".join(_multi_results)
+        _summary_suffix = "" if not _multi_has_error else "\n\n⚠️ 部分步骤未成功，请检查后重试"
+        return {"success": True, "result": _combined + _summary_suffix}
+
+    # 委托给单步执行引擎
+    return await _execute_single(req)
+
+
+async def _execute_single(req) -> dict:
+    """单步指令执行引擎 — 供多步调度器和主入口复用"""
+    msg = (req.message or "").strip()
+
+    # ── P1: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）
     #    必须在导航之前，确保"创建用户"/"记住"/"回忆"等不走跳转
     try:
         action_result = await _execute_action(msg)
@@ -601,9 +674,8 @@ async def smart_chat(req: Req):
         action_result = None
     if action_result:
         return {"success": True, "result": action_result}
-        return {"success": True, "result": action_result}
 
-    # ── 优先级1: 直接信息查询（不依赖LLM，直查API）──
+    # ── P2: 直接信息查询（不依赖LLM，直查API）──
     info_result = await _execute_info_query(msg)
     if info_result:
         from api.agent_llm import call_llm as _llm_shorten
@@ -825,20 +897,16 @@ async def smart_chat(req: Req):
                 return {"success": True, "result": fallback}
             return {"success": True, "result": "处理超时，请稍后再试"}
 
-    # chat: LLM直接回答
+    # P6: chat → LLM直接回答
     result = await _try_llm_chat(msg)
     if result:
         result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
-    # 超时再试
     result = await _try_llm_chat(msg)
     if result:
         result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
     return {"success": True, "result": "正在思考中..."}
-
-
-@router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
     return await smart_chat(req)
 
