@@ -1,6 +1,6 @@
 """Plane — 项目管理桥接 (30k⭐)"""
 from fastapi import APIRouter; from api.infra import registry
-router=APIRouter(); URL="http://localhost:8080"
+router=APIRouter(); import os; URL=os.environ.get("PLANE_URL","http://localhost:8080")
 @router.get("/api/v1/tools/plane")
 async def s():return {"name":"Plane","version":"latest","status":"configured","url":URL,"description":"开源项目管理 — Issue/Kanban/Sprint/文档 (Jira替代)"}
 @router.get("/api/v1/tools/plane/health")

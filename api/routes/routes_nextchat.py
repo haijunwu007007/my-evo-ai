@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 router = APIRouter()
 B = "/api/v1/tools/nextchat"
 
-NEXTCHAT_URL = "http://127.0.0.1:3099"
+NEXTCHAT_URL = os.environ.get("NEXTCHAT_URL", "http://127.0.0.1:3099")
 
 @router.get(B)
 async def nextchat_status():

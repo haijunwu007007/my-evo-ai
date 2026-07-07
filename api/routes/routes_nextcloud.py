@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 from api.infra import registry
 router = APIRouter()
-NC_URL = "http://localhost:8080"
+import os; NC_URL = os.environ.get("NEXTCLOUD_URL", "http://localhost:8080")
 @router.get("/api/v1/tools/nextcloud")
 async def nc_status():
     return {"name":"Nextcloud","version":"latest","status":"configured","url":NC_URL,"description":"自托管企业网盘 — 文件同步/共享/协作/日历/联系人"}

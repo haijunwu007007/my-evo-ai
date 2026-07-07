@@ -9,9 +9,10 @@ from pydantic import BaseModel
 logger = logging.getLogger("routes_maxkb")
 router = APIRouter(prefix="/api/v1/maxkb", tags=["maxkb"])
 
+_MAXKB_API_URL = os.environ.get("MAXKB_URL", "http://localhost:8082")
 MAXKB_CONFIG = {
     "available": False,  # 需要启动 MaxKB Docker 容器
-    "api_url": "http://localhost:8082",
+    "api_url": _MAXKB_API_URL,
     "version": "1.0.0",
     "note": "需要启动 MaxKB Docker 容器: docker run -d -p 8082:8082 1panel/maxkb",
 }

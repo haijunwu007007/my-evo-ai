@@ -18,7 +18,8 @@ def _get_mod():
 @router.get(B)
 async def dify_status():
     m = _get_mod()
-    return {"success": True, "available": m is not None, "name": "Dify LLM平台", "url": "http://localhost:3000", "doc": "https://docs.dify.ai"}
+    _dify_url = os.environ.get("DIFY_URL", "http://localhost:3000")
+    return {"success": True, "available": m is not None, "name": "Dify LLM平台", "url": _dify_url, "doc": "https://docs.dify.ai"}
 
 @router.get(B + "/health")
 async def dify_health():

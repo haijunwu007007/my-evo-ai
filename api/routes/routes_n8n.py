@@ -12,7 +12,7 @@ _N8N_LOCK = asyncio.Lock()
 
 BASE = os.environ.get("N8N_BASE", "/home/ubuntu/n8n-workflows/n8n-workflows-main")
 DB_PATH = BASE + "/workflows.db"
-N8N_HOST = "http://127.0.0.1:18000"
+N8N_HOST = os.environ.get("N8N_HOST", "http://127.0.0.1:18000")
 
 def _db():
     conn = sqlite3.connect(DB_PATH)

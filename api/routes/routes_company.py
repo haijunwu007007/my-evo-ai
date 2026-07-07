@@ -6,6 +6,7 @@ from api.hub.company import get_status, assign_task, execute_tasks, get_stats, D
 
 logger = get_logger("evo.api.company")
 router = APIRouter(prefix="/api/v1/company")
+_API_BASE = os.environ.get("EVO_API_BASE", "http://127.0.0.1:8765")
 
 @router.get("/status")
 async def company_status():
@@ -38,7 +39,7 @@ async def company_goal(data: dict):
     subtasks_response = []
     try:
         r = await asyncio.wait_for(httpx.AsyncClient(timeout=30).post(
-            "http://localhost:8765/api/v1/agents/dispatch",
+            f"{_API_BASE}/api/v1/agents/dispatch",
             json={"task": f"把以下目标拆解为各部门任务: {goal}", "agents": ["planner"], "mode": "auto"},
             timeout=30), timeout=30)
         d = r.json()

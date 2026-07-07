@@ -11,6 +11,7 @@ from pathlib import Path
 
 logger = get_logger("evo.api.mcp")
 router = APIRouter()
+_API_BASE = os.environ.get("EVO_API_BASE", "http://127.0.0.1:8765")
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MCP_DIR = BASE_DIR / "mcp"
@@ -546,7 +547,7 @@ async def call_mcp_tool(server_name: str, tool_name: str, req: MCPCallRequest):
 async def _execute_builtin_tool(tool_name: str, args: dict):
     """执行内置 MCP 工具"""
     try:
-        base_url = "http://127.0.0.1:8765"
+        base_url = f"{_API_BASE}"
         
         if tool_name == "chat_send":
             msg = args.get("message", "")

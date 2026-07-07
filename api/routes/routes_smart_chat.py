@@ -800,8 +800,8 @@ async def _execute_single(req) -> dict:
                     if '<html' in _content.lower() or '<!DOCTYPE' in _content:
                         _created_html = _content.strip()
                         break
-            except Exception:
-                pass
+            except Exception as _ce:
+                logger.warning(f"[CREATE] LLM生成异常: {_ce}")
             await _asyncio2.sleep(0.5)
         if _created_html and len(_created_html) > 200:
             _fn = f"app_{int(_time.time())}.html"

@@ -3,7 +3,7 @@ from fastapi import APIRouter
 import urllib.request, json as _json
 router = APIRouter()
 B = "/api/v1/tools/openclaw"
-HOST = "http://127.0.0.1:3002"
+import os; HOST = os.environ.get("OPENCLAW_URL", "http://127.0.0.1:3002")
 
 def _alive():
     try:

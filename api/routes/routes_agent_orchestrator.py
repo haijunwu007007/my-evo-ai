@@ -12,6 +12,7 @@ from typing import Optional
 import httpx
 
 router = APIRouter(prefix="/api/v1/agents", tags=["agents"])
+_API_BASE = os.environ.get("EVO_API_BASE", "http://127.0.0.1:8765")
 
 # ===== Agent 注册中心 =====
 _AGENT_REGISTRY = {}  # {name: {capabilities, llm, endpoint, status, ...}}
@@ -136,7 +137,7 @@ async def _decompose_task(task: str) -> list[dict]:
     try:
         import httpx
         r = await asyncio.wait_for(httpx.AsyncClient(timeout=30).post(
-            "http://localhost:8765/api/v1/llm/chat",
+            f"{_API_BASE}/api/v1/llm/chat",
             json={"messages": [{"role": "user", "content": prompt}], "model": "GLM-4-Flash"},
             timeout=30), timeout=30)
         txt = r.json().get("choices", [{}])[0].get("message", {}).get("content", "")
@@ -186,7 +187,7 @@ async def _call_agent(agent_name: str, action: str, expected: str) -> str:
 
     try:
         r = await asyncio.wait_for(httpx.AsyncClient(timeout=60).post(
-            "http://localhost:8765/api/v1/llm/chat",
+            f"{_API_BASE}/api/v1/llm/chat",
             json={"messages": [{"role": "user", "content": prompt}], "model": agent.get("llm", "GLM-4-Flash")},
             timeout=60), timeout=60)
         txt = r.json().get("choices", [{}])[0].get("message", {}).get("content", "（无响应）")
@@ -197,7 +198,7 @@ async def _call_agent(agent_name: str, action: str, expected: str) -> str:
     if "```" in txt and agent_name in ("coder", "deployer", "planner"):
         try:
             sr = await asyncio.wait_for(httpx.AsyncClient(timeout=120).post(
-                "http://localhost:8765/api/v1/sandbox/run",
+                f"{_API_BASE}/api/v1/sandbox/run",
                 json={"code": txt, "action": "install"}, timeout=120), timeout=120)
             sr_json = sr.json()
             if sr_json.get("success"):
@@ -222,7 +223,7 @@ async def _merge_results(task: str, results: dict) -> str:
     try:
         import httpx
         r = await asyncio.wait_for(httpx.AsyncClient(timeout=30).post(
-            "http://localhost:8765/api/v1/llm/chat",
+            f"{_API_BASE}/api/v1/llm/chat",
             json={"messages": [{"role": "user", "content": prompt}], "model": "GLM-4-Flash"},
             timeout=30), timeout=30)
         return r.json().get("choices", [{}])[0].get("message", {}).get("content", "（合并失败）")

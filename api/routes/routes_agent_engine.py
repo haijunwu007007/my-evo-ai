@@ -15,6 +15,7 @@ from pathlib import Path
 
 logger = get_logger("evo.api.agent_engine")
 router = APIRouter()
+_API_BASE = os.environ.get("EVO_API_BASE", f"{_API_BASE}")
 
 # ── 外部 Skill 目录扫描 ──
 _SKILL_CATALOG: list[dict] = []

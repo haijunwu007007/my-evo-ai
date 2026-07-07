@@ -5,8 +5,8 @@ import urllib.request, json as _json
 router = APIRouter()
 B = "/api/v1/tools/meili"
 
-MEILI_HOST = "http://127.0.0.1:7700"
-MEILI_KEY = ""  # 可在环境中设置 MEILI_MASTER_KEY
+MEILI_HOST = os.environ.get("MEILI_HOST", "http://127.0.0.1:7700")
+MEILI_KEY = os.environ.get("MEILI_MASTER_KEY", "")
 
 def _req(method, path, body=None):
     try:

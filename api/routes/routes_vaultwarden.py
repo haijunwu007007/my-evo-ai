@@ -1,6 +1,6 @@
 """Vaultwarden — 密码管理桥接 (40k⭐)"""
 from fastapi import APIRouter; from api.infra import registry
-router=APIRouter(); URL="http://localhost:8080"
+router=APIRouter(); import os; URL=os.environ.get("VAULTWARDEN_URL","http://localhost:8080")
 @router.get("/api/v1/tools/vaultwarden")
 async def s():return {"name":"Vaultwarden","version":"latest","status":"configured","url":URL,"description":"轻量密码管理器 — Bitwarden兼容/自托管凭证库"}
 @router.get("/api/v1/tools/vaultwarden/health")

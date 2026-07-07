@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from api.infra import registry
 router = APIRouter()
 
-GITEA_URL = "http://localhost:3000"
+GITEA_URL = os.environ.get("GITEA_URL", "http://localhost:3000")
 
 @router.get("/api/v1/tools/gitea")
 async def gitea_status():

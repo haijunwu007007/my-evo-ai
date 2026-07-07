@@ -21,7 +21,7 @@ for _p in _env_paths:
                         _k, _v = _line.split("=", 1)
                         os.environ[_k.strip()] = _v.strip()
     except:
-        pass
+        pass  # .env 文件不存在不影响启动
 
 import sys, json, time, asyncio, importlib
 from typing import Any
@@ -84,7 +84,7 @@ from api.infra import (
 )
 
 # ── 多Worker + 熔断器 + 配置热加载 ──
-from api._multi_worker import get_worker_count, get_circuit_breaker, with_timeout
+from api._multi_worker import get_worker_count
 _WORKER_COUNT = get_worker_count()
 
 
