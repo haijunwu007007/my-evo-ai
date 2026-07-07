@@ -3,6 +3,8 @@
 支持国内(GLM/DeepSeek) + 开源(Ollama/Qwen) + 国外(OpenAI/Claude) 混合组队
 """
 import json, time, re, threading, asyncio
+from core.logging_config import get_logger
+logger = get_logger("evo.api.orchestrator")
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -143,7 +145,7 @@ async def _decompose_task(task: str) -> list[dict]:
         if m:
             return json.loads(m.group())
     except Exception as e:
-        print(f"[Orchestrator] decompose error: {e}")
+        logger.warning(f"[Orchestrator] decompose error: {e}")
 
     # 降级: 规则拆解
     if "博客" in task or "网站" in task or "page" in task.lower():

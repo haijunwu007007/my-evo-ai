@@ -8,6 +8,8 @@ from fastapi import APIRouter
 import json, base64, httpx, os, asyncio
 from pydantic import BaseModel
 from typing import Optional
+from core.logging_config import get_logger
+logger = get_logger("evo.api.vision")
 
 router = APIRouter(prefix="/api/v1/vision", tags=["vision"])
 OLLAMA = "http://localhost:11434"
@@ -39,9 +41,9 @@ async def _zhipu_vision(img_b64: str, prompt: str) -> dict | None:
             if resp.status_code == 200:
                 content = resp.json()["choices"][0]["message"]["content"]
                 return {"success": True, "description": content, "model": "zhipu:glm-4v-flash"}
-            print(f"[Vision] Zhipu API error {resp.status_code}: {resp.text[:100]}")
+            logger.warning(f"[Vision] Zhipu API error {resp.status_code}: {resp.text[:100]}")
     except Exception as e:
-        print(f"[Vision] Zhipu API failed: {e}")
+        logger.error(f"[Vision] Zhipu API failed: {e}")
     return None
 
 # ── 通道2: Ollama moondream（降级，本地） ──

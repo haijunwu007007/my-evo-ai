@@ -10,6 +10,11 @@ logger = get_logger("evo.api.smart")
 router = APIRouter()
 BASE = Path(__file__).resolve().parent.parent.parent
 
+# ── 可配置的基础地址（环境变量覆盖默认值，无需改代码）──
+_API_BASE = os.environ.get("EVO_API_BASE", "http://127.0.0.1:8765")
+_DOMAIN = os.environ.get("EVO_DOMAIN", "https://autoevoai.com")
+_N8N_BASE_PATH = os.environ.get("N8N_BASE", "/home/ubuntu/n8n-workflows/n8n-workflows-main")
+
 class Req(BaseModel):
     message: str; api_key: Optional[str] = ""; lang: Optional[str] = "zh-CN"; context: Optional[list] = []
 
@@ -165,7 +170,7 @@ async def _execute_info_query(msg: str) -> str | None:
     for keyword, path in _INFO_QUERIES.items():
         if keyword in msg:
             try:
-                async with httpx.AsyncClient(timeout=8, base_url="http://127.0.0.1:8765") as c:
+                async with httpx.AsyncClient(timeout=8, base_url=_API_BASE) as c:
                     r = await c.get(path)
                     data = r.json() if r.status_code == 200 else {"error": f"{r.status_code}"}
                     return json.dumps(data, ensure_ascii=False, indent=2)[:2000]
@@ -324,7 +329,7 @@ async def _execute_action(msg: str) -> str | None:
             if kw in lower or kw in msg:
                 body = body_fn(msg)
                 try:
-                    async with httpx.AsyncClient(timeout=10, base_url="http://127.0.0.1:8765") as c:
+                    async with httpx.AsyncClient(timeout=10, base_url=_API_BASE) as c:
                         if method == "POST":
                             r = await c.post(url, json=body)
                         elif method == "PUT":
@@ -523,12 +528,12 @@ async def _answer_hot(msg: str, platform: str, topic: str):
         if content:
             lines = [l.strip() for l in content.split("\n") if l.strip()]
             hot_lines = [l for l in lines if any(c.isdigit() for c in l[:4])]
-            if hot_lines:
-                tag = platform if platform else "今日"
-                txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
-                return txt
-    except:
-        pass
+                if hot_lines:
+                    tag = platform if platform else "今日"
+                    txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
+                    return txt
+    except Exception as _eh:
+        logger.warning(f"[HOT] LLM热点异常: {_eh}")
 
     # 搜索兜底
     search_query = f"{platform or ''} {topic or '热点'} 今日热搜最新"
@@ -550,8 +555,8 @@ async def _try_llm_chat(msg: str, system_hint: str = ""):
         content, _ = call_llm([{"role": "user", "content": prompt}], timeout=20)
         if content and len(content) > 3:
             return content
-    except:
-        pass
+    except Exception as _et:
+        logger.warning(f"[LLM-CHAT] 回答异常: {_et}")
     return None
 
 
@@ -561,7 +566,7 @@ _n8n_keywords = ['n8n','编辑器','工作流模板','浏览模板','/n8n-browse
 async def _append_n8n_links(msg: str, reply: str) -> str:
     """直接查询SQLite数据库显示匹配模板数（不走HTTP，稳定可靠）"""
     import sqlite3, os
-    _db_path = os.environ.get('N8N_BASE', '/home/ubuntu/n8n-workflows/n8n-workflows-main') + '/workflows.db'
+    _db_path = os.environ.get('N8N_BASE', _N8N_BASE_PATH) + '/workflows.db'
     _cn_en = {'邮件':'email','通知':'notification','推送':'webhook','审批':'approval',
               '监控':'alert','报表':'report','备份':'backup','表单':'form','登录':'login',
               '爬虫':'crawl','短信':'sms','翻译':'translate','客服':'slack','定时':'cron'}
@@ -572,18 +577,18 @@ async def _append_n8n_links(msg: str, reply: str) -> str:
             q = _cn_en[_kw[0]]
             total = conn.execute("SELECT COUNT(*) as c FROM workflows WHERE name LIKE ? OR filename LIKE ?", ('%'+q+'%','%'+q+'%')).fetchone()[0]
             rows = conn.execute("SELECT name FROM workflows WHERE name LIKE ? OR filename LIKE ? ORDER BY nodes DESC LIMIT 3", ('%'+q+'%','%'+q+'%')).fetchall()
-            conn.close()
+                    conn.close()
             if total > 0:
                 names = [r[0][:40] for r in rows if r[0]]
                 tip = f"\n\n 系统中有 {total} 个相关自动化模板"
                 if names:
                     tip += f"\n  例如：{'、'.join(names)}"
                 reply += tip
-        except:
-            pass
+        except Exception as _en:
+            logger.warning(f"[N8N] 数据库查询异常: {_en}")
     # 高级用户：明确提到n8n/编辑器时显示链接
     if any(k in msg for k in ['n8n','编辑','浏览模板']):
-        extra = f"\n  [浏览全部模板](https://autoevoai.com/n8n-browse) | [打开编辑器](https://autoevoai.com/api/v1/n8n/editor)"
+        extra = f"\n  [浏览全部模板]({_DOMAIN}/n8n-browse) | [打开编辑器]({_DOMAIN}/api/v1/n8n/editor)"
         reply += extra
     return reply
 
@@ -683,8 +688,8 @@ async def _execute_single(req) -> dict:
             short, _ = _llm_shorten([{"role":"user","content":f"用简洁中文总结以下系统信息（不超过100字）：{info_result[:1500]}"}], timeout=8)
             if short and len(short) > 5:
                 return {"success": True, "result": short}
-        except:
-            pass
+        except Exception as _es:
+            logger.warning(f"[INFO] 总结异常: {_es}")
         return {"success": True, "result": info_result[:1000]}
 
     # ── 优先级2: 导航路由匹配（不依赖LLM，直接跳转）──
@@ -835,8 +840,8 @@ async def _execute_single(req) -> dict:
             steps = []
             try:
                 steps = json.loads(step_text) if step_text else []
-            except:
-                pass
+            except Exception as _ep:
+                logger.warning(f"[AGENT] 步骤解析异常: {_ep}")
             if not steps or not isinstance(steps, list):
                 steps = [{"step": 1, "action": "综合分析", "tool": "llm", "target": msg}]
             
@@ -849,11 +854,12 @@ async def _execute_single(req) -> dict:
                 async with httpx.AsyncClient(timeout=8) as c:
                     for kw in msg.split():
                         if len(kw) > 1:
-                            r = await c.get(f"http://127.0.0.1:8765/api/v1/n8n/search?q={kw}&limit=3")
+                            r = await c.get(f"{_API_BASE}/api/v1/n8n/search?q={kw}&limit=3")
                             data = r.json()
                             if data.get("results"):
                                 n8n_results.extend(data["results"][:2])
-            except: pass
+            except Exception as _en2:
+                logger.warning(f"[AGENT] N8N搜索异常: {_en2}")
             
             # 执行LLM综合回答（带步骤上下文）
             exec_prompt = f"""用户要求完成以下复杂任务：{msg}
@@ -885,7 +891,7 @@ async def _execute_single(req) -> dict:
                 txt += "\n\n---\n📋 **匹配到 N8N 工作流模板:**\n"
                 for w in n8n_results[:5]:
                     txt += f"  • {w.get('name','')[:60]}\n"
-                txt += "\n  ➤ 打开编辑器运行：[/api/v1/n8n/editor](https://autoevoai.com/api/v1/n8n/editor)"
+                txt += f"\n  ➤ 打开编辑器运行：[/api/v1/n8n/editor]({_DOMAIN}/api/v1/n8n/editor)"
             
             return {"success": True, "result": txt}
         except Exception as e:
