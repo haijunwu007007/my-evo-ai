@@ -8,47 +8,39 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>编排画布 - AUTO-EVO-AI V0.1</title>
 <style>
-
-/* light theme */
-:root{--bg:#f5f5f8;--bg2:#f0f0f4;--card:#fff;--text:#1a1a2e;--text2:#6b7280;--border:#e8eaed;--accent:#4361ee}
-body{background:var(--bg);color:var(--text)}
-
-
-body{background:var(--bg);color:var(--text);min-height:100vh}
-
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
-body{background:#0f0f1a;color:#e0e0e0;display:flex;height:100vh}
-.sidebar{width:280px;background:#1a1a2e;border-right:1px solid #2d3561;display:flex;flex-direction:column;flex-shrink:0}
-.sidebar h2{padding:14px 16px;font-size:16px;border-bottom:1px solid #2d3561;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar .section{padding:8px 12px 2px;font-size:11px;color:#8892b0;font-weight:600;text-transform:uppercase;display:flex;justify-content:space-between}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:#fff;color:#333;display:flex;height:100vh}
+.sidebar{width:240px;background:#f5f7fa;border-right:1px solid #e0e0e0;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar h2{padding:12px 14px;font-size:15px;border-bottom:1px solid #e0e0e0;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar .section{padding:6px 12px 2px;font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:flex;justify-content:space-between}
 .sidebar .section .count{color:#4361ee}
 .node-list{overflow-y:auto;padding:4px;flex:1}
-.node-item{display:flex;align-items:center;gap:6px;padding:6px 10px;margin:2px 6px;border-radius:8px;cursor:grab;font-size:12px;background:#16213e;border:1px solid #2d3561;transition:all .15s}
-.node-item:hover{border-color:#4361ee;transform:translateX(3px);background:rgba(67,97,238,.08)}
+.node-item{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:2px 6px;border-radius:6px;cursor:grab;font-size:12px;background:#fff;border:1px solid #e0e0e0;transition:all .15s}
+.node-item:hover{border-color:#4361ee;transform:translateX(3px);background:#f0f4ff}
 .node-item .icon{font-size:14px;width:20px;text-align:center}
 .node-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.node-item .desc{font-size:10px;color:#8892b0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
+.node-item .desc{font-size:10px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
-.toolbar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:#1a1a2e;border-bottom:1px solid #2d3561;flex-wrap:wrap}
-.toolbar select,.toolbar input{border:1px solid #2d3561;border-radius:6px;padding:5px 8px;background:#16213e;color:#e0e0e0;font-size:12px}
+.toolbar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:#f5f7fa;border-bottom:1px solid #e0e0e0;flex-wrap:wrap}
+.toolbar select,.toolbar input{border:1px solid #d0d0d0;border-radius:6px;padding:5px 8px;background:#fff;color:#333;font-size:12px}
 .toolbar input{width:140px}
 .toolbar button{padding:5px 12px;border:none;border-radius:6px;background:#4361ee;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
 .toolbar button:hover{opacity:.85}
 .toolbar button.green{background:#22c55e}
 .toolbar button.red{background:#e74c3c}
 .toolbar button.orange{background:#f59e0b}
-.toolbar .sep{border-left:1px solid #2d3561;height:20px;margin:0 4px}
-.canvas{flex:1;position:relative;overflow:hidden;background:#0a0a1a;background-image:radial-gradient(circle,#2d3561 1px,transparent 1px);background-size:24px 24px}
-.canvas .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#2d3561;font-size:15px;text-align:center;pointer-events:none;line-height:1.8}
-.node-el{position:absolute;min-width:170px;background:#1a1a2e;border:1.5px solid #2d3561;border-radius:10px;padding:10px;cursor:move;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,.35);transition:box-shadow .2s,opacity .15s}
-.node-el:hover{border-color:#4361ee;z-index:20;box-shadow:0 4px 20px rgba(67,97,238,.2)}
+.toolbar .sep{border-left:1px solid #d0d0d0;height:20px;margin:0 4px}
+.canvas{flex:1;position:relative;overflow:hidden;background:#fafbfc;background-image:radial-gradient(circle,#d0d0d0 1px,transparent 1px);background-size:24px 24px}
+.canvas .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bbb;font-size:15px;text-align:center;pointer-events:none;line-height:1.8}
+.node-el{position:absolute;min-width:160px;background:#fff;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px;cursor:move;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s,opacity .15s}
+.node-el:hover{border-color:#4361ee;z-index:20;box-shadow:0 4px 20px rgba(67,97,238,.15)}
 .node-el .hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .node-el .hdr .icon{font-size:13px;width:18px;text-align:center}
 .node-el .hdr .nm{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node-el .hdr .del{font-size:11px;cursor:pointer;color:#e74c3c;opacity:.5;padding:0 2px}
 .node-el .hdr .del:hover{opacity:1}
-.node-el .sub{font-size:10px;color:#8892b0;margin:2px 0;display:flex;gap:4px}
-.node-el .sub .tag{padding:1px 5px;border-radius:4px;background:rgba(67,97,238,.15);color:#818cf8;font-size:9px}
+.node-el .sub{font-size:10px;color:#888;margin:2px 0;display:flex;gap:4px}
+.node-el .sub .tag{padding:1px 5px;border-radius:4px;background:#eef2ff;color:#4361ee;font-size:9px}
 .port{position:absolute;width:12px;height:12px;border-radius:50%;cursor:crosshair;z-index:5;transition:transform .15s,box-shadow .15s}
 .port:hover{transform:scale(1.4);box-shadow:0 0 8px rgba(67,97,238,.5)}
 .port-out{right:-7px;top:50%;transform:translateY(-50%);background:#4361ee}
@@ -57,39 +49,62 @@ body{background:#0f0f1a;color:#e0e0e0;display:flex;height:100vh}
 .port-in:hover{transform:translateY(-50%) scale(1.3)}
 .port-true{right:-7px;top:30%;background:#22c55e}
 .port-false{right:-7px;top:70%;background:#e74c3c}
-.cond-true{border-left:3px solid #22c55e;background:rgba(34,197,94,.05)}
-.cond-false{border-left:3px solid #e74c3c;background:rgba(231,76,60,.05)}
-.subflow-node{border-color:#f59e0b;background:rgba(245,158,11,.05)}
+.cond-true{border-left:3px solid #22c55e;background:#f0fdf4}
+.cond-false{border-left:3px solid #e74c3c;background:#fef2f2}
+.subflow-node{border-color:#f59e0b;background:#fffcf0}
 .subflow-node:hover{border-color:#f59e0b}
-.nlp-node{border-color:#a855f7;background:rgba(168,85,247,.05)}
+.nlp-node{border-color:#a855f7;background:#faf5ff}
 .nlp-node:hover{border-color:#a855f7}
-.prop-panel{position:absolute;right:12px;top:12px;width:240px;background:#1a1a2e;border:1px solid #2d3561;border-radius:10px;padding:14px;display:none;z-index:30;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.prop-panel h3{font-size:13px;margin-bottom:6px;color:#818cf8}
-.prop-panel label{font-size:11px;color:#8892b0;display:block;margin:5px 0 2px}
-.prop-panel input,.prop-panel select,.prop-panel textarea{width:100%;padding:5px 7px;border-radius:4px;border:1px solid #2d3561;background:#0f0f1a;color:#e0e0e0;font-size:11px}
+.prop-panel{position:absolute;right:12px;top:12px;width:240px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:14px;display:none;z-index:30;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.prop-panel h3{font-size:13px;margin-bottom:6px;color:#4361ee}
+.prop-panel label{font-size:11px;color:#888;display:block;margin:5px 0 2px}
+.prop-panel input,.prop-panel select,.prop-panel textarea{width:100%;padding:5px 7px;border-radius:4px;border:1px solid #d0d0d0;background:#fafbfc;color:#333;font-size:11px}
 .prop-panel textarea{resize:vertical;min-height:36px;font-family:monospace}
 .prop-panel button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-size:11px;margin:3px 2px}
-.nlp-input{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;background:#1a1a2e;border:1.5px solid #a855f7;border-radius:12px;padding:8px 14px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 24px rgba(168,85,247,.2);min-width:400px;max-width:600px}
-.nlp-input textarea{border:none;background:transparent;color:#e0e0e0;font-size:12px;resize:none;flex:1;min-height:20px;max-height:60px;outline:none;font-family:inherit}
-.nlp-input textarea::placeholder{color:#8892b0}
+.nlp-input{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;background:#fff;border:1.5px solid #a855f7;border-radius:12px;padding:8px 14px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 24px rgba(168,85,247,.12);min-width:360px;max-width:560px}
+.nlp-input textarea{border:none;background:transparent;color:#333;font-size:12px;resize:none;flex:1;min-height:20px;max-height:60px;outline:none;font-family:inherit}
+.nlp-input textarea::placeholder{color:#aaa}
 .nlp-input button{padding:5px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#a855f7,#4361ee);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
 .nlp-input button:hover{opacity:.9}
 .loading-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(168,85,247,.3);border-top-color:#a855f7;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:768px){.sidebar{width:100%;height:auto;max-height:100px;overflow-y:auto}.main{flex-direction:column}.canvas{min-height:300px}.nlp-input{min-width:90%;max-width:95%;bottom:8px}.toolbar{gap:4px}.toolbar button{font-size:11px;padding:4px 8px}}
+@media(max-width:768px){
+body{flex-direction:column}
+.sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:100;width:240px;height:100vh;max-height:none;overflow-y:auto;transition:left .25s;box-shadow:4px 0 16px rgba(0,0,0,.12)}
+.sidebar.open{left:0}
+.sidebar-toggle{display:flex!important}
+.main{width:100%}
+.canvas{min-height:350px}
+.nlp-input{min-width:92%;max-width:96%;bottom:8px}
+.toolbar{gap:4px}
+.toolbar button{font-size:11px;padding:4px 8px}
+.node-el{min-width:140px}
+.prop-panel{right:4px;top:4px;width:200px}
+}
+@media(max-width:480px){
+.sidebar h2{font-size:13px;padding:8px 10px}
+.node-item{font-size:11px;padding:4px 6px}
+.toolbar{padding:4px 6px}
+.toolbar select,.toolbar input{font-size:11px;padding:4px 6px}
+.toolbar button{font-size:10px;padding:3px 6px}
+.toolbar input{width:100px}
+.canvas{min-height:280px}
+.prop-panel{width:180px;right:2px;top:2px}
+.canvas .hint{font-size:12px}
+.nlp-input{bottom:4px;padding:6px 10px;min-width:96%}
+.nlp-input textarea{font-size:11px}
+.nlp-input button{font-size:11px;padding:4px 10px}
+.node-el{min-width:120px;padding:8px;font-size:11px}
+.prop-panel{right:2px;top:2px;width:180px;max-width:90vw}
+}
 </style>
 
 
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
-<div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:4px 10px;border-bottom:1px solid var(--border);flex-shrink:0;height:36px">
-  <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
-    <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
-    <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
-  </div>
-</div>
-<div class="sidebar">
-  <h2>🎨 编排画布 <span style="font-size:11px;-webkit-text-fill-color:#8892b0">增强版</span></h2>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" style="display:none;position:absolute;right:-36px;top:10px;width:32px;height:32px;background:#fff;border:1px solid #e0e0e0;border-radius:0 6px 6px 0;cursor:pointer;align-items:center;justify-content:center;font-size:16px;z-index:101;box-shadow:2px 0 8px rgba(0,0,0,.08)">☰</div>
+  <h2>🎨 编排画布 <span style="font-size:11px;-webkit-text-fill-color:#888">增强版</span></h2>
   <div class="section">特殊节点 <span class="count" id="specialCount">0</span></div>
   <div class="node-list">
     <div class="node-item" onclick="addNode('condition','🔀')"><span class="icon">🔀</span><span class="nm">条件分支</span><span class="desc">if/else 两个输出</span></div>
@@ -105,6 +120,7 @@ body{background:#0f0f1a;color:#e0e0e0;display:flex;height:100vh}
 </div>
 <div class="main">
   <div class="toolbar">
+    <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" style="display:none;padding:5px 10px;font-size:14px">☰</button>
     <select id="comboSelect" onchange="loadCombo(this.value)"><option value="">+ 新建组合</option></select>
     <input id="comboName" placeholder="组合名称">
     <button onclick="saveCombo()">💾 保存</button>
@@ -430,15 +446,64 @@ async function loadMods(){
   }catch(e){console.warn('mod load fail',e)}
 }
 loadMods();loadProjects();loadComboList()
+
+// ===== 手机端触控支持 =====
+function initTouchSupport(){
+  if(!('ontouchstart' in window))return;
+  // 节点拖拽
+  document.addEventListener('touchstart',function(e){
+    var el=e.target.closest('.node-el');if(!el||e.target.closest('.port')||e.target.closest('.del'))return;
+    var t=e.changedTouches[0];
+    el._touchDrag={ox:t.clientX-parseInt(el.style.left),oy:t.clientY-parseInt(el.style.top),el:el};
+    el.style.zIndex=100
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    var el=document.querySelector('.node-el[style*="z-index: 100"]');
+    if(!el||!el._touchDrag)return;
+    var t=e.changedTouches[0];
+    el.style.left=Math.max(0,t.clientX-el._touchDrag.ox)+'px';
+    el.style.top=Math.max(0,t.clientY-el._touchDrag.oy)+'px';
+    var id=el.id;if(NODES[id]){NODES[id].x=parseInt(el.style.left);NODES[id].y=parseInt(el.style.top)}
+    renderAll()
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var el=document.querySelector('.node-el[style*="z-index: 100"]');
+    if(el){el.style.zIndex=10;el._touchDrag=null}
+  });
+  // 端口连线
+  document.querySelectorAll('.port').forEach(function(p){
+    p.addEventListener('touchstart',function(e){
+      e.stopPropagation();
+      var el=e.target.closest('.node-el');
+      if(!el)return;
+      var portClass=this.className.match(/port-(\w+)/);
+      if(portClass)startConnect(el.id,portClass[1])
+    },{passive:true})
+  })
+}
+initTouchSupport();
+
+// ===== 手机端侧边栏切换 =====
+function toggleSidebar(){
+  var s=document.getElementById('sidebar');
+  if(!s)return;
+  s.classList.toggle('open');
+  var ov=document.getElementById('sidebarOverlay');
+  if(!ov&&s.classList.contains('open')){
+    ov=document.createElement('div');
+    ov.id='sidebarOverlay';
+    ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,.3)';
+    ov.addEventListener('click',function(){toggleSidebar()});
+    document.body.appendChild(ov)
+  }else if(ov&&!s.classList.contains('open')){
+    ov.remove()
+  }
+}
+// 手机端初始化：显示菜单按钮
+if(window.innerWidth<=768){
+  var mb=document.getElementById('menuBtn');if(mb)mb.style.display='inline-block';
+  var st=document.getElementById('sidebarToggle');if(st)st.style.display='flex'
+}
 </script>
-<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()
-
-// === AUTO-EVO-AI window exports ===
-window.showCanvas = showCanvas;
-window.drawFlow = drawFlow;
-window.addNode = addNode;
-window.removeNode = removeNode;
-window.exportCanvas = exportCanvas;
-
 </script>
 </body></html>

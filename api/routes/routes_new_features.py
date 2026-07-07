@@ -570,6 +570,28 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e
 .toast.success{background:#06d6a0}
 .toast.error{background:#e63946}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){
+  body{overflow-y:auto}
+  .back-btn{top:6px!important;left:6px!important;font-size:12px!important;padding:4px 10px!important;z-index:1001!important}
+  .toolbar{flex-wrap:wrap!important;gap:4px!important;padding:8px 6px!important;padding-top:36px!important}
+  .toolbar h2{font-size:14px!important;margin-right:8px!important;width:100%!important}
+  .toolbar button{font-size:11px!important;padding:4px 8px!important;min-height:34px!important;touch-action:manipulation!important}
+  .toolbar input{width:100px!important;font-size:13px!important}
+  .container{flex-direction:column!important;height:auto!important;min-height:calc(100vh - 110px)!important}
+  .palette{width:100%!important;max-height:120px!important;overflow-y:auto!important;border-right:none!important;border-bottom:1px solid #2a2a4a!important;padding:6px 8px!important}
+  .palette-item{padding:6px 8px!important;font-size:12px!important;min-height:36px!important;touch-action:manipulation!important}
+  .canvas-area{min-height:60vh!important}
+  .minimap{display:none!important}
+  .modal-content{min-width:auto!important;max-width:92%!important;padding:14px!important;margin:0 4%!important}
+  .modal-content button{min-height:36px!important;touch-action:manipulation!important}
+  .node{min-width:110px!important;padding:8px!important}
+  .node-header{font-size:11px!important}
+  .node-body{font-size:10px!important;max-width:140px!important}
+  .node-port{width:16px!important;height:16px!important}
+  #statusBar{font-size:10px!important;margin-left:4px!important}
+  .exec-btn{padding:6px 12px!important;font-size:12px!important;min-height:36px!important;touch-action:manipulation!important}
+  [onclick],button,a,.palette-item,.back-btn,.exec-btn{cursor:pointer!important;-webkit-tap-highlight-color:rgba(67,97,238,.3)!important;touch-action:manipulation!important}
+}
 </style></head>
 <body class="theme-auto">
 <a class="back-btn" href="/" style="position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)">⬅ 返回</a>

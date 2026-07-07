@@ -697,6 +697,10 @@
     <!-- Toast 容器 -->
     <div class="toast-container" id="evoToastContainer"></div>
 
+    <!-- 手机端汉堡按钮 + 侧边栏遮罩 -->
+    <button class="sidebar-toggle-fixed" onclick="toggleSidebar()" id="mobileHamburger">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- Alert Modal -->
     <div class="evo-prompt-overlay" id="evoAlertOverlay">
         <div class="evo-alert-box" onclick="event.stopPropagation()">
@@ -2315,9 +2319,15 @@
 
 
         function toggleSidebar() {
-
-            document.querySelector('.sidebar').classList.toggle('collapsed');
-
+            var isMobile = window.innerWidth <= 768;
+            var s = document.querySelector('.sidebar');
+            var o = document.getElementById('sidebarOverlay');
+            if (isMobile) {
+                s.classList.toggle('open');
+                if (o) o.classList.toggle('show');
+            } else {
+                s.classList.toggle('collapsed');
+            }
         }
 
 
@@ -7120,6 +7130,31 @@
 .sw-cs-item .scs-num{font-size:24px;font-weight:700;color:#818cf8}
 .sw-cs-item .scs-label{font-size:11px;color:#64748b;margin-top:2px}
 @media(max-width:500px){.sw-welcome-features,.sw-complete-stats{grid-template-columns:1fr}#setup-wizard{border-radius:16px}}
+
+/* ─── 移动端侧边栏抽屉 ─── */
+@media(max-width:768px){
+  .app{position:relative}
+  .sidebar{position:fixed;top:0;left:0;width:280px;height:100vh;z-index:1000;transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar.collapsed{width:280px;transform:translateX(-100%)}
+  .sidebar.collapsed.open{transform:translateX(0)}
+  .sidebar-header .sidebar-toggle{display:none}
+  .sidebar-toggle-fixed{display:flex!important}
+  .sidebar-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.4)}
+  .sidebar-overlay.show{display:block}
+  .main{margin-left:0!important}
+  .enterprise-grid{grid-template-columns:1fr!important}
+  .dashboard-stats{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
+  .topbar{padding:0 10px!important;gap:8px!important;height:48px!important}
+  .topbar-title{font-size:15px!important}
+  .sitem-grid{grid-template-columns:1fr!important}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+  .modules-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important}
+  [onclick],button,.sbtn,.sidebar-toggle-fixed,.sidebar-toggle,.topbar-btn,.card,.gc,.sitem-card,.module-card,.quick-item,.stat-card{-webkit-tap-highlight-color:rgba(67,97,238,.2)!important;touch-action:manipulation!important;cursor:pointer!important}
+}
+
+/* ─── 固定汉堡按钮（手机端始终可见） ─── */
+.sidebar-toggle-fixed{display:none;position:fixed;top:10px;left:8px;z-index:1001;width:34px;height:34px;border-radius:8px;border:none;background:var(--card);color:var(--text);font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 </style>
 
 <script>

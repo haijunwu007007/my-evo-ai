@@ -1,3 +1,5 @@
+@import url('mobile.css');
+
 /* ═══════════════════════════════════════════════════
    AUTO-EVO-AI V0.1 — 统一主题样式表
    所有模块页面共享的 CSS 变量和基础组件样式
@@ -93,32 +95,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ── 响应式：移动端通用 ── */
 @media(max-width:768px){
   body{-webkit-text-size-adjust:100%}
-  table,.table,[class*="table"]{display:block!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  .grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
-  .stat-grid{grid-template-columns:repeat(2,1fr)!important}
-  .card,.gc,.stat-card,.item,.row,[class*="item"],[class*="row"]{padding:10px!important}
-  button,.btn,[class*="button"],[class*="btn"]{min-height:36px!important;font-size:15px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(67,97,238,.2)!important;cursor:pointer!important}
-  input,select,textarea{font-size:16px!important}
-  .card h2{font-size:16px!important}
-  .card h3,.card p,.grad-title{font-size:14px!important}
-  h1.grad-title{font-size:17px!important}
-  .search-box{font-size:15px!important;padding:10px 12px!important}
-  .stat-card .snum{font-size:24px!important}
-  .stat-card .slabel{font-size:12px!important}
-  .grid .gc{padding:10px!important}
-  .grid .gc .gicon{font-size:26px!important}
-  .grid .gc .gname{font-size:13px!important}
-  .grid .gc .gdesc{font-size:12px!important}
-  .detail,.list-item,[class*="detail"],[class*="list"]{padding:8px 10px!important}
-  .output-box{font-size:14px!important;padding:10px!important}
-  .input-area{flex-direction:column!important;gap:6px!important}
-  .input-area input,.input-area .inp{font-size:15px!important;padding:10px 12px!important}
-  .input-area button,.input-area .btn{padding:10px!important;font-size:14px!important}
-  [class*="modal"],[class*="dialog"],[class*="overlay"],[class*="popup"]{width:92%!important;max-width:92%!important;padding:16px!important;left:4%!important;margin:0 auto!important}
-  /* 安全溢出控制 — 只作用于容器，不作用于按钮/交互元素 */
-  .msg,pre,code,img,video,iframe,svg,canvas{max-width:100%!important;height:auto!important}
-  /* 强制按钮可点 */
-  a,button,.btn,[onclick]{touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(67,97,238,.2)!important;cursor:pointer!important}
+  table,.table,[class*="table"]{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  [class*="modal"],[class*="dialog"],[class*="overlay"],[class*="popup"]{width:92%;max-width:92%;padding:16px;left:4%;margin:0 auto}
+  .msg,pre,code,img,video,iframe,svg,canvas{max-width:100%;height:auto}
+  a,button,.btn,[onclick]{touch-action:manipulation;-webkit-tap-highlight-color:rgba(67,97,238,.2)}
 }
 @media(min-width:769px){
   .hamburger{display:none}

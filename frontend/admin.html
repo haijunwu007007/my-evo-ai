@@ -38,7 +38,20 @@ body{background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100
 .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
 .stat .num{font-size:28px;font-weight:700;color:var(--accent)}
 .stat .label{font-size:12px;color:var(--text2);margin-top:4px}
-@media(max-width:768px){.sidebar{width:60px;padding:8px}.sidebar h2,.sidebar a span{display:none}.sidebar a{text-align:center;padding:8px;font-size:16px}.main{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:99;transform:translateX(-100%);transition:transform .25s;width:200px!important;padding:12px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar h2,.sidebar a span{display:block}
+  .sidebar a{text-align:left;padding:8px 12px;font-size:13px}
+  .sidebar-overlay{display:block;position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s}
+  .sidebar-overlay.show{opacity:1;pointer-events:auto}
+  .hamburger{display:inline-flex!important}
+  .main{padding:12px;width:100%}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr}
+  input,select,button{font-size:13px}
+}
+@media(min-width:769px){.sidebar-overlay{display:none!important}.hamburger{display:none!important}}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border)}
 th{color:var(--text2);font-size:11px;text-transform:uppercase}
@@ -68,8 +81,10 @@ button.danger{background:#e74c3c}
 </style>
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
 <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
   <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
+    <button class="hamburger" onclick="toggleAdminSidebar()" style="display:none;width:32px;height:32px;align-items:center;justify-content:center;border:none;border-radius:6px;background:transparent;color:var(--text);font-size:18px;cursor:pointer">☰</button>
     <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
     <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
   </div>
@@ -468,6 +483,11 @@ document.addEventListener('click',function(e){
   else if(act==='fn'){var fn=el.getAttribute('data-fn');if(fn&&window[fn])window[fn]()}
   else if(act==='themes'){window.toggleTheme()}
 });
+function toggleAdminSidebar(){
+  var s=document.querySelector('.sidebar'),o=document.getElementById('sidebarOverlay');
+  if(s)s.classList.toggle('open');if(o)o.classList.toggle('show');
+  if(window.innerWidth<=768&&s&&s.classList.contains('open')){var a=s.querySelector('a.active');if(a)a.scrollIntoView({block:'center'})}
+}
 </script>
 </body>
 </html>
