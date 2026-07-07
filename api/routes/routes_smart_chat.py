@@ -528,10 +528,10 @@ async def _answer_hot(msg: str, platform: str, topic: str):
         if content:
             lines = [l.strip() for l in content.split("\n") if l.strip()]
             hot_lines = [l for l in lines if any(c.isdigit() for c in l[:4])]
-                if hot_lines:
-                    tag = platform if platform else "今日"
-                    txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
-                    return txt
+            if hot_lines:
+                tag = platform if platform else "今日"
+                txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
+                return txt
     except Exception as _eh:
         logger.warning(f"[HOT] LLM热点异常: {_eh}")
 
@@ -577,7 +577,7 @@ async def _append_n8n_links(msg: str, reply: str) -> str:
             q = _cn_en[_kw[0]]
             total = conn.execute("SELECT COUNT(*) as c FROM workflows WHERE name LIKE ? OR filename LIKE ?", ('%'+q+'%','%'+q+'%')).fetchone()[0]
             rows = conn.execute("SELECT name FROM workflows WHERE name LIKE ? OR filename LIKE ? ORDER BY nodes DESC LIMIT 3", ('%'+q+'%','%'+q+'%')).fetchall()
-                    conn.close()
+            conn.close()
             if total > 0:
                 names = [r[0][:40] for r in rows if r[0]]
                 tip = f"\n\n 系统中有 {total} 个相关自动化模板"

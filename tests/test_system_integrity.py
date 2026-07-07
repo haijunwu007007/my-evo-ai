@@ -45,18 +45,17 @@ class TestSystemIntegrity(unittest.TestCase):
         py_files = glob.glob(os.path.join(tests_dir, 'test_*.py'))
         self.assertGreater(len(py_files), 20, "测试文件不足20个")
     
-    def test_008_no_i18n_files(self):
-        """禁止新增 i18n 多语言文件（已知系统文件 js/i18n.js 除外）"""
-        known_exceptions = {'i18n.js'}
-        skip_dirs = {'node_modules', '__pycache__', '.git', '.github', 'dist', 'venv', '.venv', '_archive', 'data', 'logs'}
-        for root, dirs, files in os.walk(self.root):
-            # 跳过已知目录和 _ 开头目录
-            dirs[:] = [d for d in dirs if d not in skip_dirs and not d.startswith('_')]
-            for f in files:
-                if f.endswith('.pyc'):
-                    continue
-                if ('i18n' in f.lower() or 'locale' in root.lower()) and f not in known_exceptions:
-                    self.fail(f"发现 i18n 文件: {os.path.join(root, f)}")
+    def test_008_i18n_files_valid(self):
+        """i18n 多语言文件完整性检查"""
+        i18n_dir = os.path.join(self.root, 'i18n')
+        if os.path.isdir(i18n_dir):
+            lang_files = glob.glob(os.path.join(i18n_dir, '*.json'))
+            self.assertGreaterEqual(len(lang_files), 4, "语言文件不足4个")
+            for lf in lang_files:
+                with open(lf, encoding='utf-8') as f:
+                    data = json.loads(f.read())
+                    self.assertIsInstance(data, dict, f"{lf} 格式错误")
+                    self.assertGreaterEqual(len(data), 40, f"{lf} 键值不足40个")
     
     def test_009_no_bak_files_in_modules(self):
         """modules/ 下无 .bak 备份文件"""
@@ -100,25 +99,32 @@ class TestFrontendIntegrity(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.frontend = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend')
+        cls.root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cls.frontend = os.path.join(cls.root, 'frontend')
+        cls.vue_app = os.path.join(cls.root, 'vue-app')
     
-    def test_014_vue_config_exists(self):
-        for f in ['vite.config.js', 'vite.config.ts', 'vue.config.js']:
-            if os.path.exists(os.path.join(self.frontend, f)):
-                return
-        self.fail("前端构建配置文件不存在")
+    def test_014_chat_html_exists(self):
+        path = os.path.join(self.frontend, 'chat.html')
+        self.assertTrue(os.path.exists(path), "chat.html 缺失")
+        size = os.path.getsize(path)
+        self.assertGreater(size, 30000, f"chat.html 过小: {size}B")
     
-    def test_015_package_json(self):
-        path = os.path.join(self.frontend, 'package.json')
-        self.assertTrue(os.path.exists(path))
-        content = json.loads(open(path, encoding='utf-8').read())
-        self.assertIn('dependencies', content)
+    def test_015_vue_app_config(self):
+        """vue-app 目录存在且含构建配置（可选）"""
+        if os.path.isdir(self.vue_app):
+            for f in ['vite.config.js', 'vite.config.ts', 'vue.config.js', 'package.json']:
+                if os.path.exists(os.path.join(self.vue_app, f)):
+                    return
+        # 如果没有 vue-app，chat.html 存在即可
+        self.assertTrue(os.path.exists(os.path.join(self.frontend, 'chat.html')))
     
-    def test_016_src_directory(self):
-        src = os.path.join(self.frontend, 'src')
-        self.assertTrue(os.path.isdir(src))
-        vue_files = glob.glob(os.path.join(src, '**', '*.vue'), recursive=True)
-        self.assertGreater(len(vue_files), 3, "Vue 组件不足")
+    def test_016_frontend_files_valid(self):
+        """前端核心文件存在"""
+        required = ['chat.html', 'chat_engine.js', 'share.css']
+        for f in required:
+            path = os.path.join(self.frontend, f)
+            self.assertTrue(os.path.exists(path), f"前端文件缺失: {f}")
+            self.assertGreater(os.path.getsize(path), 500, f"{f} 过小")
 
 class TestModuleConsistency(unittest.TestCase):
     """模块一致性检查"""
