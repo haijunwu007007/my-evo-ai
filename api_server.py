@@ -246,9 +246,7 @@ window.history.replaceState({{}},"","/")}})</script></body>"""
             return HTMLResponse(html.replace("</body>", script))
     if chat_path.exists():
         return FileResponse(str(chat_path))
-    idx_path = BASE_DIR / "frontend" / "index.html"
-    if idx_path.exists():
-        return FileResponse(str(idx_path))
+    # index.html 已归档至 frontend/_archive/（旧仪表盘），仅保留 chat.html 作为首页入口
 
 
 
