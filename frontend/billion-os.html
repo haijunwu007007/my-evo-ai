@@ -520,6 +520,7 @@ body {
 <body>
 <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
   <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="菜单" style="display:none;width:32px;height:32px;align-items:center;justify-content:center;border:none;border-radius:6px;background:transparent;color:#e0e0e0;font-size:18px;cursor:pointer;flex-shrink:0">☰</button>
     <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
     <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
   </div>
@@ -2219,5 +2220,7 @@ window.hideMobileMore = hideMobileMore;
 }
 </style>
 
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 </body>
 </html>

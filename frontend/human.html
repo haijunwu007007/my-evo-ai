@@ -52,7 +52,9 @@ body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
 
 <div class="main">
   <div class="topbar">
-    <div class="topbar-left"><h1>Human 人机协作</h1></div>
+    <div class="topbar-left">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="\u83dc\u5355">\u2630</button>
+<h1>Human 人机协作</h1></div>
     <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
   </div>
 
@@ -108,4 +110,6 @@ async function sendToHuman(){
 }
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 </script>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 </body></html>
