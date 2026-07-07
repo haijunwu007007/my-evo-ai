@@ -19,8 +19,9 @@ _NAVIGATION_MAP = [
     (["用户管理","用户列表","管理用户","查看用户","权限管理","角色管理","添加用户","删除用户"], "/admin#"),
     (["管理中心","管理后台","系统管理","后台管理","打开管理"], "/admin"),
     # 工作流
-    (["工作流","编排","流程编排","工作流编排","创建流程","编辑工作流"], "/canvas"),
-    (["自动化","自动化流程","自动任务","创建自动化"], "/automations"),
+    (["桌面","桌面自动化","桌面操作","desktop"], "/desktop"),
+    (["工作流","编排","工作流编排","创建流程","编辑工作流"], "/canvas"),
+    (["流程编排","自动化配置","自动任务","创建自动化","自动化流程"], "/automations"),
     # 智能体 & 专家
     (["智能体","agent","智能助理","AI助手","查看agent","多智能体","agent团队"], "/agents"),
     (["专家","专家库","找专家","领域专家","行业专家","激活专家"], "/experts"),
@@ -54,9 +55,40 @@ _NAVIGATION_MAP = [
     (["通知","通知配置","消息通知","推送配置"], "/settings"),
     (["安装向导","首次设置","初始化"], "/install-wizard"),
     (["插件","插件列表","plugin"], "/plugins"),
-    (["API","API管理","接口管理","api密钥"], "/api-keys"),
+    (["API","API管理","接口管理","api密钥","apikey"], "/api-keys"),
     (["审计","审计日志","操作日志","log","日志记录"], "/audit"),
     (["备份","备份管理","数据备份","恢复"], "/backup"),
+    (["克隆","生成网站","克隆网站","cloner"], "/cloner"),
+    # 扩展导航 — 页面直达
+    (["桌面","桌面操作","桌面自动化","desktop"], "/desktop"),
+    (["代理","本地代理","agent代理","local agent"], "/agent"),
+    (["fork","forkstudio","fork工作室","ForkStudio"], "/ForkStudio"),
+    (["编程助手","copilot","代码助手","开发助手"], "/copilot"),
+    (["钩子","webhook","hook","hooks","触发器"], "/hooks"),
+    (["游戏","小游戏","娱乐","wolf"], "/wolf"),
+    (["文档","api文档","接口文档","scalar","快速入门"], "/docs"),
+    (["帮助","帮助中心","faq","常见问题","使用指南"], "/faq"),
+    (["教程","教程中心","指导","guidence","tutorial"], "/tutorial"),
+    (["市场","market","marketplace","插件市场"], "/marketplace"),
+    (["注册","注册页面","signup","新用户注册"], "/register"),
+    (["登录","login","登录页面","登录入口"], "/login"),
+    (["聊天记录","对话记录","对话历史","archive","存档"], "/chat-archive"),
+    (["导出","数据导出","导出数据","output","输出目录"], "/output"),
+    # 高级导航 — Agent工厂/软件工厂/Ollama/文档生成
+    (["agent工厂","agent-factory","agentfactory","智能体工厂","生成agent"], "/agent-factory"),
+    (["软件工厂","software factory","soft-factory","项目生成","生成项目"], "/soft-factory"),
+    (["oss分销","oss-distiller","开源分销"], "/oss-distiller"),
+    (["记忆","记忆管理","memos","备忘录"], "/memos"),
+    (["视觉","视觉理解","vision","图片理解"], "/vision"),
+    (["realtime","实时通信","实时同步","实时协作"], "/realtime"),
+    (["团队","团队管理","team","协作"], "/team"),
+    (["频道","channel","通信频道","消息频道"], "/channel"),
+    (["权限","权限管理","permission","rbac","角色权限"], "/permission"),
+    (["自进化","自我进化","self-evolve","演进"], "/self-evolve"),
+    (["代码库","codebase","代码知识","代码索引"], "/codebase"),
+    # 终端/命令行
+    (["终端","命令行","cli","命令","控制台"], "/cli"),
+    (["一键部署","compose","docker部署","容器部署","portainer"], "/deploy"),
 ]
 
 # ── 直接信息查询（不依赖LLM，直接查API）──
@@ -98,6 +130,31 @@ _INFO_QUERIES = {
     "所有配置": "/api/v1/config",
     "认证配置": "/api/v1/auth/config",
     "健康状态": "/api/v1/health",
+    # 扩展信息查询
+    "连接器列表": "/api/v1/connectors",
+    "所有连接器": "/api/v1/connectors",
+    "集成列表": "/api/v1/gateway/tools",
+    "网关工具": "/api/v1/gateway/tools",
+    "已启用集成": "/api/v1/gateway/enabled",
+    "部署状态": "/api/v1/deploy/v2/status",
+    "部署列表": "/api/v1/deploy/v2/status",
+    "技能统计": "/api/v1/skills/stats",
+    "插件列表": "/api/v1/plugins",
+    "所有插件": "/api/v1/plugins",
+    "服务状态": "/api/v1/services",
+    "所有服务": "/api/v1/services",
+    "通知记录": "/api/v1/notify/logs",
+    "通知历史": "/api/v1/notify/logs",
+    "认证配置": "/api/v1/auth/config",
+    "用户统计": "/api/v1/users/stats",
+    "会话列表": "/api/v1/session/list",
+    "学习进度": "/api/v1/learn/progress",
+    "环境变量": "/api/v1/env/list",
+    "环境配置": "/api/v1/env/list",
+    "循环任务列表": "/api/v1/loop/tasks",
+    "MCP服务器": "/api/v1/mcp/servers",
+    "MCP工具": "/api/v1/mcp/servers",
+    "缓存状态": "/api/v1/cache/status",
 }
 
 async def _execute_info_query(msg: str) -> str | None:
@@ -158,7 +215,7 @@ _ACTION_MAP = [
 
     # ── 记忆树 ──
     (["添加记忆节点", "创建记忆节点"], "POST", "/api/v1/memory/add",
-     lambda msg: {"node_id": f"node_{int(time.time())}", "title": _extract_after(msg), "content": _extract_after(msg)}),
+     lambda msg: {"node_id": f"n_{os.urandom(4).hex()}", "title": _extract_after(msg), "content": _extract_after(msg)}),
 
     # ── 模板 ──
     (["应用模板", "使用模板"], "POST", "/api/v1/templates/github_trending/apply",
@@ -167,7 +224,76 @@ _ACTION_MAP = [
     # ── 调度任务操作 ──
     (["触发任务", "立即执行"], "POST", "/api/v1/scheduler/tasks/_trigger",
      lambda msg: {"task_id": _extract_after(msg)}),
+
+    # ── 模块管理 ──
+    (["启用模块", "激活模块", "启动模块"], "POST", "/api/v1/modules/enable",
+     lambda msg: {"module_name": _extract_after(msg)}),
+    (["禁用模块", "停用模块", "关闭模块"], "POST", "/api/v1/modules/disable",
+     lambda msg: {"module_name": _extract_after(msg)}),
+    (["重启模块", "重新加载模块", "刷新模块"], "POST", "/api/v1/modules/reload",
+     lambda msg: {"module_name": _extract_after(msg)}),
+    (["热加载模块", "热重载"], "POST", "/api/v1/modules/hot-reload",
+     lambda _: {}),
+
+    # ── 通知操作 ──
+    (["发送通知", "推送通知", "发送消息", "测试通知"], "POST", "/api/v1/notify/send",
+     lambda msg: {"channel": "console", "content": _extract_after(msg) or "测试通知"}),
+
+    # ── 缓存操作 ──
+    (["清理缓存", "清除缓存", "清空缓存", "刷新缓存"], "POST", "/api/v1/cache/clear",
+     lambda _: {}),
+    (["预热缓存"], "POST", "/api/v1/cache/warmup",
+     lambda _: {}),
+
+    # ── 日志操作 ──
+    (["查看日志", "查看最近日志", "最新日志"], "GET", "/api/v1/logs/recent",
+     lambda _: {"limit": 20}),
+    (["清理日志", "删除日志", "清空日志"], "POST", "/api/v1/logs/cleanup",
+     lambda _: {}),
+
+    # ── 系统操作 ──
+    (["重启系统", "重启服务", "重启API"], "POST", "/api/v1/system/restart",
+     lambda _: {}),
+    (["清理临时文件", "清理空间", "磁盘清理"], "POST", "/api/v1/system/cleanup",
+     lambda _: {}),
+
+    # ── 学习/教程 ──
+    (["开始课程", "开始学习", "学习课程"], "POST", "/api/v1/learn/start",
+     lambda msg: {"course_id": _extract_after(msg) or "intro", "user": _get_username()}),
+
+    # ── 数据导出 ──
+    (["导出数据", "导出CSV", "导出JSON"], "GET", "/api/v1/data/export",
+     lambda msg: {"format": "csv" if "csv" in msg.lower() else "json"}),
+
+    # ── 专家激活 ──
+    (["激活专家", "激活行业专家", "查找专家", "找行业专家"], "GET", "/api/v1/experts/search",
+     lambda msg: {"q": _extract_after(msg) or ""}),
+    (["管理专家", "专家配置"], "POST", "/api/v1/experts/configure",
+     lambda msg: {"config": {"name": _extract_after(msg)}}),
+
+    # ── 任务/队列操作 ──
+    (["取消任务", "停止任务", "终止任务"], "POST", "/api/v1/queue/tasks/_cancel",
+     lambda msg: {"task_id": _extract_after(msg)}),
+    (["查看队列", "队列状态", "任务队列"], "GET", "/api/v1/queue/status",
+     lambda _: {}),
+
+    # ── Webhook ──
+    (["创建webhook", "添加webhook", "注册webhook"], "POST", "/api/v1/webhooks",
+     lambda msg: {"name": _extract_after(msg) or "hook", "url": ""}),
+
+    # ── N8N ──
+    (["导入模板", "导入n8n", "加载模板"], "POST", "/api/v1/n8n/templates/import",
+     lambda msg: {"template_id": _extract_after(msg)}),
 ]
+
+def _get_username() -> str:
+    """获取当前用户名"""
+    try:
+        from api.infra import _request_user
+        u = _request_user.get()
+        return u or "admin"
+    except Exception:
+        return "admin"
 
 def _extract_after(msg: str) -> str:
     """提取最后一个匹配关键词后面剩余的文本（去除前缀助词）"""
@@ -496,8 +622,15 @@ async def smart_chat(req: Req):
         logger.info(f"[NAV] {msg[:30]} -> {nav_url}")
         return {"success": True, "result": f"正在打开 **{name}**...", "redirect": nav_url}
 
-    # ── 优先级3: ReAct 阶段1: Thought（意图分类）──
-    itype, platform, topic, expression = await _classify_intent(msg)
+    # ── 优先级3: 创建/生成快速通道（不依赖LLM分类）──
+    _CREATE_FAST = ["生成","创建","制作","编写","写一个","做一个","开发一个","设计一个","实现一个","画一个","绘制","生成HTML","写HTML","帮我做一个","帮我写一个","帮我生成"]
+    if any(k in msg for k in _CREATE_FAST):
+        logger.info(f"[CREATE-FAST] {msg[:30]} -> 跳过LLM分类")
+        itype = "create"
+        platform, topic, expression = "", msg, ""
+    else:
+        # ── 优先级4: ReAct 阶段1: Thought（意图分类）──
+        itype, platform, topic, expression = await _classify_intent(msg)
     logger.info(f"[ROUTE] {itype} p={platform} t={topic} e={expression[:20]}")
 
     # ── ReAct 阶段2: Action（执行）──
