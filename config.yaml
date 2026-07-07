@@ -1,3 +1,6 @@
+# AUTO-EVO-AI 配置注册表
+# 格式：YAML list of entries，每个 entry 包含 key/value/description/env_var/group 等字段
+# 由系统配置管理工具自动维护，非手动编辑文件
 - created_at: '2026-06-04T16:19:48.005944'
   default_value: ''
   description: Docker Hub访问令牌
