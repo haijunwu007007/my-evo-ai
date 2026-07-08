@@ -63,33 +63,10 @@ td{color:#e0e0e0}
 </div>
 
 <!-- Tab 2: Claw 网关 -->
-<div id="r_claw" class="tab-content">
-<p class="sub">Claw 远程网关 — 连接外部平台</p>
-<div class="card">
-  <h3>🌐 平台连接状态</h3>
-  <div id="clawPlatforms"></div>
-</div>
-<div class="card">
-  <h3>📤 发送 Claw 指令</h3>
-  <label>指令</label>
-  <input type="text" id="clawCmd" placeholder="输入 Claw 指令..." onkeydown="if(event.key==='Enter')sendClaw()">
-  <button class="btn btn-p" onclick="sendClaw()">📨 发送</button>
-</div>
-<div class="card">
-  <h3>📋 Claw 执行日志</h3>
-  <div id="clawLog" style="font-size:13px;color:#8892b0;line-height:1.8"></div>
-</div>
-</div>
+<div id="r_claw" class="tab-content" style="height:80vh"><iframe src="/claw" style="width:100%;height:100%;border:none;border-radius:8px"></iframe></div>
 
 <!-- Tab 3: 本地代理 -->
-<div id="r_agent" class="tab-content">
-<p class="sub">本地 Agent 代理 — 连接到本系统</p>
-<div class="card">
-  <h3>🔌 本地代理状态</h3>
-  <p>本地代理允许你在本地终端连接到本系统执行指令。</p>
-  <div class="token-box">本地代理模式已就绪。在本地运行：<br><br><span style="color:#10b981">python -m evo.agent --host https://autoevoai.com</span></div>
-</div>
-</div>
+<div id="r_agent" class="tab-content" style="height:80vh"><iframe src="/agent" style="width:100%;height:100%;border:none;border-radius:8px"></iframe></div>
 
 <script>
 function switchTab(el, id) {
