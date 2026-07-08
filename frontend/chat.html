@@ -524,53 +524,32 @@ function checkOnboard() {
       <div class="sgroup-body" id="sg_connect">
         <button class="sbtn" onclick="window.location.href='/remote.html'"><span class="sicon">📡</span> 远程执行</button>
         <button class="sbtn" onclick="window.location.href='/review.html'"><span class="sicon">👤</span> 审批中心</button>
-        <button class="sbtn" onclick="window.location.href='/teammates.html'"><span class="sicon">🤖</span> AI同事</button>
       </div>
     </div>
 
-    <!-- 企业 -->
+    <!-- 企业 & 管理 ← 原企业&自动化 + 系统设置 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        🏢 企业 & 自动化 <span class="arrow">▶</span>
+        🏢 企业 & 管理 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_biz">
         <button class="sbtn" onclick="window.location.href='/admin'" data-role="admin"><span class="sicon">⚙️</span> 管理中心</button>
         <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
         <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
         <button class="sbtn" onclick="window.location.href='/loop'"><span class="sicon">🔄</span> 循环</button>
+        <button class="sbtn" onclick="window.location.href='/settings'" data-role="admin"><span class="sicon">⚙️</span> 系统设置</button>
       </div>
     </div>
 
-    <!-- 数据 & 知识 -->
+    <!-- 开发 & 生态 ← 原开发&部署 + 开源中心 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        📊 数据 & 知识 <span class="arrow">▶</span>
-      </button>
-      <div class="sgroup-body" id="sg_data">
-        <button class="sbtn" onclick="window.location.href='/learn.html'"><span class="sicon">📖</span> 学习</button>
-        <button class="sbtn" onclick="window.location.href='/distill.html'"><span class="sicon">🧪</span> 蒸馏</button>
-        <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
-      </div>
-    </div>
-
-    <!-- 开发 & 部署 -->
-    <div class="sgroup">
-      <button class="sgroup-header" onclick="toggleSGroup(this)">
-        📦 开发 & 部署 <span class="arrow">▶</span>
+        📦 开发 & 生态 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_dev">
         <button class="sbtn" onclick="window.location.href='/deploy'" data-role="admin"><span class="sicon">🚀</span> 一键部署</button>
         <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
-      </div>
-    </div>
-
-    <!-- 系统 -->
-    <div class="sgroup">
-      <button class="sgroup-header" onclick="toggleSGroup(this)">
-        ⚙️ 系统 <span class="arrow">▶</span>
-      </button>
-      <div class="sgroup-body" id="sg_sys">
-        <button class="sbtn" onclick="window.location.href='/settings'" data-role="admin"><span class="sicon">⚙️</span> 系统设置</button>
+        <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
       </div>
     </div>
 
