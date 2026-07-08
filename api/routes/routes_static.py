@@ -656,6 +656,18 @@ async def components_js():
     p = BASE_DIR / "frontend" / "components.js"
     return FileResponse(str(p), media_type="application/javascript")
 
+@router.get("/register")
+async def register_page():
+    p = BASE_DIR / "frontend" / "register.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/forgot-password")
+async def forgot_password_page():
+    p = BASE_DIR / "frontend" / "forgot-password.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
 @router.get("/chat_engine.js")
 
 async def chat_engine_js():
