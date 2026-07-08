@@ -181,15 +181,18 @@ _init_users_table()
 class UserReq(BaseModel):
     username: str
     password: Optional[str] = ""
+    email: Optional[str] = ""
 
 @router.post("/api/v1/user/register")
 async def user_register(req: UserReq):
     conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
     try:
         pw = hashlib.sha256((req.password or "default").encode()).hexdigest()
-        conn.execute("INSERT INTO users (username, password, created_at) VALUES (?,?,?)", (req.username, pw, time.time()))
+        email = (req.email or "").strip()
+        conn.execute("INSERT INTO users (username, password, email, created_at) VALUES (?,?,?,?)",
+                     (req.username, pw, email, time.time()))
         conn.commit()
-        return {"success": True, "user": req.username}
+        return {"success": True, "user": req.username, "email": email}
     except sqlite3.IntegrityError:
         return {"success": False, "detail": "用户名已存在"}
     finally: conn.close()
@@ -211,6 +214,22 @@ async def user_login(req: UserReq):
     conn.close()
     if row: return {"success": True, "user": row[0], "role": row[1]}
     return {"success": False, "detail": "用户名或密码错误"}
+
+@router.post("/api/v1/user/password-reset")
+async def password_reset(req: UserReq):
+    """密码重置：需要提供用户名和 email，匹配则重置密码为123456"""
+    if not req.email or not req.username:
+        return {"success": False, "detail": "需要用户名和邮箱"}
+    conn = sqlite3.connect(str(Path(__file__).resolve().parent.parent.parent / "core" / "adaptive_engine.db"))
+    try:
+        row = conn.execute("SELECT id FROM users WHERE username=? AND email=?", (req.username, req.email)).fetchone()
+        if not row:
+            return {"success": False, "detail": "用户名或邮箱不匹配"}
+        new_pw = hashlib.sha256("123456".encode()).hexdigest()
+        conn.execute("UPDATE users SET password=? WHERE id=?", (new_pw, row[0]))
+        conn.commit()
+        return {"success": True, "detail": "密码已重置为 123456"}
+    finally: conn.close()
 
 # ─── 7. 💬 聊天记录持久化 ─────────────────────
 class ChatSaveReq(BaseModel):

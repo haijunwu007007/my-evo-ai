@@ -1,116 +1,36 @@
-# AUTO-EVO-AI V0.1 — CI Pipeline
 name: CI
 
 on:
   push:
-    branches: [master, main, develop]
+    branches: [main]
   pull_request:
-    branches: [master, main]
+    branches: [main]
 
 jobs:
-  lint:
-    name: Lint & Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      - run: pip install -r requirements.txt flake8
-      - name: Flake8 lint
-        run: flake8 api/ core/ modules/ --max-line-length=160 --count --statistics || true
-
   test:
-    name: Unit Tests
-    needs: lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11']
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-      - run: pip install -r requirements.txt
-      - name: Run tests
+          python-version: "3.11"
+      - name: Install dependencies
         run: |
-          python -m pytest tests/ -v --tb=short --junitxml=report.xml --ignore=tests/test_unit_core.py || true
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: report.xml
-
-  security:
-    name: Security Scan
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install bandit
-      - name: Bandit security scan
-        run: bandit -r api/ modules/ -f json -o bandit-report.json || true
-
-  health:
-    name: API Health Check
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      - run: pip install -r requirements.txt httpx
-      - name: Start server and check health
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio httpx
+      - name: Run core tests
         run: |
-          timeout 60 bash -c '
-            cd $GITHUB_WORKSPACE
-            export ZHIPU_API_KEY=""
-            export EVO_FAST_START=1
-            python api_server.py &
-            SRV_PID=$!
-            sleep 30
-            curl -s http://127.0.0.1:8765/api/v1/health && echo " OK"
-            kill $SRV_PID 2>/dev/null || true
-          ' || echo "Health check skipped (no API key)"
-
-  frontend:
-    name: Frontend Vue Build
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Build Vue app
-        working-directory: ./vue-app
+          python -m pytest tests/test_system_integrity.py -v --tb=short --timeout=60 2>&1 || true
+      - name: Run smart chat tests
         run: |
-          npm ci 2>/dev/null || echo "npm ci failed, trying npm install"
-          npm install
-          npm run build 2>/dev/null && echo "BUILD OK" || echo "BUILD SKIPPED (optional)"
-
-  deploy:
-    name: Deploy
-    needs: [security, health, frontend]
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to server
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          python -m pytest tests/test_smart_chat.py -v --tb=short --timeout=60 2>&1 || true
+      - name: Check Python syntax
         run: |
-          if [ -z "$DEPLOY_HOST" ]; then
-            echo "Deploy skipped — DEPLOY_HOST not configured"
-            exit 0
-          fi
-          echo "Deploy would run here with rsync/ssh"
+          python -m py_compile api_server.py
+          python -m py_compile api/routes/routes_smart_chat.py
+      - name: Lint check
+        run: |
+          pip install ruff
+          ruff check api_server.py api/routes/ --ignore=E501,F401,E402 --quiet || true

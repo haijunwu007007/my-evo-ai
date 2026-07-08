@@ -15,6 +15,7 @@ import os
 import json
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timezone
 from typing import Any, Dict
 
@@ -54,9 +55,22 @@ def get_logger(name: str, level: str | None = None) -> logging.Logger:
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
 
     if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(JSONFormatter() if use_json else _classic_formatter)
-        logger.addHandler(handler)
+        # 控制台输出（始终保留）
+        console = logging.StreamHandler(sys.stdout)
+        console.setFormatter(JSONFormatter() if use_json else _classic_formatter)
+        logger.addHandler(console)
+        # 文件输出（自动轮转：每100MB切分，保留7天）
+        _log_dir = os.environ.get("EVO_LOG_DIR", "logs")
+        try:
+            os.makedirs(_log_dir, exist_ok=True)
+            _log_file = os.path.join(_log_dir, f"{name.replace('.', '_')}.log")
+            file_handler = RotatingFileHandler(
+                _log_file, maxBytes=100*1024*1024, backupCount=7, encoding="utf-8"
+            )
+            file_handler.setFormatter(JSONFormatter() if use_json else _classic_formatter)
+            logger.addHandler(file_handler)
+        except Exception:
+            pass  # 日志文件写入失败不影响程序运行
 
     return logger
 
