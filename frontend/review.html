@@ -1,25 +1,25 @@
 <!DOCTYPE html><html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>审阅协作 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px;min-height:100vh}
-.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #2d3561}
-.tab{padding:8px 18px;cursor:pointer;font-size:14px;color:#8892b0;border-bottom:2px solid transparent;transition:all .15s}
-.tab:hover{color:#e0e0e0}.tab.active{color:#4361ee;border-bottom-color:#4361ee;font-weight:600}
+body{padding:20px;min-height:100vh}
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.tab{padding:8px 18px;cursor:pointer;font-size:14px;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .tab-content{display:none}.tab-content.active{display:block}
 .iframe-tab{height:80vh}.iframe-tab iframe{width:100%;height:100%;border:none;border-radius:8px}
-h1{font-size:24px;margin-bottom:6px}.sub{color:#8892b0;font-size:14px;margin-bottom:24px}
-.back{display:inline-block;margin-bottom:20px;color:#4361ee;text-decoration:none;font-size:14px}.back:hover{text-decoration:underline}
+h1{font-size:24px;margin-bottom:6px}.sub{color:var(--text2);font-size:14px;margin-bottom:24px}
+.back{display:inline-block;margin-bottom:20px;color:var(--accent);text-decoration:none;font-size:14px}.back:hover{text-decoration:underline}
 .review-area{display:flex;gap:20px;max-width:1200px;flex-wrap:wrap}
-.panel{flex:1;min-width:300px;background:#1a1a2e;border-radius:12px;padding:20px;border:1px solid #2d3561}
-.panel h3{font-size:15px;margin-bottom:12px;color:#4361ee}
-.content-area{background:#16213e;border-radius:8px;padding:16px;min-height:300px;font-size:14px;line-height:1.6;white-space:pre-wrap;margin-bottom:12px;color:#e0e0e0}
-.sel{width:100%;padding:8px;border-radius:6px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;margin-bottom:10px}
-textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;font-size:14px;min-height:80px;resize:vertical;margin-bottom:10px;font-family:inherit}
+.panel{flex:1;min-width:300px;background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border)}
+.panel h3{font-size:15px;margin-bottom:12px;color:var(--accent)}
+.content-area{background:var(--bg);border-radius:8px;padding:16px;min-height:300px;font-size:14px;line-height:1.6;white-space:pre-wrap;margin-bottom:12px;color:var(--text)}
+.sel{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-bottom:10px}
+textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;min-height:80px;resize:vertical;margin-bottom:10px;font-family:inherit}
 .btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
-.btn-p{background:#4361ee;color:#fff}.btn-p:hover{opacity:.9}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.9}
 .btn-g{background:#10b981;color:#fff}.btn-g:hover{opacity:.9}
-.btn-o{background:transparent;color:#e0e0e0;border:1px solid #2d3561}
+.btn-o{background:transparent;color:var(--text);border:1px solid var(--border)}
 .status{display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
 .status.ok{display:block;background:rgba(16,185,129,.1);border:1px solid #10b981;color:#10b981}
 .status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
@@ -53,7 +53,7 @@ textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #2d3561;back
       <button class="btn btn-g" onclick="submitReview()">📨 提交审阅</button>
       <button class="btn btn-o" onclick="clearComments()">清空记录</button>
     </div>
-    <div id="commentsList"><p style="color:#636e8a;font-size:13px">暂无审阅记录</p></div>
+    <div id="commentsList"><p style="color:var(--text3);font-size:13px">暂无审阅记录</p></div>
   </div>
 </div>
 </div>
