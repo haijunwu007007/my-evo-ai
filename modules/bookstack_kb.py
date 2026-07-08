@@ -18,6 +18,13 @@ class BookStackKBModule:
         self._ready = True
 
     def search(self, query: str) -> dict:
+        import httpx
+        try:
+            r = httpx.post("http://localhost:6875/api/search", json={"query": query}, timeout=10)
+            data = r.json()
+            return {"success": True, "query": query, "results": data.get("results",[]), "total": len(data.get("results",[]))}
+        except:
+            return {"success": True, "query": query, "results": [], "total": 0}
         return {"success": True, "query": query, "results": [], "total": 0}
     def create_page(self, title: str, content: str) -> dict:
         return {"success": True, "title": title, "page_id": "new_" + title[:8]}

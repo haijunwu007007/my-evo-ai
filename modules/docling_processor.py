@@ -14,6 +14,21 @@ __module_meta__ = {
 
 class DoclingProcessorModule:
     def __init__(self):
+        self._name = "Docling 文档处理器"
+        self._ready = True
+
+    def process(self, file_path: str) -> dict:
+        import os
+        if not os.path.exists(file_path):
+            return {"success": False, "error": f"文件不存在: {file_path}"}
+        try:
+            text = open(file_path, encoding="utf-8", errors="replace").read()
+            lines = text.split("
+")
+            return {"success": True, "file": file_path, "lines": len(lines), "chars": len(text), "preview": text[:500]}
+        except Exception as e:
+            return {"success": False, "error": str(e)[:100]}
+    def __init__(self):
         self._name = "Docling 文档处理"
         self._ready = True
 

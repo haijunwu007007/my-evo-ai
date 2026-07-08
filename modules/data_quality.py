@@ -14,6 +14,22 @@ __module_meta__ = {
 
 class DataQualityModule:
     def __init__(self):
+        self._name = "数据质量"
+        self._ready = True
+
+    def validate(self, data: list, rules: dict = {}) -> dict:
+        errors = []
+        for i, row in enumerate(data or []):
+            if not isinstance(row, dict): continue
+            for field, rule in rules.items():
+                val = row.get(field)
+                if rule.get("required") and val is None:
+                    errors.append({"row": i, "field": field, "issue": "必填字段缺失"})
+                if rule.get("type") == "number" and val is not None:
+                    try: float(val)
+                    except: errors.append({"row": i, "field": field, "issue": f"应为数字, 实际={val}"})
+        return {"success": True, "total": len(data or []), "errors": len(errors), "error_details": errors[:20]}
+    def __init__(self):
         self._name = "数据质量检查"
         self._ready = True
 

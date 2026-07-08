@@ -16,6 +16,18 @@ class MCPBridgeModule:
     def __init__(self):
         self._name = "MCP 桥接"
         self._ready = True
+        self._servers = {}
+
+    def call_tool(self, server: str, tool: str, args: dict = {}) -> dict:
+        import httpx
+        try:
+            r = httpx.post(f"http://localhost:8765/api/v1/mcp/{server}/{tool}", json=args, timeout=30)
+            return {"success": r.status_code == 200, "result": r.json()}
+        except Exception as e:
+            return {"success": False, "error": str(e)[:100]}
+    def __init__(self):
+        self._name = "MCP 桥接"
+        self._ready = True
 
     def list_tools(self, server: str = "") -> list:
         return [{"name": "web_search", "server": "search"}, {"name": "code_gen", "server": "coder"}]

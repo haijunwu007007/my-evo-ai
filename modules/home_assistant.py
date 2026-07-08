@@ -18,6 +18,19 @@ class HomeAssistantModule:
         self._ready = True
 
     def get_state(self, entity_id: str) -> dict:
+        import httpx
+        try:
+            token = os.environ.get("HA_TOKEN", "")
+            headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+            r = httpx.get(f"http://localhost:8123/api/states/{entity_id}", headers=headers, timeout=10)
+            return {"success": True, "state": r.json()}
+        except Exception as e:
+            return {"success": False, "error": str(e)[:100], "fallback_state": "unknown"}
+    def __init__(self):
+        self._name = "Home Assistant"
+        self._ready = True
+
+    def get_state(self, entity_id: str) -> dict:
         return {"success": True, "entity_id": entity_id, "state": "on"}
     def turn_on(self, entity_id: str) -> dict:
         return {"success": True, "entity_id": entity_id, "action": "turn_on"}

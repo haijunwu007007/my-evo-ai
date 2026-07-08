@@ -14,6 +14,25 @@ __module_meta__ = {
 
 class LogAggregatorModule:
     def __init__(self):
+        self._name = "日志聚合器"
+        self._ready = True
+
+    def collect(self, log_dir: str = "logs", pattern: str = "*.log") -> dict:
+        import glob, os
+        try:
+            base_dir = os.path.join(os.path.dirname(__file__), "..", log_dir)
+            files = glob.glob(os.path.join(base_dir, pattern))[:50]
+            entries = []
+            for f in files:
+                try:
+                    lines = open(f, encoding="utf-8", errors="replace").read().split("
+")[-100:]
+                    entries.extend([{"file": os.path.basename(f), "line": l[:200]} for l in lines if l.strip()])
+                except: pass
+            return {"success": True, "files": len(files), "entries": entries[:500], "total": len(entries)}
+        except Exception as e:
+            return {"success": False, "error": str(e)[:100]}
+    def __init__(self):
         self._name = "日志聚合"
         self._ready = True
 

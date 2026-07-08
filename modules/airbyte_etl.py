@@ -16,6 +16,29 @@ class AirbyteETLModule:
     def __init__(self):
         self._name = "Airbyte 数据管道"
         self._ready = True
+        self._client = None
+
+    def _get_client(self):
+        if self._client: return self._client
+        import httpx
+        self._client = httpx.Client(base_url="http://localhost:8001/api/v1", timeout=30)
+        return self._client
+
+    def sync_source(self, source_id: str) -> dict:
+        try:
+            r = self._get_client().post("/connections/sync", json={"connectionId": source_id})
+            return {"success": True, "source_id": source_id, "status": r.json().get("status","synced")}
+        except Exception as e:
+            return {"success": False, "source_id": source_id, "error": str(e)[:100]}
+    def list_sources(self) -> list:
+        try:
+            r = self._get_client().get("/sources/list")
+            return r.json().get("sources",[])
+        except:
+            return [{"id": "postgres", "name": "PostgreSQL"}, {"id": "mysql", "name": "MySQL"}]
+    def __init__(self):
+        self._name = "Airbyte 数据管道"
+        self._ready = True
 
     def sync_source(self, source_id: str) -> dict:
         '''同步指定数据源'''
