@@ -1,332 +1,109 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="description" content="AI 代码审查与质量分析，自动化 PR 审查">
-<meta property="og:title" content="AUTO-EVO-AI">
-<meta property="og:description" content="AI 代码审查与质量分析，自动化 PR 审查">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
-
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>代码审查 - AUTO-EVO-AI V0.1</title>
+<!DOCTYPE html><html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>审阅工作流 - AUTO-EVO-AI</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
-:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee;--green:#22c55e;--red:#e74c3c;--orange:#f59e0b;--yellow:#fbbf24}
-body{background:var(--bg);color:var(--text);min-height:100vh}
-.nav{display:flex;align-items:center;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
-.nav h2{font-size:16px;margin-right:16px;background:linear-gradient(135deg,#22c55e,#4361ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav a{color:var(--text2);text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
-.nav a:hover,.nav a.active{background:var(--accent);color:#fff}
-.nav .right{flex:1;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-.container{max-width:1400px;margin:0 auto;padding:16px}
-.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
-.tab{padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;background:var(--card);border:1px solid var(--border);color:var(--text2)}
-.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.section{margin-bottom:20px}
-.section h3{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.row > *{flex:1;min-width:200px}
-input,select,textarea{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;width:100%}
-textarea{font-family:monospace;font-size:12px;line-height:1.6}
-button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{opacity:.9}
-.btn-success{background:var(--green);color:#fff}
-.btn-success:hover{opacity:.9}
-.btn-danger{background:var(--red);color:#fff}
-.btn-warn{background:var(--orange);color:#fff}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
-.card h4{font-size:14px;margin-bottom:8px}
-.score{font-size:36px;font-weight:700;text-align:center}
-.score-good{color:var(--green)}
-.score-ok{color:var(--orange)}
-.score-bad{color:var(--red)}
-.issue{display:flex;gap:8px;padding:8px;border-radius:6px;margin:4px 0;font-size:13px;border-left:3px solid}
-.issue-critical{border-color:var(--red);background:rgba(231,76,60,.08)}
-.issue-major{border-color:var(--orange);background:rgba(245,158,11,.08)}
-.issue-minor{border-color:var(--yellow);background:rgba(251,191,36,.05)}
-.issue-info{border-color:var(--accent);background:rgba(67,97,238,.05)}
-.issue .sev{font-size:11px;padding:1px 6px;border-radius:4px;white-space:nowrap;height:fit-content}
-.issue .sev.critical{background:var(--red);color:#fff}
-.issue .sev.major{background:var(--orange);color:#fff}
-.issue .sev.minor{background:var(--yellow);color:#111}
-.issue .sev.info{background:var(--accent);color:#fff}
-.issue .msg{flex:1}
-.issue .cat{font-size:11px;color:var(--text2);padding:1px 6px;background:var(--bg);border-radius:4px}
-.diff-view{background:#0a0a1a;border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.diff-header{display:flex;justify-content:space-between;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--border);font-size:12px;color:var(--text2)}
-.diff-body{padding:0;overflow-x:auto;font-family:monospace;font-size:12px;line-height:1.6}
-.diff-line{display:flex;padding:1px 12px;white-space:pre;min-height:20px}
-.diff-add{background:rgba(34,197,94,.12);color:#86efac}
-.diff-del{background:rgba(231,76,60,.12);color:#fca5a5}
-.diff-hunk{background:rgba(67,97,238,.08);color:#818cf8;font-weight:600;padding:4px 12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.diff-info{color:var(--text2)}
-.diff-line .ln{color:var(--text2);width:48px;flex-shrink:0;text-align:right;padding-right:12px;user-select:none}
-.diff-line .code{flex:1}
-.history-item{padding:10px;border-radius:8px;margin:4px 0;background:var(--bg);border:1px solid var(--border);cursor:pointer;font-size:13px}
-.history-item:hover{border-color:var(--accent)}
-.history-item .meta{display:flex;gap:8px;color:var(--text2);font-size:11px;margin-top:4px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border)}
-th{color:var(--text2);font-size:11px;text-transform:uppercase;font-weight:600}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:768px){.grid-2{grid-template-columns:1fr}.row{flex-direction:column}}
-.loading{text-align:center;padding:40px;color:var(--text2);font-size:14px}
-pre{white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.6;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto}
-</style>
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-<div class="topbar">
-  <button class="topbar-back" onclick="window.location.href='/'">← 返回</button>
-  <span class="topbar-title">👁️ 代码审查</span>
-</div>
-<div class="topbar">
-  <button class="topbar-back" onclick="window.location.href='/'">&#8592; 返回</button>
-  <span class="topbar-title">&#128202; 代码审查</span>
-</div>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px;min-height:100vh}
+h1{font-size:24px;margin-bottom:6px}.sub{color:#8892b0;font-size:14px;margin-bottom:24px}
+.back{display:inline-block;margin-bottom:20px;color:#4361ee;text-decoration:none;font-size:14px}
+.back:hover{text-decoration:underline}
+.review-area{display:flex;gap:20px;max-width:1200px;flex-wrap:wrap}
+.panel{flex:1;min-width:300px;background:#1a1a2e;border-radius:12px;padding:20px;border:1px solid #2d3561}
+.panel h3{font-size:15px;margin-bottom:12px;color:#4361ee}
+.content-area{background:#16213e;border-radius:8px;padding:16px;min-height:300px;font-size:14px;line-height:1.6;white-space:pre-wrap;margin-bottom:12px;color:#e0e0e0}
+.sel{width:100%;padding:8px;border-radius:6px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;margin-bottom:10px}
+textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;font-size:14px;min-height:80px;resize:vertical;margin-bottom:10px;font-family:inherit}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-p{background:#4361ee;color:#fff}.btn-p:hover{opacity:.9}
+.btn-g{background:#10b981;color:#fff}.btn-g:hover{opacity:.9}
+.btn-r{background:#ef4444;color:#fff}.btn-r:hover{opacity:.9}
+.btn-o{background:transparent;color:#e0e0e0;border:1px solid #2d3561}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.comment{background:#16213e;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;border-left:3px solid #4361ee}
+.comment .meta{color:#8892b0;font-size:11px;margin-top:4px}
+.status{display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.status.ok{display:block;background:rgba(16,185,129,.1);border:1px solid #10b981;color:#10b981}
+.status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
+</style></head>
+<body>
+<a class="back" href="/">← 返回首页</a>
+<h1>📝 审阅工作流</h1>
+<p class="sub">借鉴 Moxt「皇帝批折子」模式：AI 生成 → 你划线评论 → AI 按意见修改</p>
 
-
-<div class="nav">
-  <h2>🔍 AI 代码审查</h2>
-  <a href="/admin">⚙️ 管理</a>
-  <a href="/canvas">🎨 画布</a>
-  <a href="/office">📋 办公</a>
-  <a href="/">💬 返回</a>
-  <div class="right">
-    <select id="modeSelect" onchange="switchMode(this.value)" style="width:auto">
-      <option value="working">工作区变更</option>
-      <option value="commit">审查 Commit</option>
-      <option value="branch">分支对比</option>
-      <option value="diff">Diff 查看器</option>
-    </select>
-  </div>
-</div>
-
-<div class="container">
-
-<!-- 工作区审查 -->
-<div id="panel-working" class="tab-content active">
-  <div class="section">
-    <h3>📋 工作区代码审查</h3>
-    <div class="row">
-      <label><input type="checkbox" id="stagedCheck"> 仅审查暂存区 (staged)</label>
-      <button class="btn-primary" onclick="runReview('working')">▶ 开始审查</button>
+<div class="review-area">
+  <div class="panel">
+    <h3>📄 待审阅内容</h3>
+    <select class="sel" id="docSelect"><option value="">请先生成内容...</option></select>
+    <div class="content-area" id="contentDisplay">点击"生成示例"创建一份待审阅内容</div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="generateDoc()">🔄 生成示例</button>
+      <button class="btn btn-o" onclick="refreshList()">刷新列表</button>
     </div>
   </div>
-</div>
-
-<!-- Commit 审查 -->
-<div id="panel-commit" class="tab-content">
-  <div class="section">
-    <h3>📌 审查 Commit</h3>
-    <div class="row">
-      <input id="commitHash" placeholder="Commit Hash (如: HEAD / a1b2c3d)">
-      <input id="commitCompare" placeholder="对比基准 (可选)">
-      <button class="btn-primary" onclick="runReview('commit')">▶ 审查</button>
+  <div class="panel">
+    <h3>✏️ 你的审阅意见</h3>
+    <textarea id="commentInput" placeholder="划线评论：指出问题或改进建议..."></textarea>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="submitReview()">📨 提交审阅</button>
+      <button class="btn btn-o" onclick="clearComments()">清空记录</button>
     </div>
-    <div class="card">
-      <h4>📋 最近 Commit</h4>
-      <table><thead><tr><th>Hash</th><th>作者</th><th>消息</th><th>日期</th><th>操作</th></tr></thead>
-      <tbody id="commitTable"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody></table>
-    </div>
+    <div id="commentsList"><p style="color:#636e8a;font-size:13px">暂无审阅记录</p></div>
   </div>
 </div>
-
-<!-- 分支对比 -->
-<div id="panel-branch" class="tab-content">
-  <div class="section">
-    <h3>🔀 分支代码对比</h3>
-    <div class="row">
-      <input id="branchBase" value="master" placeholder="基准分支">
-      <input id="branchHead" placeholder="对比分支 (默认当前分支)">
-      <button class="btn-primary" onclick="runReview('branch')">▶ 对比审查</button>
-    </div>
-  </div>
-</div>
-
-<!-- Diff 查看器 -->
-<div id="panel-diff" class="tab-content">
-  <div class="section">
-    <h3>📄 Diff 差异查看器</h3>
-    <div class="row">
-      <input id="diffBase" placeholder="基准 (默认 HEAD~1)" value="HEAD~1">
-      <input id="diffHead" placeholder="目标 (默认 HEAD)" value="HEAD">
-      <input id="diffFile" placeholder="指定文件 (可选)">
-      <button class="btn-primary" onclick="loadDiff()">▶ 查看 Diff</button>
-    </div>
-  </div>
-</div>
-
-<!-- 审查结果 -->
-<div id="resultArea" style="display:none">
-  <div class="section">
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-      <h3>📊 审查结果</h3>
-      <span id="resultScore" class="score"></span>
-      <span id="resultSummary" style="font-size:13px;color:var(--text2)"></span>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <h4>📋 审查概况</h4>
-        <div id="resultMeta" style="font-size:13px;color:var(--text2)"></div>
-      </div>
-      <div class="card">
-        <h4>📁 审查文件</h4>
-        <div id="resultFiles" style="font-size:13px"></div>
-      </div>
-    </div>
-  </div>
-  <div class="section" id="issuesSection">
-    <h3>⚠️ 发现的问题 (<span id="issueCount">0</span>)</h3>
-    <div id="issuesList"></div>
-  </div>
-</div>
-
-<!-- Diff 显示区域 -->
-<div id="diffArea" style="display:none">
-  <div class="section">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-      <h3>📄 Diff 差异</h3>
-      <span id="diffFilesChanged" style="font-size:12px;color:var(--text2)"></span>
-      <button class="btn-success" style="font-size:11px;padding:4px 8px" onclick="runReview('diff')">审查此 Diff</button>
-    </div>
-    <div class="diff-view"><div class="diff-body" id="diffBody"></div></div>
-  </div>
-</div>
-
-<!-- 审查历史 -->
-<div class="section" style="margin-top:24px">
-  <h3>📜 审查历史</h3>
-  <div id="historyList"><p class="loading">加载中...</p></div>
-</div>
-
-</div>
+<div class="status" id="status"></div>
 
 <script>
-const API = '/api/v1';
+var _docs=[]
+function showStatus(msg,ok){
+  var s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');s.style.display='block'
+  setTimeout(function(){s.style.display='none'},4000)}
 
-function switchMode(mode){document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));var el=document.getElementById('panel-'+mode);if(el)el.classList.add('active')}
-
-// ===== 代码审查 =====
-async function runReview(mode){
-  var area=document.getElementById('resultArea');area.style.display='none';
+async function refreshList(){
   try{
-    var body={target:mode};
-    if(mode=='working') body.staged=document.getElementById('stagedCheck').checked;
-    else if(mode=='commit'){body.hash=document.getElementById('commitHash').value||'HEAD';body.compare=document.getElementById('commitCompare').value}
-    else if(mode=='branch'){body.base=document.getElementById('branchBase').value||'master';body.head=document.getElementById('branchHead').value}
-    else if(mode=='diff'){
-      body.target='working';
-      // 用当前 diff 做审查
-    }
-    var r=await fetch(API+'/code-review/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    var d=await r.json();
-    if(!d.success){alert('审查失败: '+(d.detail||'未知'));return}
-    renderReview(d.review);loadHistory()
-  }catch(e){alert('出错: '+e.message)}
+    var r=await fetch('/api/v1/apps/list');var d=await r.json()
+    if(!d.success)return
+    _docs=d.apps||[]
+    var sel=document.getElementById('docSelect')
+    sel.innerHTML='<option value="">选择内容...</option>'
+    if(d.total===0)sel.innerHTML='<option value="">暂无生成内容，先生成一个</option>'
+    d.apps.forEach(function(a,i){sel.innerHTML+='<option value="'+i+'">'+a.name+' ('+a.size+')</option>'})
+    if(d.total>0)sel.value=0;selectDoc()
+  }catch(e){showStatus('刷新失败: '+e.message,false)}
 }
 
-function renderReview(r){
-  var area=document.getElementById('resultArea');area.style.display='block';
-  var score=r.score||0;
-  var el=document.getElementById('resultScore');
-  el.textContent=score;
-  el.className='score '+(score>=80?'score-good':score>=60?'score-ok':'score-bad');
-  document.getElementById('resultSummary').textContent=r.summary||'';
-  document.getElementById('resultMeta').innerHTML=
-    '<div>类型: '+(r.target_type||'未知')+'</div>'+
-    '<div>目标: '+(r.target||'')+'</div>'+
-    '<div>文件数: '+(r.files_reviewed?.length||0)+'</div>'+
-    '<div>变更行: '+(r.total_lines||0)+'</div>'+
-    '<div>耗时: '+(r.duration_ms||0)+'ms</div>'+
-    '<div>时间: '+(r.timestamp?new Date(r.timestamp).toLocaleString():'')+'</div>';
-  document.getElementById('resultFiles').innerHTML=(r.files_reviewed||[]).map(function(f){return '<div>📄 '+f+'</div>'}).join('')||'<span style="color:var(--text2)">无文件变更</span>';
-
-  var issues=r.issues||[];
-  document.getElementById('issueCount').textContent=issues.length;
-  if(!issues.length){document.getElementById('issuesList').innerHTML='<p style="color:var(--green)">✅ 未发现问题</p>';return}
-  var html='';
-  issues.forEach(function(i){
-    var sev=i.severity||'info';
-    html+='<div class="issue issue-'+sev+'"><span class="sev '+sev+'">'+sev.toUpperCase()+'</span>'+
-      '<div class="msg"><strong>['+i.category+']</strong> '+i.message+'</div>'+
-      '<span class="cat">📄 '+i.file+(i.line?':'+i.line:'')+'</span></div>'
-  });
-  document.getElementById('issuesList').innerHTML=html
+function selectDoc(){
+  var sel=document.getElementById('docSelect');var idx=parseInt(sel.value)
+  if(isNaN(idx)||!_docs[idx]){document.getElementById('contentDisplay').textContent='选择内容后显示...';return}
+  fetch('/output/apps/'+_docs[idx].name).then(function(r){return r.text()}).then(function(t){
+    document.getElementById('contentDisplay').textContent=t.slice(0,2000)+'\n\n...（已截断，共'+t.length+'字符）'
+  })
 }
 
-// ===== Commit 列表 =====
-async function loadCommits(){
-  try{
-    var r=await fetch(API+'/code-review/commits?limit=20');
-    var d=await r.json();
-    var commits=d.commits||[];
-    var html='';
-    commits.forEach(function(c){
-      html+='<tr><td><code style="color:var(--accent);font-size:11px">'+c.hash.slice(0,12)+'</code></td>'+
-        '<td>'+c.author+'</td><td>'+c.message.slice(0,50)+'</td><td>'+(c.date?new Date(c.date).toLocaleString():'')+'</td>'+
-        '<td><button class="btn-primary" style="font-size:11px;padding:4px 8px" onclick="document.getElementById(\'commitHash\').value=\''+c.hash+'\';switchMode(\'commit\')">审查</button></td></tr>'
-    });
-    document.getElementById('commitTable').innerHTML=html||'<tr><td colspan="5" style="color:var(--text2)">暂无 commit</td></tr>'
-  }catch(e){document.getElementById('commitTable').innerHTML='<tr><td colspan="5">加载失败</td></tr>'}
+async function generateDoc(){
+  var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'帮我生成一份产品介绍HTML，要包含标题、功能列表、定价、联系方式和公司简介，风格现代简洁'})})
+  var d=await r.json()
+  showStatus(d.success?'✅ 已生成！请到列表查看':'生成失败',d.success)
+  if(d.success)setTimeout(refreshList,2000)
 }
 
-// ===== Diff 查看器 =====
-async function loadDiff(){
-  var base=document.getElementById('diffBase').value||'HEAD~1';
-  var head=document.getElementById('diffHead').value||'HEAD';
-  var file=document.getElementById('diffFile').value||'';
-  document.getElementById('diffArea').style.display='none';
-  try{
-    var url=API+'/diff/compare?base='+encodeURIComponent(base)+'&head='+encodeURIComponent(head);
-    if(file) url+='&file='+encodeURIComponent(file);
-    var r=await fetch(url);var d=await r.json();
-    if(!d.success){alert('获取diff失败');return}
-    renderDiff(d.diff,d.files_changed||0)
-  }catch(e){alert('出错: '+e.message)}
+var _comments=JSON.parse(localStorage.getItem('evo_review_comments')||'[]')
+function renderComments(){
+  var el=document.getElementById('commentsList')
+  if(_comments.length===0){el.innerHTML='<p style="color:#636e8a;font-size:13px">暂无审阅记录</p>';return}
+  el.innerHTML=_comments.slice().reverse().map(function(c){
+    return '<div class="comment"><div>💬 '+c.text.slice(0,200)+'</div><div class="meta">📄 '+c.file+' · '+c.time+'</div></div>'
+  }).join('')
 }
 
-function renderDiff(text,filesChanged){
-  var area=document.getElementById('diffArea');area.style.display='block';
-  document.getElementById('diffFilesChanged').textContent='('+filesChanged+' 文件变更)';
-  var lines=text.split('\n');
-  var html='';
-  lines.forEach(function(line){
-    if(line.startsWith('diff --git')){html+='<div class="diff-header">'+line+'</div>';return}
-    if(line.startsWith('@@')){html+='<div class="diff-hunk">'+line+'</div>';return}
-    if(line.startsWith('+'))html+='<div class="diff-line diff-add"><span class="ln"> </span><span class="code">'+escapeHtml(line)+'</span></div>';
-    else if(line.startsWith('-'))html+='<div class="diff-line diff-del"><span class="ln"> </span><span class="code">'+escapeHtml(line)+'</span></div>';
-    else if(line.startsWith('---')||line.startsWith('+++'))html+='<div class="diff-line diff-info"><span class="ln"> </span><span class="code">'+escapeHtml(line)+'</span></div>';
-    else html+='<div class="diff-line"><span class="ln"> </span><span class="code">'+escapeHtml(line)+'</span></div>'
-  });
-  document.getElementById('diffBody').innerHTML=html
+function submitReview(){
+  var text=document.getElementById('commentInput').value.trim();if(!text){showStatus('请先写审阅意见',false);return}
+  var sel=document.getElementById('docSelect');var idx=parseInt(sel.value)
+  var fname=_docs[idx]?._docs[idx].name||'未知文件'
+  _comments.push({text:text,file:fname,time:new Date().toLocaleString()})
+  localStorage.setItem('evo_review_comments',JSON.stringify(_comments))
+  document.getElementById('commentInput').value=''
+  renderComments();showStatus('✅ 审阅意见已提交',true)
 }
-
-function escapeHtml(t){var d=document.createElement('div');d.appendChild(document.createTextNode(t));return d.innerHTML}
-
-// ===== 审查历史 =====
-async function loadHistory(){
-  try{
-    var r=await fetch(API+'/code-review/history?limit=10');
-    var d=await r.json();
-    var revs=d.reviews||[];
-    var html='';
-    revs.slice().reverse().slice(-10).reverse().forEach(function(r){
-      var c=r.score||0;
-      var color=c>=80?'var(--green)':c>=60?'var(--orange)':'var(--red)';
-      var issues=r.issues||[];
-      html+='<div class="history-item" onclick="renderReview(r)"><strong style="color:'+color+'">'+c+'分</strong> '+
-        (r.summary||'').slice(0,60)+
-        '<div class="meta">'+(r.target_type||'')+' | '+(r.target||'')+' | '+
-        (r.files_reviewed?.length||0)+'文件 | '+(issues.length)+'问题 | '+
-        (r.timestamp?new Date(r.timestamp).toLocaleString():'')+'</div></div>'
-    });
-    document.getElementById('historyList').innerHTML=html||'<p style="color:var(--text2)">暂无审查记录</p>'
-  }catch(e){document.getElementById('historyList').innerHTML='<p>加载失败</p>'}
-}
-
-// 初始加载
-loadCommits();loadHistory()
+function clearComments(){_comments=[];localStorage.removeItem('evo_review_comments');renderComments();showStatus('已清空',true)}
+refreshList();renderComments()
 </script>
 </body></html>

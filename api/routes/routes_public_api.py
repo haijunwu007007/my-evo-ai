@@ -79,7 +79,7 @@ EMBED_HTML = """<!-- AUTO-EVO-AI 嵌入聊天 -->
 </div>
 <script>
 function toggleEvoChat(){var b=document.getElementById('evo-chat-box');b.style.display=b.style.display==='none'?'block':'none'}
-function sendEvoChat(){var i=document.getElementById('evo-chat-input');var t=i.value.trim();if(!t)return;i.value='';var m=document.getElementById('evo-chat-msgs');m.innerHTML+='<div style="text-align:right;margin:4px 0">'+t+'</div>';fetch('http://localhost:8765/api/v1/public/smart?message='+encodeURIComponent(t)+'&api_key='+localStorage.getItem('evo_pub_key')||'').then(function(r){return r.json()}).then(function(d){m.innerHTML+='<div style="text-align:left;margin:4px 0;color:#8892b0">'+(d.result||d.detail||'...')+'</div>';m.scrollTop=m.scrollHeight})}
+function sendEvoChat(){var i=document.getElementById('evo-chat-input');var t=i.value.trim();if(!t)return;i.value='';var m=document.getElementById('evo-chat-msgs');m.innerHTML+='<div style="text-align:right;margin:4px 0">'+t+'</div>';fetch('+window.location.origin+'/api/v1/public/smart?message='+encodeURIComponent(t)+'&api_key='+localStorage.getItem('evo_pub_key')||'').then(function(r){return r.json()}).then(function(d){m.innerHTML+='<div style="text-align:left;margin:4px 0;color:#8892b0">'+(d.result||d.detail||'...')+'</div>';m.scrollTop=m.scrollHeight})}
 document.getElementById('evo-chat-input').addEventListener('keydown',function(e){if(e.key==='Enter')sendEvoChat()});
 </script>"""
 

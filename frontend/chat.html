@@ -510,8 +510,10 @@ function checkOnboard() {
         <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
         <button class="sbtn" onclick="window.location.href='/billion-os.html'"><span class="sicon">🏛️</span> 集团 OS</button>
         <div class="divider"></div>
+        <button class="sbtn" onclick="window.location.href='/teammates'"><span class="sicon">🤖</span> AI同事</button>
         <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家库</button>
-        <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🔗</span> Open Claw</button>
+        <button class="sbtn" onclick="window.location.href='/review'"><span class="sicon">📝</span> 审阅工作流</button>
+        <button class="sbtn" onclick="window.location.href='/remote'"><span class="sicon">📱</span> 远程执行</button>
         <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Human</button>
         <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes</button>
       </div>
@@ -568,7 +570,7 @@ function checkOnboard() {
 
     <div class="spacer"></div>
     <div class="divider"></div>
-    <button class="sbtn" id="themeBtn" onclick="nextTheme()"><span class="sicon">🎨</span> 主题</button>
+    <button class="sbtn" id="themeBtn" onclick="toggleTheme()"><span class="sicon">🌙</span> 浅色</button>
     <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
   </div><div class="left-toggle-btn" id="leftToggleBtn" onclick="toggleSidebar()"></div><div class="main" id="mainContent">
     <div class="topbar">
@@ -580,7 +582,7 @@ function checkOnboard() {
       <div class="topbar-right">
         <span onclick="clearHistory()">🔄 新对话</span>
         <span onclick="showArchives()">📋 历史</span>
-        <span id="historyBtn" onclick="showHistory()">📜 历史</span><span id="langBtn" onclick="toggleLang()" style="font-size:12px;padding:2px 6px;border-radius:4px;background:var(--glass);cursor:pointer">zh-CN</span>
+        <span id="historyBtn" onclick="showHistory()">📜 历史</span>
       
 </div>
     </div>

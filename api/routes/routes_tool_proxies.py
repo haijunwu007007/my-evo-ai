@@ -25,13 +25,13 @@ _HOSTS = {
     "hoppscotch": os.environ.get("HOPSCOTCH_URL", "http://localhost:3010"),
     "nextcloud": os.environ.get("NEXTCLOUD_URL", "http://localhost:8080"),
     "superset": os.environ.get("SUPERSET_URL", "http://localhost:8088"),
-    "stirling_pdf": "http://127.0.0.1:8081",
-    "openclaw": "http://127.0.0.1:3002",
-    "metabase": "http://localhost:3000",
-    "homeassistant": "http://localhost:8123",
-    "vaultwarden": "http://localhost:8080",
-    "plane": "http://localhost:8080",
-    "nextchat": "http://127.0.0.1:3099",
+    "stirling_pdf": os.environ.get("STIRLING_PDF_URL", "http://127.0.0.1:8081"),
+    "openclaw": os.environ.get("OPENCLAW_URL", "http://127.0.0.1:3002"),
+    "metabase": os.environ.get("METABASE_URL", "http://localhost:3000"),
+    "homeassistant": os.environ.get("HOMEASSISTANT_URL", "http://localhost:8123"),
+    "vaultwarden": os.environ.get("VAULTWARDEN_URL", "http://localhost:8080"),
+    "plane": os.environ.get("PLANE_URL", "http://localhost:8080"),
+    "nextchat": os.environ.get("NEXTCHAT_URL", "http://127.0.0.1:3099"),
 }
 
 def _check(url: str, timeout: int = 5, path: str = "") -> dict:

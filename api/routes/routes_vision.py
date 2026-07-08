@@ -12,7 +12,7 @@ from core.logging_config import get_logger
 logger = get_logger("evo.api.vision")
 
 router = APIRouter(prefix="/api/v1/vision", tags=["vision"])
-OLLAMA = "http://localhost:11434"
+OLLAMA = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 ZHIPU_API = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 _DOWNLOADING = False
 

@@ -8,7 +8,6 @@ var _TR={
 }
 if(!window.__){function __(k){var t=_TR[_LOCALE]||_TR['zh-CN'];return t[k]||k}}
 function setLocale(c){localStorage.setItem('evo_locale',c);window.location.reload()}
-function toggleLang(){var ls=['zh-CN','en','ja','ko'];var ci=ls.indexOf(_LOCALE);var ni=(ci+1)%ls.length;_LOCALE=ls[ni];localStorage.setItem('evo_locale',_LOCALE);var b=document.getElementById('langBtn');if(b)b.textContent=_LOCALE;var g=document.getElementById('greeting');var u=localStorage.getItem('evo_user')||'';if(g)g.textContent=__('greeting').replace('{name}',u)}
 
 var _TOOL_HINTS={"docx_processor":"帮我生成一份文档，主题是：","excel_pro":"帮我创建一个电子表格，包含：","ppt_generator":"帮我生成一份演示文稿，主题是：","pdf_toolkit":"帮我处理这个PDF文件：","code_review":"帮我审查这段代码：","browser_use_task":"帮我用浏览器自动化完成一个任务：","browseract_extract":"帮我用反爬提取这个网页内容：","codemem_query":"帮我查询代码库知识（codebase-memory-mcp）：","gpt_research":"请帮我做一个深度研究：","openhands_generate":"帮我生成一个全栈项目：","letta_message":"记住以下信息到长期记忆：","composio_execute":"使用外部工具执行：","self_evolving_analyze":"帮我分析当前代码库的改进点","moltron_learn":"学习一个新技能：","accomplish_desktop":"执行桌面自动化工作流：","toolbench_discover":"帮我发现可用的外部API：","markitdown_convert":"帮我转换这个文档为Markdown：","scrapegraphai_scrape":"帮我爬取这个网站的数据：","interpreter_execute":"帮我执行这个电脑操作：","s2c_generate":"帮我从截图生成代码：","pra_review":"帮我审查这个PR：","qodo_testgen":"帮我给这个文件生成测试：","aider_edit":"帮我修改这个代码文件：","openclaw_connect":"帮我连接消息平台：","tts_speak":"帮我转换成语音：","chatdev_run":"帮我用多智能体团队完成任务：","autogpt_run":"帮我自主执行这个目标：","agenteval_benchmark":"帮我评测Agent性能：","swe_fix":"帮我分析修复这个Issue：","gptpilot_build":"帮我从需求生成项目：","text2sql_query":"帮我查询数据库：","bolt_generate":"帮我生成Web应用：","openmontage_generate_script":"帮我生成一个视频脚本，主题是：","lida_visualize":"帮我分析数据并生成可视化图表：","paddleocr_image":"帮我识别这张图片中的文字：","paddleocr_pdf":"帮我识别PDF中的文字：","zen_scan":"帮我扫描这个网站的安全漏洞：","shannon_audit":"帮我审计这个目录的代码安全：","legal_review_contract":"帮我审查这份合同：","twenty_create_contact":"帮我在CRM创建一个联系人：","invoice_create":"帮我创建一张发票：","chatwoot_create_ticket":"帮我创建一个客服工单：","postiz_create_post":"帮我在社交媒体发帖：","mautic_send_email":"帮我发送营销邮件：","superset_create_chart":"帮我在Superset创建图表：","dataease_create_dashboard":"帮我创建DataEase仪表盘：","heyform_create_survey":"帮我创建一个问卷调查：","docetl_extract":"帮我提取文档内容：","accord_create_contract":"帮我创建一份协议：","claude_code_generate":"帮我用Claude Code生成代码：","odoo_manage":"帮我管理ERP：","erpclaw_manage":"帮我用AI-ERP管理业务：","coolify_deploy":"帮我在PaaS上部署应用：","rustdesk_connect":"帮我远程连接电脑：","docuseal_sign":"帮我发送电子签名：","homeassistant_control":"帮我控制智能家居设备：","vaultwarden_manage":"帮我管理密码/凭证：","nocodb_manage":"帮我管理数据表格：","appsmith_build":"帮我用低代码构建管理工具：","airbyte_sync":"帮我同步数据管道：","mlflow_track":"帮我追踪AI模型训练：","langfuse_observe":"帮我监控LLM应用：","hoppscotch_test":"帮我测试API：","grist_analyze":"帮我分析电子表格数据：","freshrss_read":"帮我读取RSS资讯：","listmonk_send":"帮我发送邮件：","mermaid_chart":"帮我生成流程图：","nocobase_build":"帮我用低代码构建业务应用：","scriberr_transcribe":"帮我转录音频：","keploy_test":"帮我自动生成API测试：","browseract_extract":"帮我用browseract提取这个网站数据：","codemem_index":"帮我索引这个代码库（codebase-memory-mcp）：","reach_search":"帮我搜索全网信息：","anime_animate":"帮我给这个页面添加动效：","graphify_index":"帮我分析代码库生成知识图谱：","hyper_extract":"帮我从文本提取结构化知识：","kg_query":"帮我查询知识图谱：","headroom_compress":"帮我压缩上下文减少Token消耗：","graphiti_knowledge":"帮我升级知识图谱为时间感知引擎：","mercury_skills":"帮我管理工具权限和Token预算：","aiviz_diagram":"帮我用AI生成专业图表：","opendev_agents":"帮我用并行Agent完成任务：","kilocode_model":"帮我切换AI模型执行：","timesfm_forecast":"帮我做时间序列预测：","eve_learn":"帮我学习 EVE Agent 架构（Vercel filesystem-first）：","openmontage_video":"帮我用 OpenMontage 生成视频：","palmier_mcp":"帮我学习 Palmier Pro MCP 视频编辑："}
 // 拓展工具提示（在_TOOL_HINTS声明后追加）
@@ -404,35 +403,19 @@ function filterTools(q){
   for(var i=0;i<bodies.length;i++){var btns=bodies[i].querySelectorAll('.tool-chip'),matched=0;for(var j=0;j<btns.length;j++){var show=btns[j].textContent.toLowerCase().indexOf(q)>=0;btns[j].style.display=show?'inline-flex':'none';if(show)matched++};bodies[i].style.display=matched>0?'flex':'none';if(tabs[i])tabs[i].classList.toggle('active',matched>0)}
   var total=0,all=document.querySelectorAll('.tool-chip');for(var i=0;i<all.length;i++){if(all[i].style.display!=='none')total++};document.getElementById('toolCount').textContent=total+'/'+all.length
 }
-// 主题已在底部 _THEMES 恢复逻辑中处理
-// ── 多主题系统 ──
-var _THEMES=[
-  {name:'浅色',icon:'☀️',cls:'',meta:'#1a1a2e',vars:{}},
-  {name:'深色',icon:'🌙',cls:'dark',meta:'#0d0d1a',vars:{}},
-  {name:'极客',icon:'💚',cls:'theme-geek',meta:'#0a1a0a',vars:{'--bg':'#0d1a0d','--card':'#162316','--sidebar':'#111f11','--text':'#c8e6c9','--text2':'#81c784','--accent':'#4caf50','--accent2':'#2e7d32','--user-msg':'#2e7d32','--ai-msg':'#1b2f1b','--border':'#1f3a1f','--glow':'rgba(76,175,80,0.15)'}},
-  {name:'暮光',icon:'🌆',cls:'theme-twilight',meta:'#1a0a2e',vars:{'--bg':'#1a0a2e','--card':'#2d1b4e','--sidebar':'#22123a','--text':'#e8d5f5','--text2':'#b39ddb','--accent':'#9c27b0','--accent2':'#673ab7','--user-msg':'#7b1fa2','--ai-msg':'#2a1545','--border':'#3d2260','--glow':'rgba(156,39,176,0.15)'}},
-  {name:'海洋',icon:'🌊',cls:'theme-ocean',meta:'#001a2e',vars:{'--bg':'#002233','--card':'#003349','--sidebar':'#002a3d','--text':'#b3e5fc','--text2':'#4fc3f7','--accent':'#0288d1','--accent2':'#01579b','--user-msg':'#0277bd','--ai-msg':'#002f44','--border':'#004d66','--glow':'rgba(2,136,209,0.15)'}}
-]
-var _themeIdx=0
-function nextTheme(){
-  _themeIdx=(_themeIdx+1)%_THEMES.length
-  applyTheme(_themeIdx)
-  localStorage.setItem('evo_theme_idx',String(_themeIdx))
-}
-function applyTheme(idx){
-  var t=_THEMES[idx]
-  if(!t)return
-  document.body.className=t.cls
-  var meta=document.getElementById('themeColorMeta')
-  if(meta)meta.content=t.meta
+// ── 亮/暗主题切换 ──
+function toggleTheme(){
+  document.body.classList.toggle('dark')
+  var isDark=document.body.classList.contains('dark')
+  localStorage.setItem('evo_theme',isDark?'dark':'light')
   var btn=document.getElementById('themeBtn')
-  if(btn)btn.innerHTML='<span class="sicon">'+t.icon+'</span> '+t.name
+  if(btn)btn.innerHTML=isDark?'<span class="sicon">☀️</span> 深色':'<span class="sicon">🌙</span> 浅色'
   if(t.vars){
     for(var k in t.vars){document.documentElement.style.setProperty(k,t.vars[k])}
   }
 }
-// 恢复主题
-try{var _saved=parseInt(localStorage.getItem('evo_theme_idx')||'0');if(!isNaN(_saved)&&_saved>=0&&_saved<_THEMES.length)_themeIdx=_saved;applyTheme(_themeIdx)}catch(ex){}
+// 恢复主题（亮/暗）
+try{if(localStorage.getItem('evo_theme')==='dark'){document.body.classList.add('dark');var btn=document.getElementById('themeBtn');if(btn)btn.innerHTML='<span class="sicon">☀️</span> 深色'}}catch(ex){}
 
 // 语音按钮事件绑定（鼠标 + 触摸）
 ;(function(){

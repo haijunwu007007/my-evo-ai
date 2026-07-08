@@ -170,7 +170,7 @@ async def _notify_complete(task_id: str, task_desc: str, status: str, summary: s
     content = f"📋 任务: {task_desc[:100]}\n📌 状态: {status}\n📝 结果: {summary[:300]}"
     try:
         async with httpx.AsyncClient(timeout=8) as c:
-            await c.post("http://127.0.0.1:8765/api/v1/notify/send", json={
+            await c.post(f"{_API_BASE}/api/v1/notify/send", json={
                 "channel": channel, "to": "", "subject": title,
                 "content": content, "msg_type": "text",
             })
@@ -225,7 +225,7 @@ async def _fast_track(task: str) -> dict | None:
                 path = "/api/v1/health"
             elif "模块" in task or "modules" in task.lower():
                 path = "/api/v1/modules"
-            r = await c.get(f"http://127.0.0.1:8765{path}", timeout=10)
+            r = await c.get(ff"{_API_BASE}{path}", timeout=10)
             return {"result": r.text, "path": path}
     except Exception:
         return None
@@ -263,7 +263,7 @@ async def agent_run(req: AgentRunRequest):
 如果任务匹配某个外部Skill，优先使用它。"""
 
         async with httpx.AsyncClient(timeout=20) as c:
-            r = await c.post("http://127.0.0.1:8765/api/v1/smart",
+            r = await c.post(f"{_API_BASE}/api/v1/smart",
                 json={"message": plan_prompt, "lang": "zh-CN"})
             plan_data = r.json().get("result", "[]")
 
@@ -308,7 +308,7 @@ async def agent_run(req: AgentRunRequest):
             f"步骤{r['step']}({r['tool']}): {r['result'][:200]}" for r in results)
 
         async with httpx.AsyncClient(timeout=15) as c:
-            sr = await c.post("http://127.0.0.1:8765/api/v1/smart",
+            sr = await c.post(f"{_API_BASE}/api/v1/smart",
                 json={"message": f"请用中文总结以下执行结果:\n{summary_prompt}", "lang": "zh-CN"})
             summary = sr.json().get("result", "执行完成")
 
@@ -368,7 +368,7 @@ async def _execute_step(tool: str, action: str, original_task: str) -> str:
             break
 
     async with httpx.AsyncClient(timeout=20) as c:
-        sr = await c.post("http://127.0.0.1:8765/api/v1/smart",
+        sr = await c.post(f"{_API_BASE}/api/v1/smart",
             json={"message": smart_msg, "lang": "zh-CN"})
         sd = sr.json()
         return sd.get("result", sd.get("detail", "完成"))[:3000]
@@ -388,7 +388,7 @@ async def skill_prepare(req: AgentRunRequest):
         return {"success": False, "result": "未找到匹配的Skill"}
     prompt = f"""分析以下任务最适合哪个技能:\n任务: {task}\n\n候选技能: {best['name']} - {best['description'][:200]}\n\n请返回YES或NO，以及一个短理由。"""
     async with httpx.AsyncClient(timeout=15) as c:
-        sr = await c.post("http://127.0.0.1:8765/api/v1/smart",
+        sr = await c.post(f"{_API_BASE}/api/v1/smart",
             json={"message": prompt, "lang": "zh-CN"})
         return {"success": True, "skill": best["name"], "analysis": sr.json().get("result", "已分析")}
 
