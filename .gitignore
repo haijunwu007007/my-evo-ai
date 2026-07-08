@@ -29,6 +29,11 @@ Thumbs.db
 *.bak
 *.log
 _archive/
+_check_*
+_migrate_*
+_deploy_*
+_find_db*
+_test_*.py
 
 # ── 测试临时文件 ──
 .pytest_cache/
