@@ -74,16 +74,48 @@ function quickTool(el, name){
   var hint=(typeof _TOOL_HINTS!=='undefined'&&_TOOL_HINTS[name])||el.textContent.trim()+': '
   inp.value=hint;inp.focus()
 }
+var _TEAMMATES = []; // 从 localStorage 加载已激活的AI同事
+try{var _tm=JSON.parse(localStorage.getItem('evo_teammates')||'[]');if(Array.isArray(_tm))_TEAMMATES=_tm}catch(e){}
 function suggestInput(val){
   var el=document.getElementById('inputSuggest');
   if(!el)return;
   if(!val||val.length<2){el.classList.remove('show');el.innerHTML='';return}
+  // @召唤AI同事：输入@+名字片段
+  if(val.indexOf('@')>=0){
+    var at=val.split('@').pop().toLowerCase().trim()
+    var matches=_TEAMMATES.filter(function(t){return t.name.toLowerCase().indexOf(at)>=0})
+    if(matches.length===0){el.classList.remove('show');el.innerHTML='';return}
+    var html=matches.slice(0,5).map(function(m,i){return '<div class="si '+(i===0?'active':'')+'" onclick="summonTeammate(\''+m.name+'\')">🤖 召唤 <b>'+m.name+'</b><span class="sibadge">AI同事</span></div>'}).join('');
+    el.innerHTML=html;el.classList.add('show');return
+  }
   var matches=[];
   for(var k in _TOOL_HINTS){if(_TOOL_HINTS[k].toLowerCase().indexOf(val.toLowerCase())>=0)matches.push({key:k,label:_TOOL_HINTS[k]})}
   if(matches.length===0){el.classList.remove('show');el.innerHTML='';return}
-  var html=matches.slice(0,5).map(function(m,i){return '<div class="si '+(i===0?'active':'')+'" onclick="document.getElementById(\'input\').value=\''+m.label.replace(/'/g,'\\\'')+'\';document.getElementById(\'input\').focus();document.getElementById(\'inputSuggest\').classList.remove(\'show\')">'+m.label.slice(0,40)+'... <span class="sibadge">'+m.key+'</span></div>'}).join('');
+  var html=matches.slice(0,5).map(function(m,i){return '<div class="si '+(i===0?'active':'')+'" onclick="fillTool(\''+m.key+'\')">'+m.label.slice(0,40)+'... <span class="sibadge">'+m.key+'</span></div>'}).join('');
   el.innerHTML=html;
   el.classList.add('show');
+}
+function fillTool(key){
+  var t=_TOOL_HINTS[key]||''
+  document.getElementById('input').value=t
+  document.getElementById('input').focus()
+  document.getElementById('inputSuggest').classList.remove('show')
+}
+function summonTeammate(name){
+  document.getElementById('input').value='@'+name+' '
+  document.getElementById('input').focus()
+  document.getElementById('inputSuggest').classList.remove('show')
+  // 查找TEAMMATES数据重新激活
+  for(var i=0;i<_TEAMMATES.length;i++){
+    if(_TEAMMATES[i].name===name){
+      var sys='你现在是 '+name+'（AI同事）。'+_TEAMMATES[i].prompt+' 请始终保持这个角色身份回答问题。'
+      localStorage.setItem('evo_active_expert',JSON.stringify({name:name,dept:'AI同事',system:sys}))
+      // 立即生效
+      try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys})
+      addMsg('🤖 已召唤AI同事: '+name,'bot')
+      break
+    }
+  }
 }
 function toolbarFilter(cat){
   var bodies=document.querySelectorAll('.cat-body');

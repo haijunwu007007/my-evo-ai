@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent 团队画布 - AUTO-EVO-AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px;min-height:100vh}
+h1{font-size:24px;margin-bottom:6px}
+.sub{color:#8892b0;font-size:14px;margin-bottom:16px}
+.back{display:inline-block;margin-bottom:16px;color:#4361ee;text-decoration:none;font-size:14px}
+.back:hover{text-decoration:underline}
+.top-bar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.mode-group{display:flex;gap:4px}
+.mode-btn{padding:6px 16px;border-radius:6px;border:1px solid #2d3561;background:#1a1a2e;color:#8892b0;cursor:pointer;font-size:13px;transition:all .2s}
+.mode-btn.active{background:#4361ee;color:#fff;border-color:#4361ee}
+.panel{display:flex;gap:20px;flex-wrap:wrap}
+.templates{width:220px;background:#1a1a2e;border-radius:12px;padding:16px;border:1px solid #2d3561}
+.templates h3{font-size:14px;color:#8892b0;margin-bottom:10px}
+.tpl{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:grab;margin-bottom:6px;border:1px solid #2d3561;font-size:13px;transition:all .2s}
+.tpl:hover{border-color:var(--c);background:rgba(67,97,238,.04)}
+.canvas{flex:1;min-height:400px;background:#1a1a2e;border-radius:12px;padding:20px;border:1px solid #2d3561;min-width:300px}
+.team-header{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.team-header input{flex:1;padding:8px 12px;border-radius:6px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;font-size:14px}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-primary{background:#4361ee;color:#fff}.btn-primary:hover{opacity:.9}
+.btn-danger{background:#ef4444;color:#fff}.btn-success{background:#10b981;color:#fff}
+.agent-node{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;margin:6px;font-size:14px;cursor:pointer;border:2px solid;transition:all .2s}
+.agent-node:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.agent-node .del{font-size:10px;opacity:.5;cursor:pointer;margin-left:4px}
+.agent-node .del:hover{opacity:1}
+.saved-team{padding:12px 16px;background:rgba(16,185,129,.05);border:1px solid #10b98133;border-radius:8px;margin-bottom:8px;font-size:14px}
+.saved-team .name{color:#10b981;font-weight:600}
+.saved-team .meta{font-size:12px;color:#636e8a;margin-top:4px}
+.saved-team .actions{margin-top:6px;display:flex;gap:6px}
+.status{display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.status.ok{display:block;background:rgba(16,185,129,.1);border:1px solid #10b981;color:#10b981}
+.status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
+</style></head>
+<body>
+<a class="back" href="/">← 返回首页</a>
+<h1>🎨 Agent 团队画布</h1>
+<p class="sub">拖拽角色到画布组建AI团队，选择执行模式，一键启动</p>
+<div class="status" id="status"></div>
+
+<div class="top-bar">
+  <span style="color:#8892b0;font-size:13px">执行模式:</span>
+  <div class="mode-group">
+    <button class="mode-btn" data-mode="manual" onclick="setMode('manual')">📋 手动</button>
+    <button class="mode-btn active" data-mode="semi" onclick="setMode('semi')">⚙️ 半自动</button>
+    <button class="mode-btn" data-mode="auto" onclick="setMode('auto')">🤖 全自动</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="templates">
+    <h3>角色模板</h3>
+    <div id="tplList"></div>
+    <h3 style="margin-top:16px">已保存团队</h3>
+    <div id="savedList"><p style="color:#636e8a;font-size:13px">暂无</p></div>
+  </div>
+  <div class="canvas">
+    <div class="team-header">
+      <input id="teamName" placeholder="输入团队名称..." value="默认团队">
+      <button class="btn btn-primary" onclick="saveTeam()">💾 保存</button>
+      <button class="btn btn-success" onclick="runTeam()">▶️ 启动</button>
+      <button class="btn btn-primary" onclick="exportToCanvas()" style="background:#8b5cf6">📤 导出到编排画布</button>
+    </div>
+    <div id="canvasArea" style="min-height:200px;border:2px dashed #2d3561;border-radius:8px;padding:12px">
+      <p style="color:#636e8a;text-align:center;padding:40px 0;font-size:14px">⇩ 点击下方角色模板添加到团队</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var _agents=[], _mode='semi', _currentTeam=null
+function showStatus(msg,ok){var s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');s.style.display='block';setTimeout(function(){s.style.display='none'},3000)}
+
+async function load(){
+  var r=await fetch('/api/v1/agent-canvas/templates');var d=await r.json()
+  if(d.success){
+    var html=''
+    for(var k in d.templates){
+      var t=d.templates[k]
+      html+='<div class="tpl" style="--c:'+t.color+'" onclick="addAgent(\''+k+'\',\''+t.name+'\',\''+t.color+'\',\''+t.icon+'\')">'+t.icon+' '+t.name+'<span style="font-size:11px;color:#636e8a;margin-left:auto">+</span></div>'
+    }
+    document.getElementById('tplList').innerHTML=html
+  }
+  loadSaved()
+  var mr=await fetch('/api/v1/agent-canvas/mode');var md=await mr.json()
+  if(md.success) setMode(md.mode)
+}
+function addAgent(type,name,color,icon){
+  _agents.push({type:type,name:name,color:color,icon:icon,id:'a'+Date.now()});renderCanvas()
+  showStatus('已添加: '+name,true)
+}
+function removeAgent(id){_agents=_agents.filter(function(a){return a.id!==id});renderCanvas()}
+function renderCanvas(){
+  var el=document.getElementById('canvasArea')
+  if(_agents.length===0){el.innerHTML='<p style="color:#636e8a;text-align:center;padding:40px 0;font-size:14px">⇩ 点击左侧角色模板添加到团队</p>';return}
+  var html='<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px">'
+  _agents.forEach(function(a){
+    html+='<div class="agent-node" style="border-color:'+a.color+'44;background:'+a.color+'11">'
+    html+=a.icon+' '+a.name+'<span class="del" onclick="removeAgent(\''+a.id+'\')">✕</span></div>'
+  })
+  _agents.push=function(){}
+  html+='</div>'
+  // 画箭头连线
+  if(_agents.length>=2){
+    html+='<div style="text-align:center;padding:8px;color:#636e8a;font-size:12px">'
+    html+=_agents.map(function(a,i){return (i+1)+'. '+a.icon+a.name})
+    html=html.replace(/,/g,' → ')
+    html+='</div>'
+  }
+  el.innerHTML=html
+}
+async function saveTeam(){
+  var name=document.getElementById('teamName').value.trim()||'未命名团队'
+  var r=await fetch('/api/v1/agent-canvas/teams',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,roles:_agents,mode:_mode})})
+  var d=await r.json()
+  if(d.success){showStatus('✅ 团队已保存: '+name,true);loadSaved()}
+  else showStatus('❌ 保存失败',false)
+}
+async function loadSaved(){
+  var r=await fetch('/api/v1/agent-canvas/teams');var d=await r.json()
+  if(!d.success||!d.teams||d.teams.length===0){document.getElementById('savedList').innerHTML='<p style="color:#636e8a;font-size:13px">暂无</p>';return}
+  var html=''
+  d.teams.slice().reverse().slice(0,5).forEach(function(t){
+    html+='<div class="saved-team"><div class="name">'+t.name+'</div>'
+    html+='<div class="meta">角色: '+t.roles.map(function(r){return r.icon+r.name}).join(' ')+' | 模式: '+t.mode+'</div>'
+    html+='<div class="actions"><button class="btn btn-success" style="padding:4px 12px;font-size:12px" onclick="loadTeam(\''+t.id+'\')">加载</button>'
+    html+='<button class="btn btn-danger" style="padding:4px 12px;font-size:12px" onclick="deleteTeam(\''+t.id+'\')">删除</button></div></div>'
+  })
+  document.getElementById('savedList').innerHTML=html
+}
+async function loadTeam(tid){
+  var r=await fetch('/api/v1/agent-canvas/teams/'+tid+'/status');var d=await r.json()
+  if(d.success&&d.team){_agents=d.team.roles;document.getElementById('teamName').value=d.team.name;renderCanvas();showStatus('已加载: '+d.team.name,true)}
+}
+async function deleteTeam(tid){
+  await fetch('/api/v1/agent-canvas/teams/'+tid,{method:'DELETE'});loadSaved()
+}
+async function setMode(m){
+  _mode=m
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-mode')===m)})
+  await fetch('/api/v1/agent-canvas/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:m})})
+  showStatus('执行模式切换: '+{'manual':'手动','semi':'半自动','auto':'全自动'}[m],true)
+}
+async function runTeam(){
+  if(_agents.length===0){showStatus('请先添加至少一个角色',false);return}
+  var name=document.getElementById('teamName').value.trim()||'未命名团队'
+  var r=await fetch('/api/v1/agent-canvas/teams',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,roles:_agents,mode:_mode})})
+  var d=await r.json()
+  if(!d.success){showStatus('保存失败',false);return}
+  var rr=await fetch('/api/v1/agent-canvas/teams/'+d.team.id+'/run',{method:'POST'});var rd=await rr.json()
+  if(rd.success) showStatus('🚀 '+rd.message,true)
+}
+function exportToCanvas(){
+  if(_agents.length===0){showStatus('请先添加角色',false);return}
+  localStorage.setItem('evo_canvas_team',JSON.stringify({agents:_agents,mode:_mode,time:Date.now()}))
+  showStatus('✅ 已导出！跳转到编排画布...',true)
+  setTimeout(function(){window.location.href='/canvas?team='+encodeURIComponent(JSON.stringify({agents:_agents,mode:_mode}))},600)
+}
+load()
+</script>
+</body></html>

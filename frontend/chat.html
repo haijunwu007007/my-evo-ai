@@ -13,10 +13,10 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text)}
 .app{display:flex;height:100vh;overflow:hidden}
 /* 左侧边栏 */
-.sidebar{width:600px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;padding:4px 0;z-index:10;border-right:1px solid var(--border)}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;padding:2px 0;z-index:10;border-right:1px solid var(--border);overflow-y:auto}
 .sidebar::-webkit-scrollbar{display:none}
 .sidebar .logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#4361ee,#7209b7);display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;margin:0 auto 4px;flex-shrink:0}
-.sidebar .sbtn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:transparent;color:var(--sidebar-text2);font-size:15px;cursor:pointer;transition:all .15s;text-align:left;white-space:nowrap;box-sizing:border-box}
+.sidebar .sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 12px;border:none;background:transparent;color:var(--sidebar-text2);font-size:13px;cursor:pointer;transition:all .15s;text-align:left;white-space:nowrap;box-sizing:border-box}
 .sidebar .sbtn .sicon{font-size:17px;width:20px;text-align:center;flex-shrink:0}
 .sidebar .sbtn:hover{background:var(--sidebar-hover);color:var(--sidebar-text)}
 .sidebar .sbtn.active{background:var(--sidebar-active);color:var(--sidebar-accent);font-weight:600}
@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .sidebar .sgroup-header:hover{color:var(--sidebar-text);background:var(--sidebar-hover)}
 .sidebar .sgroup-header .arrow{font-size:8px;margin-left:auto;transition:transform .2s}
 .sidebar .sgroup-header .arrow.open{transform:rotate(90deg)}
-.sidebar .sgroup-body{display:flex;flex-direction:column;max-height:300px;transition:max-height .25s ease}
+.sidebar .sgroup-body{display:flex;flex-direction:column;max-height:600px;transition:max-height .25s ease}
 .sidebar .sgroup-body.collapsed{max-height:0}
 .sidebar .sgroup-body .sbtn{padding:7px 16px;font-size:15px}
 /* 主区域 */
@@ -508,12 +508,14 @@ function checkOnboard() {
         <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🦾</span> Agent 集群</button>
         <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能 & 扩展</button>
         <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
+        <button class="sbtn" onclick="window.location.href='/team-canvas.html'"><span class="sicon">🎨</span> 团队画布</button>
         <button class="sbtn" onclick="window.location.href='/billion-os.html'"><span class="sicon">🏛️</span> 集团 OS</button>
         <div class="divider"></div>
-        <button class="sbtn" onclick="window.location.href='/teammates'"><span class="sicon">🤖</span> AI同事</button>
+        <button class="sbtn" onclick="window.location.href='/teammates.html'"><span class="sicon">🤖</span> AI同事</button>
         <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家库</button>
-        <button class="sbtn" onclick="window.location.href='/review'"><span class="sicon">📝</span> 审阅工作流</button>
-        <button class="sbtn" onclick="window.location.href='/remote'"><span class="sicon">📱</span> 远程执行</button>
+        <button class="sbtn" onclick="window.location.href='/review.html'"><span class="sicon">📝</span> 审阅工作流</button>
+        <button class="sbtn" onclick="window.location.href='/remote.html'"><span class="sicon">📱</span> 远程执行</button>
+        <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🕸️</span> Claw</button>
         <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Human</button>
         <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes</button>
       </div>
@@ -541,6 +543,7 @@ function checkOnboard() {
       <div class="sgroup-body" id="sg_data">
         <!-- 模块总览已合并到管理中心（企业 & 自动化） -->
         <button class="sbtn" onclick="window.location.href='/learn'"><span class="sicon">📖</span> 学习</button>
+        <button class="sbtn" onclick="window.location.href='/distill.html'"><span class="sicon">🧪</span> 蒸馏</button>
         <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
         <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
       </div>

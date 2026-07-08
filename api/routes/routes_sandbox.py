@@ -116,13 +116,11 @@ async def verify_url(data: dict):
     max_retries = data.get("retries", 3)
     for i in range(max_retries):
         try:
-            r = subprocess.run(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", url],
-                             capture_output=True, text=True, timeout=10)
-            status = r.stdout.strip()
-            if status == str(expected_status):
-                return {"success": True, "status": int(status), "retries": i+1}
-        except:
-            pass
+            async with httpx.AsyncClient(timeout=10) as _cli:
+                r = await _cli.get(url, follow_redirects=True)
+                if r.status_code == expected_status:
+                    return {"success": True, "status": r.status_code, "retries": i+1}
+        except: pass
         if i < max_retries - 1:
             asyncio.sleep(2)
     return {"success": False, "error": f"期望{expected_status}，重试{max_retries}次未通过"}

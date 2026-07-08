@@ -126,6 +126,13 @@ body{flex-direction:column}
     <button onclick="saveCombo()">💾 保存</button>
     <button class="green" onclick="deployCombo()">🚀 部署</button>
     <div class="sep"></div>
+    <button onclick="undo()">↩ 撤销</button>
+    <button onclick="redo()">↪ 重做</button>
+    <div class="sep"></div>
+    <button onclick="zoomOut()">🔍−</button>
+    <button onclick="zoomReset()">1:1</button>
+    <button onclick="zoomIn()">🔍+</button>
+    <div class="sep"></div>
     <button onclick="autoLayout()">🔁 布局</button>
     <button class="red" onclick="clearCanvas()">🗑️ 清空</button>
     <span style="color:#8892b0;font-size:11px;margin-left:auto">🟢 画布底部可自然语言输入</span>
@@ -142,6 +149,22 @@ body{flex-direction:column}
 </div>
 <script>
 var NODES={}, EDGES=[], NODE_COUNTER=0, canv=document.getElementById('canvas'), COMBO_ITEMS={}
+// 撤销/重做
+var UNDO_STACK=[], REDO_STACK=[], UNDO_MAX=50
+function snapshot(){UNDO_STACK.push({nodes:JSON.parse(JSON.stringify(Object.keys(NODES).reduce(function(o,k){o[k]={name:NODES[k].name,source:NODES[k].source,x:NODES[k].x,y:NODES[k].y,type:NODES[k].type,meta:NODES[k].meta};return o},{})),edges:JSON.parse(JSON.stringify(EDGES))});if(UNDO_STACK.length>UNDO_MAX)UNDO_STACK.shift();REDO_STACK=[]}
+function undo(){if(!UNDO_STACK.length)return;REDO_STACK.push({nodes:JSON.parse(JSON.stringify(Object.keys(NODES).reduce(function(o,k){o[k]={name:NODES[k].name,source:NODES[k].source,x:NODES[k].x,y:NODES[k].y,type:NODES[k].type,meta:NODES[k].meta};return o},{})),edges:JSON.parse(JSON.stringify(EDGES))});restoreState(UNDO_STACK.pop())}
+function redo(){if(!REDO_STACK.length)return;UNDO_STACK.push({nodes:JSON.parse(JSON.stringify(Object.keys(NODES).reduce(function(o,k){o[k]={name:NODES[k].name,source:NODES[k].source,x:NODES[k].x,y:NODES[k].y,type:NODES[k].type,meta:NODES[k].meta};return o},{})),edges:JSON.parse(JSON.stringify(EDGES))});restoreState(REDO_STACK.pop())}
+function restoreState(s){if(!s)return;clearCanvas(false);Object.keys(s.nodes).forEach(function(k){var n=s.nodes[k];NODE_COUNTER++;createNodeEl(k,n.name,n.source||'github','📦',n.x,n.y,n.type||'module',n.meta)});EDGES=(s.edges||[]).map(function(e,i){return{id:'e'+i,from:e.from,to:e.to,port:e.port||'out'}});renderAll();updateCounts();saveComboId=null}
+// 缩放/平移
+var ZOOM=1, PAN={x:0,y:0}
+function zoomIn(){ZOOM=Math.min(ZOOM*1.2,3);applyZoom()}
+function zoomOut(){ZOOM=Math.max(ZOOM/1.2,0.3);applyZoom()}
+function zoomReset(){ZOOM=1;PAN={x:0,y:0};applyZoom()}
+function applyZoom(){canv.style.transform='scale('+ZOOM+') translate('+PAN.x+'px,'+PAN.y+'px)';canv.style.transformOrigin='0 0'}
+canv.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();if(e.deltaY<0)zoomIn();else zoomOut()}},{passive:false})
+var PAN_DRAG=null;canv.addEventListener('mousedown',function(e){if(e.target===canv||e.target===document.getElementById('hint')){PAN_DRAG={x:e.clientX-PAN.x,y:e.clientY-PAN.y};canv.style.cursor='grabbing'}})
+document.addEventListener('mousemove',function(e){if(PAN_DRAG){PAN.x=e.clientX-PAN_DRAG.x;PAN.y=e.clientY-PAN_DRAG.y;applyZoom()}})
+document.addEventListener('mouseup',function(){if(PAN_DRAG){PAN_DRAG=null;canv.style.cursor='default'}})
 async function api(m,p,d){try{var r=await fetch('/api/v1/hub/'+m,{method:p||'GET',headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):null});return await r.json()}catch(e){return{success:false}}}
 
 // ===== 添加节点（特殊类型支持）=====
@@ -154,6 +177,7 @@ function addNode(type, icon, opt){
   else if(type=='nlp'){name='AI处理';cls='nodetype-nlp'}
   else{name=type;cls='nodetype-module'}
   document.getElementById('hint').style.display='none';
+  snapshot();
   var x=80+Math.random()*(canv.clientWidth-260),y=60+Math.random()*(canv.clientHeight-160);
   createNodeEl(id,name,source,icon||'📦',x,y,type)
 }
@@ -399,7 +423,7 @@ function autoLayout(){
   });
   renderAll()
 }
-function clearCanvas(){
+function clearCanvas(snap){if(snap!==false)snapshot();
   document.querySelectorAll('.node-el').forEach(function(e){e.remove()});
   canv.querySelectorAll('.edge-svg').forEach(function(e){e.remove()});
   NODES={};EDGES=[];NODE_COUNTER=0;saveComboId=null;
@@ -499,6 +523,32 @@ function toggleSidebar(){
     ov.remove()
   }
 }
+// 从团队画布导入
+try{
+  var _teamData=JSON.parse(localStorage.getItem('evo_canvas_team'))
+  if(_teamData&&_teamData.agents&&_teamData.agents.length>0){
+    setTimeout(function(){
+      _teamData.agents.forEach(function(a){
+        addNode(a.icon+' '+a.name,'agent',a.color||'#4361ee')
+      })
+      document.getElementById('comboName').value=_teamData.name||'从团队导入'
+      localStorage.removeItem('evo_canvas_team')
+    },500)
+  }
+}catch(ex){}
+// URL参数导入
+try{
+  var _sp=new URLSearchParams(window.location.search)
+  if(_sp.get('team')){
+    var _td=JSON.parse(decodeURIComponent(_sp.get('team')))
+    if(_td.agents&&_td.agents.length>0){
+      setTimeout(function(){
+        _td.agents.forEach(function(a){addNode(a.icon+' '+a.name,'agent',a.color||'#4361ee')})
+        document.getElementById('comboName').value='从团队画布导入'
+      },500)
+    }
+  }
+}catch(ex){}
 // 手机端初始化：显示菜单按钮
 if(window.innerWidth<=768){
   var mb=document.getElementById('menuBtn');if(mb)mb.style.display='inline-block';

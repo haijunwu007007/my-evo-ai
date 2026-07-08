@@ -24,7 +24,7 @@ h1{font-size:24px;margin-bottom:6px}
 <body>
 <a class="back" href="/">← 返回首页</a>
 <h1>🤖 AI 同事</h1>
-<p class="sub">借鉴 Moxt 理念的预置 AI 角色模板，一键激活即可获得专业 AI 队友。点击卡片激活，即可在聊天中 @召唤。</p>
+<p class="sub">预置 AI 角色模板，一键激活即可获得专业 AI 队友。点击卡片激活，即可在聊天中 @召唤。</p>
 <div class="status" id="status"></div>
 <div class="grid" id="grid"></div>
 
@@ -36,7 +36,7 @@ async function load(){try{
   d.teammates.forEach(function(t){
     var goals=t.goals.map(function(g){return '<span class="goal">'+g+'</span>'}).join('')
     var tags=t.goals.slice(0,3).map(function(g){return '<span class="tag" style="background:'+t.color+'22;color:'+t.color+'">'+g.slice(0,6)+'</span>'}).join('')
-    html+='<div class="card" style="border-color:'+t.color+'44" onclick="activate(\''+t.id+'\',\''+t.name+'\')">'
+    html+='<div class="card" style="border-color:'+t.color+'44" onclick="activate(\''+t.id+'\',\''+t.name+'\',\''+t.color+'\')">'
     html+='<div class="h" style="color:'+t.color+'">'+t.name+'</div>'
     html+='<div class="d">'+t.description+'</div>'
     html+='<div class="goals">'+goals+'</div>'
@@ -53,10 +53,15 @@ async function activate(id,name){
   try{
     var r=await fetch('/api/v1/teammates/'+id+'/activate',{method:'POST'});var d=await r.json()
     if(!d.success){showStatus('激活失败',false);return}
-    localStorage.setItem('evo_active_expert',JSON.stringify({name:d.activation.name,dept:'AI同事',system:d.activation.system_prompt}))
+    var tm={name:d.activation.name,prompt:d.activation.system_prompt.slice(0,200),color:t.color}
+    // 保存到已激活列表（用于@召唤）
+    var existing=JSON.parse(localStorage.getItem('evo_teammates')||'[]')
+    if(!existing.find(function(e){return e.name===tm.name}))existing.push(tm)
+    localStorage.setItem('evo_teammates',JSON.stringify(existing))
+    localStorage.setItem('evo_active_expert',JSON.stringify({name:tm.name,dept:'AI同事',system:d.activation.system_prompt}))
     showStatus('✅ 已激活「'+name+'」！正在跳转到首页...',true)
     setTimeout(function(){window.location.href='/'},800)
-  }catch(e){showStatus('激活失败: '+e.message',false)}
+  }catch(e){showStatus('激活失败: '+e.message,false)}
 }
 load()
 </script>

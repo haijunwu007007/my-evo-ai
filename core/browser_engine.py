@@ -271,6 +271,39 @@ class PlaywrightEngine:
         except Exception as e:
             return {"success": False, "error": f"填写 {selector} 失败: {e}"}
 
+    async def self_healing_click(self, text: str, timeout: int = 15000) -> dict:
+        """自愈点击 — 语义匹配代替CSS选择器（页面结构变化仍可工作）"""
+        if not self._page:
+            return {"success": False, "error": "浏览器未启动"}
+        strategies = [
+            f'text="{text}"', f'[aria-label="{text}"]', f'[placeholder="{text}"]',
+            f'button:has-text("{text}")', f'a:has-text("{text}")',
+            f'//*[contains(text(), "{text}")]',
+        ]
+        for sel in strategies:
+            try:
+                el = await self._page.wait_for_selector(sel, timeout=3000)
+                if el: await el.click(); return {"success":True,"action":"heal_click","match":sel[:40],"text":text}
+            except: pass
+        return {"success":False,"error":f"自愈点击失败: {text}"}
+
+    async def self_healing_fill(self, label: str, value: str) -> dict:
+        """自愈填表 — 通过label/placeholder匹配输入框"""
+        if not self._page:
+            return {"success": False, "error": "浏览器未启动"}
+        strategies = [
+            f'input[aria-label="{label}"]', f'input[placeholder="{label}"]',
+            f'textarea[aria-label="{label}"]', f'textarea[placeholder="{label}"]',
+            f'label:has-text("{label}") > input',
+            f'//label[contains(text(), "{label}")]/following::input[1]',
+        ]
+        for sel in strategies:
+            try:
+                el = await self._page.wait_for_selector(sel, timeout=2000)
+                if el: await el.fill(value); return {"success":True,"action":"heal_fill","match":sel[:40],"label":label}
+            except: pass
+        return {"success":False,"error":f"自愈填表失败: {label}"}
+
     async def type_text(self, selector: str, text: str, delay: int = 50) -> dict:
         """模拟键盘输入（逐字符）"""
         if not self._page:

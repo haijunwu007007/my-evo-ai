@@ -6,17 +6,15 @@ import httpx, asyncio, json
 from fastapi import APIRouter
 
 router = APIRouter(prefix="/api/v1/hk", tags=["hk-worker"])
-HK_URL = "http://43.129.75.222:8766"
+HK_URL = os.environ.get("HK_WORKER_URL", "http://43.129.75.222:8766")
 
 @router.get("/health")
 async def hk_health():
     """检查香港 Worker 状态"""
-    import subprocess
     try:
-        r = subprocess.run(["curl","-sf","--connect-timeout","5","http://localhost:18766/health"], capture_output=True, text=True, timeout=10)
-        if r.returncode == 0 and r.stdout:
-            return {"success": True, "hk": json.loads(r.stdout)}
-        return {"success": False, "error": r.stderr[:80] if r.stderr else "empty response"}
+        async with httpx.AsyncClient(timeout=10) as cli:
+            r = await cli.get("http://localhost:18766/health")
+            return {"success": True, "hk": r.json()}
     except Exception as e:
         return {"success": False, "error": str(e)[:100]}
 

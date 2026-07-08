@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang=zh-CN><head>
+<meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>蒸馏一切 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);height:44px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-left h1{font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:960px;margin:0 auto;padding:16px}
+.header-card{background:linear-gradient(135deg,var(--accent,#4361ee),#7209b7);border-radius:16px;padding:24px;color:#fff;margin-bottom:16px}
+.header-card h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.header-card p{font-size:13px;opacity:.85;line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .2s}
+.card:hover{box-shadow:0 4px 16px var(--glow,rgba(67,97,238,.15))}
+.card h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.source-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border:1.5px solid var(--border);border-radius:12px;background:transparent;color:var(--text);cursor:pointer;transition:all .2s;font-size:12px}
+.source-btn:hover{border-color:var(--accent,#4361ee);background:rgba(67,97,238,.06);transform:translateY(-2px)}
+.source-btn .icon{font-size:24px}
+.source-btn.active{border-color:var(--accent,#4361ee);background:rgba(67,97,238,.1);box-shadow:0 0 0 2px rgba(67,97,238,.2)}
+textarea,input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);margin-bottom:8px;font-family:inherit}
+textarea{resize:vertical;min-height:60px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent,#4361ee),#7209b7);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(67,97,238,.3)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent,#4361ee)}
+.progress-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4361ee,#a855f7);border-radius:2px;transition:width .5s ease}
+.status-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.s-done{background:rgba(16,185,129,.15);color:#10b981}
+.s-processing{background:rgba(245,158,11,.15);color:#f59e0b}
+.s-error{background:rgba(239,68,68,.15);color:#ef4444}
+.skill-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.03);transition:all .15s}
+.skill-item:hover{background:rgba(255,255,255,.06)}
+.skill-item .name{font-size:13px;font-weight:500}
+.skill-item .meta{font-size:11px;color:var(--text2,#8892b0)}
+.log-area{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.6;max-height:200px;overflow:auto;white-space:pre-wrap;margin-top:8px;display:none}
+.tab-bar{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.tab{padding:6px 14px;border:none;background:transparent;color:var(--text2,#8892b0);font-size:13px;cursor:pointer;border-radius:8px 8px 0 0;transition:all .15s}
+.tab:hover{color:var(--text);background:rgba(67,97,238,.04)}
+.tab.active{color:var(--accent,#4361ee);font-weight:600;background:rgba(67,97,238,.08)}
+</style>
+</head><body>
+<div class=topbar>
+  <div class=topbar-left>
+    <span onclick="window.location.href='/'" style=cursor:pointer;font-size:16px>⬅</span>
+    <h1>AUTO-EVO-AI</h1>
+    <span style=color:var(--text2,#8892b0);font-size:12px>| 蒸馏一切</span>
+  </div>
+</div>
+<div class=container>
+  <div class=header-card>
+    <h1>🧪 蒸馏一切</h1>
+    <p>把任何东西演示一遍（网页/代码/文本/视频），直接变成可以使用的技能。<br>
+    选择蒸馏源，AI 自动分析并生成 SKILL.md，注册到系统技能库。</p>
+  </div>
+
+  <div class=tab-bar>
+    <button class="tab active" onclick="switchTab('distill',this)">🧪 开始蒸馏</button>
+    <button class="tab" onclick="switchTab('skills',this)">📦 已蒸馏技能</button>
+    <button class="tab" onclick="switchTab('history',this)">📋 蒸馏历史</button>
+  </div>
+
+  <div id=tabDistill>
+    <div class=grid>
+      <div class=card>
+        <h3>🎯 选择蒸馏源</h3>
+        <div class=source-grid id=sourceGrid>
+          <button class="source-btn active" data-type=url onclick="pickSource('url',this)"><span class=icon>🌐</span>网页URL</button>
+          <button class="source-btn" data-type=text onclick="pickSource('text',this)"><span class=icon>📝</span>文本描述</button>
+          <button class="source-btn" data-type=code onclick="pickSource('code',this)"><span class=icon>💻</span>代码片段</button>
+          <button class="source-btn" data-type=demo_id onclick="pickSource('demo_id',this)"><span class=icon>🎬</span>操作演示</button>
+          <button class="source-btn" data-type=video_url onclick="pickSource('video_url',this)"><span class=icon>🎥</span>视频链接</button>
+        </div>
+        <div id=inputArea>
+          <input id=sourceInput placeholder="输入 URL（如 https://example.com/workflow）">
+          <input id=skillName placeholder="技能名称（可选，留空自动生成）" style=margin-top:4px>
+          <input id=skillTags placeholder="标签（逗号分隔，如: 爬虫,数据处理）" style=margin-top:4px>
+        </div>
+        <button class="btn btn-primary" onclick=startDistill() style=margin-top:8px;width:100%>✨ 开始蒸馏</button>
+        <div id=distillResult style=display:none;margin-top:10px></div>
+      </div>
+
+      <div class=card>
+        <h3>📊 蒸馏进度</h3>
+        <div id=sessionInfo style=color:var(--text2,#8892b0);font-size:13px>选择蒸馏源并开始</div>
+        <div class=progress-bar style=margin-top:10px><div class=progress-fill id=progressFill style=width:0%></div></div>
+        <div id=sessionLog class=log-area></div>
+      </div>
+    </div>
+  </div>
+
+  <div id=tabSkills style=display:none>
+    <div class=card>
+      <h3>📦 已蒸馏技能 <span id=skillCount style=font-size:12px;color:var(--text2,#8892b0)></span></h3>
+      <div id=skillList><p style=color:var(--text2,#8892b0);font-size:13px;padding:8px>加载中...</p></div>
+    </div>
+  </div>
+
+  <div id=tabHistory style=display:none>
+    <div class=card>
+      <h3>📋 蒸馏历史</h3>
+      <div id=historyList><p style=color:var(--text2,#8892b0);font-size:13px;padding:8px>加载中...</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var CURRENT_SOURCE='url', CURRENT_SESSION=null, POLL_TIMER=null
+
+function pickSource(type,btn){
+  CURRENT_SOURCE=type
+  document.querySelectorAll('.source-btn').forEach(function(b){b.classList.remove('active')})
+  btn.classList.add('active')
+  var input=document.getElementById('inputArea')
+  var ph={'url':'输入 URL（如 https://example.com/workflow）','text':'输入文本描述（如：如何用Python爬取网页数据）','code':'粘贴代码片段','demo_id':'输入演示ID（从学习系统获取）','video_url':'输入视频链接（B站/YouTube等）'}
+  input.innerHTML='<input id=sourceInput placeholder="'+ph[type]+'"><input id=skillName placeholder="技能名称（可选）" style=margin-top:4px><input id=skillTags placeholder="标签（逗号分隔）" style=margin-top:4px>'
+}
+
+async function startDistill(){
+  var source=document.getElementById('sourceInput').value.trim()
+  if(!source){alert('请输入蒸馏源');return}
+  var name=document.getElementById('skillName').value.trim()
+  var tags=document.getElementById('skillTags').value.split(',').map(function(s){return s.trim()}).filter(Boolean)
+  
+  document.getElementById('sessionLog').style.display='block'
+  appendLog('🚀 开始蒸馏...')
+  appendLog('📤 发送分析请求 ('+CURRENT_SOURCE+')')
+  
+  var r=await fetch('/api/v1/distill/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_type:CURRENT_SOURCE,source:source,name:name,tags:tags})})
+  var d=await r.json()
+  if(!d.success){alert('启动失败: '+(d.error||''));return}
+  
+  CURRENT_SESSION=d.session_id
+  appendLog('✅ 分析完成')
+  appendLog('📌 标题: '+(d.title||'无'))
+  appendLog('📖 摘要: '+(d.summary||'无'))
+  appendLog('📊 步骤数: '+d.estimated_steps)
+  if(d.steps&&d.steps.length){
+    appendLog('📋 步骤预览:')
+    d.steps.forEach(function(s,i){appendLog('  '+(i+1)+'. '+s)})
+  }
+  
+  document.getElementById('sessionInfo').innerHTML=
+    '<b>会话:</b> '+d.session_id+' | <b>步骤:</b> '+d.estimated_steps+'<br>'+
+    '<b>'+(d.title||'')+'</b><br><span style=font-size:11px>'+(d.summary||'')+'</span>'
+  document.getElementById('progressFill').style.width='60%'
+  
+  var result=document.getElementById('distillResult')
+  result.style.display='block'
+  result.innerHTML='<span class="status-badge s-done">✅ 分析完成</span><br>'+
+    '<button class="btn btn-primary btn-sm" onclick=generateSkill() style=margin-top:8px>🧬 生成技能</button>'
+}
+
+function appendLog(msg){
+  var el=document.getElementById('sessionLog')
+  el.style.display='block'
+  el.innerHTML+=msg+'\n'
+  el.scrollTop=el.scrollHeight
+}
+
+async function generateSkill(){
+  if(!CURRENT_SESSION){alert('请先开始蒸馏');return}
+  clearInterval(POLL_TIMER)
+  document.getElementById('progressFill').style.width='90%'
+  document.getElementById('distillResult').innerHTML='<span class="status-badge s-processing">🧬 正在生成技能...</span>'
+  
+  var r=await fetch('/api/v1/distill/generate/'+CURRENT_SESSION,{method:'POST'})
+  var d=await r.json()
+  document.getElementById('progressFill').style.width='100%'
+  
+  if(d.success){
+    document.getElementById('distillResult').innerHTML='<span class="status-badge s-done">✅ 已生成</span> <b>'+d.skill_name+'</b><br><span style=font-size:11px;color:var(--text2,#8892b0)>'+d.path+'</span><br><button class="btn btn-primary btn-sm" onclick="window.location.href=\'/learn.html\'" style=margin-top:6px>📂 查看技能</button>'
+    loadSkills();loadHistory()
+  }else{
+    document.getElementById('distillResult').innerHTML='<span class="status-badge s-error">❌ 生成失败: '+(d.error||'')+'</span>'
+  }
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')})
+  btn.classList.add('active')
+  document.getElementById('tabDistill').style.display=tab==='distill'?'block':'none'
+  document.getElementById('tabSkills').style.display=tab==='skills'?'block':'none'
+  document.getElementById('tabHistory').style.display=tab==='history'?'block':'none'
+  if(tab==='skills')loadSkills()
+  if(tab==='history')loadHistory()
+}
+
+async function loadSkills(){
+  var r=await fetch('/api/v1/distill/skills')
+  var d=await r.json()
+  document.getElementById('skillCount').textContent='('+(d.total||0)+')'
+  if(!d.skills||!d.skills.length){
+    document.getElementById('skillList').innerHTML='<p style=color:var(--text2,#8892b0);font-size:13px;padding:8px>暂无蒸馏技能，开始蒸馏一个吧</p>'
+    return
+  }
+  document.getElementById('skillList').innerHTML=d.skills.map(function(s){return '<div class=skill-item><div><div class=name>'+s.title+'</div><div class=meta>'+s.name+'</div></div><span class="status-badge s-done">✅</span></div>'}).join('')
+}
+
+async function loadHistory(){
+  var r=await fetch('/api/v1/distill/list')
+  var d=await r.json()
+  if(!d.distillations||!d.distillations.length){
+    document.getElementById('historyList').innerHTML='<p style=color:var(--text2,#8892b0);font-size:13px;padding:8px>暂无蒸馏历史</p>'
+    return
+  }
+  document.getElementById('historyList').innerHTML=d.distillations.map(function(h){
+    var ts=h.created_at?new Date(h.created_at*1000).toLocaleString():''
+    var scls=h.status==='completed'?'s-done':h.status==='processing'?'s-processing':'s-error'
+    return '<div class=skill-item><div><div class=name>'+(h.name||'未命名')+'</div><div class=meta>'+h.source_type+' | '+ts+'</div></div><span class="status-badge '+scls+'">'+(h.skill_name||h.status)+'</span></div>'
+  }).join('')
+}
+
+loadSkills();loadHistory()
+</script>
+</body></html>
