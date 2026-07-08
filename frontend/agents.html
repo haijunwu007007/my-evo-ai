@@ -1,21 +1,26 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Agent集群 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);background:var(--bg);color:var(--text);padding:20px;max-width:1200px;margin:0 auto}
-h1{font-size:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px;justify-content:space-between}
-.sub{font-size:12px;color:var(--text3);margin-bottom:16px}
-.stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.stats .s{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;flex:1;min-width:80px}
-.stats .s .n{font-size:22px;font-weight:700;color:var(--accent)}
-.stats .s .l{font-size:11px;color:var(--text2)}
-.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filter-bar input{flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;min-width:200px}
-.filter-bar select{padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px}
+.content{flex:1;overflow-y:auto;padding:16px 20px;max-width:1100px;margin:0 auto;width:100%}
+.section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;background:var(--card)}
+.stat-card .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat-card .label{font-size:10px;color:var(--text3);margin-top:2px}
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-bar input{flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;min-width:200px;background:var(--bg);color:var(--text);outline:none}
+.filter-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.filter-bar select{padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;background:var(--bg);color:var(--text)}
+.filter-bar button{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
+.filter-bar button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;transition:all .2s}
-.card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(67,97,238,.1)}
+.card:hover{border-color:var(--accent);box-shadow:0 2px 12px var(--glow)}
 .card h3{font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:6px;justify-content:space-between}
 .card .desc{font-size:11px;color:var(--text2);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .meta{font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -27,155 +32,138 @@ h1{font-size:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px;just
 .actions{display:flex;gap:6px;flex-wrap:wrap}
 .actions button{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);font-size:11px;cursor:pointer;transition:all .1s}
 .actions button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.actions .d{background:var(--card)}.actions .d:hover{background:#e74c3c;border-color:#e74c3c}
-.loading{padding:60px;text-align:center;color:var(--text3)}
-.empty{text-align:center;padding:60px;color:var(--text3)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;z-index:100;align-items:center;justify-content:center}
 .modal.show{display:flex}
 .modal-card{background:var(--card);border-radius:10px;padding:20px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto}
 .modal-card h2{font-size:16px;margin-bottom:10px}
-.modal-card pre{background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin-top:8px}
-@media(max-width:768px){body{padding:10px;}.grid{grid-template-columns:1fr}}
-<link rel="stylesheet" href="/frontend/share.css">
-</style></head><body>
-
-<!-- 系统顶栏 -->
-<div class="topbar" style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card)">
-  <div style="display:flex;align-items:center;gap:8px">
-    <a href="/" class="back-btn" onclick="event.preventDefault();window.location.href=document.referrer||'/'">← 返回</a>
-    <h1 class="grad-title" style="font-size:15px;margin:0">🦾 Agent 集群</h1>
+.modal-card pre{background:var(--bg);padding:10px;border-radius:6px;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin-top:8px}
+.log-area{max-height:200px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:11px;font-family:monospace;margin-top:8px;display:none}
+.log-area.show{display:block}
+.log-area .ll{padding:1px 0;display:flex;gap:4px}
+.log-area .ll .lt{color:var(--text3);flex-shrink:0}
+.log-area .ll .lm{color:var(--text)}
+@media(max-width:768px){.content{padding:10px 12px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span>
+      <h1>🦾 Agent 集群</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
-  <div style="display:flex;align-items:center;gap:4px">
-    <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="toggleTheme()">🌓</span>
+  <div class="content">
+    <div class="stats" id="stats"></div>
+    <div class="filter-bar">
+      <input id="search" placeholder="搜索Agent名称..." oninput="filterAgents()">
+      <select id="statusFilter" onchange="filterAgents()"><option value="">全部状态</option><option value="ok">正常</option><option value="error">异常</option></select>
+      <button onclick="loadAgents()">🔄 刷新</button>
+      <button onclick="showCreateModal()">+ 创建Agent</button>
+    </div>
+    <div class="grid" id="grid"><div class="loading">正在加载 Agent 列表...</div></div>
   </div>
 </div>
-
-<h1>🤖 Agent 集群 <span style="font-size:14px;color:var(--text3)" id="totalCount">加载中...</span></h1>
-<div class="sub">管理全部 Agent 模块，查看状态、执行任务、监控日志</div>
-<div class="stats" id="stats"></div>
-<div class="filter-bar">
-  <input id="search" placeholder="搜索Agent名称..." oninput="filterAgents()">
-  <select id="statusFilter" onchange="filterAgents()"><option value="">全部状态</option><option value="ok">正常</option><option value="error">异常</option></select>
-  <button onclick="loadAgents()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer">🔄 刷新</button>
+<div class="modal" id="modal">
+  <div class="modal-card" id="modalContent">
+    <h2>🤖 创建 Agent</h2>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Agent名称</label>
+    <input id="createName" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;background:var(--bg);color:var(--text)" placeholder="agent_my_custom"></div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">描述</label>
+    <textarea id="createDesc" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;background:var(--bg);color:var(--text);height:60px" placeholder="这个Agent负责什么"></textarea></div>
+    <div style="display:flex;gap:8px"><button onclick="doCreateAgent()" style="padding:8px 16px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer">创建</button><button onclick="closeModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">取消</button></div>
+  </div>
 </div>
-<div class="grid" id="grid"><div class="loading">正在加载 Agent 列表...</div></div>
-<div class="modal" id="modal"><div class="modal-card" id="modalContent"></div></div>
 <script>
-var _agents = [];
+var _agents=[];
 
-function fetchWithTimeout(url, ms){
-  return Promise.race([
-    fetch(url).then(function(r){return r.json().catch(function(){return {}})}),
-    new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},ms)})
-  ]).catch(function(){return {}});
+function fetchWithTimeout(url,ms){
+  return Promise.race([fetch(url).then(function(r){return r.json().catch(function(){return{}})}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},ms)})]).catch(function(){return{}});
 }
 
 function loadAgents(){
-  document.getElementById('grid').innerHTML = '<div class="loading">正在加载...</div>';
-  
-  // Try registry first, fallback to modules (with 5s timeout to prevent hang)
+  document.getElementById('grid').innerHTML='<div class="loading">正在加载...</div>';
   Promise.all([
-    fetchWithTimeout('/api/v1/agents/registry', 5000),
-    fetchWithTimeout('/api/v1/modules', 5000)
+    fetchWithTimeout('/api/v1/agents/registry',5000),
+    fetchWithTimeout('/api/v1/modules',5000)
   ]).then(function(results){
-    var raw = results[0].agents || results[0].data || [];
-    var agentList = Array.isArray(raw) ? raw : Object.values(raw);
-    var modules = results[1].modules || results[1].data || [];
-    
-    // Merge: show modules as agents if no registry data
-    if(agentList.length === 0){
-      modules.forEach(function(m){
-        if(m.name && m.name.toLowerCase().indexOf('agent') >= 0){
-          agentList.push({name: m.name, version: m.version||'', status: 'ok', description: m.description||''});
-        }
-      });
+    var raw=results[0].agents||results[0].data||[];
+    var agentList=Array.isArray(raw)?raw:Object.values(raw);
+    var modules=results[1].modules||results[1].data||[];
+    if(!agentList.length){
+      modules.forEach(function(m){if(m.name&&m.name.toLowerCase().indexOf('agent')>=0)agentList.push({name:m.name,version:m.version||'',status:'ok',description:m.description||''})});
     }
-    
-    // If still empty, show all agent_* module files
-    if(agentList.length === 0){
-      var agentNames = ['agent_apollo','agent_athena','agent_boreas','agent_cronus','agent_demeter','agent_eros','agent_hecate','agent_hephaestus','agent_hera','agent_hermes','agent_iris','agent_market','agent_marketplace','agent_mas','agent_minerva','agent_nemesis','agent_orchestrator','agent_phoebus','agent_planner','agent_poseidon','agent_resource_control','agent_s_bridge','agent_themis'];
-      agentNames.forEach(function(n){
-        agentList.push({name: n, status: 'ok', description: n.replace('agent_','').toUpperCase() + ' Agent'});
-      });
+    if(!agentList.length){
+      var names=['agent_apollo','agent_athena','agent_boreas','agent_cronus','agent_demeter','agent_eros','agent_hecate','agent_hephaestus','agent_hera','agent_hermes','agent_iris','agent_market','agent_mas','agent_minerva','agent_nemesis','agent_orchestrator','agent_phoebus','agent_planner','agent_poseidon','agent_resource_control','agent_s_bridge','agent_themis'];
+      names.forEach(function(n){agentList.push({name:n,status:'ok',description:n.replace('agent_','').toUpperCase()+' Agent'})});
     }
-    
-    _agents = agentList;
-    renderAgents();
-  }).catch(function(){
-    document.getElementById('grid').innerHTML = '<div class="empty">Failed to load agents</div>';
-  });
+    // Merge with localStorage custom agents
+    try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(Array.isArray(custom))custom.forEach(function(c){agentList.push(c)})}catch(e){}
+    _agents=agentList;renderAgents();
+  }).catch(function(){document.getElementById('grid').innerHTML='<div class="empty">Failed to load agents</div>'});
 }
 
 function renderAgents(){
-  var statsHtml = '<div class="s"><div class="n">'+_agents.length+'</div><div class="l">Agent总数</div></div>';
-  var okCount = _agents.filter(function(a){return (a.status||'ok')==='ok'||(a.status||'ok')==='running'}).length;
-  statsHtml += '<div class="s"><div class="n">'+okCount+'</div><div class="l">正常</div></div>';
-  statsHtml += '<div class="s"><div class="n">'+(_agents.length-okCount)+'</div><div class="l">异常/离线</div></div>';
-  document.getElementById('stats').innerHTML = statsHtml;
-  document.getElementById('totalCount').textContent = _agents.length + ' 个 Agent';
-  filterAgents();
+  var statsHtml='<div class="stat-card"><div class="num">'+_agents.length+'</div><div class="label">Agent总数</div></div>';
+  var okCount=_agents.filter(function(a){return(a.status||'ok')==='ok'||(a.status||'ok')==='running'}).length;
+  statsHtml+='<div class="stat-card"><div class="num">'+okCount+'</div><div class="label">正常</div></div>';
+  statsHtml+='<div class="stat-card"><div class="num">'+(_agents.length-okCount)+'</div><div class="label">异常/离线</div></div>';
+  document.getElementById('stats').innerHTML=statsHtml;filterAgents();
 }
 
 function filterAgents(){
-  var q = document.getElementById('search').value.toLowerCase();
-  var st = document.getElementById('statusFilter').value;
-  var filtered = _agents;
-  if(q) filtered = filtered.filter(function(a){return (a.name||'').toLowerCase().indexOf(q)>=0||(a.description||'').toLowerCase().indexOf(q)>=0});
-  if(st) filtered = filtered.filter(function(a){return (a.status||'ok')===st});
-  
+  var q=document.getElementById('search').value.toLowerCase();
+  var st=document.getElementById('statusFilter').value;
+  var filtered=_agents;
+  if(q)filtered=filtered.filter(function(a){return(a.name||'').toLowerCase().indexOf(q)>=0||(a.description||'').toLowerCase().indexOf(q)>=0});
+  if(st)filtered=filtered.filter(function(a){return(a.status||'ok')===st});
   if(!filtered.length){document.getElementById('grid').innerHTML='<div class="empty">无匹配Agent</div>';return}
-  
-  var h = '';
+  var h='';
   filtered.forEach(function(a){
-    var name = a.name||'unknown';
-    var desc = a.description||a.summary||'';
-    var status = a.status||'ok';
-    var version = a.version||'';
-    var cls = status==='ok'||status==='running'?'on':status==='error'?'err':'off';
-    var label = status==='ok'||status==='running'?'运行中':status==='error'?'异常':'离线';
-    h += '<div class="card"><h3>'+name+' <span class="badge '+cls+'">'+label+'</span></h3>';
-    h += '<div class="desc">'+desc.slice(0,120)+'</div>';
-    h += '<div class="meta">';
-    if(version) h += '<span class="tag">v'+version+'</span>';
-    h += '</div><div class="actions">';
-    h += '<button onclick="execAgent(\''+name+'\')">▶ 执行</button>';
-    h += '<button onclick="healthAgent(\''+name+'\')">❤️ 健康</button>';
-    h += '<button onclick="viewCode(\''+name+'\')">📄 代码</button>';
-    h += '</div></div>';
+    var name=a.name||'unknown',desc=a.description||a.summary||'',status=a.status||'ok',version=a.version||'';
+    var cls=status==='ok'||status==='running'?'on':status==='error'?'err':'off';
+    var label=status==='ok'||status==='running'?'运行中':status==='error'?'异常':'离线';
+    h+='<div class="card"><h3>'+name+' <span class="badge '+cls+'">'+label+'</span></h3>';
+    h+='<div class="desc">'+(desc.slice(0,120)||'无描述')+'</div>';
+    h+='<div class="meta">';if(version)h+='<span class="tag">v'+version+'</span>';h+='</div>';
+    h+='<div class="actions"><button onclick="execAgent(\''+name+'\')">▶ 执行</button>';
+    h+='<button onclick="healthAgent(\''+name+'\')">❤️ 健康</button>';
+    h+='<button onclick="viewLogs(\''+name+'\')">📋 日志</button></div></div>';
   });
-  document.getElementById('grid').innerHTML = h;
+  document.getElementById('grid').innerHTML=h;
 }
 
 function execAgent(name){
-  showModal('<h2>执行 Agent: '+name+'</h2><p>输入参数</p><textarea id="execArgs" style="width:100%;height:80px;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px" placeholder=\'{}\'></textarea><div style="display:flex;gap:8px;margin-top:8px"><button onclick="doExec(\''+name+'\')" style="padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer">发送</button><button onclick="closeModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer">取消</button></div><pre id="execResult" style="display:none;background:#f3f4f6;padding:10px;border-radius:6px;margin-top:8px"></pre>');
+  showModal('<h2>执行 Agent: '+name+'</h2><p>输入参数</p><textarea id="execArgs" style="width:100%;height:80px;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;background:var(--bg);color:var(--text)" placeholder=\'{}\'></textarea><div style="display:flex;gap:8px;margin-top:8px"><button onclick="doExec(\''+name+'\')" style="padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer">发送</button><button onclick="closeModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">取消</button></div><pre id="execResult" style="display:none;background:var(--bg);padding:10px;border-radius:6px;margin-top:8px;font-size:12px;overflow-x:auto"></pre>');
 }
-
 function doExec(name){
-  var args = document.getElementById('execArgs').value;
-  try{args=JSON.parse(args)}catch(e){}
-  document.getElementById('execResult').style.display='block';
-  document.getElementById('execResult').textContent='执行中...';
+  var args=document.getElementById('execArgs').value;try{args=JSON.parse(args)}catch(e){}
+  document.getElementById('execResult').style.display='block';document.getElementById('execResult').textContent='执行中...';
   fetch('/api/v1/modules/'+name+'/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({args:args})}).then(function(r){return r.text()}).then(function(t){document.getElementById('execResult').textContent=t});
 }
-
 function healthAgent(name){
-  fetch('/api/v1/modules/'+name+'/health').then(function(r){return r.json()}).then(function(j){
-    showModal('<h2>❤️ '+name+' 健康检查</h2><pre>'+JSON.stringify(j,null,2)+'</pre><button onclick="closeModal()" style="margin-top:8px;padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer">关闭</button>');
-  });
+  fetch('/api/v1/modules/'+name+'/health').then(function(r){return r.json()}).then(function(j){showModal('<h2>❤️ '+name+' 健康检查</h2><pre style="background:var(--bg);padding:10px;border-radius:6px;font-size:12px">'+JSON.stringify(j,null,2)+'</pre><button onclick="closeModal()" style="margin-top:8px;padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">关闭</button>')});
 }
-
-function viewCode(name){
-  fetch('/api/v1/modules/'+name+'/code').then(function(r){return r.text()}).then(function(t){
-    showModal('<h2>📄 '+name+' 源码</h2><pre style="max-height:500px;overflow-y:auto">'+t.slice(0,3000)+'...</pre><button onclick="closeModal()" style="margin-top:8px;padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer">关闭</button>');
-  });
+function viewLogs(name){
+  showModal('<h2>📋 '+name+' 执行日志</h2><div id="logArea" class="log-area show"><div class="ll"><span class="lt">[INFO]</span><span class="lm">等待获取日志...</span></div></div><button onclick="closeModal()" style="margin-top:8px;padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">关闭</button>');
+  fetch('/api/v1/agents/'+name+'/logs').then(function(r){return r.json()}).then(function(d){var logs=d.logs||[];var h='';logs.slice(-20).forEach(function(l){h+='<div class="ll"><span class="lt">['+l.time+']</span><span class="lm">'+l.msg+'</span></div>'});document.getElementById('logArea').innerHTML=h||'<div class="ll"><span class="lm">暂无日志</span></div>'}).catch(function(){document.getElementById('logArea').innerHTML='<div class="ll"><span class="lm">加载失败</span></div>'});
 }
-
-function showModal(html){
-  document.getElementById('modalContent').innerHTML=html;
-  document.getElementById('modal').classList.add('show');
+function showCreateModal(){showModal('<h2>🤖 创建 Agent</h2><div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Agent名称</label><input id="createName" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;background:var(--bg);color:var(--text)" placeholder="agent_my_custom"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">描述</label><textarea id="createDesc" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;background:var(--bg);color:var(--text);height:60px" placeholder="这个Agent负责什么"></textarea></div><div style="display:flex;gap:8px"><button onclick="doCreateAgent()" style="padding:8px 16px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer">创建</button><button onclick="closeModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">取消</button></div>')}
+function doCreateAgent(){
+  var name=document.getElementById('createName').value.trim();if(!name)return;
+  var desc=document.getElementById('createDesc').value.trim()||'自定义Agent';
+  try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(!Array.isArray(custom))custom=[];custom.push({name:name,description:desc,status:'ok',source:'custom'});localStorage.setItem('evo_custom_agents',JSON.stringify(custom))}catch(e){}
+  closeModal();loadAgents();
 }
+function showModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modal').classList.add('show')}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 document.getElementById('modal').onclick=function(e){if(e.target===this)closeModal()};
-
-loadAgents();
-</script></body></html>
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadAgents()})();
+</script>
+</body>
+</html>

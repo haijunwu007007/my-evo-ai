@@ -2,134 +2,155 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AUTO-EVO-AI</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>智能循环引擎 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text)}
+.content{flex:1;overflow-y:auto;padding:16px 20px;max-width:960px;margin:0 auto;width:100%}
+.section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.loop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px}
+.loop-card{padding:16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s}
+.loop-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px var(--glow)}
+.loop-card .l-icon{font-size:24px;margin-bottom:6px}
+.loop-card .l-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.loop-card .l-desc{font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:8px}
+.loop-card .l-meta{display:flex;gap:6px;flex-wrap:wrap}
+.loop-card .l-tag{font-size:9px;padding:2px 6px;border-radius:4px;background:var(--glass);color:var(--text2)}
+.exec-panel{padding:16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);margin-bottom:16px}
+.exec-panel .input-row{display:flex;gap:8px}
+.exec-panel input{flex:1;padding:9px 14px;border-radius:8px;border:1px solid var(--border);font-size:13px;outline:none;background:var(--bg);color:var(--text)}
+.exec-panel input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.exec-panel .exec-btn{padding:9px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.exec-panel .exec-btn:hover{background:var(--accent-hover)}
+.controls{display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.controls button{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
+.controls .pause:hover{border-color:#f59e0b;color:#f59e0b}
+.controls .stop:hover{border-color:#ef4444;color:#ef4444}
+.controls .mode-select select{padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;background:var(--bg);color:var(--text)}
+.output-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;color:var(--text2);margin-top:10px;min-height:80px;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none}
+.output-box.show{display:block}
+.output-box .line{padding:2px 0;display:flex;gap:6px;animation:fadeLog .2s ease}
+.output-box .line .iter{color:var(--accent);font-weight:600;flex-shrink:0}
+.output-box .line .msg{color:var(--text)}
+.output-box .line .msg.success{color:#10b981}
+.output-box .line .msg.error{color:#ef4444}
+@keyframes fadeLog{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.stat-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat-item{padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);flex:1;min-width:100px;text-align:center}
+.stat-item .num{font-size:20px;font-weight:700;color:var(--accent)}
+.stat-item .label{font-size:10px;color:var(--text3);margin-top:2px}
+@media(max-width:768px){.content{padding:12px 10px}.loop-grid{grid-template-columns:repeat(2,1fr)}.controls{flex-wrap:wrap}}
 </style>
 </head>
 <body>
-<div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
-  <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
-    <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
-    <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
-  </div>
-</div>
-<div class="main" style="flex:1;padding:16px;overflow-y:auto">
-<!DOCTYPE html><html lang=zh><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>LOOP 循环工程</title>
-<link rel="stylesheet" href="/frontend/share.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.header h1{font-size:18px;font-weight:600}
-.header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
-.container{max-width:800px;margin:0 auto;padding:16px}
-.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.btn{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer}
-.btn:hover{opacity:.9}
-.btn-sm{font-size:12px;padding:6px 12px}
-.btn-green{background:#10b981}
-.btn-orange{background:#f59e0b}
-.btn-red{background:#ef4444}
-input,textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;margin-bottom:8px;background:var(--card);color:var(--text)}
-textarea{resize:vertical;min-height:80px;font-family:monospace}
-.loop-item{padding:10px;border-bottom:1px solid #f0f0f0}
-.loop-item:last-child{border:0}
-.loop-id{font-size:12px;color:#94a3b8}
-.loop-status{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#e8f5e9;color:#2e7d32}
-.loop-status-running{background:#fff3e0;color:#e65100}
-.loop-status-error{background:#ffebee;color:#c62828}
-.phase{display:inline-block;font-size:11px;padding:2px 6px;border-radius:4px;margin:2px}
-.phase-done{background:#e8f5e9;color:#2e7d32}
-.phase-active{background:#fff3e0;color:#e65100;animation:pulse 1.5s infinite}
-.phase-pending{background:#f3f4f6;color:#6b7280}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.log-area{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.6;max-height:200px;overflow:auto;white-space:pre-wrap}
-</style>
-<div class="app">
-<div class="topbar">
+<div class="main">
+  <div class="topbar">
     <div class="topbar-left">
-      <a href="/" style="text-decoration:none;color:inherit"><strong>⚡ AUTO-EVO-AI</strong></a>
-      <span class="topbar-sep">|</span>
-      <span class="topbar-path">LOOP 循环工程</span>
+      <span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span>
+      <h1>🔄 智能循环引擎</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
     </div>
   </div>
-  <div class="main" style="flex:1">
-<div class=header><h1>🔄 LOOP 循环工程</h1><a href=/>← 返回首页</a></div>
-<div class=container>
-<div class=card><h3>📊 引擎状态</h3><div id=stats>加载中...</div></div>
-<div class=card><h3>🆕 创建新循环</h3>
-<input id=goalInput placeholder="输入目标（如：搜索AI最新动态并生成报告）">
-<textarea id=stepsInput placeholder="可选：指定步骤（每行一步，留空则LLM自动规划）" rows=4></textarea>
-<button class=btn onclick=createLoop()>创建并运行</button>
-</div>
-<div class=card><h3>📋 循环列表</h3><div id=loopList>加载中...</div></div>
-<div class=card id=logCard style="display:none"><h3>📝 执行日志 <button class="btn btn-sm btn-red" onclick=document.getElementById('logCard').style.display='none'>关闭</button></h3>
-<div class=log-area id=logArea></div></div>
-</div>
-<script>
-const BASE=''
-async function api(method,path,data){
-  const r=await fetch(BASE+path,{method:method||'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):null})
-  return r.json()
-}
-async function loadStats(){
-  const d=await api('GET','/api/v1/loop/engine/status')
-  document.getElementById('stats').innerHTML=`<span>活跃循环: ${d.active_loops||0} | 已完成: ${d.completed_loops||d.total_completed||0} | 引擎: ${d.engine||'active'}</span>`
-}
-async function loadLoops(){
-  const d=await api('GET','/api/v1/loop/list')
-  const items=d.loops||d.results||[]
-  const list=document.getElementById('loopList')
-  if(!items.length){list.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">暂无循环</div>';return}
-  list.innerHTML=items.map(l=>{
-    const status=l.status||'pending'
-    const scls=status==='running'?'loop-status-running':status==='error'?'loop-status-error':''
-    const phases=(l.phases||l.steps||[]).map((p,i)=>{
-      const pstatus=p.status||'pending'
-      const pcls=pstatus==='done'||pstatus==='completed'?'phase-done':pstatus==='running'||pstatus==='active'?'phase-active':'phase-pending'
-      return `<span class="phase ${pcls}">${p.name||'步骤'+(i+1)}</span>`
-    }).join('')
-    return `<div class="loop-item"><span><span class="loop-status ${scls}">${status}</span> <b>${l.goal||l.name||l.id}</b><br>
-    <div style="margin:6px 0">${phases}</div>
-    <div class="loop-id">${l.id} | 迭代: ${l.iteration||l.iteration_count||0} | ${l.created_at?new Date(l.created_at).toLocaleString():''}</div></span>
-    <span>${status==='running'?'':`<button class="btn btn-sm btn-orange" onclick=runLoop('${l.id}')>运行</button>`}
-    <button class="btn btn-sm" onclick=viewLog('${l.id}')>日志</button></span></div>`
-  }).join('')
-}
-async function createLoop(){
-  const goal=document.getElementById('goalInput').value
-  if(!goal){alert('请输入目标');return}
-  const steps=document.getElementById('stepsInput').value.split('\n').filter(Boolean)
-  const d=await api('POST','/api/v1/loop/create',{goal,steps:steps.length?steps:undefined})
-  if(d.loop_id||d.id){
-    document.getElementById('goalInput').value='';document.getElementById('stepsInput').value=''
-    const id=d.loop_id||d.id
-    const r2=await api('POST','/api/v1/loop/run/'+id)
-    await loadLoops();await loadStats()
-    if(r2.success)alert('循环已启动！')
-  }else alert('创建失败: '+(d.error||''))
-}
-async function runLoop(id){
-  const d=await api('POST','/api/v1/loop/run/'+id)
-  if(d.success){await loadLoops();await loadStats()}
-  else alert('运行失败')
-}
-async function viewLog(id){
-  const d=await api('GET','/api/v1/loop/status/'+id)
-  document.getElementById('logCard').style.display='block'
-  document.getElementById('logArea').textContent=JSON.stringify(d.result||d.log||d,null,2)
-}
-loadStats();loadLoops()
-</script>
+  <div class="content">
+    <div class="stat-bar">
+      <div class="stat-item"><div class="num">0</div><div class="label">当前迭代</div></div>
+      <div class="stat-item"><div class="num">0</div><div class="label">完成次数</div></div>
+      <div class="stat-item"><div class="num">-</div><div class="label">运行状态</div></div>
+    </div>
+    <div class="section-title">📋 循环模式</div>
+    <div class="loop-grid">
+      <div class="loop-card" onclick="selectMode('auto_expand')" id="mode-auto_expand">
+        <div class="l-icon">🌱</div><div class="l-name">自动扩展</div><div class="l-desc">自动分析上次结果，扩展深度和广度，直到达到目标或用户终止</div>
+        <div class="l-meta"><span class="l-tag">⏱ 不限次数</span><span class="l-tag">⚡ 自动</span></div>
+      </div>
+      <div class="loop-card" onclick="selectMode('refine')" id="mode-refine">
+        <div class="l-icon">🔧</div><div class="l-name">精炼优化</div><div class="l-desc">基于反馈循环优化输出质量，每次迭代都在前一次基础上改进</div>
+        <div class="l-meta"><span class="l-tag">⏱ 5次默认</span><span class="l-tag">🎯 质量优先</span></div>
+      </div>
+      <div class="loop-card" onclick="selectMode('research')" id="mode-research">
+        <div class="l-icon">🔬</div><div class="l-name">深度研究</div><div class="l-desc">多轮搜索+分析，每次迭代深入一层，适合复杂调研任务</div>
+        <div class="l-meta"><span class="l-tag">⏱ 可变</span><span class="l-tag">📚 研究</span></div>
+      </div>
+      <div class="loop-card" onclick="selectMode('debate')" id="mode-debate">
+        <div class="l-icon">⚖️</div><div class="l-name">多方辩论</div><div class="l-desc">多个Agent围绕主题辩论，每次迭代生成新的论点，最后综合</div>
+        <div class="l-meta"><span class="l-tag">⏱ 3轮</span><span class="l-tag">🤖 多Agent</span></div>
+      </div>
+    </div>
+    <div class="section-title">🎮 执行控制</div>
+    <div class="exec-panel">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">当前模式: <strong id="currentMode">自动扩展</strong></div>
+      <div class="input-row">
+        <input id="loopInput" placeholder="输入循环任务..." onkeydown="if(event.key==='Enter')startLoop()">
+        <button class="exec-btn" onclick="startLoop()">▶ 开始</button>
+      </div>
+      <div class="controls">
+        <span style="font-size:11px;color:var(--text3)">最大迭代:</span>
+        <select id="maxIter" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;background:var(--bg);color:var(--text)">
+          <option value="3">3次</option><option value="5" selected>5次</option><option value="10">10次</option><option value="0">不限</option>
+        </select>
+        <button class="pause" onclick="pauseLoop()">⏸ 暂停</button>
+        <button class="stop" onclick="stopLoop()">⏹ 停止</button>
+      </div>
+      <div class="mode-select" style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;color:var(--text3)">控制模式:</span>
+        <select onchange="setControlMode(this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;background:var(--bg);color:var(--text)">
+          <option value="auto">全自动</option>
+          <option value="semi">半自动(失败时询问)</option>
+          <option value="manual">手动(每步确认)</option>
+        </select>
+      </div>
+      <div class="output-box" id="loopOutput"></div>
+    </div>
   </div>
 </div>
-</html>
-</div>
+<script>
+var _currentMode='auto_expand',_running=false,_paused=false,_iteration=0;
+var modeLabels={auto_expand:'自动扩展',refine:'精炼优化',research:'深度研究',debate:'多方辩论'};
+var modePrompts={auto_expand:'你正在使用自动扩展循环模式。每次迭代分析上次输出，自动扩展深度和广度，直到目标达成或用户终止。请输出完整、有深度的内容。',refine:'你正在使用精炼优化循环模式。每次迭代基于前一次输出进行改进和优化，聚焦于质量提升。请输出每次迭代的改进点。',research:'你正在使用深度研究循环模式。每次迭代深入一层，需要搜索和分析新信息。请输出你的研究发现。',debate:'你正在使用多方辩论循环模式。需要从多个角度分析问题，生成对立观点，最后综合结论。'};
+function selectMode(mode){
+  _currentMode=mode;document.querySelectorAll('.loop-card').forEach(function(c){c.classList.remove('active')});
+  var card=document.getElementById('mode-'+mode);if(card)card.classList.add('active');
+  document.getElementById('currentMode').textContent=modeLabels[mode]||mode;
+}
+function addLine(iter,msg,cls){
+  var out=document.getElementById('loopOutput');out.classList.add('show');
+  var line=document.createElement('div');line.className='line';
+  line.innerHTML='<span class="iter">['+iter+']</span><span class="msg '+(cls||'')+'">'+msg+'</span>';
+  out.appendChild(line);out.scrollTop=out.scrollHeight;
+}
+async function startLoop(){
+  var input=document.getElementById('loopInput'),text=input.value.trim();if(!text)return;
+  var maxIter=parseInt(document.getElementById('maxIter').value,10)||999;
+  _running=true;_paused=false;_iteration=0;
+  var out=document.getElementById('loopOutput');out.innerHTML='';out.classList.add('show');
+  addLine('INIT','🚀 开始循环模式: '+modeLabels[_currentMode]+(maxIter<999?' (最多'+maxIter+'次)':''),'success');
+  addLine('INIT','📋 任务: '+text,'');
+  var lastResult=text;
+  while(_running&&_iteration<maxIter){
+    if(_paused){await new Promise(function(r){setTimeout(r,500)});continue}
+    _iteration++;
+    try{
+      var sys=modePrompts[_currentMode];
+      sys+='\n当前迭代: 第'+_iteration+'次 (共'+(maxIter<999?maxIter:'不限')+'次)';
+      if(_iteration>1)sys+='\n上次迭代结果: '+lastResult.slice(0,500);
+      addLine(_iteration,'🤖 执行中...','');
+      var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',context:[{role:'system',content:sys}],task_id:'loop_'+Date.now()+'_'+_iteration})});
+      var d=await r.json();
+      if(d&&d.success){lastResult=d.result||lastResult;addLine(_iteration,'✅ 完成 ('+(d.result||'').slice(0,100)+')','success')}
+      else{addLine(_iteration,'❌ 失败: '+(d&&d.detail||r.status),'error');if(maxIter===999)break}
+    }catch(e){addLine(_iteration,'❌ 异常: '+e.message,'error');break}
+    if(_iteration>=maxIter){addLine('DONE','✅ 循环完成，共'+_iteration+'次迭代','success');break}
+    await new Promise(function(r){setTimeout(r,500)})
+  }
+  _running=false;
+}
+function pauseLoop(){_paused=!_paused;addLine('CTRL',_paused?'⏸ 已暂停':'▶ 已恢复','')}
+function stopLoop(){_running=false;addLine('CTRL','⏹ 已停止','error')}
+function setControlMode(mode){addLine('CTRL','🔧 控制模式: {auto:\'全自动\',semi:\'半自动\',manual:\'手动\'}[mode]||mode,'')}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};selectMode('auto_expand')})();
+</script>
 </body>
 </html>
