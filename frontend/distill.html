@@ -77,6 +77,8 @@ textarea{resize:vertical;min-height:60px}
           <button class="source-btn active" data-type=url onclick="pickSource('url',this)"><span class=icon>🌐</span>网页URL</button>
           <button class="source-btn" data-type=text onclick="pickSource('text',this)"><span class=icon>📝</span>文本描述</button>
           <button class="source-btn" data-type=code onclick="pickSource('code',this)"><span class=icon>💻</span>代码片段</button>
+          <button class="source-btn" data-type=image onclick="pickSource('image',this)"><span class=icon>🖼️</span>图片</button>
+          <button class="source-btn" data-type=pdf onclick="pickSource('pdf',this)"><span class=icon>📄</span>PDF文档</button>
           <button class="source-btn" data-type=demo_id onclick="pickSource('demo_id',this)"><span class=icon>🎬</span>操作演示</button>
           <button class="source-btn" data-type=video_url onclick="pickSource('video_url',this)"><span class=icon>🎥</span>视频链接</button>
         </div>
@@ -147,8 +149,24 @@ function pickSource(type,btn){
   document.querySelectorAll('.source-btn').forEach(function(b){b.classList.remove('active')})
   btn.classList.add('active')
   var input=document.getElementById('inputArea')
-  var ph={'url':'输入 URL（如 https://example.com/workflow）','text':'输入文本描述（如：如何用Python爬取网页数据）','code':'粘贴代码片段','demo_id':'输入演示ID（从学习系统获取）','video_url':'输入视频链接（B站/YouTube等）'}
-  input.innerHTML='<input id=sourceInput placeholder="'+ph[type]+'"><input id=skillName placeholder="技能名称（可选）" style=margin-top:4px><input id=skillTags placeholder="标签（逗号分隔）" style=margin-top:4px>'
+  var ph={
+    'url':'输入 URL（如 https://example.com/workflow）',
+    'text':'输入文本描述（如：如何用Python爬取网页数据）',
+    'code':'粘贴代码片段',
+    'image':'输入图片URL，或下方上传文件',
+    'pdf':'输入PDF文档URL，或下方上传文件',
+    'demo_id':'输入演示ID（从学习系统获取）',
+    'video_url':'输入视频链接（B站/YouTube等）'
+  }
+  var html='<input id=sourceInput placeholder="'+ph[type]+'">'
+  if(type==='image'||type==='pdf'){
+    html+='<div style=display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12px;color:var(--text2,#8892b0)>— 或上传文件 —</div>'+
+      '<div style=display:flex;gap:8px>'+
+      '<input type=file id=fileInput accept="'+(type==='image'?'image/*':'.pdf')+'" style=flex:1>'+
+      '<button class="btn btn-sm btn-primary" onclick=uploadFileDistill()>📤 上传蒸馏</button></div>'
+  }
+  html+='<input id=skillName placeholder="技能名称（可选）" style=margin-top:4px><input id=skillTags placeholder="标签（逗号分隔）" style=margin-top:4px>'
+  input.innerHTML=html
 }
 
 async function startDistill(){
@@ -215,6 +233,42 @@ function appendLog(msg){
   el.style.display='block'
   el.innerHTML+=msg+'\n'
   el.scrollTop=el.scrollHeight
+}
+
+async function uploadFileDistill(){
+  var file=document.getElementById('fileInput')
+  if(!file||!file.files||!file.files[0]){alert('请先选择文件');return}
+  var f=file.files[0]
+  var endpoint=CURRENT_SOURCE==='image'?'/api/v1/distill/upload-image':'/api/v1/distill/upload-pdf'
+  var name=document.getElementById('skillName').value.trim()
+  var tags=document.getElementById('skillTags').value.trim()
+  var fd=new FormData()
+  fd.append('file',f)
+  fd.append('name',name||f.name.replace(/\.[^.]+$/,'')+'_蒸馏')
+  fd.append('tags',tags)
+  document.getElementById('sessionLog').style.display='block'
+  appendLog('🚀 上传文件: '+f.name+' ('+(f.size/1024).toFixed(1)+'KB)')
+  appendLog('📤 发送到: '+endpoint)
+  try{
+    var r=await fetch(endpoint,{method:'POST',body:fd})
+    var d=await r.json()
+    if(d.success){
+      CURRENT_SESSION=d.session_id
+      appendLog('✅ OCR/解析完成')
+      appendLog('📌 标题: '+(d.title||'无'))
+      appendLog('📖 摘要: '+(d.summary||'无'))
+      appendLog('📊 步骤数: '+d.estimated_steps)
+      if(d.steps&&d.steps.length){appendLog('📋 步骤:');d.steps.forEach(function(s,i){appendLog('  '+(i+1)+'. '+s)})}
+      if(d.ocr_text){appendLog('📝 OCR文本预览: '+d.ocr_text)}
+      document.getElementById('sessionInfo').innerHTML='<b>会话:</b> '+d.session_id+' | <b>步骤:</b> '+d.estimated_steps+'<br><b>'+(d.title||'')+'</b>'
+      document.getElementById('progressFill').style.width='60%'
+      var result=document.getElementById('distillResult')
+      result.style.display='block'
+      result.innerHTML='<span class="status-badge s-done">✅ 分析完成</span><br><button class="btn btn-primary btn-sm" onclick=generateSkill() style=margin-top:8px>🧬 生成技能</button>'
+    }else{
+      appendLog('❌ 失败: '+(d.error||''))
+    }
+  }catch(e){appendLog('❌ 请求异常: '+e.message)}
 }
 
 async function generateSkill(){

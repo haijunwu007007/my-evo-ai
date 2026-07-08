@@ -65,10 +65,11 @@ def _parse_llm_json(text: str) -> dict:
 # ── 蒸馏会话 ──
 _sessions: dict[str, dict] = {}
 import httpx
+from fastapi import UploadFile, File, Form
 
 class DistillInput(BaseModel):
-    source_type: str            # url / text / code / demo_id / video_url
-    source: str                 # 原始内容或引用
+    source_type: str            # url / text / code / demo_id / video_url / image / pdf
+    source: str                 # 原始内容、URL引用或base64内容
     name: Optional[str] = ""
     tags: Optional[list] = []
 
@@ -223,6 +224,84 @@ async def start_distillation(m: DistillInput):
                     session["step_count"] = len(session["steps"])
             except: pass
 
+        elif m.source_type == "image":
+            # 图片: OCR → LLM分析
+            session["progress"] = 20
+            try:
+                image_b64 = None
+                if m.source.startswith("http://") or m.source.startswith("https://"):
+                    # 从URL下载图片
+                    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as c:
+                        r = await c.get(m.source)
+                        if r.status_code == 200:
+                            import base64 as _b64
+                            image_b64 = _b64.b64encode(r.content).decode()
+                else:
+                    image_b64 = m.source  # 直接base64
+                if image_b64:
+                    from modules.ocr_engine import recognize_image
+                    import base64 as _b64
+                    ocr_result = recognize_image(image_b64, ["ch_sim", "en"])
+                    ocr_text = ""
+                    if isinstance(ocr_result, dict):
+                        ocr_text = ocr_result.get("text", ocr_result.get("result", str(ocr_result)))
+                    elif isinstance(ocr_result, str):
+                        ocr_text = ocr_result
+                    session["ocr_text"] = ocr_text[:5000]
+                    if ocr_text and len(ocr_text) > 10:
+                        prompt = f"""分析以下OCR识别出的图片文字内容，提炼核心信息，返回JSON：
+{{"title": "图片内容主题", "summary": "一句话总结", "steps": ["步骤1",...], "key_points": ["要点1",...], "image_description": "图片视觉描述"}}
+OCR文字：
+{session['ocr_text'][:4000]}"""
+                        result = await _call_llm(prompt, timeout=45)
+                        parsed = _parse_llm_json(result)
+                        session["steps"] = parsed.get("steps", [])
+                        session["step_count"] = len(session["steps"])
+                        session["title"] = parsed.get("title", "图片蒸馏")
+                        session["summary"] = parsed.get("summary", "")
+                        session["key_points"] = parsed.get("key_points", [])
+                        session["ocr_text"] = ocr_text[:500]
+            except Exception as e_img:
+                session["steps"] = [f"图片OCR失败: {str(e_img)[:60]}"]
+                session["step_count"] = 1
+
+        elif m.source_type == "pdf":
+            # PDF: OCR/解析 → LLM分析
+            session["progress"] = 20
+            try:
+                pdf_text = ""
+                if m.source.startswith("http://") or m.source.startswith("https://"):
+                    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as c:
+                        r = await c.get(m.source)
+                        if r.status_code == 200:
+                            import base64 as _b64
+                            pdf_b64 = _b64.b64encode(r.content).decode()
+                            from modules.ocr_engine import recognize_pdf
+                            pdf_result = recognize_pdf(r.content, ["ch_sim", "en"])
+                            if isinstance(pdf_result, dict):
+                                pdf_text = pdf_result.get("text", pdf_result.get("result", str(pdf_result)))
+                            elif isinstance(pdf_result, str):
+                                pdf_text = pdf_result
+                            session["pdf_text"] = pdf_text[:8000]
+                if pdf_text and len(pdf_text) > 10:
+                    prompt = f"""分析以下PDF文档内容，提炼核心知识，返回JSON：
+{{"title": "文档主题", "summary": "一句话总结", "steps": ["步骤1",...], "key_points": ["要点1",...]}}
+文档内容：
+{pdf_text[:6000]}"""
+                    result = await _call_llm(prompt, timeout=45)
+                    parsed = _parse_llm_json(result)
+                    session["steps"] = parsed.get("steps", [])
+                    session["step_count"] = len(session["steps"])
+                    session["title"] = parsed.get("title", "PDF蒸馏")
+                    session["summary"] = parsed.get("summary", "")
+                    session["key_points"] = parsed.get("key_points", [])
+                else:
+                    session["steps"] = ["PDF内容为空或无法解析，请检查文件是否包含可识别文字"]
+                    session["step_count"] = 1
+            except Exception as e_pdf:
+                session["steps"] = [f"PDF解析失败: {str(e_pdf)[:60]}"]
+                session["step_count"] = 1
+
     except Exception as e:
         session["status"] = "error"
         session["error"] = str(e)[:200]
@@ -247,6 +326,115 @@ async def get_session(session_id: str):
     return {"success": True, "session": {
         k: v for k, v in s.items() if k not in ("source",)
     }}
+
+# ── 文件上传蒸馏 ──
+
+@router.post("/upload-image")
+async def upload_image_distill(
+    file: UploadFile = File(...),
+    name: str = Form(""),
+    tags: str = Form("")
+):
+    """上传图片 → OCR → 蒸馏"""
+    try:
+        raw = await file.read()
+        if not raw:
+            return {"success": False, "error": "文件为空"}
+        import base64 as _b64
+        image_b64 = _b64.b64encode(raw).decode()
+        from modules.ocr_engine import recognize_image
+        ocr_result = recognize_image(image_b64, ["ch_sim", "en"])
+        ocr_text = ""
+        if isinstance(ocr_result, dict):
+            ocr_text = ocr_result.get("text", ocr_result.get("result", str(ocr_result)))
+        elif isinstance(ocr_result, str):
+            ocr_text = ocr_result
+        if not ocr_text or len(ocr_text.strip()) < 5:
+            return {"success": False, "error": "图片OCR未识别出有效文字"}
+        session_id = uuid.uuid4().hex[:12]
+        session = {
+            "id": session_id, "source_type": "image",
+            "source": f"upload_image:{file.filename}", "name": name or f"图片蒸馏_{int(time.time())}",
+            "tags": tags.split(",") if tags else [], "step_count": 0, "progress": 30,
+            "status": "processing", "steps": [], "ocr_text": ocr_text[:500],
+            "created_at": time.time()
+        }
+        prompt = f"""分析以下OCR识别出的图片文字内容，提炼核心信息，返回JSON：
+{{"title": "图片内容主题", "summary": "一句话总结", "steps": ["步骤1",...], "key_points": ["要点1",...]}}
+OCR文字：
+{ocr_text[:4000]}"""
+        result = await _call_llm(prompt, timeout=45)
+        parsed = _parse_llm_json(result)
+        session["steps"] = parsed.get("steps", [])
+        session["step_count"] = len(session["steps"])
+        session["title"] = parsed.get("title", "图片蒸馏")
+        session["summary"] = parsed.get("summary", "")
+        session["key_points"] = parsed.get("key_points", [])
+        session["progress"] = 80
+        session["status"] = "analyzed"
+        _sessions[session_id] = session
+        return {
+            "success": True, "session_id": session_id,
+            "estimated_steps": session["step_count"],
+            "title": session.get("title", ""),
+            "summary": session.get("summary", ""),
+            "steps": session["steps"][:8],
+            "ocr_text": ocr_text[:200]
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)[:200]}
+
+@router.post("/upload-pdf")
+async def upload_pdf_distill(
+    file: UploadFile = File(...),
+    name: str = Form(""),
+    tags: str = Form("")
+):
+    """上传PDF → 解析 → 蒸馏"""
+    try:
+        raw = await file.read()
+        if not raw:
+            return {"success": False, "error": "文件为空"}
+        from modules.ocr_engine import recognize_pdf
+        pdf_result = recognize_pdf(raw, ["ch_sim", "en"])
+        pdf_text = ""
+        if isinstance(pdf_result, dict):
+            pdf_text = pdf_result.get("text", pdf_result.get("result", str(pdf_result)))
+        elif isinstance(pdf_result, str):
+            pdf_text = pdf_result
+        if not pdf_text or len(pdf_text.strip()) < 5:
+            return {"success": False, "error": "PDF解析失败或内容为空"}
+        session_id = uuid.uuid4().hex[:12]
+        session = {
+            "id": session_id, "source_type": "pdf",
+            "source": f"upload_pdf:{file.filename}", "name": name or f"PDF蒸馏_{int(time.time())}",
+            "tags": tags.split(",") if tags else [], "step_count": 0, "progress": 30,
+            "status": "processing", "steps": [], "pdf_text": pdf_text[:500],
+            "created_at": time.time()
+        }
+        prompt = f"""分析以下PDF文档内容，提炼核心知识，返回JSON：
+{{"title": "文档主题", "summary": "一句话总结", "steps": ["步骤1",...], "key_points": ["要点1",...]}}
+文档内容：
+{pdf_text[:6000]}"""
+        result = await _call_llm(prompt, timeout=45)
+        parsed = _parse_llm_json(result)
+        session["steps"] = parsed.get("steps", [])
+        session["step_count"] = len(session["steps"])
+        session["title"] = parsed.get("title", "PDF蒸馏")
+        session["summary"] = parsed.get("summary", "")
+        session["key_points"] = parsed.get("key_points", [])
+        session["progress"] = 80
+        session["status"] = "analyzed"
+        _sessions[session_id] = session
+        return {
+            "success": True, "session_id": session_id,
+            "estimated_steps": session["step_count"],
+            "title": session.get("title", ""),
+            "summary": session.get("summary", ""),
+            "steps": session["steps"][:8]
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)[:200]}
 
 @router.post("/generate/{session_id}")
 async def generate_skill(session_id: str):
