@@ -15,7 +15,7 @@ from pathlib import Path
 
 logger = get_logger("evo.api.agent_engine")
 router = APIRouter()
-_API_BASE = os.environ.get("EVO_API_BASE", f"{_API_BASE}")
+_API_BASE = os.environ.get("EVO_API_BASE", "http://localhost:8765")
 
 # ── 外部 Skill 目录扫描 ──
 _SKILL_CATALOG: list[dict] = []
@@ -225,7 +225,7 @@ async def _fast_track(task: str) -> dict | None:
                 path = "/api/v1/health"
             elif "模块" in task or "modules" in task.lower():
                 path = "/api/v1/modules"
-            r = await c.get(ff"{_API_BASE}{path}", timeout=10)
+            r = await c.get(f"{_API_BASE}{path}", timeout=10)
             return {"result": r.text, "path": path}
     except Exception:
         return None
