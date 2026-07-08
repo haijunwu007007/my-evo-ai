@@ -250,6 +250,12 @@ _ACTION_MAP = [
     # ── 通知操作 ──
     (["发送通知", "推送通知", "发送消息", "测试通知"], "POST", "/api/v1/notify/send",
      lambda msg: {"channel": "console", "content": _extract_after(msg) or "测试通知"}),
+    # ── 通知配置已在导航map中处理，无需额外action ──
+
+    # ── 自动化创建 ──
+    (["创建工作流", "创建自动化", "新建工作流", "新建自动化", "新建定时任务", "创建定时任务", "添加定时任务", "添加工作流", "添加自动化"],
+     "POST", "/api/v1/automations",
+     lambda msg: _build_automation(msg)),
 
     # ── 缓存操作 ──
     (["清理缓存", "清除缓存", "清空缓存", "刷新缓存"], "POST", "/api/v1/cache/clear",
@@ -341,6 +347,42 @@ def _build_distill_body(msg: str) -> dict:
     if "def " in content and "return " in content or "import " in content[:200]:
         return {"source_type": "code", "source": content, "name": "代码蒸馏"}
     return {"source_type": "text", "source": content, "name": "文本蒸馏"}
+
+
+def _detect_channel(msg: str) -> str:
+    """从消息中检测通知渠道"""
+    m = msg.lower()
+    if "钉钉" in m or "dingtalk" in m: return "dingtalk"
+    if "企微" in m or "企业微信" in m or "wecom" in m: return "wecom"
+    if "飞书" in m or "feishu" in m: return "feishu"
+    if "telegram" in m or "tg" in m: return "telegram"
+    if "邮件" in m or "email" in m or "mail" in m: return "email"
+    if "短信" in m or "sms" in m: return "sms"
+    if "slack" in m: return "slack"
+    if "discord" in m: return "discord"
+    if "微信" in m or "wechat" in m: return "wechat"
+    return "console"
+
+
+def _build_automation(msg: str) -> dict:
+    """从消息中提取自动化配置"""
+    content = _extract_after(msg)
+    import re
+    now = int(__import__("time").time())
+    name = f"自动化_{now % 10000}"
+    schedule = "0 8 * * *"  # 默认每天早上8点
+    action = "notify"
+    if content:
+        # 尝试提取描述/名字
+        name = content.strip()[:30]
+    return {
+        "name": name,
+        "schedule": schedule,
+        "action": action,
+        "enabled": True,
+        "source": "input_box",
+        "created_at": now,
+    }
 
 
 async def _execute_action(msg: str) -> str | None:
