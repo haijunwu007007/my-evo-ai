@@ -42,7 +42,7 @@ from api._paths import BASE_DIR
 # ── FastAPI ──
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 import uvicorn
@@ -186,8 +186,22 @@ if uploads_dir.exists():
 def _error_response(status: int, error: str, message: str, detail: str = "") -> dict:
     return {"success": False, "error": error, "message": message, "detail": detail, "status_code": status}
 
+
+def _html_page(code: int) -> str | None:
+    """返回自定义错误页面的HTML内容"""
+    p = BASE_DIR / "frontend" / f"{code}.html"
+    if p.exists():
+        return p.read_text(encoding="utf-8")
+    return None
+
+
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: HTTPException):
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        html = _html_page(404)
+        if html:
+            return HTMLResponse(content=html, status_code=404)
     return JSONResponse(
         status_code=404,
         content=_error_response(404, "not_found", f"资源不存在: {request.url.path}"),
@@ -195,6 +209,11 @@ async def not_found_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept and exc.status_code in (404, 500):
+        html = _html_page(exc.status_code)
+        if html:
+            return HTMLResponse(content=html, status_code=exc.status_code)
     return JSONResponse(
         status_code=exc.status_code,
         content=_error_response(exc.status_code, "http_error", str(exc.detail), exc.detail if isinstance(exc.detail, str) else ""),
@@ -205,6 +224,11 @@ async def global_exception_handler(request: Request, exc: Exception):
     import traceback
     tb = traceback.format_exc()
     logger.error(f"[FATAL] {request.method} {request.url.path}: {exc}\n{tb[:2000]}")
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        html = _html_page(500)
+        if html:
+            return HTMLResponse(content=html, status_code=500)
     return JSONResponse(
         status_code=500,
         content=_error_response(500, "internal_error", f"服务器内部错误: {exc}", f"{tb[:500]}"),

@@ -652,6 +652,17 @@ async def chat_engine_js():
     raise HTTPException(404)
 
 
+@router.get("/enterprise-modules.js")
+
+async def enterprise_modules_js():
+
+    p = BASE_DIR / "frontend" / "enterprise-modules.js"
+
+    if p.exists(): return FileResponse(str(p), media_type="application/javascript")
+
+    raise HTTPException(404)
+
+
 
 # ── 补充缺少的路由 ──
 
@@ -830,6 +841,20 @@ async def install_file(filename: str):
 
 
 # ── 新页面路由 ──
+
+# ── 错误页面 ──
+@router.get("/404")
+async def err_404():
+    p = BASE_DIR / "frontend" / "404.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
+@router.get("/500")
+async def err_500():
+    p = BASE_DIR / "frontend" / "500.html"
+    if p.exists(): return FileResponse(str(p))
+    raise HTTPException(404)
+
 
 @router.get("/sdk/{filepath:path}")
 

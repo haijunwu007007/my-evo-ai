@@ -269,7 +269,12 @@ async function doSend(text,ai){try{
     }
     // 走智能对话
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
-    if(!sr.ok){hideLoading();addMsg('服务器返回 '+sr.status,'bot');return};var sd=await sr.json();hideLoading()
+    if(!sr.ok){
+      hideLoading()
+      if(sr.status===429) addMsg('⚠️ 请求太频繁，请稍后再试','bot')
+      else addMsg('服务器返回 '+sr.status,'bot')
+      return
+    }var sd=await sr.json();hideLoading()
     if(sd&&sd.success){
       // 自动导航跳转
       if(sd.redirect){

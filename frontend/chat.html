@@ -584,7 +584,6 @@ function checkOnboard() {
       </div>
       <div class="topbar-right">
         <span onclick="clearHistory()">🔄 新对话</span>
-        <span onclick="showArchives()">📋 历史</span>
         <span id="historyBtn" onclick="showHistory()">📜 历史</span>
       
 </div>
@@ -639,7 +638,7 @@ function checkOnboard() {
           </div>
           <div class="rsec">
             <h4>📝 变更</h4>
-            <div class="ritem" onclick="showArchives()">📋 对话历史</div>
+            <div class="ritem" onclick="showHistory()">📜 对话历史</div>
             <div class="ritem" onclick="window.location.href='/review'">🔍 版本差异</div>
           </div>
           <div class="rsec">
@@ -905,6 +904,8 @@ function demoMode(){
 <script>
 // ── PWA 离线支持 ──
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/static/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
+// ── 移动端侧栏滑动关闭手势 ──
+(function(){var sb=document.querySelector('.sidebar'),ov=document.querySelector('.sidebar-overlay'),sx=0;if(!sb)return;sb.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},false);sb.addEventListener('touchmove',function(e){if(!sb.classList.contains('open'))return;var dx=e.touches[0].clientX-sx;if(dx<-30){sb.classList.remove('open');if(ov)ov.classList.remove('show')}},false);if(ov){ov.addEventListener('touchstart',function(e){sb.classList.remove('open');ov.classList.remove('show')},false)}})();
 // ── 拖拽上传 ──
 (function(){var dz=document.getElementById('appMain');if(!dz)return;var inp=document.getElementById('fileInput');dz.addEventListener('dragenter',function(e){e.preventDefault();dz.style.outline='2px dashed var(--accent)';dz.style.outlineOffset='-4px'});dz.addEventListener('dragover',function(e){e.preventDefault()});dz.addEventListener('dragleave',function(e){e.preventDefault();dz.style.outline=''});dz.addEventListener('drop',function(e){e.preventDefault();dz.style.outline='';if(e.dataTransfer.files.length){document.getElementById('fileInput').files=e.dataTransfer.files;if(typeof handleFiles==='function')handleFiles(document.getElementById('fileInput'))}});})();
 // ── 粘贴图片 ──
