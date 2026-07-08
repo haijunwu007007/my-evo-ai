@@ -63,8 +63,10 @@ textarea{resize:vertical;min-height:60px}
 
   <div class=tab-bar>
     <button class="tab active" onclick="switchTab('distill',this)">🧪 开始蒸馏</button>
-    <button class="tab" onclick="switchTab('skills',this)">📦 已蒸馏技能</button>
-    <button class="tab" onclick="switchTab('history',this)">📋 蒸馏历史</button>
+    <button class="tab" onclick="switchTab('project',this)">📁 项目</button>
+    <button class="tab" onclick="switchTab('chat',this)">💬 对话</button>
+    <button class="tab" onclick="switchTab('skills',this)">📦 技能</button>
+    <button class="tab" onclick="switchTab('history',this)">📋 历史</button>
   </div>
 
   <div id=tabDistill>
@@ -93,6 +95,32 @@ textarea{resize:vertical;min-height:60px}
         <div class=progress-bar style=margin-top:10px><div class=progress-fill id=progressFill style=width:0%></div></div>
         <div id=sessionLog class=log-area></div>
       </div>
+    </div>
+  </div>
+
+  <div id=tabProject style=display:none>
+    <div class=card>
+      <h3>📁 项目蒸馏</h3>
+      <p style=font-size:12px;color:var(--text2,#8892b0);margin-bottom:10px>扫描项目目录，AI 自动分析架构、技术栈，生成项目文档和建议蒸馏的技能。</p>
+      <input id=projectPath placeholder="项目目录路径（如 /home/ubuntu/my-project）">
+      <input id=projectName placeholder="项目名称（可选）" style=margin-top:4px>
+      <button class="btn btn-primary" onclick=distillProject() style=margin-top:6px;width:100%>🔍 分析项目</button>
+      <div id=projectResult style=display:none;margin-top:10px></div>
+    </div>
+  </div>
+
+  <div id=tabChat style=display:none>
+    <div class=card>
+      <h3>💬 对话蒸馏</h3>
+      <p style=font-size:12px;color:var(--text2,#8892b0);margin-bottom:10px>保存聊天记录并用 AI 提炼知识点、问答对和待办事项。</p>
+      <h4 style=font-size:13px;margin-bottom:6px>保存当前对话</h4>
+      <textarea id=chatUserInput placeholder="用户说..." rows=2 style=min-height:40px></textarea>
+      <textarea id=chatAiInput placeholder="AI 回复..." rows=2 style=min-height:40px></textarea>
+      <button class="btn btn-primary btn-sm" onclick=saveConversation() style=margin-top:4px>💾 保存对话</button>
+      <div id=chatSaveResult style=display:inline;margin-left:8px></div>
+      <hr style=margin:12px 0;border-color:var(--border)>
+      <h4 style=font-size:13px;margin-bottom:6px>对话列表 <span id=chatCount style=font-size:11px;color:var(--text2,#8892b0)></span></h4>
+      <div id=chatList><p style=color:var(--text2,#8892b0);font-size:12px;padding:4px>加载中...</p></div>
     </div>
   </div>
 
@@ -132,6 +160,30 @@ async function startDistill(){
   document.getElementById('sessionLog').style.display='block'
   appendLog('🚀 开始蒸馏...')
   appendLog('📤 发送分析请求 ('+CURRENT_SOURCE+')')
+  
+  // 视频URL特殊处理：先转录再蒸馏
+  if(CURRENT_SOURCE==='video_url'){
+    appendLog('🎥 正在转录视频音频...')
+    var tr=await fetch('/api/v1/distill/video/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({video_url:source})})
+    var td=await tr.json()
+    if(td.success && td.transcript){
+      appendLog('✅ 转录完成 ('+td.transcript_len+'字符)')
+      if(td.title){appendLog('📌 标题: '+td.title)}
+      if(td.summary){appendLog('📖 摘要: '+td.summary)}
+      // 用转录文本替代视频URL
+      source='[视频转录] '+td.title+' - '+td.summary+'\n'+td.transcript
+      CURRENT_SOURCE='text'
+    }else if(td.success && td.audio_path){
+      appendLog('📁 音频已下载: '+td.audio_path+' (服务器转录不可用)')
+      appendLog('💡 请手动转写后使用「文本描述」蒸馏')
+      appendLog('❌ 视频蒸馏因转录不可用中止')
+      return
+    }else{
+      appendLog('❌ 视频转录失败: '+(td.error||'未知')+', 改用LLM分析')
+      appendLog('💡 '+td.hint)
+      // 降级：用LLM分析视频标题
+    }
+  }
   
   var r=await fetch('/api/v1/distill/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_type:CURRENT_SOURCE,source:source,name:name,tags:tags})})
   var d=await r.json()
@@ -186,11 +238,111 @@ async function generateSkill(){
 function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')})
   btn.classList.add('active')
-  document.getElementById('tabDistill').style.display=tab==='distill'?'block':'none'
-  document.getElementById('tabSkills').style.display=tab==='skills'?'block':'none'
-  document.getElementById('tabHistory').style.display=tab==='history'?'block':'none'
+  var tabs={'distill':'tabDistill','project':'tabProject','chat':'tabChat','skills':'tabSkills','history':'tabHistory'}
+  for(var k in tabs){
+    document.getElementById(tabs[k]).style.display=k===tab?'block':'none'
+  }
   if(tab==='skills')loadSkills()
   if(tab==='history')loadHistory()
+  if(tab==='chat')loadConversations()
+}
+
+// ── 项目蒸馏 ──
+async function distillProject(){
+  var path=document.getElementById('projectPath').value.trim()
+  if(!path){alert('请输入项目路径');return}
+  var name=document.getElementById('projectName').value.trim()
+  var btn=document.querySelector('#tabProject .btn-primary')
+  btn.disabled=true;btn.textContent='⏳ 分析中...'
+  try{
+    var r=await fetch('/api/v1/distill/project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:path,name:name})})
+    var d=await r.json()
+    var el=document.getElementById('projectResult')
+    el.style.display='block'
+    if(d.success){
+      el.innerHTML='<span class="status-badge s-done">✅ 分析完成</span>\n'+
+        '<div style=margin-top:8px;font-size:13px><b>'+d.title+'</b></div>\n'+
+        '<div style=font-size:12px;color:var(--text2,#8892b0)>'+d.summary+'</div>\n'+
+        '<div style=margin-top:6px;font-size:12px>📊 '+d.file_count+' 文件 | 🛠️ '+(d.tech_stack||[]).join(', ')+'</div>'+
+        '<div style=margin-top:6px;font-size:12px>🧩 '+(d.main_modules||[]).join(', ')+'</div>'+
+        (d.suggested_skills&&d.suggested_skills.length?'<div style=margin-top:6px;font-size:12px><b>可蒸馏:</b>'+d.suggested_skills.join(', ')+'</div>':'')+
+        '<div style=margin-top:6px><span style=font-size:11px;color:var(--text2,#8892b0)>📄 '+d.doc_path+'</span></div>'
+    }else{
+      el.innerHTML='<span class="status-badge s-error">❌ '+d.error+'</span>'
+    }
+  }catch(e){alert('请求失败: '+e.message)}
+  btn.disabled=false;btn.textContent='🔍 分析项目'
+}
+
+// ── 对话蒸馏 ──
+var CURRENT_CONV_ID=''
+
+async function saveConversation(){
+  var user=document.getElementById('chatUserInput').value.trim()
+  var ai=document.getElementById('chatAiInput').value.trim()
+  if(!user&&!ai){alert('请输入至少一条消息');return}
+  var userId=''
+  try{
+    if(user){
+      var r1=await fetch('/api/v1/distill/conversation/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({speaker:'user',content:user,conversation_id:userId})})
+      var d1=await r1.json()
+      if(d1.success){userId=d1.conversation_id}
+    }
+    if(ai&&userId){
+      await fetch('/api/v1/distill/conversation/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({speaker:'ai',content:ai,conversation_id:userId})})
+    }
+    document.getElementById('chatSaveResult').innerHTML='<span class="status-badge s-done">✅ 已保存</span>'
+    document.getElementById('chatUserInput').value=''
+    document.getElementById('chatAiInput').value=''
+    CURRENT_CONV_ID=userId
+    loadConversations()
+  }catch(e){document.getElementById('chatSaveResult').innerHTML='<span class="status-badge s-error">❌ 保存失败</span>'}
+}
+
+async function loadConversations(){
+  try{
+    var r=await fetch('/api/v1/distill/conversation/list')
+    var d=await r.json()
+    document.getElementById('chatCount').textContent='('+(d.total||0)+')'
+    if(!d.conversations||!d.conversations.length){
+      document.getElementById('chatList').innerHTML='<p style=color:var(--text2,#8892b0);font-size:12px;padding:4px>暂无对话记录</p>'
+      return
+    }
+    var html=''
+    d.conversations.forEach(function(c){
+      var ts=new Date(c.updated*1000).toLocaleString()
+      html+='<div class=skill-item>'+
+        '<div><div class=name>'+c.preview+'</div><div class=meta>'+ts+' | '+c.messages+'条消息</div></div>'+
+        '<div style=display:flex;gap:4px>'+
+        '<button class="btn btn-sm btn-outline" onclick=viewConversation("'+c.id+'")>📖</button>'+
+        '<button class="btn btn-sm btn-outline" onclick=distillConversation("'+c.id+'")>🧪</button></div></div>'
+    })
+    document.getElementById('chatList').innerHTML=html
+  }catch(e){}
+}
+
+async function viewConversation(id){
+  var r=await fetch('/api/v1/distill/conversation/'+id)
+  var d=await r.json()
+  if(!d.success||!d.messages)return
+  var html=d.messages.map(function(m){return '<div style=padding:4px 0;font-size:12px><b>'+(m.speaker==='user'?'🧑 用户':'🤖 AI')+':</b> '+m.content+'</div>'}).join('')
+  document.getElementById('chatList').innerHTML='<button class="btn btn-sm btn-outline" onclick=loadConversations() style=margin-bottom:8px>⬅ 返回</button>'+html
+}
+
+async function distillConversation(id){
+  var r=await fetch('/api/v1/distill/conversation/distill/'+id,{method:'POST'})
+  var d=await r.json()
+  if(d.success){
+    var html='<span class="status-badge s-done">✅ 蒸馏完成</span>'+
+      '<div style=margin-top:8px;font-size:13px><b>'+d.title+'</b></div>'+
+      '<div style=font-size:12px;color:var(--text2,#8892b0)>'+d.summary+'</div>'+
+      (d.facts&&d.facts.length?'<div style=margin-top:6px><b>知识点:</b><br>'+d.facts.map(function(f){return '• '+f}).join('<br>')+'</div>':'')+
+      (d.qa_pairs&&d.qa_pairs.length?'<div style=margin-top:6px><b>问答:</b><br>'+d.qa_pairs.map(function(q){return '❓ '+q.question+'<br>💡 '+q.answer}).join('<br>')+'</div>':'')+
+      (d.action_items&&d.action_items.length?'<div style=margin-top:6px><b>待办:</b><br>'+d.action_items.map(function(a){return '☐ '+a}).join('<br>')+'</div>':'')
+    document.getElementById('chatList').innerHTML='<button class="btn btn-sm btn-outline" onclick=loadConversations() style=margin-bottom:8px>⬅ 返回列表</button>'+html
+  }else{
+    document.getElementById('chatList').innerHTML='<span class="status-badge s-error">❌ '+d.error+'</span>'
+  }
 }
 
 async function loadSkills(){

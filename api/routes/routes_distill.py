@@ -393,6 +393,295 @@ def _make_script_generic(title: str, summary: str, steps_json: str, points_json:
     s += '    return result\n'
     return s
 
+# ═══════════════════════════════════════════════
+# 视频转录 — yt-dlp 下载音频 + Vosk 转录 + LLM 分析
+# ═══════════════════════════════════════════════
+
+_AUDIO_CACHE = BASE / "audio_cache"
+_AUDIO_CACHE.mkdir(parents=True, exist_ok=True)
+
+class VideoTranscribeInput(BaseModel):
+    video_url: str
+    language: Optional[str] = "zh"
+
+@router.post("/video/transcribe")
+async def transcribe_video(m: VideoTranscribeInput):
+    """下载视频音频 → 转录文本 → 返回内容"""
+    import subprocess, tempfile
+    vid = uuid.uuid4().hex[:12]
+    audio_path = _AUDIO_CACHE / f"{vid}"
+    wav_path = _AUDIO_CACHE / f"{vid}.wav"
+
+    try:
+        # 1. 尝试 yt-dlp 下载音频
+        try:
+            result = subprocess.run(
+                ["yt-dlp", "-x", "--audio-format", "mp3", "-o", str(audio_path) + ".%(ext)s", m.video_url],
+                capture_output=True, text=True, timeout=120
+            )
+            if result.returncode != 0:
+                # 尝试纯音频抽取
+                subprocess.run(
+                    ["yt-dlp", "-f", "bestaudio", "--extract-audio", "--audio-format", "mp3",
+                     "-o", str(audio_path) + ".%(ext)s", m.video_url],
+                    capture_output=True, text=True, timeout=120
+                )
+            # 找下载的文件
+            mp3_files = list(_AUDIO_CACHE.glob(f"{vid}.*"))
+            downloaded = mp3_files[0] if mp3_files else None
+        except Exception as e:
+            return {"success": False, "error": f"视频下载失败: {str(e)[:100]}", "hint": "请尝试手动将视频音频转为文本后使用「文本描述」蒸馏"}
+
+        if not downloaded or not downloaded.exists():
+            return {"success": False, "error": "无法获取视频音频", "hint": "请尝试使用文本描述替代"}
+
+        # 2. 转换为 WAV 16kHz mono（Vosk需要的格式）
+        wav_converted = _AUDIO_CACHE / f"{vid}_converted.wav"
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", str(downloaded), "-ar", "16000", "-ac", "1",
+                 str(wav_converted)], capture_output=True, text=True, timeout=60
+            )
+        except Exception:
+            # 无ffmpeg，跳过转写，返回下载的音频路径
+            return {"success": True, "audio_path": str(downloaded), "note": "音频已下载，服务器无ffmpeg/Vosk，请手动转写"}
+
+        # 3. Vosk 转写
+        transcript = ""
+        try:
+            import wave, vosk
+            model_path = os.environ.get("VOSK_MODEL_PATH", "")
+            if model_path and os.path.exists(model_path):
+                model = vosk.Model(model_path)
+                wf = wave.open(str(wav_converted), "rb")
+                rec = vosk.KaldiRecognizer(model, wf.getframerate())
+                rec.SetWords(True)
+                while True:
+                    data = wf.readframes(4000)
+                    if len(data) == 0: break
+                    rec.AcceptWaveform(data)
+                result = json.loads(rec.FinalResult())
+                transcript = result.get("text", "")
+                wf.close()
+        except Exception as e:
+            transcript = ""
+
+        # 4. 清理临时文件
+        try:
+            downloaded.unlink(missing_ok=True)
+            wav_converted.unlink(missing_ok=True)
+        except: pass
+
+        if transcript:
+            # 5. LLM 提炼
+            prompt = f"""分析以下视频转录文本，提取核心内容和可执行步骤，返回JSON：
+{{"title": "视频主题", "summary": "一句话总结", "steps": ["步骤1", ...], "key_points": ["要点1", ...]}}
+转录文本：
+{transcript[:6000]}"""
+            llm_out = await _call_llm(prompt, timeout=45)
+            parsed = _parse_llm_json(llm_out)
+            return {
+                "success": True, "transcript_len": len(transcript),
+                "transcript": transcript[:2000],
+                "title": parsed.get("title", ""),
+                "summary": parsed.get("summary", ""),
+                "steps": parsed.get("steps", []),
+                "key_points": parsed.get("key_points", [])
+            }
+        return {"success": True, "audio_path": str(wav_converted), "note": "Vosk转写未产生文本，请检查模型路径"}
+    except Exception as e:
+        return {"success": False, "error": f"视频处理异常: {str(e)[:200]}"}
+
+
+# ═══════════════════════════════════════════════
+# 项目蒸馏 — 扫描目录 → LLM 分析 → 生成文档
+# ═══════════════════════════════════════════════
+
+class ProjectDistillInput(BaseModel):
+    path: str
+    depth: Optional[int] = 3
+    name: Optional[str] = ""
+
+@router.post("/project")
+async def distill_project(m: ProjectDistillInput):
+    """扫描项目目录 → 收集文件 → LLM 分析 → 生成项目文档"""
+    project_path = Path(m.path)
+    if not project_path.exists() or not project_path.is_dir():
+        return {"success": False, "error": f"目录不存在: {m.path}"}
+
+    # 1. 收集文件
+    collected = []
+    extensions = {".py", ".md", ".html", ".js", ".ts", ".css", ".json", ".yaml", ".yml", ".txt", ".toml", ".cfg", ".ini"}
+    skip_dirs = {"node_modules", ".git", "__pycache__", ".venv", "venv", "_archive", ".workbuddy"}
+
+    for i, (root, dirs, files) in enumerate(os.walk(str(project_path))):
+        if m.depth and root.count(os.sep) - str(project_path).count(os.sep) >= m.depth:
+            dirs[:] = []  # 不超过深度
+            continue
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
+        for f in files:
+            ext = os.path.splitext(f)[1].lower()
+            if ext in extensions:
+                fp = os.path.join(root, f)
+                try:
+                    content = open(fp, "r", encoding="utf-8", errors="replace").read()
+                    rel = os.path.relpath(fp, str(project_path))
+                    collected.append({"path": rel, "size": len(content), "ext": ext, "content": content[:3000]})
+                except: pass
+
+    if not collected:
+        return {"success": False, "error": "项目中未找到可分析的文件"}
+
+    # 2. 构建项目摘要供LLM分析
+    summary_lines = []
+    for c in collected[:30]:
+        summary_lines.append(f"📄 {c['path']} ({c['size']}B)")
+    file_list = "\n".join(summary_lines)
+
+    prompt = f"""分析以下项目结构，提取项目的功能、架构和技术栈，返回JSON：
+{{"title": "项目名称", "summary": "一句话描述", "tech_stack": ["技术1", "技术2", ...], "architecture": "架构描述", "main_modules": ["模块1", "模块2", ...], "file_count": {len(collected)}, "suggested_skills": ["可以蒸馏的技能建议1", ...]}}
+项目文件列表：
+{file_list}
+
+关键文件内容示例：
+{collected[0]['content'][:2000] if collected else '无'}"""
+
+    llm_out = await _call_llm(prompt, timeout=60)
+    parsed = _parse_llm_json(llm_out)
+
+    # 3. 生成项目文档
+    session_id = uuid.uuid4().hex[:12]
+    proj_name = m.name or project_path.name
+    doc = f"""# {proj_name} — 项目分析报告
+
+> 自动分析自 `{m.path}` · {time.strftime("%Y-%m-%d %H:%M")}
+
+## 📊 概览
+- **文件数:** {len(collected)}
+- **技术栈:** {', '.join(parsed.get('tech_stack', ['未知']))}
+- **架构:** {parsed.get('architecture', '未分析')}
+
+## 🎯 功能
+{parsed.get('summary', '')}
+
+## 🧩 主要模块
+{chr(10).join(f'- {m}' for m in parsed.get('main_modules', ['-']))}
+
+## 🛠️ 可蒸馏技能
+{chr(10).join(f'- {s}' for s in parsed.get('suggested_skills', ['-']))}
+
+## 📋 文件清单
+{chr(10).join(f'1. {c["path"]}' for c in collected[:50])}
+"""
+    doc_path = BASE / f"projects/{proj_name.replace(' ', '_')}.md"
+    doc_path.parent.mkdir(parents=True, exist_ok=True)
+    doc_path.write_text(doc, encoding="utf-8")
+
+    return {
+        "success": True, "project": proj_name,
+        "file_count": len(collected),
+        "title": parsed.get("title", proj_name),
+        "summary": parsed.get("summary", ""),
+        "tech_stack": parsed.get("tech_stack", []),
+        "architecture": parsed.get("architecture", ""),
+        "main_modules": parsed.get("main_modules", []),
+        "suggested_skills": parsed.get("suggested_skills", []),
+        "doc_path": str(doc_path)
+    }
+
+
+# ═══════════════════════════════════════════════
+# 对话蒸馏 — 聊天记录存储 + 知识提炼
+# ═══════════════════════════════════════════════
+
+_CONV_STORE = BASE / "conversations"
+_CONV_STORE.mkdir(parents=True, exist_ok=True)
+
+class ConversationMessage(BaseModel):
+    speaker: str            # "user" 或 "ai"
+    content: str
+    conversation_id: Optional[str] = ""
+
+@router.post("/conversation/save")
+async def save_conversation(m: ConversationMessage):
+    """保存一条对话记录"""
+    conv_id = m.conversation_id or uuid.uuid4().hex[:12]
+    conv_dir = _CONV_STORE / conv_id
+    conv_dir.mkdir(parents=True, exist_ok=True)
+    msg_file = conv_dir / f"{int(time.time() * 1000)}.json"
+    msg_file.write_text(json.dumps({
+        "speaker": m.speaker, "content": m.content,
+        "ts": time.time()
+    }, ensure_ascii=False), encoding="utf-8")
+    return {"success": True, "conversation_id": conv_id, "messages": len(list(conv_dir.glob("*.json")))}
+
+@router.get("/conversation/list")
+async def list_conversations():
+    """列出所有对话""" 
+    convs = []
+    for d in sorted(_CONV_STORE.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True):
+        if d.is_dir():
+            msgs = sorted(d.glob("*.json"), key=lambda f: f.stat().st_mtime)
+            first = ""
+            if msgs:
+                try: first = json.loads(msgs[0].read_text(encoding="utf-8")).get("content", "")[:80]
+                except: pass
+            convs.append({"id": d.name, "messages": len(msgs), "preview": first, "updated": d.stat().st_mtime})
+    return {"success": True, "conversations": convs, "total": len(convs)}
+
+@router.get("/conversation/{conv_id}")
+async def get_conversation(conv_id: str):
+    """获取对话详情"""
+    conv_dir = _CONV_STORE / conv_id
+    if not conv_dir.is_dir():
+        return {"success": False, "error": "对话不存在"}
+    msgs = []
+    for f in sorted(conv_dir.glob("*.json"), key=lambda p: p.stat().st_mtime):
+        try: msgs.append(json.loads(f.read_text(encoding="utf-8")))
+        except: pass
+    return {"success": True, "conversation_id": conv_id, "messages": msgs}
+
+@router.post("/conversation/distill/{conv_id}")
+async def distill_conversation(conv_id: str):
+    """把对话记录蒸馏为知识库"""
+    conv_dir = _CONV_STORE / conv_id
+    if not conv_dir.is_dir():
+        return {"success": False, "error": "对话不存在"}
+    msgs = []
+    for f in sorted(conv_dir.glob("*.json"), key=lambda p: p.stat().st_mtime):
+        try: msgs.append(json.loads(f.read_text(encoding="utf-8")))
+        except: pass
+    if not msgs:
+        return {"success": False, "error": "对话为空"}
+
+    dialogue = "\n".join(f"{m['speaker']}: {m['content']}" for m in msgs[-50:])
+    prompt = f"""分析以下对话记录，提取所有知识点、问答对和关键信息，返回JSON：
+{{"title": "对话主题", "summary": "对话总结", "facts": ["知识点1", "知识点2", ...], "qa_pairs": [{{"question": "问题", "answer": "答案"}}], "action_items": ["待办1", ...]}}
+对话记录：
+{dialogue[:6000]}"""
+
+    llm_out = await _call_llm(prompt, timeout=45)
+    parsed = _parse_llm_json(llm_out)
+
+    # 保存知识
+    knowledge_file = BASE / "knowledge" / f"conv_{conv_id}.json"
+    knowledge_file.parent.mkdir(parents=True, exist_ok=True)
+    knowledge_file.write_text(json.dumps({
+        "source": f"conversation/{conv_id}", "extracted_at": time.time(),
+        **parsed
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    return {
+        "success": True, "conversation_id": conv_id,
+        "messages_analyzed": len(msgs),
+        "title": parsed.get("title", ""),
+        "summary": parsed.get("summary", ""),
+        "facts": parsed.get("facts", []),
+        "qa_pairs": parsed.get("qa_pairs", []),
+        "action_items": parsed.get("action_items", [])
+    }
+
+
 @router.get("/list")
 async def list_distillations():
     records = []
