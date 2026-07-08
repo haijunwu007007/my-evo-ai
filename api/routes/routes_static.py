@@ -651,6 +651,11 @@ async def share_css():
     p = BASE_DIR / "frontend" / "share.css"
     return FileResponse(str(p), media_type="text/css")
 
+@router.get("/components.js")
+async def components_js():
+    p = BASE_DIR / "frontend" / "components.js"
+    return FileResponse(str(p), media_type="application/javascript")
+
 @router.get("/chat_engine.js")
 
 async def chat_engine_js():
