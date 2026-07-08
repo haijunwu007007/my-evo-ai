@@ -641,6 +641,16 @@ async def company_page():
 
 
 
+@router.get("/i18n-loader.js")
+async def i18n_loader_js():
+    p = BASE_DIR / "frontend" / "i18n-loader.js"
+    return FileResponse(str(p), media_type="application/javascript")
+
+@router.get("/share.css")
+async def share_css():
+    p = BASE_DIR / "frontend" / "share.css"
+    return FileResponse(str(p), media_type="text/css")
+
 @router.get("/chat_engine.js")
 
 async def chat_engine_js():
