@@ -297,20 +297,33 @@ function showArchives(){var a=JSON.parse(localStorage.getItem('evo_chat_archives
 function showHistory(){
   var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');
   var rp=document.getElementById('rightPanel');
-  if(rp.classList.contains('hidden')){var rt=document.getElementById('rightToggleBtn');if(rt)rt.click()}
-  var rc=document.querySelector('.right-content');
-  if(!rc)return;
-  var h='<div class="rsec"><h4>📋 对话历史</h4>';
-  if(a.length===0){h+='<div class="ritem" style="cursor:default;color:var(--text3);font-size:15px">暂无历史对话</div>'}
+  if(rp.classList.contains('hidden')){
+    rp.classList.remove('hidden');
+    var parent=rp.parentElement;
+    parent.classList.add('right-panel-visible');
+  }
+  var overlay=document.getElementById('historyOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='historyOverlay';
+    overlay.style.cssText='position:fixed;top:0;right:0;width:320px;max-width:85vw;height:100vh;z-index:999;background:var(--card);border-left:1px solid var(--border);overflow-y:auto;padding:12px;box-shadow:-4px 0 20px rgba(0,0,0,.15)';
+    overlay.onclick=function(e){if(e.target===overlay)closeHistoryOverlay()};
+    document.body.appendChild(overlay);
+  }
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h4 style="margin:0">📋 对话历史</h4><span onclick="closeHistoryOverlay()" style="cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px">✕</span></div>';
+  if(a.length===0){h+='<div style="padding:20px;text-align:center;color:var(--text3)">暂无历史对话</div>'}
   for(var i=0;i<a.length;i++){
-    var t=a[i].time||'';
     var n=a[i].name||('对话 '+(i+1));
     var cnt=a[i].messages?Math.ceil(a[i].messages.length/2):0;
-    h+='<div class="ritem" onclick="restoreArchive('+i+')" title="点击恢复"><span style="font-size:17px">💬</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.slice(0,16)+'</span><span style="font-size:14px;color:var(--text3)">'+cnt+'条</span><span style="font-size:14px;color:var(--text3);margin-left:4px;cursor:pointer" onclick="event.stopPropagation();renameArchive('+i+')">✏️</span><span style="font-size:14px;color:#e74c3c;margin-left:2px;cursor:pointer" onclick="event.stopPropagation();deleteArchive('+i+')">🗑️</span></div>';
+    h+='<div onclick="restoreArchive('+i+')" style="display:flex;align-items:center;gap:8px;padding:10px 8px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--bg);transition:background .15s" onmouseover="this.style.background=\'var(--sidebar-hover)\'" onmouseout="this.style.background=\'var(--bg)\'"><span>💬</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">'+n.slice(0,20)+'</span><span style="font-size:12px;color:var(--text3)">'+cnt+'条</span><span onclick="event.stopPropagation();renameArchive('+i+')" style="cursor:pointer;font-size:14px">✏️</span><span onclick="event.stopPropagation();deleteArchive('+i+')" style="cursor:pointer;font-size:14px;color:#e74c3c">🗑️</span></div>';
   }
-  h+='</div>';
-  rc.innerHTML=h;
-  document.getElementById('historyBtn').textContent='🔄 刷新';
+  overlay.innerHTML=h;
+  overlay.style.display='block';
+  document.getElementById('historyBtn').textContent='📜 历史';
+}
+function closeHistoryOverlay(){
+  var overlay=document.getElementById('historyOverlay');
+  if(overlay)overlay.style.display='none';
 }
 function restoreArchive(idx){
   var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');
@@ -318,7 +331,9 @@ function restoreArchive(idx){
   CHAT=a[idx].messages||[];
   localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));
   restoreHistory();
-  document.getElementById('historyBtn').textContent='📋 历史';
+  document.getElementById('historyBtn').textContent='📜 历史';
+  closeRightPanel();
+  closeHistoryOverlay();
 }
 function renameArchive(idx){
   var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');
@@ -432,7 +447,8 @@ function cancelVoiceRecord(e){
   if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
   _voiceChunks=[]
 }
-function toggleRightPanel(){document.getElementById('rightPanel').classList.toggle('hidden')}
+function toggleRightPanel(){var p=document.getElementById('rightPanel');var parent=p.parentElement;p.classList.toggle('hidden');parent.classList.toggle('right-panel-visible')}
+function closeRightPanel(){var p=document.getElementById('rightPanel');var parent=p.parentElement;if(!p.classList.contains('hidden')){p.classList.add('hidden');parent.classList.remove('right-panel-visible')}}
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 
 
