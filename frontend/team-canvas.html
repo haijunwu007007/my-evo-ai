@@ -4,6 +4,10 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px;min-height:100vh}
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #2d3561}
+.tab{padding:8px 18px;cursor:pointer;font-size:14px;color:#8892b0;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:#e0e0e0}.tab.active{color:#4361ee;border-bottom-color:#4361ee;font-weight:600}
+.tab-content{display:none}.tab-content.active{display:block}
 h1{font-size:24px;margin-bottom:6px}
 .sub{color:#8892b0;font-size:14px;margin-bottom:16px}
 .back{display:inline-block;margin-bottom:16px;color:#4361ee;text-decoration:none;font-size:14px}
@@ -36,7 +40,12 @@ h1{font-size:24px;margin-bottom:6px}
 .status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
 </style></head>
 <body>
-<a class="back" href="/">← 返回首页</a>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(this,'tc_team')">🧑‍🤝‍🧑 团队画布</div>
+  <div class="tab" onclick="switchTab(this,'tc_canvas')">🎨 编排画布</div>
+</div>
+<a class="back" href="/">← 返回</a>
+<div id="tc_team" class="tab-content active">
 <h1>🎨 Agent 团队画布</h1>
 <p class="sub">拖拽角色到画布组建AI团队，选择执行模式，一键启动</p>
 <div class="status" id="status"></div>
@@ -160,5 +169,18 @@ function exportToCanvas(){
   setTimeout(function(){window.location.href='/canvas?team='+encodeURIComponent(JSON.stringify({agents:_agents,mode:_mode}))},600)
 }
 load()
+</script>
+
+<div id="tc_canvas" class="tab-content">
+  <iframe src="/canvas" style="width:100%;height:85vh;border:none;border-radius:8px"></iframe>
+</div>
+
+<script>
+function switchTab(el, id) {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
+  el.classList.add('active')
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active')})
+  document.getElementById(id).classList.add('active')
+}
 </script>
 </body></html>
