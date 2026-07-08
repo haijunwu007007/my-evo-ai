@@ -42,7 +42,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .topbar-left h1{font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .model-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
 .topbar-right{display:flex;align-items:center;gap:4px}
-.topbar-right span{font-size:15px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .2s}
+.topbar-right span{font-size:15px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .2s;display:inline-block;touch-action:manipulation}
 .topbar-right span:hover{background:var(--glass);color:var(--accent)}
 /* 内容区 */
 .content-flex{flex:1;display:flex;overflow:hidden;position:relative}
@@ -565,8 +565,8 @@ function checkOnboard() {
         <span class="model-badge" id="modelBadge" data-model="zhipu/glm-4-flash" onclick="checkLLM()">🧠 zhipu/glm-4-flash</span>
       </div>
       <div class="topbar-right">
-        <span onclick="clearHistory()">🔄 新对话</span>
-        <span id="historyBtn" onclick="showHistory()">📜 历史</span>
+        <span onclick="clearHistory()" ontouchend="clearHistory();event.preventDefault()">🔄 新对话</span>
+        <span id="historyBtn" onclick="showHistory()" ontouchend="showHistory();event.preventDefault()">📜 历史</span>
       
 </div>
     </div>
