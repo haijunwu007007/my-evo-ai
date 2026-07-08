@@ -108,8 +108,18 @@ var API='/api/v1';var CHAT=[];try{var _tmp=JSON.parse(localStorage.getItem('evo_
 
 async function doRegister(){
   var user=document.getElementById('regUser').value.trim();if(!user||user.length<2){alert('用户名至少2个字符');return}
+  var email=document.getElementById('regEmail')?.value.trim()||''
+  var phone=document.getElementById('regPhone')?.value.trim()||''
   var key=document.getElementById('regKey').value.trim();var pass=document.getElementById('regPass').value.trim()
-  try{var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});var d=await r.json();if(!d.access_token){await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});var r2=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});d=await r2.json()}}catch(e){}
+  if(!pass||pass.length<3){alert('密码至少3个字符');return}
+  try{
+    var r=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});var d=await r.json()
+    if(!d.access_token){
+      var rr=await fetch('/api/v1/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass,email:email,phone:phone})});var dd=await rr.json()
+      if(!dd.success){alert(dd.error||'注册失败');return}
+      var r2=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});d=await r2.json()
+    }
+  }catch(e){alert('网络错误: '+e.message);return}
   if(d&&d.access_token){localStorage.setItem('evo_token',d.access_token);localStorage.setItem('evo_role',d.role||'user')}
   if(!localStorage.getItem('evo_logged_in')){localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1');localStorage.setItem('evo_login_ts',Date.now().toString())}
   if(key)localStorage.setItem('evo_api_key',key);document.getElementById('authWrap').classList.remove('active');document.getElementById('appMain').style.display='flex'
@@ -117,6 +127,23 @@ async function doRegister(){
   document.getElementById('greeting').textContent=__('greeting').replace('{name}',user);restoreHistory();_checkExpert();setTimeout(function(){checkLLM()},1000)
 }
 function doLogout(){localStorage.removeItem('evo_logged_in');localStorage.removeItem('evo_token');localStorage.removeItem('evo_role');document.getElementById('authWrap').classList.add('active');document.getElementById('appMain').style.display='none'}
+function showPasswordReset(){
+  var input=prompt('请输入注册时填写的邮箱或手机号，我们将发送重置码')
+  if(!input||input.trim().length<3)return
+  fetch('/api/v1/user/password-reset/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input,phone:''})})
+    .then(function(r){return r.json()}).then(function(d){
+      if(!d.success){alert(d.error||'请求失败');return}
+      var code=prompt('重置码已生成。请输入重置码：')
+      if(!code)return
+      var np=prompt('请输入新密码（至少3位）：')
+      if(!np||np.length<3){alert('密码至少3位');return}
+      fetch('/api/v1/user/password-reset/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:code.trim(),new_password:np})})
+        .then(function(r){return r.json()}).then(function(d2){
+          if(d2.success){alert('密码已重置，请用新密码登录')}
+          else{alert(d2.error||'重置失败')}
+        })
+    }).catch(function(e){alert('网络错误: '+e.message)})
+}
 function _renderMd(t){return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,function(m,a,s){return '<img src="'+s.replace(/["<>']/g,'')+'" alt="'+a.replace(/["<>']/g,'')+'" style="max-width:100%;border-radius:8px;margin:4px 0">'}).replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,t,h){return '<a href="'+h.replace(/["<>'` ]/g,'')+'" target="_blank" rel="noopener">'+t.replace(/["<>']/g,'')+'</a>'})}
 function friendlyError(msg){var m=msg||'';if(m.indexOf('502')>=0)return'服务暂时不可用，请稍后重试';if(m.indexOf('timeout')>=0||m.indexOf('timed out')>=0)return'请求超时，可能是网络或服务器负载较高';if(m.indexOf('500')>=0)return'服务器内部错误，已记录日志';if(m.indexOf('404')>=0)return'资源不存在';if(m.indexOf('Failed to fetch')>=0||m.indexOf('NetworkError')>=0)return'网络连接失败，请检查网络';return m.slice(0,120)}
 function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}

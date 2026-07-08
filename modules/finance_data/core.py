@@ -1,3 +1,4 @@
+"""m53_finance_data - core module"""
 """
 AUTO-EVO-AI V0.1 — M53 Finance Data
 """

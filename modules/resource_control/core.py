@@ -1,3 +1,4 @@
+"""agent_resource_control - core module"""
 """
 AUTO-EVO-AI V0.1 — Agent Resource Control — 智能体资源管控
 """

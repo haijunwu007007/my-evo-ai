@@ -1,3 +1,4 @@
+"""agent_hephaestus - core module"""
 """
 # Grade: A
 AUTO-EVO-AI V0.1 — Agent Hephaestus (代码构建引擎)

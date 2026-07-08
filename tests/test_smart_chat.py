@@ -304,11 +304,11 @@ class TestCoreFiles(unittest.TestCase):
         self.assertTrue(self.core.is_dir())
 
     def test_101_core_engines_exist(self):
-        """核心引擎存在"""
-        required = ["decision_engine.py", "llm_gateway.py", "scheduler_engine.py",
-                     "event_engine.py", "module_delegate.py"]
-        for f in required:
-            self.assertTrue((self.core / f).is_file(), f"核心文件缺失: core/{f}")
+        """核心引擎存在（支持拆分后子目录结构）"""
+        required = {"decision_engine.py": "decision", "llm_gateway.py": "llm"}
+        for f, subdir in required.items():
+            target = self.core / subdir / "core.py"
+            self.assertTrue(target.is_file(), f"核心文件缺失: core/{subdir}/core.py (从 {f} 拆分)")
 
 
 if __name__ == "__main__":

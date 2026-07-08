@@ -1,3 +1,4 @@
+"""llm_gateway - core module"""
 """
 AUTO-EVO-AI V0.1 — 系统级LLM智能网关
 ====================================

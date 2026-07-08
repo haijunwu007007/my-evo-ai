@@ -1,3 +1,4 @@
+"""cli_interface - core module"""
 """
 AUTO-EVO-AI V0.1 — CLI Interface — 命令行交互接口
 """

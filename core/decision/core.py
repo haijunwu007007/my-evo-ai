@@ -1,3 +1,4 @@
+"""decision_engine - core module"""
 """
 AUTO-EVO-AI 自主决策引擎 v1.0
 生产级闭环: 事件感知 → 智能决策 → 自动执行 → 结果反馈

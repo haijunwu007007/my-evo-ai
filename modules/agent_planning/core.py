@@ -1,8 +1,10 @@
-"""AUTO-EVO-AI V0.1 - 智能规划引擎"""
 # Grade: A
 from __future__ import annotations
 import time, json, logging, asyncio, uuid
 from typing import Any, Dict, List, Optional, Tuple
+
+"""agent_planner - core module"""
+"""AUTO-EVO-AI V0.1 - 智能规划引擎"""
 from datetime import datetime
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 from modules._base.planner_types import TaskType, PlanStatus, ModuleCapability, ExecutionStep, ExecutionPlan
