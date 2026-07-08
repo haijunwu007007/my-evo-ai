@@ -39,7 +39,7 @@ _NAVIGATION_MAP = [
     (["视频","视频生成","做视频","制作视频","生成视频"], "/video"),
     # 数据 & 知识
     (["记忆","知识库","记忆库","cognee","知识图谱","回忆"], "/cognee"),
-    (["学习","教程","learn","学习中心"], "/learn"),
+    (["学习","教程","learn","学习中心","我要学习","开始学习"], "/learn.html"),
     (["开源","中心","市场","hub","开源项目","发现项目"], "/hub"),
     # 开发 & 画布
     (["画布","canvas","编排画布","可视化编排"], "/canvas"),
@@ -83,6 +83,7 @@ _NAVIGATION_MAP = [
     (["agent工厂","agent-factory","agentfactory","智能体工厂","生成agent"], "/agent-factory"),
     (["软件工厂","software factory","soft-factory","项目生成","生成项目"], "/soft-factory"),
     (["oss分销","oss-distiller","开源分销"], "/oss-distiller"),
+    (["蒸馏","蒸馏一切","蒸馏技能","技能蒸馏","整理"], "/distill.html"),
     (["记忆","记忆管理","memos","备忘录"], "/memos"),
     (["视觉","视觉理解","vision","图片理解"], "/vision"),
     (["realtime","实时通信","实时同步","实时协作"], "/realtime"),
@@ -209,6 +210,10 @@ _ACTION_MAP = [
      lambda msg: {"name": _extract_after(msg) or "流水线", "description": "", "steps": []}),
 
     # ── 事件规则 ──
+    # ── 蒸馏 ──
+    (["蒸馏这个", "帮我蒸馏", "提炼这个", "帮我提炼"], "POST", "/api/v1/distill/start",
+     lambda msg: _build_distill_body(msg)),
+    # ── 事件规则 ──
     (["创建规则", "添加规则", "创建事件规则"], "POST", "/api/v1/events/rules",
      lambda msg: {"name": _extract_after(msg) or "规则", "pattern": "*", "action": "notify"}),
 
@@ -265,8 +270,12 @@ _ACTION_MAP = [
      lambda _: {}),
 
     # ── 学习/教程 ──
-    (["开始课程", "开始学习", "学习课程"], "POST", "/api/v1/learn/start",
+    (["开始学习", "学习课程"], "POST", "/api/v1/learn/start",
      lambda msg: {"course_id": _extract_after(msg) or "intro", "user": _get_username()}),
+    (["录制演示", "录制教程", "开始录制"], "POST", "/api/v1/learn/demo/create",
+     lambda msg: {"name": _extract_after(msg) or f"演示_{int(time.time())}", "auto_record_mode": True}),
+    (["查看演示", "演示列表", "我的学习"], "GET", "/api/v1/learn/list",
+     lambda _: {}),
 
     # ── 数据导出 ──
     (["导出数据", "导出CSV", "导出JSON"], "GET", "/api/v1/data/export",
@@ -319,6 +328,20 @@ def _extract_after(msg: str) -> str:
     if rest.endswith("的"):
         rest = rest[:-1].strip()
     return rest
+
+
+def _build_distill_body(msg: str) -> dict:
+    """从消息中提取蒸馏内容，自动判断是URL/文本/代码"""
+    content = _extract_after(msg)
+    if not content or len(content) < 8:
+        content = msg  # 降级：整条消息作为蒸馏源
+    import re
+    if re.match(r'^https?://', content.strip()):
+        return {"source_type": "url", "source": content.strip(), "name": "网页蒸馏"}
+    if "def " in content and "return " in content or "import " in content[:200]:
+        return {"source_type": "code", "source": content, "name": "代码蒸馏"}
+    return {"source_type": "text", "source": content, "name": "文本蒸馏"}
+
 
 async def _execute_action(msg: str) -> str | None:
     """执行动作 — 匹配关键词→调API→返回结果，不依赖LLM"""

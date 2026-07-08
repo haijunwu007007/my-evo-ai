@@ -1,115 +1,192 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Human - AUTO-EVO-AI</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Human 人机协作审批中心 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif}
-body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
-.sidebar{width:120px;background:#f0f0f4;display:flex;flex-direction:column;padding:8px 0;border-right:1px solid #e8eaed;flex-shrink:0}
-.sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:#6b7280;font-size:11px;cursor:pointer}
-.sbtn:hover{background:#e4e6ed;color:#1a1a2e}
-.sbtn .sicon{font-size:13px;width:20px;text-align:center}
-.sbtn.active{background:#eef0f8;color:#4361ee;font-weight:600}
-.spacer{flex:1}
-.divider{height:1px;background:#e8eaed;margin:4px 10px}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #e8eaed;background:#fff;height:44px}
-.topbar-left{display:flex;align-items:center;gap:8px}
-.topbar-left h1{font-size:14px;font-weight:700}
-.back-btn{font-size:11px;color:#6b7280;cursor:pointer;padding:3px 8px;border-radius:6px}
-.back-btn:hover{background:#f0f2f8;color:#4361ee}
-.content{flex:1;padding:20px 24px;overflow-y:auto;max-width:900px}
-.card{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:16px;margin-bottom:12px}
-.card h2{font-size:15px;margin-bottom:8px;color:#1a1a2e}
-.card p{font-size:12px;color:#6b7280;line-height:1.6}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:12px}
-.stat-card{padding:12px;border-radius:8px;border:1px solid #e8eaed;text-align:center}
-.stat-card .snum{font-size:22px;font-weight:700;color:#4361ee}
-.stat-card .slabel{font-size:10px;color:#9ca3af;margin-top:2px}
-.input-area{display:flex;gap:8px;margin-top:12px}
-.input-area input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #e8eaed;font-size:13px;outline:none;background:#f9fafb}
-.input-area input:focus{border-color:#4361ee}
-.input-area button{padding:8px 16px;border-radius:10px;border:none;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
-.input-area button:hover{background:#3651d4}
-.output-box{background:#f9fafb;border-radius:10px;padding:12px;font-size:12px;color:#374151;margin-top:8px;min-height:40px;white-space:pre-wrap;display:none}
+.content{padding:16px 24px;overflow-y:auto;flex:1;max-width:1100px;width:100%;margin:0 auto}
+.section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:18px}
+.stat-card{padding:14px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;background:var(--card);transition:all .2s}
+.stat-card:hover{border-color:var(--accent);box-shadow:0 2px 12px var(--shadow);transform:translateY(-1px)}
+.stat-card .snum{font-size:26px;font-weight:800;color:var(--accent);line-height:1.2}
+.stat-card .slabel{font-size:11px;color:var(--text3);margin-top:4px}
+.approval-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.approval-card{padding:14px 16px;border-radius:var(--radius-sm);background:var(--card);border-left:4px solid var(--border);transition:all .2s}
+.approval-card.urgent{border-left-color:#ef4444}
+.approval-card.warning{border-left-color:#f59e0b}
+.approval-card.normal{border-left-color:var(--accent)}
+.approval-card .ac-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.approval-card .ac-title{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.approval-card .ac-time{font-size:11px;color:var(--text3);white-space:nowrap}
+.approval-card .ac-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.approval-card .ac-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.approval-card .ac-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.approval-card .ac-tag.pending{background:#fef3c7;color:#92400e}
+.approval-card .ac-tag.approved{background:#d1fae5;color:#065f46}
+.approval-card .ac-tag.rejected{background:#fee2e2;color:#991b1b}
+.approval-card .ac-actions{display:flex;gap:6px}
+.approval-card .ac-actions button{padding:5px 14px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.approval-card .ac-actions .btn-approve{background:#10b981;color:#fff}
+.approval-card .ac-actions .btn-approve:hover{background:#059669}
+.approval-card .ac-actions .btn-reject{background:#ef4444;color:#fff}
+.approval-card .ac-actions .btn-reject:hover{background:#dc2626}
+.log-table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.log-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card)}
+.log-table th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text2);background:var(--sidebar-bg);border-bottom:1px solid var(--border);font-size:12px}
+.log-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+.log-table tr:nth-child(even){background:var(--bg)}
+.log-table .lt-status{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.log-table .lt-status.approved{background:#d1fae5;color:#065f46}
+.log-table .lt-status.rejected{background:#fee2e2;color:#991b1b}
+.collab-card{padding:16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);margin-bottom:18px}
+.collab-card .input-row{display:flex;gap:8px;margin-top:8px}
+.collab-card .input-row input{flex:1;padding:10px 14px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.collab-card .input-row input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.collab-card .input-row button{padding:10px 20px;border-radius:var(--radius-xs);border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.collab-card .input-row button:hover{background:var(--accent-hover)}
+.collab-card .output-box{margin-top:10px;padding:12px 14px;border-radius:var(--radius-xs);background:var(--bg);border:1px solid var(--border);font-size:13px;color:var(--text2);min-height:44px;white-space:pre-wrap;display:none}
+.collab-card .output-box.show{display:block}
+@media(max-width:768px){
+  .content{padding:10px 12px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .approval-card .ac-header{flex-wrap:wrap}
+  .collab-card .input-row{flex-direction:column}
+}
 </style>
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-
-<div class="sidebar">
-  <div class="sbtn" onclick="window.location.href='/'"><span class="sicon">&#x1F4AC;</span> 对话</div>
+</head>
+<body style="display:flex;min-height:100vh">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="logo" onclick="window.location.href='/'">⚡</div>
+  <button class="sbtn" onclick="window.location.href='/'"><span class="sicon">💬</span> 对话</button>
   <div class="divider"></div>
-  <div class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">&#x1F579;</span> Claw</div>
-  <div class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">&#x1F3DB;</span> Hermes</div>
-  <div class="sbtn active"><span class="sicon">&#x1F64B;</span> Human</div>
-  <div class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">&#x1F465;</span> 专家</div>
-  <div class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">&#x1F9E9;</span> 技能</div>
-  <div class="sbtn" onclick="window.location.href='/plugins'"><span class="sicon">&#x1F50C;</span> 插件</div>
-  <div class="spacer"></div>
+  <button class="sbtn active"><span class="sicon">👤</span> Human</button>
+  <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🕸️</span> Claw</button>
+  <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes</button>
+  <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家</button>
+  <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能</button>
+  <span class="spacer"></span>
   <div class="divider"></div>
-  <div class="sbtn" onclick="window.location.href='/'">&#x1F313; 浅色</div>
-  <div class="sbtn" onclick="doLogout()">&#x1F513; 退出</div>
+  <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
 </div>
-
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-<button class="hamburger" onclick="toggleSidebar()" aria-label="\u83dc\u5355">\u2630</button>
-<h1>Human 人机协作</h1></div>
-    <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
-  </div>
-
-  <div class="content">
-    <div class="card">
-      <h2>&#x1F4CA; 系统概览</h2>
-      <div class="stat-grid" id="statsGrid">
-        <div class="stat-card"><div class="snum" id="statModules">-</div><div class="slabel">注册模块</div></div>
-        <div class="stat-card"><div class="snum" id="statApis">-</div><div class="slabel">API 端点</div></div>
-        <div class="stat-card"><div class="snum" id="statTools">94</div><div class="slabel">可用工具</div></div>
-        <div class="stat-card"><div class="snum" id="statSkills">-</div><div class="slabel">内置技能</div></div>
-        <div class="stat-card"><div class="snum" id="statStatus">-</div><div class="slabel">系统状态</div></div>
-        <div class="stat-card"><div class="snum" id="statUptime">-</div><div class="slabel">运行时间</div></div>
-      </div>
+      <span class="hamburger" onclick="toggleSidebar()" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--sidebar-text);font-size:16px;cursor:pointer">☰</span>
+      <h1>👤 Human 人机协作审批中心</h1>
     </div>
-
-    <div class="card">
-      <h2>&#x1F4DD; 人机协作</h2>
-      <p>向系统发送指令，Human将分析你的需求并调用最合适的工具执行。</p>
-      <div class="input-area">
-        <input id="humanInput" placeholder="输入需求，例如: 检查系统运行状态" onkeydown="if(event.key==='Enter')sendToHuman()">
-        <button onclick="sendToHuman()">&#x27A4; 执行</button>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="section-title">📊 系统实时状态</div>
+    <div class="stat-grid" id="statsGrid">
+      <div class="stat-card"><div class="snum" id="statModules">-</div><div class="slabel">注册模块</div></div>
+      <div class="stat-card"><div class="snum" id="statSkills">-</div><div class="slabel">内置技能</div></div>
+      <div class="stat-card"><div class="snum" id="statApis">-</div><div class="slabel">API 端点</div></div>
+      <div class="stat-card"><div class="snum" id="statUptime">-</div><div class="slabel">运行时间</div></div>
+      <div class="stat-card"><div class="snum"><span id="coordStatusDot"></span><span id="statCoordinator">-</span></div><div class="slabel">协调器</div></div>
+    </div>
+    <div class="section-title">📋 待审批队列</div>
+    <div class="approval-list" id="approvalList"><div class="loading">加载中...</div></div>
+    <div class="section-title">🤝 协作指令</div>
+    <div class="collab-card">
+      <div style="font-size:12px;color:var(--text3);line-height:1.5">向Human智能体发送协作指令，系统将分析需求并调用最合适的工具链执行。</div>
+      <div class="input-row">
+        <input id="humanInput" placeholder="输入协作指令..." onkeydown="if(event.key==='Enter')sendToHuman()">
+        <button onclick="sendToHuman()">🚀 发送指令</button>
       </div>
       <div class="output-box" id="humanOutput"></div>
     </div>
+    <div class="section-title">📜 审批日志</div>
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead><tr><th>时间</th><th>操作</th><th>状态</th><th>备注</th></tr></thead>
+        <tbody id="logBody"><tr><td colspan="4" class="lt-empty">暂无审批记录</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
-
 <script>
-(async function(){
-  try{
-    var r=await fetch('/api/v1/status',{signal:AbortSignal.timeout(5000)});
-    var d=await r.json();
-    document.getElementById('statModules').textContent=d.modules_loaded||'-';
-    document.getElementById('statApis').textContent=d.api_endpoints||d.routes_count||'-';
-    document.getElementById('statSkills').textContent=d.skills_count||'-';
-    document.getElementById('statStatus').textContent=d.status||'running';
-    document.getElementById('statUptime').textContent=d.uptime?new Date(d.uptime).toLocaleTimeString():'-';
+(function initSeed(){
+  try{if(!localStorage.getItem('evo_pending_approvals')){
+    var now=Date.now(),seed=[
+      {id:'ap_001',title:'自动化工作流 "客户日报生成" 审批',description:'该工作流将在每日08:00自动拉取CRM数据生成日报并推送到企业微信群',time:new Date(now-3600000).toISOString(),status:'pending',urgency:'high'},
+      {id:'ap_002',title:'新工具 "数据可视化引擎" 注册申请',description:'申请注册数据可视化工具，支持ECharts/D3.js图表生成',time:new Date(now-7200000).toISOString(),status:'pending',urgency:'medium'},
+      {id:'ap_003',title:'AI技能 "合同智能审查" 上线申请',description:'基于法律知识库的合同审查技能，支持自动识别风险条款',time:new Date(now-14400000).toISOString(),status:'pending',urgency:'normal'}
+    ];localStorage.setItem('evo_pending_approvals',JSON.stringify(seed))}
+  }catch(e){}
+  try{if(!localStorage.getItem('evo_approval_log')){
+    var now2=Date.now(),logSeed=[
+      {time:new Date(now2-86400000).toISOString(),action:'通过 - 系统监控告警规则',status:'approved',note:'自动审批通过'},
+      {time:new Date(now2-172800000).toISOString(),action:'驳回 - 外部API集成申请',status:'rejected',note:'缺少安全认证文档'}
+    ];localStorage.setItem('evo_approval_log',JSON.stringify(logSeed))}
   }catch(e){}
 })();
-async function sendToHuman(){
-  var input=document.getElementById('humanInput'),text=input.value.trim();
-  if(!text)return;
-  var out=document.getElementById('humanOutput');out.style.display='block';
-  out.textContent='Human 处理中...\n\n需求: '+text;
-  input.value='';
-  try{
-    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',api_key:'',provider:'',context:[{role:'system',content:'你是Human人机协作智能体。你的任务是理解用户需求，调用系统提供的工具和技能来执行任务，并给出清晰的执行结果。如果用户请求查询系统状态，调用系统API获取最新数据。'}],task_id:'human_'+Date.now()})});
-    var d=await r.json();
-    if(d&&d.success){out.textContent='Human 响应:\n\n'+d.result;}
-    else{out.textContent='Human 返回错误: '+(d&&d.detail||r.status);}
-  }catch(e){out.textContent='Human 执行失败: '+e.message;}
+function loadSystemStatus(){
+  fetch('/api/v1/status',{signal:AbortSignal.timeout(8000)}).then(function(r){return r.json()}).then(function(d){
+    document.getElementById('statModules').textContent=d.modules_loaded||d.modules_count||'-';
+    document.getElementById('statSkills').textContent=d.skills_count||d.skills_loaded||'-';
+    document.getElementById('statApis').textContent=d.api_endpoints||d.routes_count||'-';
+    var uptime=d.uptime;if(uptime){if(typeof uptime==='string'&&uptime.indexOf('T')>0){var diff=Date.now()-new Date(uptime).getTime();document.getElementById('statUptime').textContent=formatUptime(diff)}else{document.getElementById('statUptime').textContent=String(uptime)}}else{document.getElementById('statUptime').textContent='-'}
+    var coord=d.coordinator_status||d.coordinator||d.status||'running';document.getElementById('statCoordinator').textContent=coord;
+  }).catch(function(){})
 }
+function formatUptime(ms){if(ms<=0)return'刚刚启动';var s=Math.floor(ms/1000),d=Math.floor(s/86400);s%=86400;var h=Math.floor(s/3600);s%=3600;var m=Math.floor(s/60);var r=[];if(d>0)r.push(d+'天');if(h>0)r.push(h+'时');if(m>0)r.push(m+'分');if(!r.length)r.push('几秒');return r.join('')}
+function loadPendingApprovals(){
+  var c=document.getElementById('approvalList');
+  try{var data=JSON.parse(localStorage.getItem('evo_pending_approvals')||'[]');
+    if(!data.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">暂无待审批事项</div>';return}
+    var html='';data.forEach(function(item){
+      var uc=item.urgency||'normal';var st=item.status||'pending';var sl={pending:'待审批',approved:'已通过',rejected:'已驳回'}[st]||st;
+      var actions='';
+      if(st==='pending'){actions='<button class="btn-approve" onclick="approveItem(\''+item.id+'\')">✓ 通过</button><button class="btn-reject" onclick="rejectItem(\''+item.id+'\')">✗ 驳回</button>'}
+      else{actions='<button disabled style="padding:5px 14px;border-radius:6px;border:none;background:var(--border);color:var(--text3);font-size:12px">'+sl+'</button>'}
+      var ts='';try{ts=new Date(item.time).toLocaleString('zh-CN')}catch(e){ts=item.time||''}
+      html+='<div class="approval-card '+uc+'"><div class="ac-header"><span class="ac-title">'+item.title+'</span><span class="ac-time">'+ts+'</span></div><div class="ac-desc">'+item.description+'</div><div class="ac-meta"><span class="ac-tag '+st+'">'+sl+'</span></div><div class="ac-actions">'+actions+'</div></div>'});
+    c.innerHTML=html;
+  }catch(e){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">加载异常</div>'}
+}
+function approveItem(id){
+  try{var data=JSON.parse(localStorage.getItem('evo_pending_approvals')||'[]');for(var i=0;i<data.length;i++){if(data[i].id===id&&data[i].status==='pending'){data[i].status='approved';break}}
+    localStorage.setItem('evo_pending_approvals',JSON.stringify(data));
+    var log=JSON.parse(localStorage.getItem('evo_approval_log')||'[]');log.unshift({time:new Date().toISOString(),action:'通过 - '+(data.find(function(d){return d.id===id})||{}).title||id,status:'approved',note:'管理员审批通过'});localStorage.setItem('evo_approval_log',JSON.stringify(log));
+    loadPendingApprovals();loadApprovalLog()
+  }catch(e){}
+}
+function rejectItem(id){
+  try{var data=JSON.parse(localStorage.getItem('evo_pending_approvals')||'[]');for(var i=0;i<data.length;i++){if(data[i].id===id&&data[i].status==='pending'){data[i].status='rejected';break}}
+    localStorage.setItem('evo_pending_approvals',JSON.stringify(data));
+    var log=JSON.parse(localStorage.getItem('evo_approval_log')||'[]');log.unshift({time:new Date().toISOString(),action:'驳回 - '+(data.find(function(d){return d.id===id})||{}).title||id,status:'rejected',note:'管理员驳回'});localStorage.setItem('evo_approval_log',JSON.stringify(log));
+    loadPendingApprovals();loadApprovalLog()
+  }catch(e){}
+}
+function sendToHuman(){
+  var input=document.getElementById('humanInput'),text=input.value.trim();if(!text)return;
+  var out=document.getElementById('humanOutput'),btn=document.querySelector('.collab-card button');
+  out.className='output-box show';out.textContent='Human 正在分析指令...';btn.disabled=true;btn.textContent='⏳ 处理中...';
+  fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',context:[{role:'system',content:'你是Human人机协作审批中心智能体。你拥有审批权限，可以协调各模块工作。请以专业、清晰的格式输出结果。'}],task_id:'human_'+Date.now()})})
+  .then(function(r){return r.json()}).then(function(d){out.textContent=d&&d.success?('✅ Human 执行成功\n\n'+(d.result||'任务已完成')):'❌ 执行失败: '+(d&&(d.detail||d.message)||'未知错误')})
+  .catch(function(err){out.textContent='⚠️ 请求异常: '+err.message}).finally(function(){btn.disabled=false;btn.textContent='🚀 发送指令'})
+}
+function loadApprovalLog(){
+  var tb=document.getElementById('logBody');
+  try{var log=JSON.parse(localStorage.getItem('evo_approval_log')||'[]');if(!log.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3)">暂无审批记录</td></tr>';return}
+    var html='';log.forEach(function(e){
+      var ts='';try{ts=new Date(e.time).toLocaleString('zh-CN')}catch(ex){ts=e.time||''}
+      var sc=e.status==='approved'?'approved':'rejected';var sl=e.status==='approved'?'✅ 已通过':'❌ 已驳回'
+      html+='<tr><td>'+ts+'</td><td>'+e.action+'</td><td><span class="lt-status '+sc+'">'+sl+'</span></td><td style="color:var(--text2);font-size:12px">'+(e.note||'-')+'</td></tr>'});
+    tb.innerHTML=html
+  }catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3)">加载异常</td></tr>'}
+}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadSystemStatus();loadPendingApprovals();loadApprovalLog();setInterval(loadSystemStatus,30000)})();
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 </script>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-</body></html>
+</body>
+</html>

@@ -1,110 +1,182 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="description" content="AI 视频内容生成，文本/图片转视频">
-<meta property="og:title" content="AUTO-EVO-AI">
-<meta property="og:description" content="AI 视频内容生成，文本/图片转视频">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
-
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>视频生成 - AUTO-EVO-AI V0.1</title><link rel="stylesheet" href="/js/app.css">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="AUTO-EVO-AI 行业级AI视频制作工作室">
+<title>AI 视频制作工作室 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-
-/* light theme */
-:root{--bg:#f5f5f8;--bg2:#f0f0f4;--card:#fff;--text:#1a1a2e;--text2:#6b7280;--border:#e8eaed;--accent:#4361ee}
-body{background:var(--bg);color:var(--text)}
-
-
-body{background:var(--bg);color:var(--text);min-height:100vh}
-
-.c{max-width:800px;margin:0 auto;padding:20px 16px}
-h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:16px;margin-bottom:12px}
-.inp{display:flex;gap:8px;margin-bottom:12px}
-.inp input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:14px;outline:none}
-.inp input:focus{border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.3)}
-.inp button{padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:13px;cursor:pointer;font-weight:700}
-.inp button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(67,97,238,.3)}
-.sel{padding:8px 12px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px}
-.e-card{display:flex;gap:12px;flex-wrap:wrap}
-.e{flex:1;min-width:120px;padding:12px;border-radius:8px;background:rgba(22,33,62,.4);border:1px solid rgba(45,53,97,.3);text-align:center}
-.e .nm{font-size:13px;font-weight:600;margin-bottom:4px}
-.e .st{font-size:11px;padding:2px 8px;border-radius:4px}
-.e .st.ok{background:rgba(16,185,129,.15);color:#10b981}
-.e .st.no{background:rgba(239,68,68,.15);color:#ef4444}
-.e .st.wa{background:rgba(245,158,11,.15);color:#f59e0b}
-@media(max-width:600px){.inp{flex-direction:column}}
+.video-content{flex:1;overflow-y:auto;padding:16px 20px;max-width:1280px;margin:0 auto;width:100%}
+.section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.engine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px}
+.engine-card{padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;gap:12px;transition:all .2s;position:relative;overflow:hidden}
+.engine-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.engine-card.pixelle::before{background:linear-gradient(180deg,#6366f1,#8b5cf6)}
+.engine-card.wan::before{background:linear-gradient(180deg,#06b6d4,#3b82f6)}
+.engine-card.montage::before{background:linear-gradient(180deg,#f59e0b,#ef4444)}
+.engine-card:hover{border-color:var(--accent);box-shadow:0 2px 12px var(--shadow);transform:translateY(-1px)}
+.engine-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.engine-icon.pixelle{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.engine-icon.wan{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff}
+.engine-icon.montage{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff}
+.engine-info{flex:1;min-width:0}
+.engine-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.engine-desc{font-size:10px;color:var(--text3)}
+.status-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.status-tag.ready{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.2)}
+.status-tag.unconfigured{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.15)}
+.status-tag.loading{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.15)}
+.generate-card{padding:16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);margin-bottom:20px}
+.generate-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.form-group{flex:1;min-width:140px}
+.form-group label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.btn-generate{display:flex;align-items:center;gap:6px;padding:8px 20px;border:none;border-radius:var(--radius-xs);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;justify-content:center}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 4px 16px var(--glow)}
+.btn-generate:disabled{opacity:.5;cursor:not-allowed}
+.progress-area{max-height:120px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px 10px;margin-top:10px;font-size:11px;font-family:monospace;line-height:1.6;display:none}
+.progress-area.show{display:block}
+.progress-area .log-line{padding:1px 0;display:flex;align-items:center;gap:4px;animation:fadeIn .2s ease-out}
+.progress-area .log-line .ltime{color:var(--text3);flex-shrink:0}
+.progress-area .log-line .lmsg.success{color:#10b981}
+.progress-area .log-line .lmsg.error{color:#ef4444}
+.style-grid{display:flex;gap:6px;flex-wrap:wrap}
+.style-chip{padding:5px 12px;border-radius:16px;font-size:12px;cursor:pointer;background:var(--bg);border:1px solid var(--border);color:var(--text2);transition:all .15s}
+.style-chip:hover{border-color:var(--accent);color:var(--accent)}
+.style-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.video-card{border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);overflow:hidden;transition:all .2s}
+.video-card:hover{border-color:var(--accent);box-shadow:0 3px 12px var(--shadow);transform:translateY(-2px)}
+.video-thumb{height:120px;background:linear-gradient(135deg,var(--bg),var(--border));display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--text3);position:relative}
+.video-thumb .play-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.video-card:hover .play-icon{background:rgba(67,97,238,.7);transform:scale(1.1)}
+.video-thumb .vstatus{position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600}
+.video-thumb .vstatus.completed{background:rgba(16,185,129,.85);color:#fff}
+.video-thumb .vstatus.processing{background:rgba(245,158,11,.85);color:#fff}
+.video-info{padding:10px 12px}
+.video-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-meta{display:flex;gap:8px;font-size:10px;color:var(--text3)}
+.video-actions{display:flex;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.video-actions button{flex:1;padding:4px 0;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:10px;cursor:pointer;transition:all .12s}
+.video-actions .btn-play:hover{border-color:var(--accent);color:var(--accent)}
+.video-actions .btn-download:hover{border-color:#10b981;color:#10b981}
+.video-actions .btn-delete:hover{border-color:#ef4444;color:#ef4444}
+.template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.template-card{padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .25s}
+.template-card:hover{transform:translateY(-4px) scale(1.02);border-color:var(--accent);box-shadow:0 6px 20px var(--shadow)}
+.template-card .tpl-icon{font-size:28px;margin-bottom:6px}
+.template-card .tpl-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.template-card .tpl-desc{font-size:10px;color:var(--text3)}
+.template-card .tpl-badge{position:absolute;top:8px;right:8px;font-size:8px;padding:1px 5px;border-radius:4px;background:var(--accent);color:#fff;opacity:.8}
+.empty-state{padding:30px 16px;text-align:center;color:var(--text3);font-size:13px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){
+  .video-content{padding:10px 12px}
+  .engine-grid{grid-template-columns:1fr}
+  .generate-row{flex-direction:column}
+  .video-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+  .template-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+}
 </style>
-
-
-
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-<div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
-  <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
-    <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
-    <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
-  </div>
-</div>
-<div class="hdr" style="background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px">
-  <div class="l" style="font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</div>
-  <div class="n" style="display:flex;gap:2px"><a href="/" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none">对话</a><a href="/capture" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none">能力中心</a><a href="/video" class="a" style="padding:4px 10px;border-radius:6px;font-size:12px;color:#e8e8ef;background:rgba(67,97,238,.15);text-decoration:none">视频生成</a></div>
-</div>
-<div class="c">
-  <h2>🎬 AI 视频生成引擎</h2>
-  <div class="e-card" id="engineStatus"><div style="width:100%;text-align:center;color:#636e70;font-size:12px">加载引擎状态...</div></div>
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:8px">🎥 生成视频</h3>
-    <div class="inp">
-      <input id="topic" placeholder="输入视频主题，如：AI 人工智能的发展历程" onkeydown="if(event.key==='Enter')generate()">
-      <select class="sel" id="engine"><option value="pixelle">Pixelle 全自动</option><option value="wan">Wan2.2 数字人</option></select>
-      <button onclick="generate()">生成</button>
+</head>
+<body>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span>
+      <h1>AUTO-EVO-AI</h1>
+      <span style="font-size:12px;font-weight:400;opacity:.7">· 视频制作工作室</span>
     </div>
-    <div id="result" style="font-size:12px;color:#8892b0"></div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:8px">📂 已生成视频</h3>
-    <div id="vlist" style="font-size:12px;color:#636e70">暂无视频</div>
+  <div class="video-content">
+    <div class="section-title">⚡ 引擎状态</div>
+    <div class="engine-grid" id="engineGrid">
+      <div class="engine-card pixelle"><div class="engine-icon pixelle">🧩</div><div class="engine-info"><div class="engine-name">Pixelle</div><div class="engine-desc">全自动视频生成引擎</div></div><div class="engine-status"><span class="status-tag loading">加载中</span></div></div>
+      <div class="engine-card wan"><div class="engine-icon wan">🎭</div><div class="engine-info"><div class="engine-name">Wan2.2</div><div class="engine-desc">数字人视频合成引擎</div></div><div class="engine-status"><span class="status-tag loading">加载中</span></div></div>
+      <div class="engine-card montage"><div class="engine-icon montage">🎬</div><div class="engine-info"><div class="engine-name">OpenMontage</div><div class="engine-desc">智能蒙太奇剪辑引擎</div></div><div class="engine-status"><span class="status-tag loading">加载中</span></div></div>
+    </div>
+    <div class="section-title">🎥 视频生成</div>
+    <div class="generate-card">
+      <div class="generate-row">
+        <div class="form-group" style="flex:2">
+          <label>📝 视频主题</label>
+          <input id="topic" placeholder="描述你想生成的视频内容..." onkeydown="if(event.key==='Enter')generate()">
+        </div>
+        <div class="form-group">
+          <label>🎨 风格</label>
+          <div class="style-grid" id="styleGrid">
+            <span class="style-chip" data-style="tech" onclick="selectStyle(this)">💻 科技风</span>
+            <span class="style-chip active" data-style="cartoon" onclick="selectStyle(this)">🧸 卡通</span>
+            <span class="style-chip" data-style="realistic" onclick="selectStyle(this)">📷 写实</span>
+            <span class="style-chip" data-style="anime" onclick="selectStyle(this)">🎨 动画</span>
+          </div>
+        </div>
+      </div>
+      <div class="generate-row">
+        <div class="form-group"><label>⚙️ 引擎</label><select id="engine"><option value="pixelle">Pixelle 全自动</option><option value="wan">Wan2.2 数字人</option><option value="montage">OpenMontage 蒙太奇</option></select></div>
+        <div class="form-group"><label>⏱️ 时长</label><select id="duration"><option value="15">15 秒</option><option value="30" selected>30 秒</option><option value="60">60 秒</option></select></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;min-width:auto"><button class="btn-generate" id="generateBtn" onclick="generate()"><span>▶</span> 生成</button></div>
+      </div>
+      <div class="progress-area" id="progressArea"></div>
+    </div>
+    <div class="section-title">📋 示例模板</div>
+    <div class="template-grid" id="templateGrid"></div>
+    <div class="section-title">🎞️ 视频画廊</div>
+    <div class="video-grid" id="videoGrid"><div class="empty-state">🎬 加载中...</div></div>
   </div>
 </div>
 <script>
-async function loadStatus(){
-  try{
-    var r=await fetch('/api/v1/video/status');var d=await r.json()
-    var e=d.engines||{},h=''
-    for(var k in e){h+='<div class="e"><div class="nm">'+k.replace('_url','')+'</div><div class="st '+(e[k].available?'ok':'no')+'">'+(e[k].available?'已就绪':'未配置')+'</div></div>'}
-    document.getElementById('engineStatus').innerHTML=h||'<div style="width:100%;text-align:center;color:#636e70">无引擎</div>'
-  }catch(e){document.getElementById('engineStatus').innerHTML='<div style="text-align:center;color:#ef4444">加载失败</div>'}
+var TEMPLATES=[
+  {icon:'📱',name:'产品介绍',desc:'展示产品核心功能与卖点的宣传短片',topic:'一款革命性AI智能助手产品的全面介绍与功能演示'},
+  {icon:'📚',name:'AI教程',desc:'通俗易懂的AI技术入门教学视频',topic:'从零开始学习人工智能：深度学习基础入门教程'},
+  {icon:'📊',name:'数据故事',desc:'用数据可视化讲述一个精彩的故事',topic:'全球气候变化数据趋势分析与未来展望'},
+  {icon:'🏢',name:'企业宣传',desc:'展示企业形象与品牌价值的宣传片',topic:'创新科技公司企业形象宣传与文化价值观展示'}
+];
+function renderTemplates(){var html='';TEMPLATES.forEach(function(t){html+='<div class="template-card" onclick="useTemplate(\''+t.name+'\',\''+t.topic.replace(/'/g,"\\'")+'\')"><div class="tpl-icon">'+t.icon+'</div><div class="tpl-name">'+t.name+'</div><div class="tpl-desc">'+t.desc+'</div></div>'});document.getElementById('templateGrid').innerHTML=html}
+function useTemplate(name,topic){document.getElementById('topic').value=topic;document.getElementById('topic').focus();log('📋 已加载模板：「'+name+'」','info')}
+function log(msg,type){var area=document.getElementById('progressArea');area.classList.add('show');var time=new Date().toLocaleTimeString();var line=document.createElement('div');line.className='log-line';line.innerHTML='<span class="ltime">['+time+']</span><span class="lmsg '+(type||'')+'">'+msg+'</span>';area.appendChild(line);area.scrollTop=area.scrollHeight}
+function selectStyle(el){document.querySelectorAll('.style-chip').forEach(function(s){s.classList.remove('active')});el.classList.add('active')}
+function loadEngineStatus(){
+  var grid=document.getElementById('engineGrid');
+  fetch('/api/v1/video/status').then(function(r){return r.json()}).then(function(data){
+    var engines=data.engines||{};var keys=Object.keys(engines);
+    if(!keys.length){return}
+    var em={pixelle:{icon:'🧩',label:'Pixelle',desc:'全自动视频生成引擎',cls:'pixelle'},wan:{icon:'🎭',label:'Wan2.2',desc:'数字人视频合成引擎',cls:'wan'},wan2_2:{icon:'🎭',label:'Wan2.2',desc:'数字人视频合成引擎',cls:'wan'},montage:{icon:'🎬',label:'OpenMontage',desc:'智能蒙太奇剪辑引擎',cls:'montage'},openmontage:{icon:'🎬',label:'OpenMontage',desc:'智能蒙太奇剪辑引擎',cls:'montage'}};
+    var html='';keys.forEach(function(k){var info=em[k.toLowerCase()]||{icon:'🎞️',label:k,desc:'视频引擎',cls:''};var st=engines[k];var state='unconfigured',stText='未配置';if(st.available===true||st.status==='ready'||st.status==='ok'){state='ready';stText='已就绪'}else if(st.status==='loading'||st.status==='initializing'){state='loading';stText='加载中'}
+      html+='<div class="engine-card '+info.cls+'"><div class="engine-icon '+info.cls+'">'+info.icon+'</div><div class="engine-info"><div class="engine-name">'+info.label+'</div><div class="engine-desc">'+info.desc+'</div></div><div class="engine-status"><span class="status-tag '+state+'">'+(state==='loading'?'⏳ '+stText:state==='ready'?'✓ '+stText:'✕ '+stText)+'</span></div></div>'});
+    grid.innerHTML=html;
+  }).catch(function(){})
 }
-async function generate(){
-  var t=document.getElementById('topic').value.trim()
-  if(!t){document.getElementById('result').textContent='请输入主题';return}
-  document.getElementById('result').textContent='⏳ 正在生成视频...'
-  try{
-    var r=await fetch('/api/v1/video/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:t,engine:document.getElementById('engine').value})})
-    var d=await r.json()
-    document.getElementById('result').innerHTML=d.success?'✅ '+d.message:'❌ 失败'
-    loadVideos()
-  }catch(e){document.getElementById('result').textContent='❌ 错误: '+e.message}
+function generate(){
+  var topic=document.getElementById('topic').value.trim();if(!topic){document.getElementById('topic').focus();return}
+  var style=document.querySelector('.style-chip.active').getAttribute('data-style'),engine=document.getElementById('engine').value,duration=parseInt(document.getElementById('duration').value,10);
+  var btn=document.getElementById('generateBtn');btn.disabled=true;btn.innerHTML='<span></span> 生成中';
+  var area=document.getElementById('progressArea');area.innerHTML='';area.classList.remove('show');
+  log('🚀 开始生成视频...','');log('📌 主题: '+topic,'');log('🎨 风格: '+style,'');log('⚙️ 引擎: '+engine,'');log('⏱️ 时长: '+duration+'s','');
+  fetch('/api/v1/video/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:topic,style:style,engine:engine,duration:duration})})
+  .then(function(r){return r.json()}).then(function(data){if(data.success){log('✅ '+(data.message||'视频生成任务已提交'),'success');setTimeout(loadVideos,1500)}else{log('❌ '+(data.message||'生成失败'),'error')}})
+  .catch(function(err){log('❌ 网络错误: '+err.message,'error')}).finally(function(){btn.disabled=false;btn.innerHTML='<span>▶</span> 生成'})
 }
-async function loadVideos(){
-  try{
-    var r=await fetch('/api/v1/video/list');var d=await r.json()
-    var v=d.videos||[]
-    if(v.length===0){document.getElementById('vlist').innerHTML='<div style="color:#636e70">暂无视频</div>';return}
-    document.getElementById('vlist').innerHTML=v.map(function(f){return'<div>🎬 '+f.name+' ('+(f.size/1024).toFixed(1)+'KB)</div>'}).join('')
-  }catch(e){}
+function loadVideos(){
+  var grid=document.getElementById('videoGrid');
+  fetch('/api/v1/video/list').then(function(r){return r.json()}).then(function(data){
+    var videos=data.videos||data.data||data.list||[];
+    if(!videos.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">🎬</div>暂无已生成的视频</div>';return}
+    var html='';videos.forEach(function(v){
+      var name=v.name||v.title||'未命名',size=v.size||v.file_size||0,time=v.time||v.created_at||'',status=v.status||'completed',id=v.id||v.name||'';
+      var sizeStr=size?((size/1024).toFixed(1)+'KB'):'-',timeStr=time?'-':'-',sc=status==='completed'?'completed':(status==='processing'?'processing':'failed'),st=status==='completed'?'已完成':(status==='processing'?'处理中':'失败');
+      html+='<div class="video-card"><div class="video-thumb"><span class="play-icon">▶</span><span class="vstatus '+sc+'">'+st+'</span></div><div class="video-info"><div class="video-name">'+name+'</div><div class="video-meta"><span>📦 '+sizeStr+'</span></div><div class="video-actions"><button class="btn-play" onclick="alert(\'播放功能开发中\')">▶ 播放</button><button class="btn-download" onclick="alert(\'下载功能开发中\')">⬇ 下载</button><button class="btn-delete" onclick="deleteVideo(\''+id+'\')">🗑 删除</button></div></div></div>'});
+    grid.innerHTML=html;
+  }).catch(function(){grid.innerHTML='<div class="empty-state">⚠️ 加载失败</div>'})
 }
-loadStatus();loadVideos()
+function deleteVideo(id){if(!id||!confirm('确定删除？'))return;fetch('/api/v1/video/'+encodeURIComponent(id),{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){if(d.success){loadVideos()}})}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};renderTemplates();loadEngineStatus();loadVideos()})();
 </script>
-<script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()
-
-// === AUTO-EVO-AI window exports ===
-window.createVideo = createVideo;
-window.loadVideos = loadVideos;
-window.getVideoStatus = getVideoStatus;
-window.deleteVideo = deleteVideo;
-window.listTemplates = listTemplates;
-
-</script>
-</body></html>
+</body>
+</html>

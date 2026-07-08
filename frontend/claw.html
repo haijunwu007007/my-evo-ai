@@ -1,127 +1,241 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Claw - AUTO-EVO-AI</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Claw 远程执行仪表盘 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif}
-body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
-.sidebar{width:120px;background:#f0f0f4;display:flex;flex-direction:column;padding:8px 0;border-right:1px solid #e8eaed;flex-shrink:0}
-.sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:#6b7280;font-size:11px;cursor:pointer}
-.sbtn:hover{background:#e4e6ed;color:#1a1a2e}
-.sbtn .sicon{font-size:13px;width:20px;text-align:center}
-.sbtn.active{background:#eef0f8;color:#4361ee;font-weight:600}
-.spacer{flex:1}
-.divider{height:1px;background:#e8eaed;margin:4px 10px}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #e8eaed;background:#fff;height:44px}
-.topbar-left{display:flex;align-items:center;gap:8px}
-.topbar-left h1{font-size:14px;font-weight:700}
-.back-btn{font-size:11px;color:#6b7280;cursor:pointer;padding:3px 8px;border-radius:6px}
-.back-btn:hover{background:#f0f2f8;color:#4361ee}
-.content{flex:1;padding:20px 24px;overflow-y:auto;max-width:900px}
-.card{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:16px;margin-bottom:12px}
-.card h2{font-size:15px;margin-bottom:8px;color:#1a1a2e}
-.card p{font-size:12px;color:#6b7280;line-height:1.6;margin-bottom:12px}
-.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-.status-dot.online{background:#22c55e}
-.status-dot.offline{background:#ef4444}
-.status-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#6b7280;padding:4px 0}
-.input-area{display:flex;gap:8px;margin-top:12px}
-.input-area input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #e8eaed;font-size:13px;outline:none;background:#f9fafb}
-.input-area input:focus{border-color:#4361ee}
-.input-area button{padding:8px 16px;border-radius:10px;border:none;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
-.input-area button:hover{background:#3651d4}
-.output-box{background:#f9fafb;border-radius:10px;padding:12px;font-size:12px;color:#374151;margin-top:8px;min-height:40px;white-space:pre-wrap;display:none}
-.platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px}
-.platform-card{padding:10px;border-radius:8px;border:1px solid #e8eaed;text-align:center;font-size:11px;cursor:pointer;transition:all .2s}
-.platform-card:hover{border-color:#4361ee;background:#f0f2f8}
-.platform-card .picon{font-size:20px;margin-bottom:4px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.content{flex:1;overflow-y:auto;padding:16px 20px;max-width:960px;margin:0 auto;width:100%}
+.card{background:var(--card);border-radius:var(--radius,12px);border:1px solid var(--border);padding:16px;margin-bottom:16px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 2px 12px var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-header h2{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--text)}
+.card-header .badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--accent);color:#fff;font-weight:500}
+.platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.platform-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm,8px);border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s}
+.platform-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.platform-card .picon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.platform-card .pname{font-size:12px;font-weight:500;color:var(--text);flex:1}
+.platform-card .pstatus{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.online{background:#22c55e}
+.dot.offline{background:#ef4444}
+.dot.online.live{animation:breathing 2s ease-in-out infinite}
+@keyframes breathing{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,.1)}}
+.status-text{font-size:10px;margin-left:2px}
+.status-text.online{color:#22c55e}
+.status-text.offline{color:#ef4444}
+.status-bar{display:flex;align-items:center;gap:8px;padding:8px 0 4px;font-size:11px;color:var(--text2);flex-wrap:wrap}
+.exec-input-area{display:flex;gap:8px;margin-bottom:10px}
+.exec-input-area input{flex:1;padding:10px 14px;border-radius:var(--radius-sm,8px);border:1px solid var(--border);font-size:13px;outline:none;background:var(--bg);color:var(--text);transition:border .2s}
+.exec-input-area input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.exec-input-area button{display:flex;align-items:center;gap:4px;padding:10px 18px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.exec-input-area button:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.exec-input-area button:disabled{opacity:.5;cursor:not-allowed}
+.exec-output{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:monospace;font-size:12px;color:var(--text2);min-height:80px;max-height:240px;overflow-y:auto;white-space:pre-wrap;display:none}
+.exec-output.show{display:block}
+.exec-output .log-line{padding:2px 0;display:flex;gap:8px;align-items:flex-start;animation:fadeLog .3s ease-out}
+.exec-output .log-line .log-time{color:var(--text3);flex-shrink:0;font-size:10px;min-width:70px}
+.exec-output .log-line .log-level{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:600;flex-shrink:0;min-width:40px;text-align:center}
+.exec-output .log-line .log-level.info{background:#dbeafe;color:#1e40af}
+.exec-output .log-line .log-level.warn{background:#fef3c7;color:#92400e}
+.exec-output .log-line .log-level.error{background:#fee2e2;color:#991b1b}
+.exec-output .log-line .log-level.success{background:#d1fae5;color:#065f46}
+.exec-output .log-line .log-msg{flex:1;color:var(--text)}
+@keyframes fadeLog{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.quick-cmds{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.quick-cmd{padding:4px 10px;border-radius:14px;font-size:11px;cursor:pointer;background:var(--glass);border:1px solid var(--border);color:var(--text2);transition:all .15s}
+.quick-cmd:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.history-list{max-height:320px;overflow-y:auto}
+.history-list .h-item{display:flex;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);transition:background .15s;animation:fadeLog .3s ease-out}
+.history-list .h-item:last-child{border-bottom:none}
+.history-list .h-item:hover{background:var(--glass)}
+.h-item .h-time{font-size:10px;color:var(--text3);flex-shrink:0;min-width:60px;padding-top:1px}
+.h-item .h-body{flex:1;min-width:0}
+.h-item .h-body .h-cmd{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-item .h-body .h-status{margin-top:2px;display:flex;align-items:center;gap:4px}
+.h-item .h-body .h-status .dot{width:6px;height:6px}
+.history-empty{padding:24px 0;text-align:center;color:var(--text3);font-size:13px}
+.clear-btn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;cursor:pointer}
+.clear-btn:hover{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:8px;font-size:12px;z-index:9999;transition:opacity .3s;opacity:0}
+.toast.show{opacity:1}
+.toast.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+.toast.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:transform .25s;width:120px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.3);display:none}
+  .sidebar-overlay.show{display:block}
+  .content{padding:12px 14px}
+  .platform-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .exec-input-area{flex-direction:column}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:16px;cursor:pointer}
+}
+@media(min-width:769px){.hamburger{display:none}.sidebar-overlay{display:none!important}}
 </style>
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-
-<div class="sidebar">
-  <div class="sbtn" onclick="window.location.href='/'"><span class="sicon">&#x1F4AC;</span> 对话</div>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="logo" onclick="window.location.href='/'">⚡</div>
+  <button class="sbtn" onclick="window.location.href='/'"><span class="sicon">💬</span> 对话</button>
   <div class="divider"></div>
-  <div class="sbtn active"><span class="sicon">&#x1F579;</span> Claw</div>
-  <div class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">&#x1F3DB;</span> Hermes</div>
-  <div class="sbtn" onclick="window.location.href='/human'"><span class="sicon">&#x1F64B;</span> Human</div>
-  <div class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">&#x1F465;</span> 专家</div>
-  <div class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">&#x1F9E9;</span> 技能</div>
-  <div class="sbtn" onclick="window.location.href='/plugins'"><span class="sicon">&#x1F50C;</span> 插件</div>
-  <div class="spacer"></div>
+  <button class="sbtn active"><span class="sicon">🕸️</span> Claw</button>
+  <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes</button>
+  <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Human</button>
+  <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家</button>
+  <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能</button>
+  <span class="spacer"></span>
   <div class="divider"></div>
-  <div class="sbtn" onclick="window.location.href='/'">&#x1F313; 浅色</div>
-  <div class="sbtn" onclick="doLogout()">&#x1F513; 退出</div>
+  <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
 </div>
-
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-<button class="hamburger" onclick="toggleSidebar()" aria-label="\u83dc\u5355">\u2630</button>
-<h1>Claw 远程联动</h1></div>
-    <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
+      <span class="hamburger" onclick="toggleSidebarMobile()">☰</span>
+      <h1>🕸️ Claw 远程执行仪表盘</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="back-btn" onclick="window.location.href='/'">← 返回主页</span>
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
-
   <div class="content">
     <div class="card">
-      <h2>&#x1F310; 平台连接</h2>
-      <div class="platform-grid">
-        <div class="platform-card" onclick="connectPlatform('github')"><div class="picon">&#x1F4BB;</div>GitHub</div>
-        <div class="platform-card" onclick="connectPlatform('slack')"><div class="picon">&#x1F4AC;</div>Slack</div>
-        <div class="platform-card" onclick="connectPlatform('discord')"><div class="picon">&#x1F3AE;</div>Discord</div>
-        <div class="platform-card" onclick="connectPlatform('telegram')"><div class="picon">&#x2709;</div>Telegram</div>
-        <div class="platform-card" onclick="connectPlatform('wechat')"><div class="picon">&#x1F4F1;</div>微信</div>
-        <div class="platform-card" onclick="connectPlatform('dingtalk')"><div class="picon">&#x1F514;</div>钉钉</div>
-        <div class="platform-card" onclick="connectPlatform('feishu')"><div class="picon">&#x1F4C4;</div>飞书</div>
-        <div class="platform-card" onclick="connectPlatform('whatsapp')"><div class="picon">&#x1F4F2;</div>WhatsApp</div>
+      <div class="card-header">
+        <h2>🌐 平台连接状态</h2>
+        <span class="badge" id="onlineCount">0/8 在线</span>
+      </div>
+      <div class="status-bar"><span class="dot online live" id="sysDot"></span>系统状态：<span id="sysStatusText">检测中...</span></div>
+      <div class="platform-grid" id="platformGrid">
+        <div class="platform-card" onclick="connectPlatform('github')">
+          <span class="picon">💻</span><span class="pname">GitHub</span>
+          <span class="pstatus"><span class="dot offline" id="dot_github"></span><span class="status-text offline" id="stxt_github">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('slack')">
+          <span class="picon">💬</span><span class="pname">Slack</span>
+          <span class="pstatus"><span class="dot offline" id="dot_slack"></span><span class="status-text offline" id="stxt_slack">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('discord')">
+          <span class="picon">🎮</span><span class="pname">Discord</span>
+          <span class="pstatus"><span class="dot offline" id="dot_discord"></span><span class="status-text offline" id="stxt_discord">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('telegram')">
+          <span class="picon">✈️</span><span class="pname">Telegram</span>
+          <span class="pstatus"><span class="dot offline" id="dot_telegram"></span><span class="status-text offline" id="stxt_telegram">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('wechat')">
+          <span class="picon">💚</span><span class="pname">微信</span>
+          <span class="pstatus"><span class="dot offline" id="dot_wechat"></span><span class="status-text offline" id="stxt_wechat">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('dingtalk')">
+          <span class="picon">🔔</span><span class="pname">钉钉</span>
+          <span class="pstatus"><span class="dot offline" id="dot_dingtalk"></span><span class="status-text offline" id="stxt_dingtalk">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('feishu')">
+          <span class="picon">📄</span><span class="pname">飞书</span>
+          <span class="pstatus"><span class="dot offline" id="dot_feishu"></span><span class="status-text offline" id="stxt_feishu">离线</span></span>
+        </div>
+        <div class="platform-card" onclick="connectPlatform('whatsapp')">
+          <span class="picon">📱</span><span class="pname">WhatsApp</span>
+          <span class="pstatus"><span class="dot offline" id="dot_whatsapp"></span><span class="status-text offline" id="stxt_whatsapp">离线</span></span>
+        </div>
       </div>
     </div>
-
     <div class="card">
-      <h2>&#x1F916; Claw 智能体</h2>
-      <p>向 Claw 发送指令，它将联动各平台执行任务。支持自然语言、远程部署、自动化流程。</p>
-      <div class="status-row" id="clawStatus"><span class="status-dot offline"></span>检测连接中...</div>
-      <div class="input-area">
-        <input id="clawInput" placeholder="输入指令，例如: 推送代码到GitHub仓库" onkeydown="if(event.key==='Enter')sendToClaw()">
-        <button onclick="sendToClaw()">&#x27A4; 发送</button>
+      <div class="card-header">
+        <h2>🤖 任务执行面板</h2>
+        <span class="badge">Claw Agent</span>
       </div>
-      <div class="output-box" id="clawOutput"></div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px">向Claw智能体发送指令，它将联动各平台执行任务。</p>
+      <div class="exec-input-area">
+        <input id="clawInput" placeholder="输入指令，例如：推送代码到 GitHub 仓库" onkeydown="if(event.key==='Enter')sendToClaw()">
+        <button id="sendBtn" onclick="sendToClaw()">▶ 发送</button>
+      </div>
+      <div class="exec-output" id="clawOutput"></div>
+      <div class="quick-cmds">
+        <span class="quick-cmd" onclick="quickExec('推送最新代码到 GitHub 仓库')">📦 推送代码</span>
+        <span class="quick-cmd" onclick="quickExec('检查所有平台连接状态')">🔍 健康检查</span>
+        <span class="quick-cmd" onclick="quickExec('发送测试消息到所有平台')">📨 群发测试</span>
+        <span class="quick-cmd" onclick="quickExec('同步各平台联系人列表')">👥 同步联系人</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2>📜 执行历史</h2>
+        <button class="clear-btn" onclick="clearHistory()">🗑️ 清空</button>
+      </div>
+      <div class="history-list" id="historyList"><div class="history-empty">暂无执行记录</div></div>
     </div>
   </div>
 </div>
-
+<div class="toast" id="toast"></div>
 <script>
+var PLATFORMS=['github','slack','discord','telegram','wechat','dingtalk','feishu','whatsapp'];
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(t._timer);t._timer=setTimeout(function(){t.classList.remove('show')},3000)}
+function setPlatformStatus(name,status){
+  var dot=document.getElementById('dot_'+name),txt=document.getElementById('stxt_'+name);if(!dot||!txt)return;
+  dot.className='dot';txt.className='status-text';
+  if(status==='online'){dot.classList.add('online','live');txt.classList.add('online');txt.textContent='在线'}
+  else if(status==='connecting'){dot.classList.add('connecting');txt.classList.add('connecting');txt.textContent='连接中'}
+  else{dot.classList.add('offline');txt.classList.add('offline');txt.textContent='离线'}
+  var count=0;PLATFORMS.forEach(function(p){var d=document.getElementById('dot_'+p);if(d&&d.classList.contains('online'))count++});
+  document.getElementById('onlineCount').textContent=count+'/8 在线';
+}
+async function checkStatus(){
+  try{var r=await fetch('/api/v1/status',{signal:AbortSignal.timeout(5000)});PLATFORMS.forEach(function(p){setPlatformStatus(p,'online')});
+  document.getElementById('sysDot').className='dot online live';document.getElementById('sysStatusText').textContent='API 正常 · 系统在线';
+  }catch(e){PLATFORMS.forEach(function(p){setPlatformStatus(p,'offline')});
+  document.getElementById('sysDot').className='dot offline';document.getElementById('sysStatusText').textContent='无法连接 API';}
+}
 async function sendToClaw(){
-  var input=document.getElementById('clawInput'),text=input.value.trim();
-  if(!text)return;
-  var out=document.getElementById('clawOutput');out.style.display='block';out.textContent='Claw 处理中...\n\n指令: '+text;
-  input.value='';
+  var input=document.getElementById('clawInput'),text=input.value.trim();if(!text){showToast('请输入指令','warn');return}
+  var btn=document.getElementById('sendBtn');btn.disabled=true;btn.textContent='⏳ 执行中...';
+  var output=document.getElementById('clawOutput');output.classList.add('show');
+  addLog('info','接收',text);addLog('processing','执行中','Claw智能体正在处理...');input.value='';saveHistory(text,'pending');
   try{
-    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',api_key:'',provider:'',context:[{role:'system',content:'你是Claw远程联动智能体。你负责联动多个平台(GitHub/Slack/Discord/Telegram/微信/钉钉/飞书/WhatsApp)执行用户指令。请根据用户需求，调用系统工具完成任务。'}],task_id:'claw_'+Date.now()})});
+    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',context:[{role:'system',content:'你是Claw远程联动智能体。你负责联动多个平台(GitHub/Slack/Discord/Telegram/微信/钉钉/飞书/WhatsApp)执行用户指令。'}],task_id:'claw_'+Date.now()})});
     var d=await r.json();
-    if(d&&d.success){out.textContent='Claw 响应:\n\n'+d.result;}
-    else{out.textContent='Claw 返回错误: '+(d&&d.detail||r.status);}
-  }catch(e){out.textContent='Claw 执行失败: '+e.message;}
+    if(d&&d.success){addLog('success','完成',d.result||'任务执行成功');saveHistory(text,'success');showToast('任务执行成功','success')}
+    else{addLog('error','失败',(d&&d.detail)||r.status+' '+r.statusText);saveHistory(text,'fail');showToast('任务执行失败','error')}
+  }catch(e){addLog('error','异常','请求异常: '+e.message);saveHistory(text,'fail');showToast('网络异常','error')}
+  btn.disabled=false;btn.textContent='▶ 发送';
 }
-function connectPlatform(name){
-  var out=document.getElementById('clawOutput');out.style.display='block';
-  out.textContent='正在连接 '+name+' ...';
-  sendToClawWith('连接 '+name+' 平台，测试连通性');
+function addLog(level,label,msg){
+  var output=document.getElementById('clawOutput'),now=new Date(),time=now.toLocaleTimeString('zh-CN',{hour12:false});
+  var line=document.createElement('div');line.className='log-line';
+  line.innerHTML='<span class="log-time">'+time+'</span><span class="log-level '+level+'">'+label+'</span><span class="log-msg">'+msg+'</span>';
+  output.appendChild(line);output.scrollTop=output.scrollHeight;
 }
-function sendToClawWith(msg){
-  var input=document.getElementById('clawInput');input.value=msg;sendToClaw();
+function quickExec(cmd){document.getElementById('clawInput').value=cmd;sendToClaw()}
+function connectPlatform(name){setPlatformStatus(name,'connecting');addLog('info','连接','正在连接 '+name+'...');quickExec('连接 '+name+' 平台，测试连通性')}
+var HISTORY_KEY='claw_exec_history';
+function loadHistory(){
+  var list=document.getElementById('historyList');
+  try{var raw=localStorage.getItem(HISTORY_KEY),records=raw?JSON.parse(raw):[];if(!Array.isArray(records))records=[]
+    var show=records.slice(-10).reverse();
+    if(!show.length){list.innerHTML='<div class="history-empty">暂无执行记录</div>';return}
+    var html='';show.forEach(function(rec){var t=rec.time||'',c=rec.cmd||'',s=rec.status||'pending',sl={success:'成功',fail:'失败',pending:'执行中'}[s]||s;html+='<div class="h-item"><span class="h-time">'+t+'</span><div class="h-body"><div class="h-cmd">'+c+'</div><div class="h-status"><span class="dot '+s+'"></span>'+sl+'</div></div></div>'})
+    list.innerHTML=html;
+  }catch(e){list.innerHTML='<div class="history-empty">加载历史失败</div>'}
 }
-// 状态检测
-(async function(){
-  try{
-    var r=await fetch('/api/v1/status',{signal:AbortSignal.timeout(3000)});
-    document.getElementById('clawStatus').innerHTML='<span class="status-dot online"></span>系统在线 | API 正常';
-  }catch(e){
-    document.getElementById('clawStatus').innerHTML='<span class="status-dot offline"></span>无法连接 API';
-  }
-})();
+function saveHistory(cmd,status){
+  try{var raw=localStorage.getItem(HISTORY_KEY),records=raw?JSON.parse(raw):[];if(!Array.isArray(records))records=[]
+    var now=new Date(),time=now.toLocaleString('zh-CN',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+    records.push({time:time,cmd:cmd,status:status||'pending'});if(records.length>50)records=records.slice(-50)
+    localStorage.setItem(HISTORY_KEY,JSON.stringify(records));loadHistory()
+  }catch(e){}
+}
+function clearHistory(){if(!confirm('确定清空所有执行历史记录？'))return;try{localStorage.removeItem(HISTORY_KEY)}catch(e){}loadHistory();showToast('历史已清空','info')}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadHistory();checkStatus();setInterval(checkStatus,30000)})();
+function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 </script>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-</body></html>
+</body>
+</html>

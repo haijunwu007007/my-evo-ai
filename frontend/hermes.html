@@ -1,120 +1,189 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Hermes - AUTO-EVO-AI</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Hermes 智能体团队管理 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif}
-body{background:#f5f5f8;color:#1a1a2e;display:flex;min-height:100vh}
-.sidebar{width:120px;background:#f0f0f4;display:flex;flex-direction:column;padding:8px 0;border-right:1px solid #e8eaed;flex-shrink:0}
-.sbtn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 10px;border:none;background:transparent;color:#6b7280;font-size:11px;cursor:pointer}
-.sbtn:hover{background:#e4e6ed;color:#1a1a2e}
-.sbtn .sicon{font-size:13px;width:20px;text-align:center}
-.sbtn.active{background:#eef0f8;color:#4361ee;font-weight:600}
-.spacer{flex:1}
-.divider{height:1px;background:#e8eaed;margin:4px 10px}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #e8eaed;background:#fff;height:44px}
-.topbar-left{display:flex;align-items:center;gap:8px}
-.topbar-left h1{font-size:14px;font-weight:700}
-.back-btn{font-size:11px;color:#6b7280;cursor:pointer;padding:3px 8px;border-radius:6px}
-.back-btn:hover{background:#f0f2f8;color:#4361ee}
-.content{flex:1;padding:20px 24px;overflow-y:auto;max-width:900px}
-.card{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:16px;margin-bottom:12px}
-.card h2{font-size:15px;margin-bottom:8px;color:#1a1a2e}
-.card p{font-size:12px;color:#6b7280;line-height:1.6;margin-bottom:12px}
-.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px}
-.agent-card{padding:12px;border-radius:8px;border:1px solid #e8eaed;text-align:center;font-size:11px;cursor:pointer;transition:all .2s}
-.agent-card:hover{border-color:#4361ee;background:#f0f2f8}
-.agent-card .aicon{font-size:22px;margin-bottom:4px}
-.agent-card .aname{font-weight:600;color:#1a1a2e;margin-bottom:2px}
-.agent-card .adesc{color:#9ca3af;font-size:10px}
-.input-area{display:flex;gap:8px;margin-top:12px}
-.input-area input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #e8eaed;font-size:13px;outline:none;background:#f9fafb}
-.input-area input:focus{border-color:#4361ee}
-.input-area button{padding:8px 16px;border-radius:10px;border:none;background:#4361ee;color:#fff;font-size:12px;cursor:pointer}
-.input-area button:hover{background:#3651d4}
-.output-box{background:#f9fafb;border-radius:10px;padding:12px;font-size:12px;color:#374151;margin-top:8px;min-height:40px;white-space:pre-wrap;display:none}
+.content{padding:16px 24px;overflow-y:auto;flex:1;max-width:1100px;margin:0 auto;width:100%}
+.section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.agent-card{padding:16px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);text-align:center;cursor:pointer;transition:all .25s}
+.agent-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px var(--glow)}
+.agent-card.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow);background:linear-gradient(135deg,var(--card),rgba(67,97,238,.04))}
+.agent-card .aicon{font-size:28px;margin-bottom:6px;display:block}
+.agent-card .aname{font-weight:700;font-size:14px;color:var(--text);margin-bottom:2px}
+.agent-card .adesc{font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:8px;min-height:30px}
+.agent-card .astatus{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.astatus.online{color:#065f46;background:rgba(5,150,105,.1)}
+.astatus.busy{color:#92400e;background:rgba(245,158,11,.1)}
+.astatus.offline{color:#6b7280;background:rgba(107,114,128,.1)}
+.astatus .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.astatus.online .dot{background:#10b981;animation:breath 1.8s ease-in-out infinite}
+.astatus.busy .dot{background:#f59e0b}
+.astatus.offline .dot{background:#9ca3af}
+@keyframes breath{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+.task-panel{padding:16px;border-radius:10px;border:1px solid var(--border);background:var(--card);margin-bottom:16px}
+.task-panel .input-row{display:flex;gap:8px;margin-top:8px}
+.task-panel input{flex:1;padding:9px 14px;border-radius:8px;border:1px solid var(--border);font-size:13px;outline:none;background:var(--bg);color:var(--text)}
+.task-panel input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.task-panel .exec-btn{padding:9px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.task-panel .exec-btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.output-box{background:var(--bg);border-radius:8px;padding:12px;font-size:13px;color:var(--text);margin-top:10px;min-height:50px;white-space:pre-wrap;border:1px solid var(--border);display:none;max-height:300px;overflow-y:auto}
+.output-box.show{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{padding:14px 10px;border-radius:10px;border:1px solid var(--border);text-align:center;background:var(--card);transition:all .2s}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.stat-card .snum{font-size:24px;font-weight:800;color:var(--accent);line-height:1.2}
+.stat-card .slabel{font-size:11px;color:var(--text3);margin-top:2px}
+.history-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.history-item{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--border);font-size:11px}
+.history-item:hover{border-color:var(--accent)}
+.history-item .h-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;min-width:52px}
+.history-item .h-agent{font-size:10px;padding:1px 5px;border-radius:4px;background:var(--glass);color:var(--accent);font-weight:600;flex-shrink:0}
+.history-item .h-text{color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-item .h-status{font-size:9px;padding:1px 5px;border-radius:4px;flex-shrink:0}
+.h-status.success{background:#d1fae5;color:#065f46}
+.h-status.fail{background:#fee2e2;color:#991b1b}
+@media(max-width:768px){
+  .content{padding:12px 10px}
+  .agent-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .task-panel .input-row{flex-direction:column}
+}
 </style>
-  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-
-<div class="sidebar">
-  <div class="sbtn" onclick="window.location.href='/'"><span class="sicon">&#x1F4AC;</span> 对话</div>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="logo" onclick="window.location.href='/'">⚡</div>
+  <button class="sbtn" onclick="window.location.href='/'"><span class="sicon">💬</span> 对话</button>
   <div class="divider"></div>
-  <div class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">&#x1F579;</span> Claw</div>
-  <div class="sbtn active"><span class="sicon">&#x1F3DB;</span> Hermes</div>
-  <div class="sbtn" onclick="window.location.href='/human'"><span class="sicon">&#x1F64B;</span> Human</div>
-  <div class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">&#x1F465;</span> 专家</div>
-  <div class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">&#x1F9E9;</span> 技能</div>
-  <div class="sbtn" onclick="window.location.href='/plugins'"><span class="sicon">&#x1F50C;</span> 插件</div>
-  <div class="spacer"></div>
+  <button class="sbtn active"><span class="sicon">⚡</span> Hermes</button>
+  <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🕸️</span> Claw</button>
+  <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Human</button>
+  <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家</button>
+  <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能</button>
+  <span class="spacer"></span>
   <div class="divider"></div>
-  <div class="sbtn" onclick="window.location.href='/'">&#x1F313; 浅色</div>
-  <div class="sbtn" onclick="doLogout()">&#x1F513; 退出</div>
+  <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
 </div>
-
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-<button class="hamburger" onclick="toggleSidebar()" aria-label="\u83dc\u5355">\u2630</button>
-<h1>Hermes 智能体框架</h1></div>
-    <div class="back-btn" onclick="window.location.href='/'">&#x2190; 返回主页</div>
+      <span class="hamburger" onclick="toggleSidebarMobile()" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--sidebar-text);font-size:16px;cursor:pointer">☰</span>
+      <h1>⚡ Hermes 智能体团队</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="back-btn" onclick="window.location.href='/'">← 返回主页</span>
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
-
   <div class="content">
-    <div class="card">
-      <h2>&#x1F916; 智能体团队</h2>
-      <div class="agent-grid">
-        <div class="agent-card" onclick="activateAgent('planner')"><div class="aicon">&#x1F9E0;</div><div class="aname">Planner</div><div class="adesc">任务规划拆解</div></div>
-        <div class="agent-card" onclick="activateAgent('coder')"><div class="aicon">&#x1F4BB;</div><div class="aname">Coder</div><div class="adesc">代码编写</div></div>
-        <div class="agent-card" onclick="activateAgent('reviewer')"><div class="aicon">&#x1F50D;</div><div class="aname">Reviewer</div><div class="adesc">代码审查</div></div>
-        <div class="agent-card" onclick="activateAgent('operator')"><div class="aicon">&#x2699;</div><div class="aname">Operator</div><div class="adesc">运维执行</div></div>
-        <div class="agent-card" onclick="activateAgent('analyst')"><div class="aicon">&#x1F4CA;</div><div class="aname">Analyst</div><div class="adesc">数据分析</div></div>
-        <div class="agent-card" onclick="activateAgent('researcher')"><div class="aicon">&#x1F50D;</div><div class="aname">Researcher</div><div class="adesc">信息调研</div></div>
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card"><div class="snum" id="statTotal">6</div><div class="slabel">Agent 总数</div></div>
+      <div class="stat-card"><div class="snum" id="statActive">0</div><div class="slabel">已激活</div></div>
+      <div class="stat-card"><div class="snum" id="statTasks">0</div><div class="slabel">任务完成数</div></div>
+      <div class="stat-card"><div class="snum" id="statUptime">-</div><div class="slabel">运行时间</div></div>
+    </div>
+    <div class="section-title">👥 Agent 团队成员</div>
+    <div class="agent-grid" id="agentGrid">
+      <div class="agent-card" onclick="activateAgent('planner')" id="card-planner">
+        <span class="aicon">🧠</span><div class="aname">Planner</div><div class="adesc">任务规划与拆解</div>
+        <span class="astatus online"><span class="dot"></span>在线</span>
+      </div>
+      <div class="agent-card" onclick="activateAgent('coder')" id="card-coder">
+        <span class="aicon">💻</span><div class="aname">Coder</div><div class="adesc">代码编写与实现</div>
+        <span class="astatus online"><span class="dot"></span>在线</span>
+      </div>
+      <div class="agent-card" onclick="activateAgent('reviewer')" id="card-reviewer">
+        <span class="aicon">🔍</span><div class="aname">Reviewer</div><div class="adesc">代码审查与质量</div>
+        <span class="astatus busy"><span class="dot"></span>忙碌</span>
+      </div>
+      <div class="agent-card" onclick="activateAgent('operator')" id="card-operator">
+        <span class="aicon">⚙️</span><div class="aname">Operator</div><div class="adesc">部署与运维执行</div>
+        <span class="astatus online"><span class="dot"></span>在线</span>
+      </div>
+      <div class="agent-card" onclick="activateAgent('analyst')" id="card-analyst">
+        <span class="aicon">📊</span><div class="aname">Analyst</div><div class="adesc">数据分析与可视化</div>
+        <span class="astatus offline"><span class="dot"></span>离线</span>
+      </div>
+      <div class="agent-card" onclick="activateAgent('researcher')" id="card-researcher">
+        <span class="aicon">🔬</span><div class="aname">Researcher</div><div class="adesc">信息检索与调研</div>
+        <span class="astatus online"><span class="dot"></span>在线</span>
       </div>
     </div>
-
-    <div class="card">
-      <h2>&#x1F4DD; 任务执行</h2>
-      <p>选择智能体或直接输入任务，Hermes 将自动调度团队完成任务。</p>
-      <div class="input-area">
-        <input id="hermesInput" placeholder="输入任务，例如: 写一个Python爬虫" onkeydown="if(event.key==='Enter')sendToHermes()">
-        <button onclick="sendToHermes()">&#x27A4; 执行</button>
+    <div class="section-title">📝 任务分配</div>
+    <div class="task-panel">
+      <div style="font-size:12px;color:var(--text2)" id="agentHint">选择一个Agent或直接输入任务指令</div>
+      <div class="input-row">
+        <input id="hermesInput" placeholder="输入任务指令..." onkeydown="if(event.key==='Enter')sendToHermes()">
+        <button class="exec-btn" onclick="sendToHermes()">▶ 执行</button>
       </div>
       <div class="output-box" id="hermesOutput"></div>
+      <div class="history-section" id="historySection" style="display:none;margin-top:12px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">📜 任务历史 <span id="historyCount" style="font-weight:400;color:var(--text3)">(0)</span></div>
+        <div class="history-list" id="historyList"></div>
+      </div>
     </div>
   </div>
 </div>
-
 <script>
-var currentAgent='';
+var currentAgent='',agentLabels={planner:'规划师',coder:'程序员',reviewer:'审查员',operator:'运维',analyst:'分析师',researcher:'研究员'};
+var agentDesc={planner:'负责将复杂任务拆解为可执行的子步骤和计划',coder:'负责根据需求编写高质量代码实现功能',reviewer:'负责审查代码质量、安全漏洞和最佳实践',operator:'负责部署、运维和持续交付流水线',analyst:'负责数据分析、统计建模和可视化呈现',researcher:'负责信息检索、文献调研和技术预研'};
 function activateAgent(name){
-  currentAgent=name;
-  var labels={'planner':'任务规划师','coder':'程序员','reviewer':'代码审查员','operator':'运维工程师','analyst':'数据分析师','researcher':'研究员'};
-  var descs={'planner':'负责将复杂任务拆解为可执行步骤','coder':'负责编写代码实现功能','reviewer':'负责审查代码质量和安全','operator':'负责部署和运维操作','analyst':'负责数据分析与可视化','researcher':'负责信息检索和调研'};
-  var input=document.getElementById('hermesInput');
-  input.placeholder='向 '+labels[name]+' 发送指令...';
-  input.focus();
-  var out=document.getElementById('hermesOutput');out.style.display='block';
-  out.textContent='已激活: '+labels[name]+'\n'+descs[name]+'\n\n输入你的任务开始协作。';
+  currentAgent=name;document.querySelectorAll('.agent-card').forEach(function(c){c.classList.remove('active')});
+  var card=document.getElementById('card-'+name);if(card)card.classList.add('active');
+  var input=document.getElementById('hermesInput');input.placeholder='向 '+agentLabels[name]+' 发送指令...';input.focus();
+  document.getElementById('agentHint').innerHTML='🎯 已激活: <strong>'+agentLabels[name]+'</strong> — '+agentDesc[name];
+  var out=document.getElementById('hermesOutput');out.classList.add('show');
+  out.textContent='✅ 已激活 '+agentLabels[name]+'\n'+agentDesc[name]+'\n\n请在下方输入任务指令开始协作。';loadHistory(name);
 }
 async function sendToHermes(){
-  var input=document.getElementById('hermesInput'),text=input.value.trim();
-  if(!text)return;
-  var out=document.getElementById('hermesOutput');out.style.display='block';
-  out.textContent='Hermes 处理中...\n\n任务: '+text;
-  if(currentAgent)out.textContent+='\n智能体: '+currentAgent;
+  var input=document.getElementById('hermesInput'),text=input.value.trim();if(!text)return;
+  var out=document.getElementById('hermesOutput');out.classList.add('show');
+  out.textContent='Hermes 正在处理...\n\n📋 任务: '+text+(currentAgent?'\n🤖 Agent: '+agentLabels[currentAgent]:'');
+  var agentName=currentAgent||'hermes',taskData={agent:agentName,task:text,time:new Date().toISOString(),status:'pending'};
   input.value='';
   try{
-    var sys='你是Hermes智能体框架。你管理一个智能体团队(Planner/Coder/Reviewer/Operator/Analyst/Researcher)。';
-    if(currentAgent)sys+='\n当前激活的智能体是: '+currentAgent+'。请以该智能体角色执行任务。';
-    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',api_key:'',provider:'',context:[{role:'system',content:sys}],task_id:'hermes_'+Date.now()})});
+    var sys='你是Hermes智能体框架的管理中枢。你管理着一个智能体团队: Planner(规划师), Coder(程序员), Reviewer(审查员), Operator(运维), Analyst(分析师), Researcher(研究员)。';
+    if(currentAgent){sys+='\n当前激活的智能体是: '+currentAgent+' ('+agentLabels[currentAgent]+')。\n请以该智能体的专业角色来执行任务。\n'+agentLabels[currentAgent]+' 的职责: '+agentDesc[currentAgent];}
+    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:'zh-CN',context:[{role:'system',content:sys}],task_id:'hermes_'+Date.now()})});
     var d=await r.json();
-    if(d&&d.success){out.textContent='Hermes 响应:\n\n'+d.result;}
-    else{out.textContent='Hermes 返回错误: '+(d&&d.detail||r.status);}
-  }catch(e){out.textContent='Hermes 执行失败: '+e.message;}
+    if(d&&d.success){out.textContent='✅ Hermes 响应完成:\n\n'+d.result;taskData.status='success';taskData.result=d.result}
+    else{out.textContent='❌ Hermes 返回错误: '+(d&&d.detail||r.status);taskData.status='fail';taskData.error=d&&d.detail||String(r.status)}
+  }catch(e){out.textContent='❌ Hermes 执行失败: '+e.message;taskData.status='fail';taskData.error=e.message}
+  saveHistory(taskData);loadHistory(agentName);loadAgentStats();
 }
+function saveHistory(data){
+  try{var key='hermes_history_'+data.agent,hist=JSON.parse(localStorage.getItem(key)||'[]');hist.push(data);if(hist.length>50)hist=hist.slice(-50);localStorage.setItem(key,JSON.stringify(hist))}catch(e){}
+}
+function loadHistory(agentName){
+  var name=agentName||currentAgent||'hermes';
+  try{var key='hermes_history_'+name,hist=JSON.parse(localStorage.getItem(key)||'[]'),section=document.getElementById('historySection'),list=document.getElementById('historyList'),count=document.getElementById('historyCount');
+    if(!hist.length){section.style.display='none';return}
+    section.style.display='block';count.textContent='('+hist.length+')';
+    var html='';for(var i=hist.length-1;i>=0;i--){var h=hist[i],time='';try{var t=new Date(h.time);time=('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2)}catch(e){time='--:--'}
+      var sc=h.status==='success'?'success':(h.status==='fail'?'fail':'pending'),sl=h.status==='success'?'成功':(h.status==='fail'?'失败':'进行中');
+      html+='<div class="history-item"><span class="h-time">'+time+'</span><span class="h-agent">'+(agentLabels[h.agent]||h.agent)+'</span><span class="h-text">'+h.task+'</span><span class="h-status '+sc+'">'+sl+'</span></div>'}
+    list.innerHTML=html
+  }catch(e){}
+}
+function loadAgentStats(){
+  fetch('/api/v1/status').then(function(r){return r.json()}).then(function(d){
+    if(!d)return;document.getElementById('statTotal').textContent=d.total_agents||d.agents||d.agent_count||6;
+    document.getElementById('statActive').textContent=d.active_agents||d.active||d.active_count||0;
+    document.getElementById('statTasks').textContent=d.tasks_completed||d.completed_tasks||d.task_count||0;
+    var uptime=d.uptime||d.runtime||d.run_time||'-';
+    if(typeof uptime==='number'){if(uptime<60)uptime=uptime+'s';else if(uptime<3600)uptime=Math.floor(uptime/60)+'m';else if(uptime<86400)uptime=Math.floor(uptime/3600)+'h';else uptime=Math.floor(uptime/86400)+'d'}
+    document.getElementById('statUptime').textContent=uptime;
+  }).catch(function(){})
+}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};setTimeout(function(){activateAgent('planner');loadAgentStats();setInterval(loadAgentStats,30000)},100)})();
+function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 </script>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-</body></html>
+</body>
+</html>
