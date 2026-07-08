@@ -1,0 +1,15 @@
+# k8s/pdb.yaml — Pod 中断预算（保证多副本可用性）
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: evo-api-pdb
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+    app.kubernetes.io/component: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: evo-api

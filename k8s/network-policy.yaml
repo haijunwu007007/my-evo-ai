@@ -1,0 +1,36 @@
+# k8s/network-policy.yaml — 网络策略（零信任模型）
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: evo-default-deny
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: evo-api-allow
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: evo-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 8765
+          protocol: TCP

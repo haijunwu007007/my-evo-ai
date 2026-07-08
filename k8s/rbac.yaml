@@ -1,0 +1,40 @@
+# k8s/rbac.yaml — 服务账号与 RBAC（最小权限原则）
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: evo-api-sa
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: evo-api-role
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: evo-api-rolebinding
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: evo-api-role
+subjects:
+  - kind: ServiceAccount
+    name: evo-api-sa
+    namespace: auto-evo-ai

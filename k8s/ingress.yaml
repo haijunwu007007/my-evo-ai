@@ -1,0 +1,32 @@
+# k8s/ingress.yaml — Nginx Ingress（TLS终止）
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: evo-ingress
+  namespace: auto-evo-ai
+  labels:
+    app.kubernetes.io/name: auto-evo-ai
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - evo.your-domain.com
+      secretName: evo-tls
+  rules:
+    - host: evo.your-domain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: evo-api-service
+                port:
+                  number: 80
