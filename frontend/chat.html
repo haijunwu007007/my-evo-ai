@@ -529,7 +529,7 @@ function checkOnboard() {
         🏢 企业 & 自动化 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_biz">
-        <button class="sbtn" onclick="window.location.href='/admin'"><span class="sicon">⚙️</span> 管理中心</button>
+        <button class="sbtn" onclick="window.location.href='/admin'" data-role="admin"><span class="sicon">⚙️</span> 管理中心</button>
         <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
         <button class="sbtn" onclick="window.location.href='/canvas'"><span class="sicon">🎨</span> 编排画布</button>
         <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
@@ -557,7 +557,7 @@ function checkOnboard() {
         📦 开发 & 部署 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_dev">
-        <button class="sbtn" onclick="window.location.href='/deploy'"><span class="sicon">🚀</span> 一键部署</button>
+        <button class="sbtn" onclick="window.location.href='/deploy'" data-role="admin"><span class="sicon">🚀</span> 一键部署</button>
         <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
         <button class="sbtn" onclick="window.open('/agent','_blank')"><span class="sicon">🔌</span> 本地代理</button>
       </div>
@@ -569,7 +569,7 @@ function checkOnboard() {
         ⚙️ 系统 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_sys">
-        <button class="sbtn" onclick="window.location.href='/settings'"><span class="sicon">⚙️</span> 系统设置</button>
+        <button class="sbtn" onclick="window.location.href='/settings'" data-role="admin"><span class="sicon">⚙️</span> 系统设置</button>
       </div>
     </div>
 
@@ -894,7 +894,21 @@ function _cleanVoice(){
 function _voiceFail(){switchToText();alert('请在浏览器设置中允许麦克风权限');}
 
 
-function demoMode(){
+function checkUserRole(){
+  var t=localStorage.getItem('evo_token')||'';
+  var r='viewer';
+  if(t){try{var p=JSON.parse(atob(t.split('.')[1]));r=p.role||'viewer'}catch(e){}}
+  var l={viewer:1,editor:2,admin:3};
+  document.querySelectorAll('[data-role]').forEach(function(el){
+    var need=l[el.getAttribute('data-role')]||3;
+    var have=l[r]||1;
+    if(have<need) el.style.display='none';
+  });
+  // 存到全局
+  window._userRole=r;
+}
+// 页面加载后执行
+checkUserRole();
   localStorage.setItem('evo_demo','true');
   localStorage.setItem('evo_onboard_done','true');
   document.getElementById('regUser').value='demo';
