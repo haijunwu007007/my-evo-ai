@@ -501,54 +501,54 @@ function checkOnboard() {
     <button class="sbtn" onclick="window.location.href='/enterprise.html'"><span class="sicon">📊</span> 工作台</button>
     <div class="divider"></div>
 
-    <!-- AI 智能体 -->
+    <!-- AI & 智能 — AI驱动能力 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        🤖 AI 智能体 <span class="arrow">▶</span>
+        🤖 AI & 智能 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_ai">
         <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🦾</span> Agent 集群</button>
         <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能 & 扩展</button>
-        <button class="sbtn" onclick="window.location.href='/team-canvas.html'"><span class="sicon">🧑‍🤝‍🧑</span> 团队 & 编排</button>
-        <button class="sbtn" onclick="window.location.href='/billion-os.html'"><span class="sicon">🏛️</span> 集团 OS</button>
         <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家库</button>
         <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
+        <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
       </div>
     </div>
 
-    <!-- 连接 & 协作 -->
+    <!-- 协作 & 流程 — 人机协作+流程编排+自动化 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        🔗 连接 & 协作 <span class="arrow">▶</span>
+        🔗 协作 & 流程 <span class="arrow">▶</span>
       </button>
-      <div class="sgroup-body" id="sg_connect">
+      <div class="sgroup-body" id="sg_flow">
+        <button class="sbtn" onclick="window.location.href='/team-canvas.html'"><span class="sicon">🧑‍🤝‍🧑</span> 团队 & 编排</button>
         <button class="sbtn" onclick="window.location.href='/remote.html'"><span class="sicon">📡</span> 远程执行</button>
         <button class="sbtn" onclick="window.location.href='/review.html'"><span class="sicon">👤</span> 审批中心</button>
+        <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
+        <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
+        <button class="sbtn" onclick="window.location.href='/loop'"><span class="sicon">🔄</span> 循环</button>
       </div>
     </div>
 
-    <!-- 企业 & 管理 ← 原企业&自动化 + 系统设置 -->
+    <!-- 企业 & 管理 — 系统本身管理 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
         🏢 企业 & 管理 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_biz">
         <button class="sbtn" onclick="window.location.href='/admin'" data-role="admin"><span class="sicon">⚙️</span> 管理中心</button>
-        <button class="sbtn" onclick="window.location.href='/workflow'"><span class="sicon">📝</span> 工作流</button>
-        <button class="sbtn" onclick="window.location.href='/automations'"><span class="sicon">🤖</span> 自动化</button>
-        <button class="sbtn" onclick="window.location.href='/loop'"><span class="sicon">🔄</span> 循环</button>
+        <button class="sbtn" onclick="window.location.href='/billion-os.html'"><span class="sicon">🏛️</span> 集团 OS</button>
         <button class="sbtn" onclick="window.location.href='/settings'" data-role="admin"><span class="sicon">⚙️</span> 系统设置</button>
       </div>
     </div>
 
-    <!-- 开发 & 生态 ← 原开发&部署 + 开源中心 -->
+    <!-- 开发 & 生态 — 开发者工具+开源生态 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
         📦 开发 & 生态 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_dev">
         <button class="sbtn" onclick="window.location.href='/deploy'" data-role="admin"><span class="sicon">🚀</span> 一键部署</button>
-        <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
         <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
       </div>
     </div>
