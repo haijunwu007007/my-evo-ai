@@ -67,7 +67,7 @@ class SsoAuth(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
 
     # JWT 常量
     _JWT_ALGORITHM = "HS256"
-    _JWT_SECRET = os.environ.get("SSO_JWT_SECRET", "evo-sso-secret-change-me-2026")
+    _JWT_SECRET = os.environ.get("SSO_JWT_SECRET") or (lambda: __import__('secrets').token_hex(32))()
     _JWT_ISSUER = "auto-evo-ai"
 
     def __init__(self, config: dict[str, Any] | None = None):

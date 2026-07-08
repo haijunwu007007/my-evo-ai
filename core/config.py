@@ -46,4 +46,5 @@ N8N_API_KEY = os.environ.get('N8N_API_KEY', '')
 
 # 认证
 MCP_AUTH_ENABLED = os.environ.get('MCP_AUTH', '1') == '1'
-MCP_AUTH_TOKEN = os.environ.get('MCP_TOKEN', os.environ.get('EVO_JWT_SECRET', 'change-me-in-production'))
+import secrets
+MCP_AUTH_TOKEN = os.environ.get('MCP_TOKEN') or os.environ.get('EVO_JWT_SECRET') or secrets.token_hex(32)

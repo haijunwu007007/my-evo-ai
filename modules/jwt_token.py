@@ -42,8 +42,8 @@ class JwtToken(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
     VERSION = "V0.1"
     MODULE_LEVEL = "A"
 
-    # 默认密钥（优先从环境变量读取）
-    DEFAULT_SECRET = os.environ.get("EVO_JWT_SECRET", "evo-ai-jwt-secret-key-change-in-production")
+    # 默认密钥（环境变量 → 运行时随机生成）
+    DEFAULT_SECRET = os.environ.get("EVO_JWT_SECRET") or (lambda: __import__('secrets').token_hex(32))()
 
     def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)

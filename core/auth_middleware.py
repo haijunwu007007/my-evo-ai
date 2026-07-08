@@ -5,8 +5,8 @@ from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 import jwt, time
 
-import os
-JWT_SECRET = os.environ.get("EVO_JWT_SECRET", "evo-secret-key-2026")
+import os, secrets
+JWT_SECRET = os.environ.get("EVO_JWT_SECRET") or secrets.token_hex(32)
 ROLE_HIERARCHY = {"viewer": 1, "editor": 2, "admin": 3}
 
 def create_token(username, role="admin"):
