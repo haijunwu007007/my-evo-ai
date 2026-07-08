@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" id="themeColorMeta" content="#1a1a2e">
 <link rel="manifest" href="/manifest.json">
 
 <title>AUTO-EVO-AI</title>
@@ -566,7 +566,7 @@ function checkOnboard() {
 
     <div class="spacer"></div>
     <div class="divider"></div>
-    <button class="sbtn" id="themeBtn" onclick="toggleTheme()"><span class="sicon">🌙</span> 浅色</button>
+    <button class="sbtn" id="themeBtn" onclick="nextTheme()"><span class="sicon">🎨</span> 主题</button>
     <button class="sbtn" onclick="doLogout()"><span class="sicon">🔓</span> 退出</button>
   </div><div class="left-toggle-btn" id="leftToggleBtn" onclick="toggleSidebar()"></div><div class="main" id="mainContent">
     <div class="topbar">
@@ -578,7 +578,7 @@ function checkOnboard() {
       <div class="topbar-right">
         <span onclick="clearHistory()">🔄 新对话</span>
         <span onclick="showArchives()">📋 历史</span>
-        <span onclick="showHistory()">📜 操作</span>
+        <span id="historyBtn" onclick="showHistory()">📜 历史</span><span id="langBtn" onclick="toggleLang()" style="font-size:12px;padding:2px 6px;border-radius:4px;background:var(--glass);cursor:pointer">zh-CN</span>
       
 </div>
     </div>
@@ -704,7 +704,7 @@ function quickTool(el,action){
   }catch(e){}
 })();
 </script>
-<script src="/frontend/chat_engine.js?v=500"></script>
+<script src="/frontend/chat_engine.js?v=1783468578"></script>
 
 <script>
 // 侧边栏折叠分组（每个分组独立记忆）
@@ -895,7 +895,18 @@ function demoMode(){
 }
 
 </script>
-</body>
+<script>
+// ── PWA 离线支持 ──
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/static/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
+// ── 拖拽上传 ──
+(function(){var dz=document.getElementById('appMain');if(!dz)return;var inp=document.getElementById('fileInput');dz.addEventListener('dragenter',function(e){e.preventDefault();dz.style.outline='2px dashed var(--accent)';dz.style.outlineOffset='-4px'});dz.addEventListener('dragover',function(e){e.preventDefault()});dz.addEventListener('dragleave',function(e){e.preventDefault();dz.style.outline=''});dz.addEventListener('drop',function(e){e.preventDefault();dz.style.outline='';if(e.dataTransfer.files.length){document.getElementById('fileInput').files=e.dataTransfer.files;if(typeof handleFiles==='function')handleFiles(document.getElementById('fileInput'))}});})();
+// ── 粘贴图片 ──
+(function(){var inp=document.getElementById('input');if(!inp)return;inp.addEventListener('paste',function(e){var items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(var i=0;i<items.length;i++){if(items[i].type.indexOf('image')>=0){var f=items[i].getAsFile();if(f){document.getElementById('fileInput').files=[f];if(typeof handleFiles==='function')handleFiles(document.getElementById('fileInput'))}}}});})();
+// ── ↑键回显上条消息 ──
+(function(){var inp=document.getElementById('input'),hist=[];try{var c=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');for(var i=c.length-1;i>=0;i--){if(c[i].role==='user'&&c[i].text){hist.push(c[i].text);if(hist.length>=10)break}}var hi=0;inp.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&hist.length){e.preventDefault();if(hi<hist.length){hi++;inp.value=hist[hist.length-hi];inp.setSelectionRange(inp.value.length,inp.value.length)}}});inp.addEventListener('keydown',function(e){if(e.key==='ArrowDown'&&hist.length&&hi>0){e.preventDefault();hi--;if(hi===0)inp.value='';else inp.value=hist[hist.length-hi];inp.setSelectionRange(inp.value.length,inp.value.length)}});inp.addEventListener('input',function(){hi=0})}catch(ex){}})();
+// ── @提到技能 ──
+(function(){var inp=document.getElementById('input');if(!inp)return;var lastAtPos=-1;inp.addEventListener('input',function(){var v=inp.value,pos=inp.selectionStart;var atPos=v.lastIndexOf('@',pos);if(atPos>=0&&(atPos===0||v[atPos-1]===' '||v[atPos-1]==='')&&pos>atPos){lastAtPos=atPos;var q=v.slice(atPos+1,pos).toLowerCase();var sug=document.getElementById('inputSuggest');if(sug&&typeof window._TOOL_HINTS!=='undefined'&&window._TOOL_HINTS){var matches=[];for(var k in window._TOOL_HINTS){if(k.toLowerCase().indexOf(q)>=0||window._TOOL_HINTS[k].toLowerCase().indexOf(q)>=0)matches.push(k);if(matches.length>=6)break}if(matches.length){sug.innerHTML=matches.map(function(m,i){return '<div class="si '+(i===0?'active':'')+'" onclick="document.getElementById(\'input\').value=document.getElementById(\'input\').value.replace(/@\\w*$/,\'@'+m+' \');document.getElementById(\'input\').focus();document.getElementById(\'inputSuggest\').classList.remove(\'show\')">@<b>'+m.slice(0,25)+'</b><span class="sibadge">'+(window._TOOL_HINTS[m]||'').slice(0,30)+'</span></div>'});sug.classList.add('show')}else{sug.classList.remove('show')}}else{if(sug)sug.classList.remove('show')}}else{if(lastAtPos>=0){var sug2=document.getElementById('inputSuggest');if(sug2)sug2.classList.remove('show')}lastAtPos=-1}});inp.addEventListener('keydown',function(e){if(e.key==='Tab'||e.key==='Enter'){var sug=document.getElementById('inputSuggest');if(sug&&sug.classList.contains('show')&&sug.querySelector('.si.active')){e.preventDefault();sug.querySelector('.si.active').click()}}}});})();
+</script></body>
 </html>
 
 
