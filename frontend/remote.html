@@ -111,20 +111,5 @@ function renderLogs(){
   if(_logs.length===0){el.innerHTML='<tr><td colspan="3" style="text-align:center;color:#636e8a">暂无记录</td></tr>';return}
   el.innerHTML=_logs.map(function(l){return '<tr><td style="color:#636e8a">'+l.time+'</td><td>'+l.cmd.slice(0,30)+'</td><td style="color:#10b981">✅ 完成</td></tr>'}).join('')}
 if(_token)displayToken();renderLogs()
-
-// ── Claw ──
-function sendClaw(){
-  var cmd=document.getElementById('clawCmd').value.trim()
-  if(!cmd)return
-  var log=document.getElementById('clawLog')
-  log.innerHTML+='<div style="color:#4361ee">> '+cmd+'</div>'
-  fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:cmd,agent:'claw'})})
-    .then(function(r){return r.json()}).then(function(d){
-      log.innerHTML+='<div style="color:#8892b0;margin-bottom:6px">'+(d.result||'OK')+'</div>'
-    }).catch(function(e){log.innerHTML+='<div style="color:#ef4444">错误: '+e.message+'</div>'})
-  document.getElementById('clawCmd').value=''}
-var platforms=['GitHub','Slack','Discord','Telegram','钉钉','飞书']
-var pp=document.getElementById('clawPlatforms')
-pp.innerHTML=platforms.map(function(p){return '<span style="display:inline-block;margin:4px;padding:4px 10px;border-radius:6px;border:1px solid #2d3561;font-size:13px;color:#8892b0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b7280;margin-right:6px"></span>'+p+'</span>'}).join('')
 </script>
 </body></html>

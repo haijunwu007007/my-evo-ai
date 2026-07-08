@@ -41,16 +41,11 @@
 </head>
 <body>
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span>
-      <h1>🛠️ 技能 & 扩展</h1>
-    </div>
-    <div class="topbar-right">
-      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
-    </div>
+  <div class="tabs" style="display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card)">
+    <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--accent);border-bottom:2px solid var(--accent);font-weight:600;transition:all .15s" onclick="switchSTab(this,'s_skills')">🛠️ 技能管理</div>
+    <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s" onclick="switchSTab(this,'s_capabilities')">🧠 能力中心</div>
   </div>
-  <div class="content">
+  <div id="s_skills" class="tab-content" style="display:flex;flex-direction:column;flex:1;min-height:0"><div class="topbar"><div class="topbar-left"><span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span><h1>🛠️ 技能 & 扩展</h1></div><div class="topbar-right"><button class="topbar-btn" onclick="toggleTheme()">🌙</button></div></div><div class="content">
     <div class="stats" id="stats"></div>
     <div class="filter-bar">
       <input id="search" placeholder="搜索技能名称..." oninput="filterSkills()">
@@ -109,4 +104,12 @@ function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.s
 (function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadSkills()})();
 </script>
 </body>
-</html>
+<div id="s_capabilities" class="tab-content" style="display:none;flex:1;min-height:0"><iframe src="/capabilities" style="width:100%;height:100%;border:none"></iframe></div>
+<script>
+function switchSTab(el,id){
+  el.parentElement.querySelectorAll('.tab').forEach(function(t){t.style.color='var(--text3)';t.style.borderBottomColor='transparent';t.style.fontWeight='400'})
+  el.style.color='var(--accent)';el.style.borderBottomColor='var(--accent)';el.style.fontWeight='600'
+  el.parentElement.parentElement.querySelectorAll('.tab-content').forEach(function(c){c.style.display='none'})
+  document.getElementById(id).style.display='flex'}
+</script>
+</body></html>

@@ -47,16 +47,12 @@
 </head>
 <body>
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span>
-      <h1>🦾 Agent 集群</h1>
-    </div>
-    <div class="topbar-right">
-      <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
-    </div>
+  <div class="tabs" style="display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card)">
+    <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;border-bottom-color:var(--accent);font-weight:600;color:var(--accent)" onclick="switchATab(this,'a_cluster')">🦾 集群管理</div>
+    <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s" onclick="switchATab(this,'a_hermes')">⚡ Hermes</div>
+    <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s" onclick="switchATab(this,'a_teammates')">🤖 AI同事</div>
   </div>
-  <div class="content">
+  <div id="a_cluster" class="tab-content" style="display:flex;flex-direction:column;flex:1;min-height:0"><div class="topbar"><div class="topbar-left"><span onclick="window.location.href='/'" style="cursor:pointer;font-size:15px;color:var(--text2);padding:4px">←</span><h1>🦾 Agent 集群</h1></div><div class="topbar-right"><button class="topbar-btn" onclick="toggleTheme()">🌙</button></div></div><div class="content">
     <div class="stats" id="stats"></div>
     <div class="filter-bar">
       <input id="search" placeholder="搜索Agent名称..." oninput="filterAgents()">
@@ -166,4 +162,13 @@ function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.s
 (function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadAgents()})();
 </script>
 </body>
-</html>
+<div id="a_hermes" class="tab-content" style="display:none;flex:1;min-height:0"><iframe src="/hermes" style="width:100%;height:100%;border:none"></iframe></div>
+<div id="a_teammates" class="tab-content" style="display:none;flex:1;min-height:0"><iframe src="/teammates.html" style="width:100%;height:100%;border:none"></iframe></div>
+<script>
+function switchATab(el,id){
+  el.parentElement.querySelectorAll('.tab').forEach(function(t){t.style.color='var(--text3)';t.style.borderBottomColor='transparent';t.style.fontWeight='400'})
+  el.style.color='var(--accent)';el.style.borderBottomColor='var(--accent)';el.style.fontWeight='600'
+  el.parentElement.parentElement.querySelectorAll('.tab-content').forEach(function(c){c.style.display='none'})
+  document.getElementById(id).style.display='flex'}
+</script>
+</body></html>
