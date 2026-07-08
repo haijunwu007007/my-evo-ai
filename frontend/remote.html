@@ -1,33 +1,36 @@
-<!DOCTYPE html><html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>远程执行 - AUTO-EVO-AI</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" id="themeColorMeta" content="#1a1a2e">
+<title>Agent连接 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px;min-height:100vh}
-.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #2d3561}
-.tab{padding:8px 18px;cursor:pointer;font-size:14px;color:#8892b0;border-bottom:2px solid transparent;transition:all .15s}
-.tab:hover{color:#e0e0e0}.tab.active{color:#4361ee;border-bottom-color:#4361ee;font-weight:600}
-.tab-content{display:none}.tab-content.active{display:block}
-h1{font-size:24px;margin-bottom:6px}.sub{color:#8892b0;font-size:14px;margin-bottom:24px}
-.back{display:inline-block;margin-bottom:20px;color:#4361ee;text-decoration:none;font-size:14px}
+body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
+.tabs{display:flex;gap:0;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--card)}
+.tab{padding:8px 18px;cursor:pointer;font-size:14px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab-content{display:none;flex:1;min-height:0}.tab-content.active{display:flex;flex-direction:column}
+.back{flex-shrink:0;padding:8px 16px;color:var(--accent);text-decoration:none;font-size:14px;border-bottom:1px solid var(--border)}
 .back:hover{text-decoration:underline}
-.card{background:#1a1a2e;border-radius:12px;padding:24px;border:1px solid #2d3561;max-width:600px;margin-bottom:16px}
-.card h3{font-size:15px;margin-bottom:8px;color:#4361ee}
-.card p{font-size:13px;color:#8892b0;margin-bottom:12px;line-height:1.5}
-label{font-size:14px;color:#c0c0d0;display:block;margin-bottom:4px}
-input[type=text],input[type=url]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2d3561;background:#16213e;color:#e0e0e0;font-size:14px;margin-bottom:12px}
-.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
-.btn-p{background:#4361ee;color:#fff}.btn-p:hover{opacity:.9}
-.btn-s{background:#10b981;color:#fff}.btn-s:hover{opacity:.9}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-th,td{text-align:left;padding:8px;border-bottom:1px solid #2d3561;font-size:13px}
-th{color:#8892b0;font-weight:600}
-td{color:#e0e0e0}
-.token-box{background:#16213e;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;margin:8px 0;word-break:break-all;border:1px solid #2d3561}
-.status{display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+h1{font-size:22px;font-weight:700;padding:12px 16px 4px;flex-shrink:0}.sub{color:var(--text3);font-size:13px;padding:0 16px 8px;flex-shrink:0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin:8px 12px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--accent)}
+.card p{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+label{font-size:13px;color:var(--text2);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:13px;margin-bottom:8px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+.btn{padding:7px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.9}
+.btn-g{background:#10b981;color:#fff}.btn-g:hover{opacity:.9}
+table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+th{color:var(--text3);font-weight:600}td{color:var(--text2)}
+.token-box{background:var(--bg);border-radius:6px;padding:10px;font-family:monospace;font-size:12px;margin:6px 0;word-break:break-all;border:1px solid var(--border);color:var(--text2)}
+.status{display:none;padding:8px 12px;border-radius:6px;margin-bottom:8px;font-size:13px}
 .status.ok{display:block;background:rgba(16,185,129,.1);border:1px solid #10b981;color:#10b981}
 .status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
-.copy-btn{background:transparent;border:1px solid #2d3561;color:#e0e0e0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:8px}
-.copy-btn:hover{background:#2d3561}
 </style></head>
 <body>
 <div class="tabs">
@@ -35,11 +38,9 @@ td{color:#e0e0e0}
   <div class="tab" onclick="switchTab(this,'r_claw')">🕸️ Claw</div>
   <div class="tab" onclick="switchTab(this,'r_agent')">🔌 本地代理</div>
 </div>
-<a href="/" class="back">← 返回</a>
-<h1 id="pageTitle">📡 Agent 连接</h1>
-
-<!-- Tab 1: 远程执行 -->
+<a class="back" href="/">← 返回首页</a>
 <div id="r_remote" class="tab-content active">
+<h1>📡 远程执行</h1>
 <p class="sub">手机发指令 → 服务器自动执行 → 结果通知</p>
 <div class="status" id="status"></div>
 <div class="card">
@@ -47,69 +48,39 @@ td{color:#e0e0e0}
   <p>在其他设备上使用此 Token 发送指令到本系统。</p>
   <div class="token-box" id="tokenDisplay">请先生成 Token</div>
   <button class="btn btn-p" onclick="generateToken()">🔄 生成新的 Token</button>
-  <button class="btn btn-s" onclick="copyToken()" id="copyBtn">📋 复制远程链接</button>
+  <button class="btn btn-g" onclick="copyToken()" id="copyBtn">📋 复制远程链接</button>
 </div>
 <div class="card">
   <h3>✉️ 远程发送指令</h3>
-  <label>指令内容</label>
-  <input type="text" id="remoteCmd" placeholder="如：帮我系统怎么样、创建用户 张三" onkeydown="if(event.key==='Enter')sendRemote()">
+  <input type="text" id="remoteCmd" placeholder="如：系统怎么样、创建用户 张三" onkeydown="if(event.key==='Enter')sendRemote()">
   <button class="btn btn-p" onclick="sendRemote()">📨 发送远程指令</button>
 </div>
 <div class="card">
   <h3>📋 执行记录</h3>
   <table><thead><tr><th>时间</th><th>指令</th><th>状态</th></tr></thead>
-  <tbody id="logList"><tr><td colspan="3" style="text-align:center;color:#636e8a">暂无记录</td></tr></tbody></table>
+  <tbody id="logList"><tr><td colspan="3" style="text-align:center;color:var(--text3)">暂无记录</td></tr></tbody></table>
 </div>
 </div>
-
-<!-- Tab 2: Claw 网关 -->
-<div id="r_claw" class="tab-content" style="height:80vh"><iframe src="/claw?embed=1" style="width:100%;height:100%;border:none;border-radius:8px"></iframe></div>
-
-<!-- Tab 3: 本地代理 -->
-<div id="r_agent" class="tab-content" style="height:80vh"><iframe src="/agent" style="width:100%;height:100%;border:none;border-radius:8px"></iframe></div>
-
+<div id="r_claw" class="tab-content"><iframe src="/claw?embed=1" style="width:100%;height:100%;border:none"></iframe></div>
+<div id="r_agent" class="tab-content"><iframe src="/agent" style="width:100%;height:100%;border:none"></iframe></div>
 <script>
-function switchTab(el, id) {
+function switchTab(el,id){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
   el.classList.add('active')
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active')})
-  document.getElementById(id).classList.add('active')
-}
-
-// ── 远程执行 ──
+  document.getElementById(id).classList.add('active')}
 var _token=localStorage.getItem('evo_remote_token')||''
-function showStatus(msg,ok){
-  var s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');s.style.display='block'
-  setTimeout(function(){s.style.display='none'},4000)}
-function generateToken(){
-  _token='evoremote_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36)
-  localStorage.setItem('evo_remote_token',_token);displayToken();showStatus('✅ 新 Token 已生成',true)}
-function displayToken(){
-  var link=window.location.origin+'/remote-exec.html?token='+_token
-  document.getElementById('tokenDisplay').textContent=link}
-function copyToken(){
-  var link=window.location.origin+'/remote-exec.html?token='+_token
-  navigator.clipboard.writeText(link).then(function(){
-    document.getElementById('copyBtn').textContent='✅ 已复制'
-    setTimeout(function(){document.getElementById('copyBtn').textContent='📋 复制远程链接'},2000)
-  }).catch(function(){showStatus('复制失败，请手动复制',false)})}
-async function sendRemote(){
-  var cmd=document.getElementById('remoteCmd').value.trim()
-  if(!cmd){showStatus('请输入指令',false);return}
-  try{
-    var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:cmd})})
-    var d=await r.json();var result=d.result||d.detail||'(空)'
-    addLog(cmd,result);showStatus('✅ 执行成功: '+result.slice(0,80)+(result.length>80?'...':''),true)
-  }catch(e){showStatus('执行失败: '+e.message,false)}
-  document.getElementById('remoteCmd').value=''}
+function showStatus(msg,ok){var s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');s.style.display='block';setTimeout(function(){s.style.display='none'},4000)}
+function generateToken(){_token='evoremote_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('evo_remote_token',_token);displayToken();showStatus('✅ 新 Token 已生成',true)}
+function displayToken(){document.getElementById('tokenDisplay').textContent=window.location.origin+'/remote-exec.html?token='+_token}
+function copyToken(){var link=window.location.origin+'/remote-exec.html?token='+_token;navigator.clipboard.writeText(link).then(function(){document.getElementById('copyBtn').textContent='✅ 已复制';setTimeout(function(){document.getElementById('copyBtn').textContent='📋 复制远程链接'},2000)}).catch(function(){showStatus('复制失败',false)})}
+async function sendRemote(){var cmd=document.getElementById('remoteCmd').value.trim();if(!cmd){showStatus('请输入指令',false);return}
+  try{var r=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:cmd})});var d=await r.json();var result=d.result||d.detail||'(空)';addLog(cmd,result);showStatus('✅ 成功: '+result.slice(0,60),true)}
+  catch(e){showStatus('❌ 失败: '+e.message,false)};document.getElementById('remoteCmd').value=''}
 var _logs=JSON.parse(localStorage.getItem('evo_remote_logs')||'[]')
-function addLog(cmd,result){
-  _logs.unshift({cmd:cmd,result:result.slice(0,100),time:new Date().toLocaleString()})
-  if(_logs.length>50)_logs.length=50;localStorage.setItem('evo_remote_logs',JSON.stringify(_logs));renderLogs()}
-function renderLogs(){
-  var el=document.getElementById('logList')
-  if(_logs.length===0){el.innerHTML='<tr><td colspan="3" style="text-align:center;color:#636e8a">暂无记录</td></tr>';return}
-  el.innerHTML=_logs.map(function(l){return '<tr><td style="color:#636e8a">'+l.time+'</td><td>'+l.cmd.slice(0,30)+'</td><td style="color:#10b981">✅ 完成</td></tr>'}).join('')}
+function addLog(cmd,result){_logs.unshift({cmd:cmd,result:result.slice(0,60),time:new Date().toLocaleString()});if(_logs.length>30)_logs.length=30;localStorage.setItem('evo_remote_logs',JSON.stringify(_logs));renderLogs()}
+function renderLogs(){var el=document.getElementById('logList');if(!_logs.length){el.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text3)">暂无记录</td></tr>';return}
+  el.innerHTML=_logs.map(function(l){return '<tr><td style="color:var(--text3)">'+l.time+'</td><td>'+l.cmd.slice(0,30)+'</td><td style="color:#10b981">✅ 完成</td></tr>'}).join('')}
 if(_token)displayToken();renderLogs()
 </script>
 </body></html>
