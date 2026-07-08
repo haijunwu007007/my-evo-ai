@@ -501,25 +501,30 @@ function checkOnboard() {
     <button class="sbtn" onclick="window.location.href='/enterprise.html'"><span class="sicon">📊</span> 工作台</button>
     <div class="divider"></div>
 
-    <!-- AI & Agent -->
+    <!-- AI 智能体 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        🤖 AI & Agent <span class="arrow">▶</span>
+        🤖 AI 智能体 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_ai">
         <button class="sbtn" onclick="window.location.href='/agents'"><span class="sicon">🦾</span> Agent 集群</button>
         <button class="sbtn" onclick="window.location.href='/skills'"><span class="sicon">🛠️</span> 技能 & 扩展</button>
-        <button class="sbtn" onclick="window.location.href='/capabilities'"><span class="sicon">🧠</span> 能力中心</button>
         <button class="sbtn" onclick="window.location.href='/team-canvas.html'"><span class="sicon">🧑‍🤝‍🧑</span> Agent 团队</button>
         <button class="sbtn" onclick="window.location.href='/billion-os.html'"><span class="sicon">🏛️</span> 集团 OS</button>
-        <div class="divider"></div>
-        <button class="sbtn" onclick="window.location.href='/teammates.html'"><span class="sicon">🤖</span> AI同事</button>
         <button class="sbtn" onclick="window.location.href='/experts'"><span class="sicon">🎓</span> 专家库</button>
-        <button class="sbtn" onclick="window.location.href='/review.html'"><span class="sicon">📝</span> 审阅工作流</button>
-        <button class="sbtn" onclick="window.location.href='/remote.html'"><span class="sicon">📱</span> 远程执行</button>
-        <button class="sbtn" onclick="window.location.href='/claw'"><span class="sicon">🕸️</span> Claw</button>
-        <button class="sbtn" onclick="window.location.href='/human'"><span class="sicon">👤</span> Human</button>
-        <button class="sbtn" onclick="window.location.href='/hermes'"><span class="sicon">⚡</span> Hermes</button>
+        <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
+      </div>
+    </div>
+
+    <!-- 连接 & 协作 -->
+    <div class="sgroup">
+      <button class="sgroup-header" onclick="toggleSGroup(this)">
+        🔗 连接 & 协作 <span class="arrow">▶</span>
+      </button>
+      <div class="sgroup-body" id="sg_connect">
+        <button class="sbtn" onclick="window.location.href='/remote.html'"><span class="sicon">📡</span> 远程执行</button>
+        <button class="sbtn" onclick="window.location.href='/review.html'"><span class="sicon">👤</span> 审批中心</button>
+        <button class="sbtn" onclick="window.location.href='/teammates.html'"><span class="sicon">🤖</span> AI同事</button>
       </div>
     </div>
 
@@ -537,21 +542,19 @@ function checkOnboard() {
       </div>
     </div>
 
-    <!-- 数据 -->
+    <!-- 数据 & 知识 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
-        📊 数据 & 分析 <span class="arrow">▶</span>
+        📊 数据 & 知识 <span class="arrow">▶</span>
       </button>
       <div class="sgroup-body" id="sg_data">
-        <!-- 模块总览已合并到管理中心（企业 & 自动化） -->
         <button class="sbtn" onclick="window.location.href='/learn.html'"><span class="sicon">📖</span> 学习</button>
         <button class="sbtn" onclick="window.location.href='/distill.html'"><span class="sicon">🧪</span> 蒸馏</button>
         <button class="sbtn" onclick="window.location.href='/hub'"><span class="sicon">🪐</span> 开源中心</button>
-        <button class="sbtn" onclick="window.location.href='/cognee'"><span class="sicon">📦</span> 记忆库</button>
       </div>
     </div>
 
-    <!-- 开发 -->
+    <!-- 开发 & 部署 -->
     <div class="sgroup">
       <button class="sgroup-header" onclick="toggleSGroup(this)">
         📦 开发 & 部署 <span class="arrow">▶</span>
@@ -559,7 +562,6 @@ function checkOnboard() {
       <div class="sgroup-body" id="sg_dev">
         <button class="sbtn" onclick="window.location.href='/deploy'" data-role="admin"><span class="sicon">🚀</span> 一键部署</button>
         <button class="sbtn" onclick="window.location.href='/video'"><span class="sicon">🎬</span> 视频生成</button>
-        <button class="sbtn" onclick="window.open('/agent','_blank')"><span class="sicon">🔌</span> 本地代理</button>
       </div>
     </div>
 
