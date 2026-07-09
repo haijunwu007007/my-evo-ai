@@ -236,6 +236,21 @@ async def data_analyzer_html():
     p = BASE_DIR / "frontend" / "data-analyzer.html"
     return FileResponse(str(p), media_type="text/html")
 
+@router.get("/assistant")
+async def assistant_html():
+    p = BASE_DIR / "frontend" / "assistant.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/site-builder")
+async def site_builder_html():
+    p = BASE_DIR / "frontend" / "site-builder.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/social-media")
+async def social_media_html():
+    p = BASE_DIR / "frontend" / "social-media.html"
+    return FileResponse(str(p), media_type="text/html")
+
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"
