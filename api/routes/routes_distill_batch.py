@@ -102,6 +102,19 @@ async def discover_sources():
         "site:mp.weixin.qq.com 编程 教程 2026",
     ]))
     
+    # 视频号
+    tasks.append(_search_platform("video", [
+        "site:weixin.qq.com 视频号 AI 2026",
+        "视频号 编程教程 2026",
+        "视频号 技术分享 2026",
+    ]))
+    
+    # 朋友圈
+    tasks.append(_search_platform("moments", [
+        "朋友圈 AI 技术 2026",
+        "朋友圈 编程 2026",
+    ]))
+    
     # 掘金
     tasks.append(_search_platform("juejin", [
         "site:juejin.cn AI 教程 2026",
@@ -143,3 +156,25 @@ async def discover_sources():
             add(f)
     
     return {"success": True, "sources": all_sources, "total": len(all_sources), "has_search": len(all_sources) > 6}
+
+# ── 自定义来源管理 ──────────────────────
+_CUSTOM_SOURCES: list = []
+
+class CustomSource(BaseModel):
+    name: str
+    query: str
+
+@router.get("/sources")
+async def list_custom_sources():
+    return {"success": True, "sources": _CUSTOM_SOURCES, "total": len(_CUSTOM_SOURCES)}
+
+@router.post("/sources/add")
+async def add_custom_source(src: CustomSource):
+    _CUSTOM_SOURCES.append({"name": src.name, "query": src.query, "added": time.time()})
+    return {"success": True, "sources": _CUSTOM_SOURCES, "total": len(_CUSTOM_SOURCES)}
+
+@router.delete("/sources/{idx}")
+async def remove_custom_source(idx: int):
+    if 0 <= idx < len(_CUSTOM_SOURCES):
+        _CUSTOM_SOURCES.pop(idx)
+    return {"success": True, "sources": _CUSTOM_SOURCES}
