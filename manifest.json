@@ -1,28 +1,14 @@
 {
-    "name": "AUTO-EVO-AI",
-    "short_name": "EVO-AI",
-    "description": "企业级AI自动化平台 — 500+模块/457技能/30+引擎",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0f0f1a",
-    "theme_color": "#4361ee",
-    "orientation": "any",
-    "scope": "/",
-    "lang": "zh-CN",
-    "icons": [
-        {
-            "src": "/icon-192.svg",
-            "sizes": "192x192",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/icon-512.svg",
-            "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        }
-    ],
-    "categories": ["productivity", "developer tools", "utilities"],
-    "prefer_related_applications": false
+  "name": "AUTO-EVO-AI",
+  "short_name": "EVO-AI",
+  "description": "AI Agent 操作系统 — 500+模块/457技能",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#4361ee",
+  "scope": "/",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
 }
