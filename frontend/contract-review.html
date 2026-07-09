@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>合同智能审阅 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif;min-height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--card)}
+.top h1{font-size:18px}.top a{color:var(--accent);text-decoration:none;font-size:14px}
+.c{max-width:900px;margin:0 auto;padding:20px}
+textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;min-height:200px;resize:vertical;font-family:inherit;margin-bottom:10px}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.9}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.card h3{font-size:14px;margin-bottom:8px;color:var(--accent)}
+.risk-item{padding:10px;border-radius:8px;margin:6px 0;font-size:13px;line-height:1.5}
+.risk-h{border-left:3px solid #ef4444;background:rgba(239,68,68,.08)}
+.risk-m{border-left:3px solid #f59e0b;background:rgba(245,158,11,.08)}
+.risk-l{border-left:3px solid #3b82f6;background:rgba(59,130,246,.08)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px}
+.tag-r{background:#ef4444;color:#fff}.tag-y{background:#f59e0b;color:#fff}.tag-b{background:#3b82f6;color:#fff}
+.hidden{display:none}
+</style></head><body>
+<div class="top"><a href="/">←</a><h1>⚖️ 合同智能审阅</h1></div>
+<div class="c">
+  <p style="color:var(--text2);font-size:13px;margin-bottom:12px">粘贴合同条款 → AI识别风险 → 修改建议</p>
+  <textarea id="contractInput" placeholder="粘贴合同内容或关键条款..."></textarea>
+  <button class="btn btn-p" onclick="review()">🔍 开始审阅</button>
+  <div id="result" class="hidden" style="margin-top:16px"></div>
+</div>
+<script>
+function review(){
+  var txt=document.getElementById('contractInput').value.trim();if(!txt){alert('请输入合同内容');return}
+  var el=document.getElementById('result');el.classList.remove('hidden');
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2)">⏳ AI审阅中...</div>';
+  fetch('/api/v1/contract/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contract_text:txt})})
+  .then(function(r){return r.json()}).then(function(d){
+    var h='<div class="card"><h3>📊 审阅结果</h3><p style="font-size:13px;color:var(--text2)">风险项: <b style="color:#ef4444">'+d.high+'</b> 高 · <b style="color:#f59e0b">'+d.medium+'</b> 中 · <b style="color:#3b82f6">'+d.low+'</b> 低</p></div>';
+    d.risks.forEach(function(r){
+      var cls=r.level==='high'?'risk-h':'risk-m';
+      var tag=r.level==='high'?'<span class="tag tag-r">高危</span>':'<span class="tag tag-y">中危</span>';
+      h+='<div class="risk-item '+cls+'">'+tag+' <b>'+r.issue+'</b><br><span style="color:var(--text3)">建议: '+r.suggestion+'</span></div>';
+    });
+    h+='<div class="card"><h3>💡 总体建议</h3><p style="font-size:13px;color:var(--text2);line-height:1.6">'+d.summary+'</p></div>';
+    el.innerHTML=h;
+  }).catch(function(){el.innerHTML='<div style="color:#ef4444">❌ 分析失败</div>'});
+}
+</script></body></html>

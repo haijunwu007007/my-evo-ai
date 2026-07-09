@@ -251,6 +251,21 @@ async def social_media_html():
     p = BASE_DIR / "frontend" / "social-media.html"
     return FileResponse(str(p), media_type="text/html")
 
+@router.get("/resume")
+async def resume_html():
+    p = BASE_DIR / "frontend" / "resume.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/contract-review")
+async def contract_review_html():
+    p = BASE_DIR / "frontend" / "contract-review.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/image-processor")
+async def image_processor_html():
+    p = BASE_DIR / "frontend" / "image-processor.html"
+    return FileResponse(str(p), media_type="text/html")
+
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"

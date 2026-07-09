@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI简历优化 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif;min-height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--card)}
+.top h1{font-size:18px}.top a{color:var(--accent);text-decoration:none;font-size:14px}
+.c{max-width:900px;margin:0 auto;padding:20px}
+textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;min-height:150px;resize:vertical;font-family:inherit;margin-bottom:10px}
+input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:10px}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.9}
+.btn-g{background:#10b981;color:#fff}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.card h3{font-size:14px;margin-bottom:8px;color:var(--accent)}
+.score{font-size:36px;font-weight:700;text-align:center;padding:10px;margin-bottom:10px}
+.score.g{color:#10b981}.score.y{color:#f59e0b}.score.r{color:#ef4444}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;background:var(--accent);color:#fff;margin:3px}
+.guess{font-size:13px;padding:10px;border-radius:8px;background:var(--glass);margin-bottom:10px;line-height:1.6}
+.hidden{display:none}
+</style></head><body>
+<div class="top"><a href="/">←</a><h1>📝 AI简历优化</h1></div>
+<div class="c">
+  <p style="color:var(--text2);font-size:13px;margin-bottom:12px">粘贴简历文本 → AI评分 → 优化建议 → 模拟面试</p>
+  <textarea id="resumeInput" placeholder="粘贴你的简历内容..."></textarea>
+  <div class="row">
+    <input id="jobInput" placeholder="目标职位（可选）" style="flex:1;margin:0">
+    <button class="btn btn-p" onclick="analyze()">📊 开始分析</button>
+  </div>
+  <div id="resultArea" class="hidden">
+    <div class="row" style="gap:16px;justify-content:center">
+      <div class="card" style="flex:1;text-align:center"><h3>综合评分</h3><div class="score" id="score">0</div></div>
+      <div class="card" style="flex:1;text-align:center"><h3>字数</h3><div class="score" id="words" style="font-size:24px">0</div></div>
+      <div class="card" style="flex:1;text-align:center"><h3>技能识别</h3><div id="skills" style="font-size:13px">-</div></div>
+    </div>
+    <div class="card"><h3>💡 优化建议</h3><div id="suggestions"></div></div>
+    <div class="card"><h3>🎤 模拟面试</h3>
+      <div id="questions"></div>
+      <div style="margin-top:10px">
+        <textarea id="answerInput" placeholder="你的回答..." style="min-height:80px"></textarea>
+        <button class="btn btn-g" onclick="submitAnswer()">提交回答获取反馈</button>
+        <div id="answerFeedback" class="hidden" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function analyze(){
+  var r=document.getElementById('resumeInput').value.trim();var j=document.getElementById('jobInput').value.trim();
+  if(!r){alert('请粘贴简历');return}
+  document.getElementById('resultArea').classList.remove('hidden');
+  fetch('/api/v1/resume/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume:r,job_title:j})})
+  .then(function(res){return res.json()}).then(function(d){
+    if(!d.success)return;
+    document.getElementById('score').textContent=d.score;
+    document.getElementById('score').className='score '+(d.score>=70?'g':d.score>=50?'y':'r');
+    document.getElementById('words').textContent=d.word_count;
+    document.getElementById('skills').innerHTML=d.skills.map(function(s){return'<span class="tag">'+s+'</span>'}).join('')||'<span style="color:var(--text3)">未识别到技能关键词</span>';
+    document.getElementById('suggestions').innerHTML='<ul style="padding-left:16px;font-size:13px;line-height:1.8;color:var(--text2)">'+d.suggestions.map(function(s){return'<li>'+s+'</li>'}).join('')+'</ul>';
+    var qh='';var qi=0;
+    d.interview_questions.forEach(function(q){
+      qh+='<div style="padding:8px 10px;margin:4px 0;border-radius:6px;background:var(--glass);font-size:13px"><b>问题'+(++qi)+':</b> '+q+'</div>';
+    });
+    document.getElementById('questions').innerHTML=qh;
+    window._currentResume=r;window._currentJob=j;
+  }).catch(function(){});
+}
+function submitAnswer(){
+  var a=document.getElementById('answerInput').value.trim();if(!a)return;
+  fetch('/api/v1/resume/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume:window._currentResume||'',question:'模拟面试',answer:a,job_title:window._currentJob||''})})
+  .then(function(r){return r.json()}).then(function(d){
+    var el=document.getElementById('answerFeedback');el.classList.remove('hidden');
+    el.innerHTML='<div style="padding:10px;border-radius:8px;background:var(--glass)"><b>评分: '+d.score+'/10</b><br>'+d.summary+'<br><small style="color:var(--text3)">'+d.tips.join('; ')+'</small></div>';
+  }).catch(function(){});
+}
+</script></body></html>
