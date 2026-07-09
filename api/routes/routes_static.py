@@ -226,6 +226,16 @@ async def get_icon_svg(size: int):
     if p.exists(): return FileResponse(str(p), media_type="image/svg+xml")
     raise HTTPException(404)
 
+@router.get("/ppt-gen.html")
+async def ppt_gen_html():
+    p = BASE_DIR / "frontend" / "ppt-gen.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/data-analyzer")
+async def data_analyzer_html():
+    p = BASE_DIR / "frontend" / "data-analyzer.html"
+    return FileResponse(str(p), media_type="text/html")
+
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"
