@@ -897,9 +897,30 @@ async def install_file(filename: str):
 
     raise HTTPException(404)
 
-
-
-# ── 新页面路由 ──
+# ── 桌面安装器 ──
+@router.get("/api/v1/installer/win")
+async def win_installer():
+    from fastapi.responses import Response
+    url = "https://autoevoai.com/"
+    bat = f"""@echo off
+chcp 65001 >nul
+echo ====================================
+echo    AUTO-EVO-AI 桌面安装
+echo ====================================
+echo.
+echo 正在创建桌面快捷方式...
+echo.
+set SHORTCUT=%USERPROFILE%\\Desktop\\AUTO-EVO-AI.url
+echo [InternetShortcut] > "%SHORTCUT%"
+echo URL={url} >> "%SHORTCUT%"
+echo IconFile=%WINDIR%\\system32\\url.dll >> "%SHORTCUT%"
+echo IconIndex=0 >> "%SHORTCUT%"
+echo.
+echo 双击桌面上的 AUTO-EVO-AI 即可打开！
+echo.
+pause
+"""
+    return Response(content=bat.encode('utf-8'), media_type='application/octet-stream', headers={'Content-Disposition': 'attachment; filename="install-evo.bat"'})
 
 # ── 错误页面 ──
 @router.get("/404")

@@ -102,7 +102,7 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
 </div>
 
 <div class="actions">
-  <button class="btn btn-p" id="installBtn" style="display:inline-flex" onclick="installPWA()">📥 安装到桌面</button>
+  <button class="btn btn-p" id="installBtn" onclick="installApp()">📥 安装到桌面</button>
   <button class="btn btn-s" onclick="registerSW()">🔄 启用离线缓存</button>
 </div>
 
@@ -118,78 +118,47 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
 <footer>AUTO-EVO-AI · PWA 桌面版 · 扫码即用</footer>
 
 <script>
-var deferredPrompt=null
-
-// QR 码（使用国内可访问的API + 本地兜底）
-var qr=document.getElementById('qrCode')
-var url=location.protocol+'//'+location.host
-// 尝试多个QR API，哪个能用用哪个
-function tryQR(apis,i){
-  if(i>=apis.length){qr.alt='请手动访问: '+url;return}
-  qr.src=apis[i]+encodeURIComponent(url)
-}
-tryQR(['https://api.pwmqr.com/qrcode/create/?url=','https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='],0)
-
-// PWA 安装状态
-function setStatus(t,c){
-  document.getElementById('statusText').textContent=t
-  document.getElementById('statusDot').className='dot '+(c||'gray')
-}
-
-// 检测是否已在PWA模式
-if(window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.matchMedia('(display-mode: minimal-ui)').matches){
-  setStatus('✅ 已在桌面应用模式运行','green')
-}else{
-  setStatus('📱 用Chrome/Edge打开后，地址栏或菜单点「安装/添加到主屏幕」','yellow')
-}
-
-// PWA 安装拦截
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();deferredPrompt=e
-  document.getElementById('installBtn').style.display='inline-flex'
-  setStatus('📥 点击上方「安装到桌面」按钮','yellow')
-})
-window.addEventListener('appinstalled',function(){
-  setStatus('✅ 已安装到桌面','green')
-  document.getElementById('installBtn').style.display='none'
-})
-
-function installPWA(){
-  if(deferredPrompt){
-    deferredPrompt.prompt()
-    deferredPrompt.userChoice.then(function(r){
-      setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow')
-      deferredPrompt=null
-    })
-    return
-  }
-  // 无beforeinstallprompt（大多数浏览器）→ 显示手动安装指引
+// ── QR 码 ──
+var qr=document.getElementById('qrCode'),url=location.protocol+'//'+location.host
+qr.src='https://api.pwmqr.com/qrcode/create/?url='+encodeURIComponent(url)
+// ── 状态 ──
+function setStatus(t,c){document.getElementById('statusText').textContent=t;document.getElementById('statusDot').className='dot '+(c||'gray')}
+if(window.matchMedia('(display-mode: standalone)').matches)setStatus('✅ 已在桌面应用模式运行','green')
+else setStatus('💡 点击「安装到桌面」按钮安装','yellow')
+// ── 安装 ──
+function installApp(){
+  // 先尝试PWA原生安装
+  if(window.matchMedia('(display-mode: standalone)').matches){setStatus('✅ 已安装','green');return}
   var ua=navigator.userAgent
   var isIOS=/iPad|iPhone|iPod/.test(ua)
   var isAndroid=/Android/.test(ua)
+  var isWin=/Windows|Win64/.test(ua)
+  var isMac=/Macintosh|Mac OS/.test(ua)
   var isChrome=/Chrome/.test(ua)&&!/Edg/.test(ua)
   var isEdge=/Edg/.test(ua)
-  var msg=''
-  if(isIOS)msg='🍎 iOS: 点击底部分享按钮 → 添加到主屏幕'
-  else if(isAndroid&&isChrome)msg='🤖 Android: 右上角菜单 → 添加到主屏幕'
-  else if(isChrome||isEdge)msg='💻 地址栏右侧点击安装图标 '+(isChrome?'↓':'')+'\n或菜单 → 更多工具 → 创建快捷方式'
-  else msg='请在 Chrome/Edge 中打开此页面，通过菜单添加到主屏幕'
-  alert(msg)
-}
-
-function registerSW(){
-  if(navigator.serviceWorker){
-    navigator.serviceWorker.register('/sw.js').then(function(){
-      setStatus('✅ 离线缓存已启用','green')
-    }).catch(function(e){
-      setStatus('❌ 注册失败: '+e.message,'yellow')
-    })
-  }else{
-    setStatus('❌ 浏览器不支持 Service Worker','yellow')
+  // Windows 下载安装脚本
+  if(isWin){
+    setStatus('⬇️ 下载安装脚本...','yellow')
+    var a=document.createElement('a');a.href='/api/v1/installer/win';a.download='install-evo.bat';document.body.appendChild(a);a.click();document.body.removeChild(a)
+    setStatus('✅ 已下载，双击 install-evo.bat 安装到桌面','green')
+    return
   }
+  if(isMac){
+    setStatus('⬇️ 下载安装命令...','yellow')
+    var m='# 在终端执行:\\ncd ~/Desktop\\ncat > EVO-AI.app << \\"EOF\\"\\n#!/bin/bash\\nopen -a "Google Chrome" --args --app='+url+'\\nEOF\\nchmod +x EVO-AI.app\\nopen EVO-AI.app'
+    var a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(m.replace(/\\n/g,'\\n'));a.download='install-evo.command';document.body.appendChild(a);a.click();document.body.removeChild(a)
+    setStatus('✅ 已下载，终端执行一键安装','green')
+    return
+  }
+  if(isAndroid){setStatus('🤖 Android: 点浏览器右上角菜单 → 添加到主屏幕','yellow')}
+  else if(isIOS){setStatus('🍎 iOS: 点击底部分享按钮 → 添加到主屏幕','yellow')}
+  else{setStatus('🌐 请在 Chrome/Edge 中打开此页面，地址栏点安装图标','yellow')}
 }
-
-// 自动注册 SW（正确路径）
-if(navigator.serviceWorker){navigator.serviceWorker.register('/sw.js').catch(function(){})}
+// ── SW ──
+function registerSW(){
+  if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').then(function(){setStatus('✅ 离线缓存已启用','green')}).catch(function(e){setStatus('❌ 注册失败: '+e.message,'yellow')})
+  else setStatus('❌ 浏览器不支持 Service Worker','yellow')
+}
+if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').catch(function(){})
 </script>
 </body></html>
