@@ -1,222 +1,190 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="manifest" href="/manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>安装到桌面 — AUTO-EVO-AI</title>
+<title>安装 AUTO-EVO-AI</title>
+<meta name="theme-color" content="#0a1628">
 <link rel="stylesheet" href="/frontend/share.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{min-height:100vh;display:flex;flex-direction:column;align-items:center;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px}
-.container{max-width:700px;width:100%}
-header{text-align:center;padding:30px 0 20px}
-.app-icon{width:80px;height:80px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4361ee 0%,#7c3aed 50%,#e94560 100%);box-shadow:0 8px 32px rgba(67,97,238,.25)}
-.app-icon svg{width:46px;height:46px}
-.app-icon svg path{fill:#fff}
-h1{font-size:24px;font-weight:700;margin-bottom:4px}
-.sub{color:var(--text2);font-size:14px;margin-bottom:24px}
-.steps{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
-.step{flex:1;min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 14px;text-align:center;transition:all .2s}
-.step:hover{border-color:var(--accent);transform:translateY(-2px)}
-.step .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin:0 auto 10px}
-.step .ico{font-size:26px;margin-bottom:6px}
-.step .tl{font-size:14px;font-weight:600;margin-bottom:4px}
-.step .ds{font-size:12px;color:var(--text2);line-height:1.5}
-.qr-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:20px}
-.qr-section h3{font-size:15px;font-weight:600;margin-bottom:12px}
-.qr-box{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px}
-.qr-box img{width:170px;height:170px;display:block}
-.qr-section .hint{font-size:12px;color:var(--text2)}
-.features{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.feature{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
-.feature .ico{font-size:22px;margin-bottom:6px}
-.feature .nm{font-size:12px;font-weight:600}
-.feature .st{font-size:11px;color:#10b981;margin-top:2px}
-.status-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px}
-.status-box .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot.green{background:#10b981}.dot.yellow{background:#f59e0b}.dot.gray{background:var(--text3)}
-.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-.btn{padding:11px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
-.btn-p{background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff}
-.btn-p:hover{box-shadow:0 4px 20px rgba(67,97,238,.3);transform:translateY(-1px)}
-.btn-s{background:var(--card);color:var(--accent);border:1px solid var(--border)}
-.btn-s:hover{border-color:var(--accent)}
-.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
-.platforms{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-.plat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text2);background:var(--card);border:1px solid var(--border)}
-.plat .ico{font-size:16px}
-footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-top:auto}
-@media(max-width:480px){.steps{flex-direction:column}.step{min-width:auto}}
-</style></head><body>
+body{min-height:100vh;background:linear-gradient(135deg,#0a1628,#1a2744);display:flex;flex-direction:column;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px;color:#e8e8ef}
+.container{max-width:600px;width:100%}
+/* header */
+.hdr{text-align:center;padding:30px 0}
+.hdr .icon{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#1e6af6,#4361ee);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;box-shadow:0 8px 32px rgba(30,106,246,.3)}
+.hdr h1{font-size:26px;font-weight:800;letter-spacing:1px;background:linear-gradient(135deg,#e8e8ef,#8892b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .sub{font-size:13px;color:#6b7280;margin-top:4px}
+/* 卡片 */
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;margin-bottom:14px;backdrop-filter:blur(8px)}
+.card h3{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3 .badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(30,106,246,.3);color:#1e6af6}
+/* 平台按钮 */
+.plat-grid{display:flex;gap:8px;flex-wrap:wrap}
+.plat-btn{flex:1;min-width:120px;padding:14px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .2s}
+.plat-btn:hover{border-color:#1e6af6;background:rgba(30,106,246,.08);transform:translateY(-1px)}
+.plat-btn .picon{font-size:24px;margin-bottom:6px}
+.plat-btn .pname{font-size:13px;font-weight:600}
+.plat-btn .pdesc{font-size:11px;color:#6b7280;margin-top:2px}
+/* 步骤 */
+.step-list{list-style:none}
+.step-list li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;line-height:1.5}
+.step-list li:last-child{border:none}
+.step-list .num{width:22px;height:22px;border-radius:50%;background:#1e6af6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.step-list .step-desc{flex:1}
+.step-list code{background:rgba(30,106,246,.15);padding:1px 6px;border-radius:4px;font-size:12px;color:#1e6af6}
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,#1e6af6,#4361ee);color:#fff;width:100%;justify-content:center}
+.btn-primary:hover{box-shadow:0 4px 20px rgba(30,106,246,.3);transform:translateY(-1px)}
+.btn-secondary{background:rgba(255,255,255,.06);color:#e8e8ef;border:1px solid rgba(255,255,255,.1)}
+.btn-secondary:hover{background:rgba(255,255,255,.1)}
+.actions{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.status{text-align:center;font-size:12px;color:#6b7280;padding:8px}
+/* 底部 */
+footer{text-align:center;padding:20px 0;font-size:11px;color:#4b5563}
+.hidden{display:none!important}
+@media(max-width:480px){.plat-grid{flex-direction:column}.plat-btn{min-width:auto}}
+</style>
+</head>
+<body>
 <div class="container">
 
-<header>
-  <div class="app-icon">
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4361ee"/><stop offset="100%" stop-color="#7209b7"/></linearGradient></defs>
-      <rect width="100" height="100" rx="20" fill="url(#g)"/>
-      <text x="50" y="72" font-size="60" text-anchor="middle" fill="#fff">⚡</text>
-    </svg>
-  </div>
-  <h1>安装 AUTO-EVO-AI</h1>
-  <p class="sub">将系统安装为桌面应用，支持离线使用、桌面通知、快速启动</p>
-</header>
-
-<div class="steps">
-  <div class="step" onclick="copyUrl()" style="cursor:pointer">
-    <div class="num">1</div>
-    <div class="ico">🌐</div>
-    <div class="tl">打开网页</div>
-    <div class="ds">点我复制链接 → 分享到其他设备</div>
-  </div>
-  <div class="step" id="stepInstall" onclick="doInstall()" style="cursor:pointer">
-    <div class="num">2</div>
-    <div class="ico">📥</div>
-    <div class="tl">安装到桌面</div>
-    <div class="ds" id="stepHint">点我开始安装</div>
-  </div>
-  <div class="step" onclick="window.location.href='/'" style="cursor:pointer">
-    <div class="num">3</div>
-    <div class="ico">🚀</div>
-    <div class="tl">开始使用</div>
-    <div class="ds">点我直接进入系统</div>
-  </div>
+<div class="hdr">
+  <div class="icon">⚡</div>
+  <h1>AUTO-EVO-AI</h1>
+  <p class="sub">安装到桌面 · 一键启动 · 离线可用</p>
 </div>
 
-<div class="qr-section">
-  <h3>📱 手机扫码安装</h3>
-  <div class="qr-box">
-    <img id="qrCode" alt="扫码安装">
-  </div>
-  <div class="hint">打开手机相机扫码 → 打开网页 → 底部菜单「添加到主屏幕」</div>
-</div>
-
-<div class="features">
-  <div class="feature"><div class="ico">⚡</div><div class="nm">快速启动</div><div class="st">一键打开</div></div>
-  <div class="feature"><div class="ico">📴</div><div class="nm">离线可用</div><div class="st">已缓存</div></div>
-  <div class="feature"><div class="ico">🔔</div><div class="nm">桌面通知</div><div class="st">支持</div></div>
-  <div class="feature"><div class="ico">🖥️</div><div class="nm">全平台</div><div class="st">Win/Mac/Linux</div></div>
-</div>
-
-<div class="status-box" id="statusBox">
-  <span class="dot gray" id="statusDot"></span>
-  <span id="statusText">检测浏览器 PWA 支持...</span>
-</div>
-
-<!-- Windows 安装步骤（默认显示，JS会根据平台切换） -->
-<div id="step-win" style="display:block">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🪟 Windows 安装步骤</h3>
-    <div style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px">电脑桌面已经多了一个 <b>AUTO-EVO-AI</b> 图标</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px"><b>双击图标</b> → 自动以窗口模式打开系统，像原生应用一样</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">如果桌面没有图标，手动创建：右键桌面 → 新建 → 快捷方式 → 输入 <code style="background:var(--bg);padding:1px 4px;border-radius:3px;font-size:12px">msedge.exe --app=https://autoevoai.com/</code></span></div>
+<!-- 平台选择 -->
+<div class="card">
+  <h3>📱 选择你的设备</h3>
+  <div class="plat-grid">
+    <div class="plat-btn" onclick="showPlat('win')">
+      <div class="picon">🪟</div>
+      <div class="pname">Windows</div>
+      <div class="pdesc">桌面安装</div>
     </div>
-    <div style="font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border);margin-top:6px">📌 推荐使用 Edge 或 Chrome 的「应用模式」，安装后像原生应用一样运行</div>
-  </div>
-</div>
-
-<!-- macOS 安装步骤 -->
-<div id="step-mac" style="display:none">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🍎 macOS 安装步骤</h3>
-    <div style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px"><b>Safari 用户</b>：菜单栏 → 文件 → 添加到程序坞</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px"><b>Chrome 用户</b>：右上角菜单 → 更多工具 → 创建快捷方式 → 勾选「打开为窗口」</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">程序坞或桌面出现图标，点击即可打开</span></div>
+    <div class="plat-btn" onclick="showPlat('mac')">
+      <div class="picon">🍎</div>
+      <div class="pname">macOS</div>
+      <div class="pdesc">桌面安装</div>
+    </div>
+    <div class="plat-btn" onclick="showPlat('ios')">
+      <div class="picon">📱</div>
+      <div class="pname">iPhone/iPad</div>
+      <div class="pdesc">添加到主屏幕</div>
+    </div>
+    <div class="plat-btn" onclick="showPlat('android')">
+      <div class="picon">🤖</div>
+      <div class="pname">Android</div>
+      <div class="pdesc">添加到主屏幕</div>
     </div>
   </div>
 </div>
 
-<!-- iOS 安装步骤 -->
-<div id="step-ios" style="display:none">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">📱 iOS (iPhone/iPad) 安装步骤</h3>
-    <div style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px">使用 <b>Safari 浏览器</b> 打开此页面（其他浏览器不支持）</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px">点击底部 <b>分享按钮</b>（方框+箭头图标）</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">向下滑动，选择 <b>「添加到主屏幕」</b></span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">4</span><span style="font-size:13px">点右上角 <b>「添加」</b>，桌面出现图标</span></div>
+<!-- 操作区 -->
+<div id="actionArea">
+  <div class="card" id="stepAuto" style="border-color:rgba(30,106,246,.3)">
+    <h3>🖥️ 检测到 Windows <span class="badge">推荐</span></h3>
+    <ul class="step-list">
+      <li><span class="num">1</span><span class="step-desc">点击下方按钮，下载安装脚本</span></li>
+      <li><span class="num">2</span><span class="step-desc">双击下载的 <code>install-evo.bat</code></span></li>
+      <li><span class="num">3</span><span class="step-desc">桌面出现 <b>AUTO-EVO-AI</b> 图标，双击打开</span></li>
+    </ul>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn btn-primary" onclick="downloadWin()">📥 下载安装脚本</button>
+      <button class="btn btn-secondary" onclick="window.open('/')">🌐 直接打开网页版</button>
     </div>
   </div>
 </div>
 
-<!-- Android 安装步骤 -->
-<div id="step-android" style="display:none">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🤖 Android 安装步骤</h3>
-    <div style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px">使用 <b>Chrome 浏览器</b> 打开此页面</span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px">右上角 <b>三点菜单</b> → <b>「添加到主屏幕」</b></span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">底部弹出安装确认 → 点 <b>「安装」</b></span></div>
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">4</span><span style="font-size:13px">桌面出现图标，点击即可打开</span></div>
+<div class="status" id="statusBar">⚡ 扫码也可安装 · 手机相机扫描下方二维码即可访问</div>
+
+<div id="platWin" class="hidden">
+  <div class="card">
+    <h3>🪟 Windows 安装步骤</h3>
+    <ul class="step-list">
+      <li><span class="num">1</span><span class="step-desc">点击上方「下载安装脚本」按钮</span></li>
+      <li><span class="num">2</span><span class="step-desc">保存 <code>install-evo.bat</code> 到桌面</span></li>
+      <li><span class="num">3</span><span class="step-desc">双击运行，自动创建桌面快捷方式</span></li>
+      <li><span class="num">4</span><span class="step-desc">双击桌面 <b>AUTO-EVO-AI</b> 图标打开</span></li>
+    </ul>
+    <div style="font-size:12px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)">
+      💡 如果用 Edge 浏览器：右上角菜单 → 应用 → 将此站点安装为应用
     </div>
   </div>
 </div>
 
-<!-- 其他浏览器 -->
-<div id="step-other" style="display:none">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🌐 安装说明</h3>
-    <p style="font-size:13px;color:var(--text2);line-height:1.6">
-      请使用 <b>Chrome</b> 或 <b>Edge</b> 浏览器打开此页面安装。<br>
-      安装后像原生应用一样运行，支持离线缓存和桌面通知。
-    </p>
+<div id="platMac" class="hidden">
+  <div class="card">
+    <h3>🍎 macOS 安装步骤</h3>
+    <ul class="step-list">
+      <li><span class="num">1</span><span class="step-desc">用 <b>Safari</b> 打开此页面</span></li>
+      <li><span class="num">2</span><span class="step-desc">菜单栏 → 文件 → 添加到程序坞</span></li>
+      <li><span class="num">3</span><span class="step-desc">程序坞出现图标，点击即可打开</span></li>
+    </ul>
   </div>
 </div>
 
-<div class="platforms">
-  <span class="plat"><span class="ico">🪟</span> Windows</span>
-  <span class="plat"><span class="ico">🍎</span> macOS</span>
-  <span class="plat"><span class="ico">🐧</span> Linux</span>
-  <span class="plat"><span class="ico">📱</span> iOS</span>
-  <span class="plat"><span class="ico">🤖</span> Android</span>
+<div id="platIos" class="hidden">
+  <div class="card">
+    <h3>📱 iOS 安装步骤</h3>
+    <ul class="step-list">
+      <li><span class="num">1</span><span class="step-desc">用 <b>Safari</b> 打开此页面</span></li>
+      <li><span class="num">2</span><span class="step-desc">点击底部 <b>分享按钮</b>（方框+箭头）</span></li>
+      <li><span class="num">3</span><span class="step-desc">向下滑 → 点 <b>「添加到主屏幕」</b></span></li>
+      <li><span class="num">4</span><span class="step-desc">点右上角「添加」→ 桌面出现图标</span></li>
+    </ul>
+  </div>
 </div>
 
+<div id="platAndroid" class="hidden">
+  <div class="card">
+    <h3>🤖 Android 安装步骤</h3>
+    <ul class="step-list">
+      <li><span class="num">1</span><span class="step-desc">用 <b>Chrome</b> 打开此页面</span></li>
+      <li><span class="num">2</span><span class="step-desc">右上角 <b>三点菜单</b> → <b>「添加到主屏幕」</b></span></li>
+      <li><span class="num">3</span><span class="step-desc">底部弹出安装确认 → 点「安装」</span></li>
+      <li><span class="num">4</span><span class="step-desc">桌面出现图标，点击即打开</span></li>
+    </ul>
+  </div>
 </div>
-<footer>AUTO-EVO-AI · PWA 桌面版 · 扫码即用</footer>
+
+<footer>AUTO-EVO-AI · 扫码即用 · 全平台支持</footer>
+</div>
 
 <script>
-// ── QR 码 ──
-var qr=document.getElementById('qrCode'),url=location.protocol+'//'+location.host
-qr.src='https://api.pwmqr.com/qrcode/create/?url='+encodeURIComponent(url)
-// ── 状态 ──
-function setStatus(t,c){document.getElementById('statusText').textContent=t;document.getElementById('statusDot').className='dot '+(c||'gray')}
-if(window.matchMedia('(display-mode: standalone)').matches)setStatus('✅ 已在桌面应用模式运行','green')
-else setStatus('💡 按下方指引安装到桌面','yellow')
-// ── 检测平台显示对应安装步骤 ──
-(function(){
-  var ua=navigator.userAgent
-  var isWin=/Windows|Win64/.test(ua),isMac=/Macintosh/.test(ua),isIOS=/iPad|iPhone|iPod/.test(ua),isAndroid=/Android/.test(ua)
-  var isChrome=/Chrome/.test(ua)&&!/Edg/.test(ua),isEdge=/Edg/.test(ua)
-  // 隐藏所有平台的步骤，只显示当前平台
-  var all=['step-win','step-mac','step-ios','step-android','step-other']
-  all.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none'})
-  if(isWin)document.getElementById('step-win').style.display='block'
-  else if(isMac)document.getElementById('step-mac').style.display='block'
-  else if(isIOS)document.getElementById('step-ios').style.display='block'
-  else if(isAndroid)document.getElementById('step-android').style.display='block'
-  else{document.getElementById('step-other').style.display='block'}
-})()
-// ── 复制链接 ──
-function copyUrl(){
-  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){setStatus('✅ 链接已复制: '+url,'green')}).catch(function(){prompt('复制链接:',url)})}
-  else{prompt('复制链接:',url)}
+// ── 平台检测 ──
+var ua = navigator.userAgent
+var plat = 'win'
+if(/Macintosh/.test(ua)&&!/iPad|iPhone|iPod/.test(ua))plat='mac'
+else if(/iPad|iPhone|iPod/.test(ua))plat='ios'
+else if(/Android/.test(ua))plat='android'
+
+// 默认显示对应平台
+function showPlat(p){
+  ['win','mac','ios','android'].forEach(function(id){
+    document.getElementById('plat'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('hidden')
+  })
+  document.getElementById('plat'+p.charAt(0).toUpperCase()+p.slice(1)).classList.remove('hidden')
+  document.getElementById('stepAuto').classList.add('hidden')
+  document.getElementById('statusBar').textContent='📌 按上方步骤操作即可完成安装'
 }
-// ── 安装 ──
-function doInstall(){
-  var ua=navigator.userAgent,ids=['step-win','step-mac','step-ios','step-android']
-  ids.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none'})
-  var id='step-other'
-  if(/Windows|Win64/.test(ua))id='step-win'
-  else if(/Macintosh/.test(ua))id='step-mac'
-  else if(/iPad|iPhone|iPod/.test(ua))id='step-ios'
-  else if(/Android/.test(ua))id='step-android'
-  document.getElementById(id).style.display='block'
-  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})
-  document.getElementById('stepInstall').scrollIntoView({behavior:'smooth',block:'start'})
+showPlat(plat)
+
+// ── 下载安装脚本 ──
+function downloadWin(){
+  var content = '@echo off\r\nchcp 65001 >nul\r\necho ====================================\r\necho    AUTO-EVO-AI 桌面安装\r\necho ====================================\r\necho.\r\necho 正在创建桌面快捷方式...\r\necho.\r\nset SHORTCUT=%USERPROFILE%\\Desktop\\AUTO-EVO-AI.url\r\necho [InternetShortcut] > "%SHORTCUT%"\r\necho URL=https://autoevoai.com/ >> "%SHORTCUT%"\r\necho IconFile=%WINDIR%\\system32\\url.dll >> "%SHORTCUT%"\r\necho IconIndex=0 >> "%SHORTCUT%"\r\necho.\r\necho 快捷方式已创建！双击桌面 AUTO-EVO-AI 即可打开！\r\necho.\r\npause\r\n'
+  var blob = new Blob([content], {type:'application/octet-stream'})
+  var a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'install-evo.bat'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(function(){URL.revokeObjectURL(a.href)}, 5000)
+  document.getElementById('statusBar').textContent = '✅ 下载完成！双击 install-evo.bat 安装'
 }
-// ── SW ──
-if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').catch(function(){})
 </script>
-</body></html>
+</body>
+</html>
