@@ -117,6 +117,7 @@ textarea{resize:vertical;min-height:60px}
         <textarea id=batchInput placeholder='每行一个:\nhttps://youtube.com/c/xxx/video1\nhttps://youtube.com/c/xxx/video2\n...' style=min-height:80px></textarea>
         <input id=batchName placeholder="创作者/系列名称（如: 张三的编程教程）" style=margin-top:4px>
         <button class="btn btn-primary" onclick=startBatch() style=margin-top:8px;width:100%">⚡ 批量蒸馏</button>
+        <button class="btn" onclick=autoDiscover() style=margin-top:6px;width:100%;background:var(--accent);color:#fff;padding:8px;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔍 自动发现可蒸馏内容</button>
         <div id=batchProgress style=margin-top:10px;display:none>
           <div class=progress-bar><div class=progress-fill id=batchFill style=width:0%></div></div>
           <div id=batchStatus style=font-size:12px;color:var(--text2,#8892b0);text-align:center>准备中...</div>
@@ -125,6 +126,7 @@ textarea{resize:vertical;min-height:60px}
       <div class=card>
         <h3>📊 蒸馏结果</h3>
         <div id=batchResult style=font-size:13px;color:var(--text2,#8892b0)">执行批量蒸馏后，结果将在此展示。</div>
+        <div id=discoverResult style=margin-top:10px;display:none></div>
       </div>
     </div>
   </div>
@@ -392,6 +394,37 @@ async function startBatch(){
     document.getElementById('batchStatus').textContent='❌ 请求失败'
     document.getElementById('batchResult').innerHTML='<div style="color:#ef4444">'+e.message+'</div>'
   }
+}
+
+// ── 自动发现 ──
+async function autoDiscover(){
+  var dr=document.getElementById('discoverResult')
+  dr.style.display='block'
+  dr.innerHTML='<div style="color:var(--text2)">🔍 正在搜索可蒸馏内容...</div>'
+  try{
+    var r=await fetch('/api/v1/distill/discover')
+    var d=await r.json()
+    if(!d.success||!d.sources||!d.sources.length){
+      dr.innerHTML='<div style="color:var(--text2)">暂无发现</div>';return
+    }
+    var h='<div style="font-size:13px;font-weight:600;margin-bottom:8px">发现 '+d.total+' 个可蒸馏来源:</div>'
+    d.sources.forEach(function(s){
+      h+='<div style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer" onclick=\'addToBatch("'+s.url+'")\'>'
+      h+='<div style="font-size:13px">'+(s.type==='github'?'📦':'📝')+' '+s.name+'</div>'
+      h+='<div style="font-size:11px;color:var(--text2)">'+s.desc.slice(0,80)+'</div>'
+      h+='</div>'
+    })
+    h+='<div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">点击来源自动添加到输入框</div>'
+    dr.innerHTML=h
+  }catch(e){
+    dr.innerHTML='<div style="color:#ef4444">发现失败: '+e.message+'</div>'
+  }
+}
+function addToBatch(url){
+  var ta=document.getElementById('batchInput')
+  ta.value+=url+'\n'
+  ta.scrollTop=ta.scrollHeight
+  document.getElementById('discoverResult').style.display='none'
 }
 
 async function saveConversation(){

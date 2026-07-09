@@ -17,6 +17,31 @@ class BatchRequest(BaseModel):
     items: list[str] = []
     name: str = "批量蒸馏"
 
+@router.get("/discover")
+async def discover_sources():
+    """自动发现可蒸馏的热门来源"""
+    sources = []
+    
+    # 1. GitHub Trending
+    try:
+        from core.github_scanner import GitHubScannerEngine
+        scanner = GitHubScannerEngine()
+        repos = scanner.get_trending(language="", since="daily", limit=10)
+        for r in repos:
+            sources.append({"type": "github", "name": r.get("name",""), "url": r.get("url",""), "desc": r.get("description","")[:100]})
+    except Exception as e:
+        pass
+    
+    # 2. 热门技术博客（模拟）
+    blogs = [
+        {"type": "blog", "name": "阮一峰的技术周刊", "url": "https://www.ruanyifeng.com/blog/", "desc": "每周分享科技前沿动态"},
+        {"type": "blog", "name": "美团技术团队", "url": "https://tech.meituan.com/", "desc": "美团技术博客"},
+        {"type": "blog", "name": "阿里云开发者社区", "url": "https://developer.aliyun.com/", "desc": "阿里云技术分享"},
+    ]
+    sources.extend(blogs)
+    
+    return {"success": True, "sources": sources, "total": len(sources)}
+
 @router.post("/batch")
 async def batch_distill(req: BatchRequest):
     items = req.items[:100]
