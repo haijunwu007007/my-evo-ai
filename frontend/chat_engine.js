@@ -183,6 +183,14 @@ async function doRegister(){
   if(typeof checkOnboard==='function')setTimeout(checkOnboard,300)
   document.getElementById('greeting').textContent=__('greeting').replace('{name}',user);restoreHistory();_checkExpert();setTimeout(function(){checkLLM()},1000)
 }
+function demoMode(){
+  document.getElementById('regUser').value='demo';
+  document.getElementById('regPass').value='demo123';
+  document.getElementById('regEmail').value='demo@evo.ai';
+  document.getElementById('regPhone').value='';
+  document.getElementById('regKey').value='';
+  doRegister();
+}
 function doLogout(){localStorage.removeItem('evo_logged_in');localStorage.removeItem('evo_token');localStorage.removeItem('evo_role');document.getElementById('authWrap').classList.add('active');document.getElementById('appMain').style.display='none'}
 function showPasswordReset(){
   var input=prompt('请输入注册时填写的邮箱或手机号，我们将发送重置码')
