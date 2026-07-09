@@ -101,9 +101,66 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
   <span id="statusText">检测浏览器 PWA 支持...</span>
 </div>
 
-<div class="actions">
-  <button class="btn btn-p" id="installBtn" onclick="installApp()">📥 安装到桌面</button>
-  <button class="btn btn-s" onclick="registerSW()">🔄 启用离线缓存</button>
+<!-- Windows 安装步骤（默认显示，JS会根据平台切换） -->
+<div id="step-win" style="display:block">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🪟 Windows 安装步骤</h3>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px"><b>Chrome 用户</b>：右上角菜单 → 更多工具 → 创建快捷方式 → 勾选「打开为窗口」</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px"><b>Edge 用户</b>：右上角菜单 → 应用 → 将此站点安装为应用</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">安装后桌面会出现图标，双击即可打开</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border);margin-top:6px">📌 推荐使用 Chrome，安装后像原生应用一样运行</div>
+  </div>
+</div>
+
+<!-- macOS 安装步骤 -->
+<div id="step-mac" style="display:none">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🍎 macOS 安装步骤</h3>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px"><b>Safari 用户</b>：菜单栏 → 文件 → 添加到程序坞</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px"><b>Chrome 用户</b>：右上角菜单 → 更多工具 → 创建快捷方式 → 勾选「打开为窗口」</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">程序坞或桌面出现图标，点击即可打开</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- iOS 安装步骤 -->
+<div id="step-ios" style="display:none">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">📱 iOS (iPhone/iPad) 安装步骤</h3>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px">使用 <b>Safari 浏览器</b> 打开此页面（其他浏览器不支持）</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px">点击底部 <b>分享按钮</b>（方框+箭头图标）</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">向下滑动，选择 <b>「添加到主屏幕」</b></span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">4</span><span style="font-size:13px">点右上角 <b>「添加」</b>，桌面出现图标</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Android 安装步骤 -->
+<div id="step-android" style="display:none">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🤖 Android 安装步骤</h3>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">1</span><span style="font-size:13px">使用 <b>Chrome 浏览器</b> 打开此页面</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">2</span><span style="font-size:13px">右上角 <b>三点菜单</b> → <b>「添加到主屏幕」</b></span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">3</span><span style="font-size:13px">底部弹出安装确认 → 点 <b>「安装」</b></span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">4</span><span style="font-size:13px">桌面出现图标，点击即可打开</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 其他浏览器 -->
+<div id="step-other" style="display:none">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">🌐 安装说明</h3>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6">
+      请使用 <b>Chrome</b> 或 <b>Edge</b> 浏览器打开此页面安装。<br>
+      安装后像原生应用一样运行，支持离线缓存和桌面通知。
+    </p>
+  </div>
 </div>
 
 <div class="platforms">
@@ -124,41 +181,22 @@ qr.src='https://api.pwmqr.com/qrcode/create/?url='+encodeURIComponent(url)
 // ── 状态 ──
 function setStatus(t,c){document.getElementById('statusText').textContent=t;document.getElementById('statusDot').className='dot '+(c||'gray')}
 if(window.matchMedia('(display-mode: standalone)').matches)setStatus('✅ 已在桌面应用模式运行','green')
-else setStatus('💡 点击「安装到桌面」按钮安装','yellow')
-// ── 安装 ──
-function installApp(){
-  // 先尝试PWA原生安装
-  if(window.matchMedia('(display-mode: standalone)').matches){setStatus('✅ 已安装','green');return}
+else setStatus('💡 按下方指引安装到桌面','yellow')
+// ── 检测平台显示对应安装步骤 ──
+(function(){
   var ua=navigator.userAgent
-  var isIOS=/iPad|iPhone|iPod/.test(ua)
-  var isAndroid=/Android/.test(ua)
-  var isWin=/Windows|Win64/.test(ua)
-  var isMac=/Macintosh|Mac OS/.test(ua)
-  var isChrome=/Chrome/.test(ua)&&!/Edg/.test(ua)
-  var isEdge=/Edg/.test(ua)
-  // Windows 下载安装脚本
-  if(isWin){
-    setStatus('⬇️ 下载安装脚本...','yellow')
-    var a=document.createElement('a');a.href='/api/v1/installer/win';a.download='install-evo.bat';document.body.appendChild(a);a.click();document.body.removeChild(a)
-    setStatus('✅ 已下载，双击 install-evo.bat 安装到桌面','green')
-    return
-  }
-  if(isMac){
-    setStatus('⬇️ 下载安装命令...','yellow')
-    var m='# 在终端执行:\\ncd ~/Desktop\\ncat > EVO-AI.app << \\"EOF\\"\\n#!/bin/bash\\nopen -a "Google Chrome" --args --app='+url+'\\nEOF\\nchmod +x EVO-AI.app\\nopen EVO-AI.app'
-    var a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(m.replace(/\\n/g,'\\n'));a.download='install-evo.command';document.body.appendChild(a);a.click();document.body.removeChild(a)
-    setStatus('✅ 已下载，终端执行一键安装','green')
-    return
-  }
-  if(isAndroid){setStatus('🤖 Android: 点浏览器右上角菜单 → 添加到主屏幕','yellow')}
-  else if(isIOS){setStatus('🍎 iOS: 点击底部分享按钮 → 添加到主屏幕','yellow')}
-  else{setStatus('🌐 请在 Chrome/Edge 中打开此页面，地址栏点安装图标','yellow')}
-}
+  var isWin=/Windows|Win64/.test(ua),isMac=/Macintosh/.test(ua),isIOS=/iPad|iPhone|iPod/.test(ua),isAndroid=/Android/.test(ua)
+  var isChrome=/Chrome/.test(ua)&&!/Edg/.test(ua),isEdge=/Edg/.test(ua)
+  // 隐藏所有平台的步骤，只显示当前平台
+  var all=['step-win','step-mac','step-ios','step-android','step-other']
+  all.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none'})
+  if(isWin)document.getElementById('step-win').style.display='block'
+  else if(isMac)document.getElementById('step-mac').style.display='block'
+  else if(isIOS)document.getElementById('step-ios').style.display='block'
+  else if(isAndroid)document.getElementById('step-android').style.display='block'
+  else{document.getElementById('step-other').style.display='block'}
+})()
 // ── SW ──
-function registerSW(){
-  if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').then(function(){setStatus('✅ 离线缓存已启用','green')}).catch(function(e){setStatus('❌ 注册失败: '+e.message,'yellow')})
-  else setStatus('❌ 浏览器不支持 Service Worker','yellow')
-}
 if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').catch(function(){})
 </script>
 </body></html>
