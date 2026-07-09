@@ -1,47 +1,144 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="description" content="AUTO-EVO-AI 智能进化平台 - 一键部署、智能Agent、自动化工作流">
-<meta property="og:title" content="AUTO-EVO-AI">
-<meta property="og:description" content="一键部署任意项目，自动完成所有工作">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>💻 桌面客户端 — AUTO-EVO-AI</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0b0b16,#12122a);color:#e8e8ef;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}.hdr{background:rgba(20,20,35,.92);border-bottom:1px solid rgba(45,53,97,.4);padding:0 16px;height:46px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px)}.hdr .l{font-size:15px;font-weight:800;background:linear-gradient(135deg,#4361ee,#a855f7,#e94560);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr .n{display:flex;gap:2px}.hdr .n a{padding:4px 10px;border-radius:6px;font-size:12px;color:#8892b0;text-decoration:none;transition:all .2s}.hdr .n a:hover{color:#e8e8ef;background:rgba(67,97,238,.15)}.c{max-width:720px;margin:0 auto;padding:40px 16px;text-align:center}h2{font-size:22px;margin-bottom:16px;background:linear-gradient(135deg,#e8e8ef,#a0a8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.big-icon{font-size:64px;margin-bottom:16px}.note{color:#8892b0;font-size:13px;line-height:1.7;margin-bottom:24px}.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}.card{background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:20px;min-width:160px;flex:1;transition:all .3s}.card:hover{transform:translateY(-2px);border-color:rgba(67,97,238,.5);box-shadow:0 8px 24px rgba(0,0,0,.2)}.card .ico{font-size:28px;margin-bottom:8px}.card .nm{font-size:13px;font-weight:600}.card .st{font-size:11px;color:#10b981;margin-top:4px}.btn{padding:12px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#4361ee,#a855f7);color:#fff;font-size:14px;cursor:pointer;font-weight:600;transition:all .2s;margin:0 4px}.btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(67,97,238,.3)}.btn:active{transform:scale(.97)}.btn2{background:rgba(67,97,238,.15);color:#4361ee;border:1px solid rgba(67,97,238,.3)}.btn2:hover{background:rgba(67,97,238,.25);box-shadow:none}.status{color:#8892b0;font-size:13px;margin:12px 0;padding:8px;border-radius:8px;background:rgba(26,26,46,.3)}.ok{color:#10b981}.ft{text-align:center;padding:10px;font-size:10px;color:#636e70;margin-top:40px}
-</style>  <link rel="stylesheet" href="/frontend/share.css">
-</head><body>
-<div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/capabilities">能力中心</a><a href="/desktop" class="a">桌面</a></div></div>
-<div class="c">
-<div class="big-icon">💻</div><h2>PWA 桌面客户端</h2>
-<p class="note">将 AUTO-EVO-AI 安装为桌面应用，支持离线缓存、系统托盘、桌面通知。</p>
-<div class="row">
-<div class="card"><div class="ico">📦</div><div class="nm">PWA 安装</div><div class="st">✅ 支持</div></div>
-<div class="card"><div class="ico">🔔</div><div class="nm">桌面通知</div><div class="st">✅ 支持</div></div>
-<div class="card"><div class="ico">📴</div><div class="nm">离线缓存</div><div class="st">✅ 支持</div></div>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>安装到桌面 — AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px}
+.container{max-width:700px;width:100%}
+header{text-align:center;padding:30px 0 20px}
+.app-icon{width:80px;height:80px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4361ee 0%,#7c3aed 50%,#e94560 100%);box-shadow:0 8px 32px rgba(67,97,238,.25)}
+.app-icon svg{width:46px;height:46px}
+.app-icon svg path{fill:#fff}
+h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.sub{color:var(--text2);font-size:14px;margin-bottom:24px}
+.steps{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.step{flex:1;min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 14px;text-align:center;transition:all .2s}
+.step:hover{border-color:var(--accent);transform:translateY(-2px)}
+.step .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin:0 auto 10px}
+.step .ico{font-size:26px;margin-bottom:6px}
+.step .tl{font-size:14px;font-weight:600;margin-bottom:4px}
+.step .ds{font-size:12px;color:var(--text2);line-height:1.5}
+.qr-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:20px}
+.qr-section h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.qr-box{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px}
+.qr-box img{width:170px;height:170px;display:block}
+.qr-section .hint{font-size:12px;color:var(--text2)}
+.features{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.feature{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.feature .ico{font-size:22px;margin-bottom:6px}
+.feature .nm{font-size:12px;font-weight:600}
+.feature .st{font-size:11px;color:#10b981;margin-top:2px}
+.status-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px}
+.status-box .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.green{background:#10b981}.dot.yellow{background:#f59e0b}.dot.gray{background:var(--text3)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.btn{padding:11px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff}
+.btn-p:hover{box-shadow:0 4px 20px rgba(67,97,238,.3);transform:translateY(-1px)}
+.btn-s{background:var(--card);color:var(--accent);border:1px solid var(--border)}
+.btn-s:hover{border-color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.platforms{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.plat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text2);background:var(--card);border:1px solid var(--border)}
+.plat .ico{font-size:16px}
+footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-top:auto}
+@media(max-width:480px){.steps{flex-direction:column}.step{min-width:auto}}
+</style></head><body>
+<div class="container">
+
+<header>
+  <div class="app-icon">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 8L62 38L94 40L68 60L76 92L50 73L24 92L32 60L6 40L38 38L50 8Z"/>
+    </svg>
+  </div>
+  <h1>安装 AUTO-EVO-AI</h1>
+  <p class="sub">将系统安装为桌面应用，支持离线使用、桌面通知、快速启动</p>
+</header>
+
+<div class="steps">
+  <div class="step">
+    <div class="num">1</div>
+    <div class="ico">🌐</div>
+    <div class="tl">打开网页</div>
+    <div class="ds">手机扫码或电脑浏览器访问</div>
+  </div>
+  <div class="step">
+    <div class="num">2</div>
+    <div class="ico">📥</div>
+    <div class="tl">安装到桌面</div>
+    <div class="ds">Chrome/Safari 点击「添加到主屏幕」</div>
+  </div>
+  <div class="step">
+    <div class="num">3</div>
+    <div class="ico">🚀</div>
+    <div class="tl">开始使用</div>
+    <div class="ds">桌面图标一键打开，离线也可访问</div>
+  </div>
 </div>
 
-<!-- 扫码安装 -->
-<div style="background:rgba(26,26,46,.5);border:1px solid rgba(45,53,97,.3);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center">
-  <div style="font-size:14px;font-weight:600;margin-bottom:10px">📱 手机扫码安装</div>
-  <img id="qrCode" style="width:180px;height:180px;border-radius:8px;background:#fff;padding:8px" alt="扫码安装">
-  <div style="color:#8892b0;font-size:12px;margin-top:8px">手机扫码 → 打开 → 添加到主屏幕</div>
+<div class="qr-section">
+  <h3>📱 手机扫码安装</h3>
+  <div class="qr-box">
+    <img id="qrCode" alt="扫码安装">
+  </div>
+  <div class="hint">打开手机相机扫码 → 打开网页 → 底部菜单「添加到主屏幕」</div>
 </div>
 
-<div class="status" id="pwaStatus">⏳ 检测浏览器 PWA 支持...</div>
-<div style="margin:16px 0">
-<button class="btn" id="installBtn" style="display:none" onclick="installPWA()">📥 安装到桌面</button>
-<button class="btn btn2" onclick="if(navigator.serviceWorker)navigator.serviceWorker.register('/static/sw.js').then(function(){document.getElementById('pwaStatus').innerHTML='✅ 离线缓存已启用'})">🔄 启用离线缓存</button>
+<div class="features">
+  <div class="feature"><div class="ico">⚡</div><div class="nm">快速启动</div><div class="st">一键打开</div></div>
+  <div class="feature"><div class="ico">📴</div><div class="nm">离线可用</div><div class="st">已缓存</div></div>
+  <div class="feature"><div class="ico">🔔</div><div class="nm">桌面通知</div><div class="st">支持</div></div>
+  <div class="feature"><div class="ico">🖥️</div><div class="nm">全平台</div><div class="st">Win/Mac/Linux</div></div>
 </div>
+
+<div class="status-box" id="statusBox">
+  <span class="dot gray" id="statusDot"></span>
+  <span id="statusText">检测浏览器 PWA 支持...</span>
 </div>
-<div class="ft">AUTO-EVO-AI · PWA 桌面客户端</div>
+
+<div class="actions">
+  <button class="btn btn-p" id="installBtn" style="display:none" onclick="installPWA()">📥 安装到桌面</button>
+  <button class="btn btn-s" onclick="registerSW()">🔄 启用离线缓存</button>
+</div>
+
+<div class="platforms">
+  <span class="plat"><span class="ico">🪟</span> Windows</span>
+  <span class="plat"><span class="ico">🍎</span> macOS</span>
+  <span class="plat"><span class="ico">🐧</span> Linux</span>
+  <span class="plat"><span class="ico">📱</span> iOS</span>
+  <span class="plat"><span class="ico">🤖</span> Android</span>
+</div>
+
+</div>
+<footer>AUTO-EVO-AI · PWA 桌面版 · 扫码即用</footer>
+
 <script>
 var deferredPrompt=null
-// 生成二维码
-document.getElementById('qrCode').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(location.protocol+'//'+location.host)
 
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-block';document.getElementById('pwaStatus').innerHTML='📥 可以安装到桌面，点击上方按钮'})
-window.addEventListener('appinstalled',function(){document.getElementById('pwaStatus').innerHTML='✅ 已安装到桌面';document.getElementById('installBtn').style.display='none'})
-if(window.matchMedia('(display-mode: standalone)').matches){document.getElementById('pwaStatus').innerHTML='✅ 已在桌面应用模式运行'}
-else if(!('beforeinstallprompt'in window)){document.getElementById('pwaStatus').innerHTML='ℹ️ 当前浏览器支持 PWA，但可能需要 HTTPS'}
-async function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();var r=await deferredPrompt.userChoice;document.getElementById('pwaStatus').innerHTML=r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消';deferredPrompt=null;document.getElementById('installBtn').style.display='none'}
-// 尝试注册 SW
+// QR 码
+var qr=document.getElementById('qrCode')
+var url=location.protocol+'//'+location.host
+qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url)
+qr.onerror=function(){qr.style.display='none'}
+
+// PWA 安装
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-flex';setStatus('📥 可以安装到桌面，点击上方按钮','yellow')})
+window.addEventListener('appinstalled',function(){setStatus('✅ 已安装到桌面，可在桌面图标启动','green');document.getElementById('installBtn').style.display='none'})
+if(window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.matchMedia('(display-mode: minimal-ui)').matches){setStatus('✅ 已在桌面应用模式运行','green')}
+else if(!('beforeinstallprompt'in window)){setStatus('ℹ️ 当前浏览器支持PWA，请使用Chrome/Edge/Safari访问','yellow')}
+
+function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(function(r){setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow');deferredPrompt=null;document.getElementById('installBtn').style.display='none'})}
+
+function registerSW(){if(navigator.serviceWorker){navigator.serviceWorker.register('/static/sw.js').then(function(){setStatus('✅ 离线缓存已启用','green')}).catch(function(){setStatus('❌ 注册失败','yellow')})}else{setStatus('❌ 浏览器不支持 Service Worker','yellow')}}
+
+function setStatus(t,c){document.getElementById('statusText').textContent=t;var dot=document.getElementById('statusDot');dot.className='dot '+(c||'gray')}
+
+// 自动注册 SW
 if(navigator.serviceWorker){navigator.serviceWorker.register('/static/sw.js').catch(function(){})}
-</script></body></html>
+</script>
+</body></html>
