@@ -226,6 +226,11 @@ async def get_icon_svg(size: int):
     if p.exists(): return FileResponse(str(p), media_type="image/svg+xml")
     raise HTTPException(404)
 
+@router.get("/js/app.css")
+async def js_app_css():
+    p = BASE_DIR / "js" / "app.css"
+    return FileResponse(str(p), media_type="text/css") if p.exists() else Response("/* not found */", media_type="text/css")
+
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"
