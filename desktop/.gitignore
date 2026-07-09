@@ -1,7 +1,0 @@
-node_modules/
-dist/
-*.exe
-*.dmg
-*.AppImage
-*.deb
-icon.png
