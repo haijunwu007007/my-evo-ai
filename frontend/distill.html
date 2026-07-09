@@ -129,6 +129,16 @@ textarea{resize:vertical;min-height:60px}
         <div id=discoverResult style=margin-top:10px;display:none></div>
       </div>
     </div>
+    <!-- 自定义来源 -->
+    <div class=card>
+      <h3>🔌 自定义来源</h3>
+      <p style=font-size:12px;color:var(--text2,#8892b0);margin-bottom:8px>添加任意平台搜索规则，例如：site:xiaohongshu.com AI</p>
+      <div style=display:flex;gap:6px;flex-wrap:wrap>
+        <input id=customQuery placeholder="site:xiaohongshu.com AI" style=flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--card);color:var(--text)>
+        <button class="btn" onclick=addCustomSource() style=background:var(--accent);color:#fff;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px>🔌 添加来源</button>
+      </div>
+      <div id=customSourceList style=margin-top:8px;font-size:12px></div>
+    </div>
   </div>
   <div id=tabProject style=display:none>
     <div class=card>
@@ -420,6 +430,44 @@ async function autoDiscover(){
     dr.innerHTML='<div style="color:#ef4444">发现失败: '+e.message+'</div>'
   }
 }
+// ── 自定义来源 ──
+async function loadCustomSources(){
+  try{
+    var r=await fetch('/api/v1/distill/sources')
+    var d=await r.json()
+    if(!d.success||!d.sources||!d.sources.length){
+      document.getElementById('customSourceList').innerHTML='<span style=color:var(--text3)>暂无自定义来源</span>'
+      return
+    }
+    var h='<div style=font-weight:600;margin-bottom:4px>已添加 '+d.total+' 个来源:</div>'
+    d.sources.forEach(function(s,i){
+      h+='<div style=display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border:1px solid var(--border);border-radius:4px;margin-bottom:3px>'
+      h+='<span style=font-size:12px>'+s.name+'</span>'
+      h+='<span style=font-size:11px;color:var(--text3)">'+s.query.slice(0,40)+'</span>'
+      h+='<span style=cursor:pointer;color:#ef4444;font-size:12px onclick="delCustomSource('+i+')">✕</span>'
+      h+='</div>'
+    })
+    document.getElementById('customSourceList').innerHTML=h
+  }catch(e){}
+}
+async function addCustomSource(){
+  var input=document.getElementById('customQuery')
+  var q=input.value.trim()
+  if(!q){alert('请输入搜索规则');return}
+  try{
+    var r=await fetch('/api/v1/distill/sources/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'自定义:'+q.slice(0,30),query:q})})
+    var d=await r.json()
+    if(d.success){input.value='';loadCustomSources()}
+  }catch(e){alert('添加失败')}
+}
+async function delCustomSource(i){
+  try{
+    var r=await fetch('/api/v1/distill/sources/'+i,{method:'DELETE'})
+    var d=await r.json()
+    if(d.success)loadCustomSources()
+  }catch(e){}
+}
+loadCustomSources()
 function addToBatch(url){
   var ta=document.getElementById('batchInput')
   ta.value+=url+'\n'
