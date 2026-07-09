@@ -131,7 +131,7 @@ function showPlat(p){
 }
 
 function downloadWin(){
-  var content='@echo off\r\nchcp 65001 >nul\r\necho.\r\necho 正在创建桌面快捷方式...\r\necho.\r\necho [InternetShortcut]\r\necho URL=https://autoevoai.com/\r\necho IconIndex=0\r\necho.\r\necho 步骤：将此内容保存为 AUTO-EVO-AI.url\r\necho 放到桌面即可使用。\r\necho.\r\npause\r\n'
+  var content='@echo off\r\nchcp 65001 >nul\r\necho === AUTO-EVO-AI 桌面安装 ===\r\necho.\r\necho 正在创建桌面快捷方式...\r\nset SHORTCUT=%USERPROFILE%\\Desktop\\AUTO-EVO-AI.url\r\necho [InternetShortcut] > "%SHORTCUT%"\r\necho URL=https://autoevoai.com/ >> "%SHORTCUT%"\r\necho IconIndex=0 >> "%SHORTCUT%"\r\necho.\r\necho ✔ 快捷方式已创建！\r\necho.\r\necho 双击桌面 "AUTO-EVO-AI" 即可打开\r\necho.\r\npause\r\n'
   try{
     var blob=new Blob([content],{type:'application/octet-stream'})
     var a=document.createElement('a')
