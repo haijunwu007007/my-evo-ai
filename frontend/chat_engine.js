@@ -270,7 +270,37 @@ async function doSend(text,ai){try{
     if(td.success&&td.workflow_id){
       addMsg('[🎯 系统自动分解任务]\n'+td.steps.map(function(s,i){return '  '+(i+1)+'. '+s}).join('\n')+'\n\n⏳ 正在自动执行...','bot')
     }
-    // 走智能对话
+    // 尝试流式SSE
+    try{
+      var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
+      if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
+        hideLoading()
+        var bub=document.createElement('div');bub.className='msg-bubble'
+        var ld=document.createElement('div');ld.className='msg bot';var ll=document.createElement('div');ll.className='msg-label';ll.textContent='AUTO-EVO-AI'
+        ld.appendChild(ll);ld.appendChild(bub);document.getElementById('messages').appendChild(ld)
+        var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf=''
+        while(true){
+          var {done,value}=await reader.read()
+          if(done)break
+          buf+=decoder.decode(value,{stream:true})
+          var lines=buf.split('\n');buf=lines.pop()||''
+          for(var line of lines){
+            if(line.startsWith('data: ')){
+              try{
+                var d=JSON.parse(line.slice(6))
+                if(d.done){break}
+                bub.innerHTML=_renderMd((bub.textContent||'')+d.chunk)
+                document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight
+              }catch(e){}
+            }
+          }
+        }
+        try{CTX=CTX||[];CTX.push({role:'assistant',content:bub.textContent||''})}catch(ex){}
+        return
+      }
+    }catch(e){console.log('stream fallback',e.message)}
+    hideLoading()
+    // 走智能对话（非流式）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){
       hideLoading()

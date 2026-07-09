@@ -979,7 +979,21 @@ async def _execute_single(req) -> dict:
         return {"success": True, "result": result}
     return {"success": True, "result": "正在思考中..."}
 async def smart_stream(req: Req):
-    return await smart_chat(req)
+    """SSE流式响应 — 打字机效果"""
+    from api.agent_llm import call_llm_stream as _stream
+    import asyncio
+
+    async def _gen():
+        try:
+            # 先用非流式获取完整回复（call_llm_stream是字符级yield）
+            for ch in _stream([{"role": "user", "content": req.message}]):
+                yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
+                await asyncio.sleep(0.02)  # 控制流速，给人打字感
+            yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
+
+    return StreamingResponse(_gen(), media_type="text/event-stream")
 
 
 @router.get("/api/v1/llm/status")
