@@ -320,7 +320,7 @@ async function generateSkill(){
 function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')})
   btn.classList.add('active')
-  var tabs={'distill':'tabDistill','project':'tabProject','chat':'tabChat','skills':'tabSkills','history':'tabHistory'}
+  var tabs={'distill':'tabDistill','project':'tabProject','chat':'tabChat','skills':'tabSkills','history':'tabHistory','batch':'tabBatch'}
   for(var k in tabs){
     document.getElementById(tabs[k]).style.display=k===tab?'block':'none'
   }
