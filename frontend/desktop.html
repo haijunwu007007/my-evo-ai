@@ -61,23 +61,23 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
 </header>
 
 <div class="steps">
-  <div class="step">
+  <div class="step" onclick="copyUrl()" style="cursor:pointer">
     <div class="num">1</div>
     <div class="ico">🌐</div>
     <div class="tl">打开网页</div>
-    <div class="ds">手机扫码或电脑浏览器访问</div>
+    <div class="ds">点我复制链接 → 分享到其他设备</div>
   </div>
-  <div class="step">
+  <div class="step" id="stepInstall" onclick="doInstall()" style="cursor:pointer">
     <div class="num">2</div>
     <div class="ico">📥</div>
     <div class="tl">安装到桌面</div>
-    <div class="ds">Chrome/Safari 点击「添加到主屏幕」</div>
+    <div class="ds" id="stepHint">点我开始安装</div>
   </div>
-  <div class="step">
+  <div class="step" onclick="window.location.href='/'" style="cursor:pointer">
     <div class="num">3</div>
     <div class="ico">🚀</div>
     <div class="tl">开始使用</div>
-    <div class="ds">桌面图标一键打开，离线也可访问</div>
+    <div class="ds">点我直接进入系统</div>
   </div>
 </div>
 
@@ -196,6 +196,24 @@ else setStatus('💡 按下方指引安装到桌面','yellow')
   else if(isAndroid)document.getElementById('step-android').style.display='block'
   else{document.getElementById('step-other').style.display='block'}
 })()
+// ── 复制链接 ──
+function copyUrl(){
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){setStatus('✅ 链接已复制: '+url,'green')}).catch(function(){prompt('复制链接:',url)})}
+  else{prompt('复制链接:',url)}
+}
+// ── 安装 ──
+function doInstall(){
+  var ua=navigator.userAgent,ids=['step-win','step-mac','step-ios','step-android']
+  ids.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none'})
+  var id='step-other'
+  if(/Windows|Win64/.test(ua))id='step-win'
+  else if(/Macintosh/.test(ua))id='step-mac'
+  else if(/iPad|iPhone|iPod/.test(ua))id='step-ios'
+  else if(/Android/.test(ua))id='step-android'
+  document.getElementById(id).style.display='block'
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})
+  document.getElementById('stepInstall').scrollIntoView({behavior:'smooth',block:'start'})
+}
 // ── SW ──
 if(navigator.serviceWorker)navigator.serviceWorker.register('/sw.js').catch(function(){})
 </script>
