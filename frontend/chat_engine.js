@@ -90,12 +90,28 @@ function suggestInput(val){
   var el=document.getElementById('inputSuggest');
   if(!el)return;
   if(!val||val.length<2){el.classList.remove('show');el.innerHTML='';return}
-  // @召唤AI同事：输入@+名字片段
+  // @召唤：同时显示AI同事和工具
   if(val.indexOf('@')>=0){
     var at=val.split('@').pop().toLowerCase().trim()
-    var matches=_TEAMMATES.filter(function(t){return t.name.toLowerCase().indexOf(at)>=0})
-    if(matches.length===0){el.classList.remove('show');el.innerHTML='';return}
-    var html=matches.slice(0,5).map(function(m,i){return '<div class="si '+(i===0?'active':'')+'" onclick="summonTeammate(\''+m.name+'\')">🤖 召唤 <b>'+m.name+'</b><span class="sibadge">AI同事</span></div>'}).join('');
+    var items=[]
+    // AI同事
+    if(_TEAMMATES&&_TEAMMATES.length){
+      _TEAMMATES.forEach(function(t){
+        if(t.name.toLowerCase().indexOf(at)>=0)items.push({type:'teammate',name:t.name,label:t.description||'AI同事'})
+      })
+    }
+    // 工具
+    if(typeof _TOOL_HINTS!=='undefined'&&_TOOL_HINTS){
+      for(var k in _TOOL_HINTS){
+        if(k.toLowerCase().indexOf(at)>=0||_TOOL_HINTS[k].toLowerCase().indexOf(at)>=0)items.push({type:'tool',name:k,label:_TOOL_HINTS[k]})
+      }
+    }
+    if(items.length===0){el.classList.remove('show');el.innerHTML='';return}
+    var html=items.slice(0,8).map(function(it,i){
+      var active=i===0?'active':''
+      if(it.type==='teammate') return '<div class="si '+active+'" onclick="summonTeammate(\''+it.name+'\')">🤖 <b>'+it.name+'</b><span class="sibadge">AI同事</span></div>'
+      return '<div class="si '+active+'" onclick="fillTool(\''+it.name+'\')">🔧 '+it.label.slice(0,40)+'<span class="sibadge">'+it.name+'</span></div>'
+    }).join('');
     el.innerHTML=html;el.classList.add('show');return
   }
   var matches=[];
