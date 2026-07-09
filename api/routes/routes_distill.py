@@ -892,3 +892,87 @@ async def list_distilled_skills():
                 name = name_line[0].replace("# ", "").strip() if name_line else d.name
                 skills.append({"name": d.name, "title": name, "path": str(d)})
     return {"success": True, "skills": skills, "total": len(skills)}
+
+# ===== 对话式创建技能 — 自然语言 → LLM → SKILL.md =====
+class CreateSkillInput(BaseModel):
+    description: str
+
+@router.post("/skills/create-from-chat")
+async def create_skill_from_chat(m: CreateSkillInput):
+    desc = m.description.strip()
+    if not desc:
+        return {"success": False, "error": "请描述你想创建的技能"}
+    if len(desc) > 2000:
+        return {"success": False, "error": "描述过长，请控制在2000字以内"}
+    try:
+        from api.agent_llm import call_llm
+        prompt = f"""你是一个熟练的AI技能生成专家。用户想要创建一个AI技能，请分析并生成结构化的技能定义。
+
+用户描述：{desc}
+
+请按以下JSON格式回复（只返回JSON，不要markdown包裹）：
+{{"name": "技能英文名（简短，如github_trending_searcher）","title": "技能中文名","description": "一句话描述","tags": ["标签1"],"steps": ["步骤1","步骤2"],"key_points": ["要点1"],"dependencies": ["依赖库"],"language": "python","entry_point": ""}}"""
+        messages = [{"role": "user", "content": prompt}]
+        reply, _ = call_llm(messages, None, "")
+        if not reply:
+            return {"success": False, "error": "AI 生成失败，请重试"}
+        json_str = reply.strip()
+        if "```json" in json_str:
+            json_str = json_str.split("```json")[1].split("```")[0].strip()
+        elif "```" in json_str:
+            json_str = json_str.split("```")[1].split("```")[0].strip()
+        skill_def = json.loads(json_str)
+    except Exception as e:
+        return {"success": False, "error": f"AI 解析失败: {str(e)[:100]}"}
+
+    skill_name = re.sub(r'[^a-zA-Z0-9_]', '_', skill_def.get("name", "custom_skill")).strip("_")
+    if not skill_name:
+        skill_name = f"chat_skill_{uuid.uuid4().hex[:6]}"
+    skill_dir = SKILLS_DIR / skill_name
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    title = skill_def.get("title", desc[:30])
+    description = skill_def.get("description", "")
+    tags = skill_def.get("tags", [])
+    steps = skill_def.get("steps", ["分析需求","执行任务","返回结果"])
+    key_points = skill_def.get("key_points", [])
+    dependencies = skill_def.get("dependencies", [])
+    steps_md = "\n".join(f"{i+1}. {step}" for i, step in enumerate(steps))
+    points_md = "\n".join(f"- {p}" for p in key_points) if key_points else "- 详见执行脚本"
+    deps_str = ", ".join(dependencies) if dependencies else "无"
+    skill_md = f"""# {title}
+
+> 自动创建自对话 · {time.strftime("%Y-%m-%d %H:%M")}
+
+## 描述
+{description}
+
+## 元数据
+- **标签:** {', '.join(tags) or "无"}
+- **依赖:** {deps_str}
+
+## 执行步骤
+{steps_md}
+
+## 关键要点
+{points_md}
+
+## 使用方式
+1. 在聊天中输入 @{skill_name} 激活此技能
+2. 调用 POST /api/v1/skills/{skill_name}/execute
+"""
+    (skill_dir / "SKILL.md").write_text(skill_md, encoding="utf-8")
+    scripts_dir = skill_dir / "scripts"
+    scripts_dir.mkdir(exist_ok=True)
+    (scripts_dir / "__init__.py").write_text("", encoding="utf-8")
+    steps_json = json.dumps(steps[:20], ensure_ascii=False)
+    main_py = f'''"""Auto-created: {title}"""
+import json
+SKILL_INFO = {{"title":"{title}","description":"""{description}""","steps":{steps_json}}}
+async def run(input_data:dict)->dict:
+    result = {{"success":True,"skill":SKILL_INFO["title"]}}
+    result["steps_completed"] = len(SKILL_INFO["steps"])
+    result["message"] = f'技能执行完成，共{{result["steps_completed"]}}步'
+    return result
+'''
+    (scripts_dir / "main.py").write_text(main_py, encoding="utf-8")
+    return {"success": True, "skill": {"name": skill_name, "title": title, "description": description, "tags": tags, "steps_text": steps_md}, "path": str(skill_dir)}

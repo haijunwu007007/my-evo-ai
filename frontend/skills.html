@@ -52,6 +52,7 @@ body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple
     <div class="filter-bar">
       <input id="search" placeholder="搜索技能名称..." oninput="filterSkills()">
       <select id="sourceFilter" onchange="filterSkills()"><option value="">全部来源</option><option value="local">本地</option><option value="platform">平台</option><option value="distilled">蒸馏</option></select>
+      <button onclick="window.location.href='/create-skill.html'">💬 对话创建技能</button>
       <button onclick="discoverSkills()">🌐 发现新技能</button>
       <button onclick="showImportModal()">📥 导入技能</button>
       <button onclick="window.location.href='/distill.html'">🧪 蒸馏一切为技能</button>
