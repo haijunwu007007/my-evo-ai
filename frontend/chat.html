@@ -575,7 +575,6 @@ function checkOnboard() {
       <div class="topbar-right">
         <span onclick="clearHistory()" ontouchend="clearHistory();event.preventDefault()">🔄 新对话</span>
         <span id="historyBtn" onclick="showHistory()" ontouchend="showHistory();event.preventDefault()">📜 历史</span>
-        <span id="installBtn" onclick="if(_deferredPrompt){_deferredPrompt.prompt();_deferredPrompt.userChoice.then(function(r){console.log('install:',r.outcome);_deferredPrompt=null;document.getElementById('installBtn').style.display='none'})}" style="display:none;background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-size:13px">📲 安装</span>
       
 </div>
     </div>

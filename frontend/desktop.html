@@ -120,25 +120,63 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
 <script>
 var deferredPrompt=null
 
-// QR 码
+// QR 码（使用国内可访问的API + 本地兜底）
 var qr=document.getElementById('qrCode')
 var url=location.protocol+'//'+location.host
-qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url)
-qr.onerror=function(){qr.style.display='none'}
+// 尝试多个QR API，哪个能用用哪个
+function tryQR(apis,i){
+  if(i>=apis.length){qr.alt='请手动访问: '+url;return}
+  qr.src=apis[i]+encodeURIComponent(url)
+}
+tryQR(['https://api.pwmqr.com/qrcode/create/?url=','https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='],0)
 
-// PWA 安装
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-flex';setStatus('📥 可以安装到桌面，点击上方按钮','yellow')})
-window.addEventListener('appinstalled',function(){setStatus('✅ 已安装到桌面，可在桌面图标启动','green');document.getElementById('installBtn').style.display='none'})
-if(window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.matchMedia('(display-mode: minimal-ui)').matches){setStatus('✅ 已在桌面应用模式运行','green')}
-else if(!('beforeinstallprompt'in window)){setStatus('ℹ️ 当前浏览器支持PWA，请使用Chrome/Edge/Safari访问','yellow')}
+// PWA 安装状态
+function setStatus(t,c){
+  document.getElementById('statusText').textContent=t
+  document.getElementById('statusDot').className='dot '+(c||'gray')
+}
 
-function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(function(r){setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow');deferredPrompt=null;document.getElementById('installBtn').style.display='none'})}
+// 检测是否已在PWA模式
+if(window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.matchMedia('(display-mode: minimal-ui)').matches){
+  setStatus('✅ 已在桌面应用模式运行','green')
+}else{
+  setStatus('📱 用Chrome/Edge打开后，地址栏或菜单点「安装/添加到主屏幕」','yellow')
+}
 
-function registerSW(){if(navigator.serviceWorker){navigator.serviceWorker.register('/static/sw.js').then(function(){setStatus('✅ 离线缓存已启用','green')}).catch(function(){setStatus('❌ 注册失败','yellow')})}else{setStatus('❌ 浏览器不支持 Service Worker','yellow')}}
+// PWA 安装拦截
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferredPrompt=e
+  document.getElementById('installBtn').style.display='inline-flex'
+  setStatus('📥 点击上方「安装到桌面」按钮','yellow')
+})
+window.addEventListener('appinstalled',function(){
+  setStatus('✅ 已安装到桌面','green')
+  document.getElementById('installBtn').style.display='none'
+})
 
-function setStatus(t,c){document.getElementById('statusText').textContent=t;var dot=document.getElementById('statusDot');dot.className='dot '+(c||'gray')}
+function installPWA(){
+  if(!deferredPrompt){setStatus('⚠️ 当前浏览器不支持自动安装，请手动添加到主屏幕','yellow');return}
+  deferredPrompt.prompt()
+  deferredPrompt.userChoice.then(function(r){
+    setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow')
+    deferredPrompt=null
+    document.getElementById('installBtn').style.display='none'
+  })
+}
 
-// 自动注册 SW
-if(navigator.serviceWorker){navigator.serviceWorker.register('/static/sw.js').catch(function(){})}
+function registerSW(){
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.register('/sw.js').then(function(){
+      setStatus('✅ 离线缓存已启用','green')
+    }).catch(function(e){
+      setStatus('❌ 注册失败: '+e.message,'yellow')
+    })
+  }else{
+    setStatus('❌ 浏览器不支持 Service Worker','yellow')
+  }
+}
+
+// 自动注册 SW（正确路径）
+if(navigator.serviceWorker){navigator.serviceWorker.register('/sw.js').catch(function(){})}
 </script>
 </body></html>
