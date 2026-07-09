@@ -175,12 +175,16 @@ function showPasswordReset(){
         })
     }).catch(function(e){alert('网络错误: '+e.message)})
 }
-function _renderMd(t){return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,function(m,a,s){return '<img src="'+s.replace(/["<>']/g,'')+'" alt="'+a.replace(/["<>']/g,'')+'" style="max-width:100%;border-radius:8px;margin:4px 0">'}).replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,t,h){return '<a href="'+h.replace(/["<>'` ]/g,'')+'" target="_blank" rel="noopener">'+t.replace(/["<>']/g,'')+'</a>'})}
+function _renderMd(t,r){
+  var html=t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,function(m,a,s){return '<img src="'+s.replace(/["<>']/g,'')+'" alt="'+a.replace(/["<>']/g,'')+'" style="max-width:100%;border-radius:8px;margin:4px 0">'}).replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,t,h){return '<a href="'+h.replace(/["<>'` ]/g,'')+'" target="_blank" rel="noopener">'+t.replace(/["<>']/g,'')+'</a>'})
+  if(r==='bot'&&t.length>20){html+='<span class="copy-btn" onclick="navigator.clipboard.writeText(\''+t.replace(/['"\\]/g,'').slice(0,2000)+'\');this.textContent=\"已复制\"" style="display:inline-block;font-size:10px;color:var(--text3);cursor:pointer;margin-left:6px">📋</span>'}
+  return html
+}
 function friendlyError(msg){var m=msg||'';if(m.indexOf('502')>=0)return'服务暂时不可用，请稍后重试';if(m.indexOf('timeout')>=0||m.indexOf('timed out')>=0)return'请求超时，可能是网络或服务器负载较高';if(m.indexOf('500')>=0)return'服务器内部错误，已记录日志';if(m.indexOf('404')>=0)return'资源不存在';if(m.indexOf('Failed to fetch')>=0||m.indexOf('NetworkError')>=0)return'网络连接失败，请检查网络';return m.slice(0,120)}
 // ── 搜索缓存 ──
 var _searchCacheTTL=3600000;
 function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){}cb(d)})}).catch(function(){cb(null)})}
-function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
+function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
 function showLoading(){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
 function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
@@ -220,10 +224,17 @@ async function processAttachments(){
   return parts.join('\n\n');
 }
 
+
+// ── 粘贴文件 ──
+document.addEventListener('paste',function(e){
+  var files=e.clipboardData.files
+  if(files.length){attachFiles=attachFiles||[];for(var i=0;i<files.length;i++)attachFiles.push(files[i]);renderAttachBar()}
+})
+
 function send(){
   if(_sendLock)return;_sendLock=true
   try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;input.value='';var ai=null;if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
-  }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+  }catch(e){hideLoading();addMsg('❌ 出错了: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 async function doSend(text,ai){try{
   if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
@@ -305,7 +316,7 @@ async function doSend(text,ai){try{
     if(!sr.ok){
       hideLoading()
       if(sr.status===429) addMsg('⚠️ 请求太频繁，请稍后再试','bot')
-      else addMsg('服务器返回 '+sr.status,'bot')
+      else addMsg('❌ 请求失败 ('+sr.status+') 请稍后重试','bot')
       return
     }var sd=await sr.json();hideLoading()
     if(sd&&sd.success){
@@ -317,8 +328,8 @@ async function doSend(text,ai){try{
       }
       var rt=sd.result||'(空)'
       if(rt.includes('【模块调用】')||rt.includes('execute_module')||rt.includes('引擎:')){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';var l=document.createElement('div');l.className='msg-label';l.textContent='AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=rt.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/【模块调用】/g,'<span style="color:var(--accent);font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:var(--accent2)">引擎:</span>');d.appendChild(l);d.appendChild(b);m.appendChild(d)}else{addMsg(rt,'bot')};if(!CTX)CTX=[];CTX.push({role:'assistant',content:sd.result})
-    }else{addMsg('系统: '+(sd&&sd.detail||'未知错误'),'bot')}
-  }catch(e){hideLoading();addMsg('错误: '+e.message,'bot')}
+    }else{addMsg('❌ 系统返回错误，请重试','bot')}
+  }catch(e){hideLoading();addMsg('❌ 出错了: '+e.message,'bot')}
   _sendLock=false
   try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
@@ -337,7 +348,18 @@ function showHistory(){
     overlay=document.createElement('div');
     overlay.id='historyOverlay';
     overlay.style.cssText='position:fixed;top:0;right:0;width:320px;max-width:85vw;height:100vh;z-index:999;background:var(--card);border-left:1px solid var(--border);overflow-y:auto;padding:12px;box-shadow:-4px 0 20px rgba(0,0,0,.15)';
+    var sh=document.createElement('input');
+    sh.placeholder='🔍 搜索历史...';
+    sh.style.cssText='width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:8px';
+    sh.oninput=function(){
+      var q=this.value.toLowerCase().trim()
+      document.querySelectorAll('.hi').forEach(function(el){
+        el.style.display=q&&el.textContent.toLowerCase().indexOf(q)<0?'none':'block'
+      })
+    };
+    overlay.insertBefore(sh,overlay.firstChild);
     overlay.onclick=function(e){if(e.target===overlay)closeHistoryOverlay()};
+
     document.body.appendChild(overlay);
   }
   var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h4 style="margin:0">📋 对话历史</h4><span onclick="closeHistoryOverlay()" style="cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px">✕</span></div>';
