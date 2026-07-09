@@ -21,24 +21,44 @@ class BatchRequest(BaseModel):
 async def discover_sources():
     """自动发现可蒸馏的热门来源"""
     sources = []
+    seen = set()
     
-    # 1. GitHub Trending
+    def add(s):
+        key = s["url"][:60]
+        if key not in seen:
+            seen.add(key)
+            sources.append(s)
+    
+    # 1. 尝试动态搜索（web_search skill）
     try:
-        from core.github_scanner import GitHubScannerEngine
-        scanner = GitHubScannerEngine()
-        repos = scanner.get_trending(language="", since="daily", limit=10)
-        for r in repos:
-            sources.append({"type": "github", "name": r.get("name",""), "url": r.get("url",""), "desc": r.get("description","")[:100]})
-    except Exception as e:
-        pass
+        from skills.builtin.search_web import search
+        for q in ["AI Agent 教程", "Python 入门教程", "开源项目", "2026 AI 工具"]:
+            try:
+                res = search(q, num=5)
+                if isinstance(res, dict) and res.get("success"):
+                    items = res.get("results", res.get("data", []))
+                    for item in items[:3]:
+                        add({"type": "search", "name": item.get("title","")[:60], "url": item.get("link","") or item.get("url",""), "desc": item.get("snippet","")[:100]})
+            except: pass
+    except: pass
     
-    # 2. 热门技术博客（模拟）
-    blogs = [
-        {"type": "blog", "name": "阮一峰的技术周刊", "url": "https://www.ruanyifeng.com/blog/", "desc": "每周分享科技前沿动态"},
-        {"type": "blog", "name": "美团技术团队", "url": "https://tech.meituan.com/", "desc": "美团技术博客"},
-        {"type": "blog", "name": "阿里云开发者社区", "url": "https://developer.aliyun.com/", "desc": "阿里云技术分享"},
+    # 2. 内置热门来源（真实中文技术社区）
+    builtin = [
+        {"type":"blog","name":"阮一峰的技术周刊","url":"https://www.ruanyifeng.com/blog/","desc":"每周分享科技前沿动态，涵盖AI/编程/科技"},
+        {"type":"blog","name":"美团技术团队","url":"https://tech.meituan.com/","desc":"美团技术博客，Java/分布式/系统设计"},
+        {"type":"blog","name":"阿里云开发者社区","url":"https://developer.aliyun.com/","desc":"阿里云技术分享，云计算/大数据/AI"},
+        {"type":"blog","name":"腾讯云开发者社区","url":"https://cloud.tencent.com/developer","desc":"腾讯云技术博客，AI/云原生/架构"},
+        {"type":"blog","name":"字节跳动技术团队","url":"https://juejin.cn/user/1838039172387262","desc":"字节跳动技术博客"},
+        {"type":"blog","name":"GitHub 热榜","url":"https://github.com/trending","desc":"GitHub每日趋势，发现开源好项目"},
+        {"type":"blog","name":"知乎AI话题","url":"https://www.zhihu.com/topic/19559436","desc":"知乎AI相关热门问答和文章"},
+        {"type":"blog","name":"开源中国","url":"https://www.oschina.net/","desc":"开源技术社区，新闻/博客/问答"},
+        {"type":"blog","name":"InfoQ 中文","url":"https://www.infoq.cn/","desc":"技术趋势/架构实践/AI应用"},
+        {"type":"blog","name":"V2EX 技术","url":"https://www.v2ex.com/","desc":"技术交流社区，编程/创业/分享"},
+        {"type":"blog","name":"CSDN AI频道","url":"https://www.csdn.net/","desc":"中文开发者社区，AI/编程/教程"},
+        {"type":"blog","name":"掘金 AI","url":"https://juejin.cn/","desc":"开发者技术社区，前端/AI/后端"},
     ]
-    sources.extend(blogs)
+    for b in builtin:
+        add(b)
     
     return {"success": True, "sources": sources, "total": len(sources)}
 
