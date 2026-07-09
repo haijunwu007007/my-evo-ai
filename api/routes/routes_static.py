@@ -266,6 +266,26 @@ async def image_processor_html():
     p = BASE_DIR / "frontend" / "image-processor.html"
     return FileResponse(str(p), media_type="text/html")
 
+@router.get("/doc-qa")
+async def doc_qa_html():
+    p = BASE_DIR / "frontend" / "doc-qa.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/price-compare")
+async def price_compare_html():
+    p = BASE_DIR / "frontend" / "price-compare.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/mortgage-calc")
+async def mortgage_calc_html():
+    p = BASE_DIR / "frontend" / "mortgage-calc.html"
+    return FileResponse(str(p), media_type="text/html")
+
+@router.get("/health-report")
+async def health_report_html():
+    p = BASE_DIR / "frontend" / "health-report.html"
+    return FileResponse(str(p), media_type="text/html")
+
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"

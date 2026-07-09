@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>文档对话 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px;min-height:100vh}
+h1{font-size:22px;margin-bottom:6px}.sub{color:var(--text2);font-size:14px;margin-bottom:20px}
+.back{display:inline-block;margin-bottom:16px;color:var(--accent);text-decoration:none;font-size:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:700px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:8px}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px}
+.upload-zone:hover{border-color:var(--accent);background:var(--glass)}
+.upload-zone .ico{font-size:36px;margin-bottom:8px}
+.upload-zone p{color:var(--text2);font-size:13px}
+.msg-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;min-height:120px;margin-bottom:12px;overflow-y:auto;max-height:300px;font-size:14px;line-height:1.7}
+.msg-box .q{color:var(--accent);margin-bottom:4px}
+.msg-box .a{color:var(--text);margin-bottom:8px;padding-left:10px;border-left:2px solid var(--accent)}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px}
+.input-row input:focus{border-color:var(--accent);outline:none}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.9}
+.btn-s{background:#10b981;color:#fff}
+.file-info{font-size:12px;color:var(--text2);margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:6px}
+</style></head><body>
+<a href="/" class="back">← 返回</a>
+<h1>📄 文档对话</h1>
+<p class="sub">上传PDF/文档，直接问AI，不用翻页找</p>
+
+<div class="card">
+  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <div class="ico">📁</div>
+    <p>点击上传 PDF/TXT/文档</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:4px">支持 .pdf .txt</p>
+    <input type="file" id="fileInput" accept=".pdf,.txt" style="display:none" onchange="handleFile()">
+  </div>
+  <div class="file-info" id="fileInfo" style="display:none"></div>
+</div>
+
+<div class="card" id="qaCard">
+  <h3>💬 问你的文档</h3>
+  <div class="msg-box" id="msgBox"><div style="color:var(--text3);font-size:13px;text-align:center">先上传文档，然后在这里提问</div></div>
+  <div class="input-row">
+    <input id="qInput" placeholder="关于文档的问题..." onkeydown="if(event.key==='Enter')askQuestion()">
+    <button class="btn btn-p" onclick="askQuestion()">提问</button>
+  </div>
+</div>
+
+<script>
+var _docText = '';
+function handleFile(){
+  var f = document.getElementById('fileInput').files[0];
+  if(!f)return;
+  document.getElementById('fileInfo').style.display = 'block';
+  document.getElementById('fileInfo').textContent = '📄 '+f.name+' ('+(f.size/1024).toFixed(1)+'KB) 加载中...';
+  var reader = new FileReader();
+  reader.onload = function(e){
+    if(f.name.endsWith('.pdf')){
+      // 用PDF.js或直接后端处理
+      document.getElementById('fileInfo').textContent = '📄 '+f.name+' - PDF已上传，后端处理中';
+      _docText = '[PDF: '+f.name+', '+f.size+' bytes]';
+    } else {
+      _docText = e.target.result;
+      document.getElementById('fileInfo').textContent = '📄 '+f.name+' ('+_docText.length+'字符)';
+    }
+    document.getElementById('msgBox').innerHTML = '<div class="q">📄 已加载文档：'+f.name+'</div><div class="a">你可以开始提问了</div>';
+    // 后端处理
+    var fd = new FormData();
+    fd.append('file', f);
+    fetch('/api/v1/doc-qa/upload', {method:'POST', body:fd}).then(function(r){return r.json()}).then(function(d){
+      document.getElementById('fileInfo').textContent = '📄 '+f.name+' ('+(f.size/1024).toFixed(1)+'KB) 已加载';
+      _docText = d.text||_docText;
+    }).catch(function(){});
+  };
+  reader.readAsText(f);
+}
+function askQuestion(){
+  var q = document.getElementById('qInput').value.trim();
+  if(!q||!_docText){alert('请先上传文档');return}
+  var box = document.getElementById('msgBox');
+  box.innerHTML += '<div class="q">❓ '+q+'</div><div class="a">🤖 分析中...</div>';
+  document.getElementById('qInput').value = '';
+  box.scrollTop = box.scrollHeight;
+  fetch('/api/v1/doc-qa/ask', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question:q, context:_docText})})
+  .then(function(r){return r.json()}).then(function(d){
+    box.innerHTML = box.innerHTML.replace('🤖 分析中...', d.answer||'无法回答');
+    box.scrollTop = box.scrollHeight;
+  }).catch(function(){
+    box.innerHTML = box.innerHTML.replace('🤖 分析中...', '请求失败');
+  });
+}
+</script></body></html>

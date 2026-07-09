@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全网比价 - AUTO-EVO-AI</title>
+<link rel="stylesheet" href="/frontend/share.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px;min-height:100vh}
+h1{font-size:22px;margin-bottom:6px}.sub{color:var(--text2);font-size:14px;margin-bottom:20px}
+.back{display:inline-block;margin-bottom:16px;color:var(--accent);text-decoration:none;font-size:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:700px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.search-row{display:flex;gap:8px;margin-bottom:16px}
+.search-row input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px}
+.btn{padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-p{background:var(--accent);color:#fff}
+.result{margin-top:12px}.item{display:flex;justify-content:space-between;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:13px}
+.item .name{flex:2}.item .price{flex:1;text-align:right;color:var(--accent);font-weight:700}.item .platform{flex:1;text-align:center;color:var(--text2);font-size:12px}
+.loading{text-align:center;padding:20px;color:var(--text3)}
+</style></head><body>
+<a href="/" class="back">← 返回</a>
+<h1>🛒 全网比价</h1>
+<p class="sub">搜索商品，查看多平台价格对比</p>
+<div class="card">
+  <div class="search-row">
+    <input id="searchInput" placeholder="例如：索尼WH-1000XM5 降噪耳机" onkeydown="if(event.key==='Enter')searchPrice()">
+    <button class="btn btn-p" onclick="searchPrice()">搜索比价</button>
+  </div>
+  <div id="resultArea"><div style="color:var(--text3);font-size:13px;text-align:center;padding:30px">输入商品名称开始比价</div></div>
+</div>
+<script>
+function searchPrice(){
+  var q=document.getElementById('searchInput').value.trim();
+  if(!q)return;
+  document.getElementById('resultArea').innerHTML='<div class="loading">🔍 正在搜索各平台价格...</div>';
+  fetch('/api/v1/price-compare/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:q})})
+  .then(function(r){return r.json()}).then(function(d){
+    if(!d.success||!d.results||!d.results.length){
+      document.getElementById('resultArea').innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">未找到相关商品</div>';return
+    }
+    var h='<div style="margin-bottom:8px;font-size:12px;color:var(--text2)">找到 '+d.results.length+' 个结果</div>';
+    d.results.forEach(function(r){
+      var minP = Math.min.apply(null, r.prices.map(function(p){return p.price}));
+      h+='<div class="item"><div class="name">'+r.name+'</div><div class="price">¥'+minP+'起</div><div class="platform">'+r.prices.length+'家</div></div>';
+    });
+    document.getElementById('resultArea').innerHTML = h;
+  }).catch(function(){
+    document.getElementById('resultArea').innerHTML='<div style="color:#ef4444;text-align:center">查询失败</div>';
+  });
+}
+</script></body></html>
