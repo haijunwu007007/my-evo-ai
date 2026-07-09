@@ -978,6 +978,7 @@ async def _execute_single(req) -> dict:
         result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
     return {"success": True, "result": "正在思考中..."}
+@router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
     """SSE流式响应 — 打字机效果"""
     from api.agent_llm import call_llm_stream as _stream
