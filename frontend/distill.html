@@ -63,6 +63,7 @@ textarea{resize:vertical;min-height:60px}
 
   <div class=tab-bar>
     <button class="tab active" onclick="switchTab('distill',this)">🧪 开始蒸馏</button>
+    <button class="tab" onclick="switchTab('batch',this)">📦 批量蒸馏</button>
     <button class="tab" onclick="switchTab('project',this)">📁 项目</button>
     <button class="tab" onclick="switchTab('chat',this)">💬 对话</button>
     <button class="tab" onclick="switchTab('skills',this)">📦 技能</button>
@@ -100,6 +101,33 @@ textarea{resize:vertical;min-height:60px}
     </div>
   </div>
 
+  <div id=tabBatch style=display:none>
+    <div class=grid>
+      <div class=card>
+        <h3>📦 批量蒸馏</h3>
+        <p style=font-size:12px;color:var(--text2,#8892b0);margin-bottom:10px>一次性蒸馏创作者的整个内容库，自动提取核心知识、风格特征、方法论。</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <select id=batchType style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text)">
+            <option value=urls>多条URL</option>
+            <option value=youtube>YouTube博主</option>
+            <option value=blog>博客/公众号</option>
+            <option value=texts>批量文本</option>
+          </select>
+        </div>
+        <textarea id=batchInput placeholder='每行一个:\nhttps://youtube.com/c/xxx/video1\nhttps://youtube.com/c/xxx/video2\n...' style=min-height:80px></textarea>
+        <input id=batchName placeholder="创作者/系列名称（如: 张三的编程教程）" style=margin-top:4px>
+        <button class="btn btn-primary" onclick=startBatch() style=margin-top:8px;width:100%">⚡ 批量蒸馏</button>
+        <div id=batchProgress style=margin-top:10px;display:none>
+          <div class=progress-bar><div class=progress-fill id=batchFill style=width:0%></div></div>
+          <div id=batchStatus style=font-size:12px;color:var(--text2,#8892b0);text-align:center>准备中...</div>
+        </div>
+      </div>
+      <div class=card>
+        <h3>📊 蒸馏结果</h3>
+        <div id=batchResult style=font-size:13px;color:var(--text2,#8892b0)">执行批量蒸馏后，结果将在此展示。</div>
+      </div>
+    </div>
+  </div>
   <div id=tabProject style=display:none>
     <div class=card>
       <h3>📁 项目蒸馏</h3>
@@ -330,6 +358,41 @@ async function distillProject(){
 
 // ── 对话蒸馏 ──
 var CURRENT_CONV_ID=''
+
+// ── 批量蒸馏 ─────────────────
+async function startBatch(){
+  var type=document.getElementById('batchType').value
+  var input=document.getElementById('batchInput').value.trim()
+  var name=document.getElementById('batchName').value.trim()||'批量蒸馏'
+  if(!input){alert('请输入要蒸馏的内容');return}
+  var items=input.split('\n').filter(function(l){return l.trim()})
+  if(items.length<1){alert('至少需要1条内容');return}
+  document.getElementById('batchProgress').style.display='block'
+  document.getElementById('batchFill').style.width='5%'
+  document.getElementById('batchStatus').textContent='⏳ 准备批量蒸馏 '+items.length+' 项...'
+  document.getElementById('batchResult').innerHTML='<div style="color:var(--text2)">⏳ 正在处理...</div>'
+  try{
+    var r=await fetch('/api/v1/distill/batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:type,items:items.slice(0,100),name:name})})
+    var d=await r.json()
+    if(d.success){
+      document.getElementById('batchFill').style.width='100%'
+      document.getElementById('batchStatus').textContent='✅ 蒸馏完成!'
+      var html='<div style="padding:10px;background:rgba(16,185,129,.1);border-radius:8px;border:1px solid #10b981">'
+      html+='<div style="font-size:14px;font-weight:600;color:#10b981;margin-bottom:6px">✅ '+d.skill_name+'</div>'
+      html+='<div style="font-size:12px;color:var(--text2)">已处理 '+d.processed+'/'+d.total+' 项 | 技能ID: '+d.skill_id+'</div>'
+      if(d.summary) html+='<div style="font-size:12px;margin-top:8px;padding:8px;background:var(--bg);border-radius:6px">'+d.summary+'</div>'
+      html+='<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/skills\'" style="margin-top:8px">📦 查看技能</button>'
+      html+='</div>'
+      document.getElementById('batchResult').innerHTML=html
+    }else{
+      document.getElementById('batchStatus').textContent='❌ 蒸馏失败'
+      document.getElementById('batchResult').innerHTML='<div style="color:#ef4444">'+ (d.error||'未知错误')+'</div>'
+    }
+  }catch(e){
+    document.getElementById('batchStatus').textContent='❌ 请求失败'
+    document.getElementById('batchResult').innerHTML='<div style="color:#ef4444">'+e.message+'</div>'
+  }
+}
 
 async function saveConversation(){
   var user=document.getElementById('chatUserInput').value.trim()
