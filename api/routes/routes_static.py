@@ -226,66 +226,6 @@ async def get_icon_svg(size: int):
     if p.exists(): return FileResponse(str(p), media_type="image/svg+xml")
     raise HTTPException(404)
 
-@router.get("/ppt-gen.html")
-async def ppt_gen_html():
-    p = BASE_DIR / "frontend" / "ppt-gen.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/data-analyzer")
-async def data_analyzer_html():
-    p = BASE_DIR / "frontend" / "data-analyzer.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/assistant")
-async def assistant_html():
-    p = BASE_DIR / "frontend" / "assistant.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/site-builder")
-async def site_builder_html():
-    p = BASE_DIR / "frontend" / "site-builder.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/social-media")
-async def social_media_html():
-    p = BASE_DIR / "frontend" / "social-media.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/resume")
-async def resume_html():
-    p = BASE_DIR / "frontend" / "resume.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/contract-review")
-async def contract_review_html():
-    p = BASE_DIR / "frontend" / "contract-review.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/image-processor")
-async def image_processor_html():
-    p = BASE_DIR / "frontend" / "image-processor.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/doc-qa")
-async def doc_qa_html():
-    p = BASE_DIR / "frontend" / "doc-qa.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/price-compare")
-async def price_compare_html():
-    p = BASE_DIR / "frontend" / "price-compare.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/mortgage-calc")
-async def mortgage_calc_html():
-    p = BASE_DIR / "frontend" / "mortgage-calc.html"
-    return FileResponse(str(p), media_type="text/html")
-
-@router.get("/health-report")
-async def health_report_html():
-    p = BASE_DIR / "frontend" / "health-report.html"
-    return FileResponse(str(p), media_type="text/html")
-
 @router.get("/favicon.ico")
 async def favicon_ico():
     p = BASE_DIR / "frontend" / "favicon.svg"
