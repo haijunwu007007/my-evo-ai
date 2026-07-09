@@ -872,6 +872,19 @@ checkUserRole();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
 // ── PWA 安装提示 ──
 var _deferredPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_deferredPrompt=e;var btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex';console.log('beforeinstallprompt fired')});window.addEventListener('appinstalled',function(e){_deferredPrompt=null;var btn=document.getElementById('installBtn');if(btn)btn.style.display='none';console.log('app installed')});
+// ── iOS引导：检测非Chrome且未触发beforeinstallprompt → 显示添加主屏幕提示 ──
+setTimeout(function(){
+  var btn=document.getElementById('installBtn');
+  if(btn&&btn.style.display!='inline-flex'){
+    var ua=navigator.userAgent;
+    if(/iPad|iPhone|iPod/.test(ua)&&!/Safari/.test(ua)){
+      btn.style.display='inline-flex';btn.textContent='📲 添加到主屏幕';
+      btn.onclick=function(){alert('在Safari中打开本页，点分享按钮 → 添加到主屏幕')}
+    }else if(!_deferredPrompt){
+      // 其他不支持PWA安装的浏览器
+    }
+  }
+},3000);
 // ── 移动端侧栏滑动关闭手势 ──
 (function(){var sb=document.querySelector('.sidebar'),ov=document.querySelector('.sidebar-overlay'),sx=0;if(!sb)return;sb.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},false);sb.addEventListener('touchmove',function(e){if(!sb.classList.contains('open'))return;var dx=e.touches[0].clientX-sx;if(dx<-30){sb.classList.remove('open');if(ov)ov.classList.remove('show')}},false);if(ov){ov.addEventListener('touchstart',function(e){sb.classList.remove('open');ov.classList.remove('show')},false)}})();
 // ── 拖拽上传 ──

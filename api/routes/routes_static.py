@@ -937,3 +937,28 @@ async def sdk_file(filepath: str):
 
 
 
+
+
+# ── 自动清理定时任务 ──
+_AUTO_CLEANUP_RUNNING = False
+async def _auto_cleanup_loop():
+    global _AUTO_CLEANUP_RUNNING
+    if _AUTO_CLEANUP_RUNNING: return
+    _AUTO_CLEANUP_RUNNING = True
+    import asyncio
+    while True:
+        try:
+            await asyncio.sleep(86400)  # 每24小时
+            log_dir = BASE_DIR / "logs"
+            if log_dir.exists():
+                import time as _t
+                now = _t.time()
+                for f in log_dir.glob("*.log"):
+                    if now - f.stat().st_mtime > 86400 * 15:
+                        f.unlink(missing_ok=True)
+        except: pass
+
+@router.on_event("startup")
+async def start_cleanup():
+    import asyncio
+    asyncio.create_task(_auto_cleanup_loop())
