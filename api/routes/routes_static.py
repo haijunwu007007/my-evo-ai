@@ -216,14 +216,32 @@ async def get_manifest():
 @router.get("/icon-{size}.png")
 
 async def get_icon(size: int):
-
     p = BASE_DIR / f"icon-{size}.png"
-
     if p.exists(): return FileResponse(str(p), media_type="image/png")
-
     raise HTTPException(404)
 
+@router.get("/icon-{size}.svg")
+async def get_icon_svg(size: int):
+    p = BASE_DIR / "frontend" / f"icon-{size}.svg"
+    if p.exists(): return FileResponse(str(p), media_type="image/svg+xml")
+    raise HTTPException(404)
 
+@router.get("/favicon.ico")
+async def favicon_ico():
+    p = BASE_DIR / "frontend" / "favicon.svg"
+    return FileResponse(str(p), media_type="image/svg+xml")
+
+@router.get("/favicon.svg")
+async def favicon_svg():
+    p = BASE_DIR / "frontend" / "favicon.svg"
+    return FileResponse(str(p), media_type="image/svg+xml")
+
+
+
+@router.get("/desktop")
+async def desktop_html():
+    p = BASE_DIR / "frontend" / "desktop.html"
+    return FileResponse(str(p), media_type="text/html")
 
 @router.get("/sw.js")
 
