@@ -576,6 +576,7 @@ function checkOnboard() {
       <div class="topbar-right">
         <span onclick="clearHistory()" ontouchend="clearHistory();event.preventDefault()">🔄 新对话</span>
         <span id="historyBtn" onclick="showHistory()" ontouchend="showHistory();event.preventDefault()">📜 历史</span>
+        <span id="installBtn" onclick="if(_deferredPrompt){_deferredPrompt.prompt();_deferredPrompt.userChoice.then(function(r){console.log('install:',r.outcome);_deferredPrompt=null;document.getElementById('installBtn').style.display='none'})}" style="display:none;background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-size:13px">📲 安装</span>
       
 </div>
     </div>
@@ -909,7 +910,10 @@ checkUserRole();
 </script>
 <script>
 // ── PWA 离线支持 ──
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/static/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
+// ── Service Worker ──
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
+// ── PWA 安装提示 ──
+var _deferredPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_deferredPrompt=e;var btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex';console.log('beforeinstallprompt fired')});window.addEventListener('appinstalled',function(e){_deferredPrompt=null;var btn=document.getElementById('installBtn');if(btn)btn.style.display='none';console.log('app installed')});
 // ── 移动端侧栏滑动关闭手势 ──
 (function(){var sb=document.querySelector('.sidebar'),ov=document.querySelector('.sidebar-overlay'),sx=0;if(!sb)return;sb.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},false);sb.addEventListener('touchmove',function(e){if(!sb.classList.contains('open'))return;var dx=e.touches[0].clientX-sx;if(dx<-30){sb.classList.remove('open');if(ov)ov.classList.remove('show')}},false);if(ov){ov.addEventListener('touchstart',function(e){sb.classList.remove('open');ov.classList.remove('show')},false)}})();
 // ── 拖拽上传 ──
