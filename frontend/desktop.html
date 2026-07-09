@@ -102,7 +102,7 @@ footer{text-align:center;padding:10px;font-size:10px;color:var(--text3);margin-t
 </div>
 
 <div class="actions">
-  <button class="btn btn-p" id="installBtn" style="display:none" onclick="installPWA()">📥 安装到桌面</button>
+  <button class="btn btn-p" id="installBtn" style="display:inline-flex" onclick="installPWA()">📥 安装到桌面</button>
   <button class="btn btn-s" onclick="registerSW()">🔄 启用离线缓存</button>
 </div>
 
@@ -155,13 +155,26 @@ window.addEventListener('appinstalled',function(){
 })
 
 function installPWA(){
-  if(!deferredPrompt){setStatus('⚠️ 当前浏览器不支持自动安装，请手动添加到主屏幕','yellow');return}
-  deferredPrompt.prompt()
-  deferredPrompt.userChoice.then(function(r){
-    setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow')
-    deferredPrompt=null
-    document.getElementById('installBtn').style.display='none'
-  })
+  if(deferredPrompt){
+    deferredPrompt.prompt()
+    deferredPrompt.userChoice.then(function(r){
+      setStatus(r.outcome==='accepted'?'✅ 安装成功':'❌ 已取消',r.outcome==='accepted'?'green':'yellow')
+      deferredPrompt=null
+    })
+    return
+  }
+  // 无beforeinstallprompt（大多数浏览器）→ 显示手动安装指引
+  var ua=navigator.userAgent
+  var isIOS=/iPad|iPhone|iPod/.test(ua)
+  var isAndroid=/Android/.test(ua)
+  var isChrome=/Chrome/.test(ua)&&!/Edg/.test(ua)
+  var isEdge=/Edg/.test(ua)
+  var msg=''
+  if(isIOS)msg='🍎 iOS: 点击底部分享按钮 → 添加到主屏幕'
+  else if(isAndroid&&isChrome)msg='🤖 Android: 右上角菜单 → 添加到主屏幕'
+  else if(isChrome||isEdge)msg='💻 地址栏右侧点击安装图标 '+(isChrome?'↓':'')+'\n或菜单 → 更多工具 → 创建快捷方式'
+  else msg='请在 Chrome/Edge 中打开此页面，通过菜单添加到主屏幕'
+  alert(msg)
 }
 
 function registerSW(){
