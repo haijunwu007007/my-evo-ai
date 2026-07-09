@@ -247,9 +247,9 @@ async def desktop_html():
 
 async def service_worker():
 
-    p = BASE_DIR / "sw.js"
+    p = BASE_DIR / "static" / "sw.js"
 
-    return FileResponse(p, media_type="application/javascript") if p.exists() else StreamingResponse(iter(["// SW"]), media_type="application/javascript")
+    return FileResponse(p, media_type="application/javascript") if p.exists() else StreamingResponse(iter(["// SW stub"]), media_type="application/javascript")
 
 
 
@@ -428,6 +428,15 @@ async def hub_page():
 
     raise HTTPException(404)
 
+
+
+@router.get("/tools")
+
+async def tools_page():
+
+    p = BASE_DIR / "frontend" / "tools.html"
+
+    return FileResponse(str(p), media_type="text/html") if p.exists() else HTMLResponse("<h2>Tools page not found</h2>", status_code=404)
 
 
 @router.get("/deploy")
