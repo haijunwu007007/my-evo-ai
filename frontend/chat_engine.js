@@ -74,8 +74,18 @@ function quickTool(el, name){
   var hint=(typeof _TOOL_HINTS!=='undefined'&&_TOOL_HINTS[name])||el.textContent.trim()+': '
   inp.value=hint;inp.focus()
 }
-var _TEAMMATES = []; // 从 localStorage 加载已激活的AI同事
-try{var _tm=JSON.parse(localStorage.getItem('evo_teammates')||'[]');if(Array.isArray(_tm))_TEAMMATES=_tm}catch(e){}
+var _TEAMMATES = []; // 从API加载AI同事列表
+// ── 异步加载队友列表 ──
+async function loadTeammates(){
+  try{
+    var r=await fetch('/api/v1/teammates/list');
+    var d=await r.json();
+    if(d.success&&d.teammates&&d.teammates.length){_TEAMMATES=d.teammates;localStorage.setItem('evo_teammates',JSON.stringify(d.teammates))}
+  }catch(e){}
+  // 兜底：从localStorage加载
+  try{var _tm=JSON.parse(localStorage.getItem('evo_teammates')||'[]');if(Array.isArray(_tm)&&_tm.length>0)_TEAMMATES=_tm}catch(e){}
+}
+setTimeout(loadTeammates,500);
 function suggestInput(val){
   var el=document.getElementById('inputSuggest');
   if(!el)return;
