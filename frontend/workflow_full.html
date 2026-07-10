@@ -76,8 +76,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 }
 </style></head>
 <body>
+<span class="back-btn" onclick="window.location.href='/'" style="position:fixed;top:10px;right:12px;z-index:999;padding:4px 10px;border-radius:6px;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:16px;line-height:1">←</span>
 <div class="toolbar">
-  
   <h2>🎨 Workflow</h2>
   <input id="wfName" placeholder="Workflow 名称" value="未命名流程">
   <button class="btn-primary" onclick="saveWF()">💾 保存</button>
