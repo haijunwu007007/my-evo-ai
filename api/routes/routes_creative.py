@@ -183,3 +183,66 @@ async def sandbox_exec(data: dict):
         return {"success":False,"error":"执行超时(>10s)"}
     except Exception as e:
         return {"success":False,"error":str(e)[:100]}
+
+
+# 7) 一句话生成网站 (Bolt.new style)
+@router.post("/api/v1/creative/site-gen")
+async def site_gen(data: dict):
+    desc = data.get("desc", "")
+    if not desc: return {"success": False, "error": "请描述网站需求"}
+    prompt = ("根据以下需求生成一个完整的HTML单页应用(含CSS+JS内联)。\n"
+              "需求: " + desc + "\n"
+              "要求: 完整HTML, 响应式设计, 现代化UI, 功能完整。直接输出HTML代码。")
+    html_code = _llm(prompt)
+    if not html_code:
+        html_code = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>" + desc[:20] + "</title><style>body{font-family:sans-serif;max-width:800px;margin:40px auto;padding:20px}h1{color:#4361ee}</style></head><body><h1>" + desc[:30] + "</h1><p>AI生成的网站模板</p></body></html>"
+    html_code = html_code.replace("```html","").replace("```","").strip()
+    fid = hashlib.md5(desc.encode()).hexdigest()[:8]
+    fp = str(OUT / ("site_" + fid + ".html"))
+    with open(fp, 'w', encoding='utf-8') as f:
+        f.write(html_code)
+    return {"success": True, "file": "/output/site_" + fid + ".html", "preview": html_code[:200]}
+
+# 8) 设计稿生成 (OpenPencil style)
+@router.post("/api/v1/creative/design-edit")
+async def design_edit(data: dict):
+    desc = data.get("desc", "")
+    dim = data.get("dimension", "网页")
+    if not desc: return {"success": False, "error": "请描述设计需求"}
+    prompt = ("根据以下需求生成UI设计的HTML预览。类型:" + dim + "\n需求:" + desc + "\n要求: 现代化UI, 毛玻璃/渐变效果, 完整HTML+CSS。直接输出HTML。")
+    html_code = _llm(prompt)
+    if not html_code:
+        html_code = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>设计预览</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;max-width:500px;width:100%}h2{color:#333}.btn{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;width:100%}</style></head><body><div class='card'><h2>" + desc[:30] + "</h2><button class='btn'>提交</button></div></body></html>"
+    html_code = html_code.replace("```html","").replace("```","").strip()
+    fid = hashlib.md5(desc.encode()).hexdigest()[:8]
+    fp = str(OUT / ("design_" + fid + ".html"))
+    with open(fp, 'w', encoding='utf-8') as f:
+        f.write(html_code)
+    return {"success": True, "file": "/output/design_" + fid + ".html", "preview": html_code[:200]}
+
+# 9) 自动深度研究
+@router.post("/api/v1/creative/deep-research")
+async def deep_research(data: dict):
+    topic = data.get("topic", "")
+    depth = data.get("depth", "全面")
+    if not topic: return {"success": False, "error": "请输入研究主题"}
+    prompt = ("请对以下主题进行" + depth + "研究分析，输出结构化研究报告。\n"
+              "主题: " + topic + "\n"
+              "要求: 1.研究背景 2.核心概念 3.现状分析 4.挑战与方案 5.未来趋势\n"
+              "用Markdown格式输出。")
+    report = _llm(prompt)
+    if not report:
+        report = "# " + topic + " 研究报告\n\n## 概述\n本文对" + topic + "进行了研究分析。\n\n## 核心发现\n" + topic + "是当前重要的发展方向。\n\n## 结论\n值得持续关注。"
+    report = report.replace("```markdown","").replace("```","").strip()
+    fid = hashlib.md5(topic.encode()).hexdigest()[:8]
+    fp = str(OUT / ("research_" + fid + ".md"))
+    with open(fp, 'w', encoding='utf-8') as f:
+        f.write(report)
+    html_report = ("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>" + topic[:20] + "</title>"
+                   "<link rel='stylesheet' href='/frontend/share.css'>"
+                   "<style>body{max-width:800px;margin:0 auto;padding:20px}.md{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;line-height:1.8}</style>"
+                   "</head><body><div class='md'>" + report.replace("\n","<br>") + "</div></body></html>")
+    fp2 = str(OUT / ("research_" + fid + ".html"))
+    with open(fp2, 'w', encoding='utf-8') as f:
+        f.write(html_report)
+    return {"success": True, "file": "/output/research_" + fid + ".html", "text": report[:300]}
