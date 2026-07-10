@@ -37,7 +37,7 @@ h1{font-size:22px;margin-bottom:4px;display:flex;align-items:center;gap:8px;just
 </style></head><body>
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:8px">
-    <span class="back-btn" onclick="window.location.href='/'">←</span>
+    
     <h1 style="font-size:15px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">N8N 工作流库</h1>
   </div>
 </div>
@@ -101,7 +101,7 @@ function fetchWorkflows(){
 function renderPage(){
   var pages=Math.ceil(_total/24);
   var h='<span class="page-info">共 '+_total+' 个，第 '+_page+'/'+pages+' 页</span>';
-  if(_page>1)h+='<button onclick="gotoPage('+(_page-1)+')">← 上一页</button>';
+  if(_page>1)h+='<button onclick="gotoPage('+(_page-1)+')">上一页</button>';
   if(_page<pages)h+='<button onclick="gotoPage('+(_page+1)+')">下一页 →</button>';
   document.getElementById('pagination').innerHTML=h;
 }
