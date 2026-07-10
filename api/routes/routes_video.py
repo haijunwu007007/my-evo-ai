@@ -5,15 +5,15 @@ import os, json, subprocess, time, httpx, base64, hashlib
 from typing import Optional
 from pathlib import Path
 
-router = APIRouter(prefix="/api/v1/video", tags=["video"])
+router = APIRouter(prefix="/api/v1/video-engine", tags=["video"])
 
 VIDEO_DIR = Path(os.path.join(os.path.dirname(__file__), "..", "data", "videos"))
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 _CONFIG = {
-    "pixelle_url": os.environ.get("PIXELLE_URL", "http://localhost:8501"),
-    "wan_url": os.environ.get("WAN_URL", ""),
-    "ltx_url": os.environ.get("LTX_URL", ""),
+    "pixelle": os.environ.get("PIXELLE_URL", "http://localhost:8501"),
+    "wan": os.environ.get("WAN_URL", ""),
+    "montage": os.environ.get("MONTAGE_URL", ""),
 }
 
 # ---- 状态 ----

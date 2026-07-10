@@ -143,7 +143,7 @@ function log(msg,type){var area=document.getElementById('progressArea');area.cla
 function selectStyle(el){document.querySelectorAll('.style-chip').forEach(function(s){s.classList.remove('active')});el.classList.add('active')}
 function loadEngineStatus(){
   var grid=document.getElementById('engineGrid');
-  fetch('/api/v1/video/status').then(function(r){return r.json()}).then(function(data){
+  fetch('/api/v1/video-engine/status').then(function(r){return r.json()}).then(function(data){
     var engines=data.engines||{};var keys=Object.keys(engines);
     if(!keys.length){return}
     var em={pixelle:{icon:'🧩',label:'Pixelle',desc:'全自动视频生成引擎',cls:'pixelle'},wan:{icon:'🎭',label:'Wan2.2',desc:'数字人视频合成引擎',cls:'wan'},wan2_2:{icon:'🎭',label:'Wan2.2',desc:'数字人视频合成引擎',cls:'wan'},montage:{icon:'🎬',label:'OpenMontage',desc:'智能蒙太奇剪辑引擎',cls:'montage'},openmontage:{icon:'🎬',label:'OpenMontage',desc:'智能蒙太奇剪辑引擎',cls:'montage'}};
