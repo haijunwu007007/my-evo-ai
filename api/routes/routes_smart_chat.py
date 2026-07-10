@@ -1057,34 +1057,237 @@ async def llm_status():
 
 
 # ── 模块自动路由引擎 ──
-_MODULE_NAMES = None
-_MODULE_DESC = None
+# 把模块名→中文功能关键词，用户说自然语言就能匹配
+_MODULE_KEYWORDS = None  # [{name:str, keywords:[str]}]
 
-def _get_module_names():
-    global _MODULE_NAMES
-    if _MODULE_NAMES is not None:
-        return _MODULE_NAMES
-    try:
-        import os
-        d = os.path.join(os.path.dirname(__file__), "..", "..", "modules")
-        if not os.path.isdir(d):
-            d = os.path.join(os.path.dirname(__file__), "..", "modules")
-        names = []
-        for f in sorted(os.listdir(d)):
-            if f.endswith('.py') and not f.startswith('_') and f != '__init__.py':
-                names.append(f.replace('.py', '').replace('_', ' ').replace('-', ' '))
-        _MODULE_NAMES = names
-        return names
-    except Exception as e:
-        return []
+# 模块名中常见英文词→中文映射（智能拆解用）
+_EN_TO_CN = {
+    "access": "访问", "account": "账户", "agent": "智能体代理", "ai": "人工智能AI",
+    "alert": "告警告警通知", "analysis": "分析", "api": "接口API", "app": "应用",
+    "archive": "归档", "asset": "资产", "async": "异步", "audit": "审计",
+    "auth": "认证", "auto": "自动", "backup": "备份", "batch": "批量",
+    "browser": "浏览器", "cache": "缓存", "calendar": "日历", "cdn": "加速CDN",
+    "cert": "证书", "chat": "聊天对话", "check": "检查", "clean": "清理",
+    "cli": "命令行", "client": "客户端", "cloud": "云", "cluster": "集群",
+    "code": "代码", "collect": "收集", "command": "命令", "commit": "提交",
+    "compress": "压缩", "config": "配置配置管理", "connect": "连接对接",
+    "context": "上下文", "control": "控制", "convert": "转换", "copy": "复制",
+    "cron": "定时", "cursor": "游标", "custom": "自定义", "daemon": "守护进程",
+    "dashboard": "仪表盘看板", "data": "数据", "database": "数据库", "dead": "死信",
+    "debug": "调试", "decision": "决策", "deploy": "部署", "design": "设计",
+    "detect": "检测", "device": "设备", "dns": "域名DNS", "doc": "文档",
+    "docker": "容器Docker", "download": "下载", "drive": "网盘", "edge": "边缘",
+    "email": "邮件", "encode": "编码", "encrypt": "加密", "engine": "引擎",
+    "error": "错误", "event": "事件", "execute": "执行", "export": "导出",
+    "extract": "提取", "failover": "容错", "fast": "快速", "feature": "特性",
+    "file": "文件", "filter": "过滤", "finance": "金融财务", "firewall": "防火墙",
+    "flow": "流程", "forecast": "预测", "format": "格式化", "form": "表单问卷",
+    "function": "函数", "gateway": "网关", "generate": "生成", "geo": "地理位置",
+    "git": "代码仓库Git", "github": "GitHub代码托管", "govern": "治理", "graph": "图谱",
+    "group": "分组", "guard": "防护", "health": "健康", "history": "历史",
+    "hook": "钩子", "hot": "热门", "http": "网络请求HTTP", "hub": "中心",
+    "image": "图片", "import": "导入", "incident": "故障", "index": "索引",
+    "info": "信息", "init": "初始化", "input": "输入", "insight": "洞察",
+    "install": "安装", "integrate": "集成", "invoke": "调用", "io": "输入输出",
+    "job": "任务作业", "json": "JSON", "key": "密钥键值", "knowledge": "知识",
+    "label": "标签", "lang": "语言", "leader": "领导", "learning": "学习",
+    "license": "许可", "link": "链接", "list": "列表", "load": "负载加载",
+    "local": "本地", "lock": "锁", "log": "日志", "login": "登录",
+    "manager": "管理", "market": "市场行情", "mcp": "MCP协议", "measure": "测量",
+    "media": "媒体", "meeting": "会议", "mem": "内存", "memory": "记忆存储",
+    "message": "消息", "metric": "指标", "migrate": "迁移", "mirror": "镜像",
+    "mobile": "手机移动端", "mock": "模拟", "model": "模型", "module": "模块",
+    "monitor": "监控", "multi": "多", "network": "网络", "node": "节点",
+    "note": "笔记", "notify": "通知", "oauth": "授权OAuth", "object": "对象",
+    "ocr": "文字识别OCR", "offline": "离线", "online": "在线", "open": "开放",
+    "operator": "运维", "optimize": "优化", "option": "选项", "orchestrate": "编排",
+    "output": "输出", "page": "页面", "parse": "解析", "partition": "分区",
+    "password": "密码", "path": "路径", "payment": "支付", "perf": "性能",
+    "permission": "权限", "photo": "照片", "pipeline": "流水线管道", "plan": "计划",
+    "platform": "平台", "plugin": "插件", "point": "点", "policy": "策略",
+    "pool": "池", "portal": "门户", "post": "发布", "prefetch": "预取",
+    "priority": "优先级", "private": "私有", "process": "进程", "profile": "画像",
+    "project": "项目", "prompt": "提示词", "protocol": "协议", "proxy": "代理",
+    "publish": "发布", "pull": "拉取", "push": "推送", "quality": "质量",
+    "query": "查询", "queue": "队列", "quota": "配额", "rate": "速率",
+    "reactor": "反应器", "realtime": "实时", "recover": "恢复", "redis": "Redis缓存",
+    "register": "注册", "release": "发布", "remote": "远程", "render": "渲染",
+    "replica": "副本", "report": "报告报表", "request": "请求", "research": "研究",
+    "resource": "资源", "response": "响应", "rest": "REST接口", "restore": "还原",
+    "retry": "重试", "review": "审查评审", "risk": "风险", "robot": "机器人",
+    "role": "角色", "rollback": "回滚", "route": "路由", "rule": "规则",
+    "sandbox": "沙箱", "scale": "伸缩", "scan": "扫描", "schedule": "调度",
+    "schema": "模式", "scraper": "爬虫", "search": "搜索", "secret": "密钥",
+    "secure": "安全", "security": "安全", "segment": "段", "send": "发送",
+    "sensor": "传感器", "server": "服务", "service": "服务", "session": "会话",
+    "setting": "设置", "setup": "设置", "share": "分享", "signal": "信号",
+    "site": "站点", "skill": "技能", "slack": "Slack", "slow": "慢",
+    "smart": "智能", "snapshot": "快照", "social": "社交", "sort": "排序",
+    "source": "源", "space": "空间", "sql": "SQL查询", "ssl": "SSL证书",
+    "stack": "栈", "stage": "阶段", "state": "状态", "stat": "统计",
+    "storage": "存储", "store": "存储", "stream": "流", "sync": "同步",
+    "system": "系统", "table": "表格", "task": "任务", "team": "团队",
+    "template": "模板", "test": "测试", "thread": "线程", "threat": "威胁",
+    "tier": "层", "time": "时间", "token": "令牌Token", "tool": "工具",
+    "topic": "主题", "track": "追踪", "traffic": "流量", "train": "训练",
+    "transfer": "传输", "transform": "转换", "transit": "中转", "translate": "翻译",
+    "trigger": "触发", "tunnel": "隧道穿透", "ui": "界面UI", "update": "更新",
+    "upload": "上传", "url": "网址URL", "usage": "用量", "user": "用户",
+    "validate": "验证", "value": "值", "vector": "向量", "verify": "校验",
+    "version": "版本", "video": "视频", "view": "视图", "virtual": "虚拟",
+    "voice": "语音", "vpn": "VPN", "waf": "WAF防火墙", "watch": "观察",
+    "web": "网页", "webhook": "Webhook", "window": "窗口", "worker": "工作者",
+    "workflow": "工作流", "workspace": "工作空间", "write": "写入",
+}
+
+def _module_name_to_keywords(name: str) -> list:
+    """根据模块名自动生成中文功能关键词"""
+    # 先用下划线拆词
+    parts = name.replace('-', '_').split('_')
+    keywords = set()
+    
+    # 加入原始模块名（去下划线）
+    clean = name.replace('_', ' ').replace('-', ' ')
+    keywords.add(clean)
+    
+    # 每个部分查中英文映射
+    for p in parts:
+        p_low = p.lower()
+        if p_low in _EN_TO_CN:
+            # 加入中文关键词（可能有多个，用空格分隔）
+            cn_vals = _EN_TO_CN[p_low].split()
+            for cv in cn_vals:
+                keywords.add(cv)
+        # 同时也保留英文原词
+        keywords.add(p)
+    
+    # 特定组合补全
+    full_cn = {
+        "code_review": ["代码审查", "代码评审", "review代码", "检查代码"],
+        "stock_api": ["股票行情", "股价", "实时股价", "查股票"],
+        "voice_notify": ["语音通知", "语音播报"],
+        "ocr_engine": ["文字识别", "图片转文字", "OCR识别"],
+    "translate": ["翻译", "语言翻译", "多语言翻译", "翻译服务"],
+    "email": ["发邮件", "邮件发送", "邮箱", "电子邮件"],
+    "calendar": ["日历", "日程"],
+    "cron": ["定时任务", "定时执行", "cron表达式", "定时调度"],
+    "backup": ["数据备份", "备份数据", "备份恢复"],
+    "monitor": ["监控", "实时监控", "系统监控", "性能监控"],
+    "deploy": ["部署", "发布上线", "一键部署"],
+    "search": ["搜索", "查找", "查询", "全文搜索", "信息搜索"],
+    "report": ["报告", "报表", "生成报告", "生成报表", "周报", "月报"],
+        "chat": ["聊天", "对话", "智能问答"],
+        "agent": ["智能体", "AI代理", "自动化代理"],
+    "data": ["数据", "数据分析", "数据处理"],
+    "log": ["日志", "查看日志", "日志分析", "日志管理"],
+        "auth": ["登录", "认证", "授权"],
+        "payment": ["支付", "付款", "收款"],
+        "image": ["图片", "图像", "图片处理"],
+        "video": ["视频", "视频处理"],
+        "audio": ["音频", "语音"],
+        "file": ["文件", "文件管理", "文件处理"],
+        "database": ["数据库", "数据查询", "SQL"],
+        "notification": ["通知", "消息推送", "推送通知"],
+        "workflow": ["工作流", "自动化流程"],
+        "permission": ["权限", "权限管理"],
+        "secret": ["密钥", "密码", "凭据"],
+        "analytics": ["分析", "统计", "数据分析"],
+        "dashboard": ["看板", "仪表盘", "数据面板"],
+        "insight": ["洞察", "分析洞察"],
+        "forecast": ["预测", "趋势预测"],
+        "recommend": ["推荐", "智能推荐"],
+        "meeting": ["会议", "会议纪要", "开会"],
+    "form": ["表单", "问卷", "调查", "创建表单", "问卷调查"],
+    "approval": ["审批", "审核", "审批流程", "审批中心", "待审批"],
+    "browser": ["浏览器", "网页浏览"],
+    "export": ["导出", "数据导出"],
+    "import": ["导入", "数据导入"],
+    "sync": ["同步", "数据同步"],
+    "migrate": ["迁移", "数据迁移"],
+    "template": ["模板", "套用模板"],
+    "document": ["文档", "文档生成", "写文档"],
+    "presentation": ["PPT", "演示文稿", "幻灯片", "生成PPT"],
+    "spreadsheet": ["表格", "Excel", "电子表格"],
+    "code": ["代码", "编程", "写代码"],
+    "review": ["审查", "评审", "代码审查"],
+    "test": ["测试", "自动化测试"],
+    "network": ["网络", "网络管理"],
+    "storage": ["存储", "文件存储"],
+    "tunnel": ["穿透", "内网穿透", "隧道"],
+    "monitor": ["监控", "告警", "状态"],
+    "schedule": ["定时", "调度", "排期"],
+    "event": ["事件", "事件驱动", "事件引擎"],
+    "queue": ["队列", "消息队列", "队列管理"],
+    "task": ["任务", "任务管理"],
+        "team": ["团队", "协作"],
+        "collaboration": ["协作", "协同"],
+        "integration": ["集成", "对接"],
+        "pipeline": ["流水线", "管道"],
+        "release": ["发布", "版本发布"],
+        "cicd": ["CI/CD", "持续集成", "持续部署"],
+        "ansible": ["自动化运维", "Ansible"],
+        "terraform": ["基础设施", "Terraform"],
+        "k8s": ["Kubernetes", "容器编排", "K8s"],
+        "docker": ["Docker", "容器"],
+        "grafana": ["Grafana", "可视化面板"],
+        "prometheus": ["Prometheus", "指标监控"],
+    }
+    base_name = name.replace('_', '_')  # 保留原名
+    for key, vals in full_cn.items():
+        if key in name or key.replace('_', ' ') in name:
+            for v in vals:
+                keywords.add(v)
+    
+    return list(keywords)
+
+def _build_module_index():
+    """构建模块名→关键词索引，启动时加载一次"""
+    global _MODULE_KEYWORDS
+    if _MODULE_KEYWORDS is not None:
+        return _MODULE_KEYWORDS
+    import os
+    d = os.path.join(os.path.dirname(__file__), "..", "..", "modules")
+    if not os.path.isdir(d):
+        d = os.path.join(os.path.dirname(__file__), "..", "modules")
+    index = []
+    for f in sorted(os.listdir(d)):
+        if f.endswith('.py') and not f.startswith('_') and f != '__init__.py':
+            name = f.replace('.py', '')
+            keywords = _module_name_to_keywords(name)
+            index.append({"name": name, "keywords": keywords})
+    _MODULE_KEYWORDS = index
+    return index
 
 def _find_module_in_text(msg: str) -> str | None:
-    """在用户消息中查找匹配的模块名"""
+    """智能匹配：用户输入自然语言需求→自动找到对应模块"""
     msg_lower = msg.lower().strip()
-    names = _get_module_names()
-    # 精确匹配
-    for n in names:
-        nl = n.lower()
-        if nl in msg_lower or msg_lower in nl:
-            return n
+    index = _build_module_index()
+    
+    # 评分制：每个模块按关键词命中打分，最高分返回
+    best_score = 0
+    best_name = None
+    
+    for entry in index:
+        score = 0
+        for kw in entry["keywords"]:
+            kw_lower = kw.lower().strip()
+            if len(kw_lower) < 2:
+                continue
+            # 中文关键词直接匹配
+            if kw_lower in msg_lower:
+                # 长关键词匹配权重更高（防止"代码"匹配到所有含"代码"的模块）
+                score += len(kw_lower)
+                # 完整短语匹配额外加分
+                if len(kw_lower) >= 4:
+                    score += 5
+            # 模块名本身匹配加分（兼容直接输入模块名的情况）
+            if kw_lower == msg_lower:
+                score += 50
+        if score > best_score:
+            best_score = score
+            best_name = entry["name"]
+    
+    # 阈值：至少匹配到一个有意义的词
+    if best_score >= 2:
+        return best_name
     return None
