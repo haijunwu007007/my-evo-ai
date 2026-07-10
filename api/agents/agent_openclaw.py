@@ -91,7 +91,7 @@ def openclaw_send(platform: str = "", recipient: str = "", message: str = "",
     try:
         import httpx
         # 如果有 OpenClaw 本地服务
-        claw_host = os.environ.get("OPENCLAW_HOST", "http://localhost:8080")
+        claw_host = os.environ.get("OPENCLAW_HOST", "")
         claw_api_key = bridge.get("api_key", "")
 
         resp = httpx.post(

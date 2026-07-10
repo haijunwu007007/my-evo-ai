@@ -4,7 +4,7 @@ signoz_apm - SigNoz APM - OpenTelemetry原生, 追踪+指标+日志
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("SIGNOZ_API_KEY_URL", "") or "http://localhost:3301"
+_API_BASE = os.environ.get("SIGNOZ_API_KEY_URL", "") or ""
 _API_KEY = os.environ.get("SIGNOZ_API_KEY_KEY", "") or os.environ.get("SIGNOZ_API_KEY", "")
 _TIMEOUT = 15
 

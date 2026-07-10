@@ -4,7 +4,7 @@ RabbitMQ消息代理 - 通过RabbitMQ API管理队列和交换机
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("RABBITMQ_API_URL", "") or "http://localhost:15672"
+_API_BASE = os.environ.get("RABBITMQ_API_URL", "") or ""
 _API_KEY = os.environ.get("RABBITMQ_API_KEY", "") or os.environ.get("RABBITMQ_TOKEN", "")
 _TIMEOUT = 15
 

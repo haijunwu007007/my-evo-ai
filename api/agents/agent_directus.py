@@ -4,7 +4,7 @@ Directus数据平台 - 通过Directus API管理内容和资产
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("DIRECTUS_API_URL", "") or "http://localhost:8055"
+_API_BASE = os.environ.get("DIRECTUS_API_URL", "") or ""
 _API_KEY = os.environ.get("DIRECTUS_API_KEY", "") or os.environ.get("DIRECTUS_TOKEN", "")
 _TIMEOUT = 15
 

@@ -1,7 +1,7 @@
 """MinIO - AUTO-EVO-AI集成 (localhost:9000)"""
 import json, httpx, os
 
-MINIO_URL = os.environ.get("MINIO_URL", "http://localhost:9000")
+MINIO_URL = os.environ.get("MINIO_URL", "")
 MINIO_ACCESS = os.environ.get("MINIO_ACCESS_KEY", "")
 MINIO_SECRET = os.environ.get("MINIO_SECRET_KEY", "")
 

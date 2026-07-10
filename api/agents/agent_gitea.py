@@ -4,7 +4,7 @@ Gitea自托管Git - 通过Gitea API管理仓库/PR/CI/CD
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("GITEA_API_URL", "") or "http://localhost:3000"
+_API_BASE = os.environ.get("GITEA_API_URL", "") or ""
 _API_KEY = os.environ.get("GITEA_API_KEY", "") or os.environ.get("GITEA_TOKEN", "")
 _TIMEOUT = 15
 

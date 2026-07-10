@@ -4,7 +4,7 @@ wazuh_siem - Wazuh安全监控 - 开源SIEM/XDR, 入侵检测+漏洞扫描
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("WAZUH_API_KEY_URL", "") or "https://localhost:55000"
+_API_BASE = os.environ.get("WAZUH_API_KEY_URL", "") or ""
 _API_KEY = os.environ.get("WAZUH_API_KEY_KEY", "") or os.environ.get("WAZUH_API_KEY", "")
 _TIMEOUT = 15
 

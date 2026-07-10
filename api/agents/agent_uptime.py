@@ -1,7 +1,7 @@
 """Uptime Kuma - AUTO-EVO-AI集成 (localhost:3001)"""
 import json, httpx, os
 
-KUMA_URL = os.environ.get("KUMA_URL", "http://localhost:3001")
+KUMA_URL = os.environ.get("KUMA_URL", "")
 
 def uptime_kuma(**kwargs):
     """Uptime Kuma站点监控"""

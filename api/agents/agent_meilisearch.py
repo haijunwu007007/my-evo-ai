@@ -1,7 +1,7 @@
 """MeiliSearch - AUTO-EVO-AI集成 (localhost:7700)"""
 import json, httpx, os
 
-MEILI_URL = os.environ.get("MEILI_URL", "http://localhost:7700")
+MEILI_URL = os.environ.get("MEILI_URL", "")
 MEILI_KEY = os.environ.get("MEILI_KEY", "")
 
 def meilisearch_search(**kwargs):

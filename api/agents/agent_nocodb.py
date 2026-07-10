@@ -1,7 +1,7 @@
 """NocoDB - AUTO-EVO-AI集成 (localhost:8081)"""
 import json, httpx, os
 
-NOCO_URL = os.environ.get("NOCO_URL", "http://localhost:8081")
+NOCO_URL = os.environ.get("NOCO_URL", "")
 
 def nocodb_query(**kwargs):
     """NocoDB数据表查询 / API操作"""

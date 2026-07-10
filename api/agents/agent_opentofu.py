@@ -4,7 +4,7 @@ OpenTofu基础设施即代码 - 通过OpenTofu API管理IaC
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("OPENTOFU_API_URL", "") or "http://localhost:8080"
+_API_BASE = os.environ.get("OPENTOFU_API_URL", "") or ""
 _API_KEY = os.environ.get("OPENTOFU_API_KEY", "") or os.environ.get("OPENTOFU_TOKEN", "")
 _TIMEOUT = 15
 

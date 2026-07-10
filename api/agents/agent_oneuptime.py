@@ -4,7 +4,7 @@ OneUptime一体化可观测 - 通过OneUptime API管理监控和事件
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("ONEUPTIME_API_URL", "") or "http://localhost:3002"
+_API_BASE = os.environ.get("ONEUPTIME_API_URL", "") or ""
 _API_KEY = os.environ.get("ONEUPTIME_API_KEY", "") or os.environ.get("ONEUPTIME_TOKEN", "")
 _TIMEOUT = 15
 

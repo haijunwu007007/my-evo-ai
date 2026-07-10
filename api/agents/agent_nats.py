@@ -4,7 +4,7 @@ NATS消息队列 - 通过NATS API管理消息和流
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("NATS_API_URL", "") or "http://localhost:8222"
+_API_BASE = os.environ.get("NATS_API_URL", "") or ""
 _API_KEY = os.environ.get("NATS_API_KEY", "") or os.environ.get("NATS_TOKEN", "")
 _TIMEOUT = 15
 

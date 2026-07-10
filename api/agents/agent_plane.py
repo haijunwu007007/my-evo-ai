@@ -4,7 +4,7 @@ Plane项目管理系统 - 通过Plane API管理项目/问题/周期
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("PLANE_API_URL", "") or "http://localhost:8080"
+_API_BASE = os.environ.get("PLANE_API_URL", "") or ""
 _API_KEY = os.environ.get("PLANE_API_KEY", "") or os.environ.get("PLANE_TOKEN", "")
 _TIMEOUT = 15
 

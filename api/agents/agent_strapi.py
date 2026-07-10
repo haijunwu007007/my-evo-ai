@@ -4,7 +4,7 @@ Strapi Headless CMS - 通过Strapi API管理内容和媒体
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("STRAPI_API_URL", "") or "http://localhost:1337"
+_API_BASE = os.environ.get("STRAPI_API_URL", "") or ""
 _API_KEY = os.environ.get("STRAPI_API_KEY", "") or os.environ.get("STRAPI_TOKEN", "")
 _TIMEOUT = 15
 

@@ -4,7 +4,7 @@ Wiki.js知识管理 - 通过Wiki.js API管理文档和搜索
 import os, json, httpx
 from pathlib import Path
 
-_API_BASE = os.environ.get("WIKIJS_API_URL", "") or "http://localhost:3000"
+_API_BASE = os.environ.get("WIKIJS_API_URL", "") or ""
 _API_KEY = os.environ.get("WIKIJS_API_KEY", "") or os.environ.get("WIKIJS_TOKEN", "")
 _TIMEOUT = 15
 
