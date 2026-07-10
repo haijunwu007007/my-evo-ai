@@ -903,6 +903,11 @@ async def creative_html():
     p = BASE_DIR / "frontend" / "creative.html"
     return FileResponse(str(p)) if p.exists() else HTMLResponse("<h2>创意工坊</h2>")
 
+@router.get("/channel")
+async def channel_page():
+    p = BASE_DIR / "frontend" / "channel.html"
+    return FileResponse(str(p)) if p.exists() else HTMLResponse("<h2>多渠道管理</h2>")
+
 # ── 桌面安装器 ──
 @router.get("/api/v1/installer/win")
 async def win_installer():
