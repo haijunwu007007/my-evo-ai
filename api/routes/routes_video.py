@@ -11,17 +11,20 @@ VIDEO_DIR = Path(os.path.join(os.path.dirname(__file__), "..", "data", "videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 _CONFIG = {
-    "pixelle": os.environ.get("PIXELLE_URL", "http://localhost:8501"),
-    "wan": os.environ.get("WAN_URL", ""),
-    "montage": os.environ.get("MONTAGE_URL", ""),
+    "pixelle": {"url": os.environ.get("PIXELLE_URL", "http://localhost:8501"), "label": "Pixelle 全自动视频生成", "desc": "文本描述→AI视频生成"},
+    "wan": {"url": os.environ.get("WAN_URL", "builtin"), "label": "Wan2.2 数字人视频合成", "desc": "上传图片+音频→数字人说话视频"},
+    "montage": {"url": os.environ.get("MONTAGE_URL", "builtin"), "label": "OpenMontage 智能蒙太奇剪辑", "desc": "AI智能分镜+剪辑+配音"},
 }
 
 # ---- 状态 ----
 @router.get("/status")
 async def video_status():
     engines = {}
-    for name, url in _CONFIG.items():
-        if url:
+    for name, cfg in _CONFIG.items():
+        url = cfg["url"]
+        if url == "builtin":
+            engines[name] = {"available": True, "url": "builtin"}
+        elif url:
             try:
                 r = httpx.get(url.replace("/api", "/health"), timeout=3)
                 engines[name] = {"available": True, "url": url}
@@ -29,6 +32,11 @@ async def video_status():
                 engines[name] = {"available": False, "url": url}
         else:
             engines[name] = {"available": False, "url": ""}
+    return {
+        "engines": engines,
+        "output_dir": str(VIDEO_DIR),
+        "videos": len(list(VIDEO_DIR.glob("*.*"))),
+    }
     return {
         "engines": engines,
         "output_dir": str(VIDEO_DIR),
