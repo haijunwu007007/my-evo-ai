@@ -33,12 +33,13 @@ th{color:var(--text3);font-weight:600}td{color:var(--text2)}
 .status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
 </style></head>
 <body>
+<span class="back-btn" onclick="window.location.href='/'" style="position:fixed;top:10px;right:12px;z-index:999;padding:4px 10px;border-radius:6px;cursor:pointer;color:var(--accent);border:1px solid var(--border);background:var(--card);font-size:13px;text-decoration:none">←</span>
 <div class="tabs">
   <div class="tab active" onclick="switchTab(this,'r_remote')">📱 远程执行</div>
   <div class="tab" onclick="switchTab(this,'r_claw')">🕸️ Claw</div>
   <div class="tab" onclick="switchTab(this,'r_agent')">🔌 本地代理</div>
 </div>
-<span class="back-btn" onclick="window.location.href='/'">←</span>
+
 <div id="r_remote" class="tab-content active">
 <h1>📡 远程执行</h1>
 <p class="sub">手机发指令 → 服务器自动执行 → 结果通知</p>

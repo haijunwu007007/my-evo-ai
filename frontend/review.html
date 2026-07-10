@@ -25,11 +25,12 @@ textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border
 .status.err{display:block;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
 </style></head>
 <body>
+<span class="back-btn" onclick="window.location.href='/'" style="position:fixed;top:10px;right:12px;z-index:999;padding:4px 10px;border-radius:6px;cursor:pointer;color:var(--accent);border:1px solid var(--border);background:var(--card);font-size:13px;text-decoration:none">←</span>
 <div class="tabs">
   <div class="tab active" onclick="switchTab(this,'w_review')">📝 工作流审阅</div>
   <div class="tab" onclick="switchTab(this,'w_human')">👤 人工审批</div>
 </div>
-<span class="back-btn" onclick="window.location.href='/'">←</span>
+
 <h1>👤 审阅协作</h1>
 
 <!-- Tab 1: 工作流审阅 -->
