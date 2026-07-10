@@ -7,62 +7,64 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>编排画布 - AUTO-EVO-AI V0.1</title>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<link rel="stylesheet" href="/frontend/share.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
-body{background:#fff;color:#333;display:flex;height:100vh}
-.sidebar{width:240px;background:#f5f7fa;border-right:1px solid #e0e0e0;display:flex;flex-direction:column;flex-shrink:0}
-.sidebar h2{padding:12px 14px;font-size:15px;border-bottom:1px solid #e0e0e0;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar .section{padding:6px 12px 2px;font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:flex;justify-content:space-between}
-.sidebar .section .count{color:#4361ee}
+body{background:var(--bg);color:var(--text);display:flex;height:100vh}
+.sidebar{width:240px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar h2{padding:12px 14px;font-size:15px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar .section{padding:6px 12px 2px;font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;display:flex;justify-content:space-between}
+.sidebar .section .count{color:var(--accent)}
 .node-list{overflow-y:auto;padding:4px;flex:1}
-.node-item{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:2px 6px;border-radius:6px;cursor:grab;font-size:12px;background:#fff;border:1px solid #e0e0e0;transition:all .15s}
-.node-item:hover{border-color:#4361ee;transform:translateX(3px);background:#f0f4ff}
+.node-item{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:2px 6px;border-radius:6px;cursor:grab;font-size:12px;background:var(--bg);border:1px solid var(--border);transition:all .15s}
+.node-item:hover{border-color:var(--accent);transform:translateX(3px);background:#f0f4ff}
 .node-item .icon{font-size:14px;width:20px;text-align:center}
 .node-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.node-item .desc{font-size:10px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
+.node-item .desc{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
-.toolbar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:#f5f7fa;border-bottom:1px solid #e0e0e0;flex-wrap:wrap}
-.toolbar select,.toolbar input{border:1px solid #d0d0d0;border-radius:6px;padding:5px 8px;background:#fff;color:#333;font-size:12px}
+.toolbar{display:flex;gap:6px;align-items:center;padding:6px 12px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.toolbar select,.toolbar input{border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:12px}
 .toolbar input{width:140px}
-.toolbar button{padding:5px 12px;border:none;border-radius:6px;background:#4361ee;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
+.toolbar button{padding:5px 12px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
 .toolbar button:hover{opacity:.85}
-.toolbar button.green{background:#22c55e}
-.toolbar button.red{background:#e74c3c}
-.toolbar button.orange{background:#f59e0b}
+.toolbar button.green{background:var(--accent-success)}
+.toolbar button.red{background:var(--accent-danger)}
+.toolbar button.orange{background:var(--accent-warning)}
 .toolbar .sep{border-left:1px solid #d0d0d0;height:20px;margin:0 4px}
 .canvas{flex:1;position:relative;overflow:hidden;background:#fafbfc;background-image:radial-gradient(circle,#d0d0d0 1px,transparent 1px);background-size:24px 24px}
-.canvas .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bbb;font-size:15px;text-align:center;pointer-events:none;line-height:1.8}
-.node-el{position:absolute;min-width:160px;background:#fff;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px;cursor:move;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s,opacity .15s}
-.node-el:hover{border-color:#4361ee;z-index:20;box-shadow:0 4px 20px rgba(67,97,238,.15)}
+.canvas .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--text3);font-size:15px;text-align:center;pointer-events:none;line-height:1.8}
+.node-el{position:absolute;min-width:160px;background:var(--bg);border:1.5px solid #e0e0e0;border-radius:10px;padding:10px;cursor:move;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s,opacity .15s}
+.node-el:hover{border-color:var(--accent);z-index:20;box-shadow:0 4px 20px rgba(67,97,238,.15)}
 .node-el .hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .node-el .hdr .icon{font-size:13px;width:18px;text-align:center}
 .node-el .hdr .nm{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node-el .hdr .del{font-size:11px;cursor:pointer;color:#e74c3c;opacity:.5;padding:0 2px}
 .node-el .hdr .del:hover{opacity:1}
-.node-el .sub{font-size:10px;color:#888;margin:2px 0;display:flex;gap:4px}
-.node-el .sub .tag{padding:1px 5px;border-radius:4px;background:#eef2ff;color:#4361ee;font-size:9px}
+.node-el .sub{font-size:10px;color:var(--text2);margin:2px 0;display:flex;gap:4px}
+.node-el .sub .tag{padding:1px 5px;border-radius:4px;background:#eef2ff;color:var(--accent);font-size:9px}
 .port{position:absolute;width:12px;height:12px;border-radius:50%;cursor:crosshair;z-index:5;transition:transform .15s,box-shadow .15s}
 .port:hover{transform:scale(1.4);box-shadow:0 0 8px rgba(67,97,238,.5)}
-.port-out{right:-7px;top:50%;transform:translateY(-50%);background:#4361ee}
+.port-out{right:-7px;top:50%;transform:translateY(-50%);background:var(--accent)}
 .port-out:hover{transform:translateY(-50%) scale(1.3)}
 .port-in{left:-7px;top:50%;transform:translateY(-50%);background:#00b894}
 .port-in:hover{transform:translateY(-50%) scale(1.3)}
-.port-true{right:-7px;top:30%;background:#22c55e}
-.port-false{right:-7px;top:70%;background:#e74c3c}
+.port-true{right:-7px;top:30%;background:var(--accent-success)}
+.port-false{right:-7px;top:70%;background:var(--accent-danger)}
 .cond-true{border-left:3px solid #22c55e;background:#f0fdf4}
 .cond-false{border-left:3px solid #e74c3c;background:#fef2f2}
 .subflow-node{border-color:#f59e0b;background:#fffcf0}
 .subflow-node:hover{border-color:#f59e0b}
 .nlp-node{border-color:#a855f7;background:#faf5ff}
 .nlp-node:hover{border-color:#a855f7}
-.prop-panel{position:absolute;right:12px;top:12px;width:240px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:14px;display:none;z-index:30;box-shadow:0 8px 32px rgba(0,0,0,.12)}
-.prop-panel h3{font-size:13px;margin-bottom:6px;color:#4361ee}
-.prop-panel label{font-size:11px;color:#888;display:block;margin:5px 0 2px}
-.prop-panel input,.prop-panel select,.prop-panel textarea{width:100%;padding:5px 7px;border-radius:4px;border:1px solid #d0d0d0;background:#fafbfc;color:#333;font-size:11px}
+.prop-panel{position:absolute;right:12px;top:12px;width:240px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;display:none;z-index:30;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.prop-panel h3{font-size:13px;margin-bottom:6px;color:var(--accent)}
+.prop-panel label{font-size:11px;color:var(--text2);display:block;margin:5px 0 2px}
+.prop-panel input,.prop-panel select,.prop-panel textarea{width:100%;padding:5px 7px;border-radius:4px;border:1px solid var(--border);background:#fafbfc;color:var(--text);font-size:11px}
 .prop-panel textarea{resize:vertical;min-height:36px;font-family:monospace}
 .prop-panel button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-size:11px;margin:3px 2px}
-.nlp-input{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;background:#fff;border:1.5px solid #a855f7;border-radius:12px;padding:8px 14px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 24px rgba(168,85,247,.12);min-width:360px;max-width:560px}
-.nlp-input textarea{border:none;background:transparent;color:#333;font-size:12px;resize:none;flex:1;min-height:20px;max-height:60px;outline:none;font-family:inherit}
+.nlp-input{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;background:var(--bg);border:1.5px solid #a855f7;border-radius:12px;padding:8px 14px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 24px rgba(168,85,247,.12);min-width:360px;max-width:560px}
+.nlp-input textarea{border:none;background:transparent;color:var(--text);font-size:12px;resize:none;flex:1;min-height:20px;max-height:60px;outline:none;font-family:inherit}
 .nlp-input textarea::placeholder{color:#aaa}
 .nlp-input button{padding:5px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#a855f7,#4361ee);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
 .nlp-input button:hover{opacity:.9}
@@ -103,8 +105,8 @@ body{flex-direction:column}
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
 <div class="sidebar" id="sidebar">
-  <div class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" style="display:none;position:absolute;right:-36px;top:10px;width:32px;height:32px;background:#fff;border:1px solid #e0e0e0;border-radius:0 6px 6px 0;cursor:pointer;align-items:center;justify-content:center;font-size:16px;z-index:101;box-shadow:2px 0 8px rgba(0,0,0,.08)">☰</div>
-  <h2>🎨 编排画布 <span style="font-size:11px;-webkit-text-fill-color:#888">增强版</span></h2>
+  <div class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" style="display:none;position:absolute;right:-36px;top:10px;width:32px;height:32px;background:var(--bg);border:1px solid var(--border);border-radius:0 6px 6px 0;cursor:pointer;align-items:center;justify-content:center;font-size:16px;z-index:101;box-shadow:2px 0 8px rgba(0,0,0,.08)">☰</div>
+  <h2>🎨 编排画布 <span style="font-size:11px;-webkit-text-fill-color:var(--text2)">增强版</span></h2>
   <div class="section">特殊节点 <span class="count" id="specialCount">0</span></div>
   <div class="node-list">
     <div class="node-item" onclick="addNode('condition','🔀')"><span class="icon">🔀</span><span class="nm">条件分支</span><span class="desc">if/else 两个输出</span></div>
@@ -135,7 +137,9 @@ body{flex-direction:column}
     <div class="sep"></div>
     <button onclick="autoLayout()">🔁 布局</button>
     <button class="red" onclick="clearCanvas()">🗑️ 清空</button>
-    <span style="color:#8892b0;font-size:11px;margin-left:auto">🟢 画布底部可自然语言输入</span>
+    <span class="sep"></span>
+    <button onclick="toggleTheme()" style="background:var(--accent);color:#fff;padding:5px 10px;border:none;border-radius:6px;cursor:pointer;font-size:12px">🌙</button>
+    <span style="color:var(--text3);font-size:11px;margin-left:auto">🟢 画布底部可自然语言输入</span>
   </div>
   <div class="canvas" id="canvas" ondrop="onDrop(event)" ondragover="event.preventDefault()">
     <div class="hint" id="hint">⬇️ 从左侧拖入或点击添加节点<br>🔀 条件分支 / 📦 子流程 / 🧠 AI节点<br>📝 在底部输入自然语言生成流程</div>
@@ -148,6 +152,8 @@ body{flex-direction:column}
   <div class="prop-panel" id="propPanel"></div>
 </div>
 <script>
+function toggleTheme(){document.body.classList.toggle('dark');localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}
+(function(){var t=localStorage.getItem('evo_theme');if(t==='dark')document.body.classList.add('dark')})()
 var NODES={}, EDGES=[], NODE_COUNTER=0, canv=document.getElementById('canvas'), COMBO_ITEMS={}
 // 撤销/重做
 var UNDO_STACK=[], REDO_STACK=[], UNDO_MAX=50
@@ -314,7 +320,7 @@ function showProps(id){
     (n.type=='subflow'?'<label>关联组合ID</label><input id="pSubflow" value="'+(n.meta?.compose_id||'')+'" placeholder="输入组合ID" onchange="setMeta(\''+id+'\',\'compose_id\',this.value)">':'')+
     (n.type=='nlp'?'<label>AI提示词</label><textarea id="pNlpPrompt" placeholder="处理逻辑描述" onchange="setMeta(\''+id+'\',\'prompt\',this.value)">'+(n.meta?.prompt||'')+'</textarea>':'')+
     '<label>位置</label><div style="font-size:11px;color:#8892b0">x: '+n.x+' y: '+n.y+'</div>'+
-    '<button onclick="document.getElementById(\'propPanel\').style.display=\'none\'" style="background:#4361ee;color:#fff;width:100%">关闭</button>';
+    '<button onclick="document.getElementById(\'propPanel\').style.display=\'none\'" style="background:var(--accent);color:#fff;width:100%">关闭</button>';
   p.style.display='block'
 }
 function updateNodeLabel(id){var n=NODES[id];if(n){var e=n.el.querySelector('.nm');if(e)e.textContent=n.name}}
