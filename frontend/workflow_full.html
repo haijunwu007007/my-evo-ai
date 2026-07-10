@@ -9,7 +9,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
-.back-btn{position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)}
+.back-btn{display:inline-flex;align-items:center;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;cursor:pointer;text-decoration:none}
 .back-btn:hover{background:var(--bg)}
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)}
 .toolbar h2{font-size:16px;margin-right:20px;color:var(--accent)}
@@ -54,8 +54,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:768px){
   body{overflow-y:auto}
-  .back-btn{top:6px!important;left:6px!important;font-size:12px!important;padding:4px 10px!important;z-index:1001!important}
-  .toolbar{flex-wrap:wrap!important;gap:4px!important;padding:8px 6px!important;padding-top:36px!important}
+  .back-btn{font-size:12px!important;padding:4px 10px!important}
+  .toolbar{flex-wrap:wrap!important;gap:4px!important;padding:8px 6px!important}
   .toolbar h2{font-size:14px!important;margin-right:8px!important;width:100%!important}
   .toolbar button{font-size:11px!important;padding:4px 8px!important;min-height:34px!important;touch-action:manipulation!important}
   .toolbar input{width:100px!important;font-size:13px!important}
