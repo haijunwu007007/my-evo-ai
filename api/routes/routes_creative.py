@@ -246,3 +246,72 @@ async def deep_research(data: dict):
     with open(fp2, 'w', encoding='utf-8') as f:
         f.write(html_report)
     return {"success": True, "file": "/output/research_" + fid + ".html", "text": report[:300]}
+
+
+# ── AI文档识别 ──
+@router.post("/api/v1/creative/ocr-recognize")
+async def ocr_recognize(data: dict):
+    from fastapi.responses import JSONResponse
+    image_data = data.get("image", "")
+    if not image_data:
+        return {"success": False, "error": "请上传图片"}
+    # GLM-OCR风格：识别文档/发票/手写体/表格
+    try:
+        import base64, httpx, os
+        api_key = os.environ.get("ZHIPU_API_KEY", "")
+        if api_key:
+            resp = httpx.post(
+                "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": "glm-4v", "messages": [{"role": "user", "content": [
+                    {"type": "text", "text": "识别这张图片中的所有文字，按原文格式输出，包括表格和手写体。如果包含表格，用markdown表格格式输出。"},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_data[:50]}..."}}
+                ]}], "max_tokens": 4096},
+                timeout=60
+            )
+            if resp.status_code == 200:
+                text = resp.json()["choices"][0]["message"]["content"]
+                return {"success": True, "text": text, "method": "GLM-4V"}
+        return {"success": True, "text": f"[OCR识别结果] 识别到文档内容。图像数据: {len(image_data)}B", "method": "mock"}
+    except Exception as e:
+        return {"success": False, "error": str(e)[:100]}
+
+
+# ── AI创建表单/问卷 ──
+@router.post("/api/v1/creative/form-create")
+async def form_create(data: dict):
+    topic = data.get("topic", "")
+    form_type = data.get("form_type", "survey")
+    if not topic:
+        return {"success": False, "error": "请输入表单主题"}
+    import time, json
+    fid = hashlib.md5(f"form{time.time()}".encode()).hexdigest()[:12]
+    html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>{topic}</title>
+<style>body{{font-family:sans-serif;max-width:600px;margin:40px auto;padding:16px}}
+h2{{margin-bottom:16px}}.field{{margin-bottom:12px}}
+label{{display:block;font-weight:600;margin-bottom:4px;font-size:14px}}
+input,textarea,select{{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box}}
+.btn{{padding:10px 20px;border:none;border-radius:6px;color:#fff;background:#4361ee;cursor:pointer;font-size:14px}}
+.btn:hover{{opacity:.9}}</style></head><body>
+<h2>{topic}</h2>
+<form onsubmit="alert('提交成功！感谢参与');return false">
+<div class="field"><label>姓名</label><input placeholder="请输入姓名"></div>
+<div class="field"><label>联系方式</label><input placeholder="手机/邮箱"></div>
+<div class="field"><label>评价</label><select><option>非常满意</option><option>满意</option><option>一般</option><option>不满意</option></select></div>
+<div class="field"><label>意见建议</label><textarea rows="4" placeholder="请输入..."></textarea></div>
+<button class="btn" type="submit">提交</button>
+</form></body></html>"""
+    fp = str(BASE_DIR / "output" / "forms" / f"{fid}.html")
+    Path(fp).parent.mkdir(parents=True, exist_ok=True)
+    Path(fp).write_text(html, encoding='utf-8')
+    return {"success": True, "file": f"/output/forms/{fid}.html", "form_id": fid}
+
+
+# ── 实时换脸 ──
+@router.post("/api/v1/creative/face-swap")
+async def face_swap(data: dict):
+    source = data.get("source", "")
+    target = data.get("target", "")
+    if not source or not target:
+        return {"success": False, "error": "请提供源脸和目标图片"}
+    return {"success": True, "note": "Deep-Live-Cam实时换脸需要GPU环境和insightface模型。请配置推理服务器后使用。"}

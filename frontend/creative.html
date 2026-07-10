@@ -30,6 +30,9 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
   <div class="tab" onclick="switchTab('sitegen')">🚀 生成网站</div>
   <div class="tab" onclick="switchTab('designedit')">🎨 设计生成</div>
   <div class="tab" onclick="switchTab('research')">🧠 深度研究</div>
+  <div class="tab" onclick="switchTab('ocr')">📄 文档识别</div>
+  <div class="tab" onclick="switchTab('form')">📋 创建表单</div>
+  <div class="tab" onclick="switchTab('face')">🎭 实时换脸</div>
 </div>
 
 <!-- 1 TOON -->
@@ -80,6 +83,25 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
   <select id="deType"><option>网页</option><option>移动App</option><option>仪表盘</option><option>表单</option></select>
   <textarea id="deInput" rows="3" placeholder="深色主题仪表盘，左侧菜单..."></textarea>
   <button class="btn" onclick="deRun()">🎨 生成</button><div id="deRes" style="margin-top:8px"></div></div></div>
+
+<!-- 10 OCR识别 -->
+<div id="panel-ocr" class="panel">
+  <div class="card"><h3>📄 AI文档识别</h3><p class="hint">上传图片→AI识别文字/表格/手写体/印章</p>
+  <input type="file" id="ocrFile" accept="image/*" onchange="ocrRun()">
+  <div id="ocrRes" style="margin-top:8px;font-size:13px"></div></div></div>
+
+<!-- 11 表单创建 -->
+<div id="panel-form" class="panel">
+  <div class="card"><h3>📋 AI创建表单</h3><p class="hint">描述→AI生成表单问卷</p>
+  <select id="formType"><option value="survey">问卷调查</option><option value="feedback">意见反馈</option><option value="register">报名登记</option></select>
+  <textarea id="fmInput" rows=3 placeholder="例如：客户满意度调查..."></textarea>
+  <button class="btn" onclick="fmRun()">📋 生成</button><div id="fmRes" style="margin-top:8px"></div></div></div>
+
+<!-- 12 换脸 -->
+<div id="panel-face" class="panel">
+  <div class="card"><h3>🎭 AI实时换脸</h3><p class="hint">上传源脸→换到目标图片上</p>
+  <p style="font-size:12px;color:var(--text3)">需要GPU服务器配置insightface模型后使用，当前为预览版</p>
+  <div id="faceRes" style="margin-top:8px;font-size:13px;color:var(--text3)">⏳ 功能待配置GPU环境</div></div></div>
 
 <!-- 9 深度研究 -->
 <div id="panel-research" class="panel">
@@ -189,6 +211,32 @@ async function deRun(){
   }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
 }
 // 深度研究
+// OCR
+async function ocrRun(){
+  var f=document.getElementById('ocrFile').files[0];var el=document.getElementById('ocrRes')
+  if(!f){el.innerHTML='请选择图片';return}
+  el.innerHTML='⏳ 识别中...'
+  try{
+    var fd=new FormData();fd.append('file',f)
+    var r=await fetch('/api/v1/creative/ocr-recognize',{method:'POST',body:fd})
+    var d=await r.json()
+    if(d.success) el.innerHTML='<div style="color:#10b981">✅ 识别完成</div><pre style="max-height:200px">'+d.text.slice(0,2000)+'</pre>'
+    else el.innerHTML='<div style="color:#ef4444">'+d.error+'</div>'
+  }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
+}
+// 创建表单
+async function fmRun(){
+  var v=document.getElementById('fmInput').value;var el=document.getElementById('fmRes')
+  if(!v){alert('请描述');return}
+  var t=document.getElementById('formType').value
+  el.innerHTML='⏳ 生成中...'
+  try{
+    var r=await fetch('/api/v1/creative/form-create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:v,form_type:t})})
+    var d=await r.json()
+    if(d.success) el.innerHTML='<div style="color:#10b981">✅ 已生成</div><iframe src="'+d.file+'" style="width:100%;height:400px;border:1px solid var(--border);border-radius:8px;margin-top:8px"></iframe>'
+    else el.innerHTML='<div style="color:#ef4444">'+d.error+'</div>'
+  }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
+}
 async function rsRun(){
   var v=document.getElementById('rsInput').value;var el=document.getElementById('rsRes')
   if(!v){alert('请输入主题');return}
