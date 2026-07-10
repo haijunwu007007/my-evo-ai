@@ -393,6 +393,25 @@ async def _execute_action(msg: str) -> str | None:
     import httpx
     lower = msg.lower()
     
+    # ── n8n工作流模板搜索 ──
+    if any(kw in msg for kw in ["n8n", "工作流模板", "n8n模板", "自动化工作流", "workflow"]):
+        try:
+            async with httpx.AsyncClient(timeout=10) as c:
+                r = await c.get(f"{_API_BASE}/api/v1/n8n/search?q={urllib.parse.quote(msg[:60])}&limit=5")
+                if r.status_code == 200:
+                    data = r.json()
+                    if data.get("success") and data.get("workflows"):
+                        ws = data["workflows"]
+                        h = f"🔍 找到 {data.get('total',len(ws))} 个n8n工作流模板:\n\n"
+                        for w in ws[:5]:
+                            tags = " ".join(w.get("tags",[])) or ""
+                            h += f"- **{w.get('name','?')}** {tags}\n  {w.get('description','')[:80]}\n  [查看详情](/n8n-browse?id={w.get('id','')})\n\n"
+                        return h
+                    else:
+                        return "ℹ️ 未找到匹配的n8n工作流模板，试试更具体的关键词"
+        except Exception as e:
+            pass  # 降级
+    
     # ── 模块自动路由：输入模块名→自动调用 ──
     mod_name = _find_module_in_text(msg)
     if mod_name:
