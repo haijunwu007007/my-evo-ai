@@ -9,39 +9,39 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
-.back-btn{position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:#fff;font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)}
-.back-btn:hover{background:rgba(255,255,255,.15)}
-.toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid #2a2a4a}
+.back-btn{position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)}
+.back-btn:hover{background:var(--bg)}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)}
 .toolbar h2{font-size:16px;margin-right:20px;color:var(--accent)}
 .toolbar button{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px}
 .toolbar input{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;width:200px}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-danger{background:var(--accent);color:#fff}
-.btn-secondary{background:var(--card);color:var(--text)}
-.container{display:flex;height:calc(100vh-52px)}
-.palette{width:200px;background:var(--card);border-right:1px solid #2a2a4a;padding:12px;overflow-y:auto}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.container{display:flex;height:calc(100vh - 52px)}
+.palette{width:200px;background:var(--card);border-right:1px solid var(--border);padding:12px;overflow-y:auto;flex-shrink:0}
 .palette h3{font-size:13px;color:var(--text2);margin-bottom:10px}
 .palette-item{padding:8px 10px;margin-bottom:4px;border-radius:6px;cursor:grab;font-size:13px;border:1px solid transparent;user-select:none}
 .palette-item:hover{border-color:var(--accent);background:rgba(67,97,238,0.1)}
 .palette-item:active{cursor:grabbing;opacity:0.7}
-.canvas-area{flex:1;position:relative;overflow:hidden;background:#1a1a2e}
+.canvas-area{flex:1;position:relative;overflow:hidden;background:var(--bg)}
 .canvas-svg{width:100%;height:100%}
-.node{position:absolute;cursor:move;min-width:140px;border-radius:12px;border:2px solid;padding:10px;background:rgba(22,33,62,0.95);box-shadow:0 4px 20px rgba(0,0,0,0.3);user-select:none;z-index:10}
+.node{position:absolute;cursor:move;min-width:140px;border-radius:12px;border:2px solid;padding:10px;background:var(--card);box-shadow:0 4px 20px rgba(0,0,0,0.3);user-select:none;z-index:10}
 .node:hover{box-shadow:0 6px 30px rgba(0,0,0,0.5)}
 .node.selected{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(67,97,238,0.3)}
 .node-header{font-size:12px;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between}
 .node-body{font-size:11px;color:var(--text3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.node-port{position:absolute;width:12px;height:12px;border-radius:50%;background:#4361ee;border:2px solid #1a1a2e;cursor:crosshair;z-index:20}
+.node-port{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--border);cursor:crosshair;z-index:20}
 .node-port:hover{background:#6c8cff;transform:scale(1.3)}
 .port-out{right:-7px;top:50%;transform:translateY(-50%)}
 .port-in{left:-7px;top:50%;transform:translateY(-50%)}
-.edge-line{stroke:#4361ee;stroke-width:2;fill:none;stroke-dasharray:5,3}
+.edge-line{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:5,3}
 .edge-line.active{stroke-dasharray:none;opacity:0.8}
-.edge-label{font-size:10px;fill:#888}
+.edge-label{font-size:10px;fill:var(--text3)}
 .minimap{position:absolute;bottom:16px;right:16px;width:180px;height:120px;background:rgba(22,33,62,0.9);border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center}
 .modal.active{display:flex}
-.modal-content{background:#1e2a4a;border-radius:16px;padding:24px;min-width:400px;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal-content{background:var(--card);border-radius:16px;padding:24px;min-width:400px;max-width:600px;max-height:80vh;overflow-y:auto}
 .modal-content h3{margin-bottom:16px}
 .modal-content label{display:block;font-size:13px;color:var(--text3);margin:10px 0 4px}
 .modal-content input,.modal-content textarea,.modal-content select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px}
@@ -60,7 +60,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .toolbar button{font-size:11px!important;padding:4px 8px!important;min-height:34px!important;touch-action:manipulation!important}
   .toolbar input{width:100px!important;font-size:13px!important}
   .container{flex-direction:column!important;height:auto!important;min-height:calc(100vh - 110px)!important}
-  .palette{width:100%!important;max-height:120px!important;overflow-y:auto!important;border-right:none!important;border-bottom:1px solid #2a2a4a!important;padding:6px 8px!important}
+  .palette{width:100%!important;max-height:120px!important;overflow-y:auto!important;border-right:none!important;border-bottom:1px solid var(--border)!important;padding:6px 8px!important}
   .palette-item{padding:6px 8px!important;font-size:12px!important;min-height:36px!important;touch-action:manipulation!important}
   .canvas-area{min-height:60vh!important}
   .minimap{display:none!important}
@@ -75,8 +75,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   [onclick],button,a,.palette-item,.back-btn,.exec-btn{cursor:pointer!important;-webkit-tap-highlight-color:rgba(67,97,238,.3)!important;touch-action:manipulation!important}
 }
 </style></head>
-<body class="theme-auto">
-<a class="back-btn" href="/" style="position:fixed;top:10px;left:10px;z-index:999;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:#fff;font-size:14px;cursor:pointer;text-decoration:none;backdrop-filter:blur(4px)">⬅ 返回</a>
+<body>
+<span class="back-btn" onclick="window.location.href='/'">←</span>
 <div class="toolbar">
   <h2>🎨 Workflow</h2>
   <input id="wfName" placeholder="Workflow 名称" value="未命名流程">
@@ -84,12 +84,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <button class="btn-secondary" onclick="loadWF()">📂 加载</button>
   <button class="btn-primary" onclick="runWF()">▶ 运行</button>
   <button class="btn-danger" onclick="clearWF()">🗑 清空</button>
-  <button class="btn-secondary" onclick="document.getElementById('modalRerank').classList.add('active')">🔍 Rerank</button>
+  <button class="btn-secondary" onclick="document.getElementById('modalRerank').classList.add('active')">🔍 重排</button>
   <button class="btn-secondary" onclick="document.getElementById('modalSelfHeal').classList.add('active')">🧬 自进化</button>
   <button class="btn-secondary" onclick="window.open('/n8n','_blank')">🔄 n8n工作流</button>
   <button class="btn-secondary" onclick="document.getElementById('modalConnectors').classList.add('active')">🔌 连接器</button>
   <button class="btn-secondary" onclick="document.getElementById('modalMCP').classList.add('active')">🤝 MCP</button>
-  <span style="font-size:11px;color:#666;margin-left:auto" id="statusBar">就绪</span>
+  <span style="font-size:11px;color:var(--text3);margin-left:auto" id="statusBar">就绪</span>
 </div>
 <div class="container">
   <div class="palette" id="palette"></div>
@@ -99,13 +99,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- Rerank 弹窗 -->
 <div class="modal" id="modalRerank">
 <div class="modal-content">
-  <h3>🔍 Rerank Pipeline</h3>
+  <h3>🔍 重排 Pipeline</h3>
   <p style="font-size:12px;color:var(--text3);margin-bottom:12px">基于查询对候选文档重排序，提升搜索精度</p>
   <label>查询</label><input id="rrQuery" placeholder="输入搜索查询">
   <label>候选文档 (每行一条)</label>
   <textarea id="rrDocs" rows="5" placeholder="文档1标题|文档1内容\n文档2标题|文档2内容"></textarea>
   <div class="modal-actions">
-    <button class="btn-primary" onclick="doRerank()">🔍 执行 Rerank</button>
+    <button class="btn-primary" onclick="doRerank()">🔍 执行重排</button>
     <button class="btn-secondary" onclick="document.getElementById('modalRerank').classList.remove('active')">关闭</button>
   </div>
   <div id="rrResult" style="margin-top:12px;font-size:12px"></div>
@@ -183,10 +183,8 @@ Object.entries(NODE_TYPES).forEach(([type,def])=>{
   el.textContent = def.label;
   el.style.borderLeftColor = def.color;
   el.draggable = true;
-  el.ondragstart = (e)=>{
-    e.dataTransfer.setData('text/plain', type);
-    e.dataTransfer.effectAllowed = 'copy';
-  };
+  el.ondragstart = (e)=>{e.dataTransfer.setData('text/plain', type);e.dataTransfer.effectAllowed = 'copy'};
+  el.onclick = ()=>{const id='n'+Date.now();NODES[id]={type,x:100+Object.keys(NODES).length*30,y:100+Object.keys(NODES).length*40,label:def.label,config:{}};render()};
   pal.appendChild(el);
 });
 
