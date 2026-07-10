@@ -375,8 +375,8 @@ async def execute_connector(name: str, req: ConnectorExec):
             resp = httpx.get(f"{api_base.replace('/v1','').replace('/v2','').replace('/v3','')}", timeout=5)
             if resp.status_code in (200, 401, 403):
                 return {"success": True, "result": f"已连接到 {conn.get('name','')} API (HTTP {resp.status_code})"}
-    except Exception:
-            pass
+    except Exception as _ex:
+            logger.warning(f"[routes_connectors]" + str(_ex)[:80])
     
     return {"success": True, "result": {
         "note": f"连接器 '{conn.get('name','')}' 已就绪。配置认证后即可使用。",

@@ -46,7 +46,7 @@ def _scan_external_skills():
                         stars = meta.get("stars", 0)
                         category = meta.get("category", "")
                     except Exception as _e:
-            logger.warning(f"[AgentEngine] 操作异常: {_e}")
+                        logger.warning(f"[AgentEngine] 操作异常: {_e}")
                 desc = ""
                 for line in md_content.splitlines():
                     line = line.strip()
@@ -68,8 +68,8 @@ def _scan_external_skills():
 
 try:
     _SKILL_CATALOG = _scan_external_skills()
-except Exception:
-    pass
+except Exception as _ex:
+    logger.warning(f"[routes_agent_engine]" + str(_ex)[:80])
 
 # ═══════════════════════════════════════════════════════
 # SQLite持久化任务存储（替代内存dict）
@@ -276,8 +276,8 @@ async def agent_run(req: AgentRunRequest):
                 arr_match = re.search(r'\[.*?\]', plan_data, re.DOTALL)
                 if arr_match:
                     steps = json.loads(arr_match.group())
-            except Exception:
-                pass
+            except Exception as _ex:
+                logger.warning(f"[routes_agent_engine]" + str(_ex)[:80])
 
         if not steps:
             steps = [{"step": 1, "tool": "search", "action": f"搜索关于'{task}'的信息"},
@@ -348,8 +348,8 @@ async def _execute_step(tool: str, action: str, original_task: str) -> str:
                             result = data.get("result", "")
                             if result:
                                 return result[:3000]
-            except Exception:
-                pass
+            except Exception as _ex:
+                logger.warning(f"[routes_agent_engine]" + str(_ex)[:80])
 
     # 降级：注入 SKILL.md 让 LLM 自主执行
     for skill in _SKILL_CATALOG:
@@ -435,8 +435,8 @@ async def agent_schedule(req: AgentScheduleRequest):
         scheds.append({"task_id": task_id, "task": req.task, "cron": req.schedule,
                        "notify_channel": req.notify_channel or "console", "created_at": now})
         sched_path.write_text(yaml.dump(scheds, allow_unicode=True, default_flow_style=False), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as _ex:
+        logger.warning(f"[routes_agent_engine]" + str(_ex)[:80])
     return {"success": True, "task_id": task_id, "status": "scheduled",
             "schedule": req.schedule}
 
@@ -456,5 +456,5 @@ try:
     unfinished = [t for t in pending if t.get("status") in ("pending", "starting", "running", "scheduled")]
     if unfinished:
         logger.info(f"[AgentDB] 恢复 {len(unfinished)} 个未完成任务")
-except Exception:
-    pass
+except Exception as _ex:
+    logger.warning(f"[routes_agent_engine]" + str(_ex)[:80])

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+import logging
+logger = logging.getLogger("evo.daemon_modules")
 AUTO-EVO-AI V0.1 守护进程模块集
 实现162个守护进程相关模块
 """

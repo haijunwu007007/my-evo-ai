@@ -315,8 +315,8 @@ async def get_module_detail_api(name: str):
     doc = ""
     try:
         doc = inspect.getdoc(mod if not inspect.ismodule(mod) else type(mod)) or ""
-    except Exception:
-        pass
+    except Exception as _ex:
+        logger.warning(f"[routes_modules]" + str(_ex)[:80])
 
     return {
         "success": True, "name": name, "class": cls_name,

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+import logging
+logger = logging.getLogger("evo.unified_registry")
 AUTO-EVO-AI V0.1 统一模块注册中心
 所有400个模块的集中注册、调度和协调
 """

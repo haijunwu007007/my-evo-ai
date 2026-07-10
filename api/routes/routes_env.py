@@ -85,8 +85,8 @@ async def set_setting(req: SetSettingRequest):
         if not found:
             lines.append(f"{req.key}={req.value}")
         ENV_FILE.write_text("\n".join(lines), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as _ex:
+        logger.warning(f"[routes_env]" + str(_ex)[:80])
     # 写入当前进程环境
     os.environ[req.key] = req.value
     return {"success": True, "result": f"✅ {req.key} 已配置"}

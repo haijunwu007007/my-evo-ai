@@ -675,15 +675,15 @@ async def _execute_replay(session_id: str, recordings: list):
                             # try by text
                             try:
                                 await engine._page.click(f"text={selector}", timeout=5000)
-                            except Exception:
-                                pass
+                            except Exception as _ex:
+                                logger.warning(f"[routes_learn]" + str(_ex)[:80])
                     await asyncio.sleep(1)
                 elif action == "fill":
                     if engine._page and selector:
                         try:
                             await engine._page.fill(selector, value, timeout=5000)
-                        except Exception:
-                            pass
+                        except Exception as _ex:
+                            logger.warning(f"[routes_learn]" + str(_ex)[:80])
                     await asyncio.sleep(0.5)
                 elif action == "screenshot":
                     if hasattr(engine, 'screenshot'):

@@ -18,8 +18,8 @@ async def code_server_status():
         import urllib.request
         r = urllib.request.urlopen(f"{CODE_SERVER_BASE}/healthz", timeout=2)
         healthy = r.status == 200
-    except Exception:
-        pass
+    except Exception as _ex:
+        logger.warning(f"[routes_code_server]" + str(_ex)[:80])
     return {
         "name": "Code-Server",
         "stars": "70k+",

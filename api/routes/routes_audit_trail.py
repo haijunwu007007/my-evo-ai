@@ -42,8 +42,8 @@ def _cleanup_old():
         conn.execute("DELETE FROM audit_logs WHERE created_at < ?", (cutoff,))
         conn.commit()
         conn.close()
-    except Exception:
-        pass
+    except Exception as _ex:
+        logger.warning(f"[routes_audit_trail]" + str(_ex)[:80])
 
 class AuditLogInput(BaseModel):
     user: str = "system"; action: str; target: str = ""; detail: str = ""; status: str = "success"; ip: str = ""

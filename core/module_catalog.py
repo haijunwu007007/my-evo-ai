@@ -1,4 +1,6 @@
 """模块RAG索引 — 457模块建可搜索目录"""
+import logging
+logger = logging.getLogger("evo.module_catalog")
 import os, json, ast, re
 from pathlib import Path
 from typing import Dict, List

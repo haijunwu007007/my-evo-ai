@@ -178,8 +178,8 @@ def _scan_external_skills():
         d_ws = Path("./.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
-    except Exception:
-            pass
+    except Exception as _ex:
+            logger.warning(f"[routes_skills]" + str(_ex)[:80])
 
     found = 0
     for ext_dir in ext_dirs:
@@ -370,8 +370,8 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
                     elapsed = time.time() - start
                     _log_execution(name, result.get("success", False), elapsed)
                     return {"success": result.get("success", False), "result": result.get("content", ""), "execution_time": round(elapsed, 3)}
-                except Exception:
-                    pass
+                except Exception as _ex:
+                    logger.warning(f"[routes_skills]" + str(_ex)[:80])
 
         # 3) 有 endpoint → HTTP 调用
         if skill.endpoint and not skill.endpoint.startswith("mcp://"):
@@ -396,8 +396,8 @@ async def execute_skill(name: str, req: SkillExecuteRequest):
                     elapsed = time.time() - start
                     _log_execution(name, True, elapsed)
                     return {"success": True, "result": content, "execution_time": round(elapsed, 3), "mode": "llm_fallback"}
-            except Exception:
-                pass
+            except Exception as _ex:
+                logger.warning(f"[routes_skills]" + str(_ex)[:80])
 
         # 5) 降级：描述模式
         elapsed = time.time() - start
@@ -435,8 +435,8 @@ async def import_skill_from_workbuddy(name: str):
         d_ws = Path("./.workbuddy/skills")
         if d_ws.exists():
             ext_dirs.append(d_ws)
-    except Exception:
-            pass
+    except Exception as _ex:
+            logger.warning(f"[routes_skills]" + str(_ex)[:80])
 
     found_dir = None
     for ext_dir in ext_dirs:

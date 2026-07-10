@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+import logging
+logger = logging.getLogger("evo.modules_loader")
 AUTO-EVO-AI V0.1 独立模块加载器
 动态加载 modules/ 目录下的所有功能模块
 """

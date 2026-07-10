@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+import logging
+logger = logging.getLogger("evo.extension_modules")
 AUTO-EVO-AI V0.1 扩展模块集
 继续实现剩余的核心模块
 """
