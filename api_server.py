@@ -323,13 +323,18 @@ async def get_version():
 
 @app.get("/{path:path}")
 async def serve_static_html(path: str):
-    """兜底：frontend/ 下的任意 .html 文件自动可访问"""
+    """兜底：frontend/ 下的任意 .html 文件自动可访问（含无.html后缀的短路径）"""
     from fastapi.responses import FileResponse
     from api.infra import BASE_DIR
-    if path.endswith(".html"):
-        fp = BASE_DIR / "frontend" / path
-        if fp.exists() and fp.is_file():
-            return FileResponse(str(fp))
+    # 尝试精确路径
+    fp = BASE_DIR / "frontend" / path
+    if fp.exists() and fp.is_file():
+        return FileResponse(str(fp))
+    # 尝试追加.html
+    if not path.endswith(".html") and "/" not in path:
+        fp2 = BASE_DIR / "frontend" / f"{path}.html"
+        if fp2.exists():
+            return FileResponse(str(fp2))
     from fastapi import HTTPException
     raise HTTPException(status_code=404, detail="Not Found")
 
