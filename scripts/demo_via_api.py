@@ -41,9 +41,9 @@ def api_get(path):
 
 
 def print_header(title):
-    print("\n" + "=" * 60)
-    print("  " + title)
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("  " + title))
+    logger.info("=" * 60))
 
 
 def print_status(step, ok, detail=""):
@@ -51,11 +51,11 @@ def print_status(step, ok, detail=""):
     line = "  %s %s" % (icon, step)
     if detail:
         line += " | %s" % detail
-    print(line)
+    logger.info(line))
 
 
 print_header("AUTO-EVO-AI V0.1 全流程 Demo (API版)")
-print("  API: %s" % API_BASE)
+logger.info("  API: %s" % API_BASE))
 
 # 步骤1: 模块发现
 print_header("步骤1: 模块自动发现")
@@ -85,7 +85,7 @@ if ok:
     if groups:
         sorted_items = sorted(groups.items(), key=lambda x: -x[1])[:8]
         for g, c in sorted_items:
-            print("    %s: %s" % (g, c))
+            logger.info("    %s: %s" % (g, c)))
 else:
     print_status("注册表统计", False, r.get("error", ""))
 
@@ -99,7 +99,7 @@ if ok:
     print_status("分组统计", True, "%d 个分组, %d 个模块" % (len(groups), total))
     sorted_g = sorted(groups.items(), key=lambda x: -len(x[1]))[:6]
     for g, mods in sorted_g:
-        print("    %s: %d 模块" % (g, len(mods)))
+        logger.info("    %s: %d 模块" % (g, len(mods))))
 else:
     print_status("分组统计", False, r.get("error", ""))
 
@@ -152,10 +152,10 @@ if ok:
         if isinstance(mods, list) and len(mods) > 0 and isinstance(mods[0], dict):
             mods = [s.get("module_id","?") for s in mods]
         dur = h.get("total_duration_ms", 0)
-        print("    %s %s %s %.0fms" % (hid, status, mods, dur))
+        logger.info("    %s %s %s %.0fms" % (hid, status, mods, dur)))
 else:
     print_status("执行历史", False, r.get("error", ""))
 
-print("\n" + "=" * 60)
-print("  Demo 完成!")
-print("=" * 60)
+logger.info("\n" + "=" * 60))
+logger.info("  Demo 完成!"))
+logger.info("=" * 60))

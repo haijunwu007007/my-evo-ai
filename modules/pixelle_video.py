@@ -710,13 +710,13 @@ class PixelleVideo:
         }
 
 if __name__ == "__main__":
-    print("Pixelle Video v2.0 测试")
+    logger.info("Pixelle Video v2.0 测试"))
     pv = PixelleVideo("./test_pixelle")
     caps = pv.get_capabilities()
-    print(f"能力: PIL={caps['pil']}, ffmpeg={caps['ffmpeg']}, font={caps['font']}")
+    logger.info(f"能力: PIL={caps['pil']}, ffmpeg={caps['ffmpeg']}, font={caps['font']}"))
     result = pv.generate_video("AI技术发展趋势", 6, "landscape")
-    print(f"结果: success={result['success']}, path={result.get('video_path', result.get('error'))}")
-    print("测试完成")
+    logger.info(f"结果: success={result['success']}, path={result.get('video_path', result.get('error'))}"))
+    logger.info("测试完成"))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

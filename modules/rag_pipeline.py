@@ -412,8 +412,8 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
 if __name__ == "__main__":
     m = RagPipelineModule()
-    print(m.initialize())
-    print(m.execute("query", {"question": "What is RAG?", "top_k": 3}))
+    logger.info(m.initialize()))
+    logger.info(m.execute("query", {"question": "What is RAG?", "top_k": 3})))
 
     def batch_operation(self, operations: list) -> dict:
         """批量执行操作，支持事务语义"""

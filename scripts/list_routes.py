@@ -7,6 +7,6 @@ for fname in sorted(os.listdir(api_dir)):
         filepath = os.path.join(api_dir, fname)
         content = open(filepath, encoding="utf-8").read()
         routes = re.findall(r'@router\.(?:get|post|put|delete)\([\'\"]([^\'\"]+)[\'\"]', content)
-        print(f"\n=== {fname} ({len(routes)} routes) ===")
+        logger.info(f"\n=== {fname} ({len(routes)} routes) ==="))
         for r in routes:
-            print(f"  {r}")
+            logger.info(f"  {r}"))

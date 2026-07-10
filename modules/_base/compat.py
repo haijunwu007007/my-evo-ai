@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.modules._base.compat")
 """
 AUTO-EVO-AI V0.1 — 兼容层（已废弃）
 ===================================
@@ -26,8 +28,7 @@ def _import_compat_name(name: str, module_path: str):
         cls = getattr(mod, name, None)
         if cls:
             return cls
-    except Exception:
-        pass
+    except Exception as _e:        logger.warning(f"[    .strip() module] 异常: {_e}")
     return None
 
 

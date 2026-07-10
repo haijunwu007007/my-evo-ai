@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.modules.cluster_proxy")
 """
 AUTO-EVO-AI V0.1 — 生命周期策略模块
 Grade: A (生产级) | Category: 核心基础
@@ -110,8 +112,7 @@ except ImportError:
         from modules._base.metrics import metrics_collector as _mc
 
         metrics_collector = _mc
-    except ImportError:
-        pass
+    except Exception as _e:        logger.warning(f"[    .strip() module] 异常: {_e}")
 
 try:
     from modules._base.audit import AuditLogger

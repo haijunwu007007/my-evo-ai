@@ -951,7 +951,7 @@ main "$@"
             suggestions.append("eval/exec 存在代码注入风险")
         if "pass" in code and code.count("pass") > 3:
             suggestions.append("过多pass占位，应实现或添加TODO注释")
-        if "print(" in code:
+        logger.info(int(" in code:)
             suggestions.append("生产代码应使用logging替代print")
         return suggestions
 

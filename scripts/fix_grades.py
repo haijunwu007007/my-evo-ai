@@ -88,12 +88,12 @@ def fix_grades():
             if new_content != content:
                 f.write_text(new_content, encoding="utf-8")
                 changed += 1
-                print(f"  {f.stem:40s} {old_grade}→{new_grade}  ({n_bytes}B/{n_code}行)")
+                logger.info(f"  {f.stem:40s} {old_grade}→{new_grade}  ({n_bytes}B/{n_code}行)"))
         elif not old_grade and new_grade != "C":
             pass  # 不强制添加
 
-    print(f"\n总计: {total} 模块, 修正: {changed} 个 Grade")
-    print(f"新分布: A={stats.get('A',0)} B={stats.get('B',0)} C={stats.get('C',0)} S={stats.get('S',0)}")
+    logger.info(f"\n总计: {total} 模块, 修正: {changed} 个 Grade"))
+    logger.info(f"新分布: A={stats.get('A',0)} B={stats.get('B',0)} C={stats.get('C',0)} S={stats.get('S',0)}"))
 
 if __name__ == "__main__":
     fix_grades()

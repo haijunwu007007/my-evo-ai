@@ -627,7 +627,7 @@ class CodeGenerator:
         if language == "python":
             files[f"{name}/__init__.py"] = f'"""{name} package."""\n\n__version__ = "0.1.0"\n'
             files[f"{name}/main.py"] = (
-                f'"""Main entry point for {name}."""\n\ndef main():\n    print("{name} started")\n\nif __name__ == "__main__":\n    main()\n'
+                # print("{name} started")\n\nif __name__ == "__main__":\n    main()\n'
             )
             if "cli" in features:
                 files[f"{name}/cli.py"] = (

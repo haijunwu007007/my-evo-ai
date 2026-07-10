@@ -8,27 +8,27 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif
 .container{max-width:720px;margin:0 auto}
 h1{font-size:24px;margin-bottom:4px}
 .sub{color:#8892b0;font-size:13px;margin-bottom:20px}
-.card{background:#16213e;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d3561}
+.card{background:var(--bg);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
 .card h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.card textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px;min-height:100px;font-family:inherit;resize:vertical}
+.card textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#e0e0e0;font-size:14px;min-height:100px;font-family:inherit;resize:vertical}
 .card textarea:focus{outline:none;border-color:#4361ee}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600}
 .btn-primary{background:#4361ee;color:#fff}
 .btn-primary:hover{background:#3651d4}
-.btn-secondary{background:#2d3561;color:#e0e0e0}
+.btn-secondary{background:var(--border);color:#e0e0e0}
 .btn-secondary:hover{background:#3d4571}
-select{padding:8px 12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px}
-.result-box{background:#0f3460;border-radius:8px;padding:12px;margin-top:10px;font-size:13px;white-space:pre-wrap;min-height:50px;max-height:400px;overflow:auto}
+select{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#e0e0e0;font-size:14px}
+.result-box{background:var(--accent);border-radius:8px;padding:12px;margin-top:10px;font-size:13px;white-space:pre-wrap;min-height:50px;max-height:400px;overflow:auto}
 .back{color:#4361ee;text-decoration:none;font-size:13px;display:inline-block;margin-top:12px}
 .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
-.template-btn{padding:8px;border-radius:6px;background:rgba(67,97,238,0.1);border:1px solid #2d3561;cursor:pointer;text-align:center;font-size:13px;transition:.2s}
+.template-btn{padding:8px;border-radius:6px;background:rgba(67,97,238,0.1);border:1px solid var(--border);cursor:pointer;text-align:center;font-size:13px;transition:.2s}
 .template-btn:hover{background:rgba(67,97,238,0.2);border-color:#4361ee}
 .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:#4361ee;color:#fff;margin:2px}
 #loading{display:none;text-align:center;padding:20px;color:#8892b0}
 #loading.show{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:24px;height:24px;border:3px solid #2d3561;border-top-color:#4361ee;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:#4361ee;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
 </style>
   <link rel="stylesheet" href="/frontend/share.css">
 </head>

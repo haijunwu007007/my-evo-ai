@@ -3,7 +3,7 @@ import shutil, os
 root = r'./frontend'
 
 # ===== FIX 1: index.html - remove broken refs =====
-print('SKIP index.html (root stub, not served)')
+logger.info('SKIP index.html (root stub, not served)'))
 
 # ===== FIX 2: capabilities.html - real API call =====
 cap = os.path.join(root, 'capabilities.html')
@@ -21,7 +21,7 @@ fetch('/api/v1/capabilities/list').then(r=>r.json()).then(d=>{
 </script>'''
 c = c.replace(old, new)
 open(cap, 'w', encoding='utf-8').write(c)
-print('OK capabilities.html')
+logger.info('OK capabilities.html'))
 
 # ===== FIX 3: permission.html - real RBAC data =====
 per = os.path.join(root, 'permission.html')
@@ -41,7 +41,7 @@ fetch('/api/v1/rbac/status').then(r=>r.json()).then(d=>{
 <table style="display:none"'''
 c = c.replace(old, new)
 open(per, 'w', encoding='utf-8').write(c)
-print('OK permission.html')
+logger.info('OK permission.html'))
 
 # ===== FIX 4: memory.html - real memory/learning data =====
 mem = os.path.join(root, 'memory.html')
@@ -61,7 +61,7 @@ fetch('/api/v1/memory/list').then(r=>r.json()).then(d=>{
 <div style="display:none" class="memories"'''
 c = c.replace(old, new)
 open(mem, 'w', encoding='utf-8').write(c)
-print('OK memory.html')
+logger.info('OK memory.html'))
 
 # ===== FIX 5: multi_agent.html =====
 ma = os.path.join(root, 'multi_agent.html')
@@ -81,7 +81,7 @@ fetch('/api/v1/agents/list').then(r=>r.json()).then(d=>{
 <div class="container"'''
 c = c.replace(old, new)
 open(ma, 'w', encoding='utf-8').write(c)
-print('OK multi_agent.html')
+logger.info('OK multi_agent.html'))
 
 # ===== FIX 6: SEO meta for all HTML files =====
 seo = '\n<meta name="description" content="AUTO-EVO-AI 智能进化平台 - 一键部署、智能Agent、自动化工作流">\n<meta property="og:title" content="AUTO-EVO-AI">\n<meta property="og:description" content="一键部署任意项目，自动完成所有工作">\n<meta property="og:type" content="website">\n<meta name="twitter:card" content="summary">\n<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">\n'
@@ -93,10 +93,10 @@ for f in os.listdir(root):
         if '<head>' in c2:
             c2 = c2.replace('<head>', '<head>' + seo)
             open(p, 'w', encoding='utf-8').write(c2)
-            print('SEO', f)
+            logger.info('SEO', f))
         else:
             c2 = c2.replace('<!DOCTYPE html>\n<html', '<!DOCTYPE html>\n<html<head>' + seo + '</head')
             open(p, 'w', encoding='utf-8').write(c2)
-            print('SEO(nohead)', f)
+            logger.info('SEO(nohead)', f))
 
-print('ALL DONE')
+logger.info('ALL DONE'))

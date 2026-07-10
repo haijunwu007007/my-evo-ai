@@ -23,6 +23,6 @@ for f in sorted(api_dir.glob("routes_*.py")):
         f.write_text(new_text, encoding="utf-8")
         fixed += 1
         diff = len(text) - len(new_text)
-        print(f"  FIXED: {f.name} (-{diff} chars)")
+        logger.info(f"  FIXED: {f.name} (-{diff} chars)"))
 
-print(f"\nFixed {fixed} files")
+logger.info(f"\nFixed {fixed} files"))

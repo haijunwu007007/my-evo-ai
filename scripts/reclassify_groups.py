@@ -82,6 +82,6 @@ for pyfile in sorted(modules_dir.glob("*.py")):
         content = content.replace('"group": "uncategorized"', f'"group": "{matched}"')
         pyfile.write_text(content, encoding="utf-8")
         counter["fixed"] += 1
-        print(f"  {pyfile.stem}: uncategorized → {matched}")
+        logger.info(f"  {pyfile.stem}: uncategorized → {matched}"))
 
-print(f"\nTotal={counter['total']} Fixed={counter['fixed']} AlreadyCategorized={counter['skipped']}")
+logger.info(f"\nTotal={counter['total']} Fixed={counter['fixed']} AlreadyCategorized={counter['skipped']}"))

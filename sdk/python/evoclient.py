@@ -124,29 +124,29 @@ def main():
         cmd = sys.argv[1]
         if cmd == "chat" and len(sys.argv) > 2:
             r = c.chat(sys.argv[2])
-            print(json.dumps(r["data"], indent=2, ensure_ascii=False) if r["data"] else r)
+            logger.info(json.dumps(r["data"], indent=2, ensure_ascii=False) if r["data"] else r))
         elif cmd == "status":
-            print(json.dumps(c.status(), indent=2, ensure_ascii=False))
+            logger.info(json.dumps(c.status(), indent=2, ensure_ascii=False)))
         elif cmd == "version":
-            print(json.dumps(c.version(), indent=2, ensure_ascii=False))
+            logger.info(json.dumps(c.version(), indent=2, ensure_ascii=False)))
         elif cmd == "modules":
             cat = sys.argv[2] if len(sys.argv) > 2 else None
             r = c.modules(cat)
             ms = r["data"].get("modules", []) if r.get("data") else []
-            print(f"Total: {len(ms)} modules")
+            logger.info(f"Total: {len(ms)} modules"))
             for m in ms[:20]:
-                print(f"  {m}")
+                logger.info(f"  {m}"))
         elif cmd == "skills":
             r = c.skills()
             ss = r["data"].get("skills", []) if r.get("data") else []
-            print(f"Total: {len(ss)} skills")
+            logger.info(f"Total: {len(ss)} skills"))
         else:
-            print(f"Unknown: {cmd}")
+            logger.info(f"Unknown: {cmd}"))
     else:
         v = c.version()
         s = c.status()
-        print(f"AUTO-EVO-AI SDK — {v.get('version','?')}")
-        print(f"Status: {s.get('status','?')}")
+        logger.info(f"AUTO-EVO-AI SDK — {v.get('version','?')}"))
+        logger.info(f"Status: {s.get('status','?')}"))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" id="themeColorMeta" content="#1a1a2e">
+<meta name="theme-color" id="themeColorMeta" content="var(--bg)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EVO-AI">
@@ -18,7 +18,7 @@
 <title>AUTO-EVO-AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-::root{--bg:#f5f5f8;--card:#fff;--sidebar:#f0f0f4;--sidebar-hover:#e4e6ed;--sidebar-active:#eef0f8;--sidebar-text:#1a1a2e;--sidebar-text2:#6b7280;--sidebar-accent:#4361ee;--text:#1a1a2e;--text2:#6b7280;--text3:#9ca3af;--input-bg:#fff;--input-text:#111;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#f0f2f8;--border:#e8eaed;--glass:rgba(255,255,255,.7);--glow:rgba(67,97,238,.15)}
+::root{--bg:var(--bg);--card:#fff;--sidebar:#f0f0f4;--sidebar-hover:#e4e6ed;--sidebar-active:#eef0f8;--sidebar-text:var(--bg);--sidebar-text2:#6b7280;--sidebar-accent:#4361ee;--text:var(--bg);--text2:#6b7280;--text3:#9ca3af;--input-bg:#fff;--input-text:#111;--accent:#4361ee;--accent2:#7209b7;--user-msg:#4361ee;--ai-msg:#f0f2f8;--border:var(--border);--glass:rgba(255,255,255,.7);--glow:rgba(67,97,238,.15)}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text)}
 .app{display:flex;height:100vh;overflow:hidden}
 /* 左侧边栏 */
@@ -60,7 +60,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .msg.user{align-items:flex-end}
 .msg.bot{align-items:flex-start}
 .msg-bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-.msg.user .msg-bubble{background:#e8f0fe;color:#1a1a2e;border-bottom-right-radius:4px}
+.msg.user .msg-bubble{background:#e8f0fe;color:var(--bg);border-bottom-right-radius:4px}
 .msg.bot .msg-bubble{background:var(--ai-msg);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg-label{font-size:14px;color:var(--text3);margin-bottom:2px;font-weight:500}
 /* 底部输入区 */

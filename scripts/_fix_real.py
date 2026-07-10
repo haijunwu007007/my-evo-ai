@@ -1,9 +1,9 @@
 """真实业务逻辑 - CD deploy + 模块真实化批量修复"""
 import os, json, sys
 
-print("=" * 65)
+logger.info("=" * 65))
 print("AUTO-EVO-AI V0.1 - 真实业务逻辑转化")
-print("=" * 65)
+logger.info("=" * 65))
 
 # =============================================================================
 # Step 1: CD deploy job - 添加SSH部署
@@ -45,7 +45,7 @@ jobs:
 
 with open(".github/workflows/deploy.yml", "w") as f:
     f.write(deploy_yml)
-print("[1/3] CD deploy.yml 已创建 (需配置 DEPLOY_HOST/KEY 等secrets)")
+logger.info("[1/3] CD deploy.yml 已创建 (需配置 DEPLOY_HOST/KEY 等secrets)"))
 
 
 # =============================================================================
@@ -184,7 +184,7 @@ def get_client() -> RealClient:
 
 with open("modules/_client.py", "w") as f:
     f.write(client_code)
-print("[2/3] modules/_client.py 已创建 (真实HTTP/DB/FS/CMD客户端)")
+logger.info("[2/3] modules/_client.py 已创建 (真实HTTP/DB/FS/CMD客户端)"))
 
 
 # =============================================================================
@@ -211,12 +211,12 @@ fix_plan = {
 # Actually, let me just verify the client module loads correctly
 sys.path.insert(0, os.getcwd())
 exec(compile(client_code, "modules/_client.py", "exec"), {})
-print("[3/3] modules/_client.py 语法验证通过")
+logger.info("[3/3] modules/_client.py 语法验证通过"))
 
-print()
-print("=" * 65)
-print("完成! CD deploy.yml + _client.py 已创建")
-print("下一步: 编辑各模块 execute() 方法, 将 return {\"success\":...} 模拟")
-print("        替换为: from modules._client import get_client; c = get_client()")
-print("                result = c.http_get('https://real-api/endpoint')")
-print("=" * 65)
+logger.info())
+logger.info("=" * 65))
+logger.info("完成! CD deploy.yml + _client.py 已创建"))
+logger.info("下一步: 编辑各模块 execute() 方法, 将 return {\"success\":...} 模拟"))
+logger.info("        替换为: from modules._client import get_client; c = get_client()"))
+logger.info("                result = c.http_get('https://real-api/endpoint')"))
+logger.info("=" * 65))

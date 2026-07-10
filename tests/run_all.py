@@ -32,14 +32,14 @@ for tc in test_classes:
 
 runner = unittest.TextTestRunner(verbosity=0)
 result = runner.run(suite)
-print(f"\n{'='*50}")
-print(f"总计: {result.testsRun}  |  通过: {result.testsRun - len(result.failures) - len(result.errors)}  |  失败: {len(result.failures)}  |  错误: {len(result.errors)}")
+logger.info(f"\n{'='*50}"))
+logger.info(f"总计: {result.testsRun}  |  通过: {result.testsRun - len(result.failures) - len(result.errors)}  |  失败: {len(result.failures)}  |  错误: {len(result.errors)}"))
 if result.failures:
-    print(f"\n失败项:")
+    logger.info(f"\n失败项:"))
     for t, tb in result.failures:
-        print(f"  [FAIL] {t.id()}")
+        logger.info(f"  [FAIL] {t.id()}"))
 if result.errors:
-    print(f"\n错误项:")
+    logger.info(f"\n错误项:"))
     for t, tb in result.errors:
-        print(f"  [ERROR] {t.id()}")
+        logger.info(f"  [ERROR] {t.id()}"))
 exit(0 if result.wasSuccessful() else 1)

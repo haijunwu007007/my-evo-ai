@@ -196,4 +196,4 @@ add_bullet(sl, Inches(7.4), Inches(2.8), Inches(4.8), Inches(4), [
 # 保存
 out = __file__.replace(".py", ".pptx")
 prs.save(out)
-print(f"✅ PPT 已生成: {out}")
+logger.info(f"✅ PPT 已生成: {out}"))

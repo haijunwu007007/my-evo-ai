@@ -28,7 +28,7 @@ class PlagiarismCheck(EnterpriseModule):
             text_a = p.get("text_a", ""); text_b = p.get("text_b", "")
             return {"success": True, "module": "plagiarism-check", "action": "similarity", "data": {"similarity": self._similarity(text_a, text_b) if text_a and text_b else 0, "method": "jaccard_shingle"}}
         if action == "report":
-            fp = self._fingerprint(text or "sample")
+            logger.info(elf._fingerprint(text or "sample"))
             return {"success": True, "module": "plagiarism-check", "action": "report", "data": {"fingerprint": fp, "originality_score": random.randint(65, 98), "matched_sources": 0, "risk_level": "low"}}
         if action == "highlight":
             if not text: return {"success": False, "module": "plagiarism-check", "error": "text required"}

@@ -122,16 +122,16 @@ def _bench_report(request):
     yield
     if not _bench_data:
         return
-    print()
-    print("=" * 60)
+    logger.info())
+    logger.info("=" * 60))
     print("  AUTO-EVO-AI V0.1 — 性能基准报告")
-    print(f"  {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 60)
+    logger.info(f"  {time.strftime('%Y-%m-%d %H:%M:%S')}"))
+    logger.info("=" * 60))
     for metric, value_ms in sorted(_bench_data.items()):
         el = 2000 if "modules" in metric or "concurrent" in metric else 500
         status = "✅" if value_ms < el else "⚠️"
-        print(f"  {status} {metric:30s} = {value_ms:8.1f} ms")
+        logger.info(f"  {status} {metric:30s} = {value_ms:8.1f} ms"))
     avg = sum(_bench_data.values()) / len(_bench_data) if _bench_data else 0
-    print(f"  {'─' * 60}")
-    print(f"  平均延迟: {avg:.0f} ms  |  采样数: {len(_bench_data)}")
-    print("=" * 60)
+    logger.info(f"  {'─' * 60}"))
+    logger.info(f"  平均延迟: {avg:.0f} ms  |  采样数: {len(_bench_data)}"))
+    logger.info("=" * 60))

@@ -45,7 +45,7 @@ def backup():
         if d.is_dir() and d.name < (datetime.datetime.now() - datetime.timedelta(days=30)).strftime("%Y%m"):
             shutil.rmtree(d, ignore_errors=True)
     
-    print(f"备份完成: {dest} ({count} 文件, {manifest['size']/1024:.1f} KB)")
+    logger.info(f"备份完成: {dest} ({count} 文件, {manifest['size']/1024:.1f} KB)"))
 
 if __name__ == "__main__":
     backup()

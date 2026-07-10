@@ -101,7 +101,7 @@ class AlertAggregator:
         return hashlib.md5(key.encode()).hexdigest()[:12]
 
     def process(self, alert: dict) -> tuple[bool, dict | None]:
-        fp = self._fingerprint(alert)
+        logger.info(elf._fingerprint(alert))
         cached = self._fingerprint_cache.get(fp)
         if cached and (time.time() - cached["last_seen"]) < self.dedup_window:
             cached["count"] += 1

@@ -225,9 +225,9 @@ if __name__ == "__main__":
     import asyncio
     async def test():
         r = await execute("status")
-        print("Status:", json.dumps(r, ensure_ascii=False, indent=2))
+        logger.info("Status:", json.dumps(r, ensure_ascii=False, indent=2)))
         h = health_check()
-        print("Health:", json.dumps(h, ensure_ascii=False, indent=2))
+        logger.info("Health:", json.dumps(h, ensure_ascii=False, indent=2)))
     asyncio.run(test())
 
 

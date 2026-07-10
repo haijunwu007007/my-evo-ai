@@ -770,31 +770,31 @@ def quick_soul(soul_name: str) -> str:
 
 if __name__ == "__main__":
     # 示例用法
-    print("=" * 60)
-    print("AUTO-EVO-AI V0.1 - Soul Identity Module")
-    print("=" * 60)
+    logger.info("=" * 60))
+    # print("AUTO-EVO-AI V0.1 - Soul Identity Module")
+    logger.info("=" * 60))
 
     # 创建管理器
     manager = SoulIdentityManager()
 
     # 列出所有Soul
-    print(f"\n已配置的Soul: {manager.list_souls()}")
+    logger.info(f"\n已配置的Soul: {manager.list_souls()}"))
 
     # 获取默认Soul信息
     default_info = manager.get_soul_info("default")
-    print(f"\n默认Soul信息:")
-    print(f"  - 完整配置: {default_info['is_complete']}")
-    print(f"  - Token数量: {default_info['total_tokens']}")
+    logger.info(f"\n默认Soul信息:"))
+    logger.info(f"  - 完整配置: {default_info['is_complete']}"))
+    logger.info(f"  - Token数量: {default_info['total_tokens']}"))
 
     # 获取优化的上下文
     context = manager.get_optimized_context("default")
-    print(f"\n优化上下文预览 (前500字符):")
-    print("-" * 40)
-    print(context[:500] + "...")
+    logger.info(f"\n优化上下文预览 (前500字符):"))
+    logger.info("-" * 40))
+    logger.info(context[:500] + "..."))
 
     # 创建自定义Soul示例
-    print("\n" + "-" * 40)
-    print("创建自定义Soul示例:")
+    logger.info("\n" + "-" * 40))
+    logger.info("创建自定义Soul示例:"))
 
     custom_soul = manager.create_soul(
         "coding_assistant",
@@ -842,17 +842,17 @@ if __name__ == "__main__":
         },
     )
 
-    print(f"✅ 创建自定义Soul: coding_assistant")
+    logger.info(f"✅ 创建自定义Soul: coding_assistant"))
 
     # 切换到自定义Soul
     context = manager.get_optimized_context("coding_assistant")
-    print(f"\n自定义Soul上下文:")
-    print("-" * 40)
-    print(context[:300] + "...")
+    logger.info(f"\n自定义Soul上下文:"))
+    logger.info("-" * 40))
+    logger.info(context[:300] + "..."))
 
-    print("\n" + "=" * 60)
-    print("Soul Identity Module 测试完成!")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("Soul Identity Module 测试完成!"))
+    logger.info("=" * 60))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         """执行入口 - 路由到soul_identity业务方法"""

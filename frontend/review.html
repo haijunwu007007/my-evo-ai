@@ -94,7 +94,7 @@ var _comments=JSON.parse(localStorage.getItem('evo_review_comments')||'[]')
 function renderComments(){
   var el=document.getElementById('commentsList')
   if(_comments.length===0){el.innerHTML='<p style="color:#636e8a;font-size:13px">暂无审阅记录</p>';return}
-  el.innerHTML=_comments.slice().reverse().map(function(c){return '<div class="comment" style="background:#16213e;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;border-left:3px solid #4361ee"><div>💬 '+c.text.slice(0,200)+'</div><div class="meta" style="color:#8892b0;font-size:11px;margin-top:4px">📄 '+c.file+' · '+c.time+'</div></div>'}).join('')}
+  el.innerHTML=_comments.slice().reverse().map(function(c){return '<div class="comment" style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;border-left:3px solid #4361ee"><div>💬 '+c.text.slice(0,200)+'</div><div class="meta" style="color:#8892b0;font-size:11px;margin-top:4px">📄 '+c.file+' · '+c.time+'</div></div>'}).join('')}
 function submitReview(){
   var text=document.getElementById('commentInput').value.trim();if(!text){showStatus('请先写审阅意见',false);return}
   var sel=document.getElementById('docSelect');var idx=parseInt(sel.value)

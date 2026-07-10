@@ -734,7 +734,7 @@ def _generate_python_script(recordings, demo_name) -> str:
         '        engine = PlaywrightEngine(headless=False)',
         '        result = await engine.launch()',
         '        if not result.get("success"):',
-        f'            print(f"Failed: {{result.get(\\"error\\")}}")',
+        logger.info(        print(f"Failed: {{result.get(\\"error\\")}}")',)
         '            return',
         '',
     ]
@@ -776,7 +776,7 @@ def _generate_python_script(recordings, demo_name) -> str:
 
     lines.extend([
         '    await engine.close()',
-        '    print("Replay completed")',
+        logger.info(rint("Replay completed")',)
         '',
         '',
         'if __name__ == "__main__":',

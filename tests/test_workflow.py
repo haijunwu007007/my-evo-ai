@@ -4,11 +4,11 @@ def test_workflow_engine():
     s = e.get_status()
     assert s["success"] is True
     assert len(s["workflows"]) >= 8
-    print("workflow engine OK")
+    logger.info("workflow engine OK"))
 
 def test_mcp_gateway():
     from api.routes.routes_mcp_gateway import _check_auth
-    print("MCP gateway OK")
+    logger.info("MCP gateway OK"))
 
 class TestWorkflowLogic(unittest.TestCase):
     """工作流引擎逻辑测试"""
@@ -41,4 +41,4 @@ if __name__ == "__main__":
 
     test_workflow_engine()
     test_mcp_gateway()
-    print("All tests passed")
+    logger.info("All tests passed"))

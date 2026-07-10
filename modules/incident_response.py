@@ -720,11 +720,11 @@ class IncidentResponseModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 
 if __name__ == "__main__":
     m = IncidentResponseModule()
-    print(m.initialize())
+    logger.info(m.initialize()))
     r = m.execute("create", {"title": "DB Connection Pool Exhaustion", "severity": "P1", "assignee": "alice"})
-    print(r)
-    print(m.execute("triage", {"incident_id": r["incident_id"], "team": "platform", "severity": "P1"}))
-    print(m.execute("resolve", {"incident_id": r["incident_id"], "resolution": "Increased pool size"}))
-    print(m.health_check())
+    logger.info(r))
+    logger.info(m.execute("triage", {"incident_id": r["incident_id"], "team": "platform", "severity": "P1"})))
+    logger.info(m.execute("resolve", {"incident_id": r["incident_id"], "resolution": "Increased pool size"})))
+    logger.info(m.health_check()))
 
 module_class = IncidentResponseModule

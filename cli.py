@@ -37,58 +37,58 @@ def _req(method, path, data=None):
 
 def cmd_chat(args):
     """聊天/查询 — python cli.py chat "你的问题" """
-    if not args: return print("用法: python cli.py chat \"你的问题\"")
+    logger.info( args: return print("用法: python cli.py chat \"你的问题\""))
     r = _req("POST", "/chat", {"message": " ".join(args)})
     result = r.get("result", r.get("error", json.dumps(r)))
-    print(textwrap.dedent(result))
+    logger.info(textwrap.dedent(result)))
 
 def cmd_status(args):
     """系统状态 — python cli.py status"""
     r = _req("GET", "/status")
     if r.get("success"):
-        print(f"✅ 系统运行中")
-        print(f"   模块: {r.get('modules_loaded',0)}/{r.get('modules_total',0)}")
-        print(f"   版本: {r.get('api_version','-')}")
+        logger.info(f"✅ 系统运行中"))
+        logger.info(f"   模块: {r.get('modules_loaded',0)}/{r.get('modules_total',0)}"))
+        logger.info(f"   版本: {r.get('api_version','-')}"))
     else:
-        print(f"❌ 获取状态失败: {r.get('error','-')}")
+        logger.info(f"❌ 获取状态失败: {r.get('error','-')}"))
 
 def cmd_agents(args):
     """列出智能体 — python cli.py agents"""
     r = _req("GET", "/agents")
     if r.get("success"):
-        print(f"🤖 可用智能体 ({len(r['agents'])}个):")
+        logger.info(f"🤖 可用智能体 ({len(r['agents'])}个):"))
         for a in r["agents"]:
-            print(f"  {a['emoji']} {a['name']} — {a['role']}")
+            logger.info(f"  {a['emoji']} {a['name']} — {a['role']}"))
     else:
-        print(f"❌ 错误: {r.get('error','-')}")
+        logger.info(f"❌ 错误: {r.get('error','-')}"))
 
 def cmd_team(args):
     """团队讨论 — python cli.py team "任务描述" """
-    if not args: return print("用法: python cli.py team \"任务描述\"")
+    logger.info( args: return print("用法: python cli.py team \"任务描述\""))
     task = " ".join(args)
     room = _req("POST", "/agents/rooms", {"task": task})
     if not room.get("success"):
-        return print(f"❌ 创建房间失败: {room.get('error','')}")
+        logger.info( print(f"❌ 创建房间失败: {room.get('error','')}"))
     rid = room["room_id"]
-    print(f"📋 任务: {task}")
-    print(f"👥 参与: {', '.join(room['agents'])}")
-    print("🔄 智能体讨论中...")
+    logger.info(f"📋 任务: {task}"))
+    logger.info(f"👥 参与: {', '.join(room['agents'])}"))
+    logger.info("🔄 智能体讨论中..."))
     disc = _req("POST", f"/agents/rooms/{rid}/start")
     if disc.get("success"):
         r = _req("GET", f"/agents/rooms/{rid}")
         if r.get("success"):
             for m in r["room"]["messages"]:
-                print(f"\n[{m['emoji']} {m['name']}] {m['content']}")
-    print("\n✅ 讨论完成")
+                logger.info(f"\n[{m['emoji']} {m['name']}] {m['content']}"))
+    logger.info("\n✅ 讨论完成"))
 
 def cmd_industry(args):
     """启动行业 — python cli.py industry <编号>"""
-    if not args: return print("用法: python cli.py industry <编号1-100>")
+    logger.info( args: return print("用法: python cli.py industry <编号1-100>"))
     n = args[0]
-    print(f"🏭 启动行业 #{n}...")
+    logger.info(f"🏭 启动行业 #{n}..."))
     subprocess.Popen(["python", os.path.join(BASE, "_deploy_industry.py"), n],
         cwd=BASE, shell=True)
-    print(f"✅ 行业 #{n} 启动中，打开 http://localhost:8765/ 使用")
+    logger.info(f"✅ 行业 #{n} 启动中，打开 http://localhost:8765/ 使用"))
 
 def cmd_tools(args):
     """工具状态 — python cli.py tools"""
@@ -96,32 +96,32 @@ def cmd_tools(args):
     if r.get("success"):
         alive = r.get("alive", 0)
         total = r.get("total", 0)
-        print(f"🔧 工具状态: {alive}/{total} 运行中")
+        logger.info(f"🔧 工具状态: {alive}/{total} 运行中"))
         for name, info in r.get("tools", {}).items():
             status = "✅ 运行中" if info.get("alive") else "⏹️ 已停止"
-            print(f"  {status} {name} (:${info.get('port','?')})")
+            logger.info(f"  {status} {name} (:${info.get('port','?')})"))
     else:
-        print(f"❌ 错误: {r.get('error','-')}")
+        logger.info(f"❌ 错误: {r.get('error','-')}"))
 
 def cmd_workflow(args):
     """执行工作流 — python cli.py workflow <名称>"""
     if not args:
         r = _req("GET", "/workflows")
         if r.get("success"):
-            print("📋 可用工作流:")
+            logger.info("📋 可用工作流:"))
             for w in r.get("workflows", []):
-                print(f"  • {w['name']} ({w['id']}) — {w.get('description','')}")
+                logger.info(f"  • {w['name']} ({w['id']}) — {w.get('description','')}"))
         return
     name = args[0]
     r = _req("POST", f"/workflow/run/{name}")
     if r.get("success"):
-        print(f"✅ 工作流 {name} 已执行 (ID: {r.get('execution_id','')})")
+        logger.info(f"✅ 工作流 {name} 已执行 (ID: {r.get('execution_id','')})"))
     else:
-        print(f"❌ 错误: {r.get('error','-')}")
+        logger.info(f"❌ 错误: {r.get('error','-')}"))
 
 def cmd_help(args):
     """显示帮助"""
-    print(__doc__)
+    logger.info(__doc__))
 
 CMDS = {
     "chat": cmd_chat, "c": cmd_chat,
@@ -136,6 +136,6 @@ CMDS = {
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in CMDS:
-        print(__doc__)
+        logger.info(__doc__))
         sys.exit(0)
     CMDS[sys.argv[1]](sys.argv[2:])

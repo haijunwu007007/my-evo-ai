@@ -15,7 +15,8 @@ class DesktopAction(BaseModel):
     action: str  # open_file / run_cmd / list_dir / file_info
     target: str = ""
 
-@router.post("/api/v1/desktop/exec")
+# 以下路由已由 routes_desktop.py 的完整桌面 API 接管
+# @router.post("/api/v1/desktop/exec")
 async def desktop_exec(req: DesktopAction):
     system = platform.system()
     if req.action == "list_dir":

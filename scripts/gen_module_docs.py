@@ -21,8 +21,7 @@ def parse_meta(filepath: str) -> dict:
                 for target in node.targets:
                     if isinstance(target, ast.Name) and target.id == "__module_meta__":
                         return ast.literal_eval(node.value)
-    except Exception:
-        pass
+    logger.info( Exception as _e:        print(f"警告: {_e}"))
     return {}
 
 def count_methods(filepath: str) -> int:
@@ -72,7 +71,7 @@ def main():
                 f.write(f"| {m['name']} | {m['grade']} | {m['size']}KB | {m['methods']} | {m['desc']} |\n")
             f.write("\n")
 
-    print(f"OK 文档已生成: {OUTPUT} ({len(modules)} 模块, {len(groups)} 分类)")
+    logger.info(f"OK 文档已生成: {OUTPUT} ({len(modules)} 模块, {len(groups)} 分类)"))
 
 if __name__ == "__main__":
     main()

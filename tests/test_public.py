@@ -33,9 +33,9 @@ for path, name in urls:
     except Exception as e:
         status = f"❌ {e}"
         all_ok = False
-    print(f"  {status}  {name}")
+    logger.info(f"  {status}  {name}"))
     results.append((name, status))
 
-print(f"\n{'='*40}")
-print(f"总页面: {len(results)}")
-print(f"结果: {'全部通过 ✅' if all_ok else '有失败 ❌'}")
+logger.info(f"\n{'='*40}"))
+logger.info(f"总页面: {len(results)}"))
+logger.info(f"结果: {'全部通过 ✅' if all_ok else '有失败 ❌'}"))

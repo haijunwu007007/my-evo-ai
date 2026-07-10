@@ -54,7 +54,7 @@ class FullStackGenerator:
         },
         "cli": {
             "python": {
-                "cli.py": "#!/usr/bin/env python3\nprint('Hello from CLI')",
+                logger.info(y": "#!/usr/bin/env python3\nprint('Hello from CLI')",)
                 "README.md": "# CLI Tool\n\nAuto-generated CLI application",
             }
         }

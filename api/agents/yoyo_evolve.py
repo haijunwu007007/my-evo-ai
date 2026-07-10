@@ -74,7 +74,7 @@ def analyze_code(file_path: str) -> dict:
             stripped = line.strip()
             if 'except:' in stripped and 'Exception' not in stripped and i > 0 and '#' not in lines[i-1]:
                 issues.append({"line": i+1, "type": "bare_except", "msg": "裸except"})
-            if 'print(' in stripped and i > 5:
+            logger.info(int(' in stripped and i > 5:)
                 issues.append({"line": i+1, "type": "debug_print", "msg": "调试print残留"})
             if len(stripped) > 200:
                 issues.append({"line": i+1, "type": "long_line", "msg": f"超长行({len(stripped)}字符)"})

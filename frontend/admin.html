@@ -11,7 +11,7 @@
 <link rel="manifest" href="/manifest.json">
 <title>管理后台 - AUTO-EVO-AI V0.1</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,sans-serif}
-:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee}
+:root{--bg:var(--bg);--card:var(--bg);--border:var(--border);--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee}
 body{background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100vh}
 .sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:16px;flex-shrink:0}
 .sidebar h2{font-size:14px;margin-bottom:16px;text-align:center}
@@ -366,7 +366,7 @@ function fcRender(){
     // 加载mermaid
     var s = document.createElement('script')
     s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'
-    s.onload = function(){ mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#4361ee',primaryTextColor:'#fff',primaryBorderColor:'#4361ee',lineColor:'#8892b0',secondaryColor:'#7209b7',tertiaryColor:'#1a1a2e'}}); mermaid.run({nodes: [document.querySelector('.mermaid')]}) }
+    s.onload = function(){ mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#4361ee',primaryTextColor:'#fff',primaryBorderColor:'#4361ee',lineColor:'#8892b0',secondaryColor:'#7209b7',tertiaryColor:'var(--bg)'}}); mermaid.run({nodes: [document.querySelector('.mermaid')]}) }
     document.head.appendChild(s)
   }
 }

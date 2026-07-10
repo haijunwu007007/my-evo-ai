@@ -18,16 +18,16 @@ if 'free_providers' in c:
         c = c.replace(old, new)
         with open(path, 'w') as f:
             f.write(c)
-        print('FIXED: Added hardcoded API key to GLM-4-Flash provider')
+        logger.info('FIXED: Added hardcoded API key to GLM-4-Flash provider'))
     else:
         # Check if already has api_key
         if 'api_key' in c:
-            print('ALREADY: provider config already has api_key field')
+            logger.info('ALREADY: provider config already has api_key field'))
         else:
-            print('WARN: old pattern not found, checking...')
+            logger.info('WARN: old pattern not found, checking...'))
             # Find zhipu-related entries
             for line in c.split('\n'):
                 if 'zhipu' in line.lower() or 'GLM' in line:
-                    print(f'  >> {line.strip()[:120]}')
+                    logger.info(f'  >> {line.strip()[:120]}'))
 else:
-    print('ERROR: free_providers not found in file')
+    logger.info('ERROR: free_providers not found in file'))

@@ -609,7 +609,7 @@ class InfraAsCode:
                 "resource_id": rid,
                 "type": spec.resource_type.value,
                 "action": "create" if dry_run else "applied",
-                "fingerprint": spec.fingerprint(),
+                logger.info(rprint": spec.fingerprint(),)
             }
             if not dry_run:
                 drifts = self._drift_detector.detect(spec, spec.properties)

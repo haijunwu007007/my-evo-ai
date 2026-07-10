@@ -110,7 +110,7 @@ for class_name, filename in FILE_MAP.items():
         continue  # 附录在 coordinator.py 末尾
     block = class_blocks.get(class_name, "")
     if not block:
-        print(f"  !! 未找到 {class_name}")
+        logger.info(f"  !! 未找到 {class_name}"))
         continue
 
     filepath = f"{DST}/{filename}"
@@ -130,7 +130,7 @@ for class_name, filename in FILE_MAP.items():
         f.write(header)
         f.write(code)
         f.write('\n')
-    print(f"  -> {filepath} (原{class_name})")
+    logger.info(f"  -> {filepath} (原{class_name})"))
 
 # 附加 create_coordinator_v3 到 coordinator.py
 factory = class_blocks.get("create_coordinator_v3", "")
@@ -138,7 +138,7 @@ if factory:
     with open(f"{DST}/coordinator.py", "a", encoding="utf-8") as f:
         f.write('\n\n')
         f.write(factory)
-    print(f"  -> [append] create_coordinator_v3 → coordinator.py")
+    logger.info(f"  -> [append] create_coordinator_v3 → coordinator.py"))
 
 # 原文件替换为 shim
 shim_lines = [
@@ -158,5 +158,5 @@ shim_lines = [
 ]
 with open(SRC, "w", encoding="utf-8") as f:
     f.write('\n'.join(shim_lines) + '\n')
-print(f"\n  -> {SRC} → 已替换为 {len(shim_lines)} 行 re-export shim")
-print("\n拆分完成！")
+logger.info(f"\n  -> {SRC} → 已替换为 {len(shim_lines)} 行 re-export shim"))
+logger.info("\n拆分完成！"))

@@ -197,23 +197,23 @@ def main():
         result = process_file(filepath)
 
         if result.get("error"):
-            print(f"  [ERR] {filename}: {result['error']}")
+            logger.info(f"  [ERR] {filename}: {result['error']}"))
             stats["errors"] += 1
         elif result.get("modified"):
-            print(f"  [FIX] {filename}: inputs={result['inputs_fixed']}, outputs={result['outputs_fixed']}")
+            logger.info(f"  [FIX] {filename}: inputs={result['inputs_fixed']}, outputs={result['outputs_fixed']}"))
             stats["modified"] += 1
             stats["inputs_fixed_total"] += result["inputs_fixed"]
             stats["outputs_fixed_total"] += result["outputs_fixed"]
         else:
             stats["skipped"] += 1
 
-    print(f"\n=== 修复统计 ===")
-    print(f"总文件数:     {stats['total']}")
-    print(f"已修复:       {stats['modified']}")
-    print(f"跳过(无问题): {stats['skipped']}")
-    print(f"错误:         {stats['errors']}")
-    print(f"Inputs修复:   {stats['inputs_fixed_total']}")
-    print(f"Outputs修复:  {stats['outputs_fixed_total']}")
+    logger.info(f"\n=== 修复统计 ==="))
+    logger.info(f"总文件数:     {stats['total']}"))
+    logger.info(f"已修复:       {stats['modified']}"))
+    logger.info(f"跳过(无问题): {stats['skipped']}"))
+    logger.info(f"错误:         {stats['errors']}"))
+    logger.info(f"Inputs修复:   {stats['inputs_fixed_total']}"))
+    logger.info(f"Outputs修复:  {stats['outputs_fixed_total']}"))
 
 
 if __name__ == "__main__":

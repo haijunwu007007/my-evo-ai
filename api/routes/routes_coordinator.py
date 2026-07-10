@@ -169,7 +169,7 @@ async def coordinator_execute(body: dict = None):
                 "top5=[];rs=d.get('results',d.get('repos',[]));"
                 "for r in rs[:]: top5.append({'name':r.get('full_name',''),'lang':r.get('language',''),'stars':r.get('stars',0),'desc':(r.get('description','') or '')[:80]});"
                 "d['top_repos']=top5;d['total_count']=len(rs);"
-                "print('RESULT:'+__import__('json').dumps({'s':d.get('success',True),'count':d.get('count',len(rs)),'total':len(rs),'top':top5},ensure_ascii=False))"
+                logger.info(('RESULT:'+__import__('json').dumps({'s':d.get('success',True),'count':d.get('count',len(rs)),'total':len(rs),'top':top5},ensure_ascii=False))")
             )
             _proc = await asyncio.create_subprocess_exec(
                 _sy.executable, "-c", _code,

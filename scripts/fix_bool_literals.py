@@ -75,10 +75,10 @@ def main():
             if fix_booleans_in_meta(filepath):
                 fixed += 1
         except Exception as e:
-            print(f"[ERR] {filename}: {e}")
+            logger.info(f"[ERR] {filename}: {e}"))
             errors += 1
 
-    print(f"修复完成: {fixed} 个文件, {errors} 个错误")
+    logger.info(f"修复完成: {fixed} 个文件, {errors} 个错误"))
 
 
 if __name__ == "__main__":

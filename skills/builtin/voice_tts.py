@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.skills.voice_tts")
 """文字转语音技能 — edge-tts 或 gTTS"""
 from pathlib import Path
 
@@ -28,8 +30,7 @@ def execute(params, context=None):
         voice = "zh-CN-XiaoxiaoNeural" if lang.startswith("zh") else "en-US-JennyNeural"
         asyncio.run(edge_tts.Communicate(text, voice).save(fp))
         return {"file_path": fp}
-    except ImportError:
-        pass
+    except Exception as _e:        logger.warning(f"[voice_tts] 异常: {_e}")
 
     try:
         from gtts import gTTS

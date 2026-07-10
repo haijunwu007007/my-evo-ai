@@ -7,11 +7,10 @@ AUTO-EVO-AI V0.1 — 服务类路由
     from api.routes.routes_services import router
     app.include_router(router)
 """
+from __future__ import annotations
 import logging
 logger = logging.getLogger("evo.routes_services")
 
-
-from __future__ import annotations
 
 import os
 import base64
@@ -182,9 +181,10 @@ class GithubWebhookConfig(BaseModel):
     events: list[str] | None = None
     min_priority: int | None = None
 
-@router.post("/api/v1/webhook/github")
+@router.post("/api/v1/webhook/github/v2")
 async def webhook_github(request: Request):
-    """接收 GitHub Webhook (push/pr/workflow/issues/release/ping)"""
+    """接收 GitHub Webhook (v2 — 由 modules.github_webhook 接管)
+    注: /api/v1/webhook/github 已被 routes_webhook.py 注册，此处改用 /v2 前缀"""
     event_type = request.headers.get("X-GitHub-Event", "ping")
     signature = request.headers.get("X-Hub-Signature-256", "") or request.headers.get("X-Hub-Signature", "")
     secret = (get_config().get("secret") or "")
@@ -926,11 +926,11 @@ def _get_plugin_manager() -> PluginManager:
     return PluginManager()
 
 
-@router.get("/api/v1/plugins")
-async def plugin_list():
-    """列出已安装插件"""
-    pm = _get_plugin_manager()
-    return {"success": True, **pm.get_stats()}
+# @router.get("/api/v1/plugins")
+# async def plugin_list():
+#     """列出已安装插件"""
+#     pm = _get_plugin_manager()
+#     return {"success": True, **pm.get_stats()}
 
 
 @router.get("/api/v1/plugins/repository")
@@ -940,42 +940,17 @@ async def plugin_repository(tag: str = "", search: str = ""):
     return {"success": True, "plugins": pm.browse_repository(tag=tag, search=search)}
 
 
-@router.get("/api/v1/plugins/{name}")
-async def plugin_detail(name: str):
-    """插件详情"""
-    pm = _get_plugin_manager()
-    plugin = pm.get_plugin(name)
-    if not plugin:
-        return {"success": False, "error": "Plugin not found"}, 404
-    return {"success": True, **plugin}
-
-
-@router.post("/api/v1/plugins/{name}/install")
-async def plugin_install(name: str, source: str = "builtin"):
-    """安装插件"""
-    pm = _get_plugin_manager()
-    return pm.install_plugin(name, source=source)
-
-
-@router.post("/api/v1/plugins/{name}/enable")
-async def plugin_enable(name: str):
-    """启用插件"""
-    pm = _get_plugin_manager()
-    return pm.enable_plugin(name)
-
-
-@router.post("/api/v1/plugins/{name}/disable")
-async def plugin_disable(name: str):
-    """禁用插件"""
-    pm = _get_plugin_manager()
-    return pm.disable_plugin(name)
-
-
-@router.post("/api/v1/plugins/{name}/uninstall")
-async def plugin_uninstall(name: str, remove_data: bool = False):
-    """卸载插件"""
-    pm = _get_plugin_manager()
-    return pm.uninstall_plugin(name, remove_data=remove_data)
+# 插件路由已由 routes_plugins.py (v2 完整版) 接管，以下保留注释避免冲突
+# @router.get("/api/v1/plugins/{name}")
+# async def plugin_detail(name: str):
+#     pm = _get_plugin_manager()
+#     plugin = pm.get_plugin(name)
+#     if not plugin: return {"success": False, "error": "Plugin not found"}, 404
+#     return {"success": True, **plugin}
+# @router.post("/api/v1/plugins/{name}/install") ...
+# @router.post("/api/v1/plugins/{name}/enable") ...
+# @router.post("/api/v1/plugins/{name}/disable") ...
+# @router.post("/api/v1/plugins/{name}/uninstall") ...
 
 
 # ═══════════════════════════════════════════════════

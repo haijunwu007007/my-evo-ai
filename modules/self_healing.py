@@ -686,52 +686,52 @@ class SelfHealingEngine:
 # ==================== 快速测试 ====================
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("SelfHealing 测试")
-    print("=" * 60)
+    logger.info("=" * 60))
+    logger.info("SelfHealing 测试"))
+    logger.info("=" * 60))
 
     engine = SelfHealingEngine()
 
     # 测试错误记录
-    print("\n[1] 测试错误记录...")
+    logger.info("\n[1] 测试错误记录..."))
     try:
         raise ValueError("测试错误")
     except Exception as e:
         record = engine.record_error(e, "test_component", {"action": "test"})
-        print(f"  ✅ 错误已记录: {record.error_type} ({record.severity})")
+        logger.info(f"  ✅ 错误已记录: {record.error_type} ({record.severity})"))
 
     # 测试熔断器
-    print("\n[2] 测试熔断器...")
+    logger.info("\n[2] 测试熔断器..."))
     for i in range(6):
         engine._update_circuit_breaker("test_service", record)
 
     is_open = engine.is_circuit_open("test_service")
-    print(f"  熔断器状态: {'打开' if is_open else '关闭'}")
+    logger.info(f"  熔断器状态: {'打开' if is_open else '关闭'}"))
 
     # 测试健康检查
-    print("\n[3] 测试健康检查...")
+    logger.info("\n[3] 测试健康检查..."))
     engine.register_health_check("memory", lambda: True)
     engine.register_health_check("cpu", lambda: True)
     engine.register_health_check("disk", lambda: True)
 
     health = engine.check_health()
-    print(f"  健康分数: {health['score']}%")
-    print(f"  整体状态: {health['overall']}")
+    logger.info(f"  健康分数: {health['score']}%"))
+    logger.info(f"  整体状态: {health['overall']}"))
 
     # 状态报告
-    print("\n[4] 状态报告...")
+    logger.info("\n[4] 状态报告..."))
     report = engine.get_status_report()
-    print(f"  错误统计: {report['errors']['total_errors']} 个错误")
-    print(f"  熔断器: {len(report['circuit_breakers'])} 个")
+    logger.info(f"  错误统计: {report['errors']['total_errors']} 个错误"))
+    logger.info(f"  熔断器: {len(report['circuit_breakers'])} 个"))
 
     # Dashboard
-    print("\n[5] Dashboard导出...")
+    logger.info("\n[5] Dashboard导出..."))
     dashboard = engine.export_dashboard()
-    print(f"  数据长度: {len(dashboard)} 字符")
+    logger.info(f"  数据长度: {len(dashboard)} 字符"))
 
-    print("\n" + "=" * 60)
-    print("✅ SelfHealing 就绪！")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("✅ SelfHealing 就绪！"))
+    logger.info("=" * 60))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

@@ -8,24 +8,24 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif
 .container{max-width:720px;margin:0 auto}
 h1{font-size:24px;margin-bottom:4px}
 .sub{color:#8892b0;font-size:13px;margin-bottom:20px}
-.card{background:#16213e;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d3561}
+.card{background:var(--bg);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
 .card h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px;margin-bottom:8px;font-family:inherit}
+input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#e0e0e0;font-size:14px;margin-bottom:8px;font-family:inherit}
 input:focus{outline:none;border-color:#8b5cf6}
-textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #2d3561;background:#0f3460;color:#e0e0e0;font-size:14px;min-height:80px;font-family:inherit;resize:vertical}
+textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#e0e0e0;font-size:14px;min-height:80px;font-family:inherit;resize:vertical}
 textarea:focus{outline:none;border-color:#8b5cf6}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600}
 .btn-primary{background:#8b5cf6;color:#fff}
 .btn-primary:hover{background:#7c3aed}
-.btn-secondary{background:#2d3561;color:#e0e0e0}
+.btn-secondary{background:var(--border);color:#e0e0e0}
 .btn-start{background:#10b981;color:#fff}
 .btn-start:hover{background:#059669}
 .agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
-.agent-btn{padding:10px;border-radius:8px;border:1px solid #2d3561;cursor:pointer;text-align:center;font-size:13px;transition:.2s;background:rgba(139,92,246,0.08)}
+.agent-btn{padding:10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;text-align:center;font-size:13px;transition:.2s;background:rgba(139,92,246,0.08)}
 .agent-btn:hover{background:rgba(139,92,246,0.2);border-color:#8b5cf6}
-.room-msg{background:#0f3460;border-radius:8px;padding:10px;margin:6px 0;font-size:13px;max-height:300px;overflow-y:auto}
-.msg-item{padding:6px 0;border-bottom:1px solid #2d3561}
+.room-msg{background:var(--accent);border-radius:8px;padding:10px;margin:6px 0;font-size:13px;max-height:300px;overflow-y:auto}
+.msg-item{padding:6px 0;border-bottom:1px solid var(--border)}
 .msg-item:last-child{border-bottom:none}
 .msg-from{color:#8b5cf6;font-weight:600;font-size:12px}
 .msg-text{color:#e0e0e0;font-size:13px;margin-top:2px}
@@ -33,7 +33,7 @@ textarea:focus{outline:none;border-color:#8b5cf6}
 #loading{display:none;text-align:center;padding:20px;color:#8892b0}
 #loading.show{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:24px;height:24px;border:3px solid #2d3561;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
 </style>
   <link rel="stylesheet" href="/frontend/share.css">
 </head>

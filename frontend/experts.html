@@ -1,13 +1,13 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>专家中心 - 266位AI专家</title><style>
-body{background:var(--bg);margin:0;padding:16px;color:#1a1a2e;max-width:1200px;margin:0 auto}
+body{background:var(--bg);margin:0;padding:16px;color:var(--bg);max-width:1200px;margin:0 auto}
 .header{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .header h1{margin:0;font-size:18px;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header .stats{font-size:12px;color:#6b7280;margin-left:auto}
 .header a{color:#4361ee;text-decoration:none;font-size:12px;padding:4px 10px;border-radius:6px;background:#fff;border:1px solid #e5e7eb}
 .search-bar{width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:12px;box-sizing:border-box;background:#fff;outline:none}
 .search-bar:focus{border-color:#4361ee}
-.dept{margin-bottom:6px;border-radius:10px;overflow:hidden;border:1px solid #e8eaed;background:#fff}
+.dept{margin-bottom:6px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#fff}
 .dept-head{display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;background:#fff;transition:background .15s}
 .dept-head:hover{background:#f3f4f6}
 .dept-head .arrow{font-size:10px;transition:transform .2s;width:12px;text-align:center;color:#9ca3af}
@@ -18,7 +18,7 @@ body{background:var(--bg);margin:0;padding:16px;color:#1a1a2e;max-width:1200px;m
 .agent{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #e5e7eb;background:#f9fafb;transition:all .15s;white-space:nowrap}
 .agent:hover{border-color:#4361ee;background:#eef2ff;color:#4361ee;box-shadow:0 1px 4px rgba(67,97,238,.1)}
 .agent .ico{font-size:12px}
-#result{position:fixed;bottom:16px;right:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:12px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;display:none;color:#1a1a2e}
+#result{position:fixed;bottom:16px;right:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:12px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;display:none;color:var(--bg)}
 #result.show{display:block}
 #result .close{float:right;cursor:pointer;color:#9ca3af;font-size:14px;margin-left:8px}
 </style>  <link rel="stylesheet" href="/frontend/share.css">

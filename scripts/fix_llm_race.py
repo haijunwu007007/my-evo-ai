@@ -50,19 +50,19 @@ if old_code in content:
     content = content.replace(old_code, new_code)
     with open('/home/ubuntu/my-evo-ai/api/agent_llm.py', 'w') as f:
         f.write(content)
-    print("FIXED: replaced async _race with sync version")
+    logger.info("FIXED: replaced async _race with sync version"))
 else:
-    print("WARN: old_code not found, checking if already fixed...")
+    logger.info("WARN: old_code not found, checking if already fixed..."))
     if 'asyncio.run(_race())' in content:
-        print("asyncio.run still present - different code structure")
-        print("Lines around asyncio.run:")
+        logger.info("asyncio.run still present - different code structure"))
+        logger.info("Lines around asyncio.run:"))
         for i, line in enumerate(content.split('\n')):
             if 'asyncio.run' in line:
-                print(f"  L{i+1}: {line.strip()[:100]}")
+                logger.info(f"  L{i+1}: {line.strip()[:100]}"))
                 # Print surrounding lines
                 surrounding = content.split('\n')[max(0,i-15):i+3]
                 for j, sl in enumerate(surrounding):
-                    print(f"  L{max(0,i-15)+j+1}: {sl[:100]}")
+                    logger.info(f"  L{max(0,i-15)+j+1}: {sl[:100]}"))
                 break
     else:
-        print("Seems already fixed!")
+        logger.info("Seems already fixed!"))

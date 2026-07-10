@@ -666,7 +666,7 @@ class CommandRegistry:
 
         if cmd_def.deprecated:
             msg = cmd_def.deprecation_msg or f"命令 '{cmd_name}' 已弃用"
-            print(CLITheme().warning(msg))
+            logger.info(CLITheme().warning(msg)))
 
         ctx = context or CommandContext(command_name=cmd_name, raw_args=args_str)
 
@@ -1244,20 +1244,20 @@ class CLIInterface(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
                 # 输出结果
                 if result.output:
-                    print(result.output)
+                    logger.info(result.output))
                 if result.error:
-                    print(self._theme.error(result.error))
+                    logger.info(self._theme.error(result.error)))
 
                 # 审计日志
                 self._audit_log("execute_command", f"{line} [{result.exit_code}] {result.duration_ms:.0f}ms")
 
             except EOFError:
-                print("\n再见！")
+                logger.info("\n再见！"))
                 self._running = False
             except KeyboardInterrupt:
-                print(f"\n{self._theme.warning('使用 exit 退出')}")
+                logger.info(f"\n{self._theme.warning('使用 exit 退出')}"))
             except Exception as e:
-                print(self._theme.error(f"内部错误: {e}"))
+                logger.info(self._theme.error(f"内部错误: {e}")))
 
         # 保存历史
         self._history.save()
@@ -1273,7 +1273,7 @@ class CLIInterface(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
   输入 {self._theme.colored("help", self._theme.prompt_color)} 查看命令列表 | {self._theme.colored("Tab", self._theme.prompt_color)} 自动补全 | {self._theme.colored("exit", self._theme.prompt_color)} 退出
 """
-        print(banner)
+        logger.info(banner))
 
     def _readline_completer(self, text: str, state: int) -> str | None:
         """readline补全回调"""

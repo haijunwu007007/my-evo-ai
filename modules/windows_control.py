@@ -567,11 +567,11 @@ class WindowsControl:
 
 if __name__ == "__main__":
     wc = WindowsControl()
-    print(f"pywinauto: {'OK' if wc.available else 'NOT INSTALLED'}")
+    logger.info(f"pywinauto: {'OK' if wc.available else 'NOT INSTALLED'}"))
     wins = wc.list_windows()
-    print(f"Windows: {len(wins)}")
+    logger.info(f"Windows: {len(wins)}"))
     for w in wins[:5]:
-        print(f"  [{w.handle}] {w.title}")
+        logger.info(f"  [{w.handle}] {w.title}"))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

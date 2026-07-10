@@ -473,7 +473,7 @@ class PermissionGuard:
         # 执行
         pass
     else:
-        print("命令危险，拒绝执行")
+        logger.info("命令危险，拒绝执行"))
 
     # 检查文件访问
     if guard.check_file_access('/home/user/doc.txt', 'read'):
@@ -1021,15 +1021,15 @@ def request_execution(command: str) -> dict[str, Any]:
 # ============================================================================
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("AUTO-EVO-AI V0.1 - Permission Guard Module")
-    print("=" * 60)
+    logger.info("=" * 60))
+    # print("AUTO-EVO-AI V0.1 - Permission Guard Module")
+    logger.info("=" * 60))
 
     # 创建权限守卫
     guard = PermissionGuard()
 
     # 测试危险命令拦截
-    print("\n🚫 危险命令测试:")
+    logger.info("\n🚫 危险命令测试:"))
 
     dangerous_commands = [
         "rm -rf /tmp/test",
@@ -1043,11 +1043,11 @@ if __name__ == "__main__":
     for cmd in dangerous_commands:
         safe, reason = guard.is_command_safe(cmd, return_reason=True)
         icon = "✅" if safe else "❌"
-        print(f"   {icon} {cmd}")
-        print(f"      → {reason}")
+        logger.info(f"   {icon} {cmd}"))
+        logger.info(f"      → {reason}"))
 
     # 测试安全命令
-    print("\n✅ 安全命令测试:")
+    logger.info("\n✅ 安全命令测试:"))
 
     safe_commands = [
         "ls -la",
@@ -1060,27 +1060,27 @@ if __name__ == "__main__":
     for cmd in safe_commands:
         safe, reason = guard.is_command_safe(cmd, return_reason=True)
         icon = "✅" if safe else "❌"
-        print(f"   {icon} {cmd}")
-        print(f"      → {reason}")
+        logger.info(f"   {icon} {cmd}"))
+        logger.info(f"      → {reason}"))
 
     # 测试模式切换
-    print("\n⚙️ 模式切换:")
+    logger.info("\n⚙️ 模式切换:"))
 
     guard.set_mode(PermissionMode.ALLOW_ALL)
-    print(f"   切换到 ALLOW_ALL 模式")
+    logger.info(f"   切换到 ALLOW_ALL 模式"))
     safe, _ = guard.is_command_safe("pip install requests")
-    print(f"   pip install requests: {'允许' if safe else '阻止'}")
+    logger.info(f"   pip install requests: {'允许' if safe else '阻止'}"))
 
     guard.set_mode(PermissionMode.DENY_ALL)
-    print(f"   切换到 DENY_ALL 模式")
+    logger.info(f"   切换到 DENY_ALL 模式"))
     safe, _ = guard.is_command_safe("ls")
-    print(f"   ls: {'允许' if safe else '阻止'}")
+    logger.info(f"   ls: {'允许' if safe else '阻止'}"))
 
     guard.set_mode(PermissionMode.ASK_ME)
-    print(f"   切换回 ASK_ME 模式")
+    logger.info(f"   切换回 ASK_ME 模式"))
 
     # 测试文件访问
-    print("\n📁 文件访问测试:")
+    logger.info("\n📁 文件访问测试:"))
 
     test_paths = [
         "~/.workbuddy/test.txt",
@@ -1092,35 +1092,35 @@ if __name__ == "__main__":
     for path in test_paths:
         allowed = guard.check_file_access(path)
         icon = "✅" if allowed else "❌"
-        print(f"   {icon} {path}")
+        logger.info(f"   {icon} {path}"))
 
     # 测试审批流程
-    print("\n⏳ 审批流程测试:")
+    logger.info("\n⏳ 审批流程测试:"))
 
     approval_id = guard.request_approval(
         ActionType.EXECUTE_COMMAND, "执行删除操作", {"command": "rm -rf /tmp/old_files", "reason": "清理临时文件"}
     )
-    print(f"   请求审批ID: {approval_id}")
+    logger.info(f"   请求审批ID: {approval_id}"))
 
     # 模拟批准
     if guard.approve(approval_id):
-        print(f"   ✅ 审批通过")
+        logger.info(f"   ✅ 审批通过"))
 
     # 安全报告
-    print("\n📊 安全报告:")
+    logger.info("\n📊 安全报告:"))
     report = guard.get_security_report()
-    print(f"   - 总检查: {report.total_checks}")
-    print(f"   - 阻止: {report.blocked_count}")
-    print(f"   - 批准: {report.approved_count}")
-    print(f"   - 待审批: {report.pending_count}")
+    logger.info(f"   - 总检查: {report.total_checks}"))
+    logger.info(f"   - 阻止: {report.blocked_count}"))
+    logger.info(f"   - 批准: {report.approved_count}"))
+    logger.info(f"   - 待审批: {report.pending_count}"))
 
     # Markdown报告
-    print("\n📄 Markdown报告:")
-    print(guard.to_markdown())
+    logger.info("\n📄 Markdown报告:"))
+    logger.info(guard.to_markdown()))
 
-    print("\n" + "=" * 60)
-    print("Permission Guard Module 测试完成!")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("Permission Guard Module 测试完成!"))
+    logger.info("=" * 60))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

@@ -21,7 +21,7 @@ for _p in _env_paths:
                         _k, _v = _line.split("=", 1)
                         os.environ[_k.strip()] = _v.strip()
     except:
-        pass  # .env 文件不存在不影响启动
+        pass  # .env 文件不存在不影响启动，已注释说明
 
 import sys, json, time, asyncio, importlib
 from typing import Any
@@ -113,7 +113,7 @@ if _rbac_ok:
         # require_role 作为装饰器在路由中使用
         logger.info("[rbac] RBAC loaded (require_role decorator)")
     except Exception:
-        pass
+        logger.warning("[rbac] RBAC not available, skipping")
 
 # ── Scalar API 文档（替换 Swagger UI）──
 try:
@@ -149,7 +149,7 @@ for _f in sorted(_apidir.glob("*.py")):
         if hasattr(_mod, 'router'):
             app.include_router(_mod.router, prefix="/api/ext")
     except Exception:
-        pass
+        logger.debug(f"扩展路由 {_f.name} 加载跳过")
 
 
 # ── 静态文件 ──
@@ -317,7 +317,7 @@ async def get_version():
         from api.infra import registry as _registry
         _mod_count = len(_registry._pending_modules) + len(_registry.modules)
     except Exception:
-        pass
+        _mod_count = 0
     return {"success": True, "version": VERSION, "build": VERSION_BUILD, "modules": _mod_count}
 
 
@@ -365,7 +365,7 @@ if __name__ == "__main__":
     auth_status = "已启用" if _API_KEY_ENABLED else "未启用"
     if os.environ.get("EVO_AUTH_ENABLED","true").lower()=="true":
         auth_status = "JWT+APIKey"
-    print(f"""
+    logger.info(f""")
 ┌──────────────────────────────────────────────────────┐
 │  {BUILD_TAG} API Server  {'[EXE]' if _frozen else '[Python]'}
 ├──────────────────────────────────────────────────────┤

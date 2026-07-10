@@ -737,14 +737,14 @@ class ExperienceBase:
 # ==================== 快速测试 ====================
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("ExperienceBase 测试")
-    print("=" * 60)
+    logger.info("=" * 60))
+    logger.info("ExperienceBase 测试"))
+    logger.info("=" * 60))
 
     exp_base = ExperienceBase()
 
     # 添加经验
-    print("\n[1] 添加经验...")
+    logger.info("\n[1] 添加经验..."))
     exp_base.add_experience(
         "系统内存使用率超过80%",
         "调用system-monitor清理缓存",
@@ -753,51 +753,51 @@ if __name__ == "__main__":
         tags=["memory", "optimization"],
         metadata={"memory_before": 85, "memory_after": 60},
     )
-    print("  ✅ 成功经验")
+    logger.info("  ✅ 成功经验"))
 
     exp_base.add_experience("AI网关调用超时", "切换到备用模型", "任务完成", True, tags=["ai", "fallback"])
-    print("  ✅ 备用方案经验")
+    logger.info("  ✅ 备用方案经验"))
 
     exp_base.add_experience("执行未知操作", "直接执行未测试的操作", "系统异常", False, tags=["error", "caution"])
-    print("  ❌ 失败经验")
+    logger.info("  ❌ 失败经验"))
 
     # 查找相似
-    print("\n[2] 查找相似经验...")
+    logger.info("\n[2] 查找相似经验..."))
     similar = exp_base.find_similar("内存占用过高怎么办")
-    print(f"  找到 {len(similar)} 条相似经验")
+    logger.info(f"  找到 {len(similar)} 条相似经验"))
     for e in similar[:3]:
-        print(f"    - {e.action[:40]}... (成功率: {e.success_rate:.0%})")
+        logger.info(f"    - {e.action[:40]}... (成功率: {e.success_rate:.0%})"))
 
     # 推荐行动
-    print("\n[3] 行动推荐...")
+    logger.info("\n[3] 行动推荐..."))
     rec = exp_base.recommend_action("系统响应变慢", ["重启服务", "清理内存", "忽略"])
     if rec.experience:
-        print(f"  推荐: {rec.experience.action}")
-        print(f"  置信度: {rec.confidence:.1%}")
-        print(f"  原因: {rec.reasoning}")
+        logger.info(f"  推荐: {rec.experience.action}"))
+        logger.info(f"  置信度: {rec.confidence:.1%}"))
+        logger.info(f"  原因: {rec.reasoning}"))
     else:
-        print("  无推荐")
+        logger.info("  无推荐"))
 
     # 统计信息
-    print("\n[4] 统计信息...")
+    logger.info("\n[4] 统计信息..."))
     stats = exp_base.get_statistics()
-    print(f"  总经验: {stats['summary']['total']}")
-    print(f"  成功率: {stats['summary']['success_rate']}")
+    logger.info(f"  总经验: {stats['summary']['total']}"))
+    logger.info(f"  成功率: {stats['summary']['success_rate']}"))
 
     # 模式检测
-    print("\n[5] 模式检测...")
+    logger.info("\n[5] 模式检测..."))
     patterns = exp_base.detect_patterns()
-    print(f"  高成功率模式: {len(patterns.get('high_success', []))}")
-    print(f"  高失败率模式: {len(patterns.get('high_failure', []))}")
+    logger.info(f"  高成功率模式: {len(patterns.get('high_success', []))}"))
+    logger.info(f"  高失败率模式: {len(patterns.get('high_failure', []))}"))
 
     # Dashboard
-    print("\n[6] Dashboard导出...")
+    logger.info("\n[6] Dashboard导出..."))
     dashboard = exp_base.export_dashboard()
-    print(f"  数据长度: {len(dashboard)} 字符")
+    logger.info(f"  数据长度: {len(dashboard)} 字符"))
 
-    print("\n" + "=" * 60)
-    print("✅ ExperienceBase 就绪！")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("✅ ExperienceBase 就绪！"))
+    logger.info("=" * 60))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

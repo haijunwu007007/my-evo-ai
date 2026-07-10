@@ -26,15 +26,15 @@ for fp in sorted(modules):
     if grade in ('A','B') and (size < 1024 or lines < 30):
         suspects.append((grade, size, lines, fname))
 
-print(f"{'Grade':>5} {'Size':>6} {'Lines':>5} {'File':>40} {'exec':>5} {'cls':>5}")
-print('-' * 75)
+logger.info(f"{'Grade':>5} {'Size':>6} {'Lines':>5} {'File':>40} {'exec':>5} {'cls':>5}"))
+logger.info('-' * 75))
 for g, s, l, f in suspects:
     row = next(r for r in results if r[3] == f)
     he, hc = row[4], row[5]
-    print(f'{g:>5} {s:>6} {l:>5} {f:>40} {str(he):>5} {str(hc):>5}')
+    logger.info(f'{g:>5} {s:>6} {l:>5} {f:>40} {str(he):>5} {str(hc):>5}'))
 
-print(f'\n总模块: {len(results)}')
-print(f'Grade A/B 但 <1KB/30行的可疑模块: {len(suspects)}')
-print('\nGrade 分布:')
+logger.info(f'\n总模块: {len(results)}'))
+logger.info(f'Grade A/B 但 <1KB/30行的可疑模块: {len(suspects)}'))
+logger.info('\nGrade 分布:'))
 for g, c in sorted(Counter(r[0] for r in results).items()):
-    print(f'  Grade {g}: {c} 模块')
+    logger.info(f'  Grade {g}: {c} 模块'))

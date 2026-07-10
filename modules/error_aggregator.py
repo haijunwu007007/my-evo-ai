@@ -268,7 +268,7 @@ class ErrorAggregator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             sev = ErrorSeverity(severity)
         except ValueError:
             sev = ErrorSeverity.MEDIUM
-        fp = self._fingerprint(message, error_type)
+        logger.info(elf._fingerprint(message, error_type))
         now = time.time()
         eid = fp[:12]
         if fp in self._errors:

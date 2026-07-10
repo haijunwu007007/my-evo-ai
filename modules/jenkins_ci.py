@@ -595,10 +595,10 @@ class JenkinsCIModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
 if __name__ == "__main__":
     m = JenkinsCIModule()
-    print(m.initialize())
-    print(m.execute("list_jobs", {}))
-    print(m.execute("trigger_build", {"name": "sample-app", "branch": "dev"}))
-    print(m.health_check())
+    logger.info(m.initialize()))
+    logger.info(m.execute("list_jobs", {})))
+    logger.info(m.execute("trigger_build", {"name": "sample-app", "branch": "dev"})))
+    logger.info(m.health_check()))
 
     def batch_operation(self, operations: list) -> dict:
         """批量执行操作，支持事务语义"""

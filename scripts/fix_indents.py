@@ -22,6 +22,6 @@ for f in sorted(api_dir.glob("routes_*.py")):
 
     if fixed > 0:
         f.write_text("".join(new_lines), encoding="utf-8")
-        print(f"  FIXED: {f.name} ({fixed} changes)")
+        logger.info(f"  FIXED: {f.name} ({fixed} changes)"))
 
-print(f"\nTotal fixed: {fixed} indentations across files")
+logger.info(f"\nTotal fixed: {fixed} indentations across files"))

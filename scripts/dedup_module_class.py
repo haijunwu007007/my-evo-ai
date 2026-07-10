@@ -25,7 +25,7 @@ for fp in glob.glob(os.path.join(modules_dir, "*.py")):
     if changed:
         with open(fp, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
-        print(f"  ✓ {fname}: 去重")
+        logger.info(f"  ✓ {fname}: 去重"))
         count += 1
 
-print(f"\n共修改 {count} 个文件")
+logger.info(f"\n共修改 {count} 个文件"))

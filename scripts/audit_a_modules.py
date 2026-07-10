@@ -24,8 +24,8 @@ for f in sorted(MODULES_DIR.glob("*.py")):
         has_execute = "def execute" in content or "async def execute" in content
         results.append((f.stem, n_code, len(content), has_execute, len(imports), imports[:3]))
 
-print(f"Grade A 但 <150有效行的模块: {len(results)} 个\n")
-print(f"{'模块名':35s} {'代码行':>6s} {'文件大小':>8s} {'execute':>8s} {'依赖数':>5s}")
-print("-"*70)
+logger.info(f"Grade A 但 <150有效行的模块: {len(results)} 个\n"))
+logger.info(f"{'模块名':35s} {'代码行':>6s} {'文件大小':>8s} {'execute':>8s} {'依赖数':>5s}"))
+logger.info("-"*70))
 for name, nc, sz, exe, ni, _ in results:
-    print(f"{name:35s} {nc:6d} {sz:8d} {'Y' if exe else 'N':>8s} {ni:5d}")
+    logger.info(f"{name:35s} {nc:6d} {sz:8d} {'Y' if exe else 'N':>8s} {ni:5d}"))

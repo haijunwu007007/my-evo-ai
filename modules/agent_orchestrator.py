@@ -881,7 +881,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     # 全局实例
     def progress_cb(status, msg, pct):
         bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
-        print(f"  [{bar}] {pct:3d}% {msg}")
+        logger.info(f"  [{bar}] {pct:3d}% {msg}"))
 
     def execute(self, action: str = 'status', params: dict = None) -> dict:
         params=params or{}
@@ -972,14 +972,14 @@ def explain(user_input: str) -> dict[str, Any]:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-    print("=" * 60)
-    print("AUTO-EVO-AI V0.1 — Agent Orchestrator 自测")
-    print("=" * 60)
+    logger.info("=" * 60))
+    # print("AUTO-EVO-AI V0.1 — Agent Orchestrator 自测")
+    logger.info("=" * 60))
 
     orch = AgentOrchestrator()
 
     # 测试1：意图分析
-    print("\n--- 测试1：意图分析 ---")
+    # print("\n--- 测试1：意图分析 ---")
     test_inputs = [
         "把今天的销售数据整理成报告发给张总",
         "监控服务器CPU和内存使用情况",
@@ -990,44 +990,44 @@ if __name__ == "__main__":
     ]
     for inp in test_inputs:
         intent, conf, sec = IntentAnalyzer.analyze(inp)
-        print(f"  [{conf:.0%}] {inp}")
-        print(f"    → 主意图: {intent.value} | 次要: {[s.value for s in sec]}")
+        logger.info(f"  [{conf:.0%}] {inp}"))
+        logger.info(f"    → 主意图: {intent.value} | 次要: {[s.value for s in sec]}"))
 
     # 测试2：任务规划
-    print("\n--- 测试2：任务规划 ---")
+    # print("\n--- 测试2：任务规划 ---")
     plan = orch.explain("把今天的销售数据整理成报告发给张总")
-    print(f"  主意图: {plan['primary_intent']} (置信度: {plan['confidence']})")
-    print(f"  步骤数: {plan['estimated_steps']}")
+    logger.info(f"  主意图: {plan['primary_intent']} (置信度: {plan['confidence']})"))
+    logger.info(f"  步骤数: {plan['estimated_steps']}"))
     for step in plan["plan"]:
         dep = "串行" if not step["parallel"] else "并行"
-        print(f"    Step {step['step']}: {step['name']} ({step['module']}) [{dep}]")
+        logger.info(f"    Step {step['step']}: {step['name']} ({step['module']}) [{dep}]"))
 
     # 测试3：实际执行
-    print("\n--- 测试3：实际执行 ---")
+    # print("\n--- 测试3：实际执行 ---")
 
     result = orch.run(
         "检查系统状态",
         callback=progress_cb,
     )
-    print(f"\n  结果: {result.status.value}")
-    print(f"  质量评分: {result.quality_score:.0%}")
-    print(f"  子任务: {len(result.sub_tasks)}")
+    logger.info(f"\n  结果: {result.status.value}"))
+    logger.info(f"  质量评分: {result.quality_score:.0%}"))
+    logger.info(f"  子任务: {len(result.sub_tasks)}"))
     for st in result.sub_tasks:
         icon = "✅" if st.status == TaskStatus.COMPLETED else "⚠️" if st.status == TaskStatus.DEGRADED else "❌"
-        print(f"    {icon} {st.name}: {st.status.value} ({st.duration_ms:.0f}ms)")
+        logger.info(f"    {icon} {st.name}: {st.status.value} ({st.duration_ms:.0f}ms)"))
     if result.lessons_learned:
-        print(f"  经验: {result.lessons_learned}")
+        logger.info(f"  经验: {result.lessons_learned}"))
 
     # 测试4：编排器状态
-    print("\n--- 测试4：编排器状态 ---")
+    # print("\n--- 测试4：编排器状态 ---")
     status = orch.get_status()
-    print(f"  注册模块: {status['registered_modules']}")
-    print(f"  已加载: {len(status['loaded_modules'])}")
-    print(f"  加载错误: {len(status['load_errors'])}")
-    print(f"  历史任务: {status['task_history_size']}")
+    logger.info(f"  注册模块: {status['registered_modules']}"))
+    logger.info(f"  已加载: {len(status['loaded_modules'])}"))
+    logger.info(f"  加载错误: {len(status['load_errors'])}"))
+    logger.info(f"  历史任务: {status['task_history_size']}"))
 
-    print("\n" + "=" * 60)
-    print("✅ Agent Orchestrator 自测完成")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("✅ Agent Orchestrator 自测完成"))
+    logger.info("=" * 60))
 
 module_class = AgentOrchestrator

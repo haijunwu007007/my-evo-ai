@@ -578,7 +578,7 @@ class TestModuleImportHealth:
                 assert mod is not None
             except Exception as e:
                 # 某些模块需要运行环境，允许跳过
-                print(f"  [SKIP] core.{name}: {e}")
+                logger.info(f"  [SKIP] core.{name}: {e}"))
 
     def test_modules_base_import(self):
         """验证 modules/_base 基础设施"""
@@ -610,7 +610,7 @@ class TestApiConsistency:
         # 至少 80% 的路由文件使用 success 格式
         total = len(list(self._get_api_file_paths()))
         ratio = count / total if total > 0 else 0
-        print(f"\n  成功格式一致性: {count}/{total} 文件 ({ratio*100:.0f}%)")
+        logger.info(f"\n  成功格式一致性: {count}/{total} 文件 ({ratio*100:.0f}%)"))
         assert ratio >= 0.7, f"仅 {ratio*100:.0f}% 的路由文件使用统一 success 格式"
 
 

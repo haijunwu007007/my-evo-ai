@@ -106,6 +106,6 @@ if __name__ == "__main__":
     count = 0
     for f in sorted(api_dir.glob("routes_*.py")):
         if patch_file(f):
-            print(f"  patched: {f.name}")
+            logger.info(f"  patched: {f.name}"))
             count += 1
-    print(f"共计修改 {count} 个文件")
+    logger.info(f"共计修改 {count} 个文件"))

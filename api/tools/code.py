@@ -31,7 +31,7 @@ def _(args: dict, **kw):
         files = {
             f"{name}/README.md": f"# {name}\n\n{desc}\n\n## 安装\n```bash\npip install -r requirements.txt\n```\n",
             f"{name}/requirements.txt": "# 项目依赖\n",
-            f"{name}/main.py": f"#!/usr/bin/env python3\n\"\"\"{name}: {desc}\"\"\"\n\ndef main():\n    print(\"Hello from {name}!\")\n\nif __name__ == \"__main__\":\n    main()\n",
+            # print(\"Hello from {name}!\")\n\nif __name__ == \"__main__\":\n    main()\n",
             f"{name}/.gitignore": "__pycache__/\n*.pyc\n.env\nvenv/\n",
         }
     elif lang in ("js", "javascript"):

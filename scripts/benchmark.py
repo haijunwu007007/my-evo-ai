@@ -59,6 +59,6 @@ if __name__ == "__main__":
     endpoints = ["/api/status", "/api/modules/categories", "/api/scheduler/status"]
     for ep in endpoints:
         r = bench(concurrency=5, total=50, endpoint=ep)
-        print(f"\n{'='*50}\n{ep}\n{'='*50}")
+        logger.info(f"\n{'='*50}\n{ep}\n{'='*50}"))
         for k, v in r.items():
-            print(f"  {k}: {v}")
+            logger.info(f"  {k}: {v}"))

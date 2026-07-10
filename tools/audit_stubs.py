@@ -6,9 +6,9 @@ from pathlib import Path
 mods = sorted(Path('modules').glob('*.py'))
 stubs = [m for m in mods if m.stat().st_size < 2048 and not m.name.startswith('_')]
 
-print(f'Total modules: {len(mods)}')
-print(f'Stub modules (< 2KB): {len(stubs)}')
-print()
+logger.info(f'Total modules: {len(mods)}'))
+logger.info(f'Stub modules (< 2KB): {len(stubs)}'))
+logger.info())
 
 # Categorize stubs
 categories = {}
@@ -16,13 +16,13 @@ for s in stubs:
     prefix = s.stem.split('_')[0] if '_' in s.stem else s.stem
     categories.setdefault(prefix, []).append(s.stem)
 
-print('=== Categories ===')
+logger.info('=== Categories ==='))
 for cat, names in sorted(categories.items(), key=lambda x: -len(x[1])):
     shown = ' '.join(names[:5])
-    print(f'  {cat}_ ({len(names)}): {shown}{"..." if len(names) > 5 else ""}')
+    logger.info(f'  {cat}_ ({len(names)}): {shown}{"..." if len(names) > 5 else ""}'))
 
-print()
-print('=== Full stub list ===')
+logger.info())
+logger.info('=== Full stub list ==='))
 result = []
 for s in stubs:
     with open(s, encoding='utf-8', errors='ignore') as f:
@@ -42,16 +42,16 @@ for s in stubs:
         'has_module_class': has_module_class, 'has_execute': has_execute,
         'has_enterprise': has_enterprise, 'real_score': real_score,
     })
-    print(f'  {s.stem:35s} {s.stat().st_size:5d}B  mcl={int(has_module_class)} ex={int(has_execute)} ent={int(has_enterprise)} score={real_score}')
+    logger.info(f'  {s.stem:35s} {s.stat().st_size:5d}B  mcl={int(has_module_class)} ex={int(has_execute)} ent={int(has_enterprise)} score={real_score}'))
 
-print()
+logger.info())
 bins_text = {4: 'Grade A(4/5)', 3: 'Grade B(3/5)', 2: 'Grade C(2/5)', 1: 'Grade D(1/5)', 0: 'Grade F(0/5)'}
 for r in range(5):
     cnt = sum(1 for x in result if x['real_score'] == r)
     if cnt:
-        print(f'  {bins_text[r]}: {cnt} stubs')
+        logger.info(f'  {bins_text[r]}: {cnt} stubs'))
 
 with open('modules/stubs_audit.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, indent=2, ensure_ascii=False)
-print()
-print('Audit saved to modules/stubs_audit.json')
+logger.info())
+logger.info('Audit saved to modules/stubs_audit.json'))

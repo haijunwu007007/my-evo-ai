@@ -34,13 +34,13 @@ SKILL_SOURCES = {
 
 # ===== 预定义热门Skills模板 =====
 BUILTIN_SKILLS = {
-    "web-scraper": {"name": "网页抓取", "desc": "抓取网页内容转为Markdown", "source": "builtin", "cmd": "python3 -c \"import requests;print('ok')\""},
-    "image-ocr": {"name": "图片OCR", "desc": "从图片提取文字", "source": "builtin", "cmd": "python3 -c \"import pytesseract;print('ocr')\""},
-    "code-executor": {"name": "代码执行", "desc": "沙箱执行代码片段", "source": "builtin", "cmd": "python3 -c \"print('code')\""},
-    "data-viz": {"name": "数据可视化", "desc": "生成图表", "source": "builtin", "cmd": "python3 -c \"import matplotlib;print('viz')\""},
-    "translation": {"name": "翻译", "desc": "多语言翻译", "source": "builtin", "cmd": "python3 -c \"print('translate')\""},
-    "summarizer": {"name": "摘要生成", "desc": "文本摘要", "source": "builtin", "cmd": "python3 -c \"print('sum')\""},
-    "web-search": {"name": "网页搜索", "desc": "搜索引擎查询", "source": "builtin", "cmd": "python3 -c \"print('search')\""},
+    logger.info(craper": {"name": "网页抓取", "desc": "抓取网页内容转为Markdown", "source": "builtin", "cmd": "python3 -c \"import requests;print('ok')\""},)
+    logger.info(-ocr": {"name": "图片OCR", "desc": "从图片提取文字", "source": "builtin", "cmd": "python3 -c \"import pytesseract;print('ocr')\""},)
+    logger.info(executor": {"name": "代码执行", "desc": "沙箱执行代码片段", "source": "builtin", "cmd": "python3 -c \"print('code')\""},)
+    logger.info(viz": {"name": "数据可视化", "desc": "生成图表", "source": "builtin", "cmd": "python3 -c \"import matplotlib;print('viz')\""},)
+    logger.info(lation": {"name": "翻译", "desc": "多语言翻译", "source": "builtin", "cmd": "python3 -c \"print('translate')\""},)
+    logger.info(rizer": {"name": "摘要生成", "desc": "文本摘要", "source": "builtin", "cmd": "python3 -c \"print('sum')\""},)
+    logger.info(earch": {"name": "网页搜索", "desc": "搜索引擎查询", "source": "builtin", "cmd": "python3 -c \"print('search')\""},)
     "mcp-filesystem": {"name": "文件系统MCP", "desc": "读写文件系统", "source": "mcp", "cmd": "filesystem"},
     "mcp-github": {"name": "GitHub MCP", "desc": "GitHub API操作", "source": "mcp", "cmd": "github"},
     "mcp-puppeteer": {"name": "浏览器MCP", "desc": "Headless浏览器", "source": "mcp", "cmd": "puppeteer"},

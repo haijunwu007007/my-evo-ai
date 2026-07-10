@@ -211,4 +211,4 @@ for fname, spec in stubs.items():
     with open(fp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines))
 
-print(f'Filled {len(stubs)} stub modules')
+logger.info(f'Filled {len(stubs)} stub modules'))

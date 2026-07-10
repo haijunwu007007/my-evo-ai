@@ -954,7 +954,7 @@ for fname, content in MODULES.items():
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(content.lstrip('\n'))
     written.append(fname)
-    print(f'  OK {fname:35s} {len(content):>6} bytes')
+    logger.info(f'  OK {fname:35s} {len(content):>6} bytes'))
 
 # Also write to actual modules dir
 modules_dir = BASE
@@ -962,6 +962,6 @@ for fname, content in MODULES.items():
     target = os.path.join(modules_dir, fname)
     with open(target, 'w', encoding='utf-8') as f:
         f.write(content.lstrip('\n'))
-    print(f'  DEPLOY: {fname}')
+    logger.info(f'  DEPLOY: {fname}'))
 
-print(f'\nDONE: 共生成 {len(written)} 个真实模块')
+logger.info(f'\nDONE: 共生成 {len(written)} 个真实模块'))

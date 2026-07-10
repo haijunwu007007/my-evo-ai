@@ -44,7 +44,7 @@ def process_file(path: Path) -> bool:
     for pattern, replacement in REPLACE_RULES:
         replaced, count = re.subn(pattern, replacement, new_content)
         if count > 0:
-            print(f"  {path.relative_to(BASE)}: {pattern} -> {replacement} ({count}x)")
+            logger.info(f"  {path.relative_to(BASE)}: {pattern} -> {replacement} ({count}x)"))
             new_content = replaced
             changed = True
     
@@ -69,7 +69,7 @@ def main():
             if changed:
                 files_changed += 1
     
-    print(f"\n检查了 {files_checked} 个文件, 修改了 {files_changed} 个文件")
+    logger.info(f"\n检查了 {files_checked} 个文件, 修改了 {files_changed} 个文件"))
 
 if __name__ == '__main__':
     main()

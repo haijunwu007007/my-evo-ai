@@ -27,7 +27,7 @@ def fix_config(filename):
     content = content.replace("self._config", "self.config")
     with open(filename, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"  Fixed self._config -> self.config in {filename}")
+    logger.info(f"  Fixed self._config -> self.config in {filename}"))
 
 
 def add_module_class(filename, class_name):
@@ -42,9 +42,9 @@ def add_module_class(filename, class_name):
             content = content.rstrip() + "\n" + export
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"  Added module_class = {class_name} to {filename}")
+        logger.info(f"  Added module_class = {class_name} to {filename}"))
     else:
-        print(f"  module_class already exists in {filename}")
+        logger.info(f"  module_class already exists in {filename}"))
 
 
 def add_config_attr(filename):
@@ -58,21 +58,21 @@ def add_config_attr(filename):
         )
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"  Added self.config to {filename}")
+        logger.info(f"  Added self.config to {filename}"))
 
 
-print("=== Fixing config attributes ===")
+logger.info("=== Fixing config attributes ==="))
 for f, (cls, mid) in config_fixes.items():
     fix_config(f)
     add_module_class(f, cls)
 
-print("\n=== Adding config + module_class ===")
+logger.info("\n=== Adding config + module_class ==="))
 for f, (cls, mid) in config_add.items():
     add_config_attr(f)
     add_module_class(f, cls)
 
-print("\n=== Adding module_class only ===")
+logger.info("\n=== Adding module_class only ==="))
 for f, (cls, mid) in mc_only.items():
     add_module_class(f, cls)
 
-print("\nDone!")
+logger.info("\nDone!"))

@@ -8,7 +8,7 @@
 
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>文档 - AUTO-EVO-AI V0.1</title>
-<style>:root{--bg:#0f0f1a;--card:#1a1a2e;--border:#2d3561;--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee;--success:#00b894;--warn:#fdcb6e;--danger:#e74c3c}
+<style>:root{--bg:var(--bg);--card:var(--bg);--border:var(--border);--text:#e0e0e0;--text2:#8892b0;--accent:#4361ee;--success:#00b894;--warn:#fdcb6e;--danger:#e74c3c}
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,system-ui,sans-serif}
 body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 .header{background:linear-gradient(135deg,#4361ee20,#7209b720);border-bottom:1px solid var(--border);padding:20px;text-align:center}
@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-d
 .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
 .btn-success{background:var(--success);color:#fff}
 .btn-danger{background:var(--danger);color:#fff}
-.btn-warn{background:var(--warn);color:#1a1a2e}
+.btn-warn{background:var(--warn);color:var(--bg)}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}

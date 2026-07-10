@@ -370,7 +370,7 @@ class BotDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "action": "challenge",
                 **rate,
             }
-        fp = self.fingerprint.generate_fingerprint(ip, ua)
+        logger.info(elf.fingerprint.generate_fingerprint(ip, ua))
         ua_analysis = self.fingerprint.analyze_user_agent(ua)
         behavior_analysis = self.behavior.record_request(session_id, path, method, ua, referer)
         combined_score = max(ua_analysis["bot_score"], behavior_analysis["bot_score"])

@@ -50,8 +50,7 @@ async def check_available() -> dict:
     try:
         import pyautogui
         pyauto_ok = True
-    except ImportError:
-        pass
+    except Exception as _e:        logger.warning(f"[    .strip() module] 异常: {_e}")
     checks["pyautogui"] = pyauto_ok
 
     if _AGENT_S_AVAILABLE:

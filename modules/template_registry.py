@@ -1083,15 +1083,15 @@ if __name__ == "__main__":
     )
 
     if result.success:
-        print("渲染结果:")
-        print(result.content)
-        print(f"\n渲染时间: {result.render_time:.4f}s")
+        logger.info("渲染结果:"))
+        logger.info(result.content))
+        logger.info(f"\n渲染时间: {result.render_time:.4f}s"))
     else:
-        print(f"渲染失败: {result.error}")
+        logger.info(f"渲染失败: {result.error}"))
 
     # 统计
     stats = registry.get_stats()
-    print(f"\n统计: {json.dumps(stats, indent=2, ensure_ascii=False)}")
+    logger.info(f"\n统计: {json.dumps(stats, indent=2, ensure_ascii=False)}"))
 
     def execute(self, action: str = 'status', params: dict = None) -> dict:
         params=params or{}

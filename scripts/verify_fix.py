@@ -24,13 +24,13 @@ for mname in targets:
             names = [x.get('name','') for x in inp]
             dups = len(names) - len(set(names))
             if dups:
-                print(f'FAIL {mname}.{cname}: {dups} dups in {len(names)} inputs')
+                logger.info(f'FAIL {mname}.{cname}: {dups} dups in {len(names)} inputs'))
                 issues += 1
             else:
-                print(f'PASS {mname}.{cname}: {len(inp)} inputs, 0 dups')
+                logger.info(f'PASS {mname}.{cname}: {len(inp)} inputs, 0 dups'))
                 oks += 1
             break
     except Exception as e:
-        print(f'ERR  {mname}: {e}')
+        logger.info(f'ERR  {mname}: {e}'))
 
-print(f'\nSummary: {oks} pass, {issues} fail')
+logger.info(f'\nSummary: {oks} pass, {issues} fail'))

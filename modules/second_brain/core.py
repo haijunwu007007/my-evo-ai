@@ -1381,15 +1381,15 @@ def recall(query: str, memory_types: list[str] | None = None) -> str:
 # ============================================================================
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("AUTO-EVO-AI V0.1 - Second Brain Memory Module")
-    print("=" * 60)
+    logger.info("=" * 60))
+    # print("AUTO-EVO-AI V0.1 - Second Brain Memory Module")
+    logger.info("=" * 60))
 
     # 创建第二大脑
     brain = SecondBrain(db_path="~/.workbuddy/test-brain.db")
 
     # 添加一些记忆
-    print("\n📝 添加示例记忆:")
+    logger.info("\n📝 添加示例记忆:"))
 
     brain.add_memory("用户喜欢在下午工作，效率最高", memory_type="habit", confidence=0.8)
 
@@ -1399,65 +1399,65 @@ if __name__ == "__main__":
 
     brain.add_memory("用户希望提高工作效率", memory_type="goal", confidence=0.8)
 
-    print("✅ 已添加4条记忆")
+    logger.info("✅ 已添加4条记忆"))
 
     # 获取统计
     stats = brain.get_stats()
-    print(f"\n📊 记忆统计:")
-    print(f"   - 总数: {stats.total}")
-    print(f"   - 高置信度: {stats.high_confidence_count}")
-    print(f"   - 平均置信度: {stats.avg_confidence:.2f}")
+    logger.info(f"\n📊 记忆统计:"))
+    logger.info(f"   - 总数: {stats.total}"))
+    logger.info(f"   - 高置信度: {stats.high_confidence_count}"))
+    logger.info(f"   - 平均置信度: {stats.avg_confidence:.2f}"))
 
     # 召回测试
-    print("\n🔍 召回测试:")
+    logger.info("\n🔍 召回测试:"))
 
     memories = brain.recall("用户什么时候工作")
-    print(f"查询「用户什么时候工作」:")
+    logger.info(f"查询「用户什么时候工作」:"))
     if memories:
         for m in memories:
-            print(f"   - [{m.type}] {m.content}")
+            logger.info(f"   - [{m.type}] {m.content}"))
     else:
-        print("   - 未找到相关记忆")
+        logger.info("   - 未找到相关记忆"))
 
     memories = brain.recall("操作系统")
-    print(f"\n查询「操作系统」:")
+    logger.info(f"\n查询「操作系统」:"))
     if memories:
         for m in memories:
-            print(f"   - [{m.type}] {m.content}")
+            logger.info(f"   - [{m.type}] {m.content}"))
     else:
-        print("   - 未找到相关记忆")
+        logger.info("   - 未找到相关记忆"))
 
     # 按类型获取
-    print("\n📂 按类型查看:")
+    logger.info("\n📂 按类型查看:"))
     habits = brain.get_memories_by_type("habit")
     for h in habits:
-        print(f"   - {h.content}")
+        logger.info(f"   - {h.content}"))
 
     # 测试提取
-    print("\n🧠 记忆提取测试:")
+    logger.info("\n🧠 记忆提取测试:"))
     result = brain.extract_facts("用户告诉我他通常在早上8点起床，然后喜欢喝咖啡")
-    print(f"   - 从文本提取到 {len(result.facts)} 个事实")
+    logger.info(f"   - 从文本提取到 {len(result.facts)} 个事实"))
     for fact in result.facts:
-        print(f"     [{fact.type}] {fact.content}")
+        logger.info(f"     [{fact.type}] {fact.content}"))
 
     # 整合和修剪
-    print("\n⚙️ 执行整合和修剪:")
+    logger.info("\n⚙️ 执行整合和修剪:"))
     stats = brain.consolidate()
-    print(f"   - 档案更新: {stats['profiles_updated']}")
-    print(f"   - 反思生成: {stats['reflections_generated']}")
+    logger.info(f"   - 档案更新: {stats['profiles_updated']}"))
+    logger.info(f"   - 反思生成: {stats['reflections_generated']}"))
 
     prune_stats = brain.prune()
-    print(f"   - 活跃记忆清除: {prune_stats['active_pruned']}")
-    print(f"   - 低置信度清除: {prune_stats['low_confidence_pruned']}")
+    logger.info(f"   - 活跃记忆清除: {prune_stats['active_pruned']}"))
+    logger.info(f"   - 低置信度清除: {prune_stats['low_confidence_pruned']}"))
 
     # 导出测试
-    print("\n💾 导出记忆:")
+    logger.info("\n💾 导出记忆:"))
     export_path = brain.export_memories("~/.workbuddy/exported-memories.json")
-    print(f"   - 已导出到: {export_path}")
+    logger.info(f"   - 已导出到: {export_path}"))
 
-    print("\n" + "=" * 60)
-    print("Second Brain Memory Module 测试完成!")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60))
+    logger.info("Second Brain Memory Module 测试完成!"))
+    logger.info("=" * 60))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

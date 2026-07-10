@@ -1847,8 +1847,8 @@ VERSION = "V0.1"
 # ==================== 使用示例 ====================
 
 if __name__ == "__main__":
-    print(f"AUTO EVO AI v{VERSION} - 智能体集群资源精细化管控模块")
-    print("=" * 60)
+    logger.info(f"AUTO EVO AI v{VERSION} - 智能体集群资源精细化管控模块"))
+    logger.info("=" * 60))
 
     # 创建控制器
     controller = AgentResourceController()
@@ -1856,45 +1856,45 @@ if __name__ == "__main__":
     try:
         pass
         # 示例1: 获取硬件状态
-        print("\n[1] 硬件资源状态:")
+        logger.info("\n[1] 硬件资源状态:"))
         status = controller.get_hardware_status()
         if status.success:
             metrics = status.data["current"]
-            print(f"  CPU: {metrics['cpu_percent']:.1f}%")
-            print(f"  内存: {metrics['memory_percent']:.1f}%")
-            print(f"  GPU: {metrics['gpu_percent']:.1f}%")
+            logger.info(f"  CPU: {metrics['cpu_percent']:.1f}%"))
+            logger.info(f"  内存: {metrics['memory_percent']:.1f}%"))
+            logger.info(f"  GPU: {metrics['gpu_percent']:.1f}%"))
 
         # 示例2: 注册智能体
-        print("\n[2] 注册智能体到轻量池:")
+        logger.info("\n[2] 注册智能体到轻量池:"))
         result = controller.register_agent("agent_001", "light", {"purpose": "test"})
         if result.success:
-            print(f"  成功注册: {result.data['agent_id']}")
+            logger.info(f"  成功注册: {result.data['agent_id']}"))
 
         # 示例3: 任务分发
-        print("\n[3] 任务分发:")
+        logger.info("\n[3] 任务分发:"))
         task_result = controller.dispatch_task({"priority": "normal", "requires_gpu": False})
         if task_result.success:
-            print(f"  分配到: {task_result.data['agent_id']}")
+            logger.info(f"  分配到: {task_result.data['agent_id']}"))
 
         # 示例4: 休眠/唤醒
-        print("\n[4] 智能体休眠:")
+        logger.info("\n[4] 智能体休眠:"))
         sleep_result = controller.sleep_agent("agent_001", "light")
-        print(f"  结果: {sleep_result.success}")
+        logger.info(f"  结果: {sleep_result.success}"))
 
-        print("\n[5] 智能体唤醒:")
+        logger.info("\n[5] 智能体唤醒:"))
         wake_result = controller.wake_agent("agent_001", "light")
-        print(f"  结果: {wake_result.success}")
+        logger.info(f"  结果: {wake_result.success}"))
 
         # 示例5: 系统状态
-        print("\n[6] 系统整体状态:")
+        logger.info("\n[6] 系统整体状态:"))
         sys_status = controller.get_system_status()
-        print(f"  版本: {sys_status['version']}")
-        print(f"  性能模式: {sys_status['perf_mode']}")
-        print(f"  池数量: {len(sys_status['pools'])}")
+        logger.info(f"  版本: {sys_status['version']}"))
+        logger.info(f"  性能模式: {sys_status['perf_mode']}"))
+        logger.info(f"  池数量: {len(sys_status['pools'])}"))
 
     finally:
         controller.shutdown()
-        print("\n控制器已关闭")
+        logger.info("\n控制器已关闭"))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         """企业级执行入口。支持status/info/run/stop/help等通用动作。"""

@@ -21,6 +21,6 @@ for f in sorted(api_dir.glob("routes_*.py")):
     if changed:
         f.write_text("".join(lines), encoding="utf-8")
         fixed += 1
-        print(f"  FIXED: {f.name}")
+        logger.info(f"  FIXED: {f.name}"))
 
-print(f"\nFixed {fixed} files")
+logger.info(f"\nFixed {fixed} files"))

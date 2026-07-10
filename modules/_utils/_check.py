@@ -27,4 +27,4 @@ for f in files:
     has_dot = "self.config" in c
     has_mc = "module_class" in c
     lines = c.count("\n")
-    print(f"{f}: lines={lines}, self._config={has_under}, self.config={has_dot}, module_class={has_mc}")
+    logger.info(f"{f}: lines={lines}, self._config={has_under}, self.config={has_dot}, module_class={has_mc}"))
