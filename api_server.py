@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """AUTO-EVO-AI V0.1 — API服务器（入口文件）
 ====================================
 路由已拆分到 api/routes/routes_*.py（含 routes_static.py 静态资源）
@@ -5,8 +7,6 @@
 后台任务已拆分到 api/startup.py
 本文件只保留：应用初始化 + 路由注册 + 入口
 """
-
-from __future__ import annotations
 
 # ── 最优先加载 .env 环境变量（在任何其他导入之前）──
 import os

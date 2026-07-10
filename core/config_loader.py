@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 AUTO-EVO-AI V0.1 — 配置加载器（上市公司级）
 =============================================
@@ -11,8 +13,6 @@ AUTO-EVO-AI V0.1 — 配置加载器（上市公司级）
 import logging
 logger = logging.getLogger("evo.config_loader")
 
-
-from __future__ import annotations
 
 import os
 import yaml
