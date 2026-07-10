@@ -1,4 +1,7 @@
 """Nextcloud — 企业网盘桥接 (30k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_nextcloud")
+
 from fastapi import APIRouter
 from api.infra import registry
 router = APIRouter()

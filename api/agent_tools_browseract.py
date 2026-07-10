@@ -1,4 +1,7 @@
 """BrowserAct + codebase-memory-mcp 工具代理"""
+import logging
+logger = logging.getLogger("evo.agent_tools_browseract")
+
 import subprocess, shutil, json, os, httpx
 from api.infra import logger
 

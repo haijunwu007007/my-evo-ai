@@ -7,6 +7,9 @@ AUTO-EVO-AI V0.1 — 服务类路由
     from api.routes.routes_services import router
     app.include_router(router)
 """
+import logging
+logger = logging.getLogger("evo.routes_services")
+
 
 from __future__ import annotations
 

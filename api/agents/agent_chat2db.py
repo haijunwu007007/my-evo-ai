@@ -1,4 +1,7 @@
 """Chat2DB / Text-to-SQL — 自然语言查数据库"""
+import logging
+logger = logging.getLogger("evo.agent_chat2db")
+
 import os, json
 from pathlib import Path
 import os
@@ -14,8 +17,8 @@ def _load_db_configs() -> dict:
     if DB_CONFIG_FILE.exists():
         try:
             return json.loads(DB_CONFIG_FILE.read_text(encoding='utf-8'))
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return {}
 
 def _save_db_configs(configs: dict):

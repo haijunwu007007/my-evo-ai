@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_oss_distiller")
 # -*- coding: utf-8 -*-
 """OSS 蒸馏器 — 自动扫描+集成+部署"""
 import json, time, hashlib, os, subprocess

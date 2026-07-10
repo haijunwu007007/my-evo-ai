@@ -1,6 +1,9 @@
 """
 bookstack_wiki - BookStack文档系统 - 书架→章节→页面层级
 """
+import logging
+logger = logging.getLogger("evo.agent_bookstack")
+
 import os, json, httpx
 from pathlib import Path
 

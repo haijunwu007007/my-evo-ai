@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_hk_worker")
 # -*- coding: utf-8 -*-
 """
 🌉 香港 Worker 桥接 — 把 GitHub 克隆/Docker 构建/CLI 工具转发到香港服务器

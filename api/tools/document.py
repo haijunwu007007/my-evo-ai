@@ -1,4 +1,7 @@
 """AUTO-EVO-AI 工具模块"""
+import logging
+logger = logging.getLogger("evo.document")
+
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any
@@ -19,16 +22,16 @@ def _(args: dict, **kw):
                     doc = Document(fp)
                     md = "\n\n".join(p.text for p in doc.paragraphs if p.text.strip())
                     return {"ok": True, "data": md[:5000]}
-                except ImportError:
-                    pass
+                except ImportError as _e:
+                    logger.warning(f"error: {_e}")
             if ext == ".pdf":
                 try:
                     import PyPDF2
                     reader = PyPDF2.PdfReader(fp)
                     md = "\n\n".join(p.extract_text() for p in reader.pages)
                     return {"ok": True, "data": md[:5000]}
-                except ImportError:
-                    pass
+                except ImportError as _e:
+                    logger.warning(f"error: {_e}")
             # 通用文本
             with open(fp, encoding="utf-8", errors="replace") as f:
                 content = f.read(5000)
@@ -68,8 +71,8 @@ def _(args: dict, **kw):
                 result = subprocess.run(["pdftotext", fp, "-"], capture_output=True, text=True, timeout=30)
                 if result.stdout.strip():
                     return {"ok": True, "data": result.stdout[:5000]}
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             return {"ok": True, "data": "PDF提取需安装 PyPDF2 或 pdftotext"}
         except Exception as e:
             return {"ok": False, "data": f"PDF提取失败: {e}"}

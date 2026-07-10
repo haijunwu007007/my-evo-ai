@@ -1,6 +1,9 @@
 """
 Keycloak身份认证 - 通过Keycloak API管理用户/角色/权限
 """
+import logging
+logger = logging.getLogger("evo.agent_keycloak")
+
 import os, json, httpx
 from pathlib import Path
 

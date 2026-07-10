@@ -1,4 +1,7 @@
 """熔断器"""
+import logging
+logger = logging.getLogger("evo.circuit_breaker")
+
 import os, time, threading
 
 class CircuitBreaker:

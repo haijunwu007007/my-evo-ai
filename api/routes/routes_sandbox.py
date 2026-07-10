@@ -2,6 +2,9 @@
 🛝 沙箱执行环境 — 编译+运行+调试 Agent 生成的代码
 接收代码/文件 → 选构建工具 → Docker容器执行 → 返回结果
 """
+import logging
+logger = logging.getLogger("evo.routes_sandbox")
+
 from fastapi import APIRouter
 import os, json, time, hashlib, subprocess, shutil, asyncio, re
 from pathlib import Path

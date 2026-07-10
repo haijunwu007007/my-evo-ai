@@ -1,4 +1,7 @@
 """热加载配置"""
+import logging
+logger = logging.getLogger("evo.hot_config")
+
 import os, json, yaml, time, threading
 
 CONFIG_FILE = "api/evo_config.yaml"

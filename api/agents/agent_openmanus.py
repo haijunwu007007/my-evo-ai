@@ -1,4 +1,7 @@
 """OpenManus — 通用Agent框架桥接"""
+import logging
+logger = logging.getLogger("evo.agent_openmanus")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

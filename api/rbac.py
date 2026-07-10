@@ -1,4 +1,7 @@
 """三级RBAC"""
+import logging
+logger = logging.getLogger("evo.rbac")
+
 import os, json
 
 ROLES = {"admin": 100, "editor": 50, "viewer": 10}

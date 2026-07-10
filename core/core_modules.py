@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.core_modules")
 #!/usr/bin/env python3
 """
 AUTO-EVO-AI V0.1 核心模块实现

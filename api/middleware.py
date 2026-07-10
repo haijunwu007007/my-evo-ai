@@ -130,8 +130,8 @@ async def cache_middleware(request: Request, call_next):
             body = await response.json()
             async with _cache_lock:
                 _api_cache[path] = {"ts": time.time(), "content": body}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return response
 
 

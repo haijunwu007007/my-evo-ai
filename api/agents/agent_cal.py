@@ -1,6 +1,9 @@
 """
 cal_schedule - Cal.com日程调度 - 开源Calendly, 自动安排会议/预订时间
 """
+import logging
+logger = logging.getLogger("evo.agent_cal")
+
 import os, json, httpx
 from pathlib import Path
 

@@ -44,15 +44,15 @@ class AccomplishIntegration:
         try:
             import pyautogui
             self.pyautogui_available = True
-        except ImportError:
-            pass
+        except ImportError as _e:
+            logger.warning(f"error: {_e}")
 
         if IS_WINDOWS:
             try:
                 import pywinauto
                 self.pywinauto_available = True
-            except ImportError:
-                pass
+            except ImportError as _e:
+                logger.warning(f"error: {_e}")
         elif IS_MAC:
             # macOS使用AppleScript
             self.apple_script_available = True
@@ -348,16 +348,16 @@ def check_accomplish_status() -> Dict[str, Any]:
     try:
         import pyautogui
         status["pyautogui_available"] = True
-    except ImportError:
-        pass
+    except ImportError as _e:
+        logger.warning(f"error: {_e}")
 
     # 检测pywinauto (Windows only)
     if IS_WINDOWS:
         try:
             import pywinauto
             status["pywinauto_available"] = True
-        except ImportError:
-            pass
+        except ImportError as _e:
+            logger.warning(f"error: {_e}")
 
     # AppleScript (macOS only)
     if IS_MAC:
@@ -394,17 +394,17 @@ def check_accomplish_status() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # 测试
-    print("Accomplish Desktop Automation Integration Module")
-    print("=" * 50)
+    logger.info("Accomplish Desktop Automation Integration Module")
+    logger.info("=" * 50)
     
     status = check_accomplish_status()
-    print(f"pyautogui available: {status['pyautogui_available']}")
-    print(f"pywinauto available: {status['pywinauto_available']}")
-    print(f"apple_script available: {status['apple_script_available']}")
+    logger.info(f"pyautogui available: {status['pyautogui_available']}")
+    logger.info(f"pywinauto available: {status['pywinauto_available']}")
+    logger.info(f"apple_script available: {status['apple_script_available']}")
     
     if not status['pyautogui_available']:
-        print(f"\nInstall: {status['install_command']}")
+        logger.info(f"\nInstall: {status['install_command']}")
     
-    print("\nCapabilities:")
+    logger.info("\nCapabilities:")
     for cap in status['capabilities']:
-        print(f"  - {cap}")
+        logger.info(f"  - {cap}")

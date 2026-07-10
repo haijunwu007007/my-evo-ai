@@ -311,8 +311,8 @@ class ConfigCenter:
         # 设置文件权限 (仅当前用户可读)
         try:
             os.chmod(str(key_path), 0o600)
-        except OSError:
-            pass
+        except OSError as _e:
+            logger.warning(f"error: {_e}")
         logger.info("[ConfigCenter] 自动生成主密钥 (建议设置EVO_CONFIG_MASTER_KEY环境变量)")
         return new_key
 
@@ -339,8 +339,8 @@ class ConfigCenter:
                 for line in self._audit_path.read_text(encoding='utf-8').strip().split('\n'):
                     if line.strip():
                         self._audit_cache.append(ConfigAuditLog(**json.loads(line)))
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
     def save_to_file(self):
         """加密持久化到磁盘（公开接口）"""
@@ -366,8 +366,8 @@ class ConfigCenter:
         try:
             with open(self._audit_path, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(asdict(log), ensure_ascii=False) + '\n')
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     # ─── 初始化 ───
 

@@ -1,6 +1,9 @@
 """
 Ansible配置管理 - 通过Ansible API管理Playbook和自动化运维
 """
+import logging
+logger = logging.getLogger("evo.agent_ansible")
+
 import os, json, httpx
 from pathlib import Path
 

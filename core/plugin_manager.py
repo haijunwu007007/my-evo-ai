@@ -557,8 +557,8 @@ class {manifest.name.replace("-","_").replace(".","_")}Plugin:
                             loop.run_until_complete(state.module_instance.cleanup())
                         except RuntimeError:
                             asyncio.run(state.module_instance.cleanup())
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
                 state.module_instance = None
 
             state.status = "disabled"

@@ -1,4 +1,7 @@
 """Screenshot-to-Code — 截图→前端代码（Vue/React/HTML/Tailwind）"""
+import logging
+logger = logging.getLogger("evo.agent_s2c")
+
 import os, json, base64, time
 from pathlib import Path
 import os

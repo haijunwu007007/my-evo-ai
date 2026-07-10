@@ -1,4 +1,7 @@
 """PaddleOCR — 百度开源高精度OCR工具包（45K⭐），支持中英文文字识别/表格提取"""
+import logging
+logger = logging.getLogger("evo.agent_paddleocr")
+
 import os, json, tempfile
 from pathlib import Path
 import os

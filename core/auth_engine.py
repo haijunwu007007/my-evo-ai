@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — JWT 认证引擎
 上市公司生产级别：JWT令牌签发/验证/刷新、角色权限RBAC、登录审计、暴力破解防护
 """
+import logging
+logger = logging.getLogger("evo.auth_engine")
+
 import hashlib, hmac, time, json, os, secrets, base64, threading
 from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
@@ -175,8 +178,8 @@ class AuthEngine:
                     data = json.load(f)
                 for u in data:
                     self.users[u['username']] = User(**u)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         # 创建默认管理员（仅在无用户时）
         if not self.users:
             self.create_user("admin", "admin123", Role.SUPER_ADMIN.value, force=True)

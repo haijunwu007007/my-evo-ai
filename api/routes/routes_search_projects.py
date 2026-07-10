@@ -2,6 +2,9 @@
 routes_search_projects.py — 多平台开源项目搜索引擎
 支持: GitHub / HuggingFace / 国内镜像
 """
+import logging
+logger = logging.getLogger("evo.routes_search_projects")
+
 import httpx, json, asyncio
 from fastapi import APIRouter, Query
 

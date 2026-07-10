@@ -1,6 +1,9 @@
 """
 AUTO-EVO-AI V0.1 — 斜杠命令 API
 """
+import logging
+logger = logging.getLogger("evo.routes_slash")
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from modules.slash_commands import execute, list_commands, get_history

@@ -1,6 +1,9 @@
 """
 Plane项目管理系统 - 通过Plane API管理项目/问题/周期
 """
+import logging
+logger = logging.getLogger("evo.agent_plane")
+
 import os, json, httpx
 from pathlib import Path
 

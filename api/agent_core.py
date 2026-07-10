@@ -1,4 +1,7 @@
 """智能体 — 核心引擎（记忆+工具+并发+规格+记忆系统）"""
+import logging
+logger = logging.getLogger("evo.agent_core")
+
 import os, json, time, re, sqlite3, threading, importlib
 from pathlib import Path
 try:
@@ -50,8 +53,8 @@ def _match_modules(msg):
         if coord and hasattr(coord, 'capability_graph'):
             matches = coord.capability_graph.find_modules_by_task(msg)
             if matches: return [m for m, s in matches[:5] if s > 1.0]
-    except Exception:
-                    pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     BASE = Path(__file__).resolve().parent.parent
     mdir = BASE / "modules"
     if mdir.exists():
@@ -66,8 +69,8 @@ def _match_modules(msg):
                 try:
                     c = f.read_text(errors="replace",encoding="utf-8")[:500].lower()
                     if tag_en in n or tag in c or tag_en in c: matched.add(n)
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
         return list(matched)[:5]
     return []
 
@@ -80,8 +83,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             conn.execute("CREATE TABLE IF NOT EXISTS memory (id INTEGER PRIMARY KEY AUTOINCREMENT, input TEXT, output TEXT, success INTEGER, created REAL, key_hash TEXT)")
             conn.execute("INSERT INTO memory (input, output, success, created, key_hash) VALUES (?,?,?,?,?,?)", (msg[:200], str(result)[:500], 1 if ok else 0, time.time(), kh[:20]))
             conn.commit(); conn.close()
-        except Exception:
-                    pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     def _recall(msg, kh="", limit=3):
         try:
             conn = sqlite3.connect(str(MEM_DB)); conn.row_factory = sqlite3.Row
@@ -128,8 +131,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             content, _ = _pool_call(messages, key=key)
             if content:
                 return (content, None)
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         return (None, None)
 
     def get_tools():
@@ -159,22 +162,22 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                     try:
                         from api.agents.yoyo_evolve import auto_evolve
                         auto_evolve(BASE, _memos)
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
                 # A2A: 清理过期会话
                 try:
                     a2a_module = importlib.import_module("api.agent_a2a")
                     if hasattr(a2a_module, 'cleanup'):
                         a2a_module.cleanup()
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
                 # 健康检查
                 from api.infra import registry
                 health = registry.get_all_health() if hasattr(registry,'get_all_health') else {}
                 issues = [f"{m}: {h.get('status')}" for m, h in health.items() if h.get("status","") in ("error","timeout")]
                 if issues: _remember(f"_auto_{int(now)}", f"发现 {len(issues)} 个问题", ok=False, kh="system")
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             _t.sleep(30)
     threading.Thread(target=auto_global_background, daemon=True).start()
 
@@ -196,8 +199,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
             try:
                 exp = _memos.search_long(msg, top_k=2)
                 if exp: memos_experience = "\n【历史经验】\n" + "\n".join(f"- {e['pattern']}: {e['solution'][:80]}" for e in exp)
-            except Exception:
-                    pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         # ===== 开发任务：Spec-Kit + 并发 =====
         if is_dev:
@@ -210,8 +213,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                     spec_r = run_spec_driven(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS)
                     if spec_r and isinstance(spec_r, dict) and spec_r.get("spec"):
                         spec_md = f"| 规格: {spec_r.get('spec','')} |"
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
 
                 # 步骤2: 并发执行（分析师 + 开发者并行）
                 import concurrent.futures
@@ -229,8 +232,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                         for t in tc:
                             func = t.get("function",{}); nm = func.get("name",""); a = {}
                             try: a = json.loads(func.get("arguments","{}"))
-                            except Exception:
-                                pass
+                            except Exception as _e:
+                                logger.warning(f"error: {_e}")
                             r2 = exec_tool(nm, a, BASE, OUT, _LAST, _GENERATED_TOOLS)
                             if r2.get("data"): return r2["data"]
                     return None
@@ -244,8 +247,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                             name = None
                             if f == f1: name="analysis"
                             elif f == f2: name="code"
-                        except Exception:
-                            pass
+                        except Exception as _e:
+                            logger.warning(f"error: {_e}")
                 
                 ar, _ = (f1.result() if f1.done() else (None,None))
                 code_result = f2.result() if f2.done() else None
@@ -282,19 +285,19 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                                 iterations += 1
                                 r_msgs = [{"role":"user","content":f"再审查:\n{html_code[:500]}..."}]
                                 rr, _ = call_llm(r_msgs, None, key)
-                        except Exception:
-                            pass
+                        except Exception as _e:
+                            logger.warning(f"error: {_e}")
 
                         result = f"✅ **{title}**\n[📄 打开]({_LAST['url']})\n| 并发:分析+开发 | 迭代:{iterations}轮 | 模块:{', '.join(matched_modules[:3]) if matched_modules else '直接生成'} | {spec_md if spec_md else ''} |"
                         _remember(msg, result, kh=kh)
                         # MemOS积累经验
                         if _memos:
                             try: _memos.save_experience(msg[:50], f"生成成功:{_LAST['url']}")
-                            except Exception:
-                                pass
+                            except Exception as _e:
+                                logger.warning(f"error: {_e}")
                         return {"success":True,"result":result,"mode":"agent"}
-            except Exception:
-                    pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             fn, fp = _generate_page(msg, msg[:30])
             _LAST["url"]=f"/output/apps/{fn}"; _LAST["time"]=time.time(); _LAST["name"]=msg[:30]
             result = f"✅ **{msg[:30]}**\n[📄 打开]({_LAST['url']})"
@@ -561,8 +564,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                 for t in tc:
                     func = t.get("function",{}); nm = func.get("name",""); a = {}
                     try: a = json.loads(func.get("arguments","{}"))
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
                     result = exec_tool(nm, a, BASE, OUT, _LAST, _GENERATED_TOOLS)
                     tool_results.append((t, result))
                 # 最多3轮工具调用，之后强制LLM总结
@@ -585,8 +588,8 @@ def create_engine(BASE, OUT, TOOLS_DIR, MEM_DB):
                 final = f"✅ **{_LAST.get('name','')}**\n[📄 打开]({_LAST['url']})"
                 if _memos:
                     try: _memos.save_experience(msg[:50], f"工具执行成功:{_LAST.get('url','')}")
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
                 _remember(msg, final, kh=kh)
                 return {"success":True,"result":final,"mode":"agent"}
             if content and '/output/' in content:

@@ -1,4 +1,7 @@
 """AUTO-EVO-AI 工具模块"""
+import logging
+logger = logging.getLogger("evo.system")
+
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any

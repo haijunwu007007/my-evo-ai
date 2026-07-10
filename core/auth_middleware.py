@@ -1,6 +1,9 @@
 """
 Role permission middleware - JWT + role check
 """
+import logging
+logger = logging.getLogger("evo.auth_middleware")
+
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 import jwt, time

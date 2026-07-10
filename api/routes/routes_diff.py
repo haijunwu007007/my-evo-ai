@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — 代码差异对比 API (增强版)
 基于 diff_viewer 模块的文本对比 + AI解释
 """
+import logging
+logger = logging.getLogger("evo.routes_diff")
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from modules.diff_viewer import compare_text, explain_diff, batch_compare

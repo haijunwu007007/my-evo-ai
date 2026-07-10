@@ -44,8 +44,8 @@ class BrowserUseIntegration:
                 if api_key:
                     from langchain_openai import ChatOpenAI
                     return ChatOpenAI(api_key=api_key, model="glm-4-flash")
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         return None
 
     async def run_task(self, task: str, use_cloud: bool = False) -> Dict[str, Any]:
@@ -103,8 +103,8 @@ class BrowserUseIntegration:
             if self.browser:
                 try:
                     await self.browser.close()
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
 
     async def screenshot(self, url: str, save_path: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -211,13 +211,13 @@ def check_browser_use_status() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # 测试
-    print("Browser-Use Integration Module")
-    print("=" * 50)
+    logger.info("Browser-Use Integration Module")
+    logger.info("=" * 50)
     status = check_browser_use_status()
-    print(f"Available: {status['available']}")
+    logger.info(f"Available: {status['available']}")
     if not status['available']:
-        print(f"Install: {status['install_command']}")
+        logger.info(f"Install: {status['install_command']}")
     else:
-        print("Capabilities:")
+        logger.info("Capabilities:")
         for cap in status['capabilities']:
-            print(f"  - {cap}")
+            logger.info(f"  - {cap}")

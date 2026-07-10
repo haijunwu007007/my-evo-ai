@@ -1,4 +1,7 @@
 """MarkItDown — 微软通用文档转 Markdown（PDF/Office/图片→LLM可读）"""
+import logging
+logger = logging.getLogger("evo.agent_markitdown")
+
 import os, json
 from pathlib import Path
 import os

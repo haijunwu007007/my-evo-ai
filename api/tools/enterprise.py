@@ -1,4 +1,7 @@
 """AUTO-EVO-AI 工具模块"""
+import logging
+logger = logging.getLogger("evo.enterprise")
+
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any
@@ -87,7 +90,7 @@ def _(args: dict, **kw):
     if not message:
         return {"ok": False, "data": "请输入通知内容"}
     # 控制台通知
-    print(f"[NOTIFY] {title}: {message}")
+    logger.info(f"[NOTIFY] {title}: {message}")
     # 尝试桌面通知
     try:
         import platform
@@ -95,8 +98,8 @@ def _(args: dict, **kw):
             subprocess.run(["notify-send", title, message[:200]], timeout=5, capture_output=True)
         elif platform.system() == "Darwin":
             subprocess.run(["osascript", "-e", f'display notification "{message[:200]}" with title "{title}"'], timeout=5, capture_output=True)
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     return {"ok": True, "data": f"通知已发送\n标题: {title}\n通道: {channel}\n内容: {message[:200]}"}
 
 @tool("send_sms", "发短信", "发送短信通知")

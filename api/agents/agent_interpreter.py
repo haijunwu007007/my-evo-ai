@@ -1,4 +1,7 @@
 """Open Interpreter — 自然语言电脑控制（读写文件/运行代码/操作终端）"""
+import logging
+logger = logging.getLogger("evo.agent_interpreter")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

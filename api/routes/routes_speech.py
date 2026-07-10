@@ -61,8 +61,8 @@ async def recognize(file: UploadFile = File(...)):
             try:
                 if os.path.exists(wav_path):
                     os.unlink(wav_path)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
     except Exception as e:
         return {"success": False, "text": "", "error": str(e)[:100]}

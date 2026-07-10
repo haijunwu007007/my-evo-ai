@@ -8,6 +8,9 @@ AUTO-EVO-AI V0.1 — 配置加载器（上市公司级）
     cfg = load_config()
     cfg["server"]["port"]  # → 8765 (或 EVO_PORT 覆盖)
 """
+import logging
+logger = logging.getLogger("evo.config_loader")
+
 
 from __future__ import annotations
 

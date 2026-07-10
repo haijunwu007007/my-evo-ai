@@ -1,4 +1,7 @@
 """SWE-agent — 自动修复GitHub Issues（分析+修复+提交PR）"""
+import logging
+logger = logging.getLogger("evo.agent_swe")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

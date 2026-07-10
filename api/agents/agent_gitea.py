@@ -1,6 +1,9 @@
 """
 Gitea自托管Git - 通过Gitea API管理仓库/PR/CI/CD
 """
+import logging
+logger = logging.getLogger("evo.agent_gitea")
+
 import os, json, httpx
 from pathlib import Path
 

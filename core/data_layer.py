@@ -57,8 +57,8 @@ class DataEngine:
         for name, conn in cls._CONNECTION_POOL.items():
             try:
                 conn.close()
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         cls._CONNECTION_POOL.clear()
         cls._instances.clear()
 

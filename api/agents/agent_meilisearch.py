@@ -1,4 +1,7 @@
 """MeiliSearch - AUTO-EVO-AI集成 (localhost:7700)"""
+import logging
+logger = logging.getLogger("evo.agent_meilisearch")
+
 import json, httpx, os
 
 MEILI_URL = os.environ.get("MEILI_URL", "")

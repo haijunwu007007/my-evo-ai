@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_webhook")
 # -*- coding: utf-8 -*-
 """Webhook 触发器路由"""
 from fastapi import APIRouter, Request

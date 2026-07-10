@@ -1,6 +1,9 @@
 """
 OneUptime一体化可观测 - 通过OneUptime API管理监控和事件
 """
+import logging
+logger = logging.getLogger("evo.agent_oneuptime")
+
 import os, json, httpx
 from pathlib import Path
 

@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — ChromaDB 向量数据库管理路由"""
+import logging
+logger = logging.getLogger("evo.routes_chroma")
+
 from fastapi import APIRouter
 router = APIRouter()
 B = "/api/v1/tools/chroma"

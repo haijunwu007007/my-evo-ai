@@ -1,4 +1,7 @@
 """MinIO - AUTO-EVO-AI集成 (localhost:9000)"""
+import logging
+logger = logging.getLogger("evo.agent_minio")
+
 import json, httpx, os
 
 MINIO_URL = os.environ.get("MINIO_URL", "")

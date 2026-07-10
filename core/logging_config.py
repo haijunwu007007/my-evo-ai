@@ -69,8 +69,8 @@ def get_logger(name: str, level: str | None = None) -> logging.Logger:
             )
             file_handler.setFormatter(JSONFormatter() if use_json else _classic_formatter)
             logger.addHandler(file_handler)
-        except Exception:
-            pass  # 日志文件写入失败不影响程序运行
+        except Exception as _e:
+            logger.warning(f"error: {_e}")  # 日志文件写入失败不影响程序运行
 
     return logger
 

@@ -498,8 +498,8 @@ class TaskQueueEngine:
             if self._on_task_complete:
                 try:
                     self._on_task_complete(task)
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
 
     def _handle_failure(self, task: TaskItem, error: str):
         """处理失败: 重试或进入死信"""

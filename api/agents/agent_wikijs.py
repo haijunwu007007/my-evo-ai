@@ -1,6 +1,9 @@
 """
 Wiki.js知识管理 - 通过Wiki.js API管理文档和搜索
 """
+import logging
+logger = logging.getLogger("evo.agent_wikijs")
+
 import os, json, httpx
 from pathlib import Path
 

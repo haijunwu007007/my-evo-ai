@@ -1,4 +1,7 @@
 """Claude Code/Codex — 顶级编码Agent后端API桥接（113K⭐）"""
+import logging
+logger = logging.getLogger("evo.agent_claude")
+
 import os, json, subprocess, tempfile
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

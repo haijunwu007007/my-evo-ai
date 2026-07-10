@@ -1,4 +1,7 @@
 """Twenty CRM — 开源AI CRM（30K+⭐，联系人/交易/工单/REST API）"""
+import logging
+logger = logging.getLogger("evo.agent_twenty")
+
 import os, json, time
 
 TWENTY_CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".twenty", "config.json")
@@ -7,8 +10,8 @@ def _get_twenty_config() -> dict:
     try:
         if os.path.exists(TWENTY_CONFIG_FILE):
             return json.loads(Path(TWENTY_CONFIG_FILE).read_text(encoding='utf-8'))
-    except Exception:
-            pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     return {}
 def _save_twenty_config(cfg: dict):
     os.makedirs(os.path.dirname(TWENTY_CONFIG_FILE), exist_ok=True)

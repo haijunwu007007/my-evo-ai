@@ -1,4 +1,7 @@
 """智能体 — MCP协议支持（外部工具桥接）"""
+import logging
+logger = logging.getLogger("evo.agent_mcp")
+
 import json, httpx, time
 from pathlib import Path
 
@@ -18,8 +21,8 @@ class MCPClient:
             try:
                 cfg = json.loads(Path(config_path).read_text())
                 self.servers = cfg.get("mcp_servers", {})
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
     def register_server(self, name, url, api_key=""):
         self.servers[name] = {"url": url, "api_key": api_key}
@@ -35,8 +38,8 @@ class MCPClient:
                     for t in tools:
                         t["server"] = sname
                     all_tools.extend(tools)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         return all_tools
 
     def call_tool(self, server_name, tool_name, args):

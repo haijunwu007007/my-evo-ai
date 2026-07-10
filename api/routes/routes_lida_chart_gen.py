@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_lida_chart_gen")
 # coding: utf-8
 from fastapi import APIRouter
 from pydantic import BaseModel

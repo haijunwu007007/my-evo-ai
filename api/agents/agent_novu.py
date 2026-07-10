@@ -1,6 +1,9 @@
 """
 novu_notify - Novu统一通知 - Email/SMS/Push/In-App, 单API发所有通道
 """
+import logging
+logger = logging.getLogger("evo.agent_novu")
+
 import os, json, httpx
 from pathlib import Path
 

@@ -193,8 +193,8 @@ class ModuleRegistry:
             for f in files: data[f] = 1
             cache = self._get_cache_path()
             cache.write_text(json.dumps(data, separators=(",", ":")), "utf-8")
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     def auto_discover(self, modules_dir: str = "modules"):
         mod_path = BASE_DIR / modules_dir
@@ -363,8 +363,8 @@ class ModuleRegistry:
             if _pkg not in sys.modules:
                 try:
                     importlib.import_module(_pkg)
-                except ImportError:
-                    pass
+                except ImportError as _e:
+                    logger.warning(f"error: {_e}")
         mod_key = f"{mod_dir}.{name}"
         mod = importlib.import_module(mod_key)
         main_class = getattr(mod, 'module_class', None)
@@ -490,8 +490,8 @@ app.add_middleware(
 try:
     from starlette.middleware.gzip import GZipMiddleware
     app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
-except ImportError:
-    pass
+except ImportError as _e:
+    logger.warning(f"error: {_e}")
 
 def set_lifespan(lifespan_fn):
     """由 startup 模块调用，统一设置 lifespan"""
@@ -631,8 +631,8 @@ async def _execute_module_internal(name: str, action: str = "", params: dict = N
                     if hasattr(result, 'data'):
                         return {"success": result.success, "result": result.data, "error": result.error}
                     return {"success": True, "result": result}
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         if action.lower() in ("status", "info", "ping"):
             return {"success": True, "status": "running", "state": "active", "module": name}
         if action.lower() in ("health", "healthcheck", "health_check"):
@@ -771,8 +771,8 @@ def save_module_state(module_id, name, state):
         conn.execute("INSERT OR REPLACE INTO module_state VALUES (?,?,?,?)", (module_id, name, json.dumps(state), time.time()))
         conn.commit()
         conn.close()
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
 
 def load_module_state(module_id):
     try:

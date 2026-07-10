@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — GitHub Trending API 路由
 提供 GitHub 热门项目扫描和趋势分析的 REST API
 """
+import logging
+logger = logging.getLogger("evo.routes_github")
+
 import os
 from fastapi import APIRouter, Query
 from pydantic import BaseModel

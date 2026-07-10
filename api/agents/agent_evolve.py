@@ -1,4 +1,7 @@
 """智能体 — yoyo-evolve 自进化机制（自主阅读源码并改进）"""
+import logging
+logger = logging.getLogger("evo.agent_evolve")
+
 import os, json, time, re, importlib
 from pathlib import Path
 

@@ -67,8 +67,8 @@ async def search_templates(q: str = "", category: str = "", limit: int = 20):
             txt, _ = call_llm([{"role":"user","content":sp}])
             if txt and txt.strip():
                 en_query = txt.strip()[:50]
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     url = f"{N8N_API}/workflows"
     params = {"limit": limit}
@@ -92,8 +92,8 @@ async def search_templates(q: str = "", category: str = "", limit: int = 20):
                             for i, t in enumerate(templates):
                                 if i < len(lines):
                                     t["name_cn"] = lines[i]
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
                 return {"success": True, "templates": templates[:limit], "total": len(templates), "source": "n8n"}
     except Exception as _e:
             logger.warning(f"error: {_e}")
@@ -137,8 +137,8 @@ async def install_template(template_id: int = 0, workflow_json: str = ""):
                 r = await c.get(f"{N8N_API}/workflows/{template_id}")
                 if r.status_code == 200:
                     workflow_data = r.json()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         if not workflow_data:
             for t in _BUILTIN_TEMPLATES:
                 if t.get("id") == template_id:

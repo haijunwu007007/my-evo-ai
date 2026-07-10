@@ -1,4 +1,7 @@
 """YoYo-Evolve 自进化系统 V2 — 记忆+进化+自动修复+技能发现的完整闭环"""
+import logging
+logger = logging.getLogger("evo.yoyo_evolve")
+
 import os, json, time, re, random, sqlite3, threading, shutil
 from pathlib import Path
 from datetime import datetime
@@ -17,8 +20,8 @@ _ADAPTIVE = None
 try:
     from core.evolution_engine import AdaptiveEngine
     _ADAPTIVE = AdaptiveEngine()
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
 
 def _get_db():
@@ -51,8 +54,8 @@ def _log_evolution(target, analysis, suggestion, status="pending", result="", sc
             _ADAPTIVE.record(module=target[:50], action=f"evolve_{phase}",
                              success=status == "completed", latency_ms=0,
                              context={"suggestion": suggestion[:200]})
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 # ════════════════════════════════════════════════════════════
@@ -107,8 +110,8 @@ def auto_scan(base_dir: Path = None) -> dict:
             exp = m.search_long("代码质量改进", top_k=3)
             if exp:
                 memos_exp = " | ".join(f"{e['pattern']}:{e['solution'][:60]}" for e in exp)
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     return {"scanned": len([p for sd in scan_dirs if sd.exists() for p in sd.glob("*.py")]),
             "files_with_issues": len(results), "total_issues": total_issues,
             "details": results[:20], "timestamp": datetime.now().isoformat(),
@@ -159,8 +162,8 @@ def _auto_fix_code(file_path: str, issue: dict) -> dict:
                 fixed_code = m.group(1)
             elif len(content) > 50:
                 fixed_code = content
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     
     if not fixed_code or len(fixed_code) < 10:
         return {"status": "failed", "error": "LLM未生成有效修复", "backup": str(backup_path)}
@@ -241,8 +244,8 @@ def auto_discover_skills(base_dir: Path = None) -> dict:
             skill_content = f'"""自动发现的技能: {name}"""\nfrom modules.{name} import *\n'
             skill_path.parent.mkdir(parents=True, exist_ok=True)
             skill_path.write_text(skill_content, encoding='utf-8')
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     
     if discovered:
         _log_evolution("skill_discovery", f"发现{len(discovered)}个新技能", str(discovered[:10]),
@@ -288,8 +291,8 @@ def auto_evolve(base_dir=None, memos=None) -> dict:
                 _ADAPTIVE.record(module="yoyo_evolve", action="full_cycle",
                                  success=True, latency_ms=0,
                                  context={"scan": scan["total_issues"], "fix": results.get("fix", {})})
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         
         return {"status": "completed", "results": results,
                 "timestamp": datetime.now().isoformat()}
@@ -331,8 +334,8 @@ def start_background_evolve():
         while True:
             try:
                 auto_evolve()
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             _t.sleep(3600)
     
     threading.Thread(target=_loop, daemon=True).start()

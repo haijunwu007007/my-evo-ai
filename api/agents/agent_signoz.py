@@ -1,6 +1,9 @@
 """
 signoz_apm - SigNoz APM - OpenTelemetry原生, 追踪+指标+日志
 """
+import logging
+logger = logging.getLogger("evo.agent_signoz")
+
 import os, json, httpx
 from pathlib import Path
 

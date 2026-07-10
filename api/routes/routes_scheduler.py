@@ -100,8 +100,8 @@ async def scheduler_status():
                     "active_tasks": st.get("active_tasks", len(_scheduler_tasks_db)),
                     "total_tasks": st.get("total_tasks", len(_scheduler_tasks_db)),
                     "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     active = sum(1 for t in _scheduler_tasks_db.values() if t.get("status") in ("active", "running"))
     return {"success": True, "running": True, "active_tasks": active,
             "total_tasks": len(_scheduler_tasks_db), "engine": "dict"}
@@ -181,8 +181,8 @@ async def scheduler_toggle(task_id: str):
             if hasattr(_scheduler_instance, 'toggle_task'):
                 _scheduler_instance.toggle_task(task_id)
                 return {"success": True, "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     if task_id in _scheduler_tasks_db:
         t = _scheduler_tasks_db[task_id]
         t["status"] = "paused" if t.get("status") == "running" else "running"
@@ -197,8 +197,8 @@ async def scheduler_trigger(task_id: str):
             if hasattr(_scheduler_instance, 'trigger_task'):
                 await _scheduler_instance.trigger_task(task_id)
             return {"success": True, "triggered": True, "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     if task_id in _scheduler_tasks_db:
         _scheduler_tasks_db[task_id]["last_run"] = _ts()
         _save_all()
@@ -212,8 +212,8 @@ async def scheduler_delete(task_id: str):
             if hasattr(_scheduler_instance, 'remove_task'):
                 _scheduler_instance.remove_task(task_id)
             return {"success": True, "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     _scheduler_tasks_db.pop(task_id, None); _save_all()
     return {"success": True}
 
@@ -239,8 +239,8 @@ async def events_stats():
                     "top_event_types": st.get("top_event_types", {"system": len(_events_db)}),
                     "watches": st.get("watches", 0), "subscribers": st.get("subscribers", 0),
                     "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     one_hour_ago = _now() - timedelta(hours=1)
     recent = [e for e in _events_db if e.get("timestamp", "") > one_hour_ago.isoformat()]
     return {"success": True, "total_events": len(_events_db), "total_rules": len(_rules_db),
@@ -257,8 +257,8 @@ async def events_rules():
             engine_rules = _event_engine.list_rules()
             if engine_rules:
                 return {"success": True, "rules": engine_rules, "count": len(engine_rules), "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     rules = sorted(_rules_db.values(), key=lambda r: r.get("created_at", ""), reverse=True)
     return {"success": True, "rules": rules, "count": len(rules), "engine": "dict"}
 
@@ -289,8 +289,8 @@ async def pipeline_status():
         try:
             s = _pipeline_engine.get_status()
             return {"success": True, **s, "engine": "core"} if isinstance(s, dict) else {"success": True, "running": True, "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     active = sum(1 for p in _pipelines_db.values() if p.get("status") == "running")
     return {"success": True, "running": True, "pipelines": list(_pipelines_db.values()), "active_count": active,
             "engine": "dict"}
@@ -303,8 +303,8 @@ async def pipelines_list():
             pl = _pipeline_engine.list_pipelines()
             if pl:
                 return {"success": True, "pipelines": pl, "count": len(pl), "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     items = sorted(_pipelines_db.values(), key=lambda p: p.get("created_at", ""), reverse=True)
     return {"success": True, "pipelines": items, "count": len(items), "engine": "dict"}
 
@@ -353,8 +353,8 @@ async def queue_stats():
             qs = _queue_instance.get_stats()
             if isinstance(qs, dict) and qs:
                 return {"success": True, **qs, "engine": "core"}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     q = _queue_tasks_db
     total = len(q); pending = sum(1 for t in q.values() if t.get("status") == "pending")
     running = sum(1 for t in q.values() if t.get("status") == "running")

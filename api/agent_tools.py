@@ -6,14 +6,17 @@ AUTO-EVO-AI 工具引擎 — 87 个智能体工具
 工具清单见: api/tools/ 目录
 ===========================
 """
+import logging
+logger = logging.getLogger("evo.agent_tools")
+
 from api.tools import tool, exec_tool, list_tools, _tools, BASE
 
 # 注册终极集成引擎 (图片/音频/转换/WebHook/沙箱/截图)
 try:
     from api.hub.unified_toolchain import TOOLS as _UT
     _tools.update(_UT)
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
 try:
     from api.hub.ultimate_integration import execute as _UE
@@ -27,16 +30,16 @@ try:
     ]:
         _f._meta = {"name": _n, "category": "终极集成", "description": "图片生成/音频转录/格式转换/WebHook/沙箱/截图"}
         _tools[_n] = _f
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
 # ── Java/K8s 部署工具 ──
 try:
     from api.hub.java_build_deploy import auto_build_java, detect_java_type
     _tools["java_build"] = lambda a, **k: auto_build_java(a.get("path","."))
     _tools["java_build"]._meta = {"name":"java_build","category":"部署","description":"Java自动检测构建部署"}
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
 try:
     from api.hub.k8s_fallback import deploy_k8s_or_fallback, check_k8s
@@ -44,8 +47,8 @@ try:
     _tools["k8s_deploy"]._meta = {"name":"k8s_deploy","category":"部署","description":"K8s部署+自动降级docker-compose"}
     _tools["k8s_check"] = lambda a, **k: check_k8s()
     _tools["k8s_check"]._meta = {"name":"k8s_check","category":"部署","description":"检查K8s集群状态"}
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
 # ── BrowserAct 反爬浏览器自动化 ──
 try:
@@ -53,10 +56,10 @@ try:
     for _bt in get_browseract_tools():
         _tools[_bt["name"]] = _bt["fn"]
         _tools[_bt["name"]]._meta = {"name": _bt["name"], "category": "浏览器", "description": _bt["desc"]}
-except Exception:
-    pass
+except Exception as _e:
+    logger.warning(f"error: {_e}")
 
-print(f"  [agent_tools] +5 new tools (browseract_extract,browseract_browse,codemem_index,codemem_query,java_build)")
+logger.info(f"  [agent_tools] +5 new tools (browseract_extract,browseract_browse,codemem_index,codemem_query,java_build)")
 
 # ── Agent-Reach 全网搜索 ──
 try:

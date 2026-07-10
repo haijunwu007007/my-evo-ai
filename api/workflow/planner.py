@@ -2,6 +2,9 @@
 
 接收高级目标 → LLM分析 → 输出可执行步骤列表
 """
+import logging
+logger = logging.getLogger("evo.planner")
+
 import json, traceback
 from typing import List, Optional
 

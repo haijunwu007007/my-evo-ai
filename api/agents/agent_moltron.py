@@ -332,21 +332,21 @@ def suggest_new_skills(context: str = "") -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # 测试
-    print("Moltron Skills Auto-Evolution Integration Module")
-    print("=" * 50)
+    logger.info("Moltron Skills Auto-Evolution Integration Module")
+    logger.info("=" * 50)
 
-    print("\n1. 解析Skills.md...")
+    logger.info("\n1. 解析Skills.md...")
     result = parse_skills_md()
     if result["success"]:
-        print(f"   找到 {result['total_skills']} 个技能")
-        print(f"   已掌握: {result['mastered_count']}")
-        print(f"   类别: {', '.join(result['categories'])}")
+        logger.info(f"   找到 {result['total_skills']} 个技能")
+        logger.info(f"   已掌握: {result['mastered_count']}")
+        logger.info(f"   类别: {', '.join(result['categories'])}")
     else:
-        print(f"   失败: {result.get('error', 'Unknown error')}")
+        logger.info(f"   失败: {result.get('error', 'Unknown error')}")
 
-    print("\n2. 建议新技能...")
+    logger.info("\n2. 建议新技能...")
     suggestions = suggest_new_skills()
     if suggestions["success"]:
-        print(f"   建议学习 {suggestions['count']} 个新技能:")
+        logger.info(f"   建议学习 {suggestions['count']} 个新技能:")
         for sugg in suggestions["suggestions"]:
-            print(f"   - {sugg['name']}: {sugg['description']}")
+            logger.info(f"   - {sugg['name']}: {sugg['description']}")

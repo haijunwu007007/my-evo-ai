@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — ChatGPT-Next-Web 桥接路由"""
+import logging
+logger = logging.getLogger("evo.routes_nextchat")
+
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 

@@ -29,7 +29,7 @@ AUTO-EVO-AI V0.1 — 系统级LLM智能网关
   result = await pool.chat("你好", model="deepseek-chat")
   # 流式请求
   async for chunk in pool.chat_stream("讲个故事"):
-      print(chunk, end="")
+      logger.info(chunk, end="")
 
 依赖: 无外部依赖，纯标准库 (urllib/httpx可选)
 """
@@ -576,14 +576,14 @@ class LLMPool:
 
         # 简单对话
         result = pool.chat_sync("你好")
-        print(result["response"])
+        logger.info(result["response"])
 
         # 带上下文的对话
         result = pool.chat_sync("继续", session_id="s1")
 
         # 流式
         for chunk in pool.chat_stream_sync("讲个故事"):
-            print(chunk, end="")
+            logger.info(chunk, end="")
     """
 
     def __init__(self):
@@ -707,8 +707,8 @@ class LLMPool:
                     raw = yaml.safe_load(f) or {}
                     # 兼容新格式（ConfigCenter 改为 list）和老格式（dict with "ai" key）
                     yaml_cfg = raw if isinstance(raw, dict) else {}
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         # 后备: 尝试读取 config/defaults.yaml
         if not yaml_cfg:
             defaults_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "defaults.yaml")
@@ -717,8 +717,8 @@ class LLMPool:
                     with open(defaults_file, encoding="utf-8") as f:
                         raw = yaml.safe_load(f) or {}
                         yaml_cfg = raw if isinstance(raw, dict) else {}
-                except Exception:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
         ai_cfg = yaml_cfg.get("ai", {}) if isinstance(yaml_cfg, dict) else {}
 
         # ── OpenAI ──

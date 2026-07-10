@@ -1,4 +1,7 @@
 """NocoDB - AUTO-EVO-AI集成 (localhost:8081)"""
+import logging
+logger = logging.getLogger("evo.agent_nocodb")
+
 import json, httpx, os
 
 NOCO_URL = os.environ.get("NOCO_URL", "")

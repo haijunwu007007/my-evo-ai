@@ -1,6 +1,9 @@
 """
 wazuh_siem - Wazuh安全监控 - 开源SIEM/XDR, 入侵检测+漏洞扫描
 """
+import logging
+logger = logging.getLogger("evo.agent_wazuh")
+
 import os, json, httpx
 from pathlib import Path
 

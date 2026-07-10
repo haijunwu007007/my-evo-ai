@@ -3,6 +3,9 @@ AUTO-EVO-AI V0.1 — i18n 多语言引擎
 提供 /api/v1/i18n?lang=zh-CN 端点，支持 Accept-Language
 纯文件驱动：从 i18n/*.json 加载所有翻译，无内置硬编码
 """
+import logging
+logger = logging.getLogger("evo.routes_i18n")
+
 from fastapi import APIRouter, Request
 from typing import Optional
 import json, os
@@ -20,8 +23,8 @@ for f in sorted(I18N_DIR.glob("*.json")):
         lang = f.stem
         data = json.loads(f.read_text(encoding="utf-8"))
         _TRANSLATIONS[lang] = data
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
 
 
 @router.get("/api/v1/i18n")

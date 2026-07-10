@@ -1,4 +1,7 @@
 """AutoGPT v2 — 长期自主决策Agent集成"""
+import logging
+logger = logging.getLogger("evo.agent_autogpt")
+
 import os, json, time
 from pathlib import Path
 import os

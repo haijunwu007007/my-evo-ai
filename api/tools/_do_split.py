@@ -1,4 +1,7 @@
 """Split agent_tools.py into api/tools submodules"""
+import logging
+logger = logging.getLogger("evo._do_split")
+
 import re, os
 
 SRC = r"./api\agent_tools.py"
@@ -62,7 +65,7 @@ for fname, blocks in files.items():
     content = head + "\n" + "\n\n".join(b.strip() for b in blocks)
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"  {fname}.py: {len(blocks)} tools")
+    logger.info(f"  {fname}.py: {len(blocks)} tools")
 
 # Create __init__.py
 init = '''"""tools 包 — 导入所有子模块"""
@@ -74,4 +77,4 @@ __all__ = ["tool", "exec_tool", "list_tools"]
 with open(os.path.join(DST, "__init__.py"), "w", encoding="utf-8") as f:
     f.write(init)
 
-print(f"\nTotal: {sum(len(b) for b in files.values())} tools across {len(files)} files")
+logger.info(f"\nTotal: {sum(len(b) for b in files.values())} tools across {len(files)} files")

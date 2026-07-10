@@ -22,8 +22,8 @@ async def agent_ws(ws: WebSocket):
             if msg.get("type") == "result":
                 # 代理返回执行结果
                 logger.info(f"[AGENT] 收到结果: agent={agent_id}, result={str(msg.get('data',''))[:100]}")
-    except WebSocketDisconnect:
-        pass
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
     finally:
         _agents.pop(agent_id, None)
         logger.info(f"[AGENT] 代理断开: {agent_id}")

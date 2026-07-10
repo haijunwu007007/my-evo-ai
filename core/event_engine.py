@@ -432,8 +432,8 @@ class FileWatcher:
                 if fp.is_file():
                     try:
                         watch["mtimes"][str(fp)] = fp.stat().st_mtime
-                    except OSError:
-                        pass
+                    except OSError as _e:
+                        logger.warning(f"error: {_e}")
 
     def start(self) -> None:
         if self._running:
@@ -492,8 +492,8 @@ class FileWatcher:
                                 data={"path": fstr, "name": fp.name, "size": fp.stat().st_size},
                                 priority=6
                             ))
-                    except OSError:
-                        pass
+                    except OSError as _e:
+                        logger.warning(f"error: {_e}")
 
         # 检查删除的文件
         for fstr in watch["mtimes"]:
@@ -573,8 +573,8 @@ class EventEngine:
         for cb in self._global_subscribers:
             try:
                 cb(event)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         # 规则引擎
         self._process_rules(event)

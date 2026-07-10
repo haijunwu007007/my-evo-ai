@@ -1,4 +1,7 @@
 """ScrapeGraphAI — AI驱动智能爬虫（一句话爬取结构化数据）"""
+import logging
+logger = logging.getLogger("evo.agent_scrapegraphai")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

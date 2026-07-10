@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_skills_market")
 # -*- coding: utf-8 -*-
 """
 🌐 Skills 平台集成网关 — 发现/安装/桥接任意第三方 Skills
@@ -71,8 +73,8 @@ def list_skills(source: str = "", search: str = ""):
                 m = re.search(r'name:\s*["\']?(.+?)["\']?\n', c)
                 sn = m.group(1).strip() if m else f.parent.name
                 result.append({"name": sn, "desc": c[:80].replace("\n"," "), "source": "installed", "id": f.parent.name})
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
     
     return {"success": True, "skills": result, "total": len(result)}
 
@@ -136,7 +138,7 @@ def discover_skills():
             mcps = json.loads(mcp_config.read_text())
             for name in mcps.get("mcpServers", {}):
                 results.append({"name": name, "type": "mcp", "status": "available"})
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     
     return {"success": True, "discovered": results, "total": len(results)}

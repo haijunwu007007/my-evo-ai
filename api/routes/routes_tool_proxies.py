@@ -160,8 +160,8 @@ async def websocket_tool(ws: WebSocket):
             result = exec_tool(name, args)
             await ws.send_json({"type":"result","tool":name,"data":result.get("data","")})
             await ws.send_json({"type":"done"})
-    except WebSocketDisconnect:
-        pass
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
     finally:
         _ws_connections.pop(cid, None)
 

@@ -120,8 +120,8 @@ async def gateway_templates():
                           "auth_type": v.get("auth_type", "oauth2"), "description": v.get("description", "")[:200]}
                          for k, v in db.items()]
             return {"success": True, "templates": templates, "count": len(templates)}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return {"success": True, "templates": [], "note": "暂无集成模板"}
 
 @router.get("/api/v1/rag/search")

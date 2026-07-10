@@ -1,6 +1,9 @@
 """
 RabbitMQ消息代理 - 通过RabbitMQ API管理队列和交换机
 """
+import logging
+logger = logging.getLogger("evo.agent_rabbitmq")
+
 import os, json, httpx
 from pathlib import Path
 

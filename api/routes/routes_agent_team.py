@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — Agent 团队管理
 提供 Agent 团队创建、状态查询、协作消息接口
 """
+import logging
+logger = logging.getLogger("evo.routes_agent_team")
+
 from fastapi import APIRouter, Request
 from typing import Optional
 from pathlib import Path

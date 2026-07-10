@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — Stirling-PDF 工具箱桥接路由"""
+import logging
+logger = logging.getLogger("evo.routes_stirling_pdf")
+
 from fastapi import APIRouter
 import urllib.request, json as _json
 router = APIRouter()

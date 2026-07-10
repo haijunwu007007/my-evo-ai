@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_tasks")
 # -*- coding: utf-8 -*-
 """任务/看板管理路由"""
 from fastapi import APIRouter

@@ -2,6 +2,9 @@
 
 将 WorkflowEngine 绑定到实际工具执行。
 """
+import logging
+logger = logging.getLogger("evo.executor")
+
 import sys, os, json
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

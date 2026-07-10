@@ -1,6 +1,9 @@
 """LOOP 工程引擎 — 自主循环：发现→规划→执行→验证→迭代
 Loop Engineering 范式: 设计 loop 来驱动 agent，而不是手动 prompt
 """
+import logging
+logger = logging.getLogger("evo.routes_loop")
+
 
 from fastapi import APIRouter
 from pydantic import BaseModel

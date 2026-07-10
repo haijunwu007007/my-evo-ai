@@ -1,6 +1,9 @@
 """
 projectsend_files - ProjectSend安全文件共享 - 客户端上传/下载/权限
 """
+import logging
+logger = logging.getLogger("evo.agent_projectsend")
+
 import os, json, httpx
 from pathlib import Path
 

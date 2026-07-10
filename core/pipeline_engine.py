@@ -377,8 +377,8 @@ class PipelineEngine:
         # 优先从 SQLite 获取准确统计
         try:
             return self._store.get_stats()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         # fallback: 内存统计
         total = len(self._history)
         success = sum(1 for h in self._history if h.get("success"))

@@ -1,6 +1,9 @@
 """
 openproject_mgmt - OpenProject企业项目管理 - 甘特图/成本/工时管理
 """
+import logging
+logger = logging.getLogger("evo.agent_openproject")
+
 import os, json, httpx
 from pathlib import Path
 

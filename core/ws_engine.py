@@ -439,8 +439,8 @@ async def ws_endpoint_handler(websocket: WebSocket, engine: WSEngine,
                     data={"message": "无效的JSON"}
                 ))
 
-    except WebSocketDisconnect:
-        pass
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
     except Exception as e:
         logger.error("[WS] 客户端异常: %s", e)
     finally:

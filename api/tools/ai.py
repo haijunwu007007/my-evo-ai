@@ -1,4 +1,7 @@
 """AUTO-EVO-AI 工具模块"""
+import logging
+logger = logging.getLogger("evo.ai")
+
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any
@@ -21,8 +24,8 @@ def _(args: dict, **kw):
         snippets = re.findall(r'<a[^>]*class="result__snippet"[^>]*>(.*?)</a>', r.text, re.DOTALL)
         for s in snippets[:5]:
             sources.append(re.sub(r'<[^>]+>', '', s).strip())
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     context = "\n".join(f"- {s}" for s in sources[:5]) if sources else ""
     r = _llm(f"请写一篇关于「{topic}」的研究报告，包含摘要、关键发现和结论。" + (f"\n参考素材：\n{context}" if context else ""), "你是专业研究员。")
     if r:

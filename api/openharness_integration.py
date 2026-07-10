@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.openharness_integration")
 #!/usr/bin/env python3
 """
 OpenHarness Integration — Inject key capabilities into AUTO-EVO-AI
@@ -27,8 +29,8 @@ def _load_mcp_servers():
         try:
             with open(MCP_SERVERS_FILE) as f:
                 return json.load(f)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return []
 
 def _save_mcp_servers(servers):
@@ -70,8 +72,8 @@ def channel_send(platform, channel, message):
                 import httpx
                 r = httpx.post(webhook, json={"msg_type": "text", "content": {"text": message}}, timeout=15)
                 return {"ok": r.is_success, "data": f"Feishu: {r.status_code}"}
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         return {"ok": True, "data": f"Feishu/{channel}: {message[:50]}... (需配置 FEISHU_WEBHOOK)"}
     elif platform == "slack":
         webhook = os.environ.get("SLACK_WEBHOOK", "")
@@ -80,8 +82,8 @@ def channel_send(platform, channel, message):
                 import httpx
                 r = httpx.post(webhook, json={"text": f"[{channel}] {message}"}, timeout=15)
                 return {"ok": True, "data": f"Slack: {r.status_code}"}
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         return {"ok": True, "data": f"Slack/{channel}: {message[:50]}... (需配置 SLACK_WEBHOOK)"}
     elif platform == "discord":
         webhook = os.environ.get("DISCORD_WEBHOOK", "")
@@ -90,8 +92,8 @@ def channel_send(platform, channel, message):
                 import httpx
                 r = httpx.post(webhook, json={"content": message}, timeout=15)
                 return {"ok": True, "data": f"Discord: {r.status_code}"}
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         return {"ok": True, "data": f"Discord/{channel}: {message[:50]}... (需配置 DISCORD_WEBHOOK)"}
     return {"ok": False, "data": f"Unsupported platform: {platform}"}
 
@@ -110,8 +112,8 @@ def bridge_configure(provider, endpoint, key=None):
         try:
             with open(BRIDGE_CONFIG_FILE) as f:
                 bridges = json.load(f)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     bridges = [b for b in bridges if b["provider"] != provider]
     bridges.append({**config, "added": time.time()})
     with open(BRIDGE_CONFIG_FILE, "w") as f:
@@ -149,8 +151,8 @@ def perm_config(mode=None, rules=None, blacklist=None):
             with open(PERM_CONFIG_FILE) as f:
                 saved = json.load(f)
                 cfg.update(saved)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     if mode:
         cfg["mode"] = mode
     if rules:
@@ -167,8 +169,8 @@ def perm_check(path, command=None, tool=None):
         try:
             with open(PERM_CONFIG_FILE) as f:
                 cfg.update(json.load(f))
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     # Check command blacklist
     if command:
         for b in cfg.get("command_blacklist", []):
@@ -232,8 +234,8 @@ def memory_save(key, content, ttl=86400*30):
         try:
             with open(MEMORY_FILE) as f:
                 mem = json.load(f)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     # Clean expired
     now = time.time()
     mem = {k: v for k, v in mem.items() if v.get("expires", 0) > now}
@@ -249,8 +251,8 @@ def memory_search(query):
         try:
             with open(MEMORY_FILE) as f:
                 mem = json.load(f)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     now = time.time()
     results = []
     q = query.lower()
@@ -273,8 +275,8 @@ def memory_compress(max_age_hours=48):
         try:
             with open(MEMORY_FILE) as f:
                 mem = json.load(f)
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     now = time.time()
     old = {k: v for k, v in mem.items() if (now - v.get("created", 0)) > max_age_hours * 3600}
     recent = {k: v for k, v in mem.items() if (now - v.get("created", 0)) <= max_age_hours * 3600}
@@ -293,16 +295,16 @@ def memory_compress(max_age_hours=48):
 # ═══ Integration Test ═══
 
 if __name__ == "__main__":
-    print("OpenHarness Integration Test")
-    print("=" * 40)
-    print(f"MCP: {mcp_register('local', 'http://localhost:6006')['ok']}")
-    print(f"MCP: {mcp_list()['data']}")
-    print(f"Channel: {channel_send('feishu', 'general', 'test')['data']}")
-    print(f"Bridge: {bridge_configure('copilot', 'https://api.githubcopilot.com')['ok']}")
-    print(f"Perm: {perm_config(mode='default')['data']}")
-    print(f"Perm-check: {perm_check('/etc/passwd')['reason']}")
-    print(f"Skills: {skills_save('test', '# Test Skill\\nHello from OpenHarness')['ok']}")
-    print(f"Skills: {skills_list()['data']}")
-    print(f"Memory: {memory_save('test-key', 'This is a test memory')['ok']}")
-    print(f"Memory: {memory_search('test')['data']}")
-    print(f"ALL OK")
+    logger.info("OpenHarness Integration Test")
+    logger.info("=" * 40)
+    logger.info(f"MCP: {mcp_register('local', 'http://localhost:6006')['ok']}")
+    logger.info(f"MCP: {mcp_list()['data']}")
+    logger.info(f"Channel: {channel_send('feishu', 'general', 'test')['data']}")
+    logger.info(f"Bridge: {bridge_configure('copilot', 'https://api.githubcopilot.com')['ok']}")
+    logger.info(f"Perm: {perm_config(mode='default')['data']}")
+    logger.info(f"Perm-check: {perm_check('/etc/passwd')['reason']}")
+    logger.info(f"Skills: {skills_save('test', '# Test Skill\\nHello from OpenHarness')['ok']}")
+    logger.info(f"Skills: {skills_list()['data']}")
+    logger.info(f"Memory: {memory_save('test-key', 'This is a test memory')['ok']}")
+    logger.info(f"Memory: {memory_search('test')['data']}")
+    logger.info(f"ALL OK")

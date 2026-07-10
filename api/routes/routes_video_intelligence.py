@@ -78,8 +78,8 @@ async def analyze_uploaded_video(
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
             os.rmdir(tmp_dir)
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 @router.post("/info")
@@ -100,8 +100,8 @@ async def video_info(file: UploadFile = File(...)):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
             os.rmdir(tmp_dir)
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 @router.post("/transcribe")
@@ -119,5 +119,5 @@ async def transcribe_video_route(file: UploadFile = File(...)):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
             os.rmdir(tmp_dir)
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")

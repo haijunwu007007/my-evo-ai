@@ -3,6 +3,9 @@ AUTO-EVO-AI — 模块管理路由
 ==================================
 模块注册表、CRUD、执行、搜索、批量操作
 """
+import logging
+logger = logging.getLogger("evo.routes_modules")
+
 
 from __future__ import annotations
 

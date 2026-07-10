@@ -256,7 +256,7 @@ def check_openhands_status() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     r = generate_project("一个待办事项管理Web应用", "fullstack", "python")
-    print(f"Success: {r['success']}, Files: {r['file_count']}")
+    logger.info(f"Success: {r['success']}, Files: {r['file_count']}")
     if r.get("files_generated"):
         for f in r["files_generated"][:5]:
-            print(f"  - {f}")
+            logger.info(f"  - {f}")

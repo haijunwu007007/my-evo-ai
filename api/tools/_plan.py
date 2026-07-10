@@ -1,4 +1,7 @@
 """提取 agent_tools.py 中各节代码并写出到 api/tools/*.py"""
+import logging
+logger = logging.getLogger("evo._plan")
+
 import re, os, sys
 
 SCRIPT = os.environ.get("EVO_AGENT_TOOLS") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agent_tools.py")
@@ -39,8 +42,8 @@ for header_line, body in sections:
         # Default to system
         target = "system"
 
-    print(f"  {section_name:20s} → {target}.py")
+    logger.info(f"  {section_name:20s} → {target}.py")
 
 # For now just print the mapping, actual splitting will be done carefully
-print(f"\nTotal sections: {len(sections)}")
-print(f"Need to create: browser.py, code.py, document.py, data.py, ai.py, enterprise.py, system.py")
+logger.info(f"\nTotal sections: {len(sections)}")
+logger.info(f"Need to create: browser.py, code.py, document.py, data.py, ai.py, enterprise.py, system.py")

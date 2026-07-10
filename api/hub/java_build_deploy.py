@@ -1,4 +1,7 @@
 """Java项目自动检测→构建→部署"""
+import logging
+logger = logging.getLogger("evo.java_build_deploy")
+
 import os, subprocess, json, re, shutil
 
 def detect_java_type(project_dir):

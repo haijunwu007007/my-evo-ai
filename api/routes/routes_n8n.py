@@ -1,6 +1,9 @@
 """
 N8N Workflow Bridge + Full Reverse Proxy
 """
+import logging
+logger = logging.getLogger("evo.routes_n8n")
+
 import os, json, sqlite3, re, httpx, websockets, asyncio
 from fastapi import APIRouter, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse, Response
@@ -43,8 +46,8 @@ async def _ensure_cookie() -> str:
                     cookie = r.headers.get("set-cookie", "")
                     N8N_COOKIE = cookie.split(";")[0] if cookie else ""
                     return N8N_COOKIE
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         return ""
 
 async def _proxy(path: str):
@@ -236,7 +239,7 @@ async def n8n_ws_proxy(websocket: WebSocket, path: str):
                     msg = await ws.recv()
                     await websocket.send_text(msg)
             await asyncio.gather(fwd_to_n8n(), fwd_to_browser())
-    except WebSocketDisconnect:
-        pass
-    except Exception:
-        pass
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
+    except Exception as _e:
+        logger.warning(f"error: {_e}")

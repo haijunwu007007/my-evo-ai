@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — Dify LLM应用平台 桥接路由"""
+import logging
+logger = logging.getLogger("evo.routes_dify")
+
 from fastapi import APIRouter
 router = APIRouter()
 B = "/api/v1/tools/dify"

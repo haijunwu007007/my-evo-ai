@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_tool_exec")
 # -*- coding: utf-8 -*-
 """工具真执行路由 — 直接调用后端模块"""
 from fastapi import APIRouter
@@ -119,8 +121,8 @@ async def tool_list():
                 j = content.find("\n", content.find("}", i)) + 1
                 meta_str = content[i:j].split("=", 1)[1].strip()
                 meta = eval(meta_str, {"true": True, "false": False, "none": None})
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         tools.append({
             "name": fp.stem,
             "meta": meta.get("name", fp.stem),

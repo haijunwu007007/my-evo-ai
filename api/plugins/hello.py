@@ -1,4 +1,7 @@
 """示例插件 — Hello World"""
+import logging
+logger = logging.getLogger("evo.hello")
+
 from api.agent_tools import _tools
 
 def hello_tool(args, **kw):
@@ -7,4 +10,4 @@ def hello_tool(args, **kw):
 
 def register():
     _tools["hello"] = hello_tool
-    print("[plugin] hello tool registered")
+    logger.info("[plugin] hello tool registered")

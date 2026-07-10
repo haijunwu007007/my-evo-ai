@@ -7,6 +7,9 @@ AUTO-EVO-AI V0.1 — 性能分析模块
   2. 间隔采样: /api/profile/start + /api/profile/stop 手动控制
   3. /api/profile/status 查看最近记录
 """
+import logging
+logger = logging.getLogger("evo.profiler")
+
 
 from __future__ import annotations
 
@@ -92,7 +95,7 @@ async def profiling_middleware_dispatch(request: Request, call_next):
         record_profile(path, elapsed, flame)
         # 只在头触发时打印到日志
         if request.headers.get("X-Profile", "").lower() == "true":
-            print(f"[PROFILER] {path} — {elapsed:.1f}ms\n{flame[:2000]}\n{'='*60}")
+            logger.info(f"[PROFILER] {path} — {elapsed:.1f}ms\n{flame[:2000]}\n{'='*60}")
 
     return response
 

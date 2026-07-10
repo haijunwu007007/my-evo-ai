@@ -1,4 +1,7 @@
 """工具注册表 — tool() 装饰器 + exec_tool() 执行入口"""
+import logging
+logger = logging.getLogger("evo.registry")
+
 import os, json, re, time, hashlib, tempfile, subprocess
 from typing import Any
 

@@ -1,4 +1,7 @@
 """AnySearch + CLI-Anything + WebSocket + ConfigHotReload + RBAC 工具"""
+import logging
+logger = logging.getLogger("evo.external")
+
 from .registry import tool
 
 # ── AnySearch ──
@@ -18,9 +21,9 @@ try:
         if not queries: return {"ok": False, "data": "请输入查询列表"}
         r = anysearch_batch(queries)
         return {"ok": r["ok"], "data": r["data"]}
-    print("[plugin] AnySearch tools OK")
+    logger.info("[plugin] AnySearch tools OK")
 except Exception as e:
-    print(f"[plugin] AnySearch skipped: {e}")
+    logger.info(f"[plugin] AnySearch skipped: {e}")
 
 # ── CLI-Anything ──
 try:
@@ -34,9 +37,9 @@ try:
     @tool("cli_execute", "开发工具", "执行 CLI 命令")
     def _(args, **kw):
         return cli_execute(args.get("command", ""), args.get("cwd"))
-    print("[plugin] CLI-Anything tools OK")
+    logger.info("[plugin] CLI-Anything tools OK")
 except Exception as e:
-    print(f"[plugin] CLI-Anything skipped: {e}")
+    logger.info(f"[plugin] CLI-Anything skipped: {e}")
 
 # ── WebSocket ──
 _ws_clients = set()

@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — FileBrowser (55k⭐) 桥接路由"""
+import logging
+logger = logging.getLogger("evo.routes_filebrowser")
+
 from fastapi import APIRouter
 router = APIRouter()
 import os, json, urllib.request

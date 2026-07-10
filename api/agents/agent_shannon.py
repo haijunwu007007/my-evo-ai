@@ -1,4 +1,7 @@
 """Shannon — AI白盒Web应用安全测试（KeygraphHQ开源，自动代码审计）"""
+import logging
+logger = logging.getLogger("evo.agent_shannon")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

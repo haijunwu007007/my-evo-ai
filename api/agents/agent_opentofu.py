@@ -1,6 +1,9 @@
 """
 OpenTofu基础设施即代码 - 通过OpenTofu API管理IaC
 """
+import logging
+logger = logging.getLogger("evo.agent_opentofu")
+
 import os, json, httpx
 from pathlib import Path
 

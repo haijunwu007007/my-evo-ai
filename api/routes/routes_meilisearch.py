@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — Meilisearch 搜索引擎桥接路由"""
+import logging
+logger = logging.getLogger("evo.routes_meilisearch")
+
 from fastapi import APIRouter, Query
 import urllib.request, json as _json
 

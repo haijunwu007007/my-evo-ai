@@ -1,4 +1,7 @@
 """AgentEval — Agent性能评估与基准测试"""
+import logging
+logger = logging.getLogger("evo.agent_agenteval")
+
 import os, json, time
 from pathlib import Path
 import os

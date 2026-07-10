@@ -4,6 +4,9 @@ ToolBench 集成模块
 Agent不再"不知道有什么API可用"
 https://github.com/OpenBMB/ToolBench
 """
+import logging
+logger = logging.getLogger("evo.agent_toolbench")
+
 
 import os, json, time
 from pathlib import Path
@@ -418,15 +421,15 @@ def check_toolbench_status() -> dict:
 
 
 if __name__ == "__main__":
-    print("ToolBench API Registry Module")
-    print("=" * 50)
+    logger.info("ToolBench API Registry Module")
+    logger.info("=" * 50)
     stats = get_registry_stats()
-    print(f"Total APIs: {stats['total_apis']}")
-    print(f"Categories: {stats['categories']}")
+    logger.info(f"Total APIs: {stats['total_apis']}")
+    logger.info(f"Categories: {stats['categories']}")
     for cat, count in sorted(stats['by_category'].items()):
-        print(f"  - {cat}: {count} APIs")
-    print()
+        logger.info(f"  - {cat}: {count} APIs")
+    logger.info()
     result = discover_apis(query="搜索")
-    print(f"Search '搜索': found {result['total']} APIs")
+    logger.info(f"Search '搜索': found {result['total']} APIs")
     for api in result['apis'][:5]:
-        print(f"  - {api['name']}: {api['description']}")
+        logger.info(f"  - {api['name']}: {api['description']}")

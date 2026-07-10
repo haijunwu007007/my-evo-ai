@@ -1,4 +1,7 @@
 """AnySearch 集成 — AI Agent 统一实时搜索"""
+import logging
+logger = logging.getLogger("evo.anysearch_integration")
+
 import json, os, time, hashlib
 from typing import Optional
 

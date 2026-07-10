@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_nlp")
 # -*- coding: utf-8 -*-
 """NLP→工作流 — 真调用LLM拆解任务"""
 from fastapi import APIRouter

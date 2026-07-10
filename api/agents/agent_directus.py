@@ -1,6 +1,9 @@
 """
 Directus数据平台 - 通过Directus API管理内容和资产
 """
+import logging
+logger = logging.getLogger("evo.agent_directus")
+
 import os, json, httpx
 from pathlib import Path
 

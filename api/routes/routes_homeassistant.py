@@ -1,4 +1,7 @@
 """Home Assistant — 智能家居桥接 (80k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_homeassistant")
+
 from fastapi import APIRouter; from api.infra import registry
 import os; router=APIRouter(); URL=os.environ.get("HOMEASSISTANT_URL","http://localhost:8123")
 @router.get("/api/v1/tools/homeassistant")

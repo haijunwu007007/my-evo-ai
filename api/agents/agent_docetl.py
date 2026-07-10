@@ -1,4 +1,7 @@
 """DocETL — AI文档ETL管道（YAML定义→LLM处理，文档批处理自动化）"""
+import logging
+logger = logging.getLogger("evo.agent_docetl")
+
 import os, json
 
 def docetl_create_pipeline(name: str = "", source: str = "",

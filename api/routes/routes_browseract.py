@@ -1,4 +1,7 @@
 """BrowserAct 桥接路由 — 反爬浏览器自动化"""
+import logging
+logger = logging.getLogger("evo.routes_browseract")
+
 import subprocess, json, shutil
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel

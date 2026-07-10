@@ -8,6 +8,9 @@ AUTO-EVO-AI V0.1 — 智能工具路由层
   2. 关键词模糊匹配 (降级)
   3. 纯 LLM 聊天 (兜底)
 """
+import logging
+logger = logging.getLogger("evo.tool_router")
+
 import json, re, time
 from typing import Any
 
@@ -166,8 +169,8 @@ def route_and_execute(user_input: str, history: list | None = None) -> dict:
         result = _try_function_calling(text, history)
         if result:
             return result
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
 
     # ── 2. 关键词模糊匹配（降级）──
     for pattern, tool_name in _KEYWORD_TOOLS:

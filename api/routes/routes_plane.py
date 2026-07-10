@@ -1,4 +1,7 @@
 """Plane — 项目管理桥接 (30k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_plane")
+
 from fastapi import APIRouter; from api.infra import registry
 router=APIRouter(); import os; URL=os.environ.get("PLANE_URL","http://localhost:8080")
 @router.get("/api/v1/tools/plane")

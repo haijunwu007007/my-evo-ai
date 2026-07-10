@@ -1,4 +1,7 @@
 """系统能力差距分析"""
+import logging
+logger = logging.getLogger("evo.gap_analyzer")
+
 import os, json
 
 BASE = os.path.dirname(os.path.dirname(__file__))
@@ -45,6 +48,6 @@ try:
         gaps.append({"gap": "深度浏览器自动化", "current": "仅截图/爬取", "target": "导航→点击→填写→提取→截图全链路"})
 except: pass
 
-print(f"发现 {len(gaps)} 个能力差距:")
+logger.info(f"发现 {len(gaps)} 个能力差距:")
 for g in gaps:
-    print(f"  [{g['gap']}] 当前: {g['current']}")
+    logger.info(f"  [{g['gap']}] 当前: {g['current']}")

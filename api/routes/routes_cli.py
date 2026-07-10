@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_cli")
 # -*- coding: utf-8 -*-
 """
 🔧 CLI 能力网关 — 统一管理所有 CLI 工具

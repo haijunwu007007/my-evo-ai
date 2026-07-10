@@ -2,6 +2,9 @@
 AUTO-EVO-AI 终极集成引擎
 从开源项目注入6大能力, 覆盖最后差距
 """
+import logging
+logger = logging.getLogger("evo.ultimate_integration")
+
 import os, subprocess, json, tempfile, time, shutil, io
 from pathlib import Path
 

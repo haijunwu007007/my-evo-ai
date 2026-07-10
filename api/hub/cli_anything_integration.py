@@ -1,4 +1,7 @@
 """CLI-Anything 集成 — 将任意软件转为Agent工具"""
+import logging
+logger = logging.getLogger("evo.cli_anything_integration")
+
 import os, json, subprocess, tempfile, time
 
 CLI_HUB_INSTALLED = False

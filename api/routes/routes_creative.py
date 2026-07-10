@@ -1,4 +1,7 @@
 """6项新能力: 截图转码/音乐生成/照片修复/自动剪辑/人声分离/录屏分析"""
+import logging
+logger = logging.getLogger("evo.routes_creative")
+
 import os, json, time, base64, io, hashlib, uuid, re
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form

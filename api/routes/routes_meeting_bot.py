@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_meeting_bot")
 # coding: utf-8
 from fastapi import APIRouter
 from pydantic import BaseModel

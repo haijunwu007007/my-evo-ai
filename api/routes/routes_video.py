@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_video")
 # -*- coding: utf-8 -*-
 """视频生成统一路由：Pixelle-Video API代理 + Wan2.2数字人 + LTX-2.3引擎"""
 from fastapi import APIRouter, HTTPException

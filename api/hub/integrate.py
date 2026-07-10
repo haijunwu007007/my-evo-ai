@@ -184,8 +184,8 @@ async def _do_deploy(project_id: str, cfg: dict):
                     if r.status_code < 500:
                         _append_log(project_id, f"健康检查通过 (端口 {port})")
                         break
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             await asyncio.sleep(5)
         else:
             _append_log(project_id, "健康检查超时，但仍标记为运行")

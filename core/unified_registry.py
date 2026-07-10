@@ -32,9 +32,9 @@ class UnifiedModuleRegistry:
         
     async def initialize(self):
         """初始化所有模块"""
-        print("=" * 60)
-        print("  初始化模块注册中心...")
-        print("=" * 60)
+        logger.info("=" * 60)
+        logger.info("  初始化模块注册中心...")
+        logger.info("=" * 60)
         
         # 注册所有模块
         await self._register_all_modules()
@@ -46,10 +46,10 @@ class UnifiedModuleRegistry:
         await self._verify_modules()
         
         self._initialized = True
-        print(f"✓ 模块注册中心初始化完成")
-        print(f"  - 已注册: {len(self.mm.modules)} 个模块")
-        print(f"  - 已加载: {len(self.mm.module_metadata)} 个元数据")
-        print("=" * 60)
+        logger.info(f"✓ 模块注册中心初始化完成")
+        logger.info(f"  - 已注册: {len(self.mm.modules)} 个模块")
+        logger.info(f"  - 已加载: {len(self.mm.module_metadata)} 个元数据")
+        logger.info("=" * 60)
         
     async def _register_all_modules(self):
         """注册所有模块"""
@@ -221,10 +221,10 @@ class UnifiedModuleRegistry:
         total = len(self.mm.module_metadata)
         registered = len(self.mm.module_registry)
         
-        print(f"  模块验证:")
-        print(f"    - Dashboard定义: {total} 个")
-        print(f"    - 已注册实现: {registered} 个")
-        print(f"    - 待实现: {total - registered} 个")
+        logger.info(f"  模块验证:")
+        logger.info(f"    - Dashboard定义: {total} 个")
+        logger.info(f"    - 已注册实现: {registered} 个")
+        logger.info(f"    - 待实现: {total - registered} 个")
         
     async def execute_coordinated(self, module_ids: list[str], params: dict) -> dict:
         """
@@ -275,7 +275,7 @@ class UnifiedModuleRegistry:
                     await module.shutdown()
                 self.module_status[module_id]["status"] = "shutdown"
             except Exception as e:
-                print(f"  关闭模块 {module_id} 失败: {e}")
+                logger.info(f"  关闭模块 {module_id} 失败: {e}")
 
 
 # ===== P0 核心模块实现 =====
@@ -536,7 +536,7 @@ class AgentOrchestratorModule(AsyncModule):
                     "raw_input": user_input
                 }
             except Exception as e:
-                print(f"[WARN] AI意图分析失败: {e}，降级到规则引擎")
+                logger.info(f"[WARN] AI意图分析失败: {e}，降级到规则引擎")
 
         # 降级到规则引擎
         user_input_lower = user_input.lower()

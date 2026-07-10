@@ -1,6 +1,9 @@
 """
 Email/SMTP 配置路由
 """
+import logging
+logger = logging.getLogger("evo.routes_email")
+
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
 from api._rbac import require_role

@@ -201,8 +201,8 @@ def _cleanup_sqlite():
         if isinstance(obj, sqlite3.Connection):
             try:
                 obj.close()
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -215,8 +215,8 @@ async def lifespan(app: FastAPI):
     try:
         from core.production_logging import setup_production_logging
         setup_production_logging()
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     # 环境变量检查
     _env_checks = [
         ("ZHIPU_API_KEY", "智谱 GLM-4 (LLM 对话)"),
@@ -235,8 +235,8 @@ async def lifespan(app: FastAPI):
     try:
         from core.telemetry import init_telemetry
         init_telemetry()
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
 
     t0 = time.time()
     registry.auto_discover("modules")
@@ -256,8 +256,8 @@ async def lifespan(app: FastAPI):
                 if _m:
                     registry.modules[_nm] = _m
                     registry._pending_modules.pop(_nm, None)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         logger.info(f"[EAGER] 已加载 {len(registry.modules)} 个模块")
     logger.info(f"启动耗时: {time.time()-t0:.1f}s — 部分模块已预热，其余按需加载")
 
@@ -388,8 +388,8 @@ async def warmup_modules():
                 try:
                     mod = await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
                     if mod: loaded += 1
-                except:
-                    pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
             if loaded:
                 logger.info(f"[BULK-LOAD] 后台加载 {loaded}/{len(batch)} 模块 (剩余 {remaining})")
             await asyncio.sleep(30)  # 每30秒加载一批
@@ -407,8 +407,8 @@ async def heartbeat_task():
         await asyncio.sleep(30)
         try:
             registry.get_all_health()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 async def activity_broadcast_task():
@@ -417,8 +417,8 @@ async def activity_broadcast_task():
         await asyncio.sleep(10)
         try:
             await manager.broadcast({"type": "evt:activity_tick", "timestamp": datetime.now().isoformat()})
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 async def sysmon_broadcast_task():
@@ -456,10 +456,10 @@ async def auto_heal_task():
             for name in pending[:10]:
                 try:
                     await asyncio.wait_for(registry.lazy_load_module(name), timeout=5)
-                except:
-                    pass
-        except Exception:
-            pass
+                except Exception as _e:
+                    logger.warning(f"error: {_e}")
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
 
 async def hot_reload_task():

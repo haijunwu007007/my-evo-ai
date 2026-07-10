@@ -1,4 +1,7 @@
 """GPT-Pilot — 全栈AI开发者（需求→代码→调试全流程）"""
+import logging
+logger = logging.getLogger("evo.agent_gptpilot")
+
 import os, json, time
 from pathlib import Path
 import os
@@ -82,8 +85,8 @@ def gptpilot_build(description: str = "", tech_stack: str = "fastapi+vue",
                     try:
                         r = f.result()
                         if r: gen_files.append(r)
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
 
             return {
                 "success": True,

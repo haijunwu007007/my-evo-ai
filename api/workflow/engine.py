@@ -2,6 +2,9 @@
 
 支持步骤串行/并行执行，依赖解析，状态持久化，重试。
 """
+import logging
+logger = logging.getLogger("evo.engine")
+
 import json, time, os, threading
 from typing import Any, Dict, List, Optional, Callable
 from enum import Enum

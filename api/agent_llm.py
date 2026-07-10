@@ -49,8 +49,8 @@ def _init_fallback_providers():
             others = [p for p in providers if p.get("name", "") not in defaults and p.get("name", "")]
             for p in others:
                 fallbacks.append({"provider": p.get("name", ""), "model": p.get("model", ""), "priority": 50})
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     _FALLBACK_PROVIDERS = fallbacks
     if fallbacks:
         logger.info("[LLM-FALLBACK] 备用模型: %s", [f["provider"] for f in fallbacks])

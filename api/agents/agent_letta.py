@@ -217,13 +217,13 @@ def check_letta_status() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # 测试
-    print("Letta (MemGPT) Integration Module")
-    print("=" * 50)
+    logger.info("Letta (MemGPT) Integration Module")
+    logger.info("=" * 50)
     status = check_letta_status()
-    print(f"Available: {status['available']}")
+    logger.info(f"Available: {status['available']}")
     if not status['available']:
-        print(f"Install: {status['install_command']}")
+        logger.info(f"Install: {status['install_command']}")
     else:
-        print("Capabilities:")
+        logger.info("Capabilities:")
         for cap in status['capabilities']:
-            print(f"  - {cap}")
+            logger.info(f"  - {cap}")

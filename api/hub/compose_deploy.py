@@ -1,4 +1,7 @@
 """组合部署引擎 — 多个项目合成Docker Compose + 统一Nginx入口"""
+import logging
+logger = logging.getLogger("evo.compose_deploy")
+
 from __future__ import annotations
 import os, json, subprocess, time, hashlib
 from pathlib import Path
@@ -99,8 +102,8 @@ def gen_nginx_conf(compose_id: str, upstreams: list, compose_dir: Path):
     try:
         (Path("/etc/nginx/sites-enabled") / f"evo-compose-{compose_id}.conf").write_text(conf_text)
         subprocess.run(["nginx", "-s", "reload"], capture_output=True, timeout=10)
-    except Exception:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     
     return conf_text
 
@@ -165,7 +168,7 @@ def stop_compose(compose_id: str) -> dict:
                 ["docker", "compose", "down"],
                 cwd=str(compose_dir), capture_output=True, timeout=60
             )
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     update_compose(compose_id, {"status": "stopped"})
     return {"success": True}

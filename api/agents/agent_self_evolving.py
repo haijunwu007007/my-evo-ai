@@ -336,14 +336,14 @@ def commit_improvement(message: str, repo_path: str = ".") -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # 测试
-    print("Self-Evolving Agent Integration Module")
-    print("=" * 50)
+    logger.info("Self-Evolving Agent Integration Module")
+    logger.info("=" * 50)
     
-    print("\n1. 分析代码库...")
+    logger.info("\n1. 分析代码库...")
     result = analyze_codebase(".")
     if result["success"]:
-        print(f"   分析了 {result['files_analyzed']} 个文件")
-        print(f"   发现 {result['total_issues']} 个潜在改进点")
-        print(f"\n{result['summary']}")
+        logger.info(f"   分析了 {result['files_analyzed']} 个文件")
+        logger.info(f"   发现 {result['total_issues']} 个潜在改进点")
+        logger.info(f"\n{result['summary']}")
     else:
-        print(f"   失败: {result.get('error', 'Unknown error')}")
+        logger.info(f"   失败: {result.get('error', 'Unknown error')}")

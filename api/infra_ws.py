@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — WebSocket 连接管理器
 从 infra.py 拆分出
 """
+import logging
+logger = logging.getLogger("evo.infra_ws")
+
 from __future__ import annotations
 
 from fastapi import WebSocket

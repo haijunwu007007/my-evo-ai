@@ -1,4 +1,7 @@
 """LIDA — 微软开源 LLM 驱动的自动可视化/数据分析工具"""
+import logging
+logger = logging.getLogger("evo.agent_lida")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

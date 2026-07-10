@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_desktop")
 # -*- coding: utf-8 -*-
 from fastapi import APIRouter, Query
 import os, sys

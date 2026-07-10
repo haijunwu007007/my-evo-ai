@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_multi_agent")
 # -*- coding: utf-8 -*-
 from fastapi import APIRouter
 import os, sys

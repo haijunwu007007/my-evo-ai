@@ -37,8 +37,8 @@ def _extract_info(filepath: Path) -> dict:
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 if not node.name.startswith('_'):
                     info["functions"].append(node.name)
-    except:
-        pass
+    except Exception as _e:
+        logger.warning(f"error: {_e}")
     # 提取关键词（中文+英文）
     words = set(re.findall(r'[\u4e00-\u9fff]{2,}', src))
     words.update(re.findall(r'\b[a-z]{4,}\b', src.lower()))

@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_e2b_sandbox")
 # coding: utf-8
 from fastapi import APIRouter
 from pydantic import BaseModel

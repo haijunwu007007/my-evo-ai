@@ -1,4 +1,7 @@
 """Qwen3-TTS — 阿里开源语音合成（文本→语音，97ms流式延迟，情绪控制）"""
+import logging
+logger = logging.getLogger("evo.agent_tts")
+
 import os, json, base64
 from pathlib import Path
 import os

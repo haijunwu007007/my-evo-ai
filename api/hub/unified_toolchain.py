@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.unified_toolchain")
 #!/usr/bin/env python3
 """
 全方位开源工具链集成 — 自动完成几乎所有工作
@@ -275,7 +277,7 @@ def research_pipeline(topic, depth=3):
 def send_communication(channel, to, subject, body):
     """多渠道通讯: console/file/email(需配置)"""
     if channel == "console":
-        print(f"\n[TO:{to}] {subject}\n{body}\n")
+        logger.info(f"\n[TO:{to}] {subject}\n{body}\n")
         return {"ok": True, "data": f"控制台输出: {to}/{subject}"}
     if channel == "file":
         log_file = os.path.join(DATA_DIR, "messages.jsonl")

@@ -1,4 +1,7 @@
 """多Worker支持 + 超时熔断"""
+import logging
+logger = logging.getLogger("evo._multi_worker")
+
 import os, time, json, threading
 from functools import wraps
 import threading

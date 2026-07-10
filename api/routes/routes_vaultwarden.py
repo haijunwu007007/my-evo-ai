@@ -1,4 +1,7 @@
 """Vaultwarden — 密码管理桥接 (40k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_vaultwarden")
+
 from fastapi import APIRouter; from api.infra import registry
 router=APIRouter(); import os; URL=os.environ.get("VAULTWARDEN_URL","http://localhost:8080")
 @router.get("/api/v1/tools/vaultwarden")

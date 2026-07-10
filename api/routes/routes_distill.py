@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_distill")
 # -*- coding: utf-8 -*-
 """
 🧪 蒸馏一切 — 演示/URL/文档/代码/视频 → 可复用技能

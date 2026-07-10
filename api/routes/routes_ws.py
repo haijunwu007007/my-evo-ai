@@ -25,8 +25,8 @@ async def websocket_tool(websocket: WebSocket):
             result = exec_tool(name, args)
             await websocket.send_json({"type": "result", "tool": name, "data": result.get("data", "")})
             await websocket.send_json({"type": "done"})
-    except WebSocketDisconnect:
-        pass
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
     finally:
         active_connections.pop(conn_id, None)
 
@@ -50,8 +50,8 @@ async def websocket_chat(websocket: WebSocket):
                 for cid, info in chat_rooms.items():
                     try:
                         await info["ws"].send_json({"type": "users", "users": users})
-                    except:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
             elif msg.get("type") == "message":
                 text = msg.get("text", "")
                 user = msg.get("user", user_name)
@@ -59,10 +59,10 @@ async def websocket_chat(websocket: WebSocket):
                 for cid, info in chat_rooms.items():
                     try:
                         await info["ws"].send_json({"type": "message", "user": user, "text": text})
-                    except:
-                        pass
-    except WebSocketDisconnect:
-        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
+    except WebSocketDisconnect as _e:
+        logger.warning(f"error: {_e}")
     finally:
         chat_rooms.pop(conn_id, None)
         # 更新用户列表
@@ -70,5 +70,5 @@ async def websocket_chat(websocket: WebSocket):
         for cid, info in chat_rooms.items():
             try:
                 await info["ws"].send_json({"type": "users", "users": users})
-            except:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")

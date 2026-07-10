@@ -23,8 +23,8 @@ try:
             base_url=LANGFUSE_CONFIG["base_url"],
         )
         HAS_LANGFUSE = True
-except ImportError:
-    pass
+except ImportError as _e:
+    logger.warning(f"error: {_e}")
 
 
 @router.get("")

@@ -1,4 +1,7 @@
 """OpenClaw — 多平台个人AI助手桥接（WhatsApp/Telegram/Slack/Discord/iMessage 20+平台）"""
+import logging
+logger = logging.getLogger("evo.agent_openclaw")
+
 import os, json, time
 from pathlib import Path
 import os
@@ -15,8 +18,8 @@ def _get_claw_config() -> dict:
     if CLAW_CONFIG_FILE.exists():
         try:
             return json.loads(CLAW_CONFIG_FILE.read_text(encoding='utf-8'))
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return {}
 
 def _save_claw_config(config: dict):
@@ -132,8 +135,8 @@ def openclaw_send(platform: str = "", recipient: str = "", message: str = "",
                 "time": time.time()
             })
             msg_log.write_text(json.dumps(outbox, ensure_ascii=False))
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         return {"success": True, "message_id": f"queued_{int(time.time())}", "sent_to": recipient,
                 "note": f"服务不可达，已加入队列: {e}"}
 

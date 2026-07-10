@@ -1,4 +1,7 @@
 """Metabase — 数据分析桥接 (45k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_metabase")
+
 from fastapi import APIRouter
 from api.infra import registry
 router = APIRouter()

@@ -1,4 +1,7 @@
 """智能体 — 代码沙箱（Open Interpreter式代码验证）"""
+import logging
+logger = logging.getLogger("evo.agent_sandbox")
+
 import subprocess, tempfile, os, re, time
 from pathlib import Path
 

@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_monitoring")
 # -*- coding: utf-8 -*-
 """P3 监控告警系统 — 服务健康+资源使用+自动告警"""
 from fastapi import APIRouter

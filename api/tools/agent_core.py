@@ -1,4 +1,7 @@
 """Agent核心 — 自动决策引擎"""
+import logging
+logger = logging.getLogger("evo.agent_core")
+
 import os, json, time
 from typing import Optional
 

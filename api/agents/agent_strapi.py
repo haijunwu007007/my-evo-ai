@@ -1,6 +1,9 @@
 """
 Strapi Headless CMS - 通过Strapi API管理内容和媒体
 """
+import logging
+logger = logging.getLogger("evo.agent_strapi")
+
 import os, json, httpx
 from pathlib import Path
 

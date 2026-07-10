@@ -1,4 +1,7 @@
 """Bolt.new — 一句话生成并部署全栈应用"""
+import logging
+logger = logging.getLogger("evo.agent_bolt")
+
 import os, json, time
 from pathlib import Path
 import os
@@ -71,8 +74,8 @@ def bolt_generate(prompt: str = "", framework: str = "vue",
                 preview_path = out_dir / "index.html"
                 preview_path.write_text(code, encoding='utf-8')
                 deploy_url = f"/output/apps/{fn}"
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         return {
             "success": True,

@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_audit")
 # -*- coding: utf-8 -*-
 """📋 审计日志系统"""
 import os, json, time, sqlite3

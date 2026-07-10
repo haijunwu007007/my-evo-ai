@@ -1,6 +1,9 @@
 '''
 Email sender - 支持用户自配 SMTP
 '''
+import logging
+logger = logging.getLogger("evo.email_sender")
+
 import smtplib, json
 from email.mime.text import MIMEText
 from pathlib import Path

@@ -139,4 +139,4 @@ def universal_deploy(github_url: str) -> dict:
 if __name__ == "__main__":
     import sys
     url = sys.argv[1] if len(sys.argv) > 1 else "https://github.com/expressjs/express"
-    print(json.dumps(universal_deploy(url), indent=2, ensure_ascii=False))
+    logger.info(json.dumps(universal_deploy(url), indent=2, ensure_ascii=False))

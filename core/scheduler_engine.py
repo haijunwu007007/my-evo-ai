@@ -608,8 +608,8 @@ class SchedulerEngine:
         for cb in self._callbacks:
             try:
                 cb(task, exec_)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         logger.info("[Scheduler] 任务 %s 执行完成: %s (%dms)",
                      task.name, exec_.status, exec_.duration_ms)
@@ -845,8 +845,8 @@ class SchedulerEngine:
         if task.schedule_type == "cron" and task.cron_expr:
             try:
                 runs = self._parse_cron(task.cron_expr, n)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         elif task.schedule_type == "interval" and task.interval_seconds:
             now = datetime.now()
             for i in range(1, n + 1):

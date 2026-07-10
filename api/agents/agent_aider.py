@@ -1,4 +1,7 @@
 """Aider — AI配对编程（文件级代码修改）"""
+import logging
+logger = logging.getLogger("evo.agent_aider")
+
 import os, json, subprocess, tempfile
 from pathlib import Path
 import os

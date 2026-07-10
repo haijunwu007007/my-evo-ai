@@ -425,8 +425,8 @@ class Persistence:
                 self._redis.setex(cache_key, ttl_seconds or 3600, data_json)
                 if key:
                     self._redis.set(f"evo:{table}:key:{key}", str(record_id))
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         return record_id
 
@@ -456,8 +456,8 @@ class Persistence:
                 cached = self._redis.get(f"evo:{table}:{record_id}")
                 if cached:
                     return {"id": record_id, "data": json.loads(cached), "_source": "redis"}
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         self._ensure_table(table)
         safe_name = self._safe_table_name(table)
@@ -491,8 +491,8 @@ class Persistence:
                     data_str = json.dumps(data_str, ensure_ascii=False)
                 if data_str:
                     self._redis.setex(f"evo:{table}:{record_id}", 3600, data_str)
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         return result
 
@@ -650,8 +650,8 @@ class Persistence:
         if self._redis_available:
             try:
                 self._redis.delete(f"evo:{table}:{record_id}")
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         return success
 
@@ -689,8 +689,8 @@ class Persistence:
         if self._redis_available:
             try:
                 self._redis.delete(f"evo:{table}:{record_id}")
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
         return success
 

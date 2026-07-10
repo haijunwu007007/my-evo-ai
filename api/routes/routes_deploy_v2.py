@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_deploy_v2")
 # -*- coding: utf-8 -*-
 """一键部署增强版 — 真Docker构建+Monorepo+微服务+K8s支持"""
 from fastapi import APIRouter

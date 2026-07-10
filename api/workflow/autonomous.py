@@ -3,6 +3,9 @@
 接收高级目标 → LLM规划 → 逐步执行 → 记忆调整循环。
 支持：定时触发、结果记忆、失败自愈。
 """
+import logging
+logger = logging.getLogger("evo.autonomous")
+
 import json, time, os, traceback
 from datetime import datetime
 from typing import Optional, Dict, Any

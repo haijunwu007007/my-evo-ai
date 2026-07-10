@@ -1,4 +1,7 @@
 """Qodo-Cover — AI自动生成单元测试"""
+import logging
+logger = logging.getLogger("evo.agent_qodo")
+
 import os, json
 from pathlib import Path
 import os

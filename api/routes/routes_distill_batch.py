@@ -1,6 +1,9 @@
 """
 AUTO-EVO-AI V0.1 — 批量蒸馏引擎 + 全平台内容发现
 """
+import logging
+logger = logging.getLogger("evo.routes_distill_batch")
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional

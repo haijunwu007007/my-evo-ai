@@ -1,4 +1,7 @@
 """AUTO-EVO-AI V0.1 — OpenClaw (373k⭐) AI网关桥接"""
+import logging
+logger = logging.getLogger("evo.routes_openclaw")
+
 from fastapi import APIRouter
 import urllib.request, json as _json
 router = APIRouter()

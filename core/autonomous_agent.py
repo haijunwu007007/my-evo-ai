@@ -254,8 +254,8 @@ class SystemAnalyzer:
             # 检查最近事件中是否有大量失败
             if stats.get("events_last_hour", 0) > 100:
                 result["frequent_failures"] = stats["events_last_hour"]
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
         return result
 
@@ -283,8 +283,8 @@ class SystemAnalyzer:
                     "type": "need_more_data",
                     "message": "决策历史数据不足, 建议运行自主分析积累经验"
                 })
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
         return result
 
@@ -790,8 +790,8 @@ class AutonomousAgent:
                 if old_mod and hasattr(old_mod, 'shutdown'):
                     try:
                         old_mod.shutdown()
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        logger.warning(f"error: {_e}")
                 registry.health.pop(name, None)
 
                 new_mod = await asyncio.wait_for(
@@ -914,8 +914,8 @@ class AutonomousAgent:
                     "issues_count": len(issues),
                     "opportunities_count": len(opps),
                 })
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     # ─── 数据流持久化 ───
 

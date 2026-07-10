@@ -1,4 +1,7 @@
 """深度CLI集成 — 补6个核心能力差距"""
+import logging
+logger = logging.getLogger("evo.cli_integrations_deep")
+
 import os, json, subprocess, tempfile, time
 
 BASE = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))

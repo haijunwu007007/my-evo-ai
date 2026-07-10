@@ -1,4 +1,7 @@
 """Gitea — 自托管 Git 服务桥接 (50k⭐)"""
+import logging
+logger = logging.getLogger("evo.routes_gitea")
+
 from fastapi import APIRouter, HTTPException
 from api.infra import registry
 router = APIRouter()

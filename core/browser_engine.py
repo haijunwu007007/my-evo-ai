@@ -177,8 +177,8 @@ class PlaywrightEngine:
             })
             if len(self._network_log) > 1000:
                 self._network_log = self._network_log[-500:]
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     async def close(self):
         """关闭浏览器"""
@@ -187,8 +187,8 @@ class PlaywrightEngine:
                 await self._browser.close()
             if self._playwright:
                 await self._playwright.stop()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         self._browser = None
         self._context = None
         self._page = None
@@ -614,8 +614,8 @@ class SeleniumEngine:
         if self._driver:
             try:
                 self._driver.quit()
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
         self._driver = None
         self.status = EngineStatus.CLOSED
 

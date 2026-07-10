@@ -1,4 +1,7 @@
 """智能体 — 持久记忆系统（Letta式经验积累）"""
+import logging
+logger = logging.getLogger("evo.agent_memory")
+
 import sqlite3, json, time, re
 from pathlib import Path
 from collections import defaultdict
@@ -38,8 +41,8 @@ class AgentMemory:
                 (input_text[:200], str(output_text)[:500], 1 if success else 0, category, tags, model, time.time(), duration)
             )
             conn.commit(); conn.close()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     def recall(self, query, limit=5):
         """基于关键词的记忆检索"""
@@ -65,8 +68,8 @@ class AgentMemory:
             else:
                 conn.execute("INSERT INTO experience (pattern, solution, count, last_used) VALUES (?,?,1,?)", (pattern, solution[:200], time.time()))
             conn.commit(); conn.close()
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     def recall_experience(self, query):
         """回忆经验"""

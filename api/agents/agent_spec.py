@@ -1,4 +1,7 @@
 """智能体 — Spec-Kit 规格驱动开发（GitHub官方SDD）"""
+import logging
+logger = logging.getLogger("evo.agent_spec")
+
 import os, json, time, re, asyncio
 from pathlib import Path
 
@@ -71,8 +74,8 @@ def run_spec_driven(msg, key, BASE, OUT, _LAST, _GENERATED_TOOLS):
             func = tc.get("function", {})
             args = {}
             try: args = json.loads(func.get("arguments", "{}"))
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
             result = exec_tool(func.get("name", ""), args, BASE, OUT, _LAST, _GENERATED_TOOLS)
             if result.get("ok") and result.get("data"):
                 return {"success": True, "result": result['data'], "mode": "spec", "spec": str(spec_path)}

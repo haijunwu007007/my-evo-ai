@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.routes_static")
 ﻿"""
 
 路由文件: routes_static.py — 静态资源、前端路由、旧路由兼容、Cognee 记忆

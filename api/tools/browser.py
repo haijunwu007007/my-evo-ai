@@ -1,4 +1,7 @@
 """AUTO-EVO-AI 工具模块"""
+import logging
+logger = logging.getLogger("evo.browser")
+
 import os, json, subprocess, tempfile, time, hashlib, re, urllib, pathlib
 from pathlib import Path
 from typing import Any
@@ -44,8 +47,8 @@ def _(args: dict, **kw):
                 return {"ok": True, "data": text[:5000]}
             browser.close()
             return {"ok": True, "data": f"访问 {url} 成功: {title}"}
-    except ImportError:
-        pass
+    except ImportError as _e:
+        logger.warning(f"error: {_e}")
     # fallback: httpx
     body = _req(url)
     if body:
@@ -72,8 +75,8 @@ def _(args: dict, **kw):
             matches = _re.findall(rf'<[^>]*{_re.escape(selector)}[^>]*>(.*?)</[^>]+>', body, _re.DOTALL)
             if matches:
                 return {"ok": True, "data": "\n".join(matches[:10])}
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     # 纯文本提取
     clean = re.sub(r'<script[^>]*>.*?</script>', '', body, flags=re.DOTALL)
     clean = re.sub(r'<style[^>]*>.*?</style>', '', clean, flags=re.DOTALL)

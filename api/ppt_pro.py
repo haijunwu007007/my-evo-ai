@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("evo.ppt_pro")
 # AUTO-EVO-AI PPT专业工具
 """LLM驱动的PPT生成器"""
 import os, json, time, httpx, re
@@ -54,8 +56,8 @@ def generate_slides_from_message(msg: str) -> list:
                 content = content.replace("```json","").replace("```","").strip()
                 slides = json.loads(content)
                 if isinstance(slides, list) and len(slides) >= 3: return slides
-        except Exception:
-                    pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
     return [
         {"title":f"{topic}介绍","text":f"{topic}是一种专业的技术产品，下面从多维度进行全面介绍。"},
         {"title":"产品概述","text":f"{topic}凭借先进技术和可靠品质获得广泛认可。"},

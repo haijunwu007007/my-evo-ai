@@ -1,4 +1,7 @@
 """并发多Agent执行引擎 — 多Agent并行协作，协调输出"""
+import logging
+logger = logging.getLogger("evo.agent_concurrent")
+
 
 import json, time, re, concurrent.futures, threading
 from pathlib import Path

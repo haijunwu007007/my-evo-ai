@@ -1,6 +1,9 @@
 """Cognee 记忆系统 — remember/recall/forget/improve API
 灵感: Cognee, Hermes Agent 记忆系统
 """
+import logging
+logger = logging.getLogger("evo.routes_cognee")
+
 
 from fastapi import APIRouter
 from pydantic import BaseModel

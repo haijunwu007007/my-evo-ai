@@ -1,4 +1,7 @@
 """PR-Agent (Qodo) — AI代码审查自动化"""
+import logging
+logger = logging.getLogger("evo.agent_pra")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""

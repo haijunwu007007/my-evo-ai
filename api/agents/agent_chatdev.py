@@ -1,4 +1,7 @@
 """ChatDev 2.0 — 零代码多智能体编排平台桥接"""
+import logging
+logger = logging.getLogger("evo.agent_chatdev")
+
 import os, json
 from pathlib import Path
 import os

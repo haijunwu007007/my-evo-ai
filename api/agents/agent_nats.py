@@ -1,6 +1,9 @@
 """
 NATS消息队列 - 通过NATS API管理消息和流
 """
+import logging
+logger = logging.getLogger("evo.agent_nats")
+
 import os, json, httpx
 from pathlib import Path
 

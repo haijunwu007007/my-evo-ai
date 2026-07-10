@@ -1,4 +1,7 @@
 """Agent-Reach 集成路由 — 多平台互联网搜索"""
+import logging
+logger = logging.getLogger("evo.routes_agent_reach")
+
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import subprocess, json, os

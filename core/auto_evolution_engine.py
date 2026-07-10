@@ -294,8 +294,8 @@ class AutoEvolutionEngine:
             try:
                 data = json.loads(EVOLUTION_LOG_PATH.read_text(encoding="utf-8"))
                 self._events = [EvolutionEvent(**e) for e in data[-200:]]
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.warning(f"error: {_e}")
 
     def _save_events(self):
         data = [asdict(e) for e in self._events[-200:]]

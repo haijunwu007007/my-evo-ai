@@ -1,4 +1,7 @@
 """K8s部署+自动降级到docker-compose"""
+import logging
+logger = logging.getLogger("evo.k8s_fallback")
+
 import os, subprocess, json, yaml, tempfile
 
 def check_k8s():

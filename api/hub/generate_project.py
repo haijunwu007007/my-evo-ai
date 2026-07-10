@@ -2,6 +2,9 @@
 AUTO-EVO-AI 项目生成器 — 智能生成完整项目代码
 支持: ecommerce, blog, crm, dashboard, api, webapp
 """
+import logging
+logger = logging.getLogger("evo.generate_project")
+
 import os, json, subprocess, time, shutil, re
 from pathlib import Path
 

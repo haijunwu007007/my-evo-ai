@@ -1,4 +1,7 @@
 """自修复引擎 — 部署失败自动回滚 + 重试"""
+import logging
+logger = logging.getLogger("evo.routes_selfheal")
+
 from fastapi import APIRouter
 from datetime import datetime, timedelta
 import os, json, subprocess, time

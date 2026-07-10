@@ -1,4 +1,7 @@
 """OpenAnt — AI驱动的开源漏洞发现工具（LLM-based Vulnerability Scanner）"""
+import logging
+logger = logging.getLogger("evo.agent_openant")
+
 import os, json
 import os
 _DEFAULT_KEY = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
@@ -23,8 +26,8 @@ def openant_scan(target: str = "", depth: str = "standard") -> dict:
                 issues.append({"type": "missing_header", "header": "Strict-Transport-Security", "severity": "medium"})
             if "Set-Cookie" in str(resp.headers).lower() and "httponly" not in str(resp.headers).lower():
                 issues.append({"type": "cookie_no_httponly", "severity": "medium"})
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"error: {_e}")
         return {"success": True, "target": target, "depth": depth,
                 "vulnerabilities": issues, "total": len(issues),
                 "risk_level": "low" if len(issues) < 3 else "medium"}

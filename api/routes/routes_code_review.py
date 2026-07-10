@@ -2,6 +2,9 @@
 AUTO-EVO-AI V0.1 — AI Code Review + Diff API 路由
 提供：代码审查 / diff 对比 / commit 日志 / 审查历史
 """
+import logging
+logger = logging.getLogger("evo.routes_code_review")
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
