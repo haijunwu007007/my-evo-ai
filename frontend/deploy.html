@@ -52,6 +52,10 @@ h2{font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,var(--tex
 
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
+<script>
+(function(){var t=localStorage.getItem('evo_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t)})();
+function toggleTheme(){var el=document.documentElement;var t=el.getAttribute('data-theme')==='dark'?'light':'dark';el.setAttribute('data-theme',t);localStorage.setItem('evo_theme',t)}
+</script>
 <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
   <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
     <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
