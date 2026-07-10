@@ -45,8 +45,8 @@ def _scan_external_skills():
                         meta = json.loads(meta_json.read_text(encoding="utf-8"))
                         stars = meta.get("stars", 0)
                         category = meta.get("category", "")
-                    except Exception:
-                        pass
+                    except Exception as _e:
+            logger.warning(f"[AgentEngine] 操作异常: {_e}")
                 desc = ""
                 for line in md_content.splitlines():
                     line = line.strip()

@@ -182,7 +182,7 @@ function loadAgentStats(){
   }).catch(function(){})
 }
 function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};setTimeout(function(){activateAgent('planner');loadAgentStats();setInterval(loadAgentStats,30000)},100)})();
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};setTimeout(function(){activateAgent('planner');loadAgentStats();var _intv_has=setInterval(loadAgentStats,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_has)})},100)})();
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

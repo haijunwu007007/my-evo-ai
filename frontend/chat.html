@@ -868,9 +868,9 @@ checkUserRole();
 <script>
 // ── PWA 离线支持 ──
 // ── Service Worker ──
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').then(function(r){console.log('SW registered:',r.scope)}).catch(function(e){console.log('SW failed:',e)})})}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').then(function(r){// console.log('SW registered:',r.scope)}).catch(function(e){// console.log('SW failed:',e)})})}
 // ── PWA 安装提示 ──
-var _deferredPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_deferredPrompt=e;var btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex';console.log('beforeinstallprompt fired')});window.addEventListener('appinstalled',function(e){_deferredPrompt=null;var btn=document.getElementById('installBtn');if(btn)btn.style.display='none';console.log('app installed')});
+var _deferredPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_deferredPrompt=e;var btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex';// console.log('beforeinstallprompt fired')});window.addEventListener('appinstalled',function(e){_deferredPrompt=null;var btn=document.getElementById('installBtn');if(btn)btn.style.display='none';// console.log('app installed')});
 // ── iOS引导：检测非Chrome且未触发beforeinstallprompt → 显示添加主屏幕提示 ──
 setTimeout(function(){
   var btn=document.getElementById('installBtn');

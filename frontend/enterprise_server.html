@@ -12244,7 +12244,7 @@ document.addEventListener('DOMContentLoaded', init);
 `;
     document.body.appendChild(script);
 }
-function renderModuleBrowser(){console.log("renderModuleBrowser called");}
+function renderModuleBrowser(){try{var r=new XMLHttpRequest();r.open('GET','/api/v1/modules',false);r.send();var m=JSON.parse(r.responseText);var c=document.getElementById('module-browser-content');if(c)c.innerHTML='<pre>'+JSON.stringify(m,null,2).slice(0,3000)+'</pre>'}catch(e){console.warn('renderModuleBrowser fail',e)}}
 
 // AUTO-GENERATED: window exports for onclick handlers
 window.approveItem = approveItem;

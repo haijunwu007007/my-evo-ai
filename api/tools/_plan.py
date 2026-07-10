@@ -1,8 +1,8 @@
 """提取 agent_tools.py 中各节代码并写出到 api/tools/*.py"""
-import re, os
+import re, os, sys
 
-SCRIPT = "D:\\AUTO-EVO-AI-V0.1\\api\\agent_tools.py"
-OUT = "D:\\AUTO-EVO-AI-V0.1\\api\\tools"
+SCRIPT = os.environ.get("EVO_AGENT_TOOLS") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agent_tools.py")
+OUT = os.environ.get("EVO_TOOLS_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools")
 
 with open(SCRIPT, encoding="utf-8") as f:
     text = f.read()

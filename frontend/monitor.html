@@ -224,7 +224,7 @@ fetch('/api/v1/modules?all=1').then(function(r){return r.json()}).then(function(
 }).catch(function(){})
 // Start time tracking
 var t0=Date.now()
-setInterval(function(){
+var _intv_mn=setInterval(function(){window.addEventListener("beforeunload",function(){clearInterval(_intv_mn)});
   var s=Math.floor((Date.now()-t0)/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60)
   document.getElementById('uCount').innerHTML=h+'h <small id="uMin">'+m+'m</small>'
   document.getElementById('sysUptime').textContent=h+'h'+m+'m'

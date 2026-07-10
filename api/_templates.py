@@ -80,7 +80,7 @@ h1{color:#6366f1}code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-
 
 <div class="s" style="border-left:4px solid #f59e0b;background:#1a150a;">
 <span class="step" style="color:#f59e0b;">方案二：Docker 云服务器</span><br>
-<code>docker build -t auto-evo-ai D:/AUTO-EVO-AI-V0.1</code><br>
+<code>docker build -t auto-evo-ai .</code><br>
 <code>docker run -d -p 8765:8765 auto-evo-ai</code><br>
 需要一台云服务器（阿里云/腾讯云/AWS 最低配即可）</div>
 <div class="s" style="border-left:4px solid #ec4899;background:#1a0820;">

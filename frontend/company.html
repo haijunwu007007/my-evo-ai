@@ -49,7 +49,7 @@ async function loadStatus(){try{
 async function submitGoal(){var inp=document.getElementById('goalInput');var g=inp.value.trim();if(!g)return
   await fetch('/api/v1/company/goal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal:g})});inp.value='';loadStatus()}
 async function autoCycle(){await fetch('/api/v1/company/cycle',{method:'POST'});loadStatus()}
-loadStatus();setInterval(loadStatus,5000)
+loadStatus();var _intv_ls=setInterval(loadStatus,5000);window.addEventListener("beforeunload",function(){clearInterval(_intv_ls)})
 </script>
 
 <script>(function(){var t=localStorage.getItem("evo_theme");if(t==="light"){document.body.classList.add("light")}})()</script>

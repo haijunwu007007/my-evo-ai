@@ -203,8 +203,8 @@ async def _call_agent(agent_name: str, action: str, expected: str) -> str:
             sr_json = sr.json()
             if sr_json.get("success"):
                 txt += "\n\n🛝 沙箱执行结果:\n" + str(sr_json.get("results", {}))
-        except:
-            pass
+        except Exception as _e:
+            logger.warning(f"[Orchestrator] 异常: {_e}")
 
     return txt
 
@@ -227,5 +227,6 @@ async def _merge_results(task: str, results: dict) -> str:
             json={"messages": [{"role": "user", "content": prompt}], "model": "GLM-4-Flash"},
             timeout=30), timeout=30)
         return r.json().get("choices", [{}])[0].get("message", {}).get("content", "（合并失败）")
-    except:
+    except Exception as _e:
+        logger.warning(f"[Orchestrator] 合并失败: {_e}")
         return "（合并失败）"

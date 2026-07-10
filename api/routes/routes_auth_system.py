@@ -39,8 +39,8 @@ async def system_diagnosis():
         memory_mb = round(psutil.Process().memory_info().rss / 1024 / 1024, 1)
         cpu_percent = psutil.Process().cpu_percent(interval=0.1)
         threads = psutil.Process().num_threads()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"[Auth] 异常: {_e}")
     return {"success": True, "uptime_seconds": round(u, 1), "uptime_human": f"{int(u//3600)}h{int(u%3600//60)}m", "memory_mb": memory_mb, "cpu_percent": cpu_percent, "threads": threads, "api_version": "0.1.0"}
 @router.get("/api/v1/diagnosis/modules")
 async def modules_diagnosis():
@@ -91,8 +91,8 @@ async def config_save():
     try:
         import yaml as _yaml
         _yaml.dump(cc.get_all(), open(str(BASE_DIR / "config.yaml"), "w", encoding="utf-8"), allow_unicode=True, default_flow_style=False)
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"[Auth] 异常: {_e}")
     return {"success": True, "saved": True}
 @router.post("/api/v1/config/reload")
 async def config_reload():

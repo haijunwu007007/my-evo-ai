@@ -167,7 +167,7 @@ function downloadDoc(){
 }
 
 // 自动保存
-setInterval(function(){if(_current>=0)saveDoc()},30000);
+(function(){var _iv_ed=setInterval(function(){if(_current>=0)saveDoc()},30000);window.addEventListener("beforeunload",function(){clearInterval(_iv_ed)})})();
 
 // 初始化
 if(_docs.length>0){_current=0;openDoc(0)}else{newDoc()}

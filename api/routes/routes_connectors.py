@@ -248,8 +248,8 @@ def _scan_n8n_nodes():
                         "documentation_url": f"https://www.npmjs.com/package/{name}"
                     }
                     found += 1
-    except Exception:
-            pass
+    except Exception as _e:
+            logger.warning(f"[Connectors] 异常: {_e}")
     if found:
         logger.info(f"[CONN] 发现 {found} 个 n8n 节点")
 

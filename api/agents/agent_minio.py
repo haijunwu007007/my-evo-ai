@@ -2,8 +2,8 @@
 import json, httpx, os
 
 MINIO_URL = os.environ.get("MINIO_URL", "http://localhost:9000")
-MINIO_ACCESS = os.environ.get("MINIO_ACCESS_KEY", "evo_admin")
-MINIO_SECRET = os.environ.get("MINIO_SECRET_KEY", "EvoAi2024!")
+MINIO_ACCESS = os.environ.get("MINIO_ACCESS_KEY", "")
+MINIO_SECRET = os.environ.get("MINIO_SECRET_KEY", "")
 
 def minio_storage(**kwargs):
     """MinIO对象存储操作"""

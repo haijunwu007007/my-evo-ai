@@ -303,7 +303,6 @@ async def system_status():
         "uptime": datetime.now().isoformat(),
         "modules_loaded": len(registry.modules) + len(getattr(registry, '_pending_modules', {})),
         "modules_total": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
-        "modules_files": len([p for p in Path(__file__).parent.glob("modules/*.py") if p.name != "__init__.py"]),
         "modules_stub": registry.get_stub_count(),
         "coordinator": coord_data,
         "api_version": VERSION,

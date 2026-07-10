@@ -1,6 +1,6 @@
 """Vosk 子进程工作器 — 被 routes_speech.py 通过 subprocess 调用"""
 import os, io, json, sys, wave, struct
-VOSK_DIR = r"C:\vosk_model" if os.name == "nt" else "/home/ubuntu/vosk_models/vosk-model-small-cn-0.22"
+VOSK_DIR = os.environ.get("VOSK_MODEL_DIR") or (r"C:\vosk_model" if os.name == "nt" else "/home/ubuntu/vosk_models/vosk-model-small-cn-0.22")
 
 def main():
     if len(sys.argv) < 2:

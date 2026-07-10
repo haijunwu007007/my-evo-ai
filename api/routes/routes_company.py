@@ -53,8 +53,8 @@ async def company_goal(data: dict):
                 dept_key = rev_map.get(agent, "cto")
                 await assign_task(dept_key, s.get("action", goal))
                 subtasks_response.append({"department": dept_key, "task": s.get("action","")})
-    except:
-        pass
+    except Exception as _e:
+            logger.warning(f"[Company] 异常: {_e}")
 
     # 2. 执行所有部门任务
     results = await execute_tasks()

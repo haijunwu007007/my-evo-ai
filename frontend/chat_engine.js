@@ -343,7 +343,7 @@ async function doSend(text,ai){try{
         try{CTX=CTX||[];CTX.push({role:'assistant',content:bub.textContent||''})}catch(ex){}
         return
       }
-    }catch(e){console.log('stream fallback',e.message)}
+    }catch(e){/*stream fallback*/}
     hideLoading()
     // 走智能对话（非流式）
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})

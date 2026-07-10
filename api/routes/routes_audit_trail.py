@@ -32,8 +32,8 @@ def log_audit(user: str, action: str, target: str = "", detail: str = "", status
         conn.close()
         # 自动清理30天前的日志
         _cleanup_old()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"[Audit] 异常: {_e}")
 
 def _cleanup_old():
     try:

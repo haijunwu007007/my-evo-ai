@@ -252,7 +252,7 @@ async def desktop_html():
 
 async def service_worker():
 
-    p = BASE_DIR / "static" / "sw.js"
+    p = BASE_DIR / "frontend" / "sw.js"
 
     return FileResponse(p, media_type="application/javascript") if p.exists() else StreamingResponse(iter(["// SW stub"]), media_type="application/javascript")
 

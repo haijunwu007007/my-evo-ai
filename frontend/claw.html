@@ -233,7 +233,7 @@ function saveHistory(cmd,status){
 }
 function clearHistory(){if(!confirm('确定清空所有执行历史记录？'))return;try{localStorage.removeItem(HISTORY_KEY)}catch(e){}loadHistory();showToast('历史已清空','info')}
 function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadHistory();checkStatus();setInterval(checkStatus,30000)})();
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadHistory();checkStatus();var _intv_ck=setInterval(checkStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_ck)})})();
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

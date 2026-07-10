@@ -184,7 +184,7 @@ function loadApprovalLog(){
   }catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3)">加载异常</td></tr>'}
 }
 function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadSystemStatus();loadPendingApprovals();loadApprovalLog();setInterval(loadSystemStatus,30000)})();
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadSystemStatus();loadPendingApprovals();loadApprovalLog();var _intv_hss=setInterval(loadSystemStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_hss)})})();
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

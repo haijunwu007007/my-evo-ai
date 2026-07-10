@@ -5,6 +5,7 @@
 from __future__ import annotations
 import json, time, os, uuid, asyncio
 from pathlib import Path
+from core.logging_config import get_logger
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -29,7 +30,7 @@ def _load_all() -> dict:
             data = json.loads(f.read_text(encoding="utf-8"))
             data["id"] = f.stem
             autos[f.stem] = data
-        except: pass
+        except Exception: logger.warning("[Automation] 解析失败")
     return autos
 
 def _save_one(aid: str, data: dict):
