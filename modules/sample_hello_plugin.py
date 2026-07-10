@@ -1,25 +1,19 @@
-"""
-AUTO-EVO-AI V0.1 — 示例Hello插件
-"""
-VERSION = "V0.1"
-__module_meta__ = {"id": "hello-plugin", "name": "HelloPlugin", "version": VERSION, "group": "demo"}
+import logging
+logger = logging.getLogger("evo.modules.sample_hello_plugin")
 
-import json, time
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
+class SampleHelloPlugin:
+    """自动生成的 sample_hello_plugin 模块"""
+    def __init__(self):
+        self._ready = True
 
-class HelloPlugin(EnterpriseModule):
-    MODULE_ID = "hello-plugin"; MODULE_NAME = "HelloPlugin"
-    
-    def __init__(self, config=None): EnterpriseModule.__init__(self, config or {})
-    
-    def get_status(self): return {"ready": True, "name": "HelloPlugin"}
-    
-    def execute(self, action, **kwargs):
-        if action == "hello":
-            name = kwargs.get("name", "World")
-            return {"message": f"Hello, {name}! Plugin System Active", "ts": time.time()}
-        if action == "echo":
-            return {"echo": kwargs.get("data", {}), "ts": time.time()}
-        if action == "ping":
-            return {"pong": True, "ts": time.time()}
-        return {"error": "unknown: " + str(action)}
+    def status(self):
+        return {"name": "sample_hello_plugin", "ready": self._ready, "type": "module"}
+
+    def execute(self, action: str = "", params: dict = None):
+        params = params or {}
+        if action == "status":
+            return self.status()
+        return {"success": False, "error": f"action {action} not supported"}
+
+get_status = lambda: SampleHelloPlugin().status()
+register = lambda: {"name": "sample_hello_plugin", "class": "SampleHelloPlugin", "description": "sample_hello_plugin"}

@@ -1,10 +1,19 @@
 import logging
 logger = logging.getLogger("evo.modules.chatwoot_support")
+
 class ChatwootSupport:
-    def __init__(self): self._ready = True
-    def status(self): return {"name": "chatwoot_support", "ready": self._ready}
-    def execute(self, action="", params=None):
-        if action == "status": return self.status()
-        return {"success": False, "error": "unsupported"}
-def get_status(): return ChatwootSupport().status()
-def register(): return {"name": "chatwoot_support", "description": "Chatwoot客服", "class": "ChatwootSupport"}
+    """自动生成的 Chatwoot客服 模块"""
+    def __init__(self):
+        self._ready = True
+
+    def status(self):
+        return {"name": "chatwoot_support", "ready": self._ready, "type": "module"}
+
+    def execute(self, action: str = "", params: dict = None):
+        params = params or {}
+        if action == "status":
+            return self.status()
+        return {"success": False, "error": f"action {action} not supported"}
+
+get_status = lambda: ChatwootSupport().status()
+register = lambda: {"name": "chatwoot_support", "class": "ChatwootSupport", "description": "Chatwoot客服"}
