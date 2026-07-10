@@ -1,6 +1,6 @@
 import logging
 logger = logging.getLogger("evo.routes_static")
-﻿"""
+"""
 
 路由文件: routes_static.py — 静态资源、前端路由、旧路由兼容、Cognee 记忆
 
@@ -297,15 +297,7 @@ async def fork_page():
 
 
 
-@router.get("/company.html")
 
-async def company_page():
-
-    p = BASE_DIR / "frontend" / "company.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
 
 
 
@@ -415,25 +407,11 @@ async def loop_page():
 
 
 
-@router.get("/hub")
-
-async def hub_page():
-
-    p = BASE_DIR / "frontend" / "hub.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
 
 
 
-@router.get("/tools")
 
-async def tools_page():
 
-    p = BASE_DIR / "frontend" / "tools.html"
-
-    return FileResponse(str(p), media_type="text/html") if p.exists() else HTMLResponse("<h2>Tools page not found</h2>", status_code=404)
 
 
 @router.get("/deploy")
@@ -480,176 +458,60 @@ async def api_test_page():
 
 
 
-@router.get("/skills")
 
-async def skills_page():
 
-    p = BASE_DIR / "frontend" / "skills.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/plugins")
 
-async def plugins_page():
 
-    p = BASE_DIR / "frontend" / "plugins.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/capabilities")
 
-async def capabilities_page():
 
-    p = BASE_DIR / "frontend" / "capabilities.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/learn")
 
-async def learn_page():
 
-    p = BASE_DIR / "frontend" / "learn.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/video")
 
-async def video_page():
 
-    p = BASE_DIR / "frontend" / "video.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/cognee")
 
-async def cognee_page():
 
-    p = BASE_DIR / "frontend" / "cognee.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/settings")
 
-async def settings_page():
 
-    p = BASE_DIR / "frontend" / "settings.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
 
 
-@router.get("/agent")
 
-async def agent_page():
 
-    p = BASE_DIR / "frontend" / "agent.html"
 
-    if p.exists(): return FileResponse(str(p))
 
-    raise HTTPException(404)
 
-
-
-@router.get("/agents")
-async def agents_page():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/frontend/agents.html")
-
-@router.get("/claw")
-
-async def claw_page():
-
-    p = BASE_DIR / "frontend" / "claw.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
-
-
-
-@router.get("/hermes")
-
-async def hermes_page():
-
-    p = BASE_DIR / "frontend" / "hermes.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
-
-
-
-@router.get("/human")
-
-async def human_page():
-
-    p = BASE_DIR / "frontend" / "human.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
-
-
-
-@router.get("/experts")
-
-async def experts_page():
-
-    p = BASE_DIR / "frontend" / "experts.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
-
-
-
-@router.get("/automations")
-
-async def automations_page():
-
-    p = BASE_DIR / "frontend" / "automations.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
-
-
-
-@router.get("/admin")
-
-async def admin_page():
-
-    p = BASE_DIR / "frontend" / "admin.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
 
 
 
@@ -747,25 +609,11 @@ p{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px}
 
 
 
-@router.get("/review")
-
-async def review_page():
-
-    p = BASE_DIR / "frontend" / "review.html"
-
-    if p.exists(): return FileResponse(str(p))
-
-    raise HTTPException(404)
 
 
 
-@router.get("/audit")
 
-async def audit_page():
 
-    p = BASE_DIR / "frontend" / "audit.html"
-
-    return FileResponse(str(p)) if p.exists() else HTMLResponse("<html><body><h1>审计日志</h1><p>页面待创建</p></body></html>")
 
 
 
