@@ -60,7 +60,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .msg.user{align-items:flex-end}
 .msg.bot{align-items:flex-start}
 .msg-bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-.msg.user .msg-bubble{background:#e8f0fe;color:var(--bg);border-bottom-right-radius:4px}
+.msg.user .msg-bubble{background:#e8f0fe;color:var(--text);border-bottom-right-radius:4px}
 .msg.bot .msg-bubble{background:var(--ai-msg);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg-label{font-size:14px;color:var(--text3);margin-bottom:2px;font-weight:500}
 /* 底部输入区 */
@@ -684,7 +684,7 @@ function checkOnboard() {
 })();
 </script>
 <script src="/frontend/components.js"></script>
-<script src="/frontend/chat_engine.js?v=1783468578"></script>
+<script src="/frontend/chat_engine.js?v=20260710"></script>
 
 <script>
 // 侧边栏折叠分组（每个分组独立记忆）
@@ -768,8 +768,8 @@ var _vStream=null,_vCtx=null,_vNode=null,_vSamples=[];
 
 function switchToVoice(){
   document.getElementById('textInputRow').style.display='none';
-  document.getElementById('voiceBar').classList.remove('hidden');
-  document.getElementById('vbLabel').textContent='按住 说话';
+  var vb=document.getElementById('voiceBar');if(vb){vb.style.display='flex';vb.classList.remove('hidden')}
+  var vl=document.getElementById('vbLabel');if(vl)vl.textContent='按住 说话';
 }
 
 function _resample(src,srcRate){
