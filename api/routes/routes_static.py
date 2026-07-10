@@ -373,9 +373,16 @@ async def n8n_browse_page():
 
 @router.get("/workflow")
 async def workflow_page():
-    p = BASE_DIR / "frontend" / "workflow.html"
+    p = BASE_DIR / "frontend" / "workflow_full.html"
     if p.exists(): return FileResponse(str(p))
-    raise HTTPException(404)
+    try:
+        from api.routes.features.core import _WORKFLOW_HTML
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(_WORKFLOW_HTML)
+    except Exception:
+        p2 = BASE_DIR / "frontend" / "workflow.html"
+        if p2.exists(): return FileResponse(str(p2))
+        raise HTTPException(404)
 
 @router.get("/enterprise")
 
