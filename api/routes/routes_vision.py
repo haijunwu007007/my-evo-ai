@@ -68,8 +68,8 @@ async def _pull_model():
     try:
         async with httpx.AsyncClient(timeout=600) as c:
             await c.post(f"{OLLAMA}/api/pull", json={"name": "moondream"})
-    except:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     _DOWNLOADING = False
 
 async def _ollama_vision(img_b64: str, prompt: str) -> dict:

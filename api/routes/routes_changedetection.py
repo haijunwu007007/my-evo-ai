@@ -21,8 +21,8 @@ async def changedetection_status():
         if r.status == 200:
             healthy = True
             version = r.read().decode().strip()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     return {
         "name": "Changedetection.io",
         "stars": "20k+",

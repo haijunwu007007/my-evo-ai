@@ -18,8 +18,8 @@ async def ntfy_status():
         import urllib.request
         r = urllib.request.urlopen(f"{NTFY_BASE}/v1/health", timeout=2)
         healthy = r.status == 200
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     return {
         "name": "Ntfy",
         "stars": "30k+",

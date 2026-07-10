@@ -18,8 +18,8 @@ async def dashy_status():
         import urllib.request
         r = urllib.request.urlopen(f"{DASHY_BASE}/api/health", timeout=2)
         healthy = r.status == 200
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     return {
         "name": "Dashy",
         "stars": "17k+",

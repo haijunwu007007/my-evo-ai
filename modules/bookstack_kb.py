@@ -1,9 +1,10 @@
-
+import logging
+logger = logging.getLogger("evo.modules.bookstack_kb")
 class BookstackKB:
-    def __init__(self): self.pages = {}; self._ready = True
-    def status(self): return {"name": "bookstack_kb", "ready": self._ready, "pages": len(self.pages)}
-    def search(self, q): return [p for p in self.pages.values() if q in p.get("title", "")]
+    def __init__(self): self._ready = True
+    def status(self): return {"name": "bookstack_kb", "ready": self._ready}
     def execute(self, action="", params=None):
-        if action == "search": return self.search((params or {}).get("query", ""))
-        return self.status()
-get_status = lambda: BookstackKB().status()
+        if action == "status": return self.status()
+        return {"success": False, "error": "unsupported"}
+def get_status(): return BookstackKB().status()
+def register(): return {"name": "bookstack_kb", "class": "BookstackKB"}

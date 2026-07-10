@@ -92,8 +92,8 @@ def _seed_rag():
                 with open(chunk_path, "w", encoding="utf-8") as f:
                     json.dump(chunk_data, f, ensure_ascii=False)
             conn.commit()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     finally:
         conn.close()
 _seed_rag()
@@ -450,8 +450,8 @@ async def reseed_knowledge():
         conn.execute("DELETE FROM rag_documents")
         conn.execute("DELETE FROM rag_chunks")
         conn.commit()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     finally:
         conn.close()
     # 删除旧 chunk 文件

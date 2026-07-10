@@ -18,8 +18,8 @@ async def nocodb_status():
         import urllib.request
         r = urllib.request.urlopen(f"{NOCODB_BASE}/api/v1/health", timeout=2)
         healthy = r.status == 200
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"exception: {_e}")
     return {
         "name": "NocoDB",
         "stars": "55k+",
