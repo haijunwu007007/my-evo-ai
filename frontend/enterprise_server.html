@@ -2589,7 +2589,7 @@
             // 立即获取后端真实状态
             if (window.AutoExecutionEngine && AutoExecutionEngine.fetchBackendStatus) AutoExecutionEngine.fetchBackendStatus();
 
-            content.innerHTML = '<button class="back-btn" onclick="backToOverview()">← 返回概览</button>' +
+            content.innerHTML = '<button class="back-btn" onclick="backToOverview()">←</button>' +
                 '<div style="padding:20px;">' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
                         '<h1 style="font-size:20px;font-weight:700;">🧠 全模块协调中心</h1>' +
@@ -2646,7 +2646,7 @@
 
             document.getElementById('content').innerHTML = `
 
-                <button class="back-btn" onclick="backToOverview()">← 返回概览</button>
+                <button class="back-btn" onclick="backToOverview()">←</button>
 
                 <div class="detail-page">
 
@@ -4405,7 +4405,7 @@
             const steps = d.steps || [];
             body.innerHTML = `
             <div style="max-width:700px;margin:0 auto;">
-                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">← 返回列表</button>
+                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">←</button>
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
                     <span style="font-size:28px;">🔗</span>
                     <div>
@@ -4462,7 +4462,7 @@
         const steps = d.steps || {};
         body.innerHTML = `
         <div style="max-width:700px;margin:0 auto;">
-            <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">← 返回列表</button>
+            <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">←</button>
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
                 <span style="font-size:28px;">${d.status==='success'?'✅':'⚠️'}</span>
                 <div>
@@ -4500,7 +4500,7 @@
             const body = document.getElementById('pipeline-body');
             body.innerHTML = `
             <div style="max-width:700px;margin:0 auto;">
-                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">← 返回列表</button>
+                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">←</button>
                 <div style="font-weight:700;font-size:16px;margin-bottom:16px;">执行历史 (${execs.length})</div>
                 ${execs.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--text-muted);">暂无执行记录</div>' :
                 `<div style="display:flex;flex-direction:column;gap:6px;">
@@ -4541,7 +4541,7 @@
             const body = document.getElementById('pipeline-body');
             body.innerHTML = `
             <div style="max-width:500px;margin:0 auto;">
-                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">← 返回列表</button>
+                <button onclick="pipelineRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">←</button>
                 <div style="font-weight:700;font-size:16px;margin-bottom:16px;">📊 管线统计</div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
                     <div style="background:var(--bg);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);">
@@ -4754,7 +4754,7 @@
         const body = document.getElementById('scheduler-body');
         body.innerHTML = `
         <div style="max-width:500px;">
-            <button onclick="schedulerRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">← 返回</button>
+            <button onclick="schedulerRefresh()" style="margin-bottom:16px;padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">←</button>
             <h3 style="margin:0 0 16px;">新建调度任务</h3>
             <div style="display:grid;gap:12px;">
                 <input id="sch-name" placeholder="任务名称" style="padding:10px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;" />
@@ -5272,7 +5272,7 @@
         if (!content) return;
 
         content.innerHTML = `
-        <button class="back-btn" onclick="backToOverview()">← 返回概览</button>
+        <button class="back-btn" onclick="backToOverview()">←</button>
         <div id="bgos-container" style="font-family:system-ui,sans-serif;color:var(--text);">
 
             <!-- 空数据引导 -->
@@ -6463,7 +6463,7 @@
             }).join('');
 
             content.innerHTML = `
-                <button class="back-btn" onclick="backToOverview()">← 返回概览</button>
+                <button class="back-btn" onclick="backToOverview()">←</button>
                 <div style="padding:20px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
                         <h1 style="font-size:20px;font-weight:700;">🧠 全模块协调中心</h1>
