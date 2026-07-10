@@ -24,26 +24,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:linear-gradient(135deg,var(--accent),#7209b7);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.header h1{font-size:18px;font-weight:600}
+.header{background:linear-gradient(135deg,var(--accent),#7209b7);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 12px 12px}
+.header h1{font-size:22px;font-weight:700;letter-spacing:0.5px}
 .header a{color:#fff;text-decoration:none;font-size:13px;opacity:.8}
-.container{max-width:800px;margin:0 auto;padding:16px}
-.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between}
-.btn{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer}
-.btn:hover{opacity:.9}
-.btn-sm{font-size:12px;padding:6px 12px}
+.container{max-width:900px;margin:0 auto;padding:24px 20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.card h3{font-size:15px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;color:var(--text);font-weight:600}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-weight:500;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn-sm{font-size:12px;padding:6px 14px}
 .btn-green{background:#10b981}
 .btn-red{background:#ef4444}
-input,textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;margin-bottom:8px;background:var(--card);color:var(--text)}
-textarea{resize:vertical;min-height:60px;font-family:monospace}
-.mem-item{padding:10px;border-bottom:1px solid #f0f0f0}
+input,textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;margin-bottom:10px;background:var(--card);color:var(--text);outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px;font-family:monospace}
+.mem-item{padding:14px;border-bottom:1px solid var(--border);transition:background .15s}
 .mem-item:last-child{border:0}
-.mem-text{font-size:13px;margin-bottom:4px}
-.mem-meta{font-size:11px;color:#94a3b8}
-.tag{display:inline-block;background:#e0e7ff;color:#4361ee;font-size:11px;padding:2px 6px;border-radius:4px;margin:2px}
+.mem-item:hover{background:rgba(67,97,238,.04)}
+.mem-text{font-size:14px;margin-bottom:6px;line-height:1.5}
+.mem-meta{font-size:12px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap}
+.tag{display:inline-block;background:rgba(67,97,238,.1);color:var(--accent);font-size:11px;padding:3px 8px;border-radius:4px;margin:2px}
 .search-box{display:flex;gap:8px;align-items:center}
 .search-box input{flex:1;margin:0}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+.stat-card{text-align:center;padding:12px;background:var(--bg);border-radius:var(--radius-sm)}
+.stat-num{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:12px;color:var(--text3);margin-top:2px}
+@media(max-width:600px){.container{padding:12px 10px}.stats-grid{grid-template-columns:1fr}.card{padding:14px}.header h1{font-size:18px}}
 </style>
 <div class="app">
 <div class="topbar">
@@ -76,8 +84,9 @@ async function api(method,path,data){
 }
 async function loadStats(){
   const d=await api('GET','/api/v1/cognee/stats')
-  document.getElementById('stats').innerHTML=`<span>记忆: ${d.memories||d.total_memories||0} | 技能: ${d.skills||0} | 状态: ${d.status||d.engine||'ready'}</span>
-  <button class="btn btn-sm btn-green" onclick=saveMemoDemo()>添加示例记忆</button>`
+  const st=document.getElementById('stats');
+  st.innerHTML=`<div class="stats-grid"><div class="stat-card"><div class="stat-num">${d.memories||d.total_memories||0}</div><div class="stat-label">记忆</div></div><div class="stat-card"><div class="stat-num">${d.skills||0}</div><div class="stat-label">技能</div></div><div class="stat-card"><div class="stat-num">${d.status||d.engine||'ready'}</div><div class="stat-label">状态</div></div></div>
+  <div style="text-align:right;margin-top:10px"><button class="btn btn-sm btn-green" onclick=saveMemoDemo()>+ 添加示例记忆</button></div>`
 }
 async function saveMemo(){
   const text=document.getElementById('memoText').value
