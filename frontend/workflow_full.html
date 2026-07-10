@@ -184,7 +184,7 @@ Object.entries(NODE_TYPES).forEach(([type,def])=>{
   el.style.borderLeftColor = def.color;
   el.draggable = true;
   el.ondragstart = (e)=>{e.dataTransfer.setData('text/plain', type);e.dataTransfer.effectAllowed = 'copy'};
-  el.onclick = ()=>{const id='n'+Date.now();NODES[id]={type,x:100+Object.keys(NODES).length*30,y:100+Object.keys(NODES).length*40,label:def.label,config:{}};render()};
+  el.onclick = ()=>{addNode(type, 100 + nodes.length * 30, 100 + nodes.length * 40)};
   pal.appendChild(el);
 });
 
