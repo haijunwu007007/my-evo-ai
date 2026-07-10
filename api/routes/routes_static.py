@@ -72,19 +72,7 @@ async def security_audit(limit: int = 50):
 
 
 
-@router.get("/api/scheduler/tasks")
 
-@router.get("/api/v1/scheduler/tasks")
-
-async def scheduler_tasks(): return {"success": True, "tasks": []}
-
-
-
-@router.get("/api/scheduler/status")
-
-@router.get("/api/v1/scheduler/status")
-
-async def scheduler_status(): return {"success": True, "total": 0, "active": 0, "paused": 0, "failed": 0}
 
 
 
