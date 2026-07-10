@@ -184,7 +184,7 @@ Object.entries(NODE_TYPES).forEach(([type,def])=>{
   el.style.borderLeftColor = def.color;
   el.draggable = true;
   el.ondragstart = (e)=>{e.dataTransfer.setData('text/plain', type);e.dataTransfer.effectAllowed = 'copy'};
-  el.onclick = ()=>{addNode(type, 100 + nodes.length * 30, 100 + nodes.length * 40)};
+  el.onclick = ()=>{addNode(type, 40 + nodes.length % 3 * 180, 60 + Math.floor(nodes.length / 3) * 120)};
   pal.appendChild(el);
 });
 
@@ -209,6 +209,7 @@ function addNode(type, x, y, cfg){
   const id = 'n' + (nextId++);
   const node = {id, type, label:def.label, x, y, config:cfg||{}, color:def.color};
   nodes.push(node);
+  selectedNode = node;
   render();
   return node;
 }
@@ -293,9 +294,8 @@ function startConnect(node, dir){
 }
 
 function editNode(node){
-  // 简化的配置弹窗
-  const key = prompt('配置项 (JSON or key=value):', '');
-  if(key) node.config.label = key;
+  const name = prompt('节点名称:', node.label);
+  if(name && name.trim()) node.label = name.trim();
 }
 
 function deselectAll(){
