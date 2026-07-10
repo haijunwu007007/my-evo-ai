@@ -2211,13 +2211,27 @@ window.hideMobileMore = hideMobileMore;
 }
 
 @media (max-width: 480px) {
-  .sidebar { width: 48px; }
-  .sidebar-item { font-size: 9px; padding: 6px 2px; }
-  .main-content { margin-left: 48px; padding: 8px; }
-  .content-card { padding: 8px; }
-  h1 { font-size: 20px; }
-  h2 { font-size: 16px; }
-  h3 { font-size: 14px; }
+  .sidebar { width: 44px; }
+  .sidebar-item { font-size: 9px; padding: 4px 2px; }
+  .main-content { margin-left: 44px; padding: 6px; }
+  .content-card { padding: 6px; }
+  h1 { font-size: 16px; }
+  h2 { font-size: 14px; }
+  h3 { font-size: 12px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 6px; }
+  .stat-value { font-size: 16px; }
+  .card-grid { grid-template-columns: 1fr; gap: 6px; }
+  .data-table { font-size: 10px; }
+  .data-table th, .data-table td { padding: 4px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .modal-content { width: 90%; margin: 10% auto; padding: 12px; }
+  .top-nav { flex-wrap: wrap; gap: 2px; }
+  .top-nav-item { font-size: 10px; padding: 4px 6px; }
+}
+@media (max-width: 360px) {
+  .sidebar { width: 36px; }
+  .sidebar-item { font-size: 7px; padding: 2px 1px; }
+  .main-content { margin-left: 36px; }
   .stats-grid { grid-template-columns: 1fr; }
 }
 </style>
