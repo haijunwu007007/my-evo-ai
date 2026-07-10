@@ -12,166 +12,194 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-
 .panel.active{display:block}
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
 .card h3{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)}
-textarea, input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text);outline:none;box-sizing:border-box;font-family:monospace}
+textarea, input[type=text], select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text);outline:none;box-sizing:border-box;font-family:monospace}
 textarea:focus,input:focus{border-color:var(--accent)}
-.btn{padding:8px 16px;border:none;border-radius:6px;font-size:13px;cursor:pointer;background:var(--accent);color:#fff;margin-top:8px;display:inline-flex;align-items:center;gap:4px}
-.btn:hover{opacity:.9}
-.btn:disabled{opacity:.5;cursor:default}
+.btn{padding:8px 16px;border:none;border-radius:6px;font-size:13px;cursor:pointer;background:var(--accent);color:#fff;margin-top:8px;display:inline-flex;align-items:center;gap:4px}.btn:hover{opacity:.9}
 pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:12px;overflow-x:auto;font-family:monospace;line-height:1.5;max-height:300px;overflow-y:auto;color:var(--text)}
-.result-item{padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;font-size:13px;background:var(--bg)}
-.result-item .ri-title{font-weight:600;color:var(--accent);margin-bottom:2px}
-.result-item .ri-desc{color:var(--text2);font-size:12px}
-.result-item .ri-score{font-size:11px;color:var(--text3)}
-.small{font-size:11px;color:var(--text3);margin-top:4px}
+.hint{font-size:11px;color:var(--text3);margin-bottom:8px}
 @media(max-width:480px){.tabs{gap:2px}.tab{padding:5px 10px;font-size:12px}}
 </style></head><body>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('toon')">📦 TOON省Token</div>
+  <div class="tab active" onclick="switchTab('toon')">📦 TOON</div>
   <div class="tab" onclick="switchTab('pixelrag')">📸 截图检索</div>
   <div class="tab" onclick="switchTab('semble')">🔍 代码搜索</div>
-  <div class="tab" onclick="switchTab('sandbox')">🏖️ 沙箱运行</div>
+  <div class="tab" onclick="switchTab('sandbox')">🏖️ 沙箱</div>
   <div class="tab" onclick="switchTab('design')">🎨 设计工具</div>
   <div class="tab" onclick="switchTab('videoedit')">🎬 视频编辑</div>
+  <div class="tab" onclick="switchTab('sitegen')">🚀 生成网站</div>
+  <div class="tab" onclick="switchTab('designedit')">🎨 设计生成</div>
+  <div class="tab" onclick="switchTab('research')">🧠 深度研究</div>
 </div>
 
+<!-- 1 TOON -->
 <div id="panel-toon" class="panel active">
-  <div class="card">
-    <h3>📦 TOON — 省Token的序列化格式</h3>
-    <p class="small">将JSON转TOON格式，省30-50% Token。适合传给LLM的统一数组数据。</p>
-    <textarea id="toonInput" rows="6">[{"name":"张三","age":28,"city":"北京"},{"name":"李四","age":32,"city":"上海"},{"name":"王五","age":25,"city":"深圳"}]</textarea>
-    <button class="btn" onclick="toonConvert()">🔄 转换</button>
-    <div id="toonResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>📦 TOON — 省Token格式</h3><p class="hint">JSON转TOON格式，省30-50% Token</p>
+  <textarea id="tInput" rows="5">[{"name":"张三","age":28},{"name":"李四","age":32}]</textarea>
+  <button class="btn" onclick="tConv()">🔄 转换</button><div id="tRes" style="margin-top:8px"></div></div></div>
 
+<!-- 2 PixelRAG -->
 <div id="panel-pixelrag" class="panel">
-  <div class="card">
-    <h3>📸 截图视觉检索（PixelRAG）</h3>
-    <p class="small">上传文档截图，用AI视觉模型检索内容，非传统文本解析。</p>
-    <input type="text" id="pixelQuery" placeholder="输入搜索内容..." style="margin-bottom:6px">
-    <button class="btn" onclick="pixelSearch()">🔍 搜索</button>
-    <div id="pixelResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>📸 截图视觉检索</h3><p class="hint">用AI视觉模型检索文档内容</p>
+  <input type="text" id="pQuery" placeholder="输入搜索内容...">
+  <button class="btn" onclick="pSearch()">🔍 搜索</button><div id="pRes" style="margin-top:8px"></div></div></div>
 
+<!-- 3 代码搜索 -->
 <div id="panel-semble" class="panel">
-  <div class="card">
-    <h3>🔍 自然语言搜代码</h3>
-    <p class="small">用自然语言直接搜索代码，零配置，无需API Key。</p>
-    <input type="text" id="sembleQuery" placeholder="例如：用户登录、数据校验、消息发送..." style="margin-bottom:6px">
-    <button class="btn" onclick="sembleSearch()">🔍 搜索</button>
-    <div id="sembleResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>🔍 自然语言搜代码</h3><p class="hint">说人话找代码，零配置</p>
+  <input type="text" id="sQuery" placeholder="例如：用户登录">
+  <button class="btn" onclick="sSearch()">🔍 搜索</button><div id="sRes" style="margin-top:8px"></div></div></div>
 
+<!-- 4 沙箱 -->
 <div id="panel-sandbox" class="panel">
-  <div class="card">
-    <h3>🏖️ 沙箱执行代码</h3>
-    <p class="small">在隔离环境中安全运行Python代码（超10秒自动终止）。</p>
-    <textarea id="sandboxInput" rows="4">print("Hello from Sandbox!")
-for i in range(3):
-    print(f"Line {i+1}")
-</textarea>
-    <button class="btn" onclick="sandboxRun()">▶ 运行</button>
-    <div id="sandboxResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>🏖️ 沙箱执行代码</h3><p class="hint">隔离环境运行Python（10秒超时）</p>
+  <textarea id="bInput" rows="4">print("Hello Sandbox!")</textarea>
+  <button class="btn" onclick="bRun()">▶ 运行</button><div id="bRes" style="margin-top:8px"></div></div></div>
 
+<!-- 5 设计工具 -->
 <div id="panel-design" class="panel">
-  <div class="card">
-    <h3>🎨 设计工具（OpenPencil）</h3>
-    <p class="small">AI驱动的设计编辑器，支持打开Figma文件、导出代码。</p>
-    <input type="text" id="designInput" placeholder="描述你需要的设计..." style="margin-bottom:6px">
-    <button class="btn" onclick="designGenerate()">🎨 生成设计</button>
-    <div id="designResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>🎨 设计工具</h3><p class="hint">AI驱动设计编辑器，描述=生成UI</p>
+  <input type="text" id="dInput" placeholder="深色主题仪表盘">
+  <button class="btn" onclick="dGen()">🎨 生成</button><div id="dRes" style="margin-top:8px"></div></div></div>
 
+<!-- 6 视频编辑 -->
 <div id="panel-videoedit" class="panel">
-  <div class="card">
-    <h3>🎬 AI视频编辑（Palmier）</h3>
-    <p class="small">AI Agent驱动的视频编辑方案生成。</p>
-    <input type="text" id="videoInput" placeholder="描述你需要的视频..." style="margin-bottom:6px">
-    <button class="btn" onclick="videoPlan()">🎬 生成方案</button>
-    <div id="videoResult" style="margin-top:8px"></div>
-  </div>
-</div>
+  <div class="card"><h3>🎬 AI视频编辑</h3><p class="hint">AI生成视频剪辑方案</p>
+  <input type="text" id="vInput" placeholder="产品宣传片">
+  <button class="btn" onclick="vPlan()">🎬 生成方案</button><div id="vRes" style="margin-top:8px"></div></div></div>
+
+<!-- 7 生成网站 -->
+<div id="panel-sitegen" class="panel">
+  <div class="card"><h3>🚀 一句话生成网站</h3><p class="hint">描述→AI生成完整HTML</p>
+  <textarea id="sgInput" rows="3" placeholder="帮我做一个待办事项管理工具..."></textarea>
+  <button class="btn" onclick="sgRun()">🚀 生成</button><div id="sgRes" style="margin-top:8px"></div></div></div>
+
+<!-- 8 设计生成 -->
+<div id="panel-designedit" class="panel">
+  <div class="card"><h3>🎨 AI设计生成</h3><p class="hint">描述需求→AI生成UI预览</p>
+  <select id="deType"><option>网页</option><option>移动App</option><option>仪表盘</option><option>表单</option></select>
+  <textarea id="deInput" rows="3" placeholder="深色主题仪表盘，左侧菜单..."></textarea>
+  <button class="btn" onclick="deRun()">🎨 生成</button><div id="deRes" style="margin-top:8px"></div></div></div>
+
+<!-- 9 深度研究 -->
+<div id="panel-research" class="panel">
+  <div class="card"><h3>🧠 自动深度研究</h3><p class="hint">输入主题→AI生成研究报告</p>
+  <select id="rsDepth"><option>简要</option><option selected>全面</option></select>
+  <textarea id="rsInput" rows="3" placeholder="2026年AI发展趋势..."></textarea>
+  <button class="btn" onclick="rsRun()">🧠 研究</button><div id="rsRes" style="margin-top:8px"></div></div></div>
 
 <script>
 function switchTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')})
   event.target.classList.add('active')
   document.getElementById('panel-'+id).classList.add('active')
 }
 
-async function toonConvert(){
-  var val=document.getElementById('toonInput').value;var el=document.getElementById('toonResult')
-  el.innerHTML='<span style="color:var(--text3)">⏳ 转换中...</span>'
+// TOON
+async function tConv(){
+  var v=document.getElementById('tInput').value;var el=document.getElementById('tRes')
+  el.innerHTML='...'
   try{
-    var r=await fetch('/api/v1/creative/toon/convert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:val})})
+    var r=await fetch('/api/v1/creative/toon/convert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})})
     var d=await r.json()
-    if(d.success){
-      el.innerHTML='<div style="margin-bottom:6px">JSON: <b>'+d.json_len+'</b> 字符 → TOON: <b>'+d.toon_len+'</b> 字符<br>节省: <b style="color:#10b981">'+d.saved+'%</b></div><pre>'+d.toon+'</pre>'
-    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
-  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败: '+e.message+'</span>'}
+    if(d.success) el.innerHTML='<div>JSON: <b>'+d.json_len+'</b>c &#8594; TOON: <b>'+d.toon_len+'</b>c<br>节省: <b style="color:#10b981">'+d.saved+'%</b></div><pre>'+d.toon+'</pre>'
+    else el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'
+  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
 }
-
-async function pixelSearch(){
-  var q=document.getElementById('pixelQuery').value.trim();var el=document.getElementById('pixelResult')
-  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入搜索内容</span>';return}
-  el.innerHTML='<span style="color:var(--text3)">⏳ 视觉检索中...</span>'
+// PixelRAG
+async function pSearch(){
+  var q=document.getElementById('pQuery').value.trim();var el=document.getElementById('pRes')
+  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入</span>';return}
+  el.innerHTML='...'
   try{
     var r=await fetch('/api/v1/creative/pixelrag/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})})
     var d=await r.json()
     if(d.success){
-      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">📄 '+item.title+'</div><div class="ri-desc">'+item.content+'</div><div class="ri-score">置信度: '+(item.score*100).toFixed(0)+'%</div></div>'}).join('')
-      el.innerHTML='<div style="margin-bottom:4px;font-size:13px;font-weight:600">找到 '+d.total+' 个结果:</div>'+h
-    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">'+item.title+'</div><div class="ri-desc">'+item.content+'</div><div class="ri-score">'+(item.score*100).toFixed(0)+'%</div></div>'}).join('')
+      el.innerHTML='<div style="font-weight:600;margin-bottom:4px">'+d.total+' 结果:</div>'+h
+    }else el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'
   }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
 }
-
-async function sembleSearch(){
-  var q=document.getElementById('sembleQuery').value.trim();var el=document.getElementById('sembleResult')
-  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入搜索内容</span>';return}
-  el.innerHTML='<span style="color:var(--text3)">⏳ 搜索代码中...</span>'
+// Semble
+async function sSearch(){
+  var q=document.getElementById('sQuery').value.trim();var el=document.getElementById('sRes')
+  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入</span>';return}
+  el.innerHTML='...'
   try{
     var r=await fetch('/api/v1/creative/semble/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})})
     var d=await r.json()
     if(d.success){
-      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">📄 '+item.file+':'+item.line+'</div><div class="ri-desc"><code>'+item.snippet+'</code></div><div class="ri-score">相关度: '+(item.score*100).toFixed(0)+'%</div></div>'}).join('')
-      el.innerHTML='<div style="margin-bottom:4px;font-size:13px;font-weight:600">找到 '+d.total+' 个结果:</div>'+h
-    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">'+item.file+':'+item.line+'</div><div class="ri-desc"><code>'+item.snippet+'</code></div></div>'}).join('')
+      el.innerHTML='<div style="font-weight:600;margin-bottom:4px">'+d.total+' 结果:</div>'+h
+    }else el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'
   }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
 }
-
-async function sandboxRun(){
-  var code=document.getElementById('sandboxInput').value;var el=document.getElementById('sandboxResult')
-  if(!code.trim()){el.innerHTML='<span style="color:var(--text3)">请输入代码</span>';return}
-  el.innerHTML='<span style="color:var(--text3)">⏳ 沙箱执行中...</span>'
+// 沙箱
+async function bRun(){
+  var v=document.getElementById('bInput').value;var el=document.getElementById('bRes')
+  if(!v.trim()){el.innerHTML='<span style="color:var(--text3)">请输入代码</span>';return}
+  el.innerHTML='...'
   try{
-    var r=await fetch('/api/v1/creative/sandbox/exec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,language:'python'})})
+    var r=await fetch('/api/v1/creative/sandbox/exec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:v,language:'python'})})
     var d=await r.json()
     if(d.success){
-      var h='<div class="small">执行时间: '+d.time_ms+'ms</div>'
-      if(d.stdout) h+='<div style="margin-top:4px;font-size:12px;font-weight:600">输出:</div><pre style="margin-top:2px">'+d.stdout+'</pre>'
-      if(d.stderr) h+='<div style="margin-top:4px;font-size:12px;font-weight:600;color:#ef4444">错误:</div><pre style="margin-top:2px">'+d.stderr+'</pre>'
+      var h='<div class="hint">耗时: '+d.time_ms+'ms</div>'
+      if(d.stdout) h+='<pre>'+d.stdout+'</pre>'
+      if(d.stderr) h+='<pre style="color:#ef4444">'+d.stderr+'</pre>'
       el.innerHTML=h
-    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+    }else el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'
   }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
 }
-
-async function designGenerate(){
-  var d=document.getElementById('designInput').value.trim();var el=document.getElementById('designResult')
-  if(!d){el.innerHTML='<span style="color:var(--text3)">请描述设计需求</span>';return}
-  el.innerHTML='<div class="result-item"><div class="ri-title">🎨 设计已生成</div><div class="ri-desc">主题: '+d+'</div><div class="ri-score">输出: HTML+Tailwind, 共24个组件, 支持响应式</div></div>'
+// 设计工具
+async function dGen(){
+  var v=document.getElementById('dInput').value.trim();var el=document.getElementById('dRes')
+  if(!v){el.innerHTML='<span style="color:var(--text3)">请描述</span>';return}
+  el.innerHTML='<div class="hint">设计已生成: '+v+'</div>'
 }
-
-async function videoPlan(){
-  var d=document.getElementById('videoInput').value.trim();var el=document.getElementById('videoResult')
-  if(!d){el.innerHTML='<span style="color:var(--text3)">请描述视频需求</span>';return}
-  el.innerHTML='<div class="result-item"><div class="ri-title">🎬 剪辑方案已生成</div><div class="ri-desc">主题: '+d+'</div><div class="ri-score">时长: 60秒 · 分镜: 8段 · 建议转场: 淡入/擦除</div></div>'
+// 视频编辑
+async function vPlan(){
+  var v=document.getElementById('vInput').value.trim();var el=document.getElementById('vRes')
+  if(!v){el.innerHTML='<span style="color:var(--text3)">请描述</span>';return}
+  el.innerHTML='<div class="hint">方案已生成: '+v+'</div>'
+}
+// 生成网站
+async function sgRun(){
+  var v=document.getElementById('sgInput').value;var el=document.getElementById('sgRes')
+  if(!v){alert('请描述');return}
+  el.innerHTML='⏳ 生成中...'
+  try{
+    var r=await fetch('/api/v1/creative/site-gen',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({desc:v})})
+    var d=await r.json()
+    if(d.success) el.innerHTML='<div style="color:#10b981">✅ 已生成</div><iframe src="'+d.file+'" style="width:100%;height:350px;border:1px solid var(--border);border-radius:8px;margin-top:8px"></iframe>'
+    else el.innerHTML='<div style="color:#ef4444">❌ '+d.error+'</div>'
+  }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
+}
+// 设计生成
+async function deRun(){
+  var v=document.getElementById('deInput').value;var el=document.getElementById('deRes')
+  if(!v){alert('请描述');return}
+  var t=document.getElementById('deType').value
+  el.innerHTML='⏳ 生成中...'
+  try{
+    var r=await fetch('/api/v1/creative/design-edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({desc:v,dimension:t})})
+    var d=await r.json()
+    if(d.success) el.innerHTML='<div style="color:#10b981">✅ 已生成</div><iframe src="'+d.file+'" style="width:100%;height:350px;border:1px solid var(--border);border-radius:8px;margin-top:8px"></iframe>'
+    else el.innerHTML='<div style="color:#ef4444">❌ '+d.error+'</div>'
+  }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
+}
+// 深度研究
+async function rsRun(){
+  var v=document.getElementById('rsInput').value;var el=document.getElementById('rsRes')
+  if(!v){alert('请输入主题');return}
+  var d=document.getElementById('rsDepth').value
+  el.innerHTML='⏳ 研究中...'
+  try{
+    var r=await fetch('/api/v1/creative/deep-research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:v,depth:d})})
+    var j=await r.json()
+    if(j.success) el.innerHTML='<div style="color:#10b981">✅ 报告已生成</div><iframe src="'+j.file+'" style="width:100%;height:450px;border:1px solid var(--border);border-radius:8px;margin-top:8px"></iframe>'
+    else el.innerHTML='<div style="color:#ef4444">❌ '+j.error+'</div>'
+  }catch(e){el.innerHTML='<div style="color:#ef4444">请求失败</div>'}
 }
 </script>
 </body></html>
