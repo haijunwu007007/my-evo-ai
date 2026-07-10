@@ -181,7 +181,7 @@ class GithubWebhookConfig(BaseModel):
     events: list[str] | None = None
     min_priority: int | None = None
 
-@router.post("/api/v1/webhook/github/v2")
+@router.post("/api/v1/webhook/github")
 async def webhook_github(request: Request):
     """接收 GitHub Webhook (v2 — 由 modules.github_webhook 接管)
     注: /api/v1/webhook/github 已被 routes_webhook.py 注册，此处改用 /v2 前缀"""

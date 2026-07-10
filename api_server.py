@@ -34,7 +34,7 @@ try:
     from modules._client import configure_requests
     configure_requests()
 except Exception:
-    pass
+    logger.debug("modules._client 加载跳过")
 
 # ── 统一路径（从共享模块计算 BASE_DIR + sys.path.insert）──
 from api._paths import BASE_DIR
