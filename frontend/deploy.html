@@ -60,6 +60,9 @@ function toggleTheme(){var el=document.documentElement;var t=el.getAttribute('da
   <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
     <span onclick="window.location.href='/'" style="cursor:pointer;font-size:16px">⬅</span>
     <h1 style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AUTO-EVO-AI</h1>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleTheme()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2)">🌙</button>
+    </div>
   </div>
 </div>
 <div class="hdr"><div class="l">AUTO-EVO-AI</div><div class="n"><a href="/">对话</a><a href="/dashboard">仪表盘</a><a href="/deploy" class="a">部署</a><a href="/canvas">编排</a><a href="/video">视频</a></div></div>
@@ -76,7 +79,7 @@ function toggleTheme(){var el=document.documentElement;var t=el.getAttribute('da
         <option value="hf-mirror">🤗 HF国内镜像</option>
         <option value="trending">🔥 热门</option>
       </select>
-      <select id="searchSort" style="padding:10px;border-radius:8px;border:1px solid rgba(45,53,97,.4);background:rgba(22,33,62,.6);color:#e8e8ef;font-size:13px;outline:none;cursor:pointer">
+      <select id="searchSort" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none;cursor:pointer">
         <option value="stars">⭐ 最多星</option>
         <option value="trending">📈 趋势</option>
         <option value="relevance">🎯 相关度</option>
