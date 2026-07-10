@@ -302,33 +302,33 @@ async def external_services():
     }
 
 
-@router.get("/api/v1/rag/documents")
-async def rag_documents():
-    """RAG 知识库文档列表"""
-    from pathlib import Path
-    docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
-    docs = []
-    if docs_dir.exists():
-        for f in sorted(docs_dir.iterdir()):
-            if f.is_file() and f.suffix in (".txt", ".md", ".pdf", ".docx"):
-                docs.append({"name": f.name, "size": f"{f.stat().st_size // 1024}KB", "chunks": 0, "status": "ready"})
-    return {"success": True, "documents": docs, "count": len(docs)}
+# @router.get("/api/v1/rag/documents")
+# async def rag_documents():
+#     """RAG 知识库文档列表"""
+#     from pathlib import Path
+#     docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
+#     docs = []
+#     if docs_dir.exists():
+#         for f in sorted(docs_dir.iterdir()):
+#             if f.is_file() and f.suffix in (".txt", ".md", ".pdf", ".docx"):
+#                 docs.append({"name": f.name, "size": f"{f.stat().st_size // 1024}KB", "chunks": 0, "status": "ready"})
+#     return {"success": True, "documents": docs, "count": len(docs)}
 
 
-@router.post("/api/v1/rag/upload")
-async def rag_upload(file: bytes | None = None):
-    """上传文档到知识库"""
-    if file is None:
-        return {"success": False, "error": "请上传文件"}
-    from pathlib import Path
-    docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
-    docs_dir.mkdir(parents=True, exist_ok=True)
-    fname = f"doc_{len(list(docs_dir.iterdir())) + 1}.txt"
-    (docs_dir / fname).write_bytes(file)
-    return {"success": True, "doc": {"name": fname, "size": f"{len(file) // 1024}KB", "chunks": 0, "status": "ready"}}
+# @router.post("/api/v1/rag/upload")
+# async def rag_upload(file: bytes | None = None):
+#     """上传文档到知识库"""
+#     if file is None:
+#         return {"success": False, "error": "请上传文件"}
+#     from pathlib import Path
+#     docs_dir = Path(__file__).parent.parent.parent / "data" / "rag"
+#     docs_dir.mkdir(parents=True, exist_ok=True)
+#     fname = f"doc_{len(list(docs_dir.iterdir())) + 1}.txt"
+#     (docs_dir / fname).write_bytes(file)
+#     return {"success": True, "doc": {"name": fname, "size": f"{len(file) // 1024}KB", "chunks": 0, "status": "ready"}}
 
 
-@router.delete("/api/v1/rag/delete")
+# @router.delete("/api/v1/rag/delete")
 async def rag_delete(name: str = ""):
     """删除知识库文档"""
     from pathlib import Path
@@ -484,34 +484,34 @@ class AIChatRequest(BaseModel):
     messages: list[AIChatMessage] = []
     temperature: float = 0.7
 
-@router.post("/api/v1/ai/chat")
-async def ai_chat(req: AIChatRequest):
-    """统一AI聊天API：自动选择最优provider，支持负载均衡和故障转移"""
-    from modules.ai_gateway import AIGateway
-    gw = AIGateway()
-    gw.initialize()
-    msgs = [{"role": m.role, "content": m.content} for m in req.messages]
-    params = {"model": req.model, "messages": msgs, "temperature": req.temperature}
-    result = await gw.execute("chat", params)
-    gw.shutdown()
-    return {"success": True, "data": result, "providers": {
-        "openai": bool(os.environ.get("OPENAI_API_KEY","")),
-        "claude": bool(os.environ.get("ANTHROPIC_API_KEY","")),
-        "gemini": bool(os.environ.get("GEMINI_API_KEY","")),
-    }}
+# @router.post("/api/v1/ai/chat")
+# async def ai_chat(req: AIChatRequest):
+#     """统一AI聊天API：自动选择最优provider，支持负载均衡和故障转移"""
+#     from modules.ai_gateway import AIGateway
+#     gw = AIGateway()
+#     gw.initialize()
+#     msgs = [{"role": m.role, "content": m.content} for m in req.messages]
+#     params = {"model": req.model, "messages": msgs, "temperature": req.temperature}
+#     result = await gw.execute("chat", params)
+#     gw.shutdown()
+#     return {"success": True, "data": result, "providers": {
+#         "openai": bool(os.environ.get("OPENAI_API_KEY","")),
+#         "claude": bool(os.environ.get("ANTHROPIC_API_KEY","")),
+#         "gemini": bool(os.environ.get("GEMINI_API_KEY","")),
+#     }}
 
 
-@router.get("/api/v1/ai/providers")
-async def ai_providers():
-    """列出可用的AI provider及状态"""
-    cfg = {
-        "openai": {"configured": bool(os.environ.get("OPENAI_API_KEY","") or os.environ.get("OPENAI_BASE_URL",""))},
-        "claude": {"configured": bool(os.environ.get("ANTHROPIC_API_KEY",""))},
-        "gemini": {"configured": bool(os.environ.get("GEMINI_API_KEY",""))},
-    }
-    return {"success": True, "providers": cfg}
+# @router.get("/api/v1/ai/providers")
+# async def ai_providers():
+#     """列出可用的AI provider及状态"""
+#     cfg = {
+#         "openai": {"configured": bool(os.environ.get("OPENAI_API_KEY","") or os.environ.get("OPENAI_BASE_URL",""))},
+#         "claude": {"configured": bool(os.environ.get("ANTHROPIC_API_KEY",""))},
+#         "gemini": {"configured": bool(os.environ.get("GEMINI_API_KEY",""))},
+#     }
+#     return {"success": True, "providers": cfg}
 
-@router.get("/api/v1/ai/models")
+# @router.get("/api/v1/ai/models")
 async def ai_models():
     """列出支持的模型"""
     models = [
