@@ -6,7 +6,7 @@
 <title>Agent集群 - AUTO-EVO-AI</title>
 <link rel="stylesheet" href="/frontend/share.css">
 <style>
-body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg,var(--bg));color:var(--text,#e0e0e0)}
+body{padding-top:44px;height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg,var(--bg));color:var(--text,#e0e0e0)}
 .main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .content{flex:1;overflow-y:auto;padding:16px 20px;max-width:1100px;margin:0 auto;width:100%}
 .section-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
@@ -46,6 +46,7 @@ body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple
 .log-area .ll .lm{color:var(--text)}
 @media(max-width:768px){.content{padding:10px 12px}.grid{grid-template-columns:1fr}}
 </style>
+<span class="back-btn" onclick="window.location.href='/'" style="position:fixed;top:10px;left:10px;z-index:999;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:16px;color:var(--text);background:var(--card);border:1px solid var(--border)">←</span>
 </head>
 <body>
 <div class="main">
@@ -54,7 +55,7 @@ body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple
     <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s" onclick="switchATab(this,'a_hermes')">⚡ Hermes</div>
     <div class="tab" style="padding:6px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s" onclick="switchATab(this,'a_teammates')">🤖 AI同事</div>
   </div>
-  <div id="a_cluster" class="tab-content" style="display:flex;flex-direction:column;flex:1;min-height:0"><div class="topbar"><div class="topbar-left"><h1>🦾 Agent 集群</h1></div><div class="topbar-right"><span class="back-btn" onclick="window.location.href='/'">←</span></div></div><div class="content">
+  <div id="a_cluster" class="tab-content" style="display:flex;flex-direction:column;flex:1;min-height:0"><div class="topbar"><div class="topbar-left"><h1>🦾 Agent 集群</h1></div><div class="topbar-right"></div></div><div class="content">
     <div class="stats" id="stats"></div>
     <div class="filter-bar">
       <input id="search" placeholder="搜索Agent名称..." oninput="filterAgents()">
