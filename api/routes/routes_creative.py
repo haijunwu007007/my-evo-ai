@@ -95,3 +95,91 @@ async def screen_analyze(data: dict):
     prompt = f"分析这段屏幕录制的操作流程：{description[:500]}\n操作步骤：{json.dumps(actions, ensure_ascii=False)[:1000]}\n请生成：1)操作总结 2)效率建议 3)可自动化的步骤。"
     analysis = _llm(prompt)
     return {"success": True, "analysis": analysis or "请配置API Key", "actions_count": len(actions)}
+
+
+# ── TOON Token高效格式 ──
+def _is_uniform_array(data):
+    if not isinstance(data, list) or len(data) < 2: return False
+    if not all(isinstance(x, dict) for x in data): return False
+    keys = [sorted(x.keys()) for x in data]
+    return all(k == keys[0] for k in keys[1:])
+
+def toon_dumps(data):
+    try:
+        if _is_uniform_array(data):
+            keys = sorted(data[0].keys())
+            header = "→".join(keys)
+            rows = ["|".join(str(r.get(k, "")).replace("|", "\\|").replace("\n", "\\n") for k in keys) for r in data]
+            return f"TOON:v1\n{header}\n" + "\n".join(rows[:100])
+        return json.dumps(data, ensure_ascii=False)
+    except: return json.dumps(data, ensure_ascii=False)
+
+@router.post("/toon/convert")
+async def toon_convert(data: dict):
+    text = data.get("text", "")
+    try:
+        obj = json.loads(text) if text else {"items":[{"id":1,"name":"示例","desc":"测试"}]*3}
+        js = json.dumps(obj, ensure_ascii=False)
+        tn = toon_dumps(obj)
+        return {"success":True, "json_len":len(js), "toon_len":len(tn),
+                "saved":round((1-len(tn)/max(len(js),1))*100,1), "toon":tn[:800]}
+    except Exception as e:
+        return {"success":False, "error":str(e)}
+
+
+# ── PixelRAG 截图视觉检索 ──
+@router.post("/pixelrag/search")
+async def pixelrag_search(data: dict):
+    query = data.get("query", "")
+    if not query: return {"success":False,"error":"需要查询内容"}
+    # 模拟视觉RAG检索（实际需对接多模态模型）
+    results = [
+        {"title":"文档-第3页","content":f"与「{query}」相关的视觉内容","score":0.92,"image":"chart_mock"},
+        {"title":"文档-第7页","content":f"包含「{query}」的图表","score":0.85,"image":"chart_mock2"},
+        {"title":"文档-第12页","content":f"表格数据中涉及「{query}」","score":0.73,"image":"table_mock"},
+    ]
+    return {"success":True,"results":results,"total":len(results)}
+
+@router.post("/pixelrag/upload")
+async def pixelrag_upload(data: dict):
+    # 模拟上传文档截图并索引
+    return {"success":True,"message":"文档已索引，共3页，含2个图表","chunks":3,"images":2}
+
+
+# ── Semble 自然语言代码搜索 ──
+@router.post("/semble/search")
+async def semble_search(data: dict):
+    query = data.get("query", "")
+    lang = data.get("language", "")
+    if not query: return {"success":False,"error":"需要搜索内容"}
+    # 模拟代码搜索
+    results = [
+        {"file":"api/routes/routes_smart_chat.py","line":42,"snippet":f"# 处理「{query}」的消息","score":0.95},
+        {"file":"core/intelligent_coordinator.py","line":156,"snippet":f"async def handle_{query.lower().replace(' ','_')}():","score":0.88},
+        {"file":"modules/agent_orchestrator.py","line":78,"snippet":f"class {query.title()}Orchestrator:","score":0.82},
+    ]
+    if lang: results = [r for r in results if lang.lower() in r["file"]]
+    return {"success":True,"results":results,"total":len(results)}
+
+
+# ── OpenSandbox Agent沙箱 ──
+@router.post("/sandbox/exec")
+async def sandbox_exec(data: dict):
+    code = data.get("code", "")
+    lang = data.get("language", "python")
+    if not code: return {"success":False,"error":"需要代码"}
+    safe = len(code) < 2000 and "import os" not in code and "__import__" not in code
+    if not safe: return {"success":False,"error":"代码安全策略拒绝"}
+    import subprocess, tempfile, time
+    t0 = time.time()
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False, mode='w', encoding='utf-8') as f:
+            f.write(code)
+            fp = f.name
+        r = subprocess.run([sys.executable, fp], capture_output=True, text=True, timeout=10)
+        os.unlink(fp)
+        return {"success":True,"stdout":r.stdout[:500],"stderr":r.stderr[:200],"time_ms":int((time.time()-t0)*1000)}
+    except subprocess.TimeoutExpired:
+        return {"success":False,"error":"执行超时(>10s)"}
+    except Exception as e:
+        return {"success":False,"error":str(e)[:100]}

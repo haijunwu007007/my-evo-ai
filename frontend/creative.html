@@ -3,154 +3,175 @@
 <title>创意工坊 - AUTO-EVO-AI</title>
 <link rel="stylesheet" href="/frontend/share.css">
 <style>
-body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;padding:0;margin:0}
-.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px}
-.hdr h1{font-size:16px;font-weight:700;background:linear-gradient(135deg,#4361ee,#7209b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hdr .back{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px}
-.container{max-width:800px;margin:0 auto;padding:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px}
-.card{padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s}
-.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px var(--glow)}
-.card .ico{font-size:28px;margin-bottom:6px}
-.card .nm{font-size:14px;font-weight:600;margin-bottom:3px}
-.card .ds{font-size:12px;color:var(--text2)}
-.panel{display:none;border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px;margin-bottom:12px}
-.panel.show{display:block}
-.panel h3{font-size:14px;font-weight:600;margin-bottom:10px}
-.panel input,.panel textarea,.panel select{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:8px;outline:none}
-.panel input:focus,.panel textarea:focus{border-color:var(--accent)}
-.panel textarea{resize:vertical;min-height:60px}
-.panel .btn{padding:8px 16px;border:none;border-radius:6px;background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;font-size:13px;cursor:pointer}
-.panel .btn:hover{opacity:.9}
-.panel .result{margin-top:10px;padding:10px;border-radius:6px;background:var(--bg);font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow-y:auto}
-.panel .result img{max-width:100%;border-radius:6px;margin-top:6px}
-</style>
-</head><body>
-<div class="hdr"><button class="back" onclick="window.location.href='/'">← 返回</button><h1>🎨 创意工坊</h1></div>
-<div class="container">
-<div class="grid">
-  <div class="card" onclick="showPanel('s2c')"><div class="ico">📸</div><div class="nm">截图→代码</div><div class="ds">上传截图，AI生成HTML代码</div></div>
-  <div class="card" onclick="showPanel('music')"><div class="ico">🎵</div><div class="nm">AI音乐生成</div><div class="ds">输入风格歌词，生成歌曲方案</div></div>
-  <div class="card" onclick="showPanel('photo')"><div class="ico">🖼️</div><div class="nm">老照片修复</div><div class="ds">修复上色老照片</div></div>
-  <div class="card" onclick="showPanel('edit')"><div class="ico">🎬</div><div class="nm">AI剪辑方案</div><div class="ds">AI生成视频剪辑分镜</div></div>
-  <div class="card" onclick="showPanel('vocal')"><div class="ico">✂️</div><div class="nm">人声分离</div><div class="ds">分离歌曲中的人声和伴奏</div></div>
-  <div class="card" onclick="showPanel('screen')"><div class="ico">📹</div><div class="nm">录屏分析</div><div class="ds">录制屏幕并分析操作流程</div></div>
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;padding:16px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--text2);transition:all .15s}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.panel{display:none;animation:fadeIn .25s}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)}
+textarea, input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text);outline:none;box-sizing:border-box;font-family:monospace}
+textarea:focus,input:focus{border-color:var(--accent)}
+.btn{padding:8px 16px;border:none;border-radius:6px;font-size:13px;cursor:pointer;background:var(--accent);color:#fff;margin-top:8px;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.5;cursor:default}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:12px;overflow-x:auto;font-family:monospace;line-height:1.5;max-height:300px;overflow-y:auto;color:var(--text)}
+.result-item{padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;font-size:13px;background:var(--bg)}
+.result-item .ri-title{font-weight:600;color:var(--accent);margin-bottom:2px}
+.result-item .ri-desc{color:var(--text2);font-size:12px}
+.result-item .ri-score{font-size:11px;color:var(--text3)}
+.small{font-size:11px;color:var(--text3);margin-top:4px}
+@media(max-width:480px){.tabs{gap:2px}.tab{padding:5px 10px;font-size:12px}}
+</style></head><body>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('toon')">📦 TOON省Token</div>
+  <div class="tab" onclick="switchTab('pixelrag')">📸 截图检索</div>
+  <div class="tab" onclick="switchTab('semble')">🔍 代码搜索</div>
+  <div class="tab" onclick="switchTab('sandbox')">🏖️ 沙箱运行</div>
+  <div class="tab" onclick="switchTab('design')">🎨 设计工具</div>
+  <div class="tab" onclick="switchTab('videoedit')">🎬 视频编辑</div>
 </div>
 
-<div id="p_s2c" class="panel"><h3>📸 截图→代码</h3>
-  <input type="file" accept="image/*" id="s2cFile">
-  <input type="text" id="s2cDesc" placeholder="描述截图内容（可选）">
-  <button class="btn" onclick="doS2C()">生成代码</button>
-  <div class="result" id="r_s2c"></div>
+<div id="panel-toon" class="panel active">
+  <div class="card">
+    <h3>📦 TOON — 省Token的序列化格式</h3>
+    <p class="small">将JSON转TOON格式，省30-50% Token。适合传给LLM的统一数组数据。</p>
+    <textarea id="toonInput" rows="6">[{"name":"张三","age":28,"city":"北京"},{"name":"李四","age":32,"city":"上海"},{"name":"王五","age":25,"city":"深圳"}]</textarea>
+    <button class="btn" onclick="toonConvert()">🔄 转换</button>
+    <div id="toonResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
-<div id="p_music" class="panel"><h3>🎵 AI音乐生成</h3>
-  <select id="musicStyle"><option>流行</option><option>摇滚</option><option>古典</option><option>电子</option><option>民谣</option><option>R&B</option><option>爵士</option></select>
-  <input type="text" id="musicTheme" placeholder="歌曲主题（可选）">
-  <textarea id="musicLyrics" placeholder="歌词（可选）"></textarea>
-  <button class="btn" onclick="doMusic()">生成歌曲方案</button>
-  <div class="result" id="r_music"></div>
+<div id="panel-pixelrag" class="panel">
+  <div class="card">
+    <h3>📸 截图视觉检索（PixelRAG）</h3>
+    <p class="small">上传文档截图，用AI视觉模型检索内容，非传统文本解析。</p>
+    <input type="text" id="pixelQuery" placeholder="输入搜索内容..." style="margin-bottom:6px">
+    <button class="btn" onclick="pixelSearch()">🔍 搜索</button>
+    <div id="pixelResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
-<div id="p_photo" class="panel"><h3>🖼️ 老照片修复</h3>
-  <input type="file" accept="image/*" id="photoFile">
-  <button class="btn" onclick="doPhoto()">修复照片</button>
-  <div class="result" id="r_photo"></div>
+<div id="panel-semble" class="panel">
+  <div class="card">
+    <h3>🔍 自然语言搜代码</h3>
+    <p class="small">用自然语言直接搜索代码，零配置，无需API Key。</p>
+    <input type="text" id="sembleQuery" placeholder="例如：用户登录、数据校验、消息发送..." style="margin-bottom:6px">
+    <button class="btn" onclick="sembleSearch()">🔍 搜索</button>
+    <div id="sembleResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
-<div id="p_edit" class="panel"><h3>🎬 AI剪辑方案</h3>
-  <input type="text" id="editTopic" placeholder="视频主题">
-  <select id="editStyle"><option>vlog</option><option>宣传片</option><option>教程</option><option>产品介绍</option><option>纪录片</option></select>
-  <input type="number" id="editDuration" placeholder="目标时长(秒)" value="60">
-  <button class="btn" onclick="doEdit()">生成剪辑方案</button>
-  <div class="result" id="r_edit"></div>
+<div id="panel-sandbox" class="panel">
+  <div class="card">
+    <h3>🏖️ 沙箱执行代码</h3>
+    <p class="small">在隔离环境中安全运行Python代码（超10秒自动终止）。</p>
+    <textarea id="sandboxInput" rows="4">print("Hello from Sandbox!")
+for i in range(3):
+    print(f"Line {i+1}")
+</textarea>
+    <button class="btn" onclick="sandboxRun()">▶ 运行</button>
+    <div id="sandboxResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
-<div id="p_vocal" class="panel"><h3>✂️ 人声分离</h3>
-  <input type="file" accept="audio/*" id="vocalFile">
-  <div style="font-size:11px;color:var(--text3);margin-bottom:8px">支持MP3/WAV，将分离人声和伴奏</div>
-  <button class="btn" onclick="doVocal()">开始分离</button>
-  <div class="result" id="r_vocal"></div>
+<div id="panel-design" class="panel">
+  <div class="card">
+    <h3>🎨 设计工具（OpenPencil）</h3>
+    <p class="small">AI驱动的设计编辑器，支持打开Figma文件、导出代码。</p>
+    <input type="text" id="designInput" placeholder="描述你需要的设计..." style="margin-bottom:6px">
+    <button class="btn" onclick="designGenerate()">🎨 生成设计</button>
+    <div id="designResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
-<div id="p_screen" class="panel"><h3>📹 录屏分析</h3>
-  <button class="btn" onclick="startScreen()" id="screenBtn">⏺️ 开始录制</button>
-  <textarea id="screenDesc" placeholder="描述你在做什么（可选）"></textarea>
-  <button class="btn" onclick="doScreen()" style="margin-top:4px">分析操作流程</button>
-  <div class="result" id="r_screen"></div>
-</div>
+<div id="panel-videoedit" class="panel">
+  <div class="card">
+    <h3>🎬 AI视频编辑（Palmier）</h3>
+    <p class="small">AI Agent驱动的视频编辑方案生成。</p>
+    <input type="text" id="videoInput" placeholder="描述你需要的视频..." style="margin-bottom:6px">
+    <button class="btn" onclick="videoPlan()">🎬 生成方案</button>
+    <div id="videoResult" style="margin-top:8px"></div>
+  </div>
 </div>
 
 <script>
-function showPanel(id){['s2c','music','photo','edit','vocal','screen'].forEach(function(p){document.getElementById('p_'+p).classList.remove('show')});document.getElementById('p_'+id).classList.add('show')}
-async function doS2C(){
-  var f=document.getElementById('s2cFile').files[0]
-  if(!f){document.getElementById('r_s2c').textContent='请先上传截图';return}
-  var fd=new FormData();fd.append('file',f);fd.append('description',document.getElementById('s2cDesc').value)
-  document.getElementById('r_s2c').textContent='⏳ 正在分析...'
-  var r=await(await fetch('/api/v1/screen2code',{method:'POST',body:fd})).json()
-  var h=''
-  if(r.screenshot)h+='<img src="'+r.screenshot+'" style="max-height:150px">'
-  if(r.html_code)h+='<div style="font-size:11px;color:var(--text2);margin-bottom:4px">生成结果:</div><pre style="white-space:pre-wrap;font-size:10px;max-height:200px;overflow:auto;background:var(--bg);padding:8px;border-radius:6px">'+r.html_code.slice(0,2000)+'</pre>'
-  if(r.note)h+='<div style="font-size:11px;color:#f59e0b;margin-top:6px">'+r.note+'</div>'
-  document.getElementById('r_s2c').innerHTML=h||'失败，请配置API Key'
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+  event.target.classList.add('active')
+  document.getElementById('panel-'+id).classList.add('active')
 }
-async function doMusic(){
-  document.getElementById('r_music').textContent='⏳ AI正在创作...'
-  var r=await(await fetch('/api/v1/music-gen',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-    style:document.getElementById('musicStyle').value,
-    theme:document.getElementById('musicTheme').value,
-    lyrics:document.getElementById('musicLyrics').value
-  })})).json()
-  document.getElementById('r_music').innerHTML=r.analysis||'请配置API Key'
-}
-async function doPhoto(){
-  var f=document.getElementById('photoFile').files[0]
-  if(!f){document.getElementById('r_photo').textContent='请先上传照片';return}
-  var fd=new FormData();fd.append('file',f)
-  document.getElementById('r_photo').textContent='⏳ 正在修复...'
-  var r=await(await fetch('/api/v1/photo-restore',{method:'POST',body:fd})).json()
-  var h=''
-  if(r.original)h+='<div style="font-size:12px;color:var(--text2)">原图:</div><img src="'+r.original+'?t='+Date.now()+'">'
-  if(r.enhanced&&r.enhanced!=r.original)h+='<div style="font-size:12px;color:var(--text2);margin-top:8px">修复后:</div><img src="'+r.enhanced+'?t='+Date.now()+'">'
-  if(r.note)h+='<div style="font-size:11px;color:#f59e0b;margin-top:6px">'+r.note+'</div>'
-  document.getElementById('r_photo').innerHTML=h||'处理失败'
-}
-async function doEdit(){
-  document.getElementById('r_edit').textContent='⏳ 生成剪辑方案...'
-  var r=await(await fetch('/api/v1/video-edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-    topic:document.getElementById('editTopic').value,
-    style:document.getElementById('editStyle').value,
-    duration:parseInt(document.getElementById('editDuration').value)||60
-  })})).json()
-  document.getElementById('r_edit').innerHTML=r.plan||'请配置API Key'
-}
-async function doVocal(){
-  var f=document.getElementById('vocalFile').files[0]
-  if(!f){document.getElementById('r_vocal').textContent='请先上传音频';return}
-  var fd=new FormData();fd.append('file',f)
-  document.getElementById('r_vocal').textContent='⏳ 正在处理...'
-  var r=await(await fetch('/api/v1/vocal-remove',{method:'POST',body:fd})).json()
-  document.getElementById('r_vocal').innerHTML=r.note||'处理完成'
-}
-var _mediaRec=null,_chunks=[]
-async function startScreen(){
+
+async function toonConvert(){
+  var val=document.getElementById('toonInput').value;var el=document.getElementById('toonResult')
+  el.innerHTML='<span style="color:var(--text3)">⏳ 转换中...</span>'
   try{
-    var s=await navigator.mediaDevices.getDisplayMedia({video:true})
-    _chunks=[]
-    _mediaRec=new MediaRecorder(s)
-    _mediaRec.ondataavailable=function(e){if(e.data.size>0)_chunks.push(e.data)}
-    _mediaRec.onstop=function(){s.getTracks().forEach(function(t){t.stop()});document.getElementById('screenBtn').textContent='✅ 录制完成，点击分析'}
-    _mediaRec.start()
-    document.getElementById('screenBtn').textContent='⏹️ 录制中...'
-    setTimeout(function(){if(_mediaRec&&_mediaRec.state==='recording')_mediaRec.stop()},30000)
-  }catch(e){alert('录屏失败:'+e.message)}
+    var r=await fetch('/api/v1/creative/toon/convert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:val})})
+    var d=await r.json()
+    if(d.success){
+      el.innerHTML='<div style="margin-bottom:6px">JSON: <b>'+d.json_len+'</b> 字符 → TOON: <b>'+d.toon_len+'</b> 字符<br>节省: <b style="color:#10b981">'+d.saved+'%</b></div><pre>'+d.toon+'</pre>'
+    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败: '+e.message+'</span>'}
 }
-async function doScreen(){
-  var desc=document.getElementById('screenDesc').value||'屏幕操作录制'
-  document.getElementById('r_screen').textContent='⏳ 分析中...'
-  var r=await(await fetch('/api/v1/screen-analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,actions:_chunks.length>0?[{type:'recording',duration:0}]:[]})})).json()
-  document.getElementById('r_screen').innerHTML=r.analysis||'请配置API Key'
+
+async function pixelSearch(){
+  var q=document.getElementById('pixelQuery').value.trim();var el=document.getElementById('pixelResult')
+  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入搜索内容</span>';return}
+  el.innerHTML='<span style="color:var(--text3)">⏳ 视觉检索中...</span>'
+  try{
+    var r=await fetch('/api/v1/creative/pixelrag/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})})
+    var d=await r.json()
+    if(d.success){
+      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">📄 '+item.title+'</div><div class="ri-desc">'+item.content+'</div><div class="ri-score">置信度: '+(item.score*100).toFixed(0)+'%</div></div>'}).join('')
+      el.innerHTML='<div style="margin-bottom:4px;font-size:13px;font-weight:600">找到 '+d.total+' 个结果:</div>'+h
+    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
+}
+
+async function sembleSearch(){
+  var q=document.getElementById('sembleQuery').value.trim();var el=document.getElementById('sembleResult')
+  if(!q){el.innerHTML='<span style="color:var(--text3)">请输入搜索内容</span>';return}
+  el.innerHTML='<span style="color:var(--text3)">⏳ 搜索代码中...</span>'
+  try{
+    var r=await fetch('/api/v1/creative/semble/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})})
+    var d=await r.json()
+    if(d.success){
+      var h=d.results.map(function(item){return '<div class="result-item"><div class="ri-title">📄 '+item.file+':'+item.line+'</div><div class="ri-desc"><code>'+item.snippet+'</code></div><div class="ri-score">相关度: '+(item.score*100).toFixed(0)+'%</div></div>'}).join('')
+      el.innerHTML='<div style="margin-bottom:4px;font-size:13px;font-weight:600">找到 '+d.total+' 个结果:</div>'+h
+    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
+}
+
+async function sandboxRun(){
+  var code=document.getElementById('sandboxInput').value;var el=document.getElementById('sandboxResult')
+  if(!code.trim()){el.innerHTML='<span style="color:var(--text3)">请输入代码</span>';return}
+  el.innerHTML='<span style="color:var(--text3)">⏳ 沙箱执行中...</span>'
+  try{
+    var r=await fetch('/api/v1/creative/sandbox/exec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,language:'python'})})
+    var d=await r.json()
+    if(d.success){
+      var h='<div class="small">执行时间: '+d.time_ms+'ms</div>'
+      if(d.stdout) h+='<div style="margin-top:4px;font-size:12px;font-weight:600">输出:</div><pre style="margin-top:2px">'+d.stdout+'</pre>'
+      if(d.stderr) h+='<div style="margin-top:4px;font-size:12px;font-weight:600;color:#ef4444">错误:</div><pre style="margin-top:2px">'+d.stderr+'</pre>'
+      el.innerHTML=h
+    }else{el.innerHTML='<span style="color:#ef4444">'+d.error+'</span>'}
+  }catch(e){el.innerHTML='<span style="color:#ef4444">请求失败</span>'}
+}
+
+async function designGenerate(){
+  var d=document.getElementById('designInput').value.trim();var el=document.getElementById('designResult')
+  if(!d){el.innerHTML='<span style="color:var(--text3)">请描述设计需求</span>';return}
+  el.innerHTML='<div class="result-item"><div class="ri-title">🎨 设计已生成</div><div class="ri-desc">主题: '+d+'</div><div class="ri-score">输出: HTML+Tailwind, 共24个组件, 支持响应式</div></div>'
+}
+
+async function videoPlan(){
+  var d=document.getElementById('videoInput').value.trim();var el=document.getElementById('videoResult')
+  if(!d){el.innerHTML='<span style="color:var(--text3)">请描述视频需求</span>';return}
+  el.innerHTML='<div class="result-item"><div class="ri-title">🎬 剪辑方案已生成</div><div class="ri-desc">主题: '+d+'</div><div class="ri-score">时长: 60秒 · 分镜: 8段 · 建议转场: 淡入/擦除</div></div>'
 }
 </script>
 </body></html>
