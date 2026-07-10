@@ -648,7 +648,7 @@ function checkOnboard() {
         <div class="input-area" id="inputArea"><div class="input-suggest" id="inputSuggest"></div>
           <div class="input-row" id="textInputRow"><input id="fileInput" type="file" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this)"><button onclick="document.getElementById('fileInput').click()" title="上传文件/拍照/录像">📎</button>
             <input id="input" placeholder="输入你想做的事..." oninput="suggestInput(this.value)" onkeydown="if(event.key==='Enter'){send()}" style="color:#000!important;background:#fff!important">
-            <button class="mic" id="voiceToggleBtn" onclick="switchToVoice();return false" ontouchend="switchToVoice();return false" title="语音输入"><span style="font-size:16px;pointer-events:none">🎤</span></button>
+            <button class="mic" id="voiceToggleBtn" onclick="switchToVoice()" ontouchend="switchToVoice()" title="语音输入">🎤</button>
             <button onclick="send()">➤</button>
           </div>
           <div class="voice-bar hidden" id="voiceBar" ontouchstart="voiceStart(event)" onmousedown="voiceStart(event)" ontouchend="voiceStop(event)" onmouseup="voiceStop(event)" ontouchcancel="voiceCancel(event)" onmouseleave="voiceCancel(event)">
@@ -767,9 +767,13 @@ function toggleCategory(catId){
 var _vStream=null,_vCtx=null,_vNode=null,_vSamples=[];
 
 function switchToVoice(){
-  document.getElementById('textInputRow').style.display='none';
-  var vb=document.getElementById('voiceBar');if(vb){vb.classList.remove('hidden');vb.style.display='flex'}
-  var vl=document.getElementById('vbLabel');if(vl)vl.textContent='按住 说话';
+  try{
+    document.getElementById('textInputRow').style.display='none';
+  }catch(e){}
+  try{
+    var vb=document.getElementById('voiceBar');if(vb){vb.classList.remove('hidden');vb.style.display='flex'}
+    var vl=document.getElementById('vbLabel');if(vl)vl.textContent='按住 说话';
+  }catch(e){}
 }
 
 function _resample(src,srcRate){
@@ -862,8 +866,6 @@ checkUserRole();
   document.getElementById('regUser').value='demo';
   document.getElementById('regPass').value='demo123';
   doRegister();
-}
-
 </script>
 <script>
 // ── PWA 离线支持 ──
