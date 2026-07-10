@@ -225,6 +225,9 @@ _ACTION_MAP = [
     (["重载配置", "重新加载配置"], "POST", "/api/v1/config/reload",
      lambda _: {}),
 
+        # ── 模块自动路由（533模块名→关键词自动匹配） ──
+    (["模块自动路由"], "INTERNAL", "__module_router__", None),
+
     # ── 记忆树 ──
     (["添加记忆节点", "创建记忆节点"], "POST", "/api/v1/memory/add",
      lambda msg: {"node_id": f"n_{os.urandom(4).hex()}", "title": _extract_after(msg), "content": _extract_after(msg)}),
@@ -389,6 +392,21 @@ async def _execute_action(msg: str) -> str | None:
     """执行动作 — 匹配关键词→调API→返回结果，不依赖LLM"""
     import httpx
     lower = msg.lower()
+    
+    # ── 模块自动路由：输入模块名→自动调用 ──
+    mod_name = _find_module_in_text(msg)
+    if mod_name:
+        try:
+            async with httpx.AsyncClient(timeout=15, base_url=_API_BASE) as c:
+                r = await c.post(f"/api/v1/modules/{mod_name}/execute", json={"action": "status", "params": {}})
+                if r.status_code in (200, 201):
+                    data = r.json()
+                    return f"✅ **{mod_name}** 模块已响应\n" + json.dumps(data, ensure_ascii=False)[:600]
+                else:
+                    return f"⚠️ **{mod_name}** 模块正在准备中..."
+        except Exception as e:
+            pass  # 降级到普通LLM
+    
     for keywords, method, url, body_fn in _ACTION_MAP:
         for kw in keywords:
             if kw in lower or kw in msg:
@@ -1001,3 +1019,37 @@ async def smart_stream(req: Req):
 async def llm_status():
     from api.agent_llm import get_active_model
     return get_active_model()
+
+
+# ── 模块自动路由引擎 ──
+_MODULE_NAMES = None
+_MODULE_DESC = None
+
+def _get_module_names():
+    global _MODULE_NAMES
+    if _MODULE_NAMES is not None:
+        return _MODULE_NAMES
+    try:
+        import os
+        d = os.path.join(os.path.dirname(__file__), "..", "..", "modules")
+        if not os.path.isdir(d):
+            d = os.path.join(os.path.dirname(__file__), "..", "modules")
+        names = []
+        for f in sorted(os.listdir(d)):
+            if f.endswith('.py') and not f.startswith('_') and f != '__init__.py':
+                names.append(f.replace('.py', '').replace('_', ' ').replace('-', ' '))
+        _MODULE_NAMES = names
+        return names
+    except Exception as e:
+        return []
+
+def _find_module_in_text(msg: str) -> str | None:
+    """在用户消息中查找匹配的模块名"""
+    msg_lower = msg.lower().strip()
+    names = _get_module_names()
+    # 精确匹配
+    for n in names:
+        nl = n.lower()
+        if nl in msg_lower or msg_lower in nl:
+            return n
+    return None
