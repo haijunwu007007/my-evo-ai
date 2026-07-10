@@ -25,7 +25,7 @@ def screenshot_to_code(image_path: str = "", image_url: str = "", stack: str = "
         return {"success": False, "error": "httpx 未安装"}
 
     # 策略1: 如果有本地部署的 screenshot-to-code 服务
-    service_url = os.environ.get("S2C_SERVICE_URL", "http://localhost:5173")
+    service_url = os.environ.get("S2C_SERVICE_URL", "")
     api_key = os.environ.get("OPENAI_API_KEY", "")
 
     if not image_path and not image_url:

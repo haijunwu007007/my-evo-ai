@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.modules_loader")
 #!/usr/bin/env python3
 """
 import logging
@@ -367,11 +369,11 @@ def register_independent_modules(manager) -> int:
             failed_modules.append((module_id, f"Error: {e}"))
     
     if failed_modules:
-        print(f"  警告: {len(failed_modules)} 个模块加载失败:")
+        logger.info("  警告: {len(failed_modules)} 个模块加载失败:")
         for mid, err in failed_modules[:5]:
-            print(f"    - {mid}: {err}")
+            logger.info("    - {mid}: {err}")
         if len(failed_modules) > 5:
-            print(f"    ... 还有 {len(failed_modules) - 5} 个")
+            logger.info("    ... 还有 {len(failed_modules) - 5} 个")
     
     return registered_count
 

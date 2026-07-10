@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.module_catalog")
 """模块RAG索引 — 457模块建可搜索目录"""
 import logging
 logger = logging.getLogger("evo.module_catalog")
@@ -81,6 +83,6 @@ def search(query: str, top_k: int = 10) -> List[dict]:
 
 if __name__ == "__main__":
     idx = build_index()
-    print(f"索引完成: {len(idx)} 模块")
+    logger.info("索引完成: {len(idx)} 模块")
     r = search("数据库")
-    print(f"搜索'数据库'结果: {[m['name'] for m in r]}")
+    logger.info("搜索'数据库'结果: {[m['name'] for m in r]}")

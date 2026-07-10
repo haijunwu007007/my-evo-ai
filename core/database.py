@@ -7,6 +7,8 @@ AUTO-EVO-AI V0.1 — 统一数据库层（PG主＋SQLite降级）
 """
 from __future__ import annotations
 import os, json, time, threading, hashlib, logging
+from core.logging_config import get_logger
+logger = get_logger("evo.database")
 from pathlib import Path
 from typing import Optional, Any
 from contextlib import contextmanager
@@ -343,7 +345,7 @@ def migrate_from_legacy():
             placeholders = ','.join('?' for _ in col_names)
             cols_str = ','.join(f'"{c}"' for c in col_names)
         except Exception as e:
-            print(f'  [{db_name}] {src_table}: SKIP ({str(e)[:60]})')
+            logger.info('  [{db_name}] {src_table}: SKIP ({str(e)[:60]})')
             continue
         try:
             insert_sql = f'INSERT OR IGNORE INTO "{dst_table}" ({cols_str}) VALUES ({placeholders})'
@@ -352,10 +354,10 @@ def migrate_from_legacy():
                 try:
                     target_conn.execute(insert_sql, row); ok += 1
                 except: break
-            print(f'  [{db_name}] {src_table} -> {dst_table}: {ok}/{len(rows)} rows')
+            logger.info('  [{db_name}] {src_table} -> {dst_table}: {ok}/{len(rows)} rows')
         except: pass
     target_conn.commit()
-    print("迁移完成")
+    logger.info("迁移完成")
 
 
 def health_check() -> dict[str, Any]:

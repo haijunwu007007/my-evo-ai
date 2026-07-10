@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.extension_modules")
 #!/usr/bin/env python3
 """
 import logging
@@ -811,7 +813,7 @@ def register_extension_modules(manager):
     """注册所有扩展模块"""
     for module_id, module_class in EXTENSION_MODULES.items():
         manager.register_module_class(module_id, module_class)
-    print(f"已注册 {len(EXTENSION_MODULES)} 个扩展模块")
+    logger.info("已注册 {len(EXTENSION_MODULES)} 个扩展模块")
 
 
 __all__ = ["EXTENSION_MODULES", "register_extension_modules"]

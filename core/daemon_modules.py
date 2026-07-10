@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.daemon_modules")
 #!/usr/bin/env python3
 """
 import logging
@@ -774,7 +776,7 @@ def register_daemon_modules(manager):
     """注册所有守护进程相关模块"""
     for module_id, module_class in DAEMON_MODULES.items():
         manager.register_module_class(module_id, module_class)
-    print(f"已注册 {len(DAEMON_MODULES)} 个守护进程模块")
+    logger.info("已注册 {len(DAEMON_MODULES)} 个守护进程模块")
 
 
 __all__ = ["DAEMON_MODULES", "register_daemon_modules"]
