@@ -95,6 +95,22 @@ _NAVIGATION_MAP = [
     # 终端/命令行
     (["终端","命令行","cli","命令","控制台"], "/cli"),
     (["一键部署","compose","docker部署","容器部署","portainer"], "/deploy"),
+    # ── 侧栏缺失映射（2026-07-10 补齐）──
+    (["团队编排","团队与编排","teamcanvas","团队协作画布","team-canvas"], "/team-canvas.html"),
+    (["远程执行","远程控制","远程管理","remote"], "/remote.html"),
+    (["审批中心","审批管理","审批流程","审核中心","approval"], "/review.html"),
+    (["扫码安装","安装到桌面","安装桌面版","desktop安装"], "/desktop"),
+    # enterprise 顶栏
+    (["模块协调","协调中心","全模块协调","openV3Panel","协调引擎"], "/enterprise.html#"),
+    (["模块浏览器","浏览模块","module explorer","模块搜索"], "/enterprise.html#explorer"),
+    (["内网穿透","隧道","tunnel","公网访问","远程访问"], "/enterprise.html#tunnel"),
+    (["云部署","部署指南","cloud deploy","云部署指南"], "/api/deploy-guide"),
+    (["模块管理器","模块管理","module manager","模块管理面板"], "/enterprise.html#manager"),
+    (["系统监控","系统监控面板","monitor panel","实时监控"], "/enterprise.html#monitor"),
+    (["定时调度","调度器","scheduler_panel","任务调度器"], "/enterprise.html#scheduler"),
+    (["事件引擎","事件驱动","event engine","事件总线"], "/enterprise.html#events"),
+    (["任务队列","task queue","队列管理","任务队列管理"], "/enterprise.html#queue"),
+    (["推送监控","ws monitor","websocket监控","实时推送"], "/enterprise.html#ws"),
 ]
 
 # ── 直接信息查询（不依赖LLM，直接查API）──
