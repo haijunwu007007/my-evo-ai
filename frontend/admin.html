@@ -46,7 +46,7 @@ body{background:var(--bg);color:var(--text);margin:0;display:flex;min-height:100
   .sidebar h2,.sidebar a span{display:block}
   .sidebar a{text-align:left;padding:8px 12px;font-size:13px}
   .sidebar-overlay{display:block;position:fixed;left:210px;top:0;right:0;bottom:0;z-index:98;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s}
-  .sidebar-overlay.show{opacity:1;pointer-events:auto}
+  .sidebar-overlay.show{opacity:1}
   .hamburger{display:inline-flex!important}
   .main{padding:12px;width:100%}
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -105,7 +105,7 @@ button.danger{background:#e74c3c}
   <link rel="stylesheet" href="/frontend/share.css">
 </head><body>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px">
   <div class="topbar-left" style="display:flex;align-items:center;gap:8px">
     <button class="hamburger" onclick="toggleAdminSidebar()" style="display:none;width:32px;height:32px;align-items:center;justify-content:center;border:none;border-radius:6px;background:transparent;color:var(--text);font-size:18px;cursor:pointer">☰</button>
@@ -511,6 +511,13 @@ function toggleAdminSidebar(){
   if(s)s.classList.toggle('open');if(o)o.classList.toggle('show');
   if(window.innerWidth<=768&&s&&s.classList.contains('open')){var a=s.querySelector('a.active');if(a)a.scrollIntoView({block:'center'})}
 }
+document.addEventListener('click',function(e){
+  var s=document.querySelector('.sidebar'),o=document.getElementById('sidebarOverlay');
+  var h=document.querySelector('.hamburger');
+  if(s&&o&&s.classList.contains('open')&&!s.contains(e.target)&&h&&!h.contains(e.target)){
+    s.classList.remove('open');o.classList.remove('show')
+  }
+})
 </script>
 </body>
 </html>
