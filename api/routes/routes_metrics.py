@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_metrics")
 """AUTO-EVO-AI V0.1 — 监控/指标路由（从 api_server.py 抽离）
 
 Prometheus 指标 + 健康检查。
@@ -39,8 +41,8 @@ async def prometheus_metrics():
             lines.append("")
             lines.append("# -- modules._prometheus --")
             lines.append(pt)
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     health = registry.get_all_health()
     ok_count = sum(1 for h in health.values() if h.get("status") in ("ok", "healthy", "configured", "module_only"))
@@ -73,8 +75,8 @@ async def prometheus_metrics():
         lines.append(f'evo_engine_active{{engine="events"}} {1 if HAS_EVENTS else 0}')
         lines.append(f'evo_engine_active{{engine="pipeline"}} {1 if HAS_PIPELINE else 0}')
         lines.append(f'evo_engine_active{{engine="queue"}} {1 if HAS_QUEUE else 0}')
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     text = "\n".join(lines)
     return Response(content=text, media_type="text/plain; version=0.0.4; charset=utf-8")

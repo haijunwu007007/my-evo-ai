@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_env")
 """AUTO-EVO-AI V0.1 — 环境配置管理（用户输入账号即可启用）"""
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel

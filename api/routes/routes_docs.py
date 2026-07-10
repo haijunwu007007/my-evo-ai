@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_docs")
 """
 路由文件: routes_docs.py — 文档办公套件 API
 

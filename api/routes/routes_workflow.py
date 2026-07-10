@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_workflow")
 """AUTO-EVO-AI V0.1 — 全自动工作流路由（中文版n8n模板集成）"""
 import logging, json, httpx, re
 from fastapi import APIRouter, HTTPException
@@ -93,8 +95,8 @@ async def search_templates(q: str = "", category: str = "", limit: int = 20):
                     except Exception:
                         pass
                 return {"success": True, "templates": templates[:limit], "total": len(templates), "source": "n8n"}
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     # 3. n8n 不可用，返回全部中文模板
     return {"success": True, "templates": _CN_TEMPLATES[:limit], "total": len(_CN_TEMPLATES), "source": "cn"}
@@ -111,8 +113,8 @@ async def get_template(template_id: int):
             r = await c.get(f"{N8N_API}/workflows/{template_id}")
             if r.status_code == 200:
                 return {"success": True, "template": r.json()}
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
     # 本地兜底
     for t in _CN_TEMPLATES:
         if t.get("id") == template_id:

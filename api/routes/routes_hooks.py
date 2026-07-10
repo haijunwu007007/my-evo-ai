@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_hooks")
 """
 AUTO-EVO-AI V0.1 — Hooks拦截器 API
 """

@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_ws")
 """WebSocket 实时工具输出"""
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import asyncio, json

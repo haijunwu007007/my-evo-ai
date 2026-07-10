@@ -40,16 +40,16 @@ async def dashboard_data():
                 v = r.json()
                 data["api_version"] = v.get("version", "")
                 data["build"] = v.get("build", "")
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     try:
         async with httpx.AsyncClient(timeout=5) as c:
             r = await c.get("http://127.0.0.1:8765/api/v1/health")
             if r.status_code == 200:
                 data["health"] = r.json()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     try:
         async with httpx.AsyncClient(timeout=8) as c:
@@ -63,8 +63,8 @@ async def dashboard_data():
                     cat_count[cat] = cat_count.get(cat, 0) + 1
                 data["module_count"] = len(modules)
                 data["module_categories"] = cat_count
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     try:
         async with httpx.AsyncClient(timeout=8) as c:
@@ -72,8 +72,8 @@ async def dashboard_data():
             if r.status_code == 200:
                 skills = r.json()
                 data["skill_count"] = len(skills.get("skills", skills.get("data", [])))
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
 
     return data
 
@@ -133,6 +133,6 @@ async def rag_search(q: str = Query("", description="搜索关键词")):
             r = await c.get(f"http://127.0.0.1:8765/api/v1/rag/search?q={q}")
             if r.status_code == 200:
                 return r.json()
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
     return {"success": True, "results": [], "note": f"搜索 '{q}' 未找到结果，可尝试其他关键词"}

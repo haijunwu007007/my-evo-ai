@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_video_intelligence")
 """
 AUTO-EVO-AI V0.1 — 视频智能理解路由（真实实现）
 ===============================================

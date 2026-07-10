@@ -1,3 +1,5 @@
+from core.logging_config import get_logger
+logger = get_logger("evo.routes_capabilities")
 # -*- coding: utf-8 -*-
 """8大能力真实路由（含SQLite持久化+LLM缓存+权限拦截）"""
 from fastapi import APIRouter, Request

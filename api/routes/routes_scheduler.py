@@ -128,8 +128,8 @@ async def scheduler_tasks():
                     if d.get('id') not in _scheduler_tasks_db:
                         _scheduler_tasks_db[d['id']] = d
                 return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "dict"}
-    except Exception:
-        pass
+    except Exception as _e:
+            logger.warning(f"error: {_e}")
     # 字典兜底
     items = sorted(_scheduler_tasks_db.values(), key=lambda t: t.get("created_at", ""), reverse=True)
     return {"success": True, "tasks": items, "count": len(items), "running": True, "engine": "dict"}
