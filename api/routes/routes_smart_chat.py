@@ -1292,15 +1292,37 @@ async def smart_stream(req: Req):
             if _r and isinstance(_r, dict) and _r.get("success"):
                 _txt = _r.get("result") or _r.get("analysis") or ""
                 if _txt: txt = "🔬 **深度研究**\n\n" + _txt
+        elif itype == "create":
+            from api.agent_llm import call_llm as _cl
+            _prompt = f"{req.message}\n\n请输出完整的HTML代码放在```html```标签中，包含CSS和JavaScript，可直接运行。"
+            import re as _reh, time as _tm
+            for _i in range(2):
+                _c, _ = _cl([{"role":"user","content":_prompt}], timeout=90)
+                if _c and len(_c) > 100:
+                    _m = _reh.search(r'```html\s*(.*?)\s*```', _c, _reh.DOTALL)
+                    _h = _m.group(1).strip() if _m else (_c.strip() if '<html' in _c.lower() or '<!DOCTYPE' in _c else None)
+                    if _h and len(_h) > 200:
+                        _fn = f"app_{int(_tm.time())}.html"
+                        from pathlib import Path
+                        _fp = Path(__file__).resolve().parent.parent.parent / "output" / "apps" / _fn
+                        _fp.parent.mkdir(parents=True, exist_ok=True)
+                        _fp.write_text(_h, encoding="utf-8")
+                        _title = req.message[:30]
+                        txt = f"✅ **{_title}**\n[📄 预览](/output/apps/{_fn})"
+                        break
         if txt:
             async def _gen():
                 _step = _think_step.get(itype, "🤔 正在处理...")
                 yield f"data: {json.dumps({'thinking':_step,'icon':_step[:2],'done':False})}\n\n"
                 await asyncio.sleep(0.3)
-                yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
-                for ch in txt:
-                    yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
-                    await asyncio.sleep(0.02)
+                if itype in ("create","calculate","help","cli_tool"):
+                    # 结果类指令：整块返回，不逐字输出
+                    yield f"data: {json.dumps({'chunk':txt,'done':False})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
+                    for ch in txt:
+                        yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
+                        await asyncio.sleep(0.02)
                 yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
             return StreamingResponse(_gen(), media_type="text/event-stream")
     # chat类走LLM流式
