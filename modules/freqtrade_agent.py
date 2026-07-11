@@ -15,4 +15,5 @@ class FreqtradeAgent:
   if a=="backtest":return s.backtest(p.get("strategy",""))
   return s.status()
 get_status=lambda:FreqtradeAgent().status()
-register=lambda:{"name":"freqtrade_agent","class":"FreqtradeAgent","description":"FreqTrade量化交易"}\nmodule_class = FreqtradeAgent\n
+register=lambda:{"name":"freqtrade_agent","class":"FreqtradeAgent","description":"FreqTrade量化交易"}
+module_class = FreqtradeAgent

@@ -151,7 +151,8 @@ class HyperExtract:
         """基于句子重要度的摘要提取"""
         start = time.time()
         # 分句
-        sentences = re.split(r'[。！？\n.!?]+', text)
+        sentences = re.split(r'[。！？
+.!?]+', text)
         sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
         if not sentences:
             return {"success": True, "summary": "", "sentences": 0}

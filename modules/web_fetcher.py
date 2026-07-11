@@ -37,8 +37,10 @@ async def fetch(url: str, timeout: int = 10) -> dict:
                     text = _html.unescape(re.sub(r'\s+', ' ', text)).strip()[:2000]
             if not text:
                 text = raw[:500]
-            lines = [l.strip() for l in text.split('\n') if l.strip() and len(l.strip()) > 2]
-            text = '\n'.join(lines[:50])
+            lines = [l.strip() for l in text.split('
+') if l.strip() and len(l.strip()) > 2]
+            text = '
+'.join(lines[:50])
             return {"title": title[:200], "text": text[:3000], "url": url}
     except Exception as e:
         return {"title": "", "text": f"抓取失败: {e}", "url": url}
@@ -60,8 +62,15 @@ async def search_and_fetch(query: str, count: int = 3) -> str:
             continue
         r = await fetch(url)
         if r.get("text") and len(r["text"]) > 50:
-            texts.append(f"📰 {r['title']}\n{r['text'][:800]}")
+            texts.append(f"📰 {r['title']}
+{r['text'][:800]}")
             if texts: break
     if texts:
-        return "📊 **搜索结果摘要**\n\n" + "\n\n---\n\n".join(texts[:2])
+        return "📊 **搜索结果摘要**
+
+" + "
+
+---
+
+".join(texts[:2])
     return result[:500]

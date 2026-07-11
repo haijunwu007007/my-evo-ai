@@ -14,4 +14,5 @@ class PerplexicaSearch:
   if a=="search":return s.search(p.get("q",""))
   return s.status()
 get_status=lambda:PerplexicaSearch().status()
-register=lambda:{"name":"perplexica_search","class":"PerplexicaSearch","description":"Perplexica搜索"}\nmodule_class = PerplexicaSearch\n
+register=lambda:{"name":"perplexica_search","class":"PerplexicaSearch","description":"Perplexica搜索"}
+module_class = PerplexicaSearch

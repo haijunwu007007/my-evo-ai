@@ -513,7 +513,8 @@ class MemGPT:
                     break
                 blocks.append(b.content)
                 total += b.token_estimate
-        return "\n".join(blocks), total
+        return "
+".join(blocks), total
 
     def recall(self, query: str, max_tokens: int = 4000) -> tuple[str, int]:
         hits = self.search(query, max_results=20)
@@ -525,7 +526,8 @@ class MemGPT:
                 break
             blocks.append(h.content)
             total += est
-        return "\n".join(blocks), total
+        return "
+".join(blocks), total
 
     def promote(self, block_id: str, target_tier: MemoryTier) -> bool:
         if not self._initialized:

@@ -12,4 +12,5 @@ class SampleHelloPlugin:
         if a=='echo': return self.echo(p.get('text',''))
         return self.status()
 get_status=lambda:SampleHelloPlugin().status()
-register=lambda:{'name':'sample_hello_plugin','class':'SampleHelloPlugin','description':'示例Hello插件'}\nmodule_class = SampleHelloPlugin\n
+register=lambda:{'name':'sample_hello_plugin','class':'SampleHelloPlugin','description':'示例Hello插件'}
+module_class = SampleHelloPlugin

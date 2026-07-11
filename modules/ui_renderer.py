@@ -770,7 +770,8 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     --border-radius: {theme.border_radius};
     --shadow: {theme.shadow};"""
         for k, v in theme.custom_css_vars.items():
-            vars_css += f"\n    {k}: {v};"
+            vars_css += f"
+    {k}: {v};"
         return vars_css
 
     def _minify_html(self, html: str) -> str:

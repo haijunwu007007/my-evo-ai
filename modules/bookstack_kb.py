@@ -15,4 +15,5 @@ class BookstackKB:
   if a=="search":return s.search(p.get("q",""))
   return s.status()
 get_status=lambda:BookstackKB().status()
-register=lambda:{"name":"bookstack_kb","class":"BookstackKB","description":"BookStack知识库"}\nmodule_class = BookstackKB\n
+register=lambda:{"name":"bookstack_kb","class":"BookstackKB","description":"BookStack知识库"}
+module_class = BookstackKB

@@ -14,4 +14,5 @@ class LeadCatcher:
   if a=="list":return s.list()
   return s.status()
 get_status=lambda:LeadCatcher().status()
-register=lambda:{"name":"lead_catcher","class":"LeadCatcher","description":"潜客捕获"}\nmodule_class = LeadCatcher\n
+register=lambda:{"name":"lead_catcher","class":"LeadCatcher","description":"潜客捕获"}
+module_class = LeadCatcher

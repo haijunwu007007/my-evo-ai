@@ -213,7 +213,7 @@ class SentimentScoringEngine:
         negate = False
         intensifier = 1.0
         for i, word in enumerate(words):
-            clean = word.strip(".,!?;:\"'()[]{}")
+            clean = word.strip(".,!?;:"'()[]{}")
             if clean in self._negators:
                 negate = True
                 continue
@@ -263,7 +263,7 @@ class SentimentScoringEngine:
         words = text.lower().split()
         word_scores: dict[str, dict] = {}
         for word in words:
-            clean = word.strip(".,!?;:\"'()[]{}")
+            clean = word.strip(".,!?;:"'()[]{}")
             if not clean:
                 continue
             if clean in self._positive_words:
@@ -714,7 +714,8 @@ class SentimentAnalysis(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
         """Real LLM-based sentiment analysis."""
         try:
             from _zhipu_helper import llm_chat
-            result = llm_chat(f"分析以下文本的情感倾向，返回JSON格式：极简数字 1-5(1非常负面 3中性 5非常正面)，以及10字内原因。\n文本: {text[:2000]}")
+            result = llm_chat(f"分析以下文本的情感倾向，返回JSON格式：极简数字 1-5(1非常负面 3中性 5非常正面)，以及10字内原因。
+文本: {text[:2000]}")
             import json as _j
             if result:
                 return {"success":True,"text":text[:200],"sentiment":result,"llm":True}

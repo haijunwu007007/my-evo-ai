@@ -675,7 +675,8 @@ class MonthlyReport:
                 parts.append("</tbody></table>")
             parts.append("</section>")
         parts.append("</body></html>")
-        return "\n".join(parts)
+        return "
+".join(parts)
 
     def _render_markdown(self, report: MonthlyReport) -> str:
         lines = [
@@ -697,7 +698,8 @@ class MonthlyReport:
                 for row in table.get("rows", []):
                     lines.append("| " + " | ".join(str(c) for c in row) + " |")
                 lines.append("")
-        return "\n".join(lines)
+        return "
+".join(lines)
 
     def _render_json(self, report: MonthlyReport) -> str:
         import json
@@ -726,7 +728,9 @@ class MonthlyReport:
 
     def _render_email(self, report: MonthlyReport) -> str:
         md = self._render_markdown(report)
-        return f"Subject: {report.title}\n\n{md}"
+        return f"Subject: {report.title}
+
+{md}"
 
     def health_check(self) -> dict[str, Any]:
         try:

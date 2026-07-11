@@ -393,7 +393,10 @@ class AgentApolloManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             if doc:
                 parts.append(doc.content[:200])
                 source_ids.append(doc.doc_id)
-        answer = "根据知识库检索结果：\n" + "\n---\n".join(parts[:3])
+        answer = "根据知识库检索结果：
+" + "
+---
+".join(parts[:3])
         confidence = min(0.95, 0.5 + len(results) * 0.15)
         self._qa_history.append(QARecord(question=question, answer=answer, doc_ids=source_ids, confidence=confidence))
         if len(self._qa_history) > 500:

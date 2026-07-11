@@ -350,7 +350,8 @@ class LogAnalyzer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _parse_logs(self, content: str, format: LogFormat, source: str) -> list[LogEntry]:
         """解析日志"""
         entries = []
-        lines = content.split("\n")
+        lines = content.split("
+")
         for i, line in enumerate(lines):
             if not line.strip():
                 continue

@@ -22,4 +22,5 @@ class DaguScheduler:
   if a=="list":return s.list()
   return s.status()
 get_status=lambda:DaguScheduler().status()
-register=lambda:{"name":"dagu_scheduler","class":"DaguScheduler","description":"Dagu调度器"}\nmodule_class = DaguScheduler\n
+register=lambda:{"name":"dagu_scheduler","class":"DaguScheduler","description":"Dagu调度器"}
+module_class = DaguScheduler

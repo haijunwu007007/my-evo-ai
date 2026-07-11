@@ -33,4 +33,5 @@ class CalScheduler:
         if action=='delete': return self.delete_event(params.get('id',0))
         return self.status()
 get_status = lambda: CalScheduler().status()
-register = lambda: {'name':'cal_scheduler','class':'CalScheduler','description':'日历调度 - 日历事件管理'}\nmodule_class = CalScheduler\n
+register = lambda: {'name':'cal_scheduler','class':'CalScheduler','description':'日历调度 - 日历事件管理'}
+module_class = CalScheduler

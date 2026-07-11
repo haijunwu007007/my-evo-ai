@@ -162,7 +162,8 @@ class TextRankEngine:
         self.threshold = threshold
 
     def split_sentences(self, text: str) -> list[str]:
-        sentences = re.split(r"[。！？\n;]+", text)
+        sentences = re.split(r"[。！？
+;]+", text)
         return [s.strip() for s in sentences if len(s.strip()) > 5]
 
     def sentence_similarity(self, s1: str, s2: str) -> float:
@@ -221,7 +222,8 @@ class TFIDFExtractor:
     )
 
     def extract_keywords(self, text: str, top_k: int = 10) -> list[Keyword]:
-        sentences = re.split(r"[。！？\n\s,，;；:：]+", text)
+        sentences = re.split(r"[。！？
+\s,，;；:：]+", text)
         n_docs = len(sentences)
         if n_docs == 0:
             return []
@@ -268,8 +270,10 @@ class SummaryQualityEvaluator:
         ideal_comp = 0.2 if len(original) > 500 else 0.4
         comp_score = max(0.0, 1.0 - abs(comp - ideal_comp) * 2)
         # 信息密度
-        orig_sentences = len(re.split(r"[。！？\n]+", original))
-        summ_sentences = len(re.split(r"[。！？\n]+", summary))
+        orig_sentences = len(re.split(r"[。！？
+]+", original))
+        summ_sentences = len(re.split(r"[。！？
+]+", summary))
         density = orig_sentences / summ_sentences if summ_sentences > 0 else 0
         factors["information_density"] = round(min(density, 3.0) / 3.0, 4)
         # 综合评分
@@ -337,11 +341,13 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
             # 格式化输出
             if style == SummaryStyle.BULLET:
-                summary = "\n".join(f"- {s}" for s in key_sentences)
+                summary = "
+".join(f"- {s}" for s in key_sentences)
             elif style == SummaryStyle.HEADLINE:
                 summary = key_sentences[0][:100] if key_sentences else ""
             elif style == SummaryStyle.KEYPOINTS:
-                summary = "\n".join(f"要点{i + 1}: {s}" for i, s in enumerate(key_sentences))
+                summary = "
+".join(f"要点{i + 1}: {s}" for i, s in enumerate(key_sentences))
             else:
                 summary = "".join(key_sentences)
 
@@ -417,7 +423,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """Real LLM-based summarization."""
         try:
             from _zhipu_helper import llm_chat
-            summary = llm_chat(f"用中文摘要以下内容，100字以内：\n{text[:2000]}")
+            summary = llm_chat(f"用中文摘要以下内容，100字以内：
+{text[:2000]}")
             if summary:
                 return {"summary": summary, "length": len(summary), "llm": True}
         except Exception:
@@ -431,7 +438,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """
         if not text or len(text.strip()) < 10:
             return {"success": False, "error": "文本内容过短，无法生成摘要"}
-        sentences = [s.strip() for s in text.replace("\n", ".").split(".") if len(s.strip()) > 5]
+        sentences = [s.strip() for s in text.replace("
+", ".").split(".") if len(s.strip()) > 5]
         if not sentences:
             return {"success": False, "error": "无法有效分句"}
         # 关键句子提取：基于句子长度和位置权重（首尾权重更高）
@@ -460,7 +468,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         key_points.sort(key=lambda s: sentences.index(s) if s in sentences else 0)
         # 生成摘要
         if style == "bullet":
-            summary_text = "\n".join(f"- {p}" for p in key_points)
+            summary_text = "
+".join(f"- {p}" for p in key_points)
         elif style == "detailed":
             summary_text = " ".join(key_points)
         else:
@@ -516,7 +525,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if source_lang == "auto":
             source_lang = detected_lang
         # 提取关键句子
-        sentences = [s.strip() for s in text.replace("\n", ".").split(".") if len(s.strip()) > 5]
+        sentences = [s.strip() for s in text.replace("
+", ".").split(".") if len(s.strip()) > 5]
         key_sentences = sentences[:5] if sentences else []
         summary_text = "。".join(key_sentences) + "。" if key_sentences else text[:200]
         return {
@@ -583,7 +593,8 @@ class AutoSummary(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             keywords = [w for w, _ in top_words]
             all_keywords.extend(keywords)
             # 生成摘要：取前几句
-            sentences = [s.strip() for s in text.replace("\n", ".").split(".") if len(s.strip()) > 5]
+            sentences = [s.strip() for s in text.replace("
+", ".").split(".") if len(s.strip()) > 5]
             summary = "。".join(sentences[:3]) + "。" if sentences else text[:max_length]
             results.append(
                 {"title": title, "status": "ok", "summary": summary, "original_length": len(text), "keywords": keywords}

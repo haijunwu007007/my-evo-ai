@@ -24,7 +24,8 @@ class SiteClonerPipeline:
         issues = [] if len(output) > 10 else ["输出过短"]
         return {"success": True, "verified": len(issues)==0, "issues": issues, "quality": "A" if not issues else "C"}
     def fix_issues(self, issues=None, output=""):
-        return {"success": True, "fixed": len(issues or []), "output": output + "\n<!-- 已修复 -->"}
+        return {"success": True, "fixed": len(issues or []), "output": output + "
+<!-- 已修复 -->"}
     def run_pipeline(self, spec=""):
         a = self.analyze_spec(spec)
         p = self.generate_plan(a["analysis"])

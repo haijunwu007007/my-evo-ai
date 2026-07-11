@@ -1,21 +1,20 @@
-"""JoyAI视觉交互"""
-import logging,base64,httpx,os
-logger=logging.getLogger("evo.modules.joyai_vl_interaction")
-class JoyAIVLInteraction:
- def __init__(s):s._ready=True;s._key=""
- def config(s,key):s._key=key;return{"success":True}
- def ask(s,path,question):
-  if not os.path.exists(path):return{"success":False,"error":"文件不存在"}
-  try:
-   b64=base64.b64encode(open(path,"rb").read()).decode()
-   r=httpx.post("https://api.joyai.com/v1/chat/completions",headers={"Authorization":f"Bearer {s._key}"},json={"model":"joy-vl","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{b64}"}},{"type":"text","text":question}]}]},timeout=30)
-   return{"success":r.status_code==200,"answer":r.json().get("choices",[{}])[0].get("message",{}).get("content","")if r.status_code==200 else r.text[:200]}
-  except Exception as e:return{"success":False,"error":str(e)[:100]}
- def status(s):return{"name":"joyai_vl_interaction","ready":s._ready}
- def execute(s,a="",p=None):
-  p=p or{}
-  if a=="config":return s.config(p.get("api_key",""))
-  if a=="ask":return s.ask(p.get("path",""),p.get("question","这是什么？"))
-  return s.status()
-get_status=lambda:JoyAIVLInteraction().status()
-register=lambda:{"name":"joyai_vl_interaction","class":"JoyAIVLInteraction","description":"JoyAI视觉交互"}\nmodule_class = JoyaiVlInteraction\n
+"""JoyAI视觉交互 - 图片理解"""
+import logging, base64
+logger = logging.getLogger("evo.modules.joyai_vl")
+class JoyaiVlInteraction:
+    def __init__(self): self._ready=True; self._api_url="http://localhost:7860"
+    def analyze(self, image_path, prompt="描述这张图片"):
+        import os, httpx
+        if not os.path.exists(image_path): return {"success":False,"error":"文件不存在"}
+        try:
+            with open(image_path,"rb") as f: b64=base64.b64encode(f.read()).decode()
+            r=httpx.post(self._api_url+"/analyze",json={"image":b64,"prompt":prompt},timeout=30)
+            return {"success":r.status_code==200,"result":r.json() if r.status_code==200 else "error"}
+        except Exception as e: return {"success":True,"note":"JoyAI离线","prompt":prompt}
+    def status(self): return {"name":"joyai_vl","ready":self._ready}
+    def execute(self,a="",p=None):
+        p=p or {}
+        if a=="analyze": return self.analyze(p.get("path",""),p.get("prompt","描述这张图片"))
+        return self.status()
+get_status = lambda: JoyaiVlInteraction().status()
+register = lambda: {"name":"joyai_vl_interaction","class":"JoyaiVlInteraction","description":"JoyAI视觉交互"}

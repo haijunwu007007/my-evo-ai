@@ -37,4 +37,5 @@ class LogAggregator:
         if action=='stats': return self.stats()
         return self.status()
 get_status = lambda: LogAggregator().status()
-register = lambda: {'name':'log_aggregator','class':'LogAggregator','description':'日志聚合 - 多源日志收集/搜索'}\nmodule_class = LogAggregator\n
+register = lambda: {'name':'log_aggregator','class':'LogAggregator','description':'日志聚合 - 多源日志收集/搜索'}
+module_class = LogAggregator

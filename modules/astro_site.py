@@ -17,4 +17,5 @@ class AstroSite:
   if a=="dev":return s.dev(p.get("dir",""),p.get("port",4321))
   return s.status()
 get_status=lambda:AstroSite().status()
-register=lambda:{"name":"astro_site","class":"AstroSite","description":"Astro站点生成器"}\nmodule_class = AstroSite\n
+register=lambda:{"name":"astro_site","class":"AstroSite","description":"Astro站点生成器"}
+module_class = AstroSite

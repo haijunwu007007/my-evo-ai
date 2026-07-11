@@ -103,7 +103,9 @@ class RAGKnowledgeEngine(CircuitBreakerMixin,RateLimiterMixin,EnterpriseModule):
             results=self._dispatch({"action":"search","query":query,"limit":5})
             if not results.get("success"):return results
             texts=[r["text"] for r in results.get("results",[])]
-            context="\n\n".join(texts)
+            context="
+
+".join(texts)
             if len(context)>n:context=context[:n]
             return{"success":True,"context":context,"source_count":len(texts)}
         if a=="chunk":

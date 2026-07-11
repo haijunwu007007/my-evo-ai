@@ -48,7 +48,8 @@ BUILTIN_WORKFLOWS = {
         "steps": [
             {"id": "fetch", "tool": "github", "action": "get_trending", "params": {"language": "python", "since": "daily"}},
             {"id": "filter", "tool": "llm", "action": "rank_by_relevance", "params": {"items": "$steps.fetch.output", "keywords": ["ai", "agent", "rag"]}},
-            {"id": "notify", "tool": "notify", "action": "send_message", "params": {"message": "今日趋势TOP5:\n$steps.filter.output"}},
+            {"id": "notify", "tool": "notify", "action": "send_message", "params": {"message": "今日趋势TOP5:
+$steps.filter.output"}},
         ]
     }
 }

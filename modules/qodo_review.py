@@ -17,4 +17,5 @@ class QodoReview:
         if a=='review': return self.review(p.get('code',''),p.get('lang','python'))
         return self.status()
 get_status=lambda:QodoReview().status()
-register=lambda:{'name':'qodo_review','class':'QodoReview','description':'Qodo AI代码审查'}\nmodule_class = QodoReview\n
+register=lambda:{'name':'qodo_review','class':'QodoReview','description':'Qodo AI代码审查'}
+module_class = QodoReview

@@ -15,4 +15,5 @@ class FeishuNotifier:
   if a=="send":return s.send(p.get("msg",""),p.get("title","通知"))
   return s.status()
 get_status=lambda:FeishuNotifier().status()
-register=lambda:{"name":"feishu_notifier","class":"FeishuNotifier","description":"飞书通知"}\nmodule_class = FeishuNotifier\n
+register=lambda:{"name":"feishu_notifier","class":"FeishuNotifier","description":"飞书通知"}
+module_class = FeishuNotifier

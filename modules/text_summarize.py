@@ -606,7 +606,8 @@ class TextSummarizeManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMix
             return {"success": False, "error": "text required"}
         try:
             from _zhipu_helper import llm_chat
-            summary = llm_chat(f"用中文摘要以下内容，150字以内：\n{text[:3000]}")
+            summary = llm_chat(f"用中文摘要以下内容，150字以内：
+{text[:3000]}")
             if summary:
                 return {"success": True, "summary": summary, "original_length": len(text), "llm": True}
         except Exception as e:

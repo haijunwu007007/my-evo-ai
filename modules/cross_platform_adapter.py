@@ -333,23 +333,23 @@ class PathAdapter:
         if not path:
             return path
         if platform.system() == "Windows":
-            return path.replace("/", "\\")
-        return path.replace("\\", "/")
+            return path.replace("/", "\")
+        return path.replace("\", "/")
 
     @staticmethod
     def to_posix(path: str) -> str:
         """转正斜杠 (POSIX格式)"""
-        return path.replace("\\", "/")
+        return path.replace("\", "/")
 
     @staticmethod
     def to_windows(path: str) -> str:
         """转反斜杠 (Windows格式)"""
-        return path.replace("/", "\\")
+        return path.replace("/", "\")
 
     @staticmethod
     def ensure_trailing_sep(path: str) -> str:
         """确保路径以分隔符结尾"""
-        sep = "\\" if platform.system() == "Windows" else "/"
+        sep = "\" if platform.system() == "Windows" else "/"
         if not path.endswith(sep):
             return path + sep
         return path
@@ -501,7 +501,9 @@ class EnvAdapter:
                 shell_rc = os.path.expanduser("~/.bashrc")
                 if os.path.exists(os.path.expanduser("~/.zshrc")):
                     shell_rc = os.path.expanduser("~/.zshrc")
-                export_line = f'\nexport {key}="{value}"\n'
+                export_line = f'
+export {key}="{value}"
+'
                 with open(shell_rc, "a", encoding="utf-8") as f:
                     f.write(export_line)
         except Exception as e:

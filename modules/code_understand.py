@@ -379,12 +379,14 @@ class CodeUnderstandManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
 
     def _count_lines(self, code: str) -> tuple[int, int, int, int]:
         """统计行数: total, code, comment, blank"""
-        total = len(code.split("\n"))
+        total = len(code.split("
+"))
         code_lines = 0
         comment_lines = 0
         blank_lines = 0
         in_docstring = False
-        for line in code.split("\n"):
+        for line in code.split("
+"):
             stripped = line.strip()
             if not stripped:
                 blank_lines += 1

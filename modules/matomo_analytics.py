@@ -15,4 +15,5 @@ class MatomoAnalytics:
   if a=="get_visits":return s.get_visits(p.get("period","day"),p.get("date","today"))
   return s.status()
 get_status=lambda:MatomoAnalytics().status()
-register=lambda:{"name":"matomo_analytics","class":"MatomoAnalytics","description":"Matomo分析"}\nmodule_class = MatomoAnalytics\n
+register=lambda:{"name":"matomo_analytics","class":"MatomoAnalytics","description":"Matomo分析"}
+module_class = MatomoAnalytics

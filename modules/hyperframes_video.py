@@ -445,18 +445,21 @@ body {{ width:{w}px; height:{h}px; overflow:hidden;
 .text-track {{ font-size:48px; color:white; text-shadow:2px 2px 8px rgba(0,0,0,0.5); }}
 .image-track img {{ max-width:100%; max-height:100%; object-fit:contain; }}
 </style>
-</head><body>\n'''
+</head><body>
+'''
         for t in project.tracks:
             if t.type == "text":
                 fs = t.properties.get("fontSize", "48px")
                 clr = t.properties.get("color", "white")
                 html += f'''<div class="track text-track" data-start="{t.start_time}" data-duration="{t.duration}"
-  style="width:{w}px;height:{h}px;font-size:{fs};color:{clr};">{t.content}</div>\n'''
+  style="width:{w}px;height:{h}px;font-size:{fs};color:{clr};">{t.content}</div>
+'''
             elif t.type == "image":
                 pos = t.properties.get("position", (0, 0))
                 sc = t.properties.get("scale", 1)
                 html += f'''<div class="track image-track" data-start="{t.start_time}" data-duration="{t.duration}"
-  style="left:{pos[0]}px;top:{pos[1]}px;transform:scale({sc});"><img src="{t.content}"></div>\n'''
+  style="left:{pos[0]}px;top:{pos[1]}px;transform:scale({sc});"><img src="{t.content}"></div>
+'''
         html += "</body></html>"
         return html
 

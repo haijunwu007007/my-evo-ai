@@ -233,7 +233,8 @@ class TaskDecomposer:
 
     def decompose(self, task: str, max_subtasks: int = 8) -> dict[str, Any]:
         """将高层任务分解为可执行的子任务链"""
-        sentences = re.split(r"[。；\n]", task)
+        sentences = re.split(r"[。；
+]", task)
         subtasks = []
         for i, sent in enumerate(sentences):
             sent = sent.strip()

@@ -507,8 +507,12 @@ class DocumentAutomationManager(EnterpriseModule, CircuitBreakerMixin, RateLimit
     def diff_documents(self, doc_a: str, doc_b: str, label_a: str = "before", label_b: str = "after") -> dict[str, Any]:
         """文档差异对比：逐段比较，生成结构化变更报告"""
         # 按段落分割
-        paragraphs_a = [p.strip() for p in doc_a.split("\n\n") if p.strip()]
-        paragraphs_b = [p.strip() for p in doc_b.split("\n\n") if p.strip()]
+        paragraphs_a = [p.strip() for p in doc_a.split("
+
+") if p.strip()]
+        paragraphs_b = [p.strip() for p in doc_b.split("
+
+") if p.strip()]
         set_a = set(paragraphs_a)
         set_b = set(paragraphs_b)
         added = sorted(set_b - set_a)

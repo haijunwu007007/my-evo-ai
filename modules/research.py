@@ -17,4 +17,5 @@ class Research:
         if a=='search': return self.search(p.get('q',''),p.get('count',10))
         return self.status()
 get_status=lambda:Research().status()
-register=lambda:{'name':'research','class':'Research','description':'通用研究搜索'}\nmodule_class = Research\n
+register=lambda:{'name':'research','class':'Research','description':'通用研究搜索'}
+module_class = Research

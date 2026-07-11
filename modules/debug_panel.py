@@ -584,22 +584,26 @@ if __name__ == "__main__":
         logger.info("  Step: failing_action -> ERROR (expected)"))
 
     # 查看结果
-    logger.info(f"\n--- 会话信息 ---"))
+    logger.info(f"
+--- 会话信息 ---"))
     info = panel.get_session_info()
     for k, v in info.items():
         logger.info(f"  {k}: {v}"))
 
-    logger.info(f"\n--- 步骤记录 ({len(panel.get_steps())} 条) ---"))
+    logger.info(f"
+--- 步骤记录 ({len(panel.get_steps())} 条) ---"))
     for s in panel.get_steps(3):
         logger.info(f"  [{s['status']}] {s['action']} ({s['duration_ms']}ms)"))
 
-    logger.info(f"\n--- 错误列表 ---"))
+    logger.info(f"
+--- 错误列表 ---"))
     for e in panel.get_errors():
         logger.info(f"  {e['action']}: {e['result_summary']}"))
 
     panel.end_session()
     panel.stop_http_server()
-    logger.info("\n✅ m41 测试通过"))
+    logger.info("
+✅ m41 测试通过"))
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

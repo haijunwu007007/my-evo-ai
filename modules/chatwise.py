@@ -588,9 +588,11 @@ class ChatwiseManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 lines.append(f"{role_label} **{msg.role.value}** ({msg.timestamp}):")
                 lines.append(f"> {msg.content}")
                 lines.append("")
-            return {"success": True, "format": "markdown", "data": "\n".join(lines)}
+            return {"success": True, "format": "markdown", "data": "
+".join(lines)}
         else:
             texts = [f"[{m.role.value}] {m.content}" for m in conv.messages]
-            return {"success": True, "format": "plain_text", "data": "\n".join(texts)}
+            return {"success": True, "format": "plain_text", "data": "
+".join(texts)}
 
 module_class = ChatwiseManager

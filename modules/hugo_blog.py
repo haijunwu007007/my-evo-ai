@@ -13,4 +13,5 @@ class HugoBlog:
   if a=="build":return s.build(p.get("dir",""))
   return s.status()
 get_status=lambda:HugoBlog().status()
-register=lambda:{"name":"hugo_blog","class":"HugoBlog","description":"Hugo博客"}\nmodule_class = HugoBlog\n
+register=lambda:{"name":"hugo_blog","class":"HugoBlog","description":"Hugo博客"}
+module_class = HugoBlog

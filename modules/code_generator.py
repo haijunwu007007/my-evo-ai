@@ -210,7 +210,8 @@ class TemplateAnalyzer:
 
     def analyze_template(self, template: str, language: str = "python") -> dict[str, Any]:
         """分析代码模板质量"""
-        lines = template.strip().split("\n")
+        lines = template.strip().split("
+")
         total_lines = len(lines)
         code_lines = [l for l in lines if l.strip() and not l.strip().startswith(("#", "//", "/*", "*"))]
         blank_lines = total_lines - len(code_lines)
@@ -315,10 +316,10 @@ class CodeGenerator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 Language.PYTHON,
                 "module",
                 "企业级Python模块模板",
-                '''\"\"\"
+                '''"""
 {module_name} — {description}
 Version: {version}
-\"\"\"
+"""
 
 import logging
 from _zhipu_helper import llm_chat  # LLM fallback
@@ -327,7 +328,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger("{module_name}")
 
 class {class_name}:
-    \"\"\"{class_description}\"\"\"
+    """{class_description}"""
 
     def __init__(self):
         self._initialized = False
@@ -443,7 +444,7 @@ class {model_name}Response(BaseModel):
 
 @router.post("/", response_model={model_name}Response)
 def create_{endpoint}(request: {model_name}Request):
-    \"\"\"创建{tag}\"\"\"
+    """创建{tag}"""
     try:
         return {{"id": "new_id", "status": "created", "data": request.dict()}}
     except Exception as e:
@@ -451,17 +452,17 @@ def create_{endpoint}(request: {model_name}Request):
 
 @router.get("/{{item_id}}", response_model={model_name}Response)
 def get_{endpoint}(item_id: str):
-    \"\"\"获取{tag}\"\"\"
+    """获取{tag}"""
     return {{"id": item_id, "status": "healthy"}}
 
 @router.get("/", response_model=List[{model_name}Response])
 def list_{endpoint}s(skip: int = 0, limit: int = 50):
-    \"\"\"列出{tag}\"\"\"
+    """列出{tag}"""
     return []
 
 @router.delete("/{{item_id}}")
 def delete_{endpoint}(item_id: str):
-    \"\"\"删除{tag}\"\"\"
+    """删除{tag}"""
     return {{"status": "deleted"}}
 """,
                 variables=["prefix", "tag", "model_name", "endpoint"],
@@ -480,7 +481,7 @@ def instance():
     return {class_name}()
 
 class Test{class_name}:
-    \"\"\"{class_name} 测试套件\"\"\"
+    """{class_name} 测试套件"""
 
     @pytest.mark.asyncio
     def test_initialize(self, instance):
@@ -626,7 +627,8 @@ COMMIT;
                 "type": code_type,
                 "quality": review.quality.value,
                 "score": review.score,
-                "lines": code_with_doc.count("\n") + 1,
+                "lines": code_with_doc.count("
+") + 1,
                 "duration_ms": round(duration, 2),
                 "suggestions": review.suggestions[:5],
             }
@@ -672,8 +674,11 @@ def _implement_{name}({params}) -> Any:
     return {{"status": "implemented", "name": "{name}"}}
 '''
         elif code_type == "class":
-            methods = "\n".join(
-                f"    def {req}(self) -> Any:\n        # TODO: {req}\n        pass" for req in requirements[:5]
+            methods = "
+".join(
+                f"    def {req}(self) -> Any:
+        # TODO: {req}
+        pass" for req in requirements[:5]
             )
             return f'''class {name}:
     """
@@ -707,8 +712,16 @@ def _implement_{name}({params}) -> Any:
 module_class = {name}
 '''
         else:
-            return f'''# Module: {name}\n# {desc}\n\nimport asyncio\nimport logging
-from _zhipu_helper import llm_chat  # LLM fallback\n\nlogger = logging.getLogger("{name}")\n\n'''
+            return f'''# Module: {name}
+# {desc}
+
+import asyncio
+import logging
+from _zhipu_helper import llm_chat  # LLM fallback
+
+logger = logging.getLogger("{name}")
+
+'''
 
     def _gen_javascript(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc)
@@ -735,7 +748,9 @@ async function implement{Name[0].upper()}{name[1:]}(params) {{
 
 module.exports = {{ {name} }};
 """
-        return f"// {name}: {desc}\n// TODO: Implement\n"
+        return f"// {name}: {desc}
+// TODO: Implement
+"
 
     def _gen_typescript(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc)
@@ -815,7 +830,9 @@ main "$@"
 """
 
     def _gen_generic(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
-        return f"// TODO: {desc}\n// Language: generic\n"
+        return f"// TODO: {desc}
+// Language: generic
+"
 
     def _extract_name(self, description: str) -> str:
         """从描述中提取标识符名"""
@@ -827,20 +844,27 @@ main "$@"
         """生成文档字符串"""
         parts = [f"{desc}."]
         if requirements:
-            parts.append(f"\nRequirements: {', '.join(requirements)}")
-        parts.append(f"\nType: {code_type}")
-        parts.append(f"\nGenerated: {datetime.now().isoformat()}")
-        return "\n".join(parts)
+            parts.append(f"
+Requirements: {', '.join(requirements)}")
+        parts.append(f"
+Type: {code_type}")
+        parts.append(f"
+Generated: {datetime.now().isoformat()}")
+        return "
+".join(parts)
 
     def _inject_docstring(self, code: str, docstring: str) -> str:
         """注入文档字符串"""
         if code.strip().startswith('"""') or code.strip().startswith("'''"):
             return code
-        lines = code.split("\n")
+        lines = code.split("
+")
         indent = ""
         if lines and lines[0].startswith(" "):
             indent = " " * (len(lines[0]) - len(lines[0].lstrip()))
-        doc_line = f'{indent}"""\n{indent}{docstring}\n{indent}"""'
+        doc_line = f'{indent}"""
+{indent}{docstring}
+{indent}"""'
         if lines and (
             lines[0].strip().startswith("class ")
             or lines[0].strip().startswith("def ")
@@ -852,7 +876,8 @@ main "$@"
             lines.insert(1, f"{indent}{docstring}")
             lines.insert(2, f'{indent}"""')
             lines.insert(3, "")
-        return "\n".join(lines)
+        return "
+".join(lines)
 
     def _quick_review(self, code: str, language: Language) -> ReviewResult:
         """快速代码审查"""
@@ -860,7 +885,8 @@ main "$@"
         suggestions = []
         score = 100.0
 
-        lines = code.split("\n")
+        lines = code.split("
+")
         total_lines = len(lines)
 
         # 检查长度

@@ -596,7 +596,8 @@ if __name__ == "__main__":
     tracker = GoalTracker()
 
     # 创建目标
-    logger.info("\n[1] 创建目标..."))
+    logger.info("
+[1] 创建目标..."))
     g1 = tracker.create_goal(
         "完成系统升级",
         "将系统升级到V0.1",
@@ -620,7 +621,8 @@ if __name__ == "__main__":
     logger.info("  ✅ 添加里程碑"))
 
     # 更新进度
-    logger.info("\n[2] 更新进度..."))
+    logger.info("
+[2] 更新进度..."))
     tracker.update_progress(g2.id, 50)
     logger.info(f"  子目标进度: {g2.progress}%"))
 
@@ -633,18 +635,21 @@ if __name__ == "__main__":
     logger.info(f"  父目标 {g1.name} 已完成"))
 
     # 生成报告
-    logger.info("\n[3] 目标报告..."))
+    logger.info("
+[3] 目标报告..."))
     report = tracker.generate_report()
     logger.info(f"  总结: {report['summary']}"))
     logger.info(f"  按优先级: {report['by_priority']}"))
     logger.info(f"  逾期: {report['overdue']} 个"))
 
     # Dashboard数据
-    logger.info("\n[4] Dashboard导出..."))
+    logger.info("
+[4] Dashboard导出..."))
     dashboard = tracker.export_dashboard()
     logger.info(f"  数据长度: {len(dashboard)} 字符"))
 
-    logger.info("\n" + "=" * 60))
+    logger.info("
+" + "=" * 60))
     logger.info("✅ GoalTracker 就绪！"))
     logger.info("=" * 60))
 

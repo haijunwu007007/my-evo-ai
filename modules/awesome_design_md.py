@@ -202,28 +202,74 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 "tpl_design",
                 "系统设计文档",
                 "design",
-                "# {title}\n\n## 概述\n{overview}\n\n## 架构设计\n{architecture}\n\n## 接口定义\n{interfaces}\n\n## 数据模型\n{data_model}",
+                "# {title}
+
+## 概述
+{overview}
+
+## 架构设计
+{architecture}
+
+## 接口定义
+{interfaces}
+
+## 数据模型
+{data_model}",
                 ["title", "overview", "architecture", "interfaces", "data_model"],
             ),
             (
                 "tpl_api",
                 "API设计文档",
                 "api",
-                "# {title}\n\n## 基本信息\n- 版本: {version}\n- 基础路径: {base_path}\n\n## 端点列表\n{endpoints}\n\n## 认证方式\n{auth}",
+                "# {title}
+
+## 基本信息
+- 版本: {version}
+- 基础路径: {base_path}
+
+## 端点列表
+{endpoints}
+
+## 认证方式
+{auth}",
                 ["title", "version", "base_path", "endpoints", "auth"],
             ),
             (
                 "tpl_ux",
                 "UX设计文档",
                 "ux",
-                "# {title}\n\n## 用户画像\n{personas}\n\n## 用户流程\n{user_flow}\n\n## 交互设计\n{interaction}\n\n## 视觉规范\n{visual}",
+                "# {title}
+
+## 用户画像
+{personas}
+
+## 用户流程
+{user_flow}
+
+## 交互设计
+{interaction}
+
+## 视觉规范
+{visual}",
                 ["title", "personas", "user_flow", "interaction", "visual"],
             ),
             (
                 "tpl_arch",
                 "架构设计文档",
                 "architecture",
-                "# {title}\n\n## 系统目标\n{goals}\n\n## 技术选型\n{tech_stack}\n\n## 部署架构\n{deployment}\n\n## 扩展性设计\n{scalability}",
+                "# {title}
+
+## 系统目标
+{goals}
+
+## 技术选型
+{tech_stack}
+
+## 部署架构
+{deployment}
+
+## 扩展性设计
+{scalability}",
                 ["title", "goals", "tech_stack", "deployment", "scalability"],
             ),
         ]
@@ -665,9 +711,14 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 "version": doc.version,
             }
         elif format_type == "plain_text":
-            exported = f"# {doc.title}\n\n{doc.content}"
+            exported = f"# {doc.title}
+
+{doc.content}"
         else:
-            exported = f"# {doc.title}\n> Type: {doc.doc_type} | Status: {doc.status}\n\n{doc.content}"
+            exported = f"# {doc.title}
+> Type: {doc.doc_type} | Status: {doc.status}
+
+{doc.content}"
         return {"success": True, "format": format_type, "content": exported}
 
 module_class = AwesomeDesignMdManager

@@ -582,7 +582,8 @@ class UiTarsBridgeModule:
                     if resp.status_code == 200:
                         vision_result = resp.json().get("response", "")
                         # 解析视觉模型返回的元素列表
-                        for line in vision_result.split("\n"):
+                        for line in vision_result.split("
+"):
                             line = line.strip()
                             if not line or "|" not in line:
                                 continue

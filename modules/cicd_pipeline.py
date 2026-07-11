@@ -720,7 +720,8 @@ class CICDPipeline(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """执行步骤"""
         cmd = step.command
         if step.script:
-            cmd = "\n".join(step.script)
+            cmd = "
+".join(step.script)
         # 变量替换
         for key, value in variables.items():
             cmd = cmd.replace(f"${{{key}}}", value)

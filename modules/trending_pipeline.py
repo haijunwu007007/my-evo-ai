@@ -338,7 +338,8 @@ class TrendingPipeline(EnterpriseModule):
                 lines.append(f"> {r['description']}")
             lines.append("")
 
-        summary = "\n".join(lines)
+        summary = "
+".join(lines)
 
         return {
             "id": report_id,
@@ -431,7 +432,8 @@ class TrendingPipeline(EnterpriseModule):
         # 封面
         elements.append({
             "tag": "markdown",
-            "content": f"**AI 开源趋势日报 — {report['date']}**\n扫描 {report['language']} 语言，发现 {report['ai_repos']} 个 AI 项目"
+            "content": f"**AI 开源趋势日报 — {report['date']}**
+扫描 {report['language']} 语言，发现 {report['ai_repos']} 个 AI 项目"
         })
         elements.append({"tag": "hr"})
 
@@ -439,7 +441,8 @@ class TrendingPipeline(EnterpriseModule):
             stars = f"⭐{r['stars']:,}" if r['stars'] else "⭐?"
             today = f" +{r['today']}today" if r.get('today') else ""
             desc = (r['description'] or "")[:60]
-            text = f"**{r['rank']}. [{r['name']}]({r['url']})**  {stars}  {r['language']}{today}\n{desc}"
+            text = f"**{r['rank']}. [{r['name']}]({r['url']})**  {stars}  {r['language']}{today}
+{desc}"
             elements.append({"tag": "markdown", "content": text})
 
         elements.append({"tag": "hr"})
@@ -489,7 +492,8 @@ class TrendingPipeline(EnterpriseModule):
 
         payload = {
             "msgtype": "markdown",
-            "markdown": {"title": f"AI开源趋势 {report['date']}", "text": "\n".join(lines)},
+            "markdown": {"title": f"AI开源趋势 {report['date']}", "text": "
+".join(lines)},
         }
 
         data = json.dumps(payload).encode("utf-8")
@@ -513,11 +517,13 @@ class TrendingPipeline(EnterpriseModule):
         for r in report["repos"][:10]:
             s = f"⭐{r['stars']:,}" if r['stars'] else "⭐?"
             content.append(f"{r['rank']}. [{r['name']}]({r['url']}) {s}")
-        content.append(f"\n> AUTO-EVO-AI V0.1 自动扫描")
+        content.append(f"
+> AUTO-EVO-AI V0.1 自动扫描")
 
         payload = {
             "msgtype": "markdown",
-            "markdown": {"content": "\n".join(content)},
+            "markdown": {"content": "
+".join(content)},
         }
 
         data = json.dumps(payload).encode("utf-8")

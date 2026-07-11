@@ -23,4 +23,5 @@ class MultiAgentCrew:
   if a=="run_crew":return s.run_crew(p.get("crew_id",""),p.get("task",""))
   return s.status()
 get_status=lambda:MultiAgentCrew().status()
-register=lambda:{"name":"multi_agent_crew","class":"MultiAgentCrew","description":"多Agent团队"}\nmodule_class = MultiAgentCrew\n
+register=lambda:{"name":"multi_agent_crew","class":"MultiAgentCrew","description":"多Agent团队"}
+module_class = MultiAgentCrew

@@ -356,7 +356,8 @@ class LogCollectorModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                         src.last_position = fh.tell()
 
                     for line in lines:
-                        line = line.rstrip("\n\r")
+                        line = line.rstrip("
+\r")
                         if not line.strip():
                             continue
                         entry = self._parse_line(line, src.source_id, f.name)

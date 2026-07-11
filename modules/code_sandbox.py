@@ -637,9 +637,11 @@ class PythonSandbox:
 
                 # 输出截断
                 if len(stdout) > limits.max_output_bytes:
-                    stdout = stdout[: limits.max_output_bytes] + "\n... [输出已截断]"
+                    stdout = stdout[: limits.max_output_bytes] + "
+... [输出已截断]"
                 if len(stderr) > limits.max_output_bytes:
-                    stderr = stderr[: limits.max_output_bytes] + "\n... [错误输出已截断]"
+                    stderr = stderr[: limits.max_output_bytes] + "
+... [错误输出已截断]"
 
                 status = SandboxStatus.COMPLETED if process.returncode == 0 else SandboxStatus.ERROR
                 if process.returncode == -signal.SIGKILL or process.returncode == -9:
@@ -724,7 +726,7 @@ class ShellSandbox:
             shell = os.environ.get("SHELL", "/bin/bash")
             if sys.platform == "win32":
                 shell = "powershell.exe"
-                temp_file = temp_file.replace("/", "\\")
+                temp_file = temp_file.replace("/", "\")
 
             process = subprocess.Popen(
                 [shell, temp_file],

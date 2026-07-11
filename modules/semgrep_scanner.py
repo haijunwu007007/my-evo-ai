@@ -18,4 +18,5 @@ class SemgrepScanner:
         if a=='scan': return self.scan(p.get('path',''),p.get('config','auto'))
         return self.status()
 get_status=lambda:SemgrepScanner().status()
-register=lambda:{'name':'semgrep_scanner','class':'SemgrepScanner','description':'Semgrep安全扫描'}\nmodule_class = SemgrepScanner\n
+register=lambda:{'name':'semgrep_scanner','class':'SemgrepScanner','description':'Semgrep安全扫描'}
+module_class = SemgrepScanner

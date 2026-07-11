@@ -15,4 +15,5 @@ class GrafanaMonitor:
   if a=="list_dashboards":return s.list_dashboards()
   return s.status()
 get_status=lambda:GrafanaMonitor().status()
-register=lambda:{"name":"grafana_monitor","class":"GrafanaMonitor","description":"Grafana监控"}\nmodule_class = GrafanaMonitor\n
+register=lambda:{"name":"grafana_monitor","class":"GrafanaMonitor","description":"Grafana监控"}
+module_class = GrafanaMonitor

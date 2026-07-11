@@ -514,9 +514,9 @@ class TemplateRegistry:
             author="system",
             current_version="1.0.0",
         )
-        content = """\"\"\"
+        content = """"""
 {{ module_description }}
-\"\"\"
+"""
 
     EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 )
@@ -525,19 +525,19 @@ class TemplateRegistry:
 logger = get_logger(__name__)
 
 class {{ class_name }}:
-    \"\"\"
+    """
     {{ class_description }}
-    \"\"\"
+    """
 
     def __init__(self{% for param in init_params %}, {{ param.name }}: {{ param.type | default("Any") }} = {{ param.default | default("None") }}{% endfor %}):
         self.logger = get_logger(__name__)
         {{ init_body | default("# 初始化逻辑") }}
 
     def {{ main_method }}(self{% for param in method_params %}, {{ param.name }}: {{ param.type | default("Any") }}{% endfor %}) -> {{ return_type | default("Dict") }}:
-        \"\"\"
+        """
         {{ method_description }}
         :return: {{ return_description | default("结果字典") }}
-        \"\"\"
+        """
         try:
             {{ method_body | default("# 方法实现") }}
         except Exception as e:
@@ -545,7 +545,7 @@ class {{ class_name }}:
             raise
 
     def health_check(self) -> Dict:
-        \"\"\"健康检查\"\"\"
+        """健康检查"""
         return {
             "status": "healthy",
             "module": "{{ class_name }}",
@@ -1085,13 +1085,15 @@ if __name__ == "__main__":
     if result.success:
         logger.info("渲染结果:"))
         logger.info(result.content))
-        logger.info(f"\n渲染时间: {result.render_time:.4f}s"))
+        logger.info(f"
+渲染时间: {result.render_time:.4f}s"))
     else:
         logger.info(f"渲染失败: {result.error}"))
 
     # 统计
     stats = registry.get_stats()
-    logger.info(f"\n统计: {json.dumps(stats, indent=2, ensure_ascii=False)}"))
+    logger.info(f"
+统计: {json.dumps(stats, indent=2, ensure_ascii=False)}"))
 
     def execute(self, action: str = 'status', params: dict = None) -> dict:
         params=params or{}

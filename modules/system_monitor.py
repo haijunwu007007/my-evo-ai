@@ -313,7 +313,9 @@ class SystemMonitorModule(EnterpriseModule, CircuitBreakerMixin):
                  f"sysmon_disk_percent {metrics.get('disk_percent',0)}",
                  f"sysmon_process_count {int(metrics.get('process_count',0))}"]
         job_name = f"evo_sysmon_{platform.node()}"
-        payload = "\n".join(lines) + "\n"
+        payload = "
+".join(lines) + "
+"
         try:
             import urllib.request
             req = urllib.request.Request(

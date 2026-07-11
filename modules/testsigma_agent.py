@@ -17,4 +17,5 @@ class TestsigmaAgent:
         if a=='run_test': return self.run_test(p.get('test_id',''))
         return self.status()
 get_status=lambda:TestsigmaAgent().status()
-register=lambda:{'name':'testsigma_agent','class':'TestsigmaAgent','description':'TestSigma测试Agent'}\nmodule_class = TestsigmaAgent\n
+register=lambda:{'name':'testsigma_agent','class':'TestsigmaAgent','description':'TestSigma测试Agent'}
+module_class = TestsigmaAgent

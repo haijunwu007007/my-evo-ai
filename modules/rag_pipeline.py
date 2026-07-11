@@ -291,7 +291,9 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             PipelineStep("vector_search", (time.time() - t1) * 1000, "done", f"{len(self._chunks)} scanned").__dict__
         )
         t2 = time.time()
-        context = "\n\n".join(f"[Doc:{r.doc_id}] {r.chunk}" for r in top_results)
+        context = "
+
+".join(f"[Doc:{r.doc_id}] {r.chunk}" for r in top_results)
         answer = f"Based on {len(top_results)} retrieved chunks: {context[:200]}..."
         steps.append(PipelineStep("generate", (time.time() - t2) * 1000, "done").__dict__)
         self._stats["queries_served"] += 1
@@ -387,7 +389,9 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 break
             context_parts.append(f"[{r.get('doc_id', '')}] {chunk}")
             total += len(chunk)
-        context = "\n\n".join(context_parts)
+        context = "
+
+".join(context_parts)
         return {"success": True, "context": context, "chunks_used": len(context_parts), "tokens_approx": total // 4}
 
     def _stats_op(self, p: dict) -> dict:

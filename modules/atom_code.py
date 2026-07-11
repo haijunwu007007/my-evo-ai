@@ -289,7 +289,8 @@ class CodeAnalyzer:
         cache_key = hashlib.md5(code.encode()).hexdigest()
         if cache_key in self._analysis_cache:
             return self._analysis_cache[cache_key]
-        lines = code.split("\n")
+        lines = code.split("
+")
         code_lines = [l for l in lines if l.strip() and not l.strip().startswith("#")]
         comment_lines = [l for l in lines if l.strip().startswith("#")]
         metrics = CodeMetrics()
@@ -344,11 +345,13 @@ class CodeAnalyzer:
         metrics.imports_count = len(re.findall(r"import |require |from ", code))
 
     def find_duplicates(self, code: str, min_lines: int = 4) -> list[dict]:
-        lines = [l.strip() for l in code.split("\n") if l.strip()]
+        lines = [l.strip() for l in code.split("
+") if l.strip()]
         blocks = {}
         duplicates = []
         for i in range(len(lines) - min_lines + 1):
-            block = "\n".join(lines[i : i + min_lines])
+            block = "
+".join(lines[i : i + min_lines])
             bh = hashlib.md5(block.encode()).hexdigest()
             if bh in blocks:
                 duplicates.append({"start_line": blocks[bh], "duplicate_line": i + 1, "lines": min_lines, "hash": bh})
@@ -373,15 +376,22 @@ class RefactorEngine:
     """Performs automated code refactoring operations."""
 
     def extract_function(self, code: str, name: str, start_line: int, end_line: int) -> RefactorResult:
-        lines = code.split("\n")
+        lines = code.split("
+")
         selected = lines[start_line - 1 : end_line]
         indent = len(selected[0]) - len(selected[0].lstrip())
-        body = "\n".join("    " + l.lstrip() for l in selected)
-        func = f"\ndef {name}():\n{body}\n    pass\n"
+        body = "
+".join("    " + l.lstrip() for l in selected)
+        func = f"
+def {name}():
+{body}
+    pass
+"
         new_lines = lines[: start_line - 1] + [func.rstrip(), f"{name}()"] + lines[end_line:]
         return RefactorResult(
             original=code,
-            refactored="\n".join(new_lines),
+            refactored="
+".join(new_lines),
             refactor_type="extract_function",
             changes=[{"type": "extracted", "name": name, "lines": f"{start_line}-{end_line}"}],
         )
@@ -392,7 +402,10 @@ class RefactorEngine:
         new_code = re.sub(r"if x == False:", "if not x:", new_code)
         new_code = re.sub(r"if x != True:", "if not x:", new_code)
         new_code = re.sub(r"if x != False:", "if x:", new_code)
-        new_code = re.sub(r"else:\s*\n\s*return True\nelse:\s*\n\s*return False", "", new_code)
+        new_code = re.sub(r"else:\s*
+\s*return True
+else:\s*
+\s*return False", "", new_code)
         return RefactorResult(
             original=code,
             refactored=new_code,
@@ -403,7 +416,8 @@ class RefactorEngine:
     def optimize_imports(self, code: str, language: str = "python") -> RefactorResult:
         import_lines = []
         other_lines = []
-        for line in code.split("\n"):
+        for line in code.split("
+"):
             stripped = line.strip()
             if stripped.startswith("import ") or stripped.startswith("from "):
                 import_lines.append(stripped)
@@ -416,7 +430,8 @@ class RefactorEngine:
                 seen.add(imp)
                 unique_imports.append(imp)
         unique_imports.sort()
-        new_code = "\n".join(unique_imports + [""] + other_lines)
+        new_code = "
+".join(unique_imports + [""] + other_lines)
         removed = len(import_lines) - len(unique_imports)
         return RefactorResult(
             original=code,
@@ -426,7 +441,8 @@ class RefactorEngine:
         )
 
     def add_docstring(self, code: str, description: str = "") -> RefactorResult:
-        lines = code.split("\n")
+        lines = code.split("
+")
         result = []
         for i, line in enumerate(lines):
             result.append(line)
@@ -439,7 +455,8 @@ class RefactorEngine:
                 result.append(doc)
         return RefactorResult(
             original=code,
-            refactored="\n".join(result),
+            refactored="
+".join(result),
             refactor_type="add_docstring",
             changes=[{"type": "added_docstrings"}],
         )
@@ -508,14 +525,14 @@ class ReviewEngine:
             {
                 "id": "C001",
                 "severity": "warning",
-                "pattern": r'password\s*=\s*["\'][^"\']+["\']',
+                "pattern": r'password\s*=\s*["'][^"']+["']',
                 "message": "Hardcoded password",
                 "suggestion": "Use environment variables or secret manager",
             },
             {
                 "id": "C002",
                 "severity": "critical",
-                "pattern": r'(api_key|secret|token)\s*=\s*["\'][^"\']+["\']',
+                "pattern": r'(api_key|secret|token)\s*=\s*["'][^"']+["']',
                 "message": "Hardcoded secret/key",
                 "suggestion": "Use secret management",
             },
@@ -529,14 +546,16 @@ class ReviewEngine:
             {
                 "id": "P001",
                 "severity": "warning",
-                "pattern": r"def \w+\([^)]*\):\s*\n\s*return",
+                "pattern": r"def \w+\([^)]*\):\s*
+\s*return",
                 "message": "Function with single return",
                 "suggestion": "Consider if function adds value",
             },
             {
                 "id": "P002",
                 "severity": "info",
-                "pattern": r"class \w+\([^)]*\):\s*\n\s*pass",
+                "pattern": r"class \w+\([^)]*\):\s*
+\s*pass",
                 "message": "Empty class",
                 "suggestion": "Add implementation or use dataclass/namedtuple",
             },
@@ -551,7 +570,8 @@ class ReviewEngine:
 
     def review(self, code: str, language: str = "python") -> dict:
         issues = []
-        lines = code.split("\n")
+        lines = code.split("
+")
         for rule in self._rules:
             for i, line in enumerate(lines):
                 matches = list(re.finditer(rule["pattern"], line, re.IGNORECASE))
@@ -604,10 +624,29 @@ class CodeGenerator:
 
     def _default_templates(self) -> dict:
         return {
-            "python_class": 'class {name}:\n    """{description}"""\n\n    def __init__(self{params}):\n{init_body}\n',
-            "python_function": 'def {name}({params}):\n    """{description}"""\n{body}\n',
-            "python_api": "@app.route('/{path}', methods=['{method}'])\ndef {func_name}():\n    {body}\n",
-            "python_test": 'def test_{name}():\n    """Test {description}"""\n    # Arrange\n    {arrange}\n    # Act\n    {act}\n    # Assert\n    {asserts}\n',
+            "python_class": 'class {name}:
+    """{description}"""
+
+    def __init__(self{params}):
+{init_body}
+',
+            "python_function": 'def {name}({params}):
+    """{description}"""
+{body}
+',
+            "python_api": "@app.route('/{path}', methods=['{method}'])
+def {func_name}():
+    {body}
+",
+            "python_test": 'def test_{name}():
+    """Test {description}"""
+    # Arrange
+    {arrange}
+    # Act
+    {act}
+    # Assert
+    {asserts}
+',
         }
 
     def generate(self, spec: dict) -> dict:
@@ -625,21 +664,44 @@ class CodeGenerator:
         features = features or []
         files = {}
         if language == "python":
-            files[f"{name}/__init__.py"] = f'"""{name} package."""\n\n__version__ = "0.1.0"\n'
+            files[f"{name}/__init__.py"] = f'"""{name} package."""
+
+__version__ = "0.1.0"
+'
             files[f"{name}/main.py"] = (
-                # print("{name} started")\n\nif __name__ == "__main__":\n    main()\n'
+                # print("{name} started")
+
+if __name__ == "__main__":
+    main()
+'
             )
             if "cli" in features:
                 files[f"{name}/cli.py"] = (
-                    f'"""CLI interface for {name}."""\nimport argparse\n\ndef parse_args():\n    parser = argparse.ArgumentParser(description="{name}")\n    return parser.parse_args()\n'
+                    f'"""CLI interface for {name}."""
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="{name}")
+    return parser.parse_args()
+'
                 )
             if "config" in features:
                 files[f"{name}/config.py"] = (
-                    f'"""Configuration for {name}."""\nCONFIG = {{\n    "debug": False,\n    "version": "0.1.0",\n}}\n'
+                    f'"""Configuration for {name}."""
+CONFIG = {{
+    "debug": False,
+    "version": "0.1.0",
+}}
+'
                 )
             if "tests" in features:
                 files[f"{name}/test_main.py"] = (
-                    f'"""Tests for {name}."""\nimport pytest\n\ndef test_main():\n    assert True\n'
+                    f'"""Tests for {name}."""
+import pytest
+
+def test_main():
+    assert True
+'
                 )
         return {
             "project_name": name,

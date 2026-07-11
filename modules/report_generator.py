@@ -207,12 +207,14 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             lines = [f"Dict ({len(data)} keys):"]
             for k, v in list(data.items())[:10]:
                 lines.append(f"  {k}: {str(v)[:60]}")
-            return "\n".join(lines)
+            return "
+".join(lines)
         elif isinstance(data, list):
             lines = [f"List ({len(data)} items):"]
             for i, item in enumerate(data[:10]):
                 lines.append(f"  [{i}]: {str(item)[:80]}")
-            return "\n".join(lines)
+            return "
+".join(lines)
         else:
             return f"{type(data).__name__}: {str(data)[:200]}"
 

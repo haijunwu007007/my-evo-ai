@@ -128,7 +128,9 @@ class SoulFile:
 
     def to_markdown(self) -> str:
         """转换为Markdown格式"""
-        return f"# {self.name.replace('.md', '').title()}\n\n{self.content}"
+        return f"# {self.name.replace('.md', '').title()}
+
+{self.content}"
 
     @property
     def token_count(self) -> int:
@@ -437,7 +439,8 @@ class SoulIdentityManager:
 
     def _dict_to_heartbeat(self, config: dict) -> str:
         """将字典转换为heartbeat markdown"""
-        lines = ["# Heartbeat - 心跳配置\n", "## 监控设置"]
+        lines = ["# Heartbeat - 心跳配置
+", "## 监控设置"]
 
         if "enabled" in config:
             lines.append(f"- 启用状态监控: {config['enabled']}")
@@ -449,11 +452,13 @@ class SoulIdentityManager:
             lines.append(f"- 通知渠道: {', '.join(config['channels'])}")
 
         if "health_check_urls" in config and config["health_check_urls"]:
-            lines.append("\n## 健康检查")
+            lines.append("
+## 健康检查")
             for url in config["health_check_urls"]:
                 lines.append(f"- {url}")
 
-        return "\n".join(lines)
+        return "
+".join(lines)
 
     def load_soul(self, name: str) -> SoulProfile:
         """
@@ -530,7 +535,11 @@ class SoulIdentityManager:
                     parts.append(file.to_markdown())
                     current_tokens += file.tokens
 
-        return "\n\n---\n\n".join(parts)
+        return "
+
+---
+
+".join(parts)
 
     def switch_persona(self, name: str) -> SoulProfile:
         """
@@ -741,7 +750,9 @@ class SoulIdentityManager:
         """
         context = self.get_optimized_context(name)
 
-        return [{"role": "system", "content": f"{system_prefix}\n\n{context}"}]
+        return [{"role": "system", "content": f"{system_prefix}
+
+{context}"}]
 
 # ============================================================================
 # 快捷函数
@@ -778,22 +789,26 @@ if __name__ == "__main__":
     manager = SoulIdentityManager()
 
     # 列出所有Soul
-    logger.info(f"\n已配置的Soul: {manager.list_souls()}"))
+    logger.info(f"
+已配置的Soul: {manager.list_souls()}"))
 
     # 获取默认Soul信息
     default_info = manager.get_soul_info("default")
-    logger.info(f"\n默认Soul信息:"))
+    logger.info(f"
+默认Soul信息:"))
     logger.info(f"  - 完整配置: {default_info['is_complete']}"))
     logger.info(f"  - Token数量: {default_info['total_tokens']}"))
 
     # 获取优化的上下文
     context = manager.get_optimized_context("default")
-    logger.info(f"\n优化上下文预览 (前500字符):"))
+    logger.info(f"
+优化上下文预览 (前500字符):"))
     logger.info("-" * 40))
     logger.info(context[:500] + "..."))
 
     # 创建自定义Soul示例
-    logger.info("\n" + "-" * 40))
+    logger.info("
+" + "-" * 40))
     logger.info("创建自定义Soul示例:"))
 
     custom_soul = manager.create_soul(
@@ -846,11 +861,13 @@ if __name__ == "__main__":
 
     # 切换到自定义Soul
     context = manager.get_optimized_context("coding_assistant")
-    logger.info(f"\n自定义Soul上下文:"))
+    logger.info(f"
+自定义Soul上下文:"))
     logger.info("-" * 40))
     logger.info(context[:300] + "..."))
 
-    logger.info("\n" + "=" * 60))
+    logger.info("
+" + "=" * 60))
     logger.info("Soul Identity Module 测试完成!"))
     logger.info("=" * 60))
 

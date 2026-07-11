@@ -346,7 +346,8 @@ class DependencyManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
     def _parse_requirements_txt(self, content: str) -> list[Dependency]:
         """解析 requirements.txt"""
         deps = []
-        for line in content.split("\n"):
+        for line in content.split("
+"):
             line = line.strip()
             if not line or line.startswith("#") or line.startswith("-"):
                 continue

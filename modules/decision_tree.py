@@ -25,4 +25,5 @@ class DecisionTree:
         if action=='evaluate': return self.evaluate(params.get('context',{}))
         return self.status()
 get_status = lambda: DecisionTree().status()
-register = lambda: {'name':'decision_tree','class':'DecisionTree','description':'决策树 - 规则引擎/条件判断'}\nmodule_class = DecisionTree\n
+register = lambda: {'name':'decision_tree','class':'DecisionTree','description':'决策树 - 规则引擎/条件判断'}
+module_class = DecisionTree

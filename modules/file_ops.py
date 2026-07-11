@@ -24,7 +24,10 @@ def excel_read(path: str) -> str:
         data_rows = len(rows) - 1
         cols = len(headers)
         sample = ", ".join(str(c)[:20] for c in (rows[1] if len(rows) > 1 else []))
-        return f"📊 Excel: {os.path.basename(path)}\n  表头: {headers[:8]}\n  数据: {data_rows}行 × {cols}列\n  示例: {sample}"
+        return f"📊 Excel: {os.path.basename(path)}
+  表头: {headers[:8]}
+  数据: {data_rows}行 × {cols}列
+  示例: {sample}"
     except Exception as e:
         return f"⚠️ 读取失败: {e}"
 
@@ -49,7 +52,8 @@ def word_create(path: str, title: str, content: str) -> str:
         from docx import Document
         doc = Document()
         doc.add_heading(title, 0)
-        for line in content.split("\n"):
+        for line in content.split("
+"):
             if line.strip():
                 doc.add_paragraph(line.strip())
         doc.save(path)

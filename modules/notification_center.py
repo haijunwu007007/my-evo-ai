@@ -480,28 +480,41 @@ class NotificationCenter:
             name="Welcome Email",
             channel=ChannelType.EMAIL,
             subject="Welcome to {app_name}",
-            body="Hello {user_name},\n\nWelcome to {app_name}! Your account has been created.\n\nBest regards",
+            body="Hello {user_name},
+
+Welcome to {app_name}! Your account has been created.
+
+Best regards",
         )
         self._templates[ChannelType.EMAIL.value]["password_reset"] = NotificationTemplate(
             template_id="pwd_reset",
             name="Password Reset",
             channel=ChannelType.EMAIL,
             subject="Password Reset - {app_name}",
-            body="Hello {user_name},\n\nYour password reset code: {reset_code}\nExpires in {expiry} minutes.",
+            body="Hello {user_name},
+
+Your password reset code: {reset_code}
+Expires in {expiry} minutes.",
         )
         self._templates[ChannelType.EMAIL.value]["alert"] = NotificationTemplate(
             template_id="alert_email",
             name="System Alert",
             channel=ChannelType.EMAIL,
             subject="[ALERT] {alert_level}: {alert_title}",
-            body="Alert Details:\n- Level: {alert_level}\n- Title: {alert_title}\n- Time: {timestamp}\n\n{message}",
+            body="Alert Details:
+- Level: {alert_level}
+- Title: {alert_title}
+- Time: {timestamp}
+
+{message}",
         )
         self._templates[ChannelType.SLACK.value]["default"] = NotificationTemplate(
             template_id="slack_default",
             name="Slack Default",
             channel=ChannelType.SLACK,
             subject="[{category}] {subject}",
-            body="*{subject}*\n{body}",
+            body="*{subject}*
+{body}",
         )
 
     def initialize(self) -> None:

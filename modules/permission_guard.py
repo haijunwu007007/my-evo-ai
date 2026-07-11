@@ -879,8 +879,10 @@ class PermissionGuard:
         report = self.get_security_report()
 
         lines = [
-            "## 安全报告\n",
-            f"### 统计\n",
+            "## 安全报告
+",
+            f"### 统计
+",
             f"| 项目 | 数值 |",
             f"|------|------|",
             f"| 总检查次数 | {report.total_checks} |",
@@ -888,18 +890,23 @@ class PermissionGuard:
             f"| 批准次数 | {report.approved_count} |",
             f"| 待审批 | {report.pending_count} |",
             f"| 当前模式 | {self.mode.value} |",
-            "\n### 允许的目录\n",
+            "
+### 允许的目录
+",
         ]
 
         for d in self.allowed_dirs:
             lines.append(f"- {d}")
 
         if report.warnings:
-            lines.append("\n### 警告\n")
+            lines.append("
+### 警告
+")
             for w in report.warnings:
                 lines.append(f"- ⚠️ {w}")
 
-        return "\n".join(lines)
+        return "
+".join(lines)
 
     def reset_stats(self):
         """重置统计"""
@@ -1029,7 +1036,8 @@ if __name__ == "__main__":
     guard = PermissionGuard()
 
     # 测试危险命令拦截
-    logger.info("\n🚫 危险命令测试:"))
+    logger.info("
+🚫 危险命令测试:"))
 
     dangerous_commands = [
         "rm -rf /tmp/test",
@@ -1047,7 +1055,8 @@ if __name__ == "__main__":
         logger.info(f"      → {reason}"))
 
     # 测试安全命令
-    logger.info("\n✅ 安全命令测试:"))
+    logger.info("
+✅ 安全命令测试:"))
 
     safe_commands = [
         "ls -la",
@@ -1064,7 +1073,8 @@ if __name__ == "__main__":
         logger.info(f"      → {reason}"))
 
     # 测试模式切换
-    logger.info("\n⚙️ 模式切换:"))
+    logger.info("
+⚙️ 模式切换:"))
 
     guard.set_mode(PermissionMode.ALLOW_ALL)
     logger.info(f"   切换到 ALLOW_ALL 模式"))
@@ -1080,7 +1090,8 @@ if __name__ == "__main__":
     logger.info(f"   切换回 ASK_ME 模式"))
 
     # 测试文件访问
-    logger.info("\n📁 文件访问测试:"))
+    logger.info("
+📁 文件访问测试:"))
 
     test_paths = [
         "~/.workbuddy/test.txt",
@@ -1095,7 +1106,8 @@ if __name__ == "__main__":
         logger.info(f"   {icon} {path}"))
 
     # 测试审批流程
-    logger.info("\n⏳ 审批流程测试:"))
+    logger.info("
+⏳ 审批流程测试:"))
 
     approval_id = guard.request_approval(
         ActionType.EXECUTE_COMMAND, "执行删除操作", {"command": "rm -rf /tmp/old_files", "reason": "清理临时文件"}
@@ -1107,7 +1119,8 @@ if __name__ == "__main__":
         logger.info(f"   ✅ 审批通过"))
 
     # 安全报告
-    logger.info("\n📊 安全报告:"))
+    logger.info("
+📊 安全报告:"))
     report = guard.get_security_report()
     logger.info(f"   - 总检查: {report.total_checks}"))
     logger.info(f"   - 阻止: {report.blocked_count}"))
@@ -1115,10 +1128,12 @@ if __name__ == "__main__":
     logger.info(f"   - 待审批: {report.pending_count}"))
 
     # Markdown报告
-    logger.info("\n📄 Markdown报告:"))
+    logger.info("
+📄 Markdown报告:"))
     logger.info(guard.to_markdown()))
 
-    logger.info("\n" + "=" * 60))
+    logger.info("
+" + "=" * 60))
     logger.info("Permission Guard Module 测试完成!"))
     logger.info("=" * 60))
 

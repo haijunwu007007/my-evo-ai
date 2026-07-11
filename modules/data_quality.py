@@ -17,4 +17,5 @@ class DataQuality:
         if a=='check_null': return self.check_null(p.get('data',[]),p.get('fields',[]))
         return self.status()
 get_status=lambda:DataQuality().status()
-register=lambda:{'name':'data_quality','class':'DataQuality','description':'数据质量 - 完整性检查'}\nmodule_class = DataQuality\n
+register=lambda:{'name':'data_quality','class':'DataQuality','description':'数据质量 - 完整性检查'}
+module_class = DataQuality

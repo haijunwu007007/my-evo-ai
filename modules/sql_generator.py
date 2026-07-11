@@ -26,7 +26,8 @@ class SqlGenerator(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseM
             nl=p.get("text","");table=p.get("table","table_name")
             try:
                 from _zhipu_helper import llm_chat
-                sql=llm_chat(f"将以下自然语言转换为SQL查询语句，表名{table}，只返回SQL：\n{nl}")
+                sql=llm_chat(f"将以下自然语言转换为SQL查询语句，表名{table}，只返回SQL：
+{nl}")
                 if sql:return {"success":True,"sql":sql,"natural_language":nl,"llm":True}
             except Exception: logger.warning("sql_generator: LLM SQL generation failed, fallback")
             sql=f"SELECT * FROM {table} LIMIT 100"
@@ -42,7 +43,8 @@ class SqlGenerator(PersistMixin,CircuitBreakerMixin,RateLimiterMixin,EnterpriseM
             return{"success":True,"templates":list(self._templates.keys()),"count":len(self._templates)}
         if a=="explain":
             sql=p.get("sql","")
-            clauses=[c.strip() for c in sql.replace("\n"," ").split()if c.strip().upper()in("SELECT","FROM","WHERE","JOIN","LEFT","RIGHT","INNER","GROUP","ORDER","HAVING","LIMIT","OFFSET","INSERT","UPDATE","DELETE","CREATE","ALTER")and c.strip().upper()!=c.strip().upper()]
+            clauses=[c.strip() for c in sql.replace("
+"," ").split()if c.strip().upper()in("SELECT","FROM","WHERE","JOIN","LEFT","RIGHT","INNER","GROUP","ORDER","HAVING","LIMIT","OFFSET","INSERT","UPDATE","DELETE","CREATE","ALTER")and c.strip().upper()!=c.strip().upper()]
             plan=[{"id":i,"operation":c,"cost_estimate":max(1,hash(c)%100)}for i,c in enumerate(set(clauses))]
             return{"success":True,"sql":sql,"plan":plan,"clauses":len(plan)}
         if a=="optimize":

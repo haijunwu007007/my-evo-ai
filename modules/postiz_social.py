@@ -15,4 +15,5 @@ class PostizSocial:
   if a=="post":return s.post(p.get("content",""),p.get("platforms",None))
   return s.status()
 get_status=lambda:PostizSocial().status()
-register=lambda:{"name":"postiz_social","class":"PostizSocial","description":"Postiz社交媒体"}\nmodule_class = PostizSocial\n
+register=lambda:{"name":"postiz_social","class":"PostizSocial","description":"Postiz社交媒体"}
+module_class = PostizSocial

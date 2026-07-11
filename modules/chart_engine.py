@@ -627,7 +627,8 @@ class ChartEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         lines = [",".join(str(h) for h in headers)]
         for row in data:
             lines.append(",".join(str(row.get(h, "")) for h in headers))
-        return {"success": True, "format": "csv", "content": "\n".join(lines)}
+        return {"success": True, "format": "csv", "content": "
+".join(lines)}
 
     def shutdown(self) -> dict:
         """Graceful shutdown for chart_engine."""

@@ -310,7 +310,8 @@ class BackupRedisManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             if backup_type == "rdb":
                 serialized = json.dumps(data, ensure_ascii=False)
             else:  # aof
-                serialized = "\n".join(f"SET {k} {v}" for k, v in data.items())
+                serialized = "
+".join(f"SET {k} {v}" for k, v in data.items())
 
             backup.size_bytes = len(serialized.encode())
             backup.keys_count = len(data)

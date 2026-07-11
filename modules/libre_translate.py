@@ -14,4 +14,5 @@ class LibreTranslate:
   if a=="translate":return s.translate(p.get("text",""),p.get("source","auto"),p.get("target","zh"))
   return s.status()
 get_status=lambda:LibreTranslate().status()
-register=lambda:{"name":"libre_translate","class":"LibreTranslate","description":"LibreTranslate翻译"}\nmodule_class = LibreTranslate\n
+register=lambda:{"name":"libre_translate","class":"LibreTranslate","description":"LibreTranslate翻译"}
+module_class = LibreTranslate

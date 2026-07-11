@@ -516,7 +516,8 @@ class PixelleVideo:
     def _wrap_text(self, text: str, font, max_width: int) -> list[str]:
         """自动换行"""
         lines = []
-        for paragraph in text.split("\n"):
+        for paragraph in text.split("
+"):
             if not paragraph:
                 lines.append("")
                 continue
@@ -639,7 +640,8 @@ class PixelleVideo:
 
         # 结尾
         templates.append(
-            {"description": f"结尾 - {topic}", "script": f"感谢观看\n了解更多: {topic}", "visual": "closing_card"}
+            {"description": f"结尾 - {topic}", "script": f"感谢观看
+了解更多: {topic}", "visual": "closing_card"}
         )
 
         scenes = []

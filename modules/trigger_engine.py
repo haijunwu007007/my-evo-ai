@@ -37,4 +37,5 @@ class TriggerEngine:
         if action=='list': return {'success':True,'total':len(self._triggers),'triggers':list(self._triggers.values())}
         return self.status()
 get_status = lambda: TriggerEngine().status()
-register = lambda: {'name':'trigger_engine','class':'TriggerEngine','description':'触发器引擎 - 事件触发/注册/执行'}\nmodule_class = TriggerEngine\n
+register = lambda: {'name':'trigger_engine','class':'TriggerEngine','description':'触发器引擎 - 事件触发/注册/执行'}
+module_class = TriggerEngine
