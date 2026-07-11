@@ -576,6 +576,11 @@ async def _classify_intent(msg: str):
                   "开发","写一个","做一个","帮我做","帮我写","帮我生成","帮我创建",
                   "html","代码","报告","合同","方案","excel","表格","演示文稿",
                   "画图","画画","画一个","图片","海报","logo"]
+    _fetch_kw = ["打开网页","抓取网页","网页内容","看这个网页","查看网页","提取内容","实时信息"]
+    for _kw in _fetch_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 网页抓取: {_kw}")
+            return "fetch", _kw, "", ""
     _cli_kw = ["下载视频","视频下载","图片处理","图片转换","ocr","文字识别","文档转换","转pdf",
                "json处理","csv处理","系统监控","文件同步","代码搜索","文件查找"]
     for _kw in _cli_kw:
@@ -675,9 +680,17 @@ async def _answer_hot(msg: str, platform: str, topic: str):
         except Exception:
             pass
     
-    # 搜索兜底
+    # 搜索兜底 — 用fetcher抓取实际内容
     try:
         _sq = f"{_source} {topic or '热点'} 热搜" if _source else f"{topic or '今日热点'} 热搜"
+        from modules.web_fetcher import WebFetcher
+        _wf = WebFetcher()
+        _fr = _wf._fetch(url="", query=_sq)  # 搜+抓第一条
+        if _fr.get("success"):
+            _txt = _fr.get("content","")[:3000]
+            if len(_txt) > 100:
+                return f"🔍 **{_source if _source else '今日'}相关热点**\n\n{_txt}\n\n_(内容自动抓取，实时)_"
+        # fetcher没内容降级为搜索链接
         _r = await _execute_search(_sq.strip())
         if _r: return _r
     except Exception as _se:
@@ -899,6 +912,22 @@ async def _execute_single(req) -> dict:
         if _tool:
             return {"success":True,"result":f"🔧 **{_tool}**\n\n你说的是 {_tool}（{_tool_map[msg]}）。在输入框说「用 {_tool} 处理」即可。\n\n{_avail}"}
         return {"success":True,"result":f"🔧 **CLI工具集**\n\n{_avail}\n\n可用命令：\n" + "\n".join(_lines) + "\n\n直接在输入框说就行，系统会自动调用对应的命令行工具。"}
+
+    # fetch: 网页内容抓取
+    if itype == "fetch":
+        try:
+            _url = topic or ""
+            _query = msg.replace("打开网页","").replace("抓取网页","").replace("网页内容","").replace("提取内容","").replace("查看网页","").strip()
+            from modules.web_fetcher import WebFetcher
+            _wf = WebFetcher()
+            _r = _wf._fetch(url=_url, query=_query)
+            if _r.get("success"):
+                _txt = f"🌐 **{_r.get('title','')}**\n\n{_r.get('content','')[:2000]}"
+                return {"success": True, "result": _txt}
+        except Exception as _fe:
+            logger.warning(f"[FETCH] 抓取失败: {_fe}")
+        # 抓取失败走搜索
+        itype = "search"
 
     # search: 搜索
     if itype == "search":
