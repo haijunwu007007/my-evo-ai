@@ -673,7 +673,7 @@ async def _execute_search(query: str, count: int = 8):
     from skills.builtin.search_web import execute as _search
     try:
         r = _search({"query": query, "count": count})
-        items = r.get("results", [])
+        items = r.get("results", [])\n        _GOOD_DOMAINS = ["baike.baidu.com","zhihu.com","csdn.net","github.com","stackoverflow.com","juejin.cn","cloud.tencent.com","tophub.today","wikipedia.org","docs.python.org","developer.mozilla.org"]\n        items = [i for i in items if any(d in i.get("url","") for d in _GOOD_DOMAINS)] or items
         if not items:
             return None
         
@@ -896,7 +896,7 @@ async def _append_n8n_links(msg: str, reply: str) -> str:
 async def smart_chat(req: Req):
     msg = (req.message or "").strip()
     if not msg:
-        return {"success": True, "result": "请说点什么"}
+        return {"success": True, "result": "请说出你的需求，或试试说「本系统能做什么」了解功能"}
 
     # ── 优先级0: 多步复合指令解析 ──
     #    把"帮我生成一个时钟HTML，然后记住它，最后打开应用列表"拆成三步逐一执行
@@ -1098,9 +1098,9 @@ async def _execute_single(req) -> dict:
         if fallback:
             fallback = await _append_n8n_links(msg, fallback)
             return {"success": True, "result": fallback}
-        return {"success": True, "result": "搜索超时，稍后再试"}
+        return {"success": True, "result": "搜索超时，请检查网络或更换关键词后重试"}
             return {"success": True, "result": fallback}
-        return {"success": True, "result": "搜索超时，稍后再试"}
+        return {"success": True, "result": "搜索超时，请检查网络或更换关键词后重试"}
 
     # help: 系统能力
     if itype == "help":
