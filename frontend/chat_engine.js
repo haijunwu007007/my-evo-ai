@@ -226,9 +226,35 @@ function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
 // ── 状态机: IDLE / TALKING ──
-var _chatState = 'idle' // 'idle' | 'talking'
+var _chatState = 'idle' // 'idle' | 'talking' | 'queued'
 function _setState(s){_chatState=s}
 function _isTalking(){return _chatState==='talking'}
+var _MSG_QUEUE = [] // 消息队列
+var _THINK_TIMER = null // 10秒超时计时器
+
+function _startThinkTimer(){
+  if(_THINK_TIMER)clearTimeout(_THINK_TIMER)
+  _THINK_TIMER=setTimeout(function(){
+    var tx=document.getElementById('thinkingText')
+    if(tx)tx.textContent='请等待，LLM响应较慢...'
+    var ic=document.getElementById('thinkingIcon')
+    if(ic)ic.textContent='⏳'
+  },10000)
+}
+function _clearThinkTimer(){
+  if(_THINK_TIMER){clearTimeout(_THINK_TIMER);_THINK_TIMER=null}
+}
+
+// 处理消息队列
+function _processQueue(){
+  if(_MSG_QUEUE.length===0){var _q=document.getElementById('queueCount');if(_q)_q.remove();return}
+  if(_chatState==='talking'||_chatState==='queued')return
+  var next=_MSG_QUEUE.shift()
+  var _q=document.getElementById('queueCount')
+  if(_q)_q.textContent=_MSG_QUEUE.length>0?'📌 队列中（'+_MSG_QUEUE.length+'条待处理）':''
+  var inp=document.getElementById('input')
+  if(inp){inp.value=next;send()}
+}
 
 var _sendLock=false
 async function loadExpert(){quickFill("帮我找一个专家：");document.getElementById("input")?.focus()}
@@ -273,9 +299,11 @@ document.addEventListener('paste',function(e){
 })
 
 function send(){
-  if(_sendLock||_isTalking())return;_sendLock=true;_setState('talking')
-  try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;input.value='';var ai=null;if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
-  }catch(e){_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+  try{var input=document.getElementById('input');if(!input)return;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;
+  if(_isTalking()){_MSG_QUEUE.push(text);input.value='';var _q=document.getElementById('queueCount');if(!_q){_q=document.createElement('div');_q.id='queueCount';_q.style.cssText='text-align:center;font-size:11px;color:var(--text3);padding:2px;background:var(--bg);border-radius:4px;margin:2px 0';document.getElementById('messages').appendChild(_q)};_q.textContent='📌 已加入队列（'+_MSG_QUEUE.length+'条待处理）';return}
+  _setState('talking');input.value='';var ai=null;
+  if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
+  }catch(e){_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 async function doSend(text,ai){try{
   if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar()
@@ -315,25 +343,34 @@ async function doSend(text,ai){try{
   if(lower.startsWith('打开 ')||lower.startsWith('打开http')||lower.startsWith('打开www')||lower.startsWith('打开https')){
     var url = text.replace(/^打开\s*/,'').trim()
     if(!url.startsWith('http')) url='https://'+url
-    _localExec.openUrl(url);bubble.innerHTML='🌐 '+_localExec.openUrl(url);msgEl.id='';_setState('idle');return
+    _localExec.openUrl(url);bubble.innerHTML='🌐 '+_localExec.openUrl(url);    msgEl.id='';_clearThinkTimer();_setState('idle');_processQueue();return
   }
   if(lower.indexOf('截图')>=0||lower.indexOf('截屏')>=0){
-    _localExec.screenshot().then(function(r){bubble.innerHTML='🖥️ '+r;msgEl.id='';_setState('idle')})
+    _localExec.screenshot().then(function(r){bubble.innerHTML='🖥️ '+r;msgEl.id='';_clearThinkTimer();_setState('idle');_processQueue()})
     return
   }
   if(lower.indexOf('上传')>=0||lower.indexOf('文件')>=0||lower.indexOf('选择文件')>=0){
-    _localExec.fileOpen().then(function(r){bubble.innerHTML='📁 '+r;msgEl.id='';_setState('idle')})
+    _localExec.fileOpen().then(function(r){bubble.innerHTML='📁 '+r;msgEl.id='';_clearThinkTimer();_setState('idle');_processQueue()})
     return
   }
   // 先尝试智能任务分解
   // 判断意图类型
   var _createIntents=['生成','创建','制作','写一个','做一个','开发','画图','设计','html','代码','报告','合同','方案','excel','表格','ppt','演示']
   var _isCreate=_createIntents.some(function(k){return text.includes(k)})
-  if(_isCreate){updateThinking('\u270d\ufe0f','\u6b63\u5728\u751f\u6210\u5185\u5bb9')}else{updateThinking('\ud83e\udde0','\u5206\u6790\u4efb\u52a1')}
+  if(_isCreate){updateThinking('✍️','正在生成内容')}else{updateThinking('🧠','分析任务')}
+  _startThinkTimer()
   var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
   var td=await tr.json()
   if(td.success&&td.workflow_id){
-    bubble.innerHTML='[🎯 系统自动分解任务]\n'+td.steps.map(function(s,i){return '  '+(i+1)+'. '+s}).join('\n')+'\n\n⏳ 正在自动执行...'
+    var steps=td.steps||[]
+    bubble.innerHTML='<div class="thinking-status"><span>📋</span><span>任务拆解完成</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>'
+    // 逐个显示步骤状态
+    for(var _si=0;_si<steps.length;_si++){
+      updateThinking('⏳','步骤'+(1+_si)+': '+steps[_si].slice(0,20)+'...')
+      bubble.innerHTML+='<br><span style="color:var(--text3)">  ⏳ 步骤'+(1+_si)+': '+_renderMd(steps[_si])+'</span>'
+      m.scrollTop=m.scrollHeight
+    }
+    updateThinking('⚡','正在自动执行...')
   }
   // 尝试流式SSE（生成类不走SSE，直接POST）
   if(!_isCreate) try{
@@ -365,7 +402,7 @@ async function doSend(text,ai){try{
         }
       }
       try{CTX=CTX||[];CTX.push({role:'assistant',content:bubble.textContent||''})}catch(ex){}
-      _setState('idle');return
+      _clearThinkTimer();_setState('idle');_processQueue();return
     }
   }catch(e){/*stream fallback*/}
   // 非流式 — 不创建新元素，直接更新loading泡的内容
@@ -374,7 +411,7 @@ async function doSend(text,ai){try{
   if(!sr.ok){
     if(sr.status===429) bubble.innerHTML='⚠️ 请求太频繁，请稍后再试'
     else bubble.innerHTML='❌ 请求失败 ('+sr.status+') 请稍后重试'
-    msgEl.id='';_setState('idle');return
+    msgEl.id='';_clearThinkTimer();_setState('idle');_processQueue();return
   }
   var sd=await sr.json();msgEl.id=''
   if(sd&&sd.success){
@@ -389,8 +426,8 @@ async function doSend(text,ai){try{
   } else {
     bubble.innerHTML='❌ 系统返回错误，请重试'
   }
-  _setState('idle')
-}catch(e){var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle')}
+  _clearThinkTimer();_setState('idle');_processQueue()
+}catch(e){_clearThinkTimer();var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle');_processQueue()}
 _sendLock=false
 try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
