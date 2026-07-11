@@ -326,14 +326,17 @@ async function doSend(text,ai){try{
     return
   }
   // 先尝试智能任务分解
-  updateThinking('🧠','分析任务')
+  // 判断意图类型
+  var _createIntents=['生成','创建','制作','写一个','做一个','开发','画图','设计','html','代码','报告','合同','方案','excel','表格','ppt','演示']
+  var _isCreate=_createIntents.some(function(k){return text.includes(k)})
+  if(_isCreate){updateThinking('\u270d\ufe0f','\u6b63\u5728\u751f\u6210\u5185\u5bb9')}else{updateThinking('\ud83e\udde0','\u5206\u6790\u4efb\u52a1')}
   var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
   var td=await tr.json()
   if(td.success&&td.workflow_id){
     bubble.innerHTML='[🎯 系统自动分解任务]\n'+td.steps.map(function(s,i){return '  '+(i+1)+'. '+s}).join('\n')+'\n\n⏳ 正在自动执行...'
   }
-  // 尝试流式SSE
-  try{
+  // 尝试流式SSE（生成类不走SSE，直接POST）
+  if(!_isCreate) try{
     updateThinking('🔍','搜索信息')
     var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
