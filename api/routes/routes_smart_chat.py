@@ -837,7 +837,7 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     return None
 
 
-async def _try_llm_chat(msg: str, system_hint: str = ""):
+async def _try_llm_chat(msg: str, system_hint: str = "", api_key: str = ""):
     """LLM直接回答"""
     from api.agent_llm import call_llm
     try:
@@ -845,7 +845,7 @@ async def _try_llm_chat(msg: str, system_hint: str = ""):
             prompt = f"{system_hint}\n\n用户: {msg}\n回答:"
         else:
             prompt = f"用户: {msg}\n\n请直接回答，简洁、有用。"
-        content, _ = call_llm([{"role": "user", "content": prompt}], timeout=20)
+        content, _ = call_llm([{"role": "user", "content": prompt}], timeout=20, key=api_key)
         if content and len(content) > 3:
             return content
     except Exception as _et:
@@ -962,6 +962,7 @@ async def smart_chat(req: Req):
 async def _execute_single(req) -> dict:
     """单步指令执行引擎 — 供多步调度器和主入口复用"""
     msg = (req.message or "").strip()
+    _ak = req.api_key or ""
 
     # ── P0: 高频问候/打招呼直接回复（不走LLM，0延迟）──
     _GREETINGS = ["你好","您好","嗨","hi","hello","hey","在吗","在不在","早上好","下午好","晚上好","哈喽","你好啊","hello你好"]
@@ -1016,7 +1017,7 @@ async def _execute_single(req) -> dict:
         if result:
             return {"success": True, "result": result}
         # 兜底：LLM试一下
-        fallback = await _try_llm_chat(msg, "用户想查热点。列出你知道的热点话题，5条左右。")
+        fallback = await _try_llm_chat(msg, "用户想查热点。列出你知道的热点话题，5条左右。", _ak)
         if fallback:
             return {"success": True, "result": fallback}
         return {"success": True, "result": "暂无热点数据，稍后再试"}
@@ -1087,9 +1088,11 @@ async def _execute_single(req) -> dict:
             result = await _append_n8n_links(msg, result)
             return {"success": True, "result": result}
         # 搜索失败→LLM
-        fallback = await _try_llm_chat(msg)
+        fallback = await _try_llm_chat(msg, api_key=_ak)
         if fallback:
             fallback = await _append_n8n_links(msg, fallback)
+            return {"success": True, "result": fallback}
+        return {"success": True, "result": "搜索超时，稍后再试"}
             return {"success": True, "result": fallback}
         return {"success": True, "result": "搜索超时，稍后再试"}
 
@@ -1129,7 +1132,7 @@ async def _execute_single(req) -> dict:
                 return {"success": True, "result": f"📐 **{clean} = {val}**"}
             except Exception as _ce:
                 logger.warning(f"[CALC] ast fail: {_ce}")
-        fallback = await _try_llm_chat(f"计算一下: {expr}")
+        fallback = await _try_llm_chat(f"计算一下: {expr}", api_key=_ak)
         if fallback:
             return {"success": True, "result": fallback}
         return {"success": True, "result": f"📐 {expr} 无法计算"}
@@ -1258,14 +1261,14 @@ async def _execute_single(req) -> dict:
         except Exception as e:
             logger.warning(f"[AGENT] 执行失败: {e}")
             # 降级到LLM
-            fallback = await _try_llm_chat(msg)
+            fallback = await _try_llm_chat(msg, api_key=_ak)
             if fallback:
                 fallback = await _append_n8n_links(msg, fallback)
                 return {"success": True, "result": fallback}
             return {"success": True, "result": "处理超时，请稍后再试"}
 
     # P6: chat → LLM直接回答
-    result = await _try_llm_chat(msg)
+    result = await _try_llm_chat(msg, api_key=_ak)
     if result:
         result = await _append_n8n_links(msg, result)
         return {"success": True, "result": result}
@@ -1320,8 +1323,9 @@ async def smart_stream(req: Req):
                     await asyncio.sleep(0.02)
         else:
             from api.agent_llm import call_llm_stream as _stream
+            _ak2 = req.api_key or ""
             try:
-                for ch in _stream([{"role": "user", "content": req.message}]):
+                for ch in _stream([{"role": "user", "content": req.message}], key=_ak2):
                     yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
                     await asyncio.sleep(0.02)
             except Exception as e:

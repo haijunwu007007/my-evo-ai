@@ -134,6 +134,14 @@ from api.profiler import router as profiler_router
 app.include_router(profiler_router)
 import api.startup  # noqa: F401
 
+# ── 手动注册 features/ 子目录路由 ──
+try:
+    from api.routes.features.core_auth import router as auth_router
+    app.include_router(auth_router)
+    logger.info("[AUTH] 认证/API网关路由已注册")
+except Exception as _ae:
+    logger.warning(f"[AUTH] 认证路由注册失败: {_ae}")
+
 # ── 批量注册路由模块（自动发现 api/routes/routes_*.py + hub_static.py）──
 # 新增路由只需创建 routes_xxx.py，无需修改本文件
 from api.routes import register_all_routers
