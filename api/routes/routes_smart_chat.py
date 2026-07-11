@@ -575,6 +575,12 @@ async def _classify_intent(msg: str):
     _create_kw = ["生成","创建","做一份","做ppt","五子棋","时钟","网页","应用","游戏",
                   "开发","写一个","做一个","帮我做","帮我写","帮我生成","帮我创建",
                   "html","代码","报告","合同","方案","excel","表格","演示文稿",
+    _cli_kw = ["下载视频","视频下载","图片处理","图片转换","ocr","文字识别","文档转换","转pdf",
+               "json处理","csv处理","系统监控","文件同步","代码搜索","文件查找"]
+    for _kw in _cli_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] CLI工具: {_kw}")
+            return "cli_tool", _kw, "", ""
                   "画图","画画","画一个","图片","海报","logo"]
     for _kw in _create_kw:
         if _kw in _lower:
@@ -896,6 +902,31 @@ async def _execute_single(req) -> dict:
         if fallback:
             return {"success": True, "result": fallback}
         return {"success": True, "result": "暂无热点数据，稍后再试"}
+
+    # cli_tool: CLI工具调用
+    if itype == "cli_tool":
+        _tool_map = {
+            "下载视频":"yt-dlp","视频下载":"yt-dlp",
+            "图片处理":"imagemagick","图片转换":"imagemagick",
+            "ocr":"tesseract","文字识别":"tesseract",
+            "文档转换":"pandoc","转pdf":"pandoc",
+            "json处理":"jq","csv处理":"csvkit",
+            "系统监控":"htop","代码搜索":"ripgrep","文件同步":"rsync","文件查找":"fd",
+        }
+        _tool = _tool_map.get(msg,"")
+        _lines = [f"「{k}」→ {v}" for k,v in _tool_map.items()]
+        _avail = ""
+        try:
+            from modules.cli_tools import executor as _cli
+            _st = _cli.status()
+            _tools = _st.get("tools",{})
+            _avail_tools = [k for k,v in _tools.items() if v.get("available")]
+            if _avail_tools:
+                _avail = "✅ 已安装: " + ", ".join(_avail_tools[:8])
+        except: pass
+        if _tool:
+            return {"success":True,"result":f"🔧 **{_tool}**\n\n你说的是 {_tool}（{_tool_map[msg]}）。在输入框说「用 {_tool} 处理」即可。\n\n{_avail}"}
+        return {"success":True,"result":f"🔧 **CLI工具集**\n\n{_avail}\n\n可用命令：\n" + "\n".join(_lines) + "\n\n直接在输入框说就行，系统会自动调用对应的命令行工具。"}
 
     # search: 搜索
     if itype == "search":
