@@ -905,6 +905,22 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     return None
 
 
+def _append_mcpize_suggest(msg: str, reply: str) -> str:
+    """如果消息包含可MCPize的内容，追加建议"""
+    _has_url = bool(__import__('re').search(r'https?://[^\s]+', msg))
+    _has_cli = any(k in msg.lower() for k in ['ffmpeg','yt-dlp','docker','git ','python3','npm ','npx ','curl'])
+    _has_code = 'def ' in msg or 'import ' in msg[:200]
+    _hints = []
+    if _has_url:
+        _hints.append("💡 说「把链接变成MCP」可把该网站注册为MCP工具")
+    if _has_cli:
+        _hints.append("💡 说「把该命令变成MCP」可把该命令注册为MCP工具")
+    if _has_code:
+        _hints.append("💡 说「蒸馏这个」可把代码蒸馏为系统技能")
+    if _hints and '💡' not in reply[:100]:
+        reply += "\n\n" + "\n".join(_hints)
+    return reply
+
 async def _try_llm_chat(msg: str, system_hint: str = "", api_key: str = ""):
     """LLM直接回答 — 默认Key优先，用户Key兜底"""
     from api.agent_llm import call_llm
@@ -1344,10 +1360,12 @@ async def _execute_single(req) -> dict:
     result = await _try_llm_chat(msg, api_key=_ak)
     if result:
         result = await _append_n8n_links(msg, result)
+        result = _append_mcpize_suggest(msg, result)
         return {"success": True, "result": result}
     result = await _try_llm_chat(msg)
     if result:
         result = await _append_n8n_links(msg, result)
+        result = _append_mcpize_suggest(msg, result)
         return {"success": True, "result": result}
     return {"success": True, "result": "正在思考中..."}
 @router.post("/api/v1/smart/stream")
