@@ -838,18 +838,24 @@ async def _answer_hot(msg: str, platform: str, topic: str):
 
 
 async def _try_llm_chat(msg: str, system_hint: str = "", api_key: str = ""):
-    """LLM直接回答"""
+    """LLM直接回答 — 默认Key优先，用户Key兜底"""
     from api.agent_llm import call_llm
-    try:
-        if system_hint:
-            prompt = f"{system_hint}\n\n用户: {msg}\n回答:"
-        else:
-            prompt = f"用户: {msg}\n\n请直接回答，简洁、有用。"
-        content, _ = call_llm([{"role": "user", "content": prompt}], timeout=20, key=api_key)
-        if content and len(content) > 3:
-            return content
-    except Exception as _et:
-        logger.warning(f"[LLM-CHAT] 回答异常: {_et}")
+    for attempt, key in [(1, ""), (2, api_key)]:
+        if attempt == 2 and not api_key:
+            break
+        try:
+            if system_hint:
+                prompt = f"{system_hint}\n\n用户: {msg}\n回答:"
+            else:
+                prompt = f"用户: {msg}\n\n请直接回答，简洁、有用。"
+            content, _ = call_llm([{"role": "user", "content": prompt}], key=key, timeout=20)
+            if content and len(content) > 3:
+                return content
+        except Exception as _et:
+            if attempt == 1:
+                logger.warning(f"[LLM-CHAT] 默认Key异常: {_et}，尝试用户Key")
+            else:
+                logger.warning(f"[LLM-CHAT] 用户Key也异常: {_et}")
     return None
 
 
@@ -1197,7 +1203,7 @@ async def _execute_single(req) -> dict:
 示例格式：[{{"step":1,"action":"搜索AI行业趋势","tool":"search","target":"AI行业最新动态"}},{{"step":2,"action":"生成分析报告","tool":"docs","target":"AI趋势分析报告"}}]
 
 只返回JSON数组，不要加额外解释。"""
-            step_text = await _try_llm_chat(plan_prompt, "你是一个严格的任务规划器。只输出JSON数组。")
+            step_text = await _try_llm_chat(plan_prompt, "你是一个严格的任务规划器。只输出JSON数组。", api_key=_ak)
             txt = "🤖 **任务拆解与执行**\n\n"
             txt += f"**📋 任务:** {msg}\n\n"
             txt += "**📌 执行计划:**\n"
@@ -1244,7 +1250,7 @@ async def _execute_single(req) -> dict:
 ...
 **最终结果：** [汇总答案]"""
             
-            result = await _try_llm_chat(exec_prompt)
+            result = await _try_llm_chat(exec_prompt, api_key=_ak)
             if result:
                 txt += "\n\n**⚡ 执行过程:**\n" + result
             else:
@@ -1267,7 +1273,6 @@ async def _execute_single(req) -> dict:
                 return {"success": True, "result": fallback}
             return {"success": True, "result": "处理超时，请稍后再试"}
 
-    # P6: chat → LLM直接回答
     result = await _try_llm_chat(msg, api_key=_ak)
     if result:
         result = await _append_n8n_links(msg, result)
@@ -1324,13 +1329,24 @@ async def smart_stream(req: Req):
         else:
             from api.agent_llm import call_llm_stream as _stream
             _ak2 = req.api_key or ""
-            try:
-                for ch in _stream([{"role": "user", "content": req.message}], key=_ak2):
-                    yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
-                    await asyncio.sleep(0.02)
-            except Exception as e:
-                yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
-                return
+            _sse_stream_text = ""
+            for _try_key in ["", _ak2]:
+                if _try_key == _ak2 and not _ak2:
+                    break
+                try:
+                    _sse_stream_text = ""
+                    for ch in _stream([{"role": "user", "content": req.message}], key=_try_key):
+                        _sse_stream_text += ch
+                        yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
+                        await asyncio.sleep(0.02)
+                    if len(_sse_stream_text) > 5:
+                        break
+                except Exception as e:
+                    if _try_key == "" and _ak2:
+                        logger.warning(f"[SSE] 默认Key流式异常: {e}，尝试用户Key")
+                    else:
+                        yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
+                        return
         yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
 
     return StreamingResponse(_gen(), media_type="text/event-stream")
