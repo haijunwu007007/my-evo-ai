@@ -615,8 +615,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 snippet = self._generate_snippet(entry.content, query_tokens)
                 highlights = [
                     f"...{line.strip()}..."
-                    for line in entry.content.split("
-")
+                    for line in entry.content.split("\n")
                     if any(t in line.lower() for t in query_tokens)
                 ][:3]
                 matched_tags = [t for t in entry.tags if any(t.lower() in qt for qt in query_tokens)]
@@ -670,8 +669,7 @@ class KnowledgeBase(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _generate_snippet(self, content: str, query_tokens: list[str], max_length: int = 200) -> str:
         """生成搜索摘要"""
-        lines = content.split("
-")
+        lines = content.split("\n")
         for line in lines:
             if any(t in line.lower() for t in query_tokens):
                 if len(line) <= max_length:

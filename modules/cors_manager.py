@@ -595,8 +595,7 @@ class CORSManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             if headers:
                 lines.append(f'    add_header Access-Control-Allow-Headers "{",".join(headers)}" always;')
             lines.append(f"    add_header Access-Control-Max-Age {max_age} always;")
-            return {"success": True, "format": "nginx", "config": "
-".join(lines), "origin_count": len(allowed)}
+            return {"success": True, "format": "nginx", "config": "\n".join(lines), "origin_count": len(allowed)}
         return {
             "success": True,
             "format": "json",

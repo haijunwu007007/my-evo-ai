@@ -199,8 +199,7 @@ class QualityMetricsAnalyzer:
         """计算圈复杂度"""
         complexity = 1
         keywords = ["if", "elif", "else", "for", "while", "and", "or", "except", "with", "case"]
-        lines = function_body.split("
-")
+        lines = function_body.split("\n")
         for line in lines:
             stripped = line.strip()
             for kw in keywords:
@@ -273,8 +272,7 @@ class CodeQualityManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
 
     def _analyze_python(self, content: str, file_path: str) -> FileAnalysis:
         """分析Python代码"""
-        lines = content.split("
-")
+        lines = content.split("\n")
         total = len(lines)
         code = blank = comment = 0
         max_complexity = 1

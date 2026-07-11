@@ -232,8 +232,7 @@ class PIIDetector:
                                 "value": match.group(),
                                 "start": match.start(),
                                 "end": match.end(),
-                                "line": text[: match.start()].count("
-") + 1,
+                                "line": text[: match.start()].count("\n") + 1,
                             }
                         )
                 except re.error:
@@ -510,8 +509,7 @@ class PIIDetection(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 content = f.read()
         except Exception as e:
             return {"success": False, "error": str(e)}
-        lines = content.split("
-")
+        lines = content.split("\n")
         total_pii = 0
         line_details = []
         for i, line in enumerate(lines):

@@ -620,8 +620,7 @@ class PptGenerator(EnterpriseModule):
 
             with open(text_file, "w", encoding="utf-8") as f:
 
-                f.write("
-".join(texts))
+                f.write("\n".join(texts))
 
             pages.append({"slide": si + 1, "text_preview": texts[:5], "text_file": text_file})
 

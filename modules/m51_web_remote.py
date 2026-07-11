@@ -432,8 +432,7 @@ class ActionRecorder:
                 x, y = act.position.get("x", 0), act.position.get("y", 0)
                 lines.append(f"await page.mouse.wheel({x}, {y})")
             lines.append("")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
 # ============================================================================
 # 任务执行器（模拟浏览器操作）

@@ -336,8 +336,7 @@ class DesktopAgent:
 
                     return {"success": False, "error": f"OCR 识别失败: {str(e)}"}
 
-                text = '
-'.join([r[1] for r in result])
+                text = '\n'.join([r[1] for r in result])
 
                 elements = [{
 
@@ -697,8 +696,7 @@ class DesktopAgent:
 
                 r = subprocess.run(["wmctrl","-l"], capture_output=True, text=True, timeout=5)
 
-                lines = r.stdout.strip().split('
-') if r.stdout.strip() else []
+                lines = r.stdout.strip().split('\n') if r.stdout.strip() else []
 
                 wins = []
 

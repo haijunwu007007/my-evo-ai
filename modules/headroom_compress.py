@@ -88,8 +88,7 @@ def _compress_item(item, depth: int) -> Any:
 
 def compress_code(code: str, keep_imports: bool = True, max_lines: int = 100) -> str:
     """压缩代码：保留结构，移除注释和空行"""
-    lines = code.split("
-")
+    lines = code.split("\n")
     compressed = []
     imports = []
     for line in lines:
@@ -111,14 +110,12 @@ def compress_code(code: str, keep_imports: bool = True, max_lines: int = 100) ->
         result.extend(compressed[:max_lines])
     else:
         result.extend(compressed)
-    return "
-".join(result)
+    return "\n".join(result)
 
 
 def compress_logs(log_text: str, max_entries: int = 50) -> str:
     """压缩日志：去重、聚合、只保留关键行"""
-    lines = log_text.strip().split("
-")
+    lines = log_text.strip().split("\n")
     if len(lines) <= max_entries:
         return log_text
     # 去重
@@ -130,8 +127,7 @@ def compress_logs(log_text: str, max_entries: int = 50) -> str:
             seen.add(h)
             unique.append(line)
     if len(unique) <= max_entries:
-        return "
-".join(unique)
+        return "\n".join(unique)
     # 只保留 Error/Warn + 头尾
     critical = [l for l in unique if re.search(r"(error|warn|fail|exception|traceback)", l, re.I)]
     head = unique[:10]
@@ -144,8 +140,7 @@ def compress_logs(log_text: str, max_entries: int = 50) -> str:
     result.extend(head)
     result.append(f"...({len(unique)-20} entries omitted)...")
     result.extend(tail)
-    return "
-".join(result)
+    return "\n".join(result)
 
 
 def compress_history(messages: list[dict], max_turns: int = 6) -> list[dict]:

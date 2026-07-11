@@ -367,8 +367,7 @@ class EvoNexusCore(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             import inspect
 
             source = inspect.getsource(instance.__class__)
-            loc = len([l for l in source.split("
-") if l.strip() and not l.strip().startswith("#")])
+            loc = len([l for l in source.split("\n") if l.strip() and not l.strip().startswith("#")])
             details["lines_of_code"] = loc
         except Exception:
             details["lines_of_code"] = 0

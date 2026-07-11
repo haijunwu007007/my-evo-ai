@@ -258,8 +258,7 @@ class ContextMonitor:
 
         if mid_start < mid_end:
 
-            mid_content = "
-".join(
+            mid_content = "\n".join(
 
                 f"[{m['role']}]: {m['content'][:100]}..." for m in self._messages[mid_start:mid_end]
 

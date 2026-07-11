@@ -402,8 +402,7 @@ class Coordinator(BaseAgent):
             results.append(result)
 
         self.state.status = "idle"
-        return "
-".join(results)
+        return "\n".join(results)
 
     def _decompose_task(self, task: str) -> list[str]:
         """分解任务"""

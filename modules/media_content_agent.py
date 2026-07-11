@@ -372,9 +372,7 @@ class ContentGenerator:
             "topic": topic,
             "style": style,
             "title": f"关于{topic}的深度解读",
-            "body": f"本文将从多个角度为您解析{topic}，帮助您全面了解这一话题。
-
-关键词: {', '.join(keywords or [])}",
+            "body": f"本文将从多个角度为您解析{topic}，帮助您全面了解这一话题。\n\n关键词: {', '.join(keywords or [])}",
             "suggested_tags": keywords or [topic],
             "word_count": len(f"本文将从多个角度为您解析{topic}") + 50,
             "estimated_read_time": 3,

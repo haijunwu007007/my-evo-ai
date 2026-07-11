@@ -336,8 +336,7 @@ class RetrievalResult:
                 break
             lines.append(line)
             total_len += len(line)
-        return "
-".join(lines)
+        return "\n".join(lines)
 
 @dataclass
 class ConsolidationReport:

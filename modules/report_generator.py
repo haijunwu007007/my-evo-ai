@@ -101,23 +101,7 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         body_html = "".join(self._render_section(s) for s in sections)
 
-        report = f"""<!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="utf-8"><title>{safe_title}</title>
-<style>{_REPORT_CSS}</style></head>
-<body>
-<div class="report-container">
-  <div class="report-header">
-    <h1>{safe_title}</h1>
-    <div class="meta">Generated: {html.escape(now)} | AUTO-EVO-AI V0.1</div>
-  </div>
-  <div class="report-body">
-    {body_html}
-  </div>
-  <div class="report-footer">AUTO-EVO-AI Report Generator &mdash; V0.1</div>
-</div>
-</body>
-</html>"""
+        report = f"""<!DOCTYPE html>\n<html lang="zh-CN">\n<head><meta charset="utf-8"><title>{safe_title}</title>\n<style>{_REPORT_CSS}</style></head>\n<body>\n<div class="report-container">\n  <div class="report-header">\n    <h1>{safe_title}</h1>\n    <div class="meta">Generated: {html.escape(now)} | AUTO-EVO-AI V0.1</div>\n  </div>\n  <div class="report-body">\n    {body_html}\n  </div>\n  <div class="report-footer">AUTO-EVO-AI Report Generator &mdash; V0.1</div>\n</div>\n</body>\n</html>"""
         self._generated += 1
         logger.info("generate_html_report: '%s' with %d sections", title, len(sections))
         return report
@@ -207,14 +191,12 @@ class ReportGenerator(CircuitBreakerMixin, RateLimiterMixin, EnterpriseModule):
             lines = [f"Dict ({len(data)} keys):"]
             for k, v in list(data.items())[:10]:
                 lines.append(f"  {k}: {str(v)[:60]}")
-            return "
-".join(lines)
+            return "\n".join(lines)
         elif isinstance(data, list):
             lines = [f"List ({len(data)} items):"]
             for i, item in enumerate(data[:10]):
                 lines.append(f"  [{i}]: {str(item)[:80]}")
-            return "
-".join(lines)
+            return "\n".join(lines)
         else:
             return f"{type(data).__name__}: {str(data)[:200]}"
 

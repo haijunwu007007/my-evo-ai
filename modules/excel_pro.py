@@ -900,8 +900,7 @@ class ExcelPro(EnterpriseModule):
 
                 for row in ws.iter_rows(values_only=True):
 
-                    f.write(",".join(str(v) if v is not None else "" for v in row) + "
-")
+                    f.write(",".join(str(v) if v is not None else "" for v in row) + "\n")
 
             wb.close()
 

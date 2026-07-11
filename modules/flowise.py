@@ -909,8 +909,7 @@ class Flowise(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             lines = [f"name: {data['name']}", f"version: {data['version']}"]
             for nid, node in data.get("nodes", {}).items():
                 lines.append(f"- node: {node['label']} ({node['node_type']})")
-            content = "
-".join(lines)
+            content = "\n".join(lines)
         return {"format": fmt, "content": content, "size": len(content)}
 
     def _import_canvas(self, params: dict) -> Any:

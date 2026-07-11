@@ -645,8 +645,7 @@ class MindmapGenerator:
 
         if doc.root:
             render(doc.root, 0)
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _export_mermaid(self, doc: MindmapDocument) -> str:
         lines = ["mindmap", f"  root(({doc.root.text}))" if doc.root else ""]
@@ -664,8 +663,7 @@ class MindmapGenerator:
                 child = self._find_node_by_id(doc.root, cid)
                 if child:
                     render(child, 0)
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _export_html(self, doc: MindmapDocument) -> str:
         md = self._export_markdown(doc)
@@ -705,8 +703,7 @@ class MindmapGenerator:
                         f'<line x1="{parent.x}" y1="{parent.y}" x2="{n.x}" y2="{n.y}" stroke="#999" stroke-width="2"/>'
                     )
         parts.append("</svg>")
-        return "
-".join(parts)
+        return "\n".join(parts)
 
     def _export_plantuml(self, doc: MindmapDocument) -> str:
         lines = ["@startmindmap", f"* {doc.root.text}" if doc.root else ""]
@@ -725,8 +722,7 @@ class MindmapGenerator:
                 if child:
                     render(child, 0)
         lines.append("@endmindmap")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def health_check(self) -> dict[str, Any]:
         try:

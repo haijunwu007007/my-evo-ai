@@ -375,8 +375,7 @@ class TranslationService(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
         """Real LLM-based translation."""
         try:
             from _zhipu_helper import llm_chat
-            result = llm_chat(f"将以下{source}文本翻译成{target}，只返回翻译结果：
-{text[:2000]}")
+            result = llm_chat(f"将以下{source}文本翻译成{target}，只返回翻译结果：\n{text[:2000]}")
             if result:
                 for src_term, tgt_term in glossary.items():
                     result = result.replace(src_term, tgt_term)

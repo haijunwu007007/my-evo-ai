@@ -856,8 +856,7 @@ class DocxProcessor(EnterpriseModule):
 
 
 
-        md = "
-".join(lines)
+        md = "\n".join(lines)
 
         if data.get("save", False):
 
@@ -891,8 +890,7 @@ class DocxProcessor(EnterpriseModule):
 
         doc = Document(path)
 
-        text = "
-".join(p.text for p in doc.paragraphs if p.text.strip())
+        text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
 
 
 
