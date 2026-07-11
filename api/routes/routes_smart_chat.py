@@ -687,14 +687,19 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     for _pk in ("百度","微博","头条","抖音","知乎","B站","小红书","快手","视频号"):
         if _pk in msg: _source = _pk; break
 
-    # 搜索+抓取（全动态，不写死URL）
-    for _sq in [f"{_source}今日热点 热榜 最新", f"{_source} 热搜榜", "今日热点新闻 热搜排行"]:
-        try:
-            from modules.web_fetcher import search_and_fetch as _saf
-            _r = await _saf(_sq.strip())
-            if _r and len(_r) > 50: return _r
-        except Exception:
-            pass
+    # 搜索+抓取（全动态，不写死URL，搜索引擎实时决定结果）
+    _queries = [f"tophub.today {_source}热搜", f"{_source} 热点 新闻排行"]
+    try:
+        from modules.web_fetcher import search_and_fetch as _saf
+    except Exception:
+        _saf = None
+    for _sq in _queries:
+        if _saf:
+            try:
+                _r = await _saf(_sq.strip())
+                if _r and len(_r) > 50: return _r
+            except Exception:
+                pass
     # 降级：返回搜索链接
     try:
         _r = await _execute_search(f"{_source} 热点新闻" if _source else "今日热点新闻")
