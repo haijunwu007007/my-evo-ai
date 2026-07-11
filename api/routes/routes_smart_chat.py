@@ -658,7 +658,23 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     for _pk in ("百度","微博","头条","抖音","知乎","B站","小红书","快手","视频号"):
         if _pk in msg: _source = _pk; break
 
-    # 搜索：不管什么平台，搜就完了
+    # 百度热点直抓（优先，返回真正内容而非链接）
+    import re
+    try:
+        async with httpx.AsyncClient(timeout=10, verify=False) as _c:
+            _resp = await _c.get("https://top.baidu.com/board?tab=realtime", headers={"User-Agent": "Mozilla/5.0"})
+            if _resp.status_code == 200:
+                _match = re.findall(r'class="c-single-text-ellipsis"[^>]*>([^<]+)', _resp.text)
+                _tl = []
+                for _m in _match:
+                    _m = _m.strip()
+                    if _m and len(_m)>=4 and _m not in _tl: _tl.append(_m)
+                if _tl:
+                    return f"📊 **{'百度' if not _source else _source}今日热点 TOP{min(len(_tl),20)}**\n\n"+"\n".join([f"{i+1}. {t}" for i,t in enumerate(_tl[:20])])
+    except Exception:
+        pass
+    
+    # 搜索兜底
     try:
         _sq = f"{_source} {topic or '热点'} 热搜" if _source else f"{topic or '今日热点'} 热搜"
         _r = await _execute_search(_sq.strip())
