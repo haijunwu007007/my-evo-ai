@@ -415,10 +415,78 @@ def _build_automation(msg: str) -> dict:
     }
 
 
+async def _do_mcpize(typ: str, params: dict) -> str | None:
+    """调用MCPize API执行转换"""
+    try:
+        async with httpx.AsyncClient(timeout=30, base_url=_API_BASE) as c:
+            r = await c.post(f"/api/v1/mcpize/{typ}", json=params)
+            if r.status_code == 200:
+                d = r.json()
+                if d.get("success"):
+                    name = d.get("name", params.get("name",""))
+                    n = d.get("n", d.get("tool_count", len(d.get("tools",[]))))
+                    return f"✅ **MCPize 成功**\n已将「{name}」注册为 MCP 工具（{n}个工具）\n\n输入「MCPize 状态」查看已集成列表"
+    except: pass
+    return None
+
+async def _do_distill(typ: str, content: str) -> str | None:
+    """调用蒸馏API"""
+    try:
+        async with httpx.AsyncClient(timeout=60, base_url=_API_BASE) as c:
+            r = await c.post("/api/v1/distill/start", json={"source_type": typ, "source": content})
+            if r.status_code == 200:
+                d = r.json()
+                if d.get("success"):
+                    name = d.get("name","蒸馏技能")
+                    return f"✅ **蒸馏成功**\n已将内容蒸馏为技能「{name}」\n\n以后说相关内容系统会自动调用此技能。"
+    except: pass
+    return None
+
 async def _execute_action(msg: str) -> str | None:
     """执行动作 — 匹配关键词→调API→返回结果，不依赖LLM"""
     import httpx
     lower = msg.lower()
+    
+    # ── MCPize / 万物转MCP: 输入框直接说，自动调用API ──
+    # 匹配: "把百度变成MCP工具" "把xxx.com注册为工具" "把ffmpeg变成MCP" "把xxx.py注册为mcp"
+    for _mcp_type, _mcp_kws in [("website",["网站","网页","com","cn","www"]),("api",["API","接口","rest"]),("cli",["命令","命令行","工具名"]),("python",["python模块","py文件"])]:
+        for _mk in ["变成mcp","注册为工具","转mcp","变成工具","注册为mcp","mcp化"]:
+            if _mk in msg.lower():
+                import re as _mre
+                _target = msg.lower().split(_mk,1)[0].replace("把","").replace("将","").replace("帮我把","").strip()
+                if _target:
+                    if _mcp_type == "website":
+                        _url = _target
+                        if not _url.startswith("http"): _url = "https://" + _url
+                        _resp = await _do_mcpize("website", {"url": _url, "name": _url.split('/')[2] if '//' in _url else _url})
+                        if _resp: return _resp
+                    elif _mcp_type == "api":
+                        _url = _target
+                        if not _url.startswith("http"): _url = "https://" + _url
+                        _resp = await _do_mcpize("api", {"base_url": _url, "name": _url.split('/')[2] if '//' in _url else _url})
+                        if _resp: return _resp
+                    elif _mcp_type == "cli":
+                        _resp = await _do_mcpize("cli", {"command": _target, "name": _target.split()[0] if _target else _target})
+                        if _resp: return _resp
+                    elif _mcp_type == "python":
+                        _resp = await _do_mcpize("python", {"module_path": _target, "name": _target.split('/')[-1].replace('.py','')})
+                        if _resp: return _resp
+                    break
+            if _mk in msg.lower(): break
+
+    # ── 蒸馏 → 直接蒸馏 ──
+    # 匹配: "蒸馏这个" "帮我蒸馏xxx"  
+    for _dk in ["帮我蒸馏","蒸馏这个","帮我提炼","提炼这个","蒸馏一下","蒸馏"]:
+        if _dk in msg:
+            _content = msg.split(_dk,1)[-1].strip()
+            if _content:
+                import re as _dre
+                if _dre.match(r'^https?://', _content):
+                    return await _do_distill("url", _content)
+                if "def " in _content or "import " in _content[:200]:
+                    return await _do_distill("code", _content)
+                return await _do_distill("text", _content)
+            break
     
     # ── n8n工作流模板搜索 ──
     if any(kw in msg for kw in ["n8n", "工作流模板", "n8n模板", "自动化工作流", "workflow"]):
