@@ -219,7 +219,8 @@ function friendlyError(msg){var m=msg||'';if(m.indexOf('502')>=0)return'服务�
 var _searchCacheTTL=3600000;
 function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){}cb(d)})}).catch(function(){cb(null)})}
 function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
-function showLoading(){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
+function showLoading(msg){msg=msg||'思考中';var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="thinking-status" id="thinkingStatus"><span id="thinkingIcon">🤔</span><span id="thinkingText">'+msg+'</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
+function updateThinking(icon,msg){var s=document.getElementById('thinkingStatus');if(s){document.getElementById('thinkingIcon').textContent=icon;document.getElementById('thinkingText').textContent=msg}}
 function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
@@ -271,7 +272,7 @@ function send(){
   }catch(e){hideLoading();addMsg('❌ 出错了: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 async function doSend(text,ai){try{
-  if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading();var ak=localStorage.getItem('evo_api_key')||''
+  if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading('接收指令');var ak=localStorage.getItem('evo_api_key')||''
     // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
     var _localExec = {
       screenshot: function(){return new Promise(function(resolve){
@@ -310,6 +311,7 @@ async function doSend(text,ai){try{
       return
     }
     // 先尝试智能任务分解
+    updateThinking('🧠','分析任务')
     var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
     var td=await tr.json()
     if(td.success&&td.workflow_id){
@@ -317,13 +319,14 @@ async function doSend(text,ai){try{
     }
     // 尝试流式SSE
     try{
+      updateThinking('🔍','搜索信息')
       var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
       if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
         hideLoading()
         var bub=document.createElement('div');bub.className='msg-bubble'
         var ld=document.createElement('div');ld.className='msg bot';var ll=document.createElement('div');ll.className='msg-label';ll.textContent='AUTO-EVO-AI'
         ld.appendChild(ll);ld.appendChild(bub);document.getElementById('messages').appendChild(ld)
-        var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf=''
+        var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf='';var _firstChunk=true
         while(true){
           var {done,value}=await reader.read()
           if(done)break
@@ -333,7 +336,9 @@ async function doSend(text,ai){try{
             if(line.startsWith('data: ')){
               try{
                 var d=JSON.parse(line.slice(6))
+                if(d.thinking){updateThinking(d.icon||'🧠',d.thinking);continue}
                 if(d.done){break}
+                if(_firstChunk){_firstChunk=false;bub.innerHTML=''}
                 bub.innerHTML=_renderMd((bub.textContent||'')+d.chunk)
                 document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight
               }catch(e){}
@@ -346,6 +351,7 @@ async function doSend(text,ai){try{
     }catch(e){/*stream fallback*/}
     hideLoading()
     // 走智能对话（非流式）
+    updateThinking('🤔','正在思考')
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){
       hideLoading()

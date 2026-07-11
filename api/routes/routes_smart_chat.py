@@ -1280,6 +1280,8 @@ async def smart_stream(req: Req):
         # 热点/搜索/创作等 → 调用smart逻辑获取完整结果
         from api.agent_llm import call_llm as _llm
         txt = None
+        _think_step = {"hot":"🔥 正在抓取热搜数据...","search":"🔍 正在搜索网络...","research":"🔬 正在深度研究...","fetch":"🌐 正在抓取网页...","create":"✍️ 正在生成内容...","calculate":"📐 正在计算...","cli_tool":"🔧 正在调用工具...","help":"💡 整理系统能力..."}
+        txt = None
         if itype == "hot":
             txt = await _answer_hot(req.message, platform, topic)
         elif itype == "search":
@@ -1292,6 +1294,10 @@ async def smart_stream(req: Req):
                 if _txt: txt = "🔬 **深度研究**\n\n" + _txt
         if txt:
             async def _gen():
+                _step = _think_step.get(itype, "🤔 正在处理...")
+                yield f"data: {json.dumps({'thinking':_step,'icon':_step[:2],'done':False})}\n\n"
+                await asyncio.sleep(0.3)
+                yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
                 for ch in txt:
                     yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
                     await asyncio.sleep(0.02)
@@ -1303,6 +1309,9 @@ async def smart_stream(req: Req):
 
     async def _gen():
         try:
+            yield f"data: {json.dumps({'thinking':'🤔 AI思考中...','icon':'🤔','done':False})}\n\n"
+            await asyncio.sleep(0.3)
+            yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
             # 先用非流式获取完整回复（call_llm_stream是字符级yield）
             for ch in _stream([{"role": "user", "content": req.message}]):
                 yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
