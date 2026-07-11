@@ -1272,62 +1272,58 @@ async def _execute_single(req) -> dict:
     return {"success": True, "result": "正在思考中..."}
 @router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
-    """SSE流式响应 — 先做意图分类，非chat类走smart逻辑获取完整结果再SSE输出"""
+    """SSE streams thinking first, then executes"""
     import asyncio
-    # 先做意图分类（热点/搜索/创作等不走LLM raw stream）
     itype, platform, topic, _ = await _classify_intent(req.message)
-    txt = None
-    if itype == "hot":
-        txt = await _answer_hot(req.message, platform, topic)
-    elif itype == "search":
-        txt = await _execute_search(topic or req.message)
-    elif itype == "research":
-        from modules.deep_researcher import research as _rs
-        _r = await _rs(req.message)
-        if _r.get("success"):
-            txt = "\U0001f52c **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
-    elif itype == "create":
-        _resp = await _execute_single(req)
-        txt = _resp.get("result", "")
-    elif itype == "help":
-        txt = _SYSTEM_CAPABILITIES
-    elif itype == "calculate":
-        _resp = await _execute_single(req)
-        txt = _resp.get("result", "")
-    elif itype == "cli_tool":
-        txt = "\U0001f527 在输入框说「用xxx处理」即可调用命令行工具"
-    if txt:
-        async def _gen():
-            _step = _think_step.get(itype, "\U0001f914 正在处理...")
-            yield f"data: {json.dumps({'thinking':_step,'icon':_step[:2],'done':False})}\n\n"
-            await asyncio.sleep(0.3)
+
+    async def _gen():
+        # P1: Send thinking BEFORE doing any work
+        _step = _think_step.get(itype, "\U0001f914 正在处理...")
+        yield f"data: {json.dumps({'thinking':_step,'icon':_step[:2],'done':False})}\n\n"
+        await asyncio.sleep(0.1)
+
+        # P2: Execute intent
+        txt = None
+        if itype == "hot":
+            txt = await _answer_hot(req.message, platform, topic)
+        elif itype == "search":
+            txt = await _execute_search(topic or req.message)
+        elif itype == "research":
+            from modules.deep_researcher import research as _rs
+            _r = await _rs(req.message)
+            if _r.get("success"):
+                txt = "\U0001f52c **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
+        elif itype == "create":
+            _resp = await _execute_single(req)
+            txt = _resp.get("result", "")
+        elif itype == "help":
+            txt = _SYSTEM_CAPABILITIES
+        elif itype == "calculate":
+            _resp = await _execute_single(req)
+            txt = _resp.get("result", "")
+        elif itype == "cli_tool":
+            txt = "\U0001f527 在输入框说「用xxx处理」即可调用命令行工具"
+
+        # P3: Send result
+        if txt:
             if itype in ("create","calculate","help","cli_tool"):
                 yield f"data: {json.dumps({'chunk':txt,'done':False})}\n\n"
             else:
                 for ch in txt:
                     yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
                     await asyncio.sleep(0.02)
-            yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
-        return StreamingResponse(_gen(), media_type="text/event-stream")
-    # chat类走LLM流式
-    from api.agent_llm import call_llm_stream as _stream
-    import asyncio
-
-    async def _gen():
-        try:
-            yield f"data: {json.dumps({'thinking':'🤔 AI思考中...','icon':'🤔','done':False})}\n\n"
-            await asyncio.sleep(0.3)
-            yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
-            # 先用非流式获取完整回复（call_llm_stream是字符级yield）
-            for ch in _stream([{"role": "user", "content": req.message}]):
-                yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
-                await asyncio.sleep(0.02)  # 控制流速，给人打字感
-            yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
-        except Exception as e:
-            yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
+        else:
+            from api.agent_llm import call_llm_stream as _stream
+            try:
+                for ch in _stream([{"role": "user", "content": req.message}]):
+                    yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
+                    await asyncio.sleep(0.02)
+            except Exception as e:
+                yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
+                return
+        yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
 
     return StreamingResponse(_gen(), media_type="text/event-stream")
-
 
 @router.get("/api/v1/llm/status")
 async def llm_status():
