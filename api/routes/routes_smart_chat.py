@@ -633,7 +633,7 @@ async def _classify_intent(msg: str):
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: calculate ({_kw})")
             return "calculate", "", "", ""
-    _search_kw = ["搜索","查找","搜一下","查一下","搜搜","百度","谷歌","什么是","怎么样","怎么用","如何","为什么","有没有","多少"]
+    _search_kw = ["搜索","查找","搜一下","查一下","搜搜","百度","谷歌"]
     for _kw in _search_kw:
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: search ({_kw})")
