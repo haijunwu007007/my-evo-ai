@@ -488,24 +488,61 @@ async def _execute_action(msg: str) -> str | None:
                 return await _do_distill("text", _content)
             break
     
-    # ── n8n工作流模板搜索 ──
-    if any(kw in msg for kw in ["n8n", "工作流模板", "n8n模板", "自动化工作流", "workflow"]):
+    # ── n8n工作流模板搜索：支持自然中文 → 自动翻译为英文搜索 ──
+    _N8N_CN_EN = {'邮件':'email','通知':'notification','推送':'webhook','审批':'approval',
+        '监控':'alert','报表':'report','备份':'backup','表单':'form','登录':'login',
+        '爬虫':'crawl','短信':'sms','翻译':'translate','客服':'slack','定时':'cron',
+        '微信':'wechat','钉钉':'dingtalk','飞书':'lark','企微':'wecom','企业微信':'wecom',
+        '短信':'sms','电话':'call','语音':'voice','视频':'video','图片':'image',
+        '文件':'file','文档':'doc','表格':'sheet','数据库':'database','sql':'sql',
+        'AI':'ai','gpt':'gpt','openai':'openai','deepseek':'deepseek',
+        '日历':'calendar','日程':'schedule','会议':'meeting','签到':'checkin',
+        '订单':'order','支付':'payment','发票':'invoice','对账':'reconciliation',
+        '用户':'user','会员':'member','积分':'point','优惠券':'coupon',
+        '仓库':'warehouse','库存':'inventory','物流':'logistics','快递':'shipping',
+        '招聘':'recruit','入职':'onboard','考勤':'attendance','绩效':'performance',
+        '日报':'daily','周报':'weekly','月报':'monthly','汇报':'report',
+        'GitHub':'github','gitlab':'gitlab','jira':'jira','confluence':'confluence',
+        'slack':'slack','discord':'discord','teams':'teams','telegram':'telegram',
+        'whatsapp':'whatsapp','line':'line','facebook':'facebook','twitter':'twitter',
+        'instagram':'instagram','youtube':'youtube','tiktok':'tiktok',
+        'wordpress':'wordpress','shopify':'shopify','woocommerce':'woocommerce',
+        'stripe':'stripe','paypal':'paypal','支付宝':'alipay','微信支付':'wechatpay'}
+    _n8n_triggers = ["n8n","工作流","模板","自动化","自动发送","自动备份","自动通知","自动回复",
+        "有没有.*模板","帮我自动","workflow","workflows"]
+    _should_search = False
+    for _nt in _n8n_triggers:
+        if __import__('re').search(_nt, msg.lower()):
+            _should_search = True
+            break
+    if _should_search:
+        # 中文→英文翻译搜索词
+        _search_terms = set()
+        for _cn_key, _en_val in _N8N_CN_EN.items():
+            if _cn_key in msg.lower():
+                _search_terms.add(_en_val)
+        _terms = list(_search_terms) if _search_terms else [urllib.parse.quote(msg[:30])]
         try:
             async with httpx.AsyncClient(timeout=10) as c:
-                r = await c.get(f"{_API_BASE}/api/v1/n8n/search?q={urllib.parse.quote(msg[:60])}&limit=5")
-                if r.status_code == 200:
-                    data = r.json()
-                    if data.get("success") and data.get("workflows"):
-                        ws = data["workflows"]
-                        h = f"🔍 找到 {data.get('total',len(ws))} 个n8n工作流模板:\n\n"
-                        for w in ws[:5]:
-                            tags = " ".join(w.get("tags",[])) or ""
-                            h += f"- **{w.get('name','?')}** {tags}\n  {w.get('description','')[:80]}\n  [查看详情](/n8n-browse?id={w.get('id','')})\n\n"
-                        return h
-                    else:
-                        return "ℹ️ 未找到匹配的n8n工作流模板，试试更具体的关键词"
-        except Exception as e:
-            pass  # 降级
+                _all_results = []
+                for _t in _terms[:3]:
+                    rr = await c.get(f"{_API_BASE}/api/v1/n8n/search?q={_t}&limit=5")
+                    if rr.status_code == 200:
+                        rd = rr.json()
+                        if rd.get("success") and rd.get("results"):
+                            _all_results.extend(rd["results"])
+                if _all_results:
+                    _dedup = {}
+                    for w in _all_results:
+                        _dedup[w["id"]] = w
+                    _unique = list(_dedup.values())[:5]
+                    h = f"🔍 **n8n工作流模板** (找到 {len(_unique)}+ 个匹配)\n\n"
+                    for w in _unique:
+                        h += f"  • **{w.get('name','?')[:50]}**\n    [查看详情]({_DOMAIN}/api/v1/n8n/workflow/{w['id']}) | [打开编辑器]({_DOMAIN}/api/v1/n8n/editor)\n\n"
+                    h += f"  [浏览全部 2077 个模板]({_DOMAIN}/n8n-browse)"
+                    return h
+        except Exception:
+            pass  # 降级到LLM/搜索
     
     # ── 研究/深度分析 → 不走模块路由 ──
     _research_kw = ["深度研究","研究报告","深入分析","全面调研","深度调研"]
@@ -741,7 +778,9 @@ async def _execute_search(query: str, count: int = 8):
     from skills.builtin.search_web import execute as _search
     try:
         r = _search({"query": query, "count": count})
-        items = r.get("results", [])\n        _GOOD_DOMAINS = ["baike.baidu.com","zhihu.com","csdn.net","github.com","stackoverflow.com","juejin.cn","cloud.tencent.com","tophub.today","wikipedia.org","docs.python.org","developer.mozilla.org"]\n        items = [i for i in items if any(d in i.get("url","") for d in _GOOD_DOMAINS)] or items
+        items = r.get("results", [])
+        _GOOD_DOMAINS = ["baike.baidu.com","zhihu.com","csdn.net","github.com","stackoverflow.com","juejin.cn","cloud.tencent.com","tophub.today","wikipedia.org","docs.python.org","developer.mozilla.org"]
+        items = [i for i in items if any(d in i.get("url","") for d in _GOOD_DOMAINS)] or items
         if not items:
             return None
         
@@ -943,36 +982,65 @@ async def _try_llm_chat(msg: str, system_hint: str = "", api_key: str = ""):
     return None
 
 
-# N8N工作流匹配函数（只有用户主动问n8n才显示链接）
+# N8N工作流匹配函数 — 自动在任意回复末尾追加相关模板建议
 _n8n_keywords = ['n8n','编辑器','工作流模板','浏览模板','/n8n-browse']
 
 async def _append_n8n_links(msg: str, reply: str) -> str:
-    """直接查询SQLite数据库显示匹配模板数（不走HTTP，稳定可靠）"""
+    """通用N8N工作流搜索：任何用户输入自动匹配N8N模板"""
     import sqlite3, os
     _db_path = os.environ.get('N8N_BASE', _N8N_BASE_PATH) + '/workflows.db'
+    # 中英文字典：用于将中文搜索词翻译为英文（n8n模板名称多为英文）
     _cn_en = {'邮件':'email','通知':'notification','推送':'webhook','审批':'approval',
-              '监控':'alert','报表':'report','备份':'backup','表单':'form','登录':'login',
-              '爬虫':'crawl','短信':'sms','翻译':'translate','客服':'slack','定时':'cron'}
-    _kw = [k for k in _cn_en if k in msg]
-    if _kw:
-        try:
-            conn = sqlite3.connect(_db_path)
-            q = _cn_en[_kw[0]]
-            total = conn.execute("SELECT COUNT(*) as c FROM workflows WHERE name LIKE ? OR filename LIKE ?", ('%'+q+'%','%'+q+'%')).fetchone()[0]
-            rows = conn.execute("SELECT name FROM workflows WHERE name LIKE ? OR filename LIKE ? ORDER BY nodes DESC LIMIT 3", ('%'+q+'%','%'+q+'%')).fetchall()
-            conn.close()
-            if total > 0:
-                names = [r[0][:40] for r in rows if r[0]]
-                tip = f"\n\n 系统中有 {total} 个相关自动化模板"
-                if names:
-                    tip += f"\n  例如：{'、'.join(names)}"
+        '监控':'alert','报表':'report','备份':'backup','表单':'form','登录':'login',
+        '爬虫':'crawl','短信':'sms','翻译':'translate','客服':'slack','定时':'cron',
+        '微信':'wechat','钉钉':'dingtalk','飞书':'lark','数据':'database','sql':'sql',
+        '日历':'calendar','日程':'schedule','会议':'meeting',
+        '订单':'order','支付':'payment','发票':'invoice',
+        '日报':'daily','周报':'weekly','月报':'monthly','报告':'report',
+        'github':'github','slack':'slack','telegram':'telegram',
+        'whatsapp':'whatsapp','wordpress':'wordpress','shopify':'shopify'}
+    try:
+        # 1. 提取中文关键词 → 翻译为英文
+        _search_terms = set()
+        for _cn, _en in _cn_en.items():
+            if _cn in msg.lower():
+                _search_terms.add(_en)
+        # 2. 提取原文中有意义的汉字（去停用词）供搜索
+        _stop = set('的了吗是我在你有和就不都一个这那也吧啊呢么')
+        _chinese_words = [c for c in msg if '\u4e00' <= c <= '\u9fff' and c not in _stop]
+        _chinese_terms = set(''.join(_chinese_words[:6]))
+        # 3. 合并搜索词
+        _all_queries = list(_search_terms) + list(_chinese_terms)[:4]
+        if not _all_queries:
+            _all_queries = [msg[:20]]
+        # 4. 去重 + 搜索
+        _seen = set()
+        _found = []
+        conn = sqlite3.connect(_db_path)
+        for _q in _all_queries[:5]:
+            if _q in _seen:
+                continue
+            _seen.add(_q)
+            for row in conn.execute(
+                "SELECT name,id FROM workflows WHERE name LIKE ? OR filename LIKE ? ORDER BY nodes DESC LIMIT 5",
+                ('%'+_q+'%', '%'+_q+'%')
+            ).fetchall():
+                _n = row[0] if row[0] else "?"
+                if _n not in _seen:
+                    _seen.add(_n)
+                    _found.append({"name": _n[:60], "id": row[1]})
+        conn.close()
+        # 5. 展示结果（匹配到任意模板就显示）
+        if _found:
+            tip = f"\n\n⚡ **自动匹配到 {len(_found)} 个现成模板:**\n"
+            for w in _found[:5]:
+                tip += f"  • **{w['name']}**\n"
+            tip += f"\n  [查看全部]({_DOMAIN}/n8n-browse) | [打开编辑器]({_DOMAIN}/api/v1/n8n/editor)"
+            # 避免重复追加
+            if '自动匹配到' not in reply and '找到' not in reply[-50:]:
                 reply += tip
-        except Exception as _en:
-            logger.warning(f"[N8N] 数据库查询异常: {_en}")
-    # 高级用户：明确提到n8n/编辑器时显示链接
-    if any(k in msg for k in ['n8n','编辑','浏览模板']):
-        extra = f"\n  [浏览全部模板]({_DOMAIN}/n8n-browse) | [打开编辑器]({_DOMAIN}/api/v1/n8n/editor)"
-        reply += extra
+    except Exception as _en:
+        logger.warning(f"[N8N] 查询异常: {_en}")
     return reply
 
 
@@ -1183,7 +1251,6 @@ async def _execute_single(req) -> dict:
             fallback = await _append_n8n_links(msg, fallback)
             return {"success": True, "result": fallback}
         return {"success": True, "result": "搜索超时，请检查网络或更换关键词后重试"}
-            return {"success": True, "result": fallback}
         return {"success": True, "result": "搜索超时，请检查网络或更换关键词后重试"}
 
     # help: 系统能力
@@ -1340,12 +1407,16 @@ async def _execute_single(req) -> dict:
             else:
                 txt += "\n\n**⚡ 执行结果:**\n综合分析完成，建议查看详细结果。"
             
-            # 追加N8N链接（如果找到）
+            # 追加N8N链接（通用搜索+内联结果去重）
+            txt = await _append_n8n_links(msg, txt)
+            # 内联搜索补充
             if n8n_results:
-                txt += "\n\n---\n📋 **匹配到 N8N 工作流模板:**\n"
+                extra = "\n\n---\n📋 **匹配到 N8N 工作流模板:**\n"
                 for w in n8n_results[:5]:
-                    txt += f"  • {w.get('name','')[:60]}\n"
-                txt += f"\n  ➤ 打开编辑器运行：[/api/v1/n8n/editor]({_DOMAIN}/api/v1/n8n/editor)"
+                    extra += f"  • {w.get('name','')[:60]}\n"
+                extra += f"\n  ➤ 打开编辑器运行：[/api/v1/n8n/editor]({_DOMAIN}/api/v1/n8n/editor)"
+                if '自动匹配' not in txt and 'N8N' not in txt:
+                    txt += extra
             
             return {"success": True, "result": txt}
         except Exception as e:
@@ -1392,7 +1463,8 @@ async def smart_stream(req: Req):
             if _r.get("success"):
                 txt = "\U0001f52c **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
         elif itype == "create":
-            yield f"data: {json.dumps({'chunk':'\u23f3 AI生成中（需要30-90秒），稍等一下...','done':False})}\n\n"
+            _wait_str = '\u23f3 AI生成中（需要30-90秒），稍等一下...'
+            yield f"data: {json.dumps({'chunk':_wait_str,'done':False})}\n\n"
             await asyncio.sleep(0.1)
             _resp = await _execute_single(req)
             txt = _resp.get("result", "")
@@ -1404,7 +1476,10 @@ async def smart_stream(req: Req):
         elif itype == "cli_tool":
             txt = "\U0001f527 在输入框说「用xxx处理」即可调用命令行工具"
 
-        # P3: Send result
+        # P3: Append N8N auto-matching
+        if txt:
+            txt = await _append_n8n_links(req.message, txt)
+        # P4: Send result
         if txt:
             if itype in ("create","calculate","help","cli_tool"):
                 yield f"data: {json.dumps({'chunk':txt,'done':False})}\n\n"
@@ -1433,6 +1508,12 @@ async def smart_stream(req: Req):
                     else:
                         yield f"data: {json.dumps({'chunk': f'错误: {e}', 'done': True})}\n\n"
                         return
+            # 追加N8N自动匹配
+            if _sse_stream_text and len(_sse_stream_text) > 5:
+                _sse_with_n8n = await _append_n8n_links(req.message, _sse_stream_text)
+                _n8n_extra = _sse_with_n8n[len(_sse_stream_text):]
+                if _n8n_extra:
+                    yield f"data: {json.dumps({'chunk': _n8n_extra, 'done': False})}\n\n"
         yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
 
     return StreamingResponse(_gen(), media_type="text/event-stream")
