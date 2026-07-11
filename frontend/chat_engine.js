@@ -225,6 +225,11 @@ showLoading(msg);s=document.getElementById('thinkingStatus')};if(s){var ic=docum
 function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
+// ── 状态机: IDLE / TALKING ──
+var _chatState = 'idle' // 'idle' | 'talking'
+function _setState(s){_chatState=s}
+function _isTalking(){return _chatState==='talking'}
+
 var _sendLock=false
 async function loadExpert(){quickFill("帮我找一个专家：");document.getElementById("input")?.focus()}
 
@@ -268,115 +273,123 @@ document.addEventListener('paste',function(e){
 })
 
 function send(){
-  if(_sendLock)return;_sendLock=true
+  if(_sendLock||_isTalking())return;_sendLock=true;_setState('talking')
   try{var input=document.getElementById('input');if(!input)return;_sendLock=false;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;input.value='';var ai=null;if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
-  }catch(e){hideLoading();addMsg('❌ 出错了: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+  }catch(e){_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}_sendLock=false;try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 async function doSend(text,ai){try{
-  if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar();showLoading('接收指令');var ak=localStorage.getItem('evo_api_key')||''
-    // 浏览器本地能力：截图/文件/桌面 — 直接在用户浏览器执行
-    var _localExec = {
-      screenshot: function(){return new Promise(function(resolve){
-        if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){resolve('截图不可用');return}
-        navigator.mediaDevices.getDisplayMedia({video:{mediaSource:'screen'}}).then(function(s){
-          var v=document.createElement('video');v.srcObject=s;v.play()
-          setTimeout(function(){
-            var c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight
-            c.getContext('2d').drawImage(v,0,0);s.getTracks().forEach(function(t){t.stop()})
-            resolve('截图成功（数据已获取）')
-          },500)
-        }).catch(function(){resolve('截图被取消')})
-      })},
-      fileOpen: function(){return new Promise(function(resolve){
-        var inp=document.createElement('input');inp.type='file';inp.multiple=true
-        inp.onchange=function(){var n=inp.files.length;resolve('已选择 '+n+' 个文件')}
-        inp.click()
-      })},
-      openUrl: function(url){window.open(url,'_blank');return '已打开: '+url},
-      clipboard: function(text){navigator.clipboard.writeText(text).then(function(){resolve('已复制到剪贴板')}).catch(function(){resolve('复制失败')})},
-      notify: function(msg){if(Notification.permission==='granted'){new Notification('AUTO-EVO-AI',{body:msg})}else{alert(msg)}}
-    }
-    // ── 浏览器本地直连命令（不经过服务器，直接操作本地浏览器）──
-    var lower = text.toLowerCase()
-    if(lower.startsWith('打开 ')||lower.startsWith('打开http')||lower.startsWith('打开www')||lower.startsWith('打开https')){
-      var url = text.replace(/^打开\s*/,'').trim()
-      if(!url.startsWith('http')) url='https://'+url
-      _localExec.openUrl(url);addMsg('🌐 '+_localExec.openUrl(url),'bot');hideLoading();return
-    }
-    if(lower.indexOf('截图')>=0||lower.indexOf('截屏')>=0){
-      _localExec.screenshot().then(function(r){addMsg('🖥️ '+r,'bot');hideLoading()})
-      return
-    }
-    if(lower.indexOf('上传')>=0||lower.indexOf('文件')>=0||lower.indexOf('选择文件')>=0){
-      _localExec.fileOpen().then(function(r){addMsg('📁 '+r,'bot');hideLoading()})
-      return
-    }
-    // 先尝试智能任务分解
-    updateThinking('🧠','分析任务')
-    var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
-    var td=await tr.json()
-    if(td.success&&td.workflow_id){
-      addMsg('[🎯 系统自动分解任务]\n'+td.steps.map(function(s,i){return '  '+(i+1)+'. '+s}).join('\n')+'\n\n⏳ 正在自动执行...','bot')
-    }
-    // 尝试流式SSE
-    try{
-      updateThinking('🔍','搜索信息')
-      var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
-      if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
-        // 复用loading元素，保持思考状态可见
-        var ld=document.getElementById('loading')
-        if(!ld){ld=document.createElement('div');ld.className='msg bot';ld.id='loading';var ll=document.createElement('div');ll.className='msg-label';ll.textContent='AUTO-EVO-AI';ld.appendChild(ll);document.getElementById('messages').appendChild(ld)}
-        var bub=ld.querySelector('.msg-bubble')
-        if(!bub){bub=document.createElement('div');bub.className='msg-bubble';ld.appendChild(bub)}
-        var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf='';var _firstChunk=true
-        while(true){
-          var {done,value}=await reader.read()
-          if(done){ld.id='';break}
-          buf+=decoder.decode(value,{stream:true})
-          var lines=buf.split('\n');buf=lines.pop()||''
-          for(var line of lines){
-            if(line.startsWith('data: ')){
-              try{
-                var d=JSON.parse(line.slice(6))
-                if(d.thinking){
-                  var ts=bub.querySelector('#thinkingStatus')
-                  if(ts){var ic=bub.querySelector('#thinkingIcon');if(ic)ic.textContent=d.icon||'🧠';var tx=bub.querySelector('#thinkingText');if(tx)tx.textContent=d.thinking}
-                  continue}
-                if(d.done){break}
-                if(_firstChunk){_firstChunk=false;bub.innerHTML=''}
-                bub.innerHTML=_renderMd((bub.textContent||'')+d.chunk)
-                document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight
-              }catch(e){}
-            }
+  if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar()
+  
+  // ── 创建单条助手消息（内含思考状态）──
+  var msgEl=document.createElement('div');msgEl.className='msg bot';msgEl.id='loading'
+  var label=document.createElement('div');label.className='msg-label';label.textContent='AUTO-EVO-AI'
+  var bubble=document.createElement('div');bubble.className='msg-bubble'
+  bubble.innerHTML='<div class="thinking-status" id="thinkingStatus"><span id="thinkingIcon">🧠</span><span id="thinkingText">接收指令</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>'
+  msgEl.appendChild(label);msgEl.appendChild(bubble)
+  var m=document.getElementById('messages');m.appendChild(msgEl);m.scrollTop=m.scrollHeight
+
+  var ak=localStorage.getItem('evo_api_key')||''
+  // ── 浏览器本地直连命令 ──
+  var _localExec = {
+    screenshot: function(){return new Promise(function(resolve){
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){resolve('截图不可用');return}
+      navigator.mediaDevices.getDisplayMedia({video:{mediaSource:'screen'}}).then(function(s){
+        var v=document.createElement('video');v.srcObject=s;v.play()
+        setTimeout(function(){
+          var c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight
+          c.getContext('2d').drawImage(v,0,0);s.getTracks().forEach(function(t){t.stop()})
+          resolve('截图成功（数据已获取）')
+        },500)
+      }).catch(function(){resolve('截图被取消')})
+    })},
+    fileOpen: function(){return new Promise(function(resolve){
+      var inp=document.createElement('input');inp.type='file';inp.multiple=true
+      inp.onchange=function(){var n=inp.files.length;resolve('已选择 '+n+' 个文件')}
+      inp.click()
+    })},
+    openUrl: function(url){window.open(url,'_blank');return '已打开: '+url},
+    clipboard: function(text){navigator.clipboard.writeText(text).then(function(){resolve('已复制到剪贴板')}).catch(function(){resolve('复制失败')})},
+    notify: function(msg){if(Notification.permission==='granted'){new Notification('AUTO-EVO-AI',{body:msg})}else{alert(msg)}}
+  }
+  var lower = text.toLowerCase()
+  if(lower.startsWith('打开 ')||lower.startsWith('打开http')||lower.startsWith('打开www')||lower.startsWith('打开https')){
+    var url = text.replace(/^打开\s*/,'').trim()
+    if(!url.startsWith('http')) url='https://'+url
+    _localExec.openUrl(url);bubble.innerHTML='🌐 '+_localExec.openUrl(url);msgEl.id='';_setState('idle');return
+  }
+  if(lower.indexOf('截图')>=0||lower.indexOf('截屏')>=0){
+    _localExec.screenshot().then(function(r){bubble.innerHTML='🖥️ '+r;msgEl.id='';_setState('idle')})
+    return
+  }
+  if(lower.indexOf('上传')>=0||lower.indexOf('文件')>=0||lower.indexOf('选择文件')>=0){
+    _localExec.fileOpen().then(function(r){bubble.innerHTML='📁 '+r;msgEl.id='';_setState('idle')})
+    return
+  }
+  // 先尝试智能任务分解
+  updateThinking('🧠','分析任务')
+  var tr=await fetch('/api/v1/task/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:text})})
+  var td=await tr.json()
+  if(td.success&&td.workflow_id){
+    bubble.innerHTML='[🎯 系统自动分解任务]\n'+td.steps.map(function(s,i){return '  '+(i+1)+'. '+s}).join('\n')+'\n\n⏳ 正在自动执行...'
+  }
+  // 尝试流式SSE
+  try{
+    updateThinking('🔍','搜索信息')
+    var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
+    if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
+      var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf='';var _firstChunk=true
+      while(true){
+        var {done,value}=await reader.read()
+        if(done){msgEl.id='';break}
+        buf+=decoder.decode(value,{stream:true})
+        var lines=buf.split('\n');buf=lines.pop()||''
+        for(var line of lines){
+          if(line.startsWith('data: ')){
+            try{
+              var d=JSON.parse(line.slice(6))
+              if(d.thinking){
+                var ts=bubble.querySelector('#thinkingStatus')
+                if(ts){var ic=bubble.querySelector('#thinkingIcon');if(ic)ic.textContent=d.icon||'🧠';var tx=bubble.querySelector('#thinkingText');if(tx)tx.textContent=d.thinking}
+                continue}
+              if(d.done){break}
+              // 第一条非thinking数据 → 清空thinking状态，显示内容
+              if(_firstChunk){_firstChunk=false;bubble.innerHTML=''}
+              var txt=(bubble.textContent||'')+d.chunk
+              bubble.innerHTML=_renderMd(txt)
+              m.scrollTop=m.scrollHeight
+            }catch(e){}
           }
         }
-        try{CTX=CTX||[];CTX.push({role:'assistant',content:bub.textContent||''})}catch(ex){}
-        return
       }
-    }catch(e){/*stream fallback*/}
-    // 非流式 — 不hideLoading，直接更新思考状态让用户可见
-    updateThinking('🤔','正在思考')
-    var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
-    if(!sr.ok){
-      hideLoading()
-      hideLoading()
-      if(sr.status===429) addMsg('⚠️ 请求太频繁，请稍后再试','bot')
-      else addMsg('❌ 请求失败 ('+sr.status+') 请稍后重试','bot')
-      return
-    }var sd=await sr.json();hideLoading()
-    if(sd&&sd.success){
-      // 自动导航跳转
-      if(sd.redirect){
-        addMsg(sd.result||'📌 正在跳转...','bot')
-        setTimeout(function(){window.location.href=sd.redirect},800)
-        return
-      }
+      try{CTX=CTX||[];CTX.push({role:'assistant',content:bubble.textContent||''})}catch(ex){}
+      _setState('idle');return
+    }
+  }catch(e){/*stream fallback*/}
+  // 非流式 — 不创建新元素，直接更新loading泡的内容
+  updateThinking('🤔','正在思考')
+  var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
+  if(!sr.ok){
+    if(sr.status===429) bubble.innerHTML='⚠️ 请求太频繁，请稍后再试'
+    else bubble.innerHTML='❌ 请求失败 ('+sr.status+') 请稍后重试'
+    msgEl.id='';_setState('idle');return
+  }
+  var sd=await sr.json();msgEl.id=''
+  if(sd&&sd.success){
+    if(sd.redirect){
+      bubble.innerHTML=sd.result||'📌 正在跳转...'
+      setTimeout(function(){window.location.href=sd.redirect},800)
+    } else {
       var rt=sd.result||'(空)'
-      if(rt.includes('【模块调用】')||rt.includes('execute_module')||rt.includes('引擎:')){var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';var l=document.createElement('div');l.className='msg-label';l.textContent='AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=rt.replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/!\[(.*?)\]\(([^)]+)\)/g,'<img src="$2" style="max-width:100%;border-radius:8px">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/【模块调用】/g,'<span style="color:var(--accent);font-weight:bold">【模块调用】</span>').replace(/引擎:/g,'<span style="color:var(--accent2)">引擎:</span>');d.appendChild(l);d.appendChild(b);m.appendChild(d)}else{addMsg(rt,'bot')};if(!CTX)CTX=[];CTX.push({role:'assistant',content:sd.result})
-    }else{addMsg('❌ 系统返回错误，请重试','bot')}
-  }catch(e){hideLoading();addMsg('❌ 出错了: '+e.message,'bot')}
-  _sendLock=false
-  try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+      bubble.innerHTML=_renderMd(rt)
+    }
+    if(!CTX)CTX=[];CTX.push({role:'assistant',content:sd.result})
+  } else {
+    bubble.innerHTML='❌ 系统返回错误，请重试'
+  }
+  _setState('idle')
+}catch(e){var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle')}
+_sendLock=false
+try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 function clearHistory(){if(typeof Evo!=='undefined'&&Evo.confirm){Evo.confirm('确认开启新对话？当前对话将存入历史',function(ok){if(ok)_doClear()})}else{if(!confirm('确认开启新对话？当前对话将存入历史'))return;_doClear()};function _doClear(){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];try{CTX=[]}catch(e){};localStorage.removeItem('evo_chat_history');var m=document.getElementById('messages');if(m)m.innerHTML=''}}
 function showArchives(){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');if(a.length===0){alert('暂无历史对话');return};var list='';for(var i=0;i<a.length;i++){list+=(i+1)+'. '+a[i].time+' ('+a[i].messages.length+'条)\n'};var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list);if(idx===null)return;var n=parseInt(idx)-1;if(n>=0&&n<a.length){CHAT=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));restoreHistory()}}
