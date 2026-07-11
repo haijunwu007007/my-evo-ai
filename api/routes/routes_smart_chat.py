@@ -710,40 +710,125 @@ async def _execute_search(query: str, count: int = 8):
     return None
 
 
+async def _fetch_tophub(platform: str) -> str:
+    """从 tophub.today 聚合站抓取热搜，一个URL覆盖全平台"""
+    import aiohttp, re as _re
+    try:
+        _headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as _sess:
+            async with _sess.get("https://tophub.today", headers=_headers) as _resp:
+                if _resp.status != 200:
+                    return None
+                _html = await _resp.text()
+    except Exception as _e:
+        logger.warning(f"[TOPHUB] fetch error: {_e}")
+        return None
+
+    # 解析每个平台板块
+    _sections = _re.split(r'<div class="cc-cd"', _html)
+    _platform_items = {}
+    for _sec in _sections[1:]:
+        # 平台名在 <div class="cc-cd-lb">...<span>平台名</span>
+        _name_m = _re.search(r'<div class="cc-cd-lb">.*?<span>\s*(.*?)\s*</span>', _sec, _re.DOTALL)
+        if not _name_m:
+            continue
+        _name = _re.sub(r'<[^>]+>', '', _name_m.group(1)).strip()
+        # 条目: class="t" 后面跟文字
+        _items = _re.findall(r'class="t"[^>]*>(.*?)<', _sec)
+        _items = [_re.sub(r'<[^>]+>', '', _t).strip() for _t in _items]
+        _items = [_t for _t in _items if _t and len(_t) >= 2]
+        if _items:
+            _platform_items[_name] = _items[:20]
+
+    # 平台名映射
+    _plat_map = {
+        "百度": ["百度"],
+        "微博": ["微博"],
+        "知乎": ["知乎"],
+        "抖音": ["抖音"],
+        "快手": ["快手"],
+        "头条": ["今日头条", "头条"],
+        "B站": ["B站", "哔哩哔哩", "哔哩"],
+        "微信": ["微信"],
+        "小红书": ["小红书"],
+        "视频号": ["视频号"],
+    }
+
+    _aliases = _plat_map.get(platform, [platform])
+    _found = None
+    _found_name = platform
+    for _alias in _aliases:
+        for _key, _items in _platform_items.items():
+            if _alias in _key:
+                _found = _items
+                _found_name = _key
+                break
+        if _found:
+            break
+
+    # 默认取百度
+    if not _found:
+        for _key, _items in _platform_items.items():
+            if "百度" in _key:
+                _found = _items
+                _found_name = _key
+                break
+
+    if not _found and _platform_items:
+        # 取第一个有内容的
+        for _key, _items in _platform_items.items():
+            if _items:
+                _found = _items
+                _found_name = _key
+                break
+
+    if not _found:
+        return None
+
+    _lines = "\n".join([f"{i+1}. {_t}" for i, _t in enumerate(_found[:20])])
+    return f"📊 **{_found_name}今日热点 TOP{len(_found[:20])}**\n\n{_lines}"
+
+
 async def _answer_hot(msg: str, platform: str, topic: str):
-    """处理热点查询 — 全走搜索+LLM，不写死任何平台解析"""
+    """处理热点查询 — tophub聚合站直抓→搜索→LLM"""
     _source = platform or ""
     for _pk in ("百度","微博","头条","抖音","知乎","B站","小红书","快手","视频号"):
         if _pk in msg: _source = _pk; break
+    if not _source:
+        _source = "百度"
 
-    # 搜索+抓取（全动态，不写死URL，搜索引擎实时决定结果）
-    _queries = [f"tophub.today {_source}热搜", f"{_source} 热点 新闻排行"]
+    # 第一优先: tophub.today 聚合站直抓
+    try:
+        _r = await _fetch_tophub(_source)
+        if _r and len(_r) > 50:
+            return _r
+    except Exception as _e:
+        logger.warning(f"[HOT] tophub failed: {_e}")
+
+    # 第二优先: 搜索+抓取
     try:
         from modules.web_fetcher import search_and_fetch as _saf
-    except Exception:
-        _saf = None
-    for _sq in _queries:
-        if _saf:
-            try:
-                _r = await _saf(_sq.strip())
-                if _r and len(_r) > 50: return _r
-            except Exception:
-                pass
-    # 降级：返回搜索链接
-    try:
-        _r = await _execute_search(f"{_source} 热点新闻" if _source else "今日热点新闻")
-        if _r: return _r
+        _r = await _saf(f"{_source}热搜 今日热点")
+        if _r and len(_r) > 50:
+            return _r
     except Exception:
         pass
-    
+
+    # 第三优先: 搜索链接
+    try:
+        _r = await _execute_search(f"{_source} 热搜 今日热点")
+        if _r:
+            return _r
+    except Exception:
+        pass
+
     # LLM兜底
     try:
         from api.agent_llm import call_llm
-        _pd = _source or "今天"
-        _c, _ = call_llm([{"role":"user","content":f"用户问: {msg}。请用中文列出{_pd}的热点话题5-8条，每条一行用数字开头。"}], timeout=15)
+        _c, _ = call_llm([{"role":"user","content":f"用户问: {msg}。请用中文列出{_source}的热点话题5-8条，每条一行用数字开头。"}], timeout=15)
         if _c:
             _hl = [l for l in _c.split("\n") if any(c.isdigit() for c in l[:4])]
-            if _hl: return f"🔥 **{_pd}热点**\n\n"+"\n".join(_hl[:8])
+            if _hl: return f"🔥 **{_source}热点**\n\n"+"\n".join(_hl[:8])
     except Exception:
         pass
     return None
