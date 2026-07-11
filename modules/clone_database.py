@@ -18,4 +18,4 @@ class CloneDatabase:
   if a=="clone_sqlite":return s.clone_sqlite(p.get("source",""),p.get("target",""))
   return s.status()
 get_status=lambda:CloneDatabase().status()
-register=lambda:{"name":"clone_database","class":"CloneDatabase","description":"数据库克隆"}
+register=lambda:{"name":"clone_database","class":"CloneDatabase","description":"数据库克隆"}\nmodule_class = CloneDatabase\n

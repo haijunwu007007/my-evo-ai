@@ -15,4 +15,4 @@ class PlausibleAnalytics:
   if a=="get_stats":return s.get_stats(p.get("period","30d"))
   return s.status()
 get_status=lambda:PlausibleAnalytics().status()
-register=lambda:{"name":"plausible_analytics","class":"PlausibleAnalytics","description":"Plausible分析"}
+register=lambda:{"name":"plausible_analytics","class":"PlausibleAnalytics","description":"Plausible分析"}\nmodule_class = PlausibleAnalytics\n

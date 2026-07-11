@@ -17,4 +17,4 @@ class DocusaurusSite:
   if a=="start":return s.start(p.get("dir",""),p.get("port",3000))
   return s.status()
 get_status=lambda:DocusaurusSite().status()
-register=lambda:{"name":"docusaurus_site","class":"DocusaurusSite","description":"Docusaurus文档站点"}
+register=lambda:{"name":"docusaurus_site","class":"DocusaurusSite","description":"Docusaurus文档站点"}\nmodule_class = DocusaurusSite\n

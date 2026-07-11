@@ -26,4 +26,4 @@ class HomeAssistant:
         if a=='call_service': return self.call(p.get('domain',''),p.get('service',''),p.get('data',{}))
         return self.status()
 get_status=lambda:HomeAssistant().status()
-register=lambda:{'name':'home_assistant','class':'HomeAssistant','description':'HomeAssistant集成'}
+register=lambda:{'name':'home_assistant','class':'HomeAssistant','description':'HomeAssistant集成'}\nmodule_class = HomeAssistant\n

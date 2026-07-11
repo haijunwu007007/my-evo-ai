@@ -15,4 +15,4 @@ class ChatwootSupport:
   if a=="send":return s.send(p.get("inbox_id",""),p.get("content",""))
   return s.status()
 get_status=lambda:ChatwootSupport().status()
-register=lambda:{"name":"chatwoot_support","class":"ChatwootSupport","description":"Chatwoot客服"}
+register=lambda:{"name":"chatwoot_support","class":"ChatwootSupport","description":"Chatwoot客服"}\nmodule_class = ChatwootSupport\n

@@ -23,4 +23,4 @@ class DoclingProcessor:
   if a=="parse":return s.parse(p.get("path",""))
   return s.status()
 get_status=lambda:DoclingProcessor().status()
-register=lambda:{"name":"docling_processor","class":"DoclingProcessor","description":"文档解析器"}
+register=lambda:{"name":"docling_processor","class":"DoclingProcessor","description":"文档解析器"}\nmodule_class = DoclingProcessor\n

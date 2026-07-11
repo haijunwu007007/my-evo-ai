@@ -21,4 +21,4 @@ class InvoiceAgent:
   if a=="list":return s.list()
   return s.status()
 get_status=lambda:InvoiceAgent().status()
-register=lambda:{"name":"invoice_agent","class":"InvoiceAgent","description":"发票智能处理"}
+register=lambda:{"name":"invoice_agent","class":"InvoiceAgent","description":"发票智能处理"}\nmodule_class = InvoiceAgent\n

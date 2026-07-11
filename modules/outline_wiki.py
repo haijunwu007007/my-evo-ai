@@ -15,4 +15,4 @@ class OutlineWiki:
   if a=="search":return s.search(p.get("q",""))
   return s.status()
 get_status=lambda:OutlineWiki().status()
-register=lambda:{"name":"outline_wiki","class":"OutlineWiki","description":"Outline知识库"}
+register=lambda:{"name":"outline_wiki","class":"OutlineWiki","description":"Outline知识库"}\nmodule_class = OutlineWiki\n

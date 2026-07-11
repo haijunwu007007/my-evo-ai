@@ -30,4 +30,4 @@ class CodeReview:
         if action=='review_text': return self.review_text(params.get('code',''))
         return self.status()
 get_status = lambda: CodeReview().status()
-register = lambda: {'name':'code_review','class':'CodeReview','description':'代码审查 - 静态分析检查'}
+register = lambda: {'name':'code_review','class':'CodeReview','description':'代码审查 - 静态分析检查'}\nmodule_class = CodeReview\n

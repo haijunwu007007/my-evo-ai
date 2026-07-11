@@ -32,4 +32,4 @@ class CronEngine:
         if action=='stop': return self.stop()
         return self.status()
 get_status = lambda: CronEngine().status()
-register = lambda: {'name':'cron_engine','class':'CronEngine','description':'Cron调度引擎 - 定时任务执行器'}
+register = lambda: {'name':'cron_engine','class':'CronEngine','description':'Cron调度引擎 - 定时任务执行器'}\nmodule_class = CronEngine\n

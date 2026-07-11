@@ -32,4 +32,4 @@ class MCPBridge:
         if action=='delete': return self.delete_server(params.get('name',''))
         return self.status()
 get_status = lambda: MCPBridge().status()
-register = lambda: {'name':'mcp_bridge','class':'MCPBridge','description':'MCP协议桥接 - 标准化外部工具接口'}
+register = lambda: {'name':'mcp_bridge','class':'MCPBridge','description':'MCP协议桥接 - 标准化外部工具接口'}\nmodule_class = McpBridge\n

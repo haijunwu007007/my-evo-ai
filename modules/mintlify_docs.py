@@ -13,4 +13,4 @@ class MintlifyDocs:
   if a=="build":return s.build(p.get("dir",""))
   return s.status()
 get_status=lambda:MintlifyDocs().status()
-register=lambda:{"name":"mintlify_docs","class":"MintlifyDocs","description":"Mintlify文档"}
+register=lambda:{"name":"mintlify_docs","class":"MintlifyDocs","description":"Mintlify文档"}\nmodule_class = MintlifyDocs\n

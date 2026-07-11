@@ -34,5 +34,4 @@ class AccessControl:
         if action=='add': return self.add_rule(params.get('ip',''),params.get('type','whitelist'))
         if action=='remove': return self.remove_rule(params.get('ip',''),params.get('type','whitelist'))
         return self.status()
-get_status = lambda: AccessControl().status()
-register = lambda: {'name':'access_control','class':'AccessControl','description':'访问控制 - IP黑白名单管理'}
+module_class = AccessControl

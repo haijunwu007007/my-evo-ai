@@ -22,4 +22,4 @@ class MeetingBot:
         if a=='summarize': return self.summarize(p.get('id',''))
         return self.status()
 get_status=lambda:MeetingBot().status()
-register=lambda:{'name':'meeting_bot','class':'MeetingBot','description':'会议机器人 - 纪要日程'}
+register=lambda:{'name':'meeting_bot','class':'MeetingBot','description':'会议机器人 - 纪要日程'}\nmodule_class = MeetingBot\n

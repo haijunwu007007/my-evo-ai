@@ -15,4 +15,4 @@ class FormbricksCollect:
   if a=="list_surveys":return s.list_surveys()
   return s.status()
 get_status=lambda:FormbricksCollect().status()
-register=lambda:{"name":"formbricks_collect","class":"FormbricksCollect","description":"Formbricks表单收集"}
+register=lambda:{"name":"formbricks_collect","class":"FormbricksCollect","description":"Formbricks表单收集"}\nmodule_class = FormbricksCollect\n

@@ -14,4 +14,4 @@ class LidaChartGen:
   if a=="generate":return s.generate(p.get("goal",""),p.get("data_summary",""))
   return s.status()
 get_status=lambda:LidaChartGen().status()
-register=lambda:{"name":"lida_chart_gen","class":"LidaChartGen","description":"LIDA图表生成"}
+register=lambda:{"name":"lida_chart_gen","class":"LidaChartGen","description":"LIDA图表生成"}\nmodule_class = LidaChartGen\n

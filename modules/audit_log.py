@@ -33,4 +33,4 @@ class AuditLog:
             return {'success':True,'total':len(r),'records':r}
         return self.status()
 get_status = lambda: AuditLog().status()
-register = lambda: {'name':'audit_log','class':'AuditLog','description':'审计日志 - 操作记录查询与导出'}
+register = lambda: {'name':'audit_log','class':'AuditLog','description':'审计日志 - 操作记录查询与导出'}\nmodule_class = AuditLog\n

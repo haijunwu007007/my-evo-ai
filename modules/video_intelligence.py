@@ -35,4 +35,4 @@ class VideoIntelligence:
         if a=='thumbnail': return self.thumbnail(p.get('path',''),p.get('time',2))
         return self.status()
 get_status=lambda:VideoIntelligence().status()
-register=lambda:{'name':'video_intelligence','class':'VideoIntelligence','description':'视频分析 - 缩略图/场景检测'}
+register=lambda:{'name':'video_intelligence','class':'VideoIntelligence','description':'视频分析 - 缩略图/场景检测'}\nmodule_class = VideoIntelligence\n

@@ -12,4 +12,4 @@ class DaggerPipeline:
   if a=="run":return s.run(p.get("module",""))
   return s.status()
 get_status=lambda:DaggerPipeline().status()
-register=lambda:{"name":"dagger_pipeline","class":"DaggerPipeline","description":"Dagger CI/CD管线"}
+register=lambda:{"name":"dagger_pipeline","class":"DaggerPipeline","description":"Dagger CI/CD管线"}\nmodule_class = DaggerPipeline\n

@@ -17,4 +17,4 @@ class SentryTracker:
         if a=='list_issues': return self.list_issues(p.get('project',''))
         return self.status()
 get_status=lambda:SentryTracker().status()
-register=lambda:{'name':'sentry_tracker','class':'SentryTracker','description':'Sentry错误跟踪'}
+register=lambda:{'name':'sentry_tracker','class':'SentryTracker','description':'Sentry错误跟踪'}\nmodule_class = SentryTracker\n

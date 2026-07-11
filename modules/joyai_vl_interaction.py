@@ -18,4 +18,4 @@ class JoyAIVLInteraction:
   if a=="ask":return s.ask(p.get("path",""),p.get("question","这是什么？"))
   return s.status()
 get_status=lambda:JoyAIVLInteraction().status()
-register=lambda:{"name":"joyai_vl_interaction","class":"JoyAIVLInteraction","description":"JoyAI视觉交互"}
+register=lambda:{"name":"joyai_vl_interaction","class":"JoyAIVLInteraction","description":"JoyAI视觉交互"}\nmodule_class = JoyaiVlInteraction\n

@@ -19,4 +19,4 @@ class VannaAiQuery:
         if a=='ask': return self.ask(p.get('question',''))
         return self.status()
 get_status=lambda:VannaAiQuery().status()
-register=lambda:{'name':'vanna_ai_query','class':'VannaAiQuery','description':'Vanna AI转SQL'}
+register=lambda:{'name':'vanna_ai_query','class':'VannaAiQuery','description':'Vanna AI转SQL'}\nmodule_class = VannaAiQuery\n

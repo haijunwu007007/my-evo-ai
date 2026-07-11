@@ -20,4 +20,4 @@ class HeyformSurvey:
   if a=="list":return s.list()
   return s.status()
 get_status=lambda:HeyformSurvey().status()
-register=lambda:{"name":"heyform_survey","class":"HeyformSurvey","description":"HeyForm问卷"}
+register=lambda:{"name":"heyform_survey","class":"HeyformSurvey","description":"HeyForm问卷"}\nmodule_class = HeyformSurvey\n

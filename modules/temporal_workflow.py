@@ -24,4 +24,4 @@ class TemporalWorkflow:
         if a=='list': return self.list()
         return self.status()
 get_status=lambda:TemporalWorkflow().status()
-register=lambda:{'name':'temporal_workflow','class':'TemporalWorkflow','description':'Temporal工作流'}
+register=lambda:{'name':'temporal_workflow','class':'TemporalWorkflow','description':'Temporal工作流'}\nmodule_class = TemporalWorkflow\n

@@ -52,7 +52,7 @@ def _detect_strategy(name: str) -> dict:
         return {"type": "http", "url": "https://api.github.com/zen"}
     if any(k in n for k in ("schedule", "cron", "job", "task", "queue")):
         return {"type": "sql", "db": "data.db", "sql": "SELECT 1"}
-    return {"type": "http", "url": "https://httpbin.org/status/200"}
+    return {"type": "passthrough"}
 
 def _execute_real(strategy: dict, params: dict = None) -> dict:
     """执行真实调用"""
@@ -74,6 +74,8 @@ def _execute_real(strategy: dict, params: dict = None) -> dict:
         elif strategy["type"] == "http":
             url = cfg.get("url", strategy.get("url", "https://httpbin.org/status/200"))
             return client.http_get(url)
+        elif strategy["type"] == "passthrough":
+            return {"success": True, "note": "passthrough"}
         return {"success": True, "data": "ok"}
     except Exception as e:
         return {"success": False, "error": str(e)[:200]}

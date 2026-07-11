@@ -23,4 +23,4 @@ class BackupChecksum:
         if a=='verify': return self.verify(p.get('path',''),p.get('hash',''))
         return self.status()
 get_status=lambda:BackupChecksum().status()
-register=lambda:{'name':'backup_checksum','class':'BackupChecksum','description':'备份校验 - SHA256'}
+register=lambda:{'name':'backup_checksum','class':'BackupChecksum','description':'备份校验 - SHA256'}\nmodule_class = BackupChecksum\n

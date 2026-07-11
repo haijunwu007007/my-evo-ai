@@ -28,4 +28,4 @@ class PriorityQueue:
         if action=='list': return {'success':True,'total':len(r:=self.list_all()),'items':r}
         return self.status()
 get_status = lambda: PriorityQueue().status()
-register = lambda: {'name':'priority_queue','class':'PriorityQueue','description':'优先级队列 - 基于优先级的任务队列'}
+register = lambda: {'name':'priority_queue','class':'PriorityQueue','description':'优先级队列 - 基于优先级的任务队列'}\nmodule_class = PriorityQueue\n

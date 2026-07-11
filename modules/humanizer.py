@@ -16,4 +16,4 @@ class Humanizer:
         if action=='humanize': return self.humanize(params.get('text',''),params.get('style','natural'))
         return self.status()
 get_status = lambda: Humanizer().status()
-register = lambda: {'name':'humanizer','class':'Humanizer','description':'内容人性化 - AI文本润色/改写'}
+register = lambda: {'name':'humanizer','class':'Humanizer','description':'内容人性化 - AI文本润色/改写'}\nmodule_class = Humanizer\n
