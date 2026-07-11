@@ -601,7 +601,7 @@ async def _classify_intent(msg: str):
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: calculate ({_kw})")
             return "calculate", "", "", ""
-    _search_kw = ["搜索","查找","搜一下","查一下","搜搜"]
+    _search_kw = ["搜索","查找","搜一下","查一下","搜搜","百度","谷歌","搜搜","什么是","怎么样","怎么用","如何","为什么","有没有","多少","什么"]
     for _kw in _search_kw:
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: search ({_kw})")
@@ -637,21 +637,45 @@ async def _classify_intent(msg: str):
 
 
 async def _execute_search(query: str, count: int = 8):
-    """执行搜索"""
+    """执行搜索 — 先搜，然后尝试抓取最相关结果的内容"""
     from skills.builtin.search_web import execute as _search
     try:
         r = _search({"query": query, "count": count})
         items = r.get("results", [])
-        if items:
-            txt = f"🔍 **搜索结果：{query[:30]}**\n\n"
-            seen = set()
-            for i, item in enumerate(items[:count]):
-                t = item.get("title", "")[:60]
-                u = item.get("url", "")
-                if t and t not in seen:
-                    seen.add(t)
-                    txt += f"**{i+1}.** [{t}]({u})\n"
-            return txt
+        if not items:
+            return None
+        
+        # 尝试抓取第一个结果的内容
+        try:
+            import httpx, re
+            _first_url = items[0].get("url", "")
+            if _first_url:
+                _resp = await httpx.AsyncClient(timeout=8, verify=False).get(_first_url, headers={"User-Agent": "Mozilla/5.0"})
+                if _resp.status_code == 200:
+                    _html = _resp.text
+                    # 提取正文（去掉HTML标签，取有意义的文本）
+                    _text = re.sub(r'<script[^>]*>.*?</script>', '', _html, flags=re.DOTALL)
+                    _text = re.sub(r'<style[^>]*>.*?</style>', '', _text, flags=re.DOTALL)
+                    _text = re.sub(r'<[^>]+>', ' ', _text)
+                    _text = re.sub(r'\s+', ' ', _text).strip()
+                    _text = _text[:2000]  # 限制长度
+                    if len(_text) > 100:
+                        _title = items[0].get("title", "")[:40]
+                        _src = _first_url.split('/')[2] if '//' in _first_url else ''
+                        return f"🔍 **{query[:30]}**\n\n📰 [{_title}]({_first_url})\n\n{_text[:1500]}\n\n---\n来源: {_src}"
+        except Exception:
+            pass  # 抓取失败不阻塞，降级到链接列表
+        
+        # 降级：返回链接列表
+        txt = f"🔍 **搜索结果：{query[:30]}**\n\n"
+        seen = set()
+        for i, item in enumerate(items[:count]):
+            t = item.get("title", "")[:60]
+            u = item.get("url", "")
+            if t and t not in seen:
+                seen.add(t)
+                txt += f"**{i+1}.** [{t}]({u})\n"
+        return txt
     except Exception as e:
         logger.warning(f"[SEARCH] error: {e}")
     return None
