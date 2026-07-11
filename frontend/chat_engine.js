@@ -323,21 +323,25 @@ async function doSend(text,ai){try{
       updateThinking('🔍','搜索信息')
       var sr_stream=await fetch('/api/v1/smart/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
       if(sr_stream.ok&&sr_stream.headers.get('content-type','').includes('text/event-stream')){
-        hideLoading()
-        var bub=document.createElement('div');bub.className='msg-bubble'
-        var ld=document.createElement('div');ld.className='msg bot';var ll=document.createElement('div');ll.className='msg-label';ll.textContent='AUTO-EVO-AI'
-        ld.appendChild(ll);ld.appendChild(bub);document.getElementById('messages').appendChild(ld)
+        // 复用loading元素，保持思考状态可见
+        var ld=document.getElementById('loading')
+        if(!ld){ld=document.createElement('div');ld.className='msg bot';ld.id='loading';var ll=document.createElement('div');ll.className='msg-label';ll.textContent='AUTO-EVO-AI';ld.appendChild(ll);document.getElementById('messages').appendChild(ld)}
+        var bub=ld.querySelector('.msg-bubble')
+        if(!bub){bub=document.createElement('div');bub.className='msg-bubble';ld.appendChild(bub)}
         var reader=sr_stream.body.getReader();var decoder=new TextDecoder();var buf='';var _firstChunk=true
         while(true){
           var {done,value}=await reader.read()
-          if(done)break
+          if(done){ld.id='';break}
           buf+=decoder.decode(value,{stream:true})
           var lines=buf.split('\n');buf=lines.pop()||''
           for(var line of lines){
             if(line.startsWith('data: ')){
               try{
                 var d=JSON.parse(line.slice(6))
-                if(d.thinking){updateThinking(d.icon||'🧠',d.thinking);continue}
+                if(d.thinking){
+                  var ts=bub.querySelector('#thinkingStatus')
+                  if(ts){var ic=bub.querySelector('#thinkingIcon');if(ic)ic.textContent=d.icon||'🧠';var tx=bub.querySelector('#thinkingText');if(tx)tx.textContent=d.thinking}
+                  continue}
                 if(d.done){break}
                 if(_firstChunk){_firstChunk=false;bub.innerHTML=''}
                 bub.innerHTML=_renderMd((bub.textContent||'')+d.chunk)
