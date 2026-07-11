@@ -1,8 +1,9 @@
 """Dagu调度器"""
 import logging,json,os,time
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.dagu_scheduler")
 _D=os.path.join(os.path.dirname(__file__),"..","data","dags.json")
-class DaguScheduler:
+class DaguScheduler(EnterpriseModule):
  def __init__(s):s._ready=True;s._dags=s._load()
  def _load(s):
   try:
@@ -23,4 +24,28 @@ class DaguScheduler:
   return s.status()
 get_status=lambda:DaguScheduler().status()
 register=lambda:{"name":"dagu_scheduler","class":"DaguScheduler","description":"Dagu调度器"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "dagu_scheduler", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = DaguScheduler

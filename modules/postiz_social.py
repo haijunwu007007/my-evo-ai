@@ -1,7 +1,8 @@
 """Postiz社交媒体"""
 import logging,httpx
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.postiz_social")
-class PostizSocial:
+class PostizSocial(EnterpriseModule):
  def __init__(s):s._ready=True;s._url="";s._key=""
  def config(s,url,key):s._url=url.rstrip("/");s._key=key;return{"success":True}
  def post(s,content,platforms=None):
@@ -16,4 +17,28 @@ class PostizSocial:
   return s.status()
 get_status=lambda:PostizSocial().status()
 register=lambda:{"name":"postiz_social","class":"PostizSocial","description":"Postiz社交媒体"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "postiz_social", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = PostizSocial

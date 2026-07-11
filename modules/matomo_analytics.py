@@ -1,7 +1,8 @@
 """Matomo分析"""
 import logging,httpx
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.matomo_analytics")
-class MatomoAnalytics:
+class MatomoAnalytics(EnterpriseModule):
  def __init__(s):s._ready=True;s._url="";s._key=""
  def config(s,url,key):s._url=url.rstrip("/");s._key=key;return{"success":True}
  def get_visits(s,period="day",date="today"):
@@ -16,4 +17,28 @@ class MatomoAnalytics:
   return s.status()
 get_status=lambda:MatomoAnalytics().status()
 register=lambda:{"name":"matomo_analytics","class":"MatomoAnalytics","description":"Matomo分析"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "matomo_analytics", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = MatomoAnalytics

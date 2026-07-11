@@ -1,7 +1,8 @@
 """Qodo代码审查 — AI代码审查"""
 import logging, httpx
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger = logging.getLogger('evo.modules.qodo_review')
-class QodoReview:
+class QodoReview(EnterpriseModule):
     def __init__(self): self._ready=True; self._key=''
     def config(self, api_key): self._key=api_key; return {'success':True}
     def review(self, code, lang='python'):
@@ -18,4 +19,28 @@ class QodoReview:
         return self.status()
 get_status=lambda:QodoReview().status()
 register=lambda:{'name':'qodo_review','class':'QodoReview','description':'Qodo AI代码审查'}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "qodo_review", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = QodoReview

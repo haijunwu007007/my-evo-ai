@@ -1,8 +1,9 @@
 """MCP桥接 - 标准化工具接口"""
 import logging, os, sqlite3
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger = logging.getLogger("evo.modules.mcp_bridge")
 _DB=os.path.join(os.path.dirname(__file__),"..","data","mcp_bridge.db")
-class McpBridge:
+class McpBridge(EnterpriseModule):
     def __init__(self): self._ready=True; self._conn=None
     def _get_db(self):
         if self._conn is None:
@@ -25,5 +26,29 @@ class McpBridge:
         if a=="register": return self.register_server(p.get("name",""),p.get("url",""))
         if a=="list": return {"success":True,"servers":self.list_servers()}
         return self.status()
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "mcp_bridge", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 get_status = lambda: McpBridge().status()
 register = lambda: {"name":"mcp_bridge","class":"McpBridge","description":"MCP桥接"}

@@ -1,7 +1,8 @@
 """Plausible分析"""
 import logging,httpx
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.plausible_analytics")
-class PlausibleAnalytics:
+class PlausibleAnalytics(EnterpriseModule):
  def __init__(s):s._ready=True;s._url="";s._key="";s._site=""
  def config(s,url,key,site):s._url=url.rstrip("/");s._key=key;s._site=site;return{"success":True}
  def get_stats(s,period="30d"):
@@ -16,4 +17,28 @@ class PlausibleAnalytics:
   return s.status()
 get_status=lambda:PlausibleAnalytics().status()
 register=lambda:{"name":"plausible_analytics","class":"PlausibleAnalytics","description":"Plausible分析"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "plausible_analytics", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = PlausibleAnalytics

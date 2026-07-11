@@ -1,7 +1,8 @@
 """Temporal工作流 — 分布式工作流引擎"""
 import logging, json, time
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger = logging.getLogger('evo.modules.temporal_workflow')
-class TemporalWorkflow:
+class TemporalWorkflow(EnterpriseModule):
     def __init__(self): self._ready=True; self._workflows={}
     def create(self, name, steps):
         wid=f'wf_{int(time.time())}'
@@ -25,4 +26,28 @@ class TemporalWorkflow:
         return self.status()
 get_status=lambda:TemporalWorkflow().status()
 register=lambda:{'name':'temporal_workflow','class':'TemporalWorkflow','description':'Temporal工作流'}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "temporal_workflow", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = TemporalWorkflow

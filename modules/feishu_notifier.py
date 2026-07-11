@@ -1,7 +1,8 @@
 """飞书通知"""
 import logging,httpx,json
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.feishu_notifier")
-class FeishuNotifier:
+class FeishuNotifier(EnterpriseModule):
  def __init__(s):s._ready=True;s._webhook=""
  def config(s,url):s._webhook=url;return{"success":True}
  def send(s,msg,title="通知"):
@@ -16,4 +17,28 @@ class FeishuNotifier:
   return s.status()
 get_status=lambda:FeishuNotifier().status()
 register=lambda:{"name":"feishu_notifier","class":"FeishuNotifier","description":"飞书通知"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "feishu_notifier", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = FeishuNotifier

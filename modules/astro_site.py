@@ -1,7 +1,8 @@
 """Astro站点生成器"""
 import logging,subprocess,os
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger=logging.getLogger("evo.modules.astro_site")
-class AstroSite:
+class AstroSite(EnterpriseModule):
  def __init__(s):s._ready=True
  def build(s,dir):
   if not os.path.exists(dir):return {"success":False,"error":"目录不存在"}
@@ -18,4 +19,28 @@ class AstroSite:
   return s.status()
 get_status=lambda:AstroSite().status()
 register=lambda:{"name":"astro_site","class":"AstroSite","description":"Astro站点生成器"}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "astro_site", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = AstroSite

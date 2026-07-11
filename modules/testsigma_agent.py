@@ -1,7 +1,8 @@
 """TestSigma测试Agent — 自动化测试执行"""
 import logging, httpx, json
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus, HealthReport
 logger = logging.getLogger('evo.modules.testsigma_agent')
-class TestsigmaAgent:
+class TestsigmaAgent(EnterpriseModule):
     def __init__(self): self._ready=True; self._url=''; self._key=''
     def config(self, url, key): self._url=url.rstrip('/'); self._key=key; return {'success':True}
     def run_test(self, test_id):
@@ -18,4 +19,28 @@ class TestsigmaAgent:
         return self.status()
 get_status=lambda:TestsigmaAgent().status()
 register=lambda:{'name':'testsigma_agent','class':'TestsigmaAgent','description':'TestSigma测试Agent'}
+
+async def execute(self, action=None, params=None):
+ return await self._safe_execute(action, params, handler=self._dispatch)
+
+async def _dispatch(self, action, params):
+ action = action.lower().strip() if action else "status"
+ return await self.status()
+
+async def status(self):
+ return {"module": "testsigma_agent", "ready": getattr(self, "_ready", True),
+         "status": self.status.value if hasattr(self, "status") else "running"}
+
+def health_check(self):
+ return HealthReport(status=self.status.value if hasattr(self, "status") else "running",
+                    healthy=getattr(self, "_ready", True), module_id=self.MODULE_ID)
+
+def initialize(self):
+ self.status = ModuleStatus.RUNNING
+ return {"success": True}
+
+def shutdown(self):
+ self.status = ModuleStatus.STOPPED
+ return {"success": True}
+
 module_class = TestsigmaAgent
