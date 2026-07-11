@@ -953,9 +953,13 @@ async def _execute_single(req) -> dict:
         # 抓取失败走搜索
         itype = "search"
 
-    # search: 搜索
+    # search: 搜索+自动抓取正文
     if itype == "search":
-        result = await _execute_search(topic or msg)
+        try:
+            from modules.web_fetcher import search_and_fetch as _saf
+            result = await _saf(topic or msg)
+        except Exception:
+            result = await _execute_search(topic or msg)
         if result:
             result = await _append_n8n_links(msg, result)
             return {"success": True, "result": result}
@@ -1145,7 +1149,26 @@ async def _execute_single(req) -> dict:
     return {"success": True, "result": "正在思考中..."}
 @router.post("/api/v1/smart/stream")
 async def smart_stream(req: Req):
-    """SSE流式响应 — 打字机效果"""
+    """SSE流式响应 — 先做意图分类，非chat类走smart逻辑获取完整结果再SSE输出"""
+    import asyncio
+    # 先做意图分类（热点/搜索/创作等不走LLM raw stream）
+    itype, platform, topic, _ = await _classify_intent(req.message)
+    if itype != "chat":
+        # 热点/搜索/创作等 → 调用smart逻辑获取完整结果
+        from api.agent_llm import call_llm as _llm
+        txt = None
+        if itype == "hot":
+            txt = await _answer_hot(req.message, platform, topic)
+        elif itype == "search":
+            txt = await _execute_search(topic or req.message)
+        if txt:
+            async def _gen():
+                for ch in txt:
+                    yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
+                    await asyncio.sleep(0.02)
+                yield f"data: {json.dumps({'chunk': '', 'done': True})}\n\n"
+            return StreamingResponse(_gen(), media_type="text/event-stream")
+    # chat类走LLM流式
     from api.agent_llm import call_llm_stream as _stream
     import asyncio
 
