@@ -220,7 +220,8 @@ var _searchCacheTTL=3600000;
 function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){}cb(d)})}).catch(function(){cb(null)})}
 function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){}}
 function showLoading(msg){msg=msg||'思考中';var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="thinking-status" id="thinkingStatus"><span id="thinkingIcon">🤔</span><span id="thinkingText">'+msg+'</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
-function updateThinking(icon,msg){var s=document.getElementById('thinkingStatus');if(s){document.getElementById('thinkingIcon').textContent=icon;document.getElementById('thinkingText').textContent=msg}}
+function updateThinking(icon,msg){var s=document.getElementById('thinkingStatus');if(!s){// 不存在则创建
+showLoading(msg);s=document.getElementById('thinkingStatus')};if(s){var ic=document.getElementById('thinkingIcon');if(ic)ic.textContent=icon;var tx=document.getElementById('thinkingText');if(tx)tx.textContent=msg}}
 function hideLoading(){var e=document.getElementById('loading');if(e)e.remove()}
 function restoreHistory(){var m=document.getElementById('messages');m.innerHTML='';for(var i=0;i<CHAT.length;i++){var h=CHAT[i];var d=document.createElement('div');d.className='msg '+h.role;var l=document.createElement('div');l.className='msg-label';l.textContent=h.role==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(h.text);d.appendChild(l);d.appendChild(b);m.appendChild(d)}m.scrollTop=m.scrollHeight}
 
@@ -349,11 +350,11 @@ async function doSend(text,ai){try{
         return
       }
     }catch(e){/*stream fallback*/}
-    hideLoading()
-    // 走智能对话（非流式）
+    // 非流式 — 不hideLoading，直接更新思考状态让用户可见
     updateThinking('🤔','正在思考')
     var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
     if(!sr.ok){
+      hideLoading()
       hideLoading()
       if(sr.status===429) addMsg('⚠️ 请求太频繁，请稍后再试','bot')
       else addMsg('❌ 请求失败 ('+sr.status+') 请稍后重试','bot')
