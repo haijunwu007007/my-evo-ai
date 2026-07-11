@@ -649,7 +649,10 @@ async def _execute_search(query: str, count: int = 8):
 async def _answer_hot(msg: str, platform: str, topic: str):
     """处理热点查询 — 先直抓/搜索，LLM兜底"""
     _titles = []
-    _source = platform or "百度"
+    _source = platform or ""
+    for _pk, _pv in (("百度","百度"),("微博","微博"),("头条","头条"),("抖音","抖音"),("知乎","知乎"),("B站","B站"),("小红书","小红书")):
+        if _pk in msg: _source = _pv; break
+    if not _source: _source = "百度"
     
     # 第一优先：直抓热点API
     _hot_apis = {
@@ -669,8 +672,12 @@ async def _answer_hot(msg: str, platform: str, topic: str):
                 async with session.get(_url, headers={"User-Agent": "Mozilla/5.0"}) as resp:
                     if resp.status == 200:
                         _html = await resp.text()
-                        _matches = re.findall(r'(?:data-title|title|alt)=["\']([^"\']{4,60})["\']', _html)
+                        # 百度新版: class="c-single-text-ellipsis"内文本
+                        _matches = re.findall(r'class="c-single-text-ellipsis"[^>]*>([^<]+)<', _html)
+                        if len(_matches) < 5:
+                            _matches = re.findall(r'word\"\s*:\s*\"([^\"]+)\"', _html)
                         for m in _matches:
+                            m = m.strip()
                             if m not in _titles and len(m) >= 4:
                                 _titles.append(m)
         except Exception as _ee:
