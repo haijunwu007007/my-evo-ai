@@ -454,19 +454,28 @@ async def _execute_action(msg: str) -> str | None:
                 return {"success": True, "result": "🔬 **深度研究**\n\n" + _rr.get("analysis", "分析中...")}
             break
     
-    # ── 模块自动路由：输入模块名→自动调用 ──
+    # ── 模块自动路由：仅模块名直接匹配（长关键词≥60%消息长度）才返回JSON ──
     mod_name = _find_module_in_text(msg)
     if mod_name:
-        try:
-            async with httpx.AsyncClient(timeout=15, base_url=_API_BASE) as c:
-                r = await c.post(f"/api/v1/modules/{mod_name}/execute", json={"action": "status", "params": {}})
-                if r.status_code in (200, 201):
-                    data = r.json()
-                    return f"✅ **{mod_name}** 模块已响应\n" + json.dumps(data, ensure_ascii=False)[:600]
-                else:
-                    return f"⚠️ **{mod_name}** 模块正在准备中..."
-        except Exception as e:
-            pass  # 降级到普通LLM
+        _is_explicit = False
+        for _entry in (_build_module_index() or []):
+            if _entry["name"] == mod_name:
+                for _kw in _entry["keywords"]:
+                    if len(_kw) >= 4 and _kw in msg and len(_kw) >= len(msg) * 0.6:
+                        _is_explicit = True; break
+                break
+        if _is_explicit:
+            try:
+                async with httpx.AsyncClient(timeout=15, base_url=_API_BASE) as c:
+                    r = await c.post(f"/api/v1/modules/{mod_name}/execute", json={"action": "execute", "params": {}})
+                    if r.status_code in (200, 201):
+                        data = r.json()
+                        _msg = data.get("result", data.get("message", ""))
+                        if _msg and len(str(_msg)) > 20:
+                            return f"✅ **{mod_name}**\n{_msg[:1000]}"
+                        return f"✅ **{mod_name}** 已执行"
+            except Exception:
+                pass  # 降级到LLM
     
     for keywords, method, url, body_fn in _ACTION_MAP:
         for kw in keywords:
@@ -1448,7 +1457,7 @@ def _find_module_in_text(msg: str) -> str | None:
             best_score = score
             best_name = entry["name"]
     
-    # 阈值：至少匹配到一个有意义的词
-    if best_score >= 2:
+    # 阈值：至少匹配到2个词以上才路由（避免"邮件""报告"等常见词误触）
+    if best_score >= 5:
         return best_name
     return None
