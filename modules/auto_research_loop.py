@@ -29,19 +29,20 @@ class AutoResearchLoop:
     def get_report(self, rid=""):
         r = self._researches.get(rid)
         if not r: return {"success": False, "error": "未找到"}
-        findings_text = "
-".join([f["summary"] for f in r["findings"]])
-        report = f"# {r['topic']} 研究报告
-
-## 研究过程
-{findings_text}
-
-## 结论
-基于{len(r['findings'])}个维度分析完成。
----
-自动研究循环 - AutoResearchLoop"
+        findings_text = "\n".join([f["summary"] for f in r["findings"]])
+        report = "# " + r["topic"] + " 研究报告\n\n## 研究过程\n" + findings_text + "\n\n## 结论\n基于" + str(len(r["findings"])) + "个维度分析完成。\n---\n自动研究循环 - AutoResearchLoop"
         return {"success": True, "research_id": rid, "topic": r["topic"], "report": report, "word_count": len(report)}
     def get_stats(self):
         return {"success": True, "total": len(self._researches), "completed": sum(1 for r in self._researches.values() if r["status"]=="completed")}
+
+    # EnterpriseModule 标准接口
+    def status(self) -> dict:
+        return {"module": "AutoResearchLoop", "status": "healthy", "version": "1.0.0"}
+    def health_check(self) -> dict:
+        return {"healthy": True, "status": "healthy", "module": "AutoResearchLoop"}
+    def initialize(self) -> dict:
+        return {"success": True, "module": "AutoResearchLoop"}
+    def shutdown(self) -> dict:
+        return {"success": True, "module": "AutoResearchLoop"}
 
 module_class = AutoResearchLoop

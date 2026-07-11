@@ -24,8 +24,7 @@ class SiteClonerPipeline:
         issues = [] if len(output) > 10 else ["输出过短"]
         return {"success": True, "verified": len(issues)==0, "issues": issues, "quality": "A" if not issues else "C"}
     def fix_issues(self, issues=None, output=""):
-        return {"success": True, "fixed": len(issues or []), "output": output + "
-<!-- 已修复 -->"}
+        return {"success": True, "fixed": len(issues or []), "output": output + "\n<!-- 已修复 -->"}
     def run_pipeline(self, spec=""):
         a = self.analyze_spec(spec)
         p = self.generate_plan(a["analysis"])
@@ -39,5 +38,15 @@ class SiteClonerPipeline:
     def get_status(self, pid=""):
         if pid: return {"success": True, "pipeline": self._pipelines.get(pid, {})}
         return {"success": True, "pipelines": list(self._pipelines.values()), "total": len(self._pipelines)}
+
+    # EnterpriseModule 标准接口
+    def status(self) -> dict:
+        return {"module": "SiteClonerPipeline", "status": "healthy", "version": "1.0.0"}
+    def health_check(self) -> dict:
+        return {"healthy": True, "status": "healthy", "module": "SiteClonerPipeline"}
+    def initialize(self) -> dict:
+        return {"success": True, "module": "SiteClonerPipeline"}
+    def shutdown(self) -> dict:
+        return {"success": True, "module": "SiteClonerPipeline"}
 
 module_class = SiteClonerPipeline

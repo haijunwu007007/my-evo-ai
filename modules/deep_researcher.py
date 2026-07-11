@@ -27,9 +27,7 @@ async def research(question: str) -> dict:
     
     # 3. LLM综合
     from api.agent_llm import call_llm
-    ctx = "
-
-".join([f"[来源{i+1}] {t[:1500]}" for i,t in enumerate(unique) if t])
+    ctx = "\n".join([f"[来源{i+1}] {t[:1500]}" for i,t in enumerate(unique) if t])
     prompt = f"""基于以下资料回答：{question}
 
 资料：
@@ -53,8 +51,5 @@ async def research(question: str) -> dict:
         "success": True,
         "question": question,
         "sources": len(unique),
-        "result": summary or "搜索无结果，请换关键词重试。
-
-" + "
-".join(unique[:3])
+        "result": summary or "搜索无结果，请换关键词重试。\n\n" + "\n".join(unique[:3])
     }
