@@ -575,13 +575,13 @@ async def _classify_intent(msg: str):
     _create_kw = ["生成","创建","做一份","做ppt","五子棋","时钟","网页","应用","游戏",
                   "开发","写一个","做一个","帮我做","帮我写","帮我生成","帮我创建",
                   "html","代码","报告","合同","方案","excel","表格","演示文稿",
+                  "画图","画画","画一个","图片","海报","logo"]
     _cli_kw = ["下载视频","视频下载","图片处理","图片转换","ocr","文字识别","文档转换","转pdf",
                "json处理","csv处理","系统监控","文件同步","代码搜索","文件查找"]
     for _kw in _cli_kw:
         if _kw in _lower:
             logger.info(f"[INTENT] CLI工具: {_kw}")
             return "cli_tool", _kw, "", ""
-                  "画图","画画","画一个","图片","海报","logo"]
     for _kw in _create_kw:
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: create ({_kw})")
