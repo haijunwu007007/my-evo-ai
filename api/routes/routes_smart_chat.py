@@ -687,38 +687,20 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     for _pk in ("百度","微博","头条","抖音","知乎","B站","小红书","快手","视频号"):
         if _pk in msg: _source = _pk; break
 
-    # 百度热点直抓（仅用户问无指定平台或百度时返回）
-    import re
-    if _source in ("", "百度", "今天", "今日"):
+    # 搜索+抓取（全动态，不写死URL）
+    for _sq in [f"{_source}今日热点 热榜 最新", f"{_source} 热搜榜", "今日热点新闻 热搜排行"]:
         try:
-            async with httpx.AsyncClient(timeout=10, verify=False) as _c:
-                _resp = await _c.get("https://top.baidu.com/board?tab=realtime", headers={"User-Agent": "Mozilla/5.0"})
-                if _resp.status_code == 200:
-                    _match = re.findall(r'class="c-single-text-ellipsis"[^>]*>([^<]+)', _resp.text)
-                    _tl = []
-                    for _m in _match:
-                        _m = _m.strip()
-                        if _m and len(_m)>=4 and _m not in _tl: _tl.append(_m)
-                    if _tl:
-                        return f"📊 **{_source if _source else '百度'}今日热点 TOP{min(len(_tl),20)}**\n\n"+"\n".join([f"{i+1}. {t}" for i,t in enumerate(_tl[:20])])
+            from modules.web_fetcher import search_and_fetch as _saf
+            _r = await _saf(_sq.strip())
+            if _r and len(_r) > 50: return _r
         except Exception:
             pass
-    
-    # 搜索兜底 — 用fetcher抓取实际内容
+    # 降级：返回搜索链接
     try:
-        _sq = f"{_source} {topic or '热点'} 热搜" if _source else f"{topic or '今日热点'} 热搜"
-        from modules.web_fetcher import WebFetcher
-        _wf = WebFetcher()
-        _fr = _wf._fetch(url="", query=_sq)  # 搜+抓第一条
-        if _fr.get("success"):
-            _txt = _fr.get("content","")[:3000]
-            if len(_txt) > 100:
-                return f"🔍 **{_source if _source else '今日'}相关热点**\n\n{_txt}\n\n_(内容自动抓取，实时)_"
-        # fetcher没内容降级为搜索链接
-        _r = await _execute_search(_sq.strip())
+        _r = await _execute_search(f"{_source} 热点新闻" if _source else "今日热点新闻")
         if _r: return _r
-    except Exception as _se:
-        logger.warning(f"[HOT] 搜索失败: {_se}")
+    except Exception:
+        pass
     
     # LLM兜底
     try:
