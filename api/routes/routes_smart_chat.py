@@ -960,6 +960,11 @@ async def _execute_single(req) -> dict:
     """单步指令执行引擎 — 供多步调度器和主入口复用"""
     msg = (req.message or "").strip()
 
+    # ── P0: 高频问候/打招呼直接回复（不走LLM，0延迟）──
+    _GREETINGS = ["你好","您好","嗨","hi","hello","hey","在吗","在不在","早上好","下午好","晚上好","哈喽","你好啊","hello你好"]
+    if msg.lower().strip() in _GREETINGS or any(msg.strip() == g for g in _GREETINGS):
+        return {"success": True, "result": "你好！我是 AUTO-EVO-AI 智能助手，有什么可以帮你的？"}
+
     # ── P1: 动作执行（匹配关键词→调API→返回结果，不依赖LLM）
     #    必须在导航之前，确保"创建用户"/"记住"/"回忆"等不走跳转
     try:
