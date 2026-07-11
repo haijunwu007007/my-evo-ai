@@ -439,6 +439,16 @@ async def _execute_action(msg: str) -> str | None:
         except Exception as e:
             pass  # 降级
     
+    # ── 研究/深度分析 → 不走模块路由 ──
+    _research_kw = ["深度研究","研究报告","深入分析","全面调研","深度调研"]
+    for _rk in _research_kw:
+        if _rk in msg:
+            from modules.deep_researcher import research as _rs
+            _rr = await _rs(msg)
+            if _rr.get("success"):
+                return {"success": True, "result": "🔬 **深度研究**\n\n" + _rr.get("analysis", "分析中...")}
+            break
+    
     # ── 模块自动路由：输入模块名→自动调用 ──
     mod_name = _find_module_in_text(msg)
     if mod_name:
@@ -596,6 +606,11 @@ async def _classify_intent(msg: str):
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: hot ({_kw})")
             return "hot", "", "", ""
+    _research_kw = ["深度研究","研究报告","深入分析","全面调研","深度调研","research"]
+    for _kw in _research_kw:
+        if _kw in _lower:
+            logger.info(f"[INTENT] 深度研究: {_kw}")
+            return "research", "", "", ""
     _calc_kw = ["等于多少","计算","数学","加减乘除","算术"]
     for _kw in _calc_kw:
         if _kw in _lower:
@@ -899,6 +914,20 @@ async def _execute_single(req) -> dict:
             return {"success": True, "result": fallback}
         return {"success": True, "result": "暂无热点数据，稍后再试"}
 
+    # research: 深度研究
+    if itype == "research":
+        try:
+            from modules.deep_researcher import research as _rs
+            _r = await _rs(msg)
+            if _r.get("success"):
+                _txt = f"🔬 **深度研究：{msg}**\n\n"
+                _txt += _r.get("analysis", "")
+                _txt += f"\n\n📊 共查阅 {_r.get('sources_count', 0)} 个来源"
+                return {"success": True, "result": _txt}
+        except Exception as _re:
+            logger.warning(f"[RESEARCH] {_re}")
+        return {"success": True, "result": f"🔬 **{msg}**\n\n研究分析进行中，请稍后查看详细结果。"}
+
     # cli_tool: CLI工具调用
     if itype == "cli_tool":
         _tool_map = {
@@ -1148,6 +1177,11 @@ async def smart_stream(req: Req):
             txt = await _answer_hot(req.message, platform, topic)
         elif itype == "search":
             txt = await _execute_search(topic or req.message)
+        elif itype == "research":
+            from modules.deep_researcher import research as _rs
+            _r = await _rs(req.message)
+            if _r.get("success"):
+                txt = "🔬 **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
         if txt:
             async def _gen():
                 for ch in txt:
