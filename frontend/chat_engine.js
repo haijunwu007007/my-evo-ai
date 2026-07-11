@@ -392,8 +392,8 @@ async function doSend(text,ai){try{
                 if(ts){var ic=bubble.querySelector('#thinkingIcon');if(ic)ic.textContent=d.icon||'🧠';var tx=bubble.querySelector('#thinkingText');if(tx)tx.textContent=d.thinking}
                 continue}
               if(d.done){break}
-              // 第一条非thinking数据 → 清空thinking状态，显示内容
-              if(_firstChunk){_firstChunk=false;bubble.innerHTML=''}
+              // 第一条非thinking数据 → 移除thinking元素，保留bubble
+              if(_firstChunk){_firstChunk=false;var _ts=document.getElementById('thinkingStatus');if(_ts&&_ts.parentNode)_ts.parentNode.removeChild(_ts)}
               var txt=(bubble.textContent||'')+d.chunk
               bubble.innerHTML=_renderMd(txt)
               m.scrollTop=m.scrollHeight

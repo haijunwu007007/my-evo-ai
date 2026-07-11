@@ -1304,7 +1304,6 @@ async def smart_stream(req: Req):
             if itype in ("create","calculate","help","cli_tool"):
                 yield f"data: {json.dumps({'chunk':txt,'done':False})}\n\n"
             else:
-                yield f"data: {json.dumps({'chunk':'','done':False})}\n\n"
                 for ch in txt:
                     yield f"data: {json.dumps({'chunk': ch, 'done': False})}\n\n"
                     await asyncio.sleep(0.02)
