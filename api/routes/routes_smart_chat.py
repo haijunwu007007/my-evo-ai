@@ -658,21 +658,22 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     for _pk in ("百度","微博","头条","抖音","知乎","B站","小红书","快手","视频号"):
         if _pk in msg: _source = _pk; break
 
-    # 百度热点直抓（优先，返回真正内容而非链接）
+    # 百度热点直抓（仅用户问无指定平台或百度时返回）
     import re
-    try:
-        async with httpx.AsyncClient(timeout=10, verify=False) as _c:
-            _resp = await _c.get("https://top.baidu.com/board?tab=realtime", headers={"User-Agent": "Mozilla/5.0"})
-            if _resp.status_code == 200:
-                _match = re.findall(r'class="c-single-text-ellipsis"[^>]*>([^<]+)', _resp.text)
-                _tl = []
-                for _m in _match:
-                    _m = _m.strip()
-                    if _m and len(_m)>=4 and _m not in _tl: _tl.append(_m)
-                if _tl:
-                    return f"📊 **{'百度' if not _source else _source}今日热点 TOP{min(len(_tl),20)}**\n\n"+"\n".join([f"{i+1}. {t}" for i,t in enumerate(_tl[:20])])
-    except Exception:
-        pass
+    if _source in ("", "百度", "今天", "今日"):
+        try:
+            async with httpx.AsyncClient(timeout=10, verify=False) as _c:
+                _resp = await _c.get("https://top.baidu.com/board?tab=realtime", headers={"User-Agent": "Mozilla/5.0"})
+                if _resp.status_code == 200:
+                    _match = re.findall(r'class="c-single-text-ellipsis"[^>]*>([^<]+)', _resp.text)
+                    _tl = []
+                    for _m in _match:
+                        _m = _m.strip()
+                        if _m and len(_m)>=4 and _m not in _tl: _tl.append(_m)
+                    if _tl:
+                        return f"📊 **{_source if _source else '百度'}今日热点 TOP{min(len(_tl),20)}**\n\n"+"\n".join([f"{i+1}. {t}" for i,t in enumerate(_tl[:20])])
+        except Exception:
+            pass
     
     # 搜索兜底
     try:
