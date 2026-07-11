@@ -647,28 +647,64 @@ async def _execute_search(query: str, count: int = 8):
 
 
 async def _answer_hot(msg: str, platform: str, topic: str):
-    """处理热点查询 — 先用LLM回答，搜索兜底"""
-    # 先用LLM回答
-    from api.agent_llm import call_llm
+    """处理热点查询 — 先直抓/搜索，LLM兜底"""
+    _titles = []
+    _source = platform or "百度"
+    
+    # 第一优先：直抓热点API
+    _hot_apis = {
+        "百度": "https://top.baidu.com/board?tab=realtime",
+        "微博": "https://weibo.com/ajax/side/hotSearch",
+        "知乎": "https://www.zhihu.com/hot",
+        "头条": "https://www.toutiao.com/hot-event/",
+        "B站": "https://api.bilibili.com/x/web-interface/ranking/v2",
+        "抖音": "",
+        "小红书": "",
+    }
+    _url = _hot_apis.get(_source)
+    if _url:
+        try:
+            import aiohttp, re
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
+                async with session.get(_url, headers={"User-Agent": "Mozilla/5.0"}) as resp:
+                    if resp.status == 200:
+                        _html = await resp.text()
+                        _matches = re.findall(r'(?:data-title|title|alt)=["\']([^"\']{4,60})["\']', _html)
+                        for m in _matches:
+                            if m not in _titles and len(m) >= 4:
+                                _titles.append(m)
+        except Exception as _ee:
+            logger.warning(f"[HOT] 直抓失败: {_ee}")
+    
+    # 第二优先：搜索热点
+    if len(_titles) < 5:
+        try:
+            search_query = f"{_source} {topic or '热点'} 今日热搜"
+            result = await _execute_search(search_query.strip())
+            if result:
+                return result
+        except Exception as _se:
+            logger.warning(f"[HOT] 搜索失败: {_se}")
+    
+    if _titles:
+        _lines = "\n".join([f"{i+1}. {t}" for i,t in enumerate(_titles[:20])])
+        return f"📊 **{_source}今日热点 TOP{len(_titles[:20])}**\n\n{_lines}"
+    
+    # 第三优先：LLM兜底
     try:
-        platform_desc = platform if platform else "今天的"
-        sp = f"用户问: {msg}。请列出{platform_desc}的热点话题5-8条，每条用数字开头。不用搜索，直接按你知道的列出来。不要加\"根据我的知识库\"这类话。"
+        from api.agent_llm import call_llm
+        platform_desc = _source if _source else "今天的"
+        sp = f"用户问: {msg}。请用中文列出{platform_desc}的热点话题5-8条，每条一行用数字开头。不要加\"根据我的知识库\"这类话。"
         content, _ = call_llm([{"role": "user", "content": sp}], timeout=15)
         if content:
             lines = [l.strip() for l in content.split("\n") if l.strip()]
             hot_lines = [l for l in lines if any(c.isdigit() for c in l[:4])]
             if hot_lines:
-                tag = platform if platform else "今日"
-                txt = f"🔥 **{tag}热点**\n\n" + "\n".join(hot_lines[:8])
-                return txt
+                return f"🔥 **{_source}热点**\n\n" + "\n".join(hot_lines[:8])
     except Exception as _eh:
-        logger.warning(f"[HOT] LLM热点异常: {_eh}")
-
-    # 搜索兜底
-    search_query = f"{platform or ''} {topic or '热点'} 今日热搜最新"
-    result = await _execute_search(search_query.strip())
-    if result:
-        return result
+        logger.warning(f"[HOT] LLM异常: {_eh}")
+    
+    return None
 
     return None
 

@@ -65,14 +65,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',PingFang SC,Microso
 .msg-label{font-size:14px;color:var(--text3);margin-bottom:2px;font-weight:500}
 /* 底部输入区 */
 .input-area{flex-shrink:0;padding:8px 16px 12px;width:100%}
-.input-row{display:flex;gap:2px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2px 4px;transition:all .2s;width:100%}
+.input-row{display:flex;gap:2px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2px 4px;transition:all .2s;width:100%;position:relative}
 .input-row input{flex:1 1 auto;min-width:0;width:auto}
 .input-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
 .input-row input{flex:1 1 auto;min-width:0;border:none;outline:none;padding:8px 0;font-size:14px;background:transparent;color:#000!important}
 .input-row input::placeholder{color:var(--text3)}
 .input-row button{width:24px;height:32px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
 .input-row button:hover{opacity:.9}
-.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:0;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:6px;height:32px;width:24px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}.cat-strip{display:flex;gap:4px;padding:6px 0;overflow-x:auto;overflow-y:hidden;white-space:nowrap;flex-wrap:nowrap;border-bottom:1px solid var(--border);margin-bottom:4px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}.cat-strip::-webkit-scrollbar{height:3px}.cat-strip::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}.cat-tab{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--sidebar);color:var(--text2);border:1px solid transparent;transition:all .15s;white-space:nowrap}.cat-tab:hover{background:var(--sidebar-hover);color:var(--accent)}.cat-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.cat-body{display:none;flex-wrap:wrap;gap:4px;padding:2px 0 6px}.tool-chip{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--sidebar);color:var(--sidebar-text);border:1px solid var(--border);transition:all .12s;white-space:nowrap}.tool-chip:hover{background:var(--sidebar-hover);border-color:var(--accent);color:var(--accent)}.tool-chip.clicked{background:var(--accent);color:#fff;transform:scale(.95)}.quick-start{display:flex;gap:6px;padding:6px 0;flex-wrap:wrap}.qcard{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--sidebar);border:1px solid var(--border);cursor:pointer;transition:all .12s}.qcard:hover{background:var(--sidebar-hover);border-color:var(--accent)}.qcard .qi{font-size:16px}.qcard .ql{font-size:12px;color:var(--text2)}.s-chip{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--glass);color:var(--text2);border:1px solid transparent;transition:all .12s;white-space:nowrap}.s-chip:hover{background:var(--sidebar-hover);color:var(--accent);border-color:var(--border)}
+.input-row input{flex:1}.kbd-btn{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;transition:all .1s;margin-left:2px}.kbd-btn:hover{color:var(--accent);background:var(--glass)}.input-row button.mic{font-size:16px;padding:0;background:#f0f2f8;color:var(--text);border:1px solid var(--border);border-radius:6px;height:32px;width:32px;transition:all .2s;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.input-row button.mic:hover{border-color:var(--accent);background:#e4e6ed}.input-row button.mic{-webkit-tap-highlight-color:transparent;touch-action:manipulation}.cat-strip{display:flex;gap:4px;padding:6px 0;overflow-x:auto;overflow-y:hidden;white-space:nowrap;flex-wrap:nowrap;border-bottom:1px solid var(--border);margin-bottom:4px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}.cat-strip::-webkit-scrollbar{height:3px}.cat-strip::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}.cat-tab{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--sidebar);color:var(--text2);border:1px solid transparent;transition:all .15s;white-space:nowrap}.cat-tab:hover{background:var(--sidebar-hover);color:var(--accent)}.cat-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.cat-body{display:none;flex-wrap:wrap;gap:4px;padding:2px 0 6px}.tool-chip{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--sidebar);color:var(--sidebar-text);border:1px solid var(--border);transition:all .12s;white-space:nowrap}.tool-chip:hover{background:var(--sidebar-hover);border-color:var(--accent);color:var(--accent)}.tool-chip.clicked{background:var(--accent);color:#fff;transform:scale(.95)}.quick-start{display:flex;gap:6px;padding:6px 0;flex-wrap:wrap}.qcard{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--sidebar);border:1px solid var(--border);cursor:pointer;transition:all .12s}.qcard:hover{background:var(--sidebar-hover);border-color:var(--accent)}.qcard .qi{font-size:16px}.qcard .ql{font-size:12px;color:var(--text2)}.s-chip{padding:3px 10px;border-radius:12px;font-size:12px;cursor:pointer;background:var(--glass);color:var(--text2);border:1px solid transparent;transition:all .12s;white-space:nowrap}.s-chip:hover{background:var(--sidebar-hover);color:var(--accent);border-color:var(--border)}
 /* 语音条 */
 .voice-bar{display:flex;align-items:center;justify-content:center;height:42px;border-radius:8px;background:var(--bg);border:1px solid var(--border);cursor:pointer;user-select:none;position:relative;transition:all .15s;touch-action:manipulation;width:100%}.voice-bar.hidden{display:none}.voice-bar:active{background:#e74c3c;transform:scale(0.99)}.voice-bar.recording{background:#e74c3c;border-color:#e74c3c;animation:vPulse .8s infinite}@keyframes vPulse{0%{box-shadow:0 0 6px rgba(231,76,60,.4)}50%{box-shadow:0 0 14px rgba(231,76,60,.7)}100%{box-shadow:0 0 6px rgba(231,76,60,.4)}}.voice-bar .vb-label{font-size:14px;font-weight:500;color:var(--text2);pointer-events:none}.voice-bar.recording .vb-label{color:#fff}.voice-bar .vb-cancel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--text3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}.voice-bar .vb-cancel:hover{background:rgba(0,0,0,.15);color:var(--text)}
 /* 右侧面板 */
@@ -648,12 +648,12 @@ function checkOnboard() {
         <div class="input-area" id="inputArea"><div class="input-suggest" id="inputSuggest"></div>
           <div class="input-row" id="textInputRow"><input id="fileInput" type="file" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this)"><button onclick="document.getElementById('fileInput').click()" title="上传文件/拍照/录像">📎</button>
             <input id="input" placeholder="输入你想做的事..." oninput="suggestInput(this.value)" onkeydown="if(event.key==='Enter'){send()}" style="color:#000!important;background:#fff!important">
-            <button class="mic" id="voiceToggleBtn" onclick="switchToVoice()" ontouchend="switchToVoice()" title="语音输入">🎤</button>
+            <button class="mic" id="voiceToggleBtn" title="语音输入">🎤</button>
             <button onclick="send()">➤</button>
-          </div>
-          <div class="voice-bar hidden" id="voiceBar" ontouchstart="voiceStart(event)" onmousedown="voiceStart(event)" ontouchend="voiceStop(event)" onmouseup="voiceStop(event)" ontouchcancel="voiceCancel(event)" onmouseleave="voiceCancel(event)">
-            <span class="vb-label" id="vbLabel">按住 说话</span>
-            <span class="vb-cancel" id="vbCancelBtn" onclick="switchToText()">✕</span>
+            <div class="voice-bar hidden" id="voiceBar" style="position:absolute;inset:0;z-index:5;border-radius:6px" ontouchstart="voiceStart(event)" onmousedown="voiceStart(event)" ontouchend="voiceStop(event)" onmouseup="voiceStop(event)" ontouchcancel="voiceCancel(event)" onmouseleave="voiceCancel(event)">
+              <span class="vb-label" id="vbLabel">按住 说话</span>
+              <span class="vb-cancel" id="vbCancelBtn" onclick="switchToText()">✕</span>
+            </div>
           </div>
         </div>
   </div>
@@ -684,7 +684,7 @@ function checkOnboard() {
 })();
 </script>
 <script src="/frontend/components.js"></script>
-<script src="/frontend/chat_engine.js?v=20260711"></script>
+<script src="/frontend/chat_engine.js?v=20260711b"></script>
 
 <script>
 // 侧边栏折叠分组（每个分组独立记忆）
@@ -768,7 +768,7 @@ var _vStream=null,_vCtx=null,_vNode=null,_vSamples=[];
 
 function switchToVoice(){
   try{
-    document.getElementById('textInputRow').style.display='none';
+    document.getElementById('textInputRow').style.display='';
   }catch(e){}
   try{
     var vb=document.getElementById('voiceBar');if(vb){vb.classList.remove('hidden');vb.style.display='flex'}
@@ -831,8 +831,10 @@ function voiceStop(e){
   var ctrl=new AbortController();
   setTimeout(function(){ctrl.abort()},25000);
   fetch('/api/v1/speech/recognize',{method:'POST',body:fd,signal:ctrl.signal}).then(function(r){return r.json()}).then(function(j){
+    if(j.success&&j.text){var inp=document.getElementById('input');inp.value=j.text;inp.style.cssText='color:#000!important';send()}else{
+    // 即使API成功但没文字也退出
+    }
     switchToText();
-    if(j.success&&j.text){var inp=document.getElementById('input');inp.value=j.text;inp.style.cssText='color:#000!important';send()}
   }).catch(function(){switchToText()});
 }
 
@@ -844,7 +846,7 @@ function _cleanVoice(){
   if(_vStream){_vStream.getTracks().forEach(function(t){t.stop()});_vStream=null}
 }
 function _voiceFail(){switchToText();alert('请在浏览器设置中允许麦克风权限');}
-
+(function(){var b=document.getElementById('voiceToggleBtn');if(b)b.onclick=switchToVoice})();
 
 function checkUserRole(){
   var t=localStorage.getItem('evo_token')||'';

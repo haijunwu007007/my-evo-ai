@@ -441,7 +441,7 @@ function openHub(){window.location.href='/hub'}
 var _voicing=false,_voiceWebSpeech=null,_voiceMediaRec=null,_voiceStream=null,_voiceChunks=[];
 function switchToText(){
   var el;
-  el=document.getElementById('voiceBar');if(el)el.classList.add('hidden');
+  el=document.getElementById('voiceBar');if(el){el.classList.add('hidden');el.style.display=''}
   el=document.getElementById('textInputRow');if(el)el.style.display='flex';
 }
 function backToVoice(){
