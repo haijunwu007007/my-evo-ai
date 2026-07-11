@@ -1142,20 +1142,24 @@ async def _execute_single(req) -> dict:
         import concurrent.futures as _cf
         import asyncio as _asyncio2
         # 先用LLM直接生成 — 用run_in_executor避免阻塞uvicorn事件循环
-        _prompt = f"{msg}\n\n请输出完整的HTML代码放在```html```标签中，包含CSS和JavaScript，可直接运行。不要输出markdown说明，只输出代码。"
+        _prompt = f"请生成一个完整可运行的HTML页面（单文件，所有CSS/JS内联）:\n\n任务: {msg}\n\n要求:\n- 必须包含完整的<!DOCTYPE html>到</html>结束标签，不能截断\n- CSS和JavaScript全部内联在单个HTML文件中\n- 代码必须完整可用，不能有任何省略或\"...\"占位\n- 把完整HTML代码放在```html```标签中"
         _created_html = None
         # 尝试2次（LLM可能慢）
         _loop = _asyncio2.get_event_loop()
         for _attempt in range(2):
             try:
-                _content, _ = await _loop.run_in_executor(None, _create_llm, [{"role":"user","content":_prompt}], None, "", 90)
+                _content, _ = await _loop.run_in_executor(None, _create_llm, [{"role":"user","content":_prompt}], None, "", 180)
                 if _content and len(_content) > 100:
-                    _match = _re_html.search(r'```html\s*(.*?)\s*```', _content, _re_html.DOTALL)
+                    _match = _re_html.search(r'```html\s*(.*?)(?:```|\Z)', _content, _re_html.DOTALL)
                     if _match:
                         _created_html = _match.group(1).strip()
-                        break
-                    if '<html' in _content.lower() or '<!DOCTYPE' in _content:
+                    elif '<html' in _content.lower() or '<!DOCTYPE' in _content:
                         _created_html = _content.strip()
+                    # 检查完整度（必须有闭合标签）
+                    if _created_html and '</html>' not in _created_html and _attempt == 0:
+                        logger.warning(f"[CREATE] HTML不完整（无</html>），重试")
+                        continue
+                    if _created_html:
                         break
             except Exception as _ce:
                 logger.warning(f"[CREATE] LLM生成异常: {_ce}")
@@ -1294,6 +1298,8 @@ async def smart_stream(req: Req):
             if _r.get("success"):
                 txt = "\U0001f52c **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
         elif itype == "create":
+            yield f"data: {json.dumps({'chunk':'\u23f3 AI生成中（需要30-90秒），稍等一下...','done':False})}\n\n"
+            await asyncio.sleep(0.1)
             _resp = await _execute_single(req)
             txt = _resp.get("result", "")
         elif itype == "help":
