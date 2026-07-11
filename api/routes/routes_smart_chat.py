@@ -443,8 +443,13 @@ async def _execute_action(msg: str) -> str | None:
     _research_kw = ["深度研究","研究报告","深入分析","全面调研","深度调研"]
     for _rk in _research_kw:
         if _rk in msg:
-            from modules.deep_researcher import research as _rs
-            _rr = await _rs(msg)
+            try:
+                from modules.deep_researcher import research as _rs
+                _rr = await _rs(msg)
+                if _rr and _rr.get("result"):
+                    return {"success": True, "result": _rr["result"]}
+            except Exception as _re:
+                logger.warning(f"[EARLY_RESEARCH] {_re}")
             if _rr.get("success"):
                 return {"success": True, "result": "🔬 **深度研究**\n\n" + _rr.get("analysis", "分析中...")}
             break
