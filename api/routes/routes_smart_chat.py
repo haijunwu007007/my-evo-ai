@@ -443,15 +443,18 @@ async def _execute_action(msg: str) -> str | None:
     _research_kw = ["深度研究","研究报告","深入分析","全面调研","深度调研"]
     for _rk in _research_kw:
         if _rk in msg:
+            _rr = None
             try:
                 from modules.deep_researcher import research as _rs
                 _rr = await _rs(msg)
-                if _rr and _rr.get("result"):
+                if _rr and isinstance(_rr, dict) and _rr.get("result") and len(str(_rr.get("result",""))) > 30:
                     return {"success": True, "result": _rr["result"]}
             except Exception as _re:
                 logger.warning(f"[EARLY_RESEARCH] {_re}")
-            if _rr.get("success"):
-                return {"success": True, "result": "🔬 **深度研究**\n\n" + _rr.get("analysis", "分析中...")}
+            if _rr and isinstance(_rr, dict) and _rr.get("success"):
+                _txt = _rr.get("result") or _rr.get("analysis") or ""
+                if _txt:
+                    return {"success": True, "result": "🔬 **深度研究**\n\n" + _txt}
             break
     
     # ── 模块自动路由：仅模块名直接匹配（长关键词≥60%消息长度）才返回JSON ──
@@ -1284,8 +1287,9 @@ async def smart_stream(req: Req):
         elif itype == "research":
             from modules.deep_researcher import research as _rs
             _r = await _rs(req.message)
-            if _r.get("success"):
-                txt = "🔬 **深度研究**\n\n" + _r.get("analysis", "分析进行中...")
+            if _r and isinstance(_r, dict) and _r.get("success"):
+                _txt = _r.get("result") or _r.get("analysis") or ""
+                if _txt: txt = "🔬 **深度研究**\n\n" + _txt
         if txt:
             async def _gen():
                 for ch in txt:
