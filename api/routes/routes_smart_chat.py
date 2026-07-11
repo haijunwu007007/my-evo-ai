@@ -580,7 +580,7 @@ async def _classify_intent(msg: str):
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: create ({_kw})")
             return "create", "", "", ""
-    _hot_kw = ["热搜","热点","热榜","头条","今天有什么新闻","新鲜事","有什么大事"]
+    _hot_kw = ["热搜","热点","热榜","头条","今天有什么新闻","新鲜事","有什么大事","热门","排行榜","快手","抖音"]
     for _kw in _hot_kw:
         if _kw in _lower:
             logger.info(f"[INTENT] 关键词快速通道: hot ({_kw})")
@@ -650,7 +650,7 @@ async def _answer_hot(msg: str, platform: str, topic: str):
     """处理热点查询 — 先直抓/搜索，LLM兜底"""
     _titles = []
     _source = platform or ""
-    for _pk, _pv in (("百度","百度"),("微博","微博"),("头条","头条"),("抖音","抖音"),("知乎","知乎"),("B站","B站"),("小红书","小红书")):
+    for _pk, _pv in (("百度","百度"),("微博","微博"),("头条","头条"),("抖音","抖音"),("知乎","知乎"),("B站","B站"),("小红书","小红书"),("快手","快手"),("视频号","视频号")):
         if _pk in msg: _source = _pv; break
     if not _source: _source = "百度"
     
@@ -663,6 +663,8 @@ async def _answer_hot(msg: str, platform: str, topic: str):
         "B站": "https://api.bilibili.com/x/web-interface/ranking/v2",
         "抖音": "",
         "小红书": "",
+        "快手": "",
+        "视频号": "",
     }
     _url = _hot_apis.get(_source)
     if _url:
