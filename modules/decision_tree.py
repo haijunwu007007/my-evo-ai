@@ -1,19 +1,25 @@
+"""决策树 — 规则引擎"""
 import logging
-logger = logging.getLogger("evo.modules.decision_tree")
-
+logger = logging.getLogger('evo.modules.decision_tree')
 class DecisionTree:
-    """自动生成的 decision_tree 模块"""
-    def __init__(self):
-        self._ready = True
-
-    def status(self):
-        return {"name": "decision_tree", "ready": self._ready, "type": "module"}
-
-    def execute(self, action: str = "", params: dict = None):
-        params = params or {}
-        if action == "status":
-            return self.status()
-        return {"success": False, "error": f"action {action} not supported"}
-
-get_status = lambda: DecisionTree().status()
-register = lambda: {"name": "decision_tree", "class": "DecisionTree", "description": "decision_tree"}
+    def __init__(self): self._ready=True; self._rules=[]
+    def add(self, condition, action, priority=0):
+        self._rules.append({'condition':condition,'action':action,'priority':priority})
+        self._rules.sort(key=lambda r:-r['priority'])
+        return {'success':True,'rules':len(self._rules)}
+    def evaluate(self, context):
+        for r in self._rules:
+            c=r['condition']
+            try:
+                if isinstance(c,str):
+                    if c in str(context): return {'matched':True,'action':r['action']}
+            except: pass
+        return {'matched':False}
+    def status(self): return {'name':'decision_tree','ready':self._ready,'rules':len(self._rules)}
+    def execute(self, a='', p=None):
+        p=p or {}
+        if a=='add': return self.add(p.get('condition',''),p.get('action',''),p.get('priority',0))
+        if a=='evaluate': return self.evaluate(p.get('context',{}))
+        return self.status()
+get_status=lambda:DecisionTree().status()
+register=lambda:{'name':'decision_tree','class':'DecisionTree','description':'决策树 - 规则引擎'}

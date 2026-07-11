@@ -1,19 +1,15 @@
+"""示例Hello插件 — 插件开发模板"""
 import logging
-logger = logging.getLogger("evo.modules.sample_hello_plugin")
-
+logger = logging.getLogger('evo.modules.sample_hello_plugin')
 class SampleHelloPlugin:
-    """自动生成的 sample_hello_plugin 模块"""
-    def __init__(self):
-        self._ready = True
-
-    def status(self):
-        return {"name": "sample_hello_plugin", "ready": self._ready, "type": "module"}
-
-    def execute(self, action: str = "", params: dict = None):
-        params = params or {}
-        if action == "status":
-            return self.status()
-        return {"success": False, "error": f"action {action} not supported"}
-
-get_status = lambda: SampleHelloPlugin().status()
-register = lambda: {"name": "sample_hello_plugin", "class": "SampleHelloPlugin", "description": "sample_hello_plugin"}
+    def __init__(self): self._ready=True; self._name='HelloPlugin'
+    def hello(self, name='World'): return {'success':True,'message':f'Hello, {name}! 这是示例插件'}
+    def echo(self, text): return {'success':True,'echo':text}
+    def status(self): return {'name':'sample_hello_plugin','ready':self._ready,'name':self._name}
+    def execute(self, a='', p=None):
+        p=p or {}
+        if a=='hello': return self.hello(p.get('name','World'))
+        if a=='echo': return self.echo(p.get('text',''))
+        return self.status()
+get_status=lambda:SampleHelloPlugin().status()
+register=lambda:{'name':'sample_hello_plugin','class':'SampleHelloPlugin','description':'示例Hello插件'}

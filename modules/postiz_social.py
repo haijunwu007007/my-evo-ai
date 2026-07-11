@@ -1,19 +1,18 @@
-import logging
-logger = logging.getLogger("evo.modules.postiz_social")
-
+"""Postiz社交媒体"""
+import logging,httpx
+logger=logging.getLogger("evo.modules.postiz_social")
 class PostizSocial:
-    """自动生成的 postiz_social 模块"""
-    def __init__(self):
-        self._ready = True
-
-    def status(self):
-        return {"name": "postiz_social", "ready": self._ready, "type": "module"}
-
-    def execute(self, action: str = "", params: dict = None):
-        params = params or {}
-        if action == "status":
-            return self.status()
-        return {"success": False, "error": f"action {action} not supported"}
-
-get_status = lambda: PostizSocial().status()
-register = lambda: {"name": "postiz_social", "class": "PostizSocial", "description": "postiz_social"}
+ def __init__(s):s._ready=True;s._url="";s._key=""
+ def config(s,url,key):s._url=url.rstrip("/");s._key=key;return{"success":True}
+ def post(s,content,platforms=None):
+  if not s._url:return{"success":False,"error":"未配置"}
+  try:r=httpx.post(f"{s._url}/api/v1/posts",headers={"Authorization":f"Bearer {s._key}"},json={"content":content,"platforms":platforms or["twitter"]},timeout=10);return{"success":r.status_code==200,"post":r.json()if r.status_code==200 else{}}
+  except Exception as e:return{"success":False,"error":str(e)[:100]}
+ def status(s):return{"name":"postiz_social","ready":s._ready}
+ def execute(s,a="",p=None):
+  p=p or{}
+  if a=="config":return s.config(p.get("url",""),p.get("key",""))
+  if a=="post":return s.post(p.get("content",""),p.get("platforms",None))
+  return s.status()
+get_status=lambda:PostizSocial().status()
+register=lambda:{"name":"postiz_social","class":"PostizSocial","description":"Postiz社交媒体"}
