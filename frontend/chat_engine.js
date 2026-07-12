@@ -298,12 +298,12 @@ document.addEventListener('paste',function(e){
   if(files.length){attachFiles=attachFiles||[];for(var i=0;i<files.length;i++)attachFiles.push(files[i]);renderAttachBar()}
 })
 
-function send(){
+async function send(){
   try{var input=document.getElementById('input');if(!input)return;var text=input.value.trim();var hasAttach=attachFiles&&attachFiles.length>0;if(!text&&!hasAttach)return;
   if(_isTalking()){_MSG_QUEUE.push(text);input.value='';var _q=document.getElementById('queueCount');if(!_q){_q=document.createElement('div');_q.id='queueCount';_q.style.cssText='text-align:center;font-size:11px;color:var(--text3);padding:2px;background:var(--bg);border-radius:4px;margin:2px 0';document.getElementById('messages').appendChild(_q)};_q.textContent='📌 已加入队列（'+_MSG_QUEUE.length+'条待处理）';return}
   _setState('talking');input.value='';var ai=null;
   if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
-  }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+  }catch(e){_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
 async function doSend(text,ai){try{
   if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar()
@@ -431,7 +431,7 @@ async function doSend(text,ai){try{
 _sendLock=false
 try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
-function clearHistory(){if(typeof Evo!=='undefined'&&Evo.confirm){Evo.confirm('确认开启新对话？当前对话将存入历史',function(ok){if(ok)_doClear()})}else{if(!confirm('确认开启新对话？当前对话将存入历史'))return;_doClear()};function _doClear(){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];try{CTX=[]}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}};localStorage.removeItem('evo_chat_history');var m=document.getElementById('messages');if(m)m.innerHTML=''}}
+function clearHistory(){if(typeof Evo!=='undefined'&&Evo.confirm){Evo.confirm('确认开启新对话？当前对话将存入历史',function(ok){if(ok)_doClear()})}else{if(!confirm('确认开启新对话？当前对话将存入历史'))return;_doClear()};function _doClear(){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];try{CTX=[]}catch(e){/* ignore */};localStorage.removeItem('evo_chat_history');var m=document.getElementById('messages');if(m)m.innerHTML=''}}
 function showArchives(){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');if(a.length===0){alert('暂无历史对话');return};var list='';for(var i=0;i<a.length;i++){list+=(i+1)+'. '+a[i].time+' ('+a[i].messages.length+'条)\n'};var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list);if(idx===null)return;var n=parseInt(idx)-1;if(n>=0&&n<a.length){CHAT=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));restoreHistory()}}
 function showHistory(){
   var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');
