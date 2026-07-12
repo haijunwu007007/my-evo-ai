@@ -81,9 +81,9 @@ async function loadTeammates(){
     var r=await fetch('/api/v1/teammates/list');
     var d=await r.json();
     if(d.success&&d.teammates&&d.teammates.length){_TEAMMATES=d.teammates;localStorage.setItem('evo_teammates',JSON.stringify(d.teammates))}
-  }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}
+  }catch(e){/*ignore*/}}
   // 兜底：从localStorage加载
-  try{var _tm=JSON.parse(localStorage.getItem('evo_teammates')||'[]');if(Array.isArray(_tm)&&_tm.length>0)_TEAMMATES=_tm}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}
+  try{var _tm=JSON.parse(localStorage.getItem('evo_teammates')||'[]');if(Array.isArray(_tm)&&_tm.length>0)_TEAMMATES=_tm}catch(e){/*ignore*/}}
 }
 setTimeout(loadTeammates,500);
 function suggestInput(val){
@@ -161,7 +161,7 @@ function toolbarFilter(cat){
 function needsTool(msg){var l=msg.toLowerCase();for(var i=0;i<_TOOL_KEYWORDS.length;i++){if(l.indexOf(_TOOL_KEYWORDS[i].toLowerCase())>=0)return true}return false}
 
 
-var API='/api/v1';var CHAT=[];try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array.isArray(_tmp))CHAT=_tmp}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}CHAT=[]};var CTX=[]
+var API='/api/v1';var CHAT=[];try{var _tmp=JSON.parse(localStorage.getItem('evo_chat_history')||'[]');if(Array.isArray(_tmp))CHAT=_tmp}catch(e){/*ignore*/}CHAT=[]};var CTX=[]
 
 async function doRegister(){
   var user=document.getElementById('regUser').value.trim();if(!user||user.length<2){alert('用户名至少2个字符');return}
@@ -176,7 +176,7 @@ async function doRegister(){
       if(!dd.success){alert(dd.error||'注册失败');return}
       var r2=await fetch('/api/v1/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});d=await r2.json()
     }
-  }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}alert('网络错误: '+e.message);return}
+  }catch(e){/*ignore*/}alert('网络错误: '+e.message);return}
   if(d&&d.access_token){localStorage.setItem('evo_token',d.access_token);localStorage.setItem('evo_role',d.role||'user')}
   if(!localStorage.getItem('evo_logged_in')){localStorage.setItem('evo_user',user);localStorage.setItem('evo_logged_in','1');localStorage.setItem('evo_login_ts',Date.now().toString())}
   if(key)localStorage.setItem('evo_api_key',key);document.getElementById('authWrap').classList.remove('active');document.getElementById('appMain').style.display='flex'
@@ -217,8 +217,8 @@ function _renderMd(t,r){
 function friendlyError(msg){var m=msg||'';if(m.indexOf('502')>=0)return'服务暂时不可用，请稍后重试';if(m.indexOf('timeout')>=0||m.indexOf('timed out')>=0)return'请求超时，可能是网络或服务器负载较高';if(m.indexOf('500')>=0)return'服务器内部错误，已记录日志';if(m.indexOf('404')>=0)return'资源不存在';if(m.indexOf('Failed to fetch')>=0||m.indexOf('NetworkError')>=0)return'网络连接失败，请检查网络';return m.slice(0,120)}
 // ── 搜索缓存 ──
 var _searchCacheTTL=3600000;
-function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}cb(d)})}).catch(function(){cb(null)})}
-function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}}
+function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){/*ignore*/}}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){/*ignore*/}}cb(d)})}).catch(function(){cb(null)})}
+function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){/*ignore*/}}}
 function showLoading(msg){msg=msg||'思考中';var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="thinking-status" id="thinkingStatus"><span id="thinkingIcon">🤔</span><span id="thinkingText">'+msg+'</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
 function updateThinking(icon,msg){var s=document.getElementById('thinkingStatus');if(!s){// 不存在则创建
 showLoading(msg);s=document.getElementById('thinkingStatus')};if(s){var ic=document.getElementById('thinkingIcon');if(ic)ic.textContent=icon;var tx=document.getElementById('thinkingText');if(tx)tx.textContent=msg}}
@@ -273,7 +273,7 @@ async function processAttachments(){
         var d=await r.json();
         if(d.success&&d.text){parts.push('[📄 图片识别: '+n+']\n'+d.text.slice(0,500));
         }else{parts.push('[🖼️ 图片: '+n+']')}
-      }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}parts.push('[🖼️ 图片: '+n+']')}
+      }catch(e){/*ignore*/}parts.push('[🖼️ 图片: '+n+']')}
     }
     // 音频 → 转写
     else if(['wav','mp3','flac','ogg','m4a','aac','webm'].indexOf(ext)>=0){
@@ -283,7 +283,7 @@ async function processAttachments(){
         var d2=await r2.json();
         if(d2.success&&d2.result&&d2.result.text){parts.push('[🎤 音频转写: '+n+']\n'+d2.result.text.slice(0,500));
         }else{parts.push('[🎵 音频: '+n+']')}
-      }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}parts.push('[🎵 音频: '+n+']')}
+      }catch(e){/*ignore*/}parts.push('[🎵 音频: '+n+']')}
     }
     // 其他文件
     else{parts.push('[📎 '+n+']')}
@@ -397,14 +397,14 @@ async function doSend(text,ai){try{
               var txt=(bubble.textContent||'')+d.chunk
               bubble.innerHTML=_renderMd(txt)
               m.scrollTop=m.scrollHeight
-            }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}}
+            }catch(e){/*ignore*/}}
           }
         }
       }
       try{CTX=CTX||[];CTX.push({role:'assistant',content:bubble.textContent||''})}catch(ex){}
       _clearThinkTimer();_setState('idle');_processQueue();return
     }
-  }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}/*stream fallback*/}
+  }catch(e){/*ignore*/}/*stream fallback*/}
   // 非流式 — 不创建新元素，直接更新loading泡的内容
   updateThinking('🤔','正在思考')
   var sr=await fetch('/api/v1/smart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text+'（请参考上面的任务分解逐步执行）',lang:_LOCALE,api_key:ak,provider:'',context:CTX.slice(-6)})})
@@ -427,7 +427,7 @@ async function doSend(text,ai){try{
     bubble.innerHTML='❌ 系统返回错误，请重试'
   }
   _clearThinkTimer();_setState('idle');_processQueue()
-}catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}_clearThinkTimer();var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle');_processQueue()}
+}catch(e){/*ignore*/}_clearThinkTimer();var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle');_processQueue()}
 _sendLock=false
 try{setTimeout(function(){backToVoice()},500)}catch(ex){}
 }
@@ -656,7 +656,7 @@ async function checkLLM(){
       b.textContent='🧠 '+name;
       if(s)s.textContent='🧠 模型: '+name;
     }
-  }catch(e){if(_sse_retries<3&&e.name!="AbortError"){updateThinking(chr(128260),"重连中...");await new Promise(r=>setTimeout(r,2000));continue}
+  }catch(e){/*ignore*/}
     if(!htmlModel){b.textContent='🧠 '+htmlModel}
   }
 }
