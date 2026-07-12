@@ -291,9 +291,7 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
             PipelineStep("vector_search", (time.time() - t1) * 1000, "done", f"{len(self._chunks)} scanned").__dict__
         )
         t2 = time.time()
-        context = "
-
-".join(f"[Doc:{r.doc_id}] {r.chunk}" for r in top_results)
+        context = "\n".join(f"[Doc:{r.doc_id}] {r.chunk}" for r in top_results)
         answer = f"Based on {len(top_results)} retrieved chunks: {context[:200]}..."
         steps.append(PipelineStep("generate", (time.time() - t2) * 1000, "done").__dict__)
         self._stats["queries_served"] += 1
@@ -389,9 +387,7 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
                 break
             context_parts.append(f"[{r.get('doc_id', '')}] {chunk}")
             total += len(chunk)
-        context = "
-
-".join(context_parts)
+        context = "\n".join(context_parts)
         return {"success": True, "context": context, "chunks_used": len(context_parts), "tokens_approx": total // 4}
 
     def _stats_op(self, p: dict) -> dict:
@@ -416,8 +412,8 @@ class RagPipelineModule(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
 if __name__ == "__main__":
     m = RagPipelineModule()
-    logger.info(m.initialize()))
-    logger.info(m.execute("query", {"question": "What is RAG?", "top_k": 3})))
+    logger.info(m.initialize())
+    logger.info(m.execute("query", {"question": "What is RAG?", "top_k": 3}))
 
     def batch_operation(self, operations: list) -> dict:
         """批量执行操作，支持事务语义"""

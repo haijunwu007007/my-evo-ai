@@ -128,9 +128,7 @@ class EveAgent:
 
             # 写入产出
 
-            (self.output_dir / f"output_{step_id}.md").write_text(f"# {action} 结果
-
-{json.dumps(params, indent=2)}")
+            (self.output_dir / f"output_{step_id}.md").write_text(f"# {action} 结果\n\n{json.dumps(params, indent=2)}")
 
             self.state["status"] = "idle"
 
@@ -220,8 +218,7 @@ class EveSandbox:
 
         issues = []
 
-        for line in code.split("
-"):
+        for line in code.split("\n"):
 
             stripped = line.strip()
 
@@ -241,8 +238,7 @@ class EveSandbox:
 
                 issues.append(f"系统调用: {stripped[:30]}")
 
-        return {"safe": len(issues) == 0, "issues": issues, "total_lines": len(code.split("
-"))}
+        return {"safe": len(issues) == 0, "issues": issues, "total_lines": len(code.split("\n"))}
 
 
 

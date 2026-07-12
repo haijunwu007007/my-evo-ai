@@ -589,69 +589,64 @@ class GoalTracker:
 # ==================== 快速测试 ====================
 
 if __name__ == "__main__":
-    logger.info("=" * 60))
-    logger.info("GoalTracker 测试"))
-    logger.info("=" * 60))
+    logger.info("=" * 60)
+    logger.info("GoalTracker 测试")
+    logger.info("=" * 60)
 
     tracker = GoalTracker()
 
     # 创建目标
-    logger.info("
-[1] 创建目标..."))
+    logger.info("[1] 创建目标...")
     g1 = tracker.create_goal(
         "完成系统升级",
         "将系统升级到V0.1",
         priority=GoalPriority.HIGH.value,
         deadline=(datetime.now() + timedelta(days=7)).isoformat(),
     )
-    logger.info(f"  ✅ 创建: {g1.name} ({g1.id})"))
+    logger.info(f"  ✅ 创建: {g1.name} ({g1.id})")
 
     # 添加子目标
     g2 = tracker.create_goal("集成浏览器自动化", "集成browser-use", priority=GoalPriority.MEDIUM.value, parent_id=g1.id)
-    logger.info(f"  ✅ 创建子目标: {g2.name}"))
+    logger.info(f"  ✅ 创建子目标: {g2.name}")
 
     g3 = tracker.create_goal(
         "集成文件系统操作", "集成文件操作模块", priority=GoalPriority.MEDIUM.value, parent_id=g1.id
     )
-    logger.info(f"  ✅ 创建子目标: {g3.name}"))
+    logger.info(f"  ✅ 创建子目标: {g3.name}")
 
     # 添加里程碑
     tracker.add_milestone(g2.id, "完成browser-use集成", "集成并测试browser-use")
     tracker.add_milestone(g2.id, "完成自动化测试", "编写自动化测试用例")
-    logger.info("  ✅ 添加里程碑"))
+    logger.info("  ✅ 添加里程碑")
 
     # 更新进度
-    logger.info("
-[2] 更新进度..."))
+    logger.info("[2] 更新进度...")
     tracker.update_progress(g2.id, 50)
-    logger.info(f"  子目标进度: {g2.progress}%"))
+    logger.info(f"  子目标进度: {g2.progress}%")
 
     tracker.update_progress(g3.id, 100)
     tracker.complete_goal(g3.id)
-    logger.info(f"  子目标 {g3.name} 已完成"))
+    logger.info(f"  子目标 {g3.name} 已完成")
 
     tracker.complete_goal(g2.id)
     tracker.complete_goal(g1.id)
-    logger.info(f"  父目标 {g1.name} 已完成"))
+    logger.info(f"  父目标 {g1.name} 已完成")
 
     # 生成报告
-    logger.info("
-[3] 目标报告..."))
+    logger.info("[3] 目标报告...")
     report = tracker.generate_report()
-    logger.info(f"  总结: {report['summary']}"))
-    logger.info(f"  按优先级: {report['by_priority']}"))
-    logger.info(f"  逾期: {report['overdue']} 个"))
+    logger.info(f"  总结: {report['summary']}")
+    logger.info(f"  按优先级: {report['by_priority']}")
+    logger.info(f"  逾期: {report['overdue']} 个")
 
     # Dashboard数据
-    logger.info("
-[4] Dashboard导出..."))
+    logger.info("[4] Dashboard导出...")
     dashboard = tracker.export_dashboard()
-    logger.info(f"  数据长度: {len(dashboard)} 字符"))
+    logger.info(f"  数据长度: {len(dashboard)} 字符")
 
-    logger.info("
-" + "=" * 60))
-    logger.info("✅ GoalTracker 就绪！"))
-    logger.info("=" * 60))
+    logger.info("\n" + "=" * 60)
+    logger.info("✅ GoalTracker 就绪！")
+    logger.info("=" * 60)
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

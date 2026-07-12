@@ -77,7 +77,7 @@ import time as tmod
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone, timezone.utc
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from modules._base.enterprise_module import EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
@@ -400,15 +400,11 @@ class GooseCoderModule:
         t0 = time.time()
         try:
             lines = max(5, len(description.split()) * 2)
-            code = f"# Generated code for: {description}
-"
-            code += f"# Language: {language}, Style: {style}
-"
+            code = f"# Generated code for: {description}\n"
+            code += f"# Language: {language}, Style: {style}\n"
             for i in range(lines):
-                code += f"  line_{i + 1}: # implementation
-"
-            actual_lines = len(code.split("
-"))
+                code += f"  line_{i + 1}: # implementation\n"
+            actual_lines = len(code.split("\n"))
             snippet_id = hashlib.md5(f"code{time.time()}".encode()).hexdigest()[:12]
             self._code_snippets[snippet_id] = {
                 "id": snippet_id,
@@ -444,8 +440,7 @@ class GooseCoderModule:
             return {"success": False, "error": "code required"}
         t0 = time.time()
         issues = []
-        line_count = len(code.split("
-"))
+        line_count = len(code.split("\n"))
         for i in range(int((__import__('time').time()*1000)%(3-0+1))+0):
             issues.append(
                 {
@@ -481,8 +476,7 @@ class GooseCoderModule:
             "root_cause": f"Identified issue in {language} code",
             "fix_suggestion": "Apply the following changes to resolve the error",
             "confidence": round(((__import__('time').time()*1000)%(0.99-0.7))+0.7, 4),
-            "related_lines": [int(time.time()*1000)%max(len(code.split("
-")),1)+1 for _ in range(3)],
+            "related_lines": [int(time.time()*1000)%max(len(code.split("\n")),1)+1 for _ in range(3)],
         }
         self._stats["bugs_fixed"] += 1
         return {"success": True, "diagnosis": diagnosis}

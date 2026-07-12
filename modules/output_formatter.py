@@ -273,8 +273,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         parts.append(self._render_single(data, fmt, tmpl))
         if tmpl and tmpl.footer:
             parts.append(tmpl.footer)
-        return "
-".join(parts)
+        return "\n".join(parts)
 
     def _render_single(self, data: Any, fmt: OutputFormat, tmpl: FormatTemplate | None = None) -> str:
         if fmt == OutputFormat.JSON:
@@ -319,8 +318,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                                 lines.append(f"{prefix}  - {self._yaml_val(item)}")
                 else:
                     lines.append(f"{prefix}{k}: {self._yaml_val(v)}")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _yaml_val(self, v: Any) -> str:
         if v is None:
@@ -332,7 +330,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if isinstance(v, datetime):
             return v.isoformat()
         s = str(v)
-        if any(c in s for c in ":#{}[]!&*?'|>-"'") or s in ("true", "false", "null"):
+        if any(c in s for c in ":#{}[]!&*?'\"|>-") or s in ("true", "false", "null"):
             return f'"{s}"'
         return s
 
@@ -344,14 +342,12 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 tag = re.sub(r"[^a-zA-Z0-9_-]", "_", str(k))
                 parts.append(self._render_xml(v, tag, depth + 1))
             parts.append(f"{indent}</{root_tag}>")
-            return "
-".join(parts)
+            return "\n".join(parts)
         elif isinstance(data, list):
             parts = []
             for item in data:
                 parts.append(self._render_xml(item, "item", depth))
-            return "
-".join(parts)
+            return "\n".join(parts)
         else:
             escaped = html.escape(str(data)) if data is not None else ""
             return f"{indent}<{root_tag}>{escaped}</{root_tag}>"
@@ -386,14 +382,12 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         for item in items:
             vals = [self._md_cell(item.get(k)) for k in keys]
             lines.append("| " + " | ".join(vals) + " |")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _md_cell(self, v: Any) -> str:
         if v is None:
             return ""
-        return str(v).replace("|", "\\|").replace("
-", " ")
+        return str(v).replace("|", "\\|").replace("\n", " ")
 
     def _render_html_table(self, items: list[dict], title: str = "Data") -> str:
         if not items:
@@ -421,8 +415,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         lines.append("-+-".join("-" * col_widths[k] for k in keys))
         for item in items:
             lines.append(" | ".join(str(item.get(k, "")).ljust(col_widths[k]) for k in keys))
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _render_markdown(self, data: Any) -> str:
         if isinstance(data, dict):
@@ -437,8 +430,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     lines.append(self._render_markdown(v))
                 else:
                     lines.append(f"**{k}:** {v}")
-            return "
-".join(lines)
+            return "\n".join(lines)
         return str(data)
 
     def _render_html(self, data: Any) -> str:
@@ -448,17 +440,14 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 parts.append(f"<dt>{html.escape(str(k))}</dt>")
                 parts.append(f"<dd>{html.escape(str(v))}</dd>")
             parts.append("</dl>")
-            return "
-".join(parts)
+            return "\n".join(parts)
         return f"<p>{html.escape(str(data))}</p>"
 
     def _render_plain(self, data: Any) -> str:
         if isinstance(data, dict):
-            return "
-".join(f"{k}: {v}" for k, v in data.items())
+            return "\n".join(f"{k}: {v}" for k, v in data.items())
         if isinstance(data, list):
-            return "
-".join(f"- {item}" for item in data)
+            return "\n".join(f"- {item}" for item in data)
         return str(data)
 
     def stream_start(self, stream_id: str, fmt: OutputFormat = OutputFormat.JSON):
@@ -467,8 +456,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def stream_append(self, stream_id: str, data: Any):
         if stream_id in self._stream_buffers:
             self._stream_buffers[stream_id].write(str(data))
-            self._stream_buffers[stream_id].write("
-")
+            self._stream_buffers[stream_id].write("\n")
 
     def stream_end(self, stream_id: str) -> str:
         buf = self._stream_buffers.pop(stream_id, None)
@@ -487,8 +475,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             return OutputFormat.MARKDOWN
         if stripped.startswith("---") or re.match(r"^\w+:", stripped, re.MULTILINE):
             return OutputFormat.YAML
-        lines = stripped.split("
-")
+        lines = stripped.split("\n")
         if len(lines) > 1 and "," in lines[0]:
             return OutputFormat.CSV
         return OutputFormat.PLAIN
@@ -609,8 +596,7 @@ class OutputFormatter(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 result["valid"] = False
                 result["issues"].append(f"json_parse_error: {str(e)}")
         elif detected == OutputFormat.CSV:
-            lines = content.strip().split("
-")
+            lines = content.strip().split("\n")
             if len(lines) > 1:
                 header_count = len(lines[0].split(","))
                 for idx, line in enumerate(lines[1:], 2):

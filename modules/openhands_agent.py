@@ -1,69 +1,43 @@
-"""
-AUTO-EVO-AI V0.1 — 开放代码Agent：代码生成+沙箱执行
-"""
-VERSION = "V0.1"
-__module_meta__ = {"id": "openhands", "name": "OpenHandsAgent", "version": VERSION, "group": "dev"}
-
-import json, subprocess, tempfile, os, time, uuid
-from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
-from modules._persist import PersistMixin
-
-class OpenHandsAgent(PersistMixin, EnterpriseModule, EnterpriseModule):
-    MODULE_ID = "openhands"; MODULE_NAME = "OpenHandsAgent"
-    
-    def __init__(self, config=None):
-        EnterpriseModule.__init__(self, config or {})
-        PersistMixin.__init__(self, "openhands")
-    
-    def get_status(self): return {"ready": True}
-    
-    def execute(self, action, **kwargs):
-        if action == "generate_code":
-            prompt = kwargs.get("prompt", "")
-            lang = kwargs.get("language", "python")
-            code = self._generate(prompt, lang)
-            with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{lang}', delete=False, encoding='utf-8') as f:
-                f.write(code); path = f.name
-            self.persist(f"code:{uuid.uuid4().hex[:8]}", json.dumps({"lang":lang,"prompt":prompt}))
-            return {"code": code, "file": path, "language": lang}
-        if action == "execute_code":
-            code = kwargs.get("code", "")
-            lang = kwargs.get("language", "python")
-            cmds = {"python": ["python3","-c",code], "bash": ["bash","-c",code]}
-            cmd = cmds.get(lang, cmds["python"])
-            try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-                return {"stdout": r.stdout[:2000], "stderr": r.stderr[:500], "code": r.returncode}
-            except Exception as e: return {"error": str(e)}
-        if action == "list_generations":
-            return {"message": "Use /api/v1/openhands/status to see generations"}
-        return {"error": "unknown: " + str(action)}
-    def _generate(self, prompt, lang):
-        # print(main())"]
-        return "
-".join(lines)
+"""
+AUTO-EVO-AI V0.1 — 开放代码Agent：代码生成+沙箱执行
+"""
+VERSION = "V0.1"
+__module_meta__ = {"id": "openhands", "name": "OpenHandsAgent", "version": VERSION, "group": "dev"}
 
-    def health_check(self) -> dict:
-        return {"status": "healthy", "module": getattr(self, "name", self.__class__.__name__)}
+import json, subprocess, tempfile, os, time, uuid
+from modules._base.enterprise_module import EnterpriseModule, ModuleStatus
+from modules._persist import PersistMixin
 
-    def initialize(self) -> dict:
-        self._initialized = True
-        return {"success": True, "module": getattr(self, "name", self.__class__.__name__)}
-
-    def shutdown(self) -> dict:
-        self._initialized = False
-        return {"success": True, "module": getattr(self, "name", self.__class__.__name__)}
-
-    async def status(self) -> dict:
-        return {"name": getattr(self, "name", self.__class__.__name__), "status": "ok", "initialized": getattr(self, "_initialized", False)}
-
-    async def execute(self, action: str = "status", params: dict = None) -> dict:
-        params = params or {}
-        try:
-            if action in ("status", "info", "stats"):
-                return self.health_check()
-            elif action == "help":
-                return {"actions": ["status", "help"], "module": getattr(self, "name", self.__class__.__name__)}
-            return {"success": True, "action": action, "module": getattr(self, "name", self.__class__.__name__)}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+class OpenHandsAgent(PersistMixin, EnterpriseModule):
+    MODULE_ID = "openhands"; MODULE_NAME = "OpenHandsAgent"
+    
+    def __init__(self, config=None):
+        EnterpriseModule.__init__(self, config or {})
+        PersistMixin.__init__(self, "openhands")
+    
+    def get_status(self): return {"ready": True}
+    
+    def execute(self, action, **kwargs):
+        if action == "generate_code":
+            prompt = kwargs.get("prompt", "")
+            lang = kwargs.get("language", "python")
+            code = self._generate(prompt, lang)
+            with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{lang}', delete=False, encoding='utf-8') as f:
+                f.write(code); path = f.name
+            self.persist(f"code:{uuid.uuid4().hex[:8]}", json.dumps({"lang":lang,"prompt":prompt}))
+            return {"code": code, "file": path, "language": lang}
+        if action == "execute_code":
+            code = kwargs.get("code", "")
+            lang = kwargs.get("language", "python")
+            cmds = {"python": ["python3","-c",code], "bash": ["bash","-c",code]}
+            cmd = cmds.get(lang, cmds["python"])
+            try:
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+                return {"stdout": r.stdout[:2000], "stderr": r.stderr[:500], "code": r.returncode}
+            except Exception as e: return {"error": str(e)}
+        if action == "list_generations":
+            return {"message": "Use /api/v1/openhands/status to see generations"}
+        return {"error": "unknown: " + str(action)}
+    def _generate(self, prompt, lang):
+        # print(main())"]
+        return "\n".join(lines)

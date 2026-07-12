@@ -80,7 +80,7 @@ import urllib.parse
 import json
 import re
 import threading
-from datetime import datetime, timedelta, timezone, timezone.utc
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum

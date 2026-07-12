@@ -212,8 +212,7 @@ def parse_event(event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
 
             "url": payload.get("compare", ""),
 
-            "commits": [{"id": c["id"][:7], "message": c["message"].split("
-")[0], "author": c["author"]["name"]} for c in commits[:10]],
+            "commits": [{"id": c["id"][:7], "message": c["message"].split("\n")[0], "author": c["author"]["name"]} for c in commits[:10]],
 
             "priority": 0,
 
@@ -611,13 +610,11 @@ async def _send_wechat_work(webhook_url: str, title: str, description: str, url:
 
         return {"channel": "wechat_work", "status": "skipped", "reason": "no webhook_url"}
 
-    content = f"**{title}**
-{description[:2000]}"
+    content = f"**{title}**\n{description[:2000]}"
 
     if url:
 
-        content += f"
-[查看详情]({url})"
+        content += f"\n[查看详情]({url})"
 
     async with httpx.AsyncClient(timeout=10) as client:
 
@@ -637,13 +634,11 @@ async def _send_dingtalk(webhook_url: str, title: str, description: str, secret:
 
         return {"channel": "dingtalk", "status": "skipped", "reason": "no webhook_url"}
 
-    text = f"{title}
-{description[:2000]}"
+    text = f"{title}\n{description[:2000]}"
 
     if url:
 
-        text += f"
-{url}"
+        text += f"\n{url}"
 
 
 
@@ -655,8 +650,7 @@ async def _send_dingtalk(webhook_url: str, title: str, description: str, secret:
 
         timestamp = str(round(time.time() * 1000))
 
-        sign_str = f"{timestamp}
-{secret}"
+        sign_str = f"{timestamp}\n{secret}"
 
         sign = hmac.new(secret.encode(), sign_str.encode(), hashlib.sha256).digest()
 
@@ -686,13 +680,11 @@ async def _send_feishu(webhook_url: str, title: str, description: str, url: str)
 
         return {"channel": "feishu", "status": "skipped", "reason": "no webhook_url"}
 
-    content = f"**{title}**
-{description[:2000]}"
+    content = f"**{title}**\n{description[:2000]}"
 
     if url:
 
-        content += f"
-[查看详情]({url})"
+        content += f"\n[查看详情]({url})"
 
     async with httpx.AsyncClient(timeout=10) as client:
 
@@ -784,8 +776,7 @@ async def process_webhook(
 
     except Exception as e:
 
-        logger.error(f"事件解析失败: {e}
-{traceback.format_exc()}")
+        logger.error(f"事件解析失败: {e}\n{traceback.format_exc()}")
 
         return {"success": False, "error": "parse_error", "message": f"事件解析失败: {e}"}
 

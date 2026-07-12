@@ -550,7 +550,7 @@ def get_panel() -> DebugPanel:
     return _instance
 
 if __name__ == "__main__":
-    logger.info("=== m41 轻量调试面板 ==="))
+    logger.info("=== m41 轻量调试面板 ===")
     panel = DebugPanel()
 
     # 启动HTTP调试服务
@@ -573,7 +573,7 @@ if __name__ == "__main__":
         panel.watcher.watch("counter", i)
         try:
             result = panel.record_step("click_button", "rpa_demo", {"x": i * 100}, demo_action, i * 100)
-            logger.info(f"  Step: click_button({i * 100}) -> {result}"))
+            logger.info(f"  Step: click_button({i * 100}) -> {result}")
         except Exception:
             pass
 
@@ -581,29 +581,25 @@ if __name__ == "__main__":
     try:
         panel.record_step("failing_action", "test", {}, lambda: 1 / 0)
     except ZeroDivisionError:
-        logger.info("  Step: failing_action -> ERROR (expected)"))
+        logger.info("  Step: failing_action -> ERROR (expected)")
 
     # 查看结果
-    logger.info(f"
---- 会话信息 ---"))
+    logger.info(f"--- 会话信息 ---")
     info = panel.get_session_info()
     for k, v in info.items():
-        logger.info(f"  {k}: {v}"))
+        logger.info(f"  {k}: {v}")
 
-    logger.info(f"
---- 步骤记录 ({len(panel.get_steps())} 条) ---"))
+    logger.info(f"--- 步骤记录 ({len(panel.get_steps())} 条) ---")
     for s in panel.get_steps(3):
-        logger.info(f"  [{s['status']}] {s['action']} ({s['duration_ms']}ms)"))
+        logger.info(f"  [{s['status']}] {s['action']} ({s['duration_ms']}ms)")
 
-    logger.info(f"
---- 错误列表 ---"))
+    logger.info(f"--- 错误列表 ---")
     for e in panel.get_errors():
-        logger.info(f"  {e['action']}: {e['result_summary']}"))
+        logger.info(f"  {e['action']}: {e['result_summary']}")
 
     panel.end_session()
     panel.stop_http_server()
-    logger.info("
-✅ m41 测试通过"))
+    logger.info("✅ m41 测试通过")
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

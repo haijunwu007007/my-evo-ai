@@ -78,7 +78,7 @@ from core.logging_config import get_logger
 import hashlib
 import threading
 import json
-from datetime import datetime, timedelta, timezone, timezone.utc
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass, field

@@ -160,7 +160,7 @@ class WorkflowDatabase(EnterpriseModule):
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
-            logger.info(f"Error reading {file_path}: {str(e)}"))
+            logger.info(f"Error reading {file_path}: {str(e)}")
             return None
 
         filename = os.path.basename(file_path)
@@ -456,17 +456,17 @@ class WorkflowDatabase(EnterpriseModule):
     def index_all_workflows(self, force_reindex: bool = False) -> Dict[str, int]:
         """Index all workflow files. Only reprocesses changed files unless force_reindex=True."""
         if not os.path.exists(self.workflows_dir):
-            logger.info(f"Warning: Workflows directory '{self.workflows_dir}' not found."))
+            logger.info(f"Warning: Workflows directory '{self.workflows_dir}' not found.")
             return {"processed": 0, "skipped": 0, "errors": 0}
 
         workflows_path = Path(self.workflows_dir)
         json_files = [str(p) for p in workflows_path.rglob("*.json")]
 
         if not json_files:
-            logger.info(f"Warning: No JSON files found in '{self.workflows_dir}' directory."))
+            logger.info(f"Warning: No JSON files found in '{self.workflows_dir}' directory.")
             return {"processed": 0, "skipped": 0, "errors": 0}
 
-        logger.info(f"Indexing {len(json_files)} workflow files..."))
+        logger.info(f"Indexing {len(json_files)} workflow files...")
 
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -525,14 +525,14 @@ class WorkflowDatabase(EnterpriseModule):
                 stats["processed"] += 1
 
             except Exception as e:
-                logger.info(f"Error processing {file_path}: {str(e)}"))
+                logger.info(f"Error processing {file_path}: {str(e)}")
                 stats["errors"] += 1
                 continue
 
         conn.commit()
         conn.close()
 
-        logger.info()
+        logger.info(
             f"✅ Indexing complete: {stats['processed']} processed, {stats['skipped']} skipped, {stats['errors']} errors"
         )
         return stats
@@ -809,24 +809,24 @@ def main():
 
     if args.index:
         stats = db.index_all_workflows(force_reindex=args.force)
-        logger.info(f"Indexed {stats['processed']} workflows"))
+        logger.info(f"Indexed {stats['processed']} workflows")
 
     elif args.search:
         results, total = db.search_workflows(args.search, limit=10)
-        logger.info(f"Found {total} workflows:"))
+        logger.info(f"Found {total} workflows:")
         for workflow in results:
-            logger.info()
+            logger.info(
                 f"  - {workflow['name']} ({workflow['trigger_type']}, {workflow['node_count']} nodes)"
             )
 
     elif args.stats:
         stats = db.get_stats()
-        logger.info("Database Statistics:"))
-        logger.info(f"  Total workflows: {stats['total']}"))
-        logger.info(f"  Active: {stats['active']}"))
-        logger.info(f"  Total nodes: {stats['total_nodes']}"))
-        logger.info(f"  Unique integrations: {stats['unique_integrations']}"))
-        logger.info(f"  Trigger types: {stats['triggers']}"))
+        logger.info("Database Statistics:")
+        logger.info(f"  Total workflows: {stats['total']}")
+        logger.info(f"  Active: {stats['active']}")
+        logger.info(f"  Total nodes: {stats['total_nodes']}")
+        logger.info(f"  Unique integrations: {stats['unique_integrations']}")
+        logger.info(f"  Trigger types: {stats['triggers']}")
 
     else:
         parser.print_help()

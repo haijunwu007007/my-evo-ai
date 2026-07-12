@@ -211,9 +211,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                 slug=re.sub(r"[^\w-]", "-", title.lower()).strip("-"),
                 type="article",
                 status="published",
-                body=f"# {title}
-
-详细内容...",
+                body=f"# {title}\n\n详细内容...",
                 format="markdown",
                 locale="zh-CN",
                 author="system",
@@ -252,8 +250,7 @@ class ContentServiceManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMi
                     lineterm="",
                 )
             )
-            version.diff = "
-".join(diff[:100])
+            version.diff = "\n".join(diff[:100])
         versions.append(version)
         return version
 

@@ -378,7 +378,7 @@ class ConfigParser:
             if "=" in stripped:
                 key, _, value = stripped.partition("=")
                 key = key.strip()
-                value = value.strip().strip("'"")
+                value = value.strip().strip('"\'')
                 result[key] = ConfigParser._parse_value(value)
         return result
 
@@ -441,8 +441,7 @@ class ConfigParser:
                 lines.append(f"{prefix}{k}: null")
             else:
                 lines.append(f'{prefix}{k}: "{v}"')
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     @staticmethod
     def _serialize_ini(data: dict) -> str:
@@ -454,8 +453,7 @@ class ConfigParser:
                 for k, v in values.items():
                     lines.append(f"{k} = {v}")
             lines.append("")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     @staticmethod
     def _serialize_env(data: dict) -> str:
@@ -466,8 +464,7 @@ class ConfigParser:
                 lines.append(f"{k}={v}")
             else:
                 lines.append(f"{k}={json.dumps(v, ensure_ascii=False)}")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     @staticmethod
     def _serialize_properties(data: dict) -> str:
@@ -475,8 +472,7 @@ class ConfigParser:
         lines = []
         for k, v in data.items():
             lines.append(f"{k}={v}")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
 class ConfigValidator:
     """配置校验器"""

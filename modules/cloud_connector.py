@@ -103,7 +103,7 @@ import base64
 import threading
 import traceback
 import uuid
-from datetime import datetime, timedelta, timezone, timezone.utc
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -536,22 +536,13 @@ class RequestSigner:
 
         canonical_headers = ""
         for k in sorted(headers.keys()):
-            canonical_headers += f"{k.lower()}:{headers[k].strip()}
-"
+            canonical_headers += f"{k.lower()}:{headers[k].strip()}\n"
         signed_headers = ";".join(sorted(k.lower() for k in headers))
 
         payload_hash = hashlib.sha256(body.encode()).hexdigest()
-        canonical_request = f"{method}
-{path}
-
-{canonical_headers}
-{signed_headers}
-{payload_hash}"
+        canonical_request = f"{method}\n{path}\n\n{canonical_headers}\n{signed_headers}\n{payload_hash}"
         credential_scope = f"{date_stamp}/{region}/{service}/aws4_request"
-        string_to_sign = f"AWS4-HMAC-SHA256
-{amz_date}
-{credential_scope}
-{hashlib.sha256(canonical_request.encode()).hexdigest()}"
+        string_to_sign = f"AWS4-HMAC-SHA256\n{amz_date}\n{credential_scope}\n{hashlib.sha256(canonical_request.encode()).hexdigest()}"
 
         def sign(key: bytes, msg: str) -> bytes:
             return hmac.new(key, msg.encode(), hashlib.sha256).digest()

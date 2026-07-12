@@ -359,13 +359,10 @@ class AIGateway(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def _call_gemini(self, model_cfg: dict, messages: list, temperature: float, stream: bool) -> dict:
         """调用 Google Gemini API"""
         # 合并 messages 为单一文本
-        content = "
-".join([f"{m['role']}: {m['content']}" for m in messages if m["role"] != "system"])
+        content = "\n".join([f"{m['role']}: {m['content']}" for m in messages if m["role"] != "system"])
         system = next((m["content"] for m in messages if m["role"] == "system"), "")
         if system:
-            content = f"System: {system}
-
-{content}"
+            content = f"System: {system}\n\n{content}"
 
         payload = json.dumps(
             {

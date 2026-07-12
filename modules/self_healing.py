@@ -1373,104 +1373,38 @@ class SelfHealingEngine:
 
 
 if __name__ == "__main__":
-
-    logger.info("=" * 60))
-
-    logger.info("SelfHealing 测试"))
-
-    logger.info("=" * 60))
-
-
-
+    logger.info("=" * 60)
+    logger.info("SelfHealing 测试")
+    logger.info("=" * 60)
     engine = SelfHealingEngine()
-
-
-
-    # 测试错误记录
-
-    logger.info("
-[1] 测试错误记录..."))
-
+    logger.info("\n[1] 测试错误记录...")
     try:
-
         raise ValueError("测试错误")
-
     except Exception as e:
-
         record = engine.record_error(e, "test_component", {"action": "test"})
-
-        logger.info(f"  ✅ 错误已记录: {record.error_type} ({record.severity})"))
-
-
-
-    # 测试熔断器
-
-    logger.info("
-[2] 测试熔断器..."))
-
+        logger.info(f"  错误已记录: {record.error_type} ({record.severity})")
+    logger.info("\n[2] 测试熔断器...")
     for i in range(6):
-
         engine._update_circuit_breaker("test_service", record)
-
-
-
     is_open = engine.is_circuit_open("test_service")
-
-    logger.info(f"  熔断器状态: {'打开' if is_open else '关闭'}"))
-
-
-
-    # 测试健康检查
-
-    logger.info("
-[3] 测试健康检查..."))
-
+    logger.info(f"  熔断器状态: {'打开' if is_open else '关闭'}")
+    logger.info("\n[3] 测试健康检查...")
     engine.register_health_check("memory", lambda: True)
-
     engine.register_health_check("cpu", lambda: True)
-
     engine.register_health_check("disk", lambda: True)
-
-
-
     health = engine.check_health()
-
-    logger.info(f"  健康分数: {health['score']}%"))
-
-    logger.info(f"  整体状态: {health['overall']}"))
-
-
-
-    # 状态报告
-
-    logger.info("
-[4] 状态报告..."))
-
+    logger.info(f"  健康分数: {health['score']}%")
+    logger.info(f"  整体状态: {health['overall']}")
+    logger.info("\n[4] 状态报告...")
     report = engine.get_status_report()
-
-    logger.info(f"  错误统计: {report['errors']['total_errors']} 个错误"))
-
-    logger.info(f"  熔断器: {len(report['circuit_breakers'])} 个"))
-
-
-
-    # Dashboard
-
-    logger.info("
-[5] Dashboard导出..."))
-
+    logger.info(f"  错误统计: {report['errors']['total_errors']} 个错误")
+    logger.info(f"  熔断器: {len(report['circuit_breakers'])} 个")
+    logger.info("\n[5] Dashboard导出...")
     dashboard = engine.export_dashboard()
-
-    logger.info(f"  数据长度: {len(dashboard)} 字符"))
-
-
-
-    logger.info("
-" + "=" * 60))
-
-    logger.info("✅ SelfHealing 就绪！"))
-
-    logger.info("=" * 60))
+    logger.info(f"  数据长度: {len(dashboard)} 字符")
+    logger.info("\n" + "=" * 60)
+    logger.info("SelfHealing 就绪!")
+    logger.info("=" * 60)
 
 
 

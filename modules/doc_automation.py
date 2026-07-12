@@ -288,8 +288,7 @@ class DocumentFormatter:
         """验证文档结构完整性和格式正确性"""
         errors = []
         warnings = []
-        stats = {"lines": content.count("
-"), "chars": len(content), "size_kb": round(len(content) / 1024, 2)}
+        stats = {"lines": content.count("\n"), "chars": len(content), "size_kb": round(len(content) / 1024, 2)}
         if format_type == "json":
             try:
                 import json
@@ -299,8 +298,7 @@ class DocumentFormatter:
             except json.JSONDecodeError as e:
                 errors.append(f"JSON parse error at line {e.lineno}: {e.msg}")
         elif format_type == "csv":
-            lines = [l for l in content.strip().split("
-") if l.strip()]
+            lines = [l for l in content.strip().split("\n") if l.strip()]
             if lines:
                 header_count = len(lines[0].split(","))
                 for i, line in enumerate(lines[1:], 2):
@@ -310,8 +308,7 @@ class DocumentFormatter:
                 stats["rows"] = len(lines) - 1
                 stats["columns"] = header_count
         elif format_type == "markdown":
-            headers = [l for l in content.split("
-") if l.strip().startswith("#")]
+            headers = [l for l in content.split("\n") if l.strip().startswith("#")]
             stats["headers"] = len(headers)
             if not headers:
                 warnings.append("No headers found in markdown document")
@@ -344,7 +341,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "标准化API接口文档",
                 "technical",
                 DocFormat.MARKDOWN,
-                "# {title}
+                """# {title}
 
 ## 概述
 {description}
@@ -359,7 +356,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 {examples}
 
 ## 错误码
-{error_codes}",
+                {error_codes}""",
                 variables=["title", "description", "api_list", "params", "examples", "error_codes"],
                 sections=[
                     {"name": "概述", "required": True},
@@ -389,7 +386,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "Sprint迭代评审文档",
                 "agile",
                 DocFormat.MARKDOWN,
-                "# {sprint_name} 迭代评审
+                """# {sprint_name} 迭代评审
 
 ## 迭代目标
 {goals}
@@ -404,7 +401,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 {risks}
 
 ## 下迭代计划
-{next_sprint}",
+                {next_sprint}""",
                 variables=["sprint_name", "goals", "completed", "metrics", "risks", "next_sprint"],
             ),
             DocumentTemplate(
@@ -413,7 +410,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "系统变更日志模板",
                 "release",
                 DocFormat.MARKDOWN,
-                "# 变更日志 v{version}
+                """# 变更日志 v{version}
 
 ## 发布日期: {date}
 
@@ -427,7 +424,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 {breaking}
 
 ## 贡献者
-{contributors}",
+                {contributors}""",
                 variables=["version", "date", "features", "fixes", "breaking", "contributors"],
             ),
             DocumentTemplate(
@@ -436,7 +433,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "系统架构设计文档",
                 "technical",
                 DocFormat.MARKDOWN,
-                "# {title}
+                """# {title}
 
 ## 架构概述
 {overview}
@@ -451,7 +448,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 {deployment}
 
 ## 性能指标
-{performance}",
+                {performance}""",
                 variables=["title", "overview", "components", "data_flow", "deployment", "performance"],
             ),
         ]
@@ -604,8 +601,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         """Markdown -> HTML"""
         import re
 
-        lines = md.split("
-")
+        lines = md.split("\n")
         html_lines = []
         in_list = False
         in_code = False
@@ -662,13 +658,12 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if in_list:
             html_lines.append("</ul>")
 
-        body = "
-".join(html_lines)
-        return f'<!DOCTYPE html>
+        body = "\n".join(html_lines)
+        return f'''<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Document</title></head>
 <body>
 {body}
-</body></html>'
+</body></html>'''
 
     def _md_to_txt(self, md: str) -> str:
         import re
@@ -684,25 +679,21 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         sections = {}
         current_section = "body"
         current_lines = []
-        for line in md.split("
-"):
+        for line in md.split("\n"):
             if line.startswith("# "):
                 if current_lines:
-                    sections[current_section] = "
-".join(current_lines).strip()
+                    sections[current_section] = "\n".join(current_lines).strip()
                 current_section = line[2:].strip()
                 current_lines = []
             elif line.startswith("## "):
                 if current_lines:
-                    sections[current_section] = "
-".join(current_lines).strip()
+                    sections[current_section] = "\n".join(current_lines).strip()
                 current_section = line[3:].strip()
                 current_lines = []
             else:
                 current_lines.append(line)
         if current_lines:
-            sections[current_section] = "
-".join(current_lines).strip()
+            sections[current_section] = "\n".join(current_lines).strip()
         return json.dumps(sections, ensure_ascii=False, indent=2)
 
     def _html_to_txt(self, html: str) -> str:
@@ -722,8 +713,7 @@ class DocAutomation(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         md = re.sub(r"<h2[^>]*>(.*?)</h2>", r"## \1", md, flags=re.DOTALL)
         md = re.sub(r"<h3[^>]*>(.*?)</h3>", r"### \1", md, flags=re.DOTALL)
         md = re.sub(r"<li[^>]*>(.*?)</li>", r"- \1", md, flags=re.DOTALL)
-        md = re.sub(r"<p[^>]*>(.*?)</p>", r"\1
-", md, flags=re.DOTALL)
+        md = re.sub(r"<p[^>]*>(.*?)</p>", r"\1\n", md, flags=re.DOTALL)
         md = re.sub(r"<strong[^>]*>(.*?)</strong>", r"**\1**", md, flags=re.DOTALL)
         md = re.sub(r"<em[^>]*>(.*?)</em>", r"*\1*", md, flags=re.DOTALL)
         md = re.sub(r"<[^>]+>", "", md)

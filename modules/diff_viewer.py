@@ -146,7 +146,7 @@ def highlight_line(line: str, lang: str = "text") -> str:
 
     # 字符串高亮
 
-    escaped = re.sub(r'("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')', r'<span class="str">\1</span>', escaped)
+    escaped = re.sub(r"(\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')", r'<span class="str">\1</span>', escaped)
 
     # 注释高亮
 
@@ -194,8 +194,7 @@ def compare_text(old_text: str, new_text: str, file_path: str = "unknown") -> Di
 
     current_chunk = None
 
-    for line in diff_text.split("
-"):
+    for line in diff_text.split("\n"):
 
         if line.startswith("@@"):
 

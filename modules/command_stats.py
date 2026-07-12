@@ -189,7 +189,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
         normalized = re.sub(r"\b\d+\.\d+\.\d+\b", "VER", cmd)
         normalized = re.sub(r"\b[\w.-]+@[\w.-]+\.\w+\b", "EMAIL", normalized)
         normalized = re.sub(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", "IP", normalized)
-        normalized = re.sub(r'(["'])(?:(?=(\\?))\2.)*?\1', "ARG", normalized)
+        normalized = re.sub(r"([\"'])(?:(?=(\\?))\\2.)*?\\1", "ARG", normalized)
         return hashlib.md5(normalized.strip().lower().encode()).hexdigest()[:12]
 
     def _check_danger(self, cmd: str) -> tuple:
@@ -580,8 +580,7 @@ class CommandStatsManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             avg = round(s["total_ms"] / max(s["count"], 1), 1)
             err_rate = round(s["errors"] / max(s["count"], 1) * 100, 1)
             lines.append(f"{cmd},{s['count']},{avg},{err_rate}")
-        return {"success": True, "hours": hours, "total_commands": len(recent), "csv_content": "
-".join(lines)}
+        return {"success": True, "hours": hours, "total_commands": len(recent), "csv_content": "\n".join(lines)}
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         """企业级执行入口。支持status/info/run/stop/help等通用动作。"""

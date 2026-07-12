@@ -110,7 +110,7 @@ import traceback
 import uuid
 import struct
 import pickle
-from datetime import datetime, timedelta, timezone, timezone.utc
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from collections.abc import Callable
 from dataclasses import dataclass, field

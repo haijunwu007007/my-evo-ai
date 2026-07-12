@@ -516,8 +516,7 @@ class PixelleVideo:
     def _wrap_text(self, text: str, font, max_width: int) -> list[str]:
         """自动换行"""
         lines = []
-        for paragraph in text.split("
-"):
+        for paragraph in text.split("\n"):
             if not paragraph:
                 lines.append("")
                 continue
@@ -640,8 +639,7 @@ class PixelleVideo:
 
         # 结尾
         templates.append(
-            {"description": f"结尾 - {topic}", "script": f"感谢观看
-了解更多: {topic}", "visual": "closing_card"}
+            {"description": f"结尾 - {topic}", "script": f"感谢观看\n了解更多: {topic}", "visual": "closing_card"}
         )
 
         scenes = []
@@ -712,13 +710,13 @@ class PixelleVideo:
         }
 
 if __name__ == "__main__":
-    logger.info("Pixelle Video v2.0 测试"))
+    logger.info("Pixelle Video v2.0 测试")
     pv = PixelleVideo("./test_pixelle")
     caps = pv.get_capabilities()
-    logger.info(f"能力: PIL={caps['pil']}, ffmpeg={caps['ffmpeg']}, font={caps['font']}"))
+    logger.info(f"能力: PIL={caps['pil']}, ffmpeg={caps['ffmpeg']}, font={caps['font']}")
     result = pv.generate_video("AI技术发展趋势", 6, "landscape")
-    logger.info(f"结果: success={result['success']}, path={result.get('video_path', result.get('error'))}"))
-    logger.info("测试完成"))
+    logger.info(f"结果: success={result['success']}, path={result.get('video_path', result.get('error'))}")
+    logger.info("测试完成")
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         params = params or {}

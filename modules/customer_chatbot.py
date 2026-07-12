@@ -558,9 +558,7 @@ class CustomerChatbotModule:
         if re.search(r"转人工|人工客服|真人|transfer", message, re.IGNORECASE):
             session.state = SessionState.PENDING_TRANSFER
             self._stats["transfers"] += 1
-            reply = "正在为您转接人工客服，请稍候...
-当前排队人数: 0
-预计等待时间: < 1分钟"
+            reply = "正在为您转接人工客服，请稍候...\n当前排队人数: 0\n预计等待时间: < 1分钟"
             session.messages.append({"role": "bot", "content": reply, "timestamp": time.time()})
             return {"success": True, "reply": reply, "intent": "transfer_human", "session_state": "pending_transfer"}
         # Check pending slots
@@ -719,8 +717,7 @@ class CustomerChatbotModule:
         session = self._sessions[session_id]
         ticket_id = f"TK{uuid.uuid4().hex[:8].upper()}"
         msgs = session.messages
-        desc = "
-".join(f"[{m['role']}] {m['content']}" for m in msgs[-10:])
+        desc = "\n".join(f"[{m['role']}] {m['content']}" for m in msgs[-10:])
         ticket = TicketInfo(
             ticket_id=ticket_id,
             session_id=session_id,

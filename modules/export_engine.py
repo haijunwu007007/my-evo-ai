@@ -546,9 +546,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
         if not isinstance(data, list):
             data = [data] if data else []
 
-        lines = [f"# {job.name}", f"
-导出时间: {datetime.now().isoformat()}
-"]
+        lines = [f"# {job.name}", f"导出时间: {datetime.now().isoformat()}"]
         if data:
             headers = list(data[0].keys())
             lines.append("| " + " | ".join(headers) + " |")
@@ -557,8 +555,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 cells = [str(row.get(h, "")) for h in headers]
                 lines.append("| " + " | ".join(cells) + " |")
         job.exported_rows = len(data)
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _export_xml(self, data: Any, job: ExportJob) -> str:
         """导出XML"""
@@ -571,27 +568,20 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     safe_k = k.replace(" ", "_")
                     lines.append(_to_xml(v, safe_k, indent + 1))
                 lines.append(f"{prefix}</{tag}>")
-                return "
-".join(lines)
+                return "\n".join(lines)
             elif isinstance(obj, list):
                 lines = []
                 for item in obj:
                     lines.append(_to_xml(item, "row", indent))
-                return "
-".join(lines)
+                return "\n".join(lines)
             else:
                 val = str(obj).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 return f"{prefix}<{tag}>{val}</{tag}>"
 
         items = data if isinstance(data, list) else [data]
-        xml = (
-            f'<?xml version="1.0" encoding="UTF-8"?>
-<export name="{job.name}" date="{datetime.now().isoformat()}">
-'
-        )
+        xml = f'<?xml version="1.0" encoding="UTF-8"?><export name="{job.name}" date="{datetime.now().isoformat()}">\n'
         for item in items:
-            xml += _to_xml(item, "row", 1) + "
-"
+            xml += _to_xml(item, "row", 1) + "\n"
         xml += "</export>"
         job.exported_rows = len(items)
         return xml
@@ -610,22 +600,17 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                     else:
                         val = str(v).replace(":", "\\:")
                         lines.append(f"{prefix}{k}: {val}")
-                return "
-".join(lines)
+                return "\n".join(lines)
             elif isinstance(obj, list):
                 lines = []
                 for item in obj:
                     lines.append(f"{prefix}- {_to_yaml(item, 0).lstrip()}")
-                return "
-".join(lines)
+                return "\n".join(lines)
             else:
                 return str(obj)
 
         items = data if isinstance(data, list) else [data]
-        yaml = f"# {job.name}
-# 导出时间: {datetime.now().isoformat()}
----
-"
+        yaml = f"# {job.name}\n# 导出时间: {datetime.now().isoformat()}\n---\n"
         yaml += _to_yaml(items)
         job.exported_rows = len(items)
         return yaml
@@ -639,8 +624,7 @@ class ExportEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             line = " | ".join(str(v) for v in row.values())
             lines.append(line)
         job.exported_rows = len(data)
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _compress(self, content: Any, compression: CompressionType, base_path: str) -> bytes:
         """压缩数据"""

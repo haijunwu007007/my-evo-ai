@@ -92,10 +92,8 @@ def recognize_image(image_data: str | bytes, languages: list = None) -> dict:
             full_text.append(text)
             total_conf += conf
 
-        text = "
-".join(full_text)
-        char_count = len(text.replace("
-", "").replace(" ", ""))
+        text = "\n".join(full_text)
+        char_count = len(text.replace("\n", "").replace(" ", ""))
 
         return {
             "success": True,
@@ -151,10 +149,8 @@ def recognize_pdf(pdf_data: bytes, languages: list = None, dpi: int = 200) -> di
                 total_items += 1
                 total_conf += float(conf)
 
-            page_str = "
-".join(page_text)
-            total_text.append(f"--- 第{page_num+1}页 ---
-{page_str}")
+            page_str = "\n".join(page_text)
+            total_text.append(f"--- 第{page_num+1}页 ---\n{page_str}")
             pages_result.append({
                 "page": page_num + 1,
                 "text": page_str,
@@ -164,9 +160,7 @@ def recognize_pdf(pdf_data: bytes, languages: list = None, dpi: int = 200) -> di
         doc.close()
         return {
             "success": True,
-            "text": "
-
-".join(total_text),
+            "text": "\n\n".join(total_text),
             "pages": pages_result,
             "total_pages": len(doc),
             "total_items": total_items,
@@ -184,8 +178,7 @@ def analyze_layout(image_data: str | bytes) -> dict:
     if not result.get("success"):
         return result
 
-    lines = result.get("text", "").split("
-")
+    lines = result.get("text", "").split("\n")
     blocks = []
     current = {"type": "text", "start": 0, "lines": 0, "chars": 0}
 

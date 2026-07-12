@@ -51,5 +51,5 @@ async def research(question: str) -> dict:
         "success": True,
         "question": question,
         "sources": len(unique),
-        "result": summary or "搜索无结果，请换关键词重试。\n\n" + "\n".join(unique[:3])
+        "result": summary or "搜索无结果，请换关键词重试。\n" + "\n".join(unique[:3])
     }

@@ -334,8 +334,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
                 segments = self._diarizer.diarize(segments)
                 self._stats["total_speakers_detected"] += len(set(s.speaker_id for s in segments if s.speaker_id))
 
-            full_text = "
-".join(full_text_parts)
+            full_text = "\n".join(full_text_parts)
             processing_ms = int((time.time() - start) * 1000)
 
             result = TranscriptionResult(
@@ -515,13 +514,7 @@ class AudioTranscription(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin
             "original": original,
             "translation": translated,
             "subtitle_format": "srt",
-            "subtitle_content": f"1
-00:00:00,000 --> 00:00:05,000
-{original['text']}
-
-2
-00:00:05,000 --> 00:00:10,000
-{translated['text']}",
+            "subtitle_content": f"1\n00:00:00,000 --> 00:00:05,000\n{original['text']}\n\n2\n00:00:05,000 --> 00:00:10,000\n{translated['text']}",
         }
 
     def get_supported_formats(self) -> dict[str, Any]:

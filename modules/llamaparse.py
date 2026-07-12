@@ -552,24 +552,16 @@ class LlamaParseEngine:
         return mapping.get(ext, ParseFormat.TXT)
 
     def _clean_text(self, text: str) -> str:
-        text = re.sub(r"\r
-", "
-", text)
-        text = re.sub(r"
-{3,}", "
-
-", text)
+        text = re.sub(r"\r\n", "\n", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
         text = re.sub(r"[ \t]+", " ", text)
-        text = re.sub(r" +
-", "
-", text)
+        text = re.sub(r" +\n", "\n", text)
         text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
         return text.strip()
 
     def _extract_sections(self, text: str) -> list[dict[str, str]]:
         sections = []
-        lines = text.split("
-")
+        lines = text.split("\n")
         current_section = "header"
         current_content = []
         for line in lines:
@@ -578,15 +570,13 @@ class LlamaParseEngine:
                 stripped and len(stripped) < 80 and (stripped.isupper() or re.match(r"^[A-Z][^.!?]+$", stripped))
             ):
                 if current_content:
-                    sections.append({"title": current_section, "content": "
-".join(current_content)})
+                    sections.append({"title": current_section, "content": "\n".join(current_content)})
                 current_section = stripped.lstrip("#").strip()
                 current_content = []
             else:
                 current_content.append(line)
         if current_content:
-            sections.append({"title": current_section, "content": "
-".join(current_content)})
+            sections.append({"title": current_section, "content": "\n".join(current_content)})
         if not sections:
             sections.append({"title": "main", "content": text})
         return sections
@@ -629,9 +619,7 @@ class LlamaParseEngine:
 
     def _chunk_paragraph(self, text: str, max_size: int, seen: Set | None) -> list[dict[str, Any]]:
         chunks = []
-        paragraphs = re.split(r"
-\s*
-", text)
+        paragraphs = re.split(r"\n\s*", text)
         current = ""
         char_pos = 0
         for para in paragraphs:
@@ -645,13 +633,9 @@ class LlamaParseEngine:
                         seen.add(content)
                     chunks.append({"content": content, "start_char": char_pos, "end_char": char_pos + len(content)})
                 char_pos += len(current)
-                current = para + "
-
-"
+                current = para + "\n"
             else:
-                current += para + "
-
-"
+                current += para + "\n"
         if current.strip():
             content = current.strip()
             if not seen or content not in seen:
@@ -700,8 +684,7 @@ class LlamaParseEngine:
 
     def _extract_tables_sim(self, text: str) -> list[dict[str, Any]]:
         tables = []
-        lines = text.split("
-")
+        lines = text.split("\n")
         i = 0
         while i < len(lines):
             line = lines[i].strip()
@@ -722,12 +705,9 @@ class LlamaParseEngine:
                 i = j
             else:
                 i += 1
-        csv_blocks = re.findall(r"(\w+(?:,\w+)+
-(?:\w+(?:,\w+)+
-?)+)", text)
+        csv_blocks = re.findall(r"(\w+(?:,\w+)+\n(?:\w+(?:,\w+)+\n?)+)", text)
         for idx, block in enumerate(csv_blocks):
-            rows = [r.split(",") for r in block.strip().split("
-") if r.strip()]
+            rows = [r.split(",") for r in block.strip().split("\n") if r.strip()]
             if rows and len(rows) > 1:
                 tid = hashlib.md5(f"csv:{idx}".encode()).hexdigest()[:12]
                 tables.append(
@@ -743,8 +723,7 @@ class LlamaParseEngine:
 
     def _extract_metadata(self, text: str, filename: str) -> dict[str, Any]:
         meta = {"filename": filename, "format": self._detect_format(filename).value}
-        lines = text.split("
-")
+        lines = text.split("\n")
         for line in lines[:20]:
             m = re.match(r"^[Tt]itle:\s*(.+)", line)
             if m:

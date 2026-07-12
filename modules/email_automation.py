@@ -202,9 +202,9 @@ class EmailTemplateEngine:
 <table border="1" cellpadding="8">{content}</table>
 <p>本邮件由 AUTO-EVO-AI 自动生成</p>
 </body></html>""",
-                "body_text": "系统报告: {title}
+                "body_text": """系统报告: {title}
 报告时间: {date}
-{content}",
+{content}""",
             },
             "alert_notification": {
                 "subject": "【告警】{module} - {alert_type}",
@@ -215,9 +215,9 @@ class EmailTemplateEngine:
 <p><b>时间:</b> {time}</p>
 <p><b>严重程度:</b> {severity}</p>
 </body></html>""",
-                "body_text": "告警: {module} - {alert_type}
+                "body_text": """告警: {module} - {alert_type}
 详情: {detail}
-时间: {time}",
+时间: {time}""",
             },
             "task_result": {
                 "subject": "【任务完成】{task_name}",
@@ -228,9 +228,9 @@ class EmailTemplateEngine:
 <p><b>耗时:</b> {duration}ms</p>
 <pre>{result}</pre>
 </body></html>""",
-                "body_text": "任务完成: {task_name}
+                "body_text": """任务完成: {task_name}
 状态: {status}
-{result}",
+{result}""",
             },
         }
 

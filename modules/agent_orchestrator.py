@@ -1070,8 +1070,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
                         if ctx_parts:
 
-                            memory_context = "
-".join(ctx_parts)
+                            memory_context = "\n".join(ctx_parts)
 
                             self.logger.info(f"[P2记忆] 检索到 {len(ctx_parts)} 条相关记忆")
 
@@ -1095,9 +1094,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
             if memory_context:
 
-                user_input = f"【相关背景】{memory_context}
-
-【当前需求】{user_input}"
+                 user_input = f"【相关背景】{memory_context}\n\n【当前需求】{user_input}"
 
 
 
@@ -1767,7 +1764,7 @@ class AgentOrchestrator(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin)
 
         bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
 
-        logger.info(f"  [{bar}] {pct:3d}% {msg}"))
+        logger.info(f"  [{bar}] {pct:3d}% {msg}")
 
 
 
@@ -1949,11 +1946,11 @@ if __name__ == "__main__":
 
 
 
-    logger.info("=" * 60))
+    logger.info("=" * 60)
 
     # print("AUTO-EVO-AI V0.1 — Agent Orchestrator 自测")
 
-    logger.info("=" * 60))
+    logger.info("=" * 60)
 
 
 
@@ -1963,8 +1960,7 @@ if __name__ == "__main__":
 
     # 测试1：意图分析
 
-    # print("
---- 测试1：意图分析 ---")
+    # print(...)
 
     test_inputs = [
 
@@ -1986,35 +1982,33 @@ if __name__ == "__main__":
 
         intent, conf, sec = IntentAnalyzer.analyze(inp)
 
-        logger.info(f"  [{conf:.0%}] {inp}"))
+        logger.info(f"  [{conf:.0%}] {inp}")
 
-        logger.info(f"    → 主意图: {intent.value} | 次要: {[s.value for s in sec]}"))
+        logger.info(f"    → 主意图: {intent.value} | 次要: {[s.value for s in sec]}")
 
 
 
     # 测试2：任务规划
 
-    # print("
---- 测试2：任务规划 ---")
+    # print(...)
 
     plan = orch.explain("把今天的销售数据整理成报告发给张总")
 
-    logger.info(f"  主意图: {plan['primary_intent']} (置信度: {plan['confidence']})"))
+    logger.info(f"  主意图: {plan['primary_intent']} (置信度: {plan['confidence']})")
 
-    logger.info(f"  步骤数: {plan['estimated_steps']}"))
+    logger.info(f"  步骤数: {plan['estimated_steps']}")
 
     for step in plan["plan"]:
 
         dep = "串行" if not step["parallel"] else "并行"
 
-        logger.info(f"    Step {step['step']}: {step['name']} ({step['module']}) [{dep}]"))
+        logger.info(f"    Step {step['step']}: {step['name']} ({step['module']}) [{dep}]")
 
 
 
     # 测试3：实际执行
 
-    # print("
---- 测试3：实际执行 ---")
+    # print(...)
 
 
 
@@ -2026,48 +2020,45 @@ if __name__ == "__main__":
 
     )
 
-    logger.info(f"
-  结果: {result.status.value}"))
+    logger.info(f"\n   结果: {result.status.value}")
 
-    logger.info(f"  质量评分: {result.quality_score:.0%}"))
+    logger.info(f"  质量评分: {result.quality_score:.0%}")
 
-    logger.info(f"  子任务: {len(result.sub_tasks)}"))
+    logger.info(f"  子任务: {len(result.sub_tasks)}")
 
     for st in result.sub_tasks:
 
         icon = "✅" if st.status == TaskStatus.COMPLETED else "⚠️" if st.status == TaskStatus.DEGRADED else "❌"
 
-        logger.info(f"    {icon} {st.name}: {st.status.value} ({st.duration_ms:.0f}ms)"))
+        logger.info(f"    {icon} {st.name}: {st.status.value} ({st.duration_ms:.0f}ms)")
 
     if result.lessons_learned:
 
-        logger.info(f"  经验: {result.lessons_learned}"))
+        logger.info(f"  经验: {result.lessons_learned}")
 
 
 
     # 测试4：编排器状态
 
-    # print("
---- 测试4：编排器状态 ---")
+    # print(...)
 
     status = orch.get_status()
 
-    logger.info(f"  注册模块: {status['registered_modules']}"))
+    logger.info(f"  注册模块: {status['registered_modules']}")
 
-    logger.info(f"  已加载: {len(status['loaded_modules'])}"))
+    logger.info(f"  已加载: {len(status['loaded_modules'])}")
 
-    logger.info(f"  加载错误: {len(status['load_errors'])}"))
+    logger.info(f"  加载错误: {len(status['load_errors'])}")
 
-    logger.info(f"  历史任务: {status['task_history_size']}"))
+    logger.info(f"  历史任务: {status['task_history_size']}")
 
 
 
-    logger.info("
-" + "=" * 60))
+    logger.info("\n" + "=" * 60)
 
-    logger.info("✅ Agent Orchestrator 自测完成"))
+    logger.info("✅ Agent Orchestrator 自测完成")
 
-    logger.info("=" * 60))
+    logger.info("=" * 60)
 
 
 

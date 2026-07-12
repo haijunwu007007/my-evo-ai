@@ -692,12 +692,83 @@ class UIRenderer(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _apply_layout(self, content: str, layout: LayoutConfig) -> str:
         """应用布局"""
-        return f"""<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <meta name="description" content="AUTO-EVO-AI Enterprise">\n  <style>\n    :root {{\n      --max-width: {layout.max_width};\n      --sidebar-width: {layout.sidebar_width};\n      --header-height: {layout.header_height};\n      --footer-height: {layout.footer_height};\n      --columns: {layout.columns};\n    }}\n    * {{ margin: 0; padding: 0; box-sizing: border-box; }}\n    body {{ font-family: system-ui, sans-serif; color: #1E293B; background: #F8FAFC; }}\n    .app-layout {{ max-width: var(--max-width); margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }}\n    .app-header {{ height: var(--header-height); background: white; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; padding: 0 24px; }}\n    .app-sidebar {{ width: var(--sidebar-width); background: white; border-right: 1px solid #E2E8F0; overflow-y: auto; }}\n    .app-footer {{ height: var(--footer-height); background: white; border-top: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; }}\n    .app-content {{ flex: 1; padding: 24px; overflow-y: auto; }}\n    .grid {{ display: grid; gap: 16px; }}\n    .grid-cols-1 {{ grid-template-columns: repeat(1, 1fr); }}\n    .grid-cols-2 {{ grid-template-columns: repeat(2, 1fr); }}\n    .grid-cols-3 {{ grid-template-columns: repeat(3, 1fr); }}\n    .grid-cols-4 {{ grid-template-columns: repeat(4, 1fr); }}\n    .card {{ background: white; border-radius: 8px; border: 1px solid #E2E8F0; overflow: hidden; }}\n    .card-header {{ padding: 16px 20px; border-bottom: 1px solid #E2E8F0; font-weight: 600; }}\n    .card-body {{ padding: 20px; }}\n    .btn {{ display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }}\n    .btn-primary {{ background: #3B82F6; color: white; }}\n    .btn-primary:hover {{ background: #2563EB; }}\n    .btn-danger {{ background: #EF4444; color: white; }}\n    .btn-success {{ background: #10B981; color: white; }}\n    .badge {{ display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 12px; font-weight: 500; }}\n    .badge-success {{ background: #D1FAE5; color: #065F46; }}\n    .badge-danger {{ background: #FEE2E2; color: #991B1B; }}\n    .badge-warning {{ background: #FEF3C7; color: #92400E; }}\n    .badge-info {{ background: #DBEAFE; color: #1E40AF; }}\n    .alert {{ padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }}\n    .alert-success {{ background: #D1FAE5; color: #065F46; }}\n    .alert-danger {{ background: #FEE2E2; color: #991B1B; }}\n    .alert-warning {{ background: #FEF3C7; color: #92400E; }}\n    .spinner {{ border: 3px solid #E2E8F0; border-top-color: #3B82F6; border-radius: 50%; animation: spin 0.8s linear infinite; }}\n    .spinner-sm {{ width: 16px; height: 16px; }}\n    .spinner-md {{ width: 24px; height: 24px; }}\n    .spinner-lg {{ width: 40px; height: 40px; }}\n    @keyframes spin {{ to {{ transform: rotate(360deg); }} }}\n    @media (max-width: 768px) {{\n      .grid-cols-2, .grid-cols-3, .grid-cols-4 {{ grid-template-columns: 1fr; }}\n      .app-sidebar {{ display: none; }}\n    }}\n    <!-- THEME_CSS -->\n  </style>\n</head>\n<body>\n  <div class="app-layout">\n    <div class="app-content">{content}</div>\n  </div>\n</body>\n</html>"""
+        return f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AUTO-EVO-AI Enterprise">
+  <style>
+    :root {{
+      --max-width: {layout.max_width};
+      --sidebar-width: {layout.sidebar_width};
+      --header-height: {layout.header_height};
+      --footer-height: {layout.footer_height};
+      --columns: {layout.columns};
+    }}
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{ font-family: system-ui, sans-serif; color: #1E293B; background: #F8FAFC; }}
+    .app-layout {{ max-width: var(--max-width); margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }}
+    .app-header {{ height: var(--header-height); background: white; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; padding: 0 24px; }}
+    .app-sidebar {{ width: var(--sidebar-width); background: white; border-right: 1px solid #E2E8F0; overflow-y: auto; }}
+    .app-footer {{ height: var(--footer-height); background: white; border-top: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; }}
+    .app-content {{ flex: 1; padding: 24px; overflow-y: auto; }}
+    .grid {{ display: grid; gap: 16px; }}
+    .grid-cols-1 {{ grid-template-columns: repeat(1, 1fr); }}
+    .grid-cols-2 {{ grid-template-columns: repeat(2, 1fr); }}
+    .grid-cols-3 {{ grid-template-columns: repeat(3, 1fr); }}
+    .grid-cols-4 {{ grid-template-columns: repeat(4, 1fr); }}
+    .card {{ background: white; border-radius: 8px; border: 1px solid #E2E8F0; overflow: hidden; }}
+    .card-header {{ padding: 16px 20px; border-bottom: 1px solid #E2E8F0; font-weight: 600; }}
+    .card-body {{ padding: 20px; }}
+    .btn {{ display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }}
+    .btn-primary {{ background: #3B82F6; color: white; }}
+    .btn-primary:hover {{ background: #2563EB; }}
+    .btn-danger {{ background: #EF4444; color: white; }}
+    .btn-success {{ background: #10B981; color: white; }}
+    .badge {{ display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 12px; font-weight: 500; }}
+    .badge-success {{ background: #D1FAE5; color: #065F46; }}
+    .badge-danger {{ background: #FEE2E2; color: #991B1B; }}
+    .badge-warning {{ background: #FEF3C7; color: #92400E; }}
+    .badge-info {{ background: #DBEAFE; color: #1E40AF; }}
+    .alert {{ padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }}
+    .alert-success {{ background: #D1FAE5; color: #065F46; }}
+    .alert-danger {{ background: #FEE2E2; color: #991B1B; }}
+    .alert-warning {{ background: #FEF3C7; color: #92400E; }}
+    .spinner {{ border: 3px solid #E2E8F0; border-top-color: #3B82F6; border-radius: 50%; animation: spin 0.8s linear infinite; }}
+    .spinner-sm {{ width: 16px; height: 16px; }}
+    .spinner-md {{ width: 24px; height: 24px; }}
+    .spinner-lg {{ width: 40px; height: 40px; }}
+    @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+    @media (max-width: 768px) {{
+      .grid-cols-2, .grid-cols-3, .grid-cols-4 {{ grid-template-columns: 1fr; }}
+      .app-sidebar {{ display: none; }}
+    }}
+    <!-- THEME_CSS -->
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-content">{content}</div>
+  </div>
+</body>
+</html>"""
 
     def _generate_theme_css(self) -> str:
         """生成主题CSS变量"""
         theme = self._themes.get(self._active_theme, self._themes.get("default", ThemeConfig()))
-        vars_css = f"""\n    --color-primary: {theme.primary_color};\n    --color-secondary: {theme.secondary_color};\n    --color-accent: {theme.accent_color};\n    --color-error: {theme.error_color};\n    --color-warning: {theme.warning_color};\n    --color-success: {theme.success_color};\n    --color-info: {theme.info_color};\n    --font-family: {theme.font_family};\n    --font-size-base: {theme.font_size_base};\n    --border-radius: {theme.border_radius};\n    --shadow: {theme.shadow};"""
+        vars_css = f"""
+    --color-primary: {theme.primary_color};
+    --color-secondary: {theme.secondary_color};
+    --color-accent: {theme.accent_color};
+    --color-error: {theme.error_color};
+    --color-warning: {theme.warning_color};
+    --color-success: {theme.success_color};
+    --color-info: {theme.info_color};
+    --font-family: {theme.font_family};
+    --font-size-base: {theme.font_size_base};
+    --border-radius: {theme.border_radius};
+    --shadow: {theme.shadow};"""
         for k, v in theme.custom_css_vars.items():
             vars_css += f"\n    {k}: {v};"
         return vars_css

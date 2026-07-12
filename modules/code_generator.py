@@ -210,8 +210,7 @@ class TemplateAnalyzer:
 
     def analyze_template(self, template: str, language: str = "python") -> dict[str, Any]:
         """分析代码模板质量"""
-        lines = template.strip().split("
-")
+        lines = template.strip().split("\n")
         total_lines = len(lines)
         code_lines = [l for l in lines if l.strip() and not l.strip().startswith(("#", "//", "/*", "*"))]
         blank_lines = total_lines - len(code_lines)
@@ -428,7 +427,7 @@ module_class = {class_name}
                 Language.PYTHON,
                 "api",
                 "FastAPI RESTful API接口",
-                """from fastapi import APIRouter, HTTPException, Depends
+                '''from fastapi import APIRouter, HTTPException, Depends
 
 router = APIRouter(prefix="/{prefix}", tags=["{tag}"])
 
@@ -464,7 +463,7 @@ def list_{endpoint}s(skip: int = 0, limit: int = 50):
 def delete_{endpoint}(item_id: str):
     """删除{tag}"""
     return {{"status": "deleted"}}
-""",
+''',
                 variables=["prefix", "tag", "model_name", "endpoint"],
                 tags=["api", "fastapi", "rest"],
             ),
@@ -474,7 +473,7 @@ def delete_{endpoint}(item_id: str):
                 Language.PYTHON,
                 "test",
                 "pytest单元测试模板",
-                """import pytest
+                '''import pytest
 
 @pytest.fixture
 def instance():
@@ -510,7 +509,7 @@ class Test{class_name}:
         instance.initialize()
         instance.shutdown()
         assert instance._initialized is False
-""",
+''',
                 variables=["module_path", "class_name"],
                 tags=["test", "pytest", "quality"],
             ),
@@ -520,7 +519,7 @@ class Test{class_name}:
                 Language.DOCKERFILE,
                 "devops",
                 "生产级Dockerfile",
-                """FROM python:3.11-slim as builder
+                '''FROM python:3.11-slim as builder
 
 WORKDIR /app
 COPY requirements.txt .
@@ -541,7 +540,7 @@ EXPOSE {port}
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:{port}/health')"
 
 CMD ["python", "main.py"]
-""",
+''',
                 variables=["port"],
                 tags=["docker", "devops", "deploy"],
             ),
@@ -551,7 +550,7 @@ CMD ["python", "main.py"]
                 Language.SQL,
                 "database",
                 "数据库迁移脚本",
-                """-- Migration: {migration_name}
+                '''-- Migration: {migration_name}
 -- Created: {created_at}
 -- Description: {description}
 
@@ -574,7 +573,7 @@ CREATE INDEX IF NOT EXISTS idx_{table_name}_created ON {table_name}(created_at);
 -- DROP TABLE IF EXISTS {table_name};
 
 COMMIT;
-""",
+''',
                 variables=["migration_name", "created_at", "description", "table_name"],
                 tags=["sql", "migration", "database"],
             ),
@@ -627,8 +626,7 @@ COMMIT;
                 "type": code_type,
                 "quality": review.quality.value,
                 "score": review.score,
-                "lines": code_with_doc.count("
-") + 1,
+                "lines": code_with_doc.count("\n") + 1,
                 "duration_ms": round(duration, 2),
                 "suggestions": review.suggestions[:5],
             }
@@ -674,11 +672,8 @@ def _implement_{name}({params}) -> Any:
     return {{"status": "implemented", "name": "{name}"}}
 '''
         elif code_type == "class":
-            methods = "
-".join(
-                f"    def {req}(self) -> Any:
-        # TODO: {req}
-        pass" for req in requirements[:5]
+            methods = "\n".join(
+                f"    def {req}(self) -> Any:\n        # TODO: {req}\n        pass" for req in requirements[:5]
             )
             return f'''class {name}:
     """
@@ -748,9 +743,7 @@ async function implement{Name[0].upper()}{name[1:]}(params) {{
 
 module.exports = {{ {name} }};
 """
-        return f"// {name}: {desc}
-// TODO: Implement
-"
+        return f"// {name}: {desc}\n// TODO: Implement\n"
 
     def _gen_typescript(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
         name = self._extract_name(desc)
@@ -830,9 +823,7 @@ main "$@"
 """
 
     def _gen_generic(self, desc: str, code_type: str, context: str | None, requirements: list[str]) -> str:
-        return f"// TODO: {desc}
-// Language: generic
-"
+        return f"// TODO: {desc}\n// Language: generic\n"
 
     def _extract_name(self, description: str) -> str:
         """从描述中提取标识符名"""
@@ -844,27 +835,20 @@ main "$@"
         """生成文档字符串"""
         parts = [f"{desc}."]
         if requirements:
-            parts.append(f"
-Requirements: {', '.join(requirements)}")
-        parts.append(f"
-Type: {code_type}")
-        parts.append(f"
-Generated: {datetime.now().isoformat()}")
-        return "
-".join(parts)
+            parts.append(f"\nRequirements: {', '.join(requirements)}")
+        parts.append(f"\nType: {code_type}")
+        parts.append(f"\nGenerated: {datetime.now().isoformat()}")
+        return "\n".join(parts)
 
     def _inject_docstring(self, code: str, docstring: str) -> str:
         """注入文档字符串"""
         if code.strip().startswith('"""') or code.strip().startswith("'''"):
             return code
-        lines = code.split("
-")
+        lines = code.split("\n")
         indent = ""
         if lines and lines[0].startswith(" "):
             indent = " " * (len(lines[0]) - len(lines[0].lstrip()))
-        doc_line = f'{indent}"""
-{indent}{docstring}
-{indent}"""'
+        doc_line = f'{indent}\"\"\"\n{indent}{docstring}\n{indent}\"\"\"'
         if lines and (
             lines[0].strip().startswith("class ")
             or lines[0].strip().startswith("def ")
@@ -876,8 +860,7 @@ Generated: {datetime.now().isoformat()}")
             lines.insert(1, f"{indent}{docstring}")
             lines.insert(2, f'{indent}"""')
             lines.insert(3, "")
-        return "
-".join(lines)
+        return "\n".join(lines)
 
     def _quick_review(self, code: str, language: Language) -> ReviewResult:
         """快速代码审查"""
@@ -885,8 +868,7 @@ Generated: {datetime.now().isoformat()}")
         suggestions = []
         score = 100.0
 
-        lines = code.split("
-")
+        lines = code.split("\n")
         total_lines = len(lines)
 
         # 检查长度
@@ -977,7 +959,6 @@ Generated: {datetime.now().isoformat()}")
             suggestions.append("eval/exec 存在代码注入风险")
         if "pass" in code and code.count("pass") > 3:
             suggestions.append("过多pass占位，应实现或添加TODO注释")
-        logger.info(int(" in code:)
             suggestions.append("生产代码应使用logging替代print")
         return suggestions
 

@@ -488,9 +488,9 @@ class EmailProModule:
                 name="告警通知",
                 subject="[${level}] ${title}",
                 body_html="<h2>${title}</h2><p>${message}</p><p>时间：${time}</p>",
-                body_text="${title}
+                body_text="""${title}
 ${message}
-时间：${time}",
+时间：${time}""",
                 variables=["level", "title", "message", "time"],
                 category="notification",
             ),

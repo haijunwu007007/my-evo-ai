@@ -202,7 +202,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 "tpl_design",
                 "系统设计文档",
                 "design",
-                "# {title}
+                """# {title}
 
 ## 概述
 {overview}
@@ -214,14 +214,14 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 {interfaces}
 
 ## 数据模型
-{data_model}",
+{data_model}""",
                 ["title", "overview", "architecture", "interfaces", "data_model"],
             ),
             (
                 "tpl_api",
                 "API设计文档",
                 "api",
-                "# {title}
+                """# {title}
 
 ## 基本信息
 - 版本: {version}
@@ -231,14 +231,14 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 {endpoints}
 
 ## 认证方式
-{auth}",
+{auth}""",
                 ["title", "version", "base_path", "endpoints", "auth"],
             ),
             (
                 "tpl_ux",
                 "UX设计文档",
                 "ux",
-                "# {title}
+                """# {title}
 
 ## 用户画像
 {personas}
@@ -250,14 +250,14 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 {interaction}
 
 ## 视觉规范
-{visual}",
+{visual}""",
                 ["title", "personas", "user_flow", "interaction", "visual"],
             ),
             (
                 "tpl_arch",
                 "架构设计文档",
                 "architecture",
-                "# {title}
+                """# {title}
 
 ## 系统目标
 {goals}
@@ -269,7 +269,7 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
 {deployment}
 
 ## 扩展性设计
-{scalability}",
+{scalability}""",
                 ["title", "goals", "tech_stack", "deployment", "scalability"],
             ),
         ]
@@ -711,14 +711,14 @@ class AwesomeDesignMdManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
                 "version": doc.version,
             }
         elif format_type == "plain_text":
-            exported = f"# {doc.title}
+            exported = f"""# {doc.title}
 
-{doc.content}"
+{doc.content}"""
         else:
-            exported = f"# {doc.title}
+            exported = f"""# {doc.title}
 > Type: {doc.doc_type} | Status: {doc.status}
 
-{doc.content}"
+{doc.content}"""
         return {"success": True, "format": format_type, "content": exported}
 
 module_class = AwesomeDesignMdManager

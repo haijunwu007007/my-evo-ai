@@ -541,8 +541,7 @@ class TokenBudgetManager:
         # 简单的精简策略
         # 实际应用中可以使用LLM来精简
 
-        lines = prompt.split("
-")
+        lines = prompt.split("\n")
         concise_lines = []
         current_tokens = 0
 
@@ -554,12 +553,10 @@ class TokenBudgetManager:
                 current_tokens += line_tokens
             else:
                 # 添加截断说明
-                concise_lines.append(f"
-[内容已精简，原长度 {len(prompt)} 字符]")
+                concise_lines.append(f"\n[内容已精简，原长度 {len(prompt)} 字符]")
                 break
 
-        return "
-".join(concise_lines)
+        return "\n".join(concise_lines)
 
     def create_concise_context(self, context: str, max_tokens: int = 1000) -> str:
         """
@@ -575,8 +572,7 @@ class TokenBudgetManager:
             str: 精简后的上下文
         """
         # 移除详细说明
-        lines = context.split("
-")
+        lines = context.split("\n")
         精简_lines = []
 
         skip_patterns = ["详细说明", "完整示例", "下面是", "例如：", "比如："]
@@ -591,13 +587,11 @@ class TokenBudgetManager:
             if not skip:
                 精简_lines.append(line)
 
-        result = "
-".join(精简_lines)
+        result = "\n".join(精简_lines)
 
         # 如果还是太长，继续精简
         if len(result) > max_tokens * 4:
-            result = result[: max_tokens * 4] + "
-[内容已截断]"
+            result = result[: max_tokens * 4] + "\n[内容已截断]"
 
         return result
 
@@ -626,8 +620,7 @@ class TokenBudgetManager:
         status = self.get_status()
 
         lines = [
-            "## Token预算状态
-",
+            "## Token预算状态\n",
             f"| 项目 | 数值 |",
             f"|------|------|",
             f"| 每日限额 | {status.daily_limit:,} tokens |",
@@ -641,8 +634,7 @@ class TokenBudgetManager:
             f"| 重置倒计时 | {status.days_until_reset}天 |",
         ]
 
-        return "
-".join(lines)
+        return "\n".join(lines)
 
 # ============================================================================
 # 快捷函数
@@ -677,81 +669,51 @@ def reset_budget():
 # ============================================================================
 
 if __name__ == "__main__":
-    logger.info("=" * 60))
-    # print("AUTO-EVO-AI V0.1 - Token Budget Module")
-    logger.info("=" * 60))
-
-    # 创建管理器
+    logger.info("=" * 60)
+    logger.info("=" * 60)
     manager = TokenBudgetManager()
-
-    # 设置每日限额
-    manager.set_daily_limit(50000)  # 5万tokens
-    logger.info("
-📊 已设置每日限额: 50,000 tokens"))
-
-    # 模拟使用
-    logger.info("
-💬 模拟使用场景:"))
-
+    manager.set_daily_limit(50000)
+    logger.info("\n已设置每日限额: 50,000 tokens")
+    logger.info("\n模拟使用场景:")
     scenarios = [
         (1000, "gpt-4o-mini", "首次问候"),
         (2000, "gpt-4o-mini", "查询数据"),
         (5000, "gpt-4o", "复杂分析"),
         (3000, "gpt-4o-mini", "再次查询"),
     ]
-
     for tokens, model, desc in scenarios:
         success = manager.record_usage(tokens, model, "test-conv")
         cost = manager._calculate_cost(tokens, model)
-
-        status = "✅" if success else "❌"
+        status = "OK" if success else "FAIL"
         concise = " [精简]" if manager.should_use_concise_mode() else ""
-
-        logger.info(f"   {status} {desc}: {tokens} tokens ({model}) - ${cost:.6f}{concise}"))
-
-    # 获取状态
+        logger.info(f"   {status} {desc}: {tokens} tokens ({model}) - ${cost:.6f}{concise}")
     status = manager.get_status()
-    logger.info("
-📈 当前预算状态:"))
-    logger.info(f"   - 已使用: {status.used_today:,} / {status.daily_limit:,}"))
-    logger.info(f"   - 剩余: {status.remaining:,} tokens"))
-    logger.info(f"   - 使用比例: {status.percentage:.1%}"))
-    logger.info(f"   - 当前模式: {status.mode.value}"))
-    logger.info(f"   - 精简模式: {'是' if status.is_concise else '否'}"))
-    logger.info(f"   - 估计成本: ${status.estimated_cost_usd:.6f}"))
-
-    # 成本分析
-    logger.info("
-💰 成本分析:"))
+    logger.info("\n当前预算状态:")
+    logger.info(f"   - 已使用: {status.used_today:,} / {status.daily_limit:,}")
+    logger.info(f"   - 剩余: {status.remaining:,} tokens")
+    logger.info(f"   - 使用比例: {status.percentage:.1%}")
+    logger.info(f"   - 当前模式: {status.mode.value}")
+    logger.info(f"   - 精简模式: {'是' if status.is_concise else '否'}")
+    logger.info(f"   - 估计成本: ${status.estimated_cost_usd:.6f}")
+    logger.info("\n成本分析:")
     breakdown = manager.get_cost_breakdown()
     for model, cost in breakdown.items():
-        logger.info(f"   - {model}: ${cost:.6f}"))
-
-    # 精简模式测试
-    logger.info("
-📝 精简模式提示:"))
+        logger.info(f"   - {model}: ${cost:.6f}")
+    logger.info("\n精简模式提示:")
     if manager.should_use_concise_mode():
-        logger.info("   ⚠️ 已启用精简模式，减少非必要信息"))
-        test_context = "这是一个详细的上下文。详细说明：第一步做什么，第二步做什么，第三步做什么。"
+        logger.info("   已启用精简模式")
+        test_context = "这是一个详细的上下文。"
         concise = manager.create_concise_context(test_context, max_tokens=500)
-        logger.info(f"   精简后: {concise[:100]}..."))
-
-    # 周报
-    logger.info("
-📅 周报:"))
+        logger.info(f"   精简后: {concise[:100]}...")
+    logger.info("\n周报:")
     report = manager.get_weekly_report()
     for key, value in report.items():
-        logger.info(f"   - {key}: {value}"))
-
-    # Markdown报告
-    logger.info("
-📄 Markdown报告:"))
-    logger.info(manager.to_markdown()))
-
-    logger.info("
-" + "=" * 60))
-    logger.info("Token Budget Module 测试完成!"))
-    logger.info("=" * 60))
+        logger.info(f"   - {key}: {value}")
+    logger.info("\nMarkdown报告:")
+    logger.info(manager.to_markdown())
+    logger.info("\n" + "=" * 60)
+    logger.info("Token Budget Module 测试完成!")
+    logger.info("=" * 60)
 
     async def execute(self, action: str = "status", params: dict = None) -> dict:
         """执行入口 - 路由到token_budget业务方法"""

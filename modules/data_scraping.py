@@ -229,8 +229,7 @@ class DataParserEngine:
             return "html"
         if data_stripped.startswith("{") or data_stripped.startswith("["):
             return "json"
-        if "," in data_stripped.split("
-")[0]:
+        if "," in data_stripped.split("\n")[0]:
             return "csv"
         return "text"
 
@@ -326,9 +325,9 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
     def _extract_links(self, html: str, base_url: str) -> list[str]:
         """提取链接"""
-        links = re.findall(r'href=["'](https?://[^"']+)["']', html)
+        links = re.findall(r'''href=["'](https?://[^"']+)["']''', html)
         # 相对链接转绝对
-        for match in re.findall(r'href=["']([^"']+)["']', html):
+        for match in re.findall(r'''href=["']([^"']+)["']''', html):
             if match.startswith("/") or not match.startswith("http"):
                 links.append(urljoin(base_url, match))
         # 去重和规范化
@@ -361,13 +360,13 @@ class DataScraping(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
             # 简单CSS选择器支持：tag, .class, #id, tag.class
             if selector.startswith("#"):
                 match = re.search(
-                    rf'<[^>]*id=["']{re.escape(selector[1:])}["'][^>]*>(.*?)</[^>]+>', html, re.DOTALL | re.IGNORECASE
+                    rf'''<[^>]*id=["']{re.escape(selector[1:])}["'][^>]*>(.*?)</[^>]+>''', html, re.DOTALL | re.IGNORECASE
                 )
                 if match:
                     results[name] = self._html_to_text(match.group(1))
             elif selector.startswith("."):
                 matches = re.findall(
-                    rf'<[^>]*class=["'][^"']*{re.escape(selector[1:])}[^"']*["'][^>]*>(.*?)</[^>]+>',
+                    rf'''<[^>]*class=["'][^"']*{re.escape(selector[1:])}[^"']*["'][^>]*>(.*?)</[^>]+>''',
                     html,
                     re.DOTALL | re.IGNORECASE,
                 )

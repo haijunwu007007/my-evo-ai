@@ -39,14 +39,4 @@ class SiteClonerPipeline:
         if pid: return {"success": True, "pipeline": self._pipelines.get(pid, {})}
         return {"success": True, "pipelines": list(self._pipelines.values()), "total": len(self._pipelines)}
 
-    # EnterpriseModule 标准接口
-    def status(self) -> dict:
-        return {"module": "SiteClonerPipeline", "status": "healthy", "version": "1.0.0"}
-    def health_check(self) -> dict:
-        return {"healthy": True, "status": "healthy", "module": "SiteClonerPipeline"}
-    def initialize(self) -> dict:
-        return {"success": True, "module": "SiteClonerPipeline"}
-    def shutdown(self) -> dict:
-        return {"success": True, "module": "SiteClonerPipeline"}
-
 module_class = SiteClonerPipeline

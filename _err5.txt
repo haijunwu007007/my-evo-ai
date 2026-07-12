@@ -1,0 +1,19 @@
+D:/AUTO-EVO-AI-V0.1/modules\incident_response.py:275: SyntaxWarning: invalid decimal literal
+  inc.resolution = "Added connection pooling to database layer"        inc.resolved_at = time.time() - 3600inc.mttr = 1800
+Traceback (most recent call last):
+  File "D:\AUTO-EVO-AI-V0.1\_fix_all_batch5.py", line 109, in <module>
+    final_errors = [f for f in sorted(os.listdir(BASE)) if f.endswith('.py') and not (lambda fp: (lambda: ast.parse(open(fp,'r',encoding='utf-8').read(),filename=fp))() if True else True)(os.path.join(BASE,f)) ]
+                                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AUTO-EVO-AI-V0.1\_fix_all_batch5.py", line 109, in <lambda>
+    final_errors = [f for f in sorted(os.listdir(BASE)) if f.endswith('.py') and not (lambda fp: (lambda: ast.parse(open(fp,'r',encoding='utf-8').read(),filename=fp))() if True else True)(os.path.join(BASE,f)) ]
+                                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\AUTO-EVO-AI-V0.1\_fix_all_batch5.py", line 109, in <lambda>
+    final_errors = [f for f in sorted(os.listdir(BASE)) if f.endswith('.py') and not (lambda fp: (lambda: ast.parse(open(fp,'r',encoding='utf-8').read(),filename=fp))() if True else True)(os.path.join(BASE,f)) ]
+                                                                                                          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\吴海军\AppData\Local\Python\pythoncore-3.14-64\Lib\ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "D:/AUTO-EVO-AI-V0.1/modules\agent_apollo.py", line 364
+    answer = "根据知识库检索结果：
+             ^
+SyntaxError: unterminated string literal (detected at line 364)

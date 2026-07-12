@@ -404,14 +404,11 @@ class PdfToolkit(EnterpriseModule):
 
                 text_pages[i + 1] = text
 
-                full_text.append(f"--- 第 {i + 1} 页 ---
-{text}")
+                full_text.append(f"--- 第 {i + 1} 页 ---\n{text}")
 
 
 
-        result = "
-
-".join(full_text)
+        result = "\n".join(full_text)
 
         if data.get("save", False):
 

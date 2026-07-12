@@ -1,0 +1,4 @@
+  File "D:\AUTO-EVO-AI-V0.1\_fix_v12_simple.py", line 53
+    text = text.replace('.strip("\\'"')', '.strip("\\'")')
+                                                    ^
+SyntaxError: unexpected character after line continuation character

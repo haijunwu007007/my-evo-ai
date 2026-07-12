@@ -659,7 +659,7 @@ class BigKeyDetectionManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterM
             "generated_at": datetime.now().isoformat(),
             "total_monitored": len(self._keys),
             "big_keys_count": len(self._big_keys),
-            logger.info(y_footprint": self.get_memory_footprint(),)
+            "memory_footprint": self.get_memory_footprint(),
             "top_big_keys": big_sorted[:20]
             if include_details
             else [

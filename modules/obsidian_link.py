@@ -387,10 +387,7 @@ class ObsidianLink:
     TAG_RE = re.compile(r"(?:^|\s)#([a-zA-Z0-9_\-/]+)")
     EMBED_RE = re.compile(r"!\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]")
     HEADER_RE = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
-    FRONTMATTER_RE = re.compile(r"^---\s*
-(.*?)
----\s*
-", re.DOTALL)
+    FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 
     def __init__(self):
         self._notes: dict[str, ObsidianNote] = {}
@@ -584,8 +581,7 @@ class ObsidianLink:
                 if title_lower in linked_titles:
                     continue
                 if title_lower in other.content.lower():
-                    lines = other.content.split("
-")
+                    lines = other.content.split("\n")
                     for i, line in enumerate(lines):
                         if title_lower in line.lower():
                             mentions.append(
@@ -752,8 +748,7 @@ class ObsidianLink:
                 target=target,
                 display_text=display,
                 context=match.group(0),
-                line_number=note.content[: match.start()].count("
-") + 1,
+                line_number=note.content[: match.start()].count("\n") + 1,
                 block_ref=block_ref,
                 header_ref=header_ref,
             )
@@ -786,8 +781,7 @@ class ObsidianLink:
             return
         fm_text = match.group(1)
         fm = {}
-        for line in fm_text.split("
-"):
+        for line in fm_text.split("\n"):
             if ":" in line:
                 key, val = line.split(":", 1)
                 key = key.strip()

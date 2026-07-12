@@ -132,8 +132,7 @@ class CodebaseIndexer(EnterpriseModule):
 
             text = open(fp, "r", encoding="utf-8", errors="replace").read()
 
-            lines = text.split("
-")
+            lines = text.split("\n")
 
             for line in lines:
 
@@ -201,7 +200,7 @@ class CodebaseIndexer(EnterpriseModule):
 
         for r in rows:
 
-            parts = r[0].replace("\", "/").split("/")
+            parts = r[0].replace("\\", "/").split("/")
 
             node = tree
 

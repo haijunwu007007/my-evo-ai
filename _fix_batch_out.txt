@@ -1,0 +1,4 @@
+  File "D:\AUTO-EVO-AI-V0.1\_fix_batch.py", line 47
+    ('__': ("return f'<{self.__class__.__name__} name={self.name}>'", None)),  # skip
+         ^
+SyntaxError: invalid syntax

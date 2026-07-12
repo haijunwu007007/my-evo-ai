@@ -1,0 +1,4 @@
+  File "D:\AUTO-EVO-AI-V0.1\_fix_all_crossline.py", line 123
+    errs = [f for f in sorted(os.listdir(BASE)) if f.endswith('.py') and not (lambda fp: ast.parse(open(fp,'r',encoding='utf-8').read(),filename=fp) if True else 1)(os.path.join(BASE,f)) if True else 1]
+                                                                                                                                                                                                   ^^^^
+SyntaxError: invalid syntax

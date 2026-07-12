@@ -384,8 +384,7 @@ class LogManager(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 SinkType.FILE,
                 "Error Log File",
                 LogLevel.ERROR,
-                "{timestamp}|{level}|{trace_id}|{module}|{function}:{line_no}|{message}
-{stack_trace}",
+                "{timestamp}|{level}|{trace_id}|{module}|{function}:{line_no}|{message}\n{stack_trace}",
                 True,
                 {"path": "logs/error.log", "rotation": "daily", "max_files": 90},
             ),

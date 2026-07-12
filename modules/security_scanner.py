@@ -429,7 +429,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "id": "SEC001",
                 "title": "SQL注入风险",
                 "level": VulnLevel.CRITICAL,
-                "pattern": r"(execute|cursor\.\w+)\s*\(\s*['"].*\%s|\.format\(|f['"].*SELECT|f['"].*INSERT",
+                "pattern": r"""(execute|cursor\.\w+)\s*\(\s*['"].*\%s|\.format\(|f['"].*SELECT|f['"].*INSERT""",
                 "category": "injection",
                 "remediation": "使用参数化查询替代字符串拼接",
             },
@@ -437,7 +437,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "id": "SEC002",
                 "title": "命令注入风险",
                 "level": VulnLevel.CRITICAL,
-                "pattern": r"os\.(system|popen|exec|spawn)\s*\(\s*['"].*\+|subprocess\.\w+\s*\(\s*['"].*\+|eval\s*\(",
+                "pattern": r"""os\.(system|popen|exec|spawn)\s*\(\s*['"].*\+|subprocess\.\w+\s*\(\s*['"].*\+|eval\s*\(""",
                 "category": "injection",
                 "remediation": "使用subprocess安全API或shlex.quote",
             },
@@ -453,7 +453,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "id": "SEC004",
                 "title": "硬编码敏感信息",
                 "level": VulnLevel.CRITICAL,
-                "pattern": r"(password|passwd|secret|api_key|apikey|token|private_key)\s*=\s*['"][^'"]{8,}['"]",
+                "pattern": r"""(password|passwd|secret|api_key|apikey|token|private_key)\s*=\s*['"][^'"]{8,}['"]""",
                 "category": "credentials",
                 "remediation": "使用环境变量或密钥管理器",
             },
@@ -493,7 +493,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "id": "SEC009",
                 "title": "路径遍历风险",
                 "level": VulnLevel.HIGH,
-                "pattern": r"open\s*\(\s*(os\.path\.join|request\.|user_).*(?:\+\s*['"]|\.format)",
+                "pattern": r"""open\s*\(\s*(os\.path\.join|request\.|user_).*(?:\+\s*['"]|\.format)""",
                 "category": "path_traversal",
                 "remediation": "验证和清理用户输入的路径",
             },
@@ -538,7 +538,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 "id": "CFG002",
                 "title": "密钥为空或默认值",
                 "level": VulnLevel.CRITICAL,
-                "pattern": r"(SECRET_KEY|API_KEY|JWT_SECRET|DB_PASSWORD)\s*=\s*['"]?(\s*|changeme|default|secret|password|12345)",
+                "pattern": r"""(SECRET_KEY|API_KEY|JWT_SECRET|DB_PASSWORD)\s*=\s*['"]?(\s*|changeme|default|secret|password|12345)""",
                 "file_patterns": [".py", ".env", ".yaml", ".yml", ".json"],
                 "remediation": "设置强随机密钥",
             },
@@ -822,8 +822,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
                 try:
                     with open(fpath, encoding="utf-8", errors="replace") as f:
                         content = f.read()
-                    lines = content.split("
-")
+                    lines = content.split("\n")
                     report.files_scanned += 1
 
                     for rule in self._config_rules:
@@ -868,8 +867,7 @@ class SecurityScanner(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
                     # 简单解析
                     if fname == "requirements.txt":
-                        for line in content.split("
-"):
+                        for line in content.split("\n"):
                             m = re.match(r"^([a-zA-Z0-9_-]+)[><=!~]*([\d.]+)?", line.strip())
                             if m:
                                 deps_found[m.group(1).lower()] = m.group(2) or "0"

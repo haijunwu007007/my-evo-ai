@@ -260,8 +260,7 @@ def _send_dingtalk(msg_type: str, content: str, title: str = "", url: str = "") 
 
         ts = str(round(time.time() * 1000))
 
-        sign_str = f"{ts}
-{secret}"
+        sign_str = f"{ts}\n{secret}"
 
         sign = b64encode(hmac.new(secret.encode(), sign_str.encode(), hashlib.sha256).digest()).decode()
 
@@ -377,9 +376,7 @@ def _test_channel(channel: str) -> dict:
 
     return _send(channel=channel, msg_type="text",
 
-                 content=f"Enterprise Notifier 测试消息
-时间: {ts}
-状态: 通道正常")
+                 content=f"Enterprise Notifier 测试消息\n时间: {ts}\n状态: 通道正常")
 
 
 
@@ -455,11 +452,11 @@ if __name__ == "__main__":
 
         r = await execute("status")
 
-        logger.info("Status:", json.dumps(r, ensure_ascii=False, indent=2)))
+        logger.info("Status:", json.dumps(r, ensure_ascii=False, indent=2))
 
         h = health_check()
 
-        logger.info("Health:", json.dumps(h, ensure_ascii=False, indent=2)))
+        logger.info("Health:", json.dumps(h, ensure_ascii=False, indent=2))
 
     asyncio.run(test())
 

@@ -573,8 +573,7 @@ class NLPEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
     def summarize(self, text: str, max_sentences: int = 3) -> dict[str, Any]:
         """文本摘要（抽取式）"""
         start = time.time()
-        sentences = re.split(r"[。！？
-]", text)
+        sentences = re.split(r"[。！？\n]", text)
         sentences = [s.strip() for s in sentences if s.strip()]
 
         if len(sentences) <= max_sentences:

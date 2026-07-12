@@ -325,15 +325,12 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
 
     def _split_sentences(self, text: str) -> list[str]:
         """分句"""
-        sentences = re.split(r"[。！？
-.!?]+", text)
+        sentences = re.split(r"[。！？\n.!?]+", text)
         return [s.strip() for s in sentences if len(s.strip()) > 5]
 
     def _split_paragraphs(self, text: str) -> list[str]:
         """分段"""
-        paragraphs = re.split(r"
-{2,}|\r
-{2,}", text)
+        paragraphs = re.split(r"\n{2,}|\r\n{2,}", text)
         return [p.strip() for p in paragraphs if p.strip()]
 
     def _tokenize(self, text: str) -> list[str]:
@@ -536,8 +533,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
                 bullet = sent
             bullets.append(f"- {bullet}")
 
-        summary = "
-".join(bullets)
+        summary = "\n".join(bullets)
 
         return SummaryResult(
             summary=summary,
@@ -569,8 +565,7 @@ class SummarizationEngine(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixi
             point = {"point": i + 1, "summary": sent, "importance": round(score, 4), "key_terms": phrases[:5]}
             points.append(point)
 
-        summary = "
-".join(f"{p['point']}. {p['summary']}" for p in points)
+        summary = "\n".join(f"{p['point']}. {p['summary']}" for p in points)
 
         return SummaryResult(
             summary=summary,

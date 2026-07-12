@@ -792,7 +792,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
             return "密码需包含数字"
 
-        if not re.search(r"[!@#$%^&*(),.?":{}|<>]", pwd):
+        if not re.search(r'[!@#$%^&*(),.?"\:{}|<>]', pwd):
 
             return "密码需包含特殊字符"
 
@@ -1230,8 +1230,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         elif fld.type == FieldType.SELECT:
 
-            opts = "
-".join(
+            opts = "\n".join(
 
                 f"<option value='{o['value']}' {'selected' if str(o['value']) == str(value) else ''}>{o['label']}</option>"
 
@@ -1243,8 +1242,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         elif fld.type == FieldType.MULTI_SELECT:
 
-            checks = "
-".join(
+            checks = "\n".join(
 
                 f"<label style='display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer'><input type='checkbox' name='{fld.name}' value='{o['value']}' {'checked' if o['value'] in (value or []) else ''} style='accent-color:#3B82F6' /><span style='font-size:14px;color:#334155'>{o['label']}</span></label>"
 
@@ -1256,8 +1254,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
         elif fld.type == FieldType.RADIO:
 
-            radios = "
-".join(
+            radios = "\n".join(
 
                 f"<label style='display:inline-flex;align-items:center;gap:8px;margin-right:16px;cursor:pointer'><input type='radio' name='{fld.name}' value='{o['value']}' {'checked' if str(o['value']) == str(value) else ''} style='accent-color:#3B82F6' /><span style='font-size:14px'>{o['label']}</span></label>"
 
@@ -1287,7 +1284,7 @@ class FormBuilder(EnterpriseModule, CircuitBreakerMixin, RateLimiterMixin):
 
             max_v = fld.props.get("max", 100)
 
-            return f"<div class='form-group'><label style='display:flex;justify-content:space-between;font-size:14px;font-weight:500;color:#334155;margin-bottom:6px'>{label}{required_mark}<span style='color:#64748B;font-weight:400'>{value or min_v}</span></label><input type='range' name='{fld.name}' min='{min_v}' max='{max_v}' value='{value or min_v}' style='width:100%;accent-color:#3B82F6' oninput="this.previousElementSibling.querySelector('span').textContent=this.value" />{error_html}</div>"
+            return f"<div class='form-group'><label style='display:flex;justify-content:space-between;font-size:14px;font-weight:500;color:#334155;margin-bottom:6px'>{label}{required_mark}<span style='color:#64748B;font-weight:400'>{value or min_v}</span></label><input type='range' name='{fld.name}' min='{min_v}' max='{max_v}' value='{value or min_v}' style='width:100%;accent-color:#3B82F6' oninput=\"this.previousElementSibling.querySelector('span').textContent=this.value\" />{error_html}</div>"
 
         elif fld.type == FieldType.DATE:
 
