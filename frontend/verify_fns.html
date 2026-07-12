@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Chat Engine 验证</title></head>
+<body style="font-family:sans-serif;padding:20px">
+<h1>验证 chat_engine.js 加载</h1>
+<div id="result">加载中...</div>
+<script src="/chat_engine.js?v=20260712c"></script>
+<script>
+var checks = {
+  'async function send': typeof send === 'function' && send.constructor.name === 'AsyncFunction',
+  'function clearHistory': typeof clearHistory === 'function',
+  'function showHistory': typeof showHistory === 'function',
+  'function toggleRightPanel': typeof toggleRightPanel === 'function',
+  'function toggleSidebarMobile': typeof toggleSidebarMobile === 'function',
+  'function toggleSidebar': typeof toggleSidebar === 'function',
+  'function toggleSGroup': typeof toggleSGroup === 'function',
+  'function switchChat': typeof switchChat === 'function',
+  'function toggleTheme': typeof toggleTheme === 'function',
+  'function doLogout': typeof doLogout === 'function',
+  'function checkLLM': typeof checkLLM === 'function',
+  'function quickTool': typeof quickTool === 'function'
+};
+var html = '';
+var ok = 0, fail = 0;
+for (var k in checks) {
+  var v = checks[k];
+  html += '<div>' + (v ? '✅' : '❌') + ' ' + k + '</div>';
+  if (v) ok++; else fail++;
+}
+html += '<hr><div><b>' + ok + '/' + (ok+fail) + ' 通过</b></div>';
+var htmlFns = ['clearHistory', 'showHistory', 'toggleRightPanel', 'toggleSidebarMobile', 'toggleSidebar', 'toggleSGroup', 'switchChat', 'toggleTheme', 'doLogout'];
+html += '<hr><h3>window上的函数：</h3>';
+for (var i=0;i<htmlFns.length;i++) {
+  var fn = htmlFns[i];
+  var exists = typeof window[fn] === 'function';
+  html += '<div>' + (exists ? '✅' : '❌') + ' window.' + fn + ' = ' + typeof window[fn] + '</div>';
+}
+document.getElementById('result').innerHTML = html;
+</script>
+</body>
+</html>
