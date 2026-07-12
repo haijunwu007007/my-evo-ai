@@ -310,7 +310,7 @@ class DesktopAgent:
 
                 # easyocr (惰性加载)
 
-                global _OCR_READER, _OCR_MODE, _HAS_OCR
+                global _OCR_READER
 
                 if _OCR_READER is None:
 
