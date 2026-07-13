@@ -56,6 +56,33 @@
   .collab-card .input-row{flex-direction:column}
 }
 </style>
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head>
 <body style="display:flex;min-height:100vh">
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -119,13 +146,13 @@
       {id:'ap_002',title:'新工具 "数据可视化引擎" 注册申请',description:'申请注册数据可视化工具，支持ECharts/D3.js图表生成',time:new Date(now-7200000).toISOString(),status:'pending',urgency:'medium'},
       {id:'ap_003',title:'AI技能 "合同智能审查" 上线申请',description:'基于法律知识库的合同审查技能，支持自动识别风险条款',time:new Date(now-14400000).toISOString(),status:'pending',urgency:'normal'}
     ];localStorage.setItem('evo_pending_approvals',JSON.stringify(seed))}
-  }catch(e){}
+  }catch(e){/*ignore*/}
   try{if(!localStorage.getItem('evo_approval_log')){
     var now2=Date.now(),logSeed=[
       {time:new Date(now2-86400000).toISOString(),action:'通过 - 系统监控告警规则',status:'approved',note:'自动审批通过'},
       {time:new Date(now2-172800000).toISOString(),action:'驳回 - 外部API集成申请',status:'rejected',note:'缺少安全认证文档'}
     ];localStorage.setItem('evo_approval_log',JSON.stringify(logSeed))}
-  }catch(e){}
+  }catch(e){/*ignore*/}
 })();
 function loadSystemStatus(){
   fetch('/api/v1/status',{signal:AbortSignal.timeout(8000)}).then(function(r){return r.json()}).then(function(d){
@@ -156,14 +183,14 @@ function approveItem(id){
     localStorage.setItem('evo_pending_approvals',JSON.stringify(data));
     var log=JSON.parse(localStorage.getItem('evo_approval_log')||'[]');log.unshift({time:new Date().toISOString(),action:'通过 - '+(data.find(function(d){return d.id===id})||{}).title||id,status:'approved',note:'管理员审批通过'});localStorage.setItem('evo_approval_log',JSON.stringify(log));
     loadPendingApprovals();loadApprovalLog()
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 function rejectItem(id){
   try{var data=JSON.parse(localStorage.getItem('evo_pending_approvals')||'[]');for(var i=0;i<data.length;i++){if(data[i].id===id&&data[i].status==='pending'){data[i].status='rejected';break}}
     localStorage.setItem('evo_pending_approvals',JSON.stringify(data));
     var log=JSON.parse(localStorage.getItem('evo_approval_log')||'[]');log.unshift({time:new Date().toISOString(),action:'驳回 - '+(data.find(function(d){return d.id===id})||{}).title||id,status:'rejected',note:'管理员驳回'});localStorage.setItem('evo_approval_log',JSON.stringify(log));
     loadPendingApprovals();loadApprovalLog()
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 function sendToHuman(){
   var input=document.getElementById('humanInput'),text=input.value.trim();if(!text)return;
@@ -183,8 +210,8 @@ function loadApprovalLog(){
     tb.innerHTML=html
   }catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3)">加载异常</td></tr>'}
 }
-function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadSystemStatus();loadPendingApprovals();loadApprovalLog();var _intv_hss=setInterval(loadSystemStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_hss)})})();
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){/*ignore*/}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){/*ignore*/};loadSystemStatus();loadPendingApprovals();loadApprovalLog();var _intv_hss=setInterval(loadSystemStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_hss)})})();
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

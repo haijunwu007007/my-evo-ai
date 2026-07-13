@@ -82,6 +82,8 @@ h1{font-size:24px;margin-bottom:6px}
 </div>
 
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 var _agents=[], _mode='semi', _currentTeam=null
 function showStatus(msg,ok){var s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');s.style.display='block';setTimeout(function(){s.style.display='none'},3000)}
 

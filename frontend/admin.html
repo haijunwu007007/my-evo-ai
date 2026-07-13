@@ -108,6 +108,33 @@ button.danger{background:#e74c3c}
 
 </style>
   <link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -430,37 +457,37 @@ function showTab(name){document.querySelectorAll('.tab-content').forEach(functio
 async function loadStats(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('stats').innerHTML='<div class=stat><div class=num>'+s.modules_total+'</div><div class=label>模块</div></div><div class=stat><div class=num>456</div><div class=label>技能</div></div><div class=stat><div class=num>101</div><div class=label>集成</div></div><div class=stat><div class=num>'+s.api_version+'</div><div class=label>版本</div></div>'}catch(e){document.getElementById('stats').innerHTML='<p>加载失败</p>'}}
 loadStats()
 // 模块
-async function loadModules(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('moduleCountText').textContent='已注册 '+s.modules_total+' 个模块';var html='';for(var i=0;i<20;i++)html+='<div class=card><h3>Module '+(i+1)+'</h3><p>系统模块 '+(i+1)+' - lazy加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){}}
+async function loadModules(){try{var s=await(await fetch(API+'/status')).json();document.getElementById('moduleCountText').textContent='已注册 '+s.modules_total+' 个模块';var html='';for(var i=0;i<20;i++)html+='<div class=card><h3>Module '+(i+1)+'</h3><p>系统模块 '+(i+1)+' - lazy加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){/*ignore*/}}
 // LLM
-async function loadLlm(){try{var r=await fetch(API+'/payment/config');var d=await r.json();document.getElementById('llmStatus').innerHTML='<p>ZHIPU_API_KEY: '+(localStorage.getItem('evo_api_key')?'已配置':'未配置')+'</p>'}catch(e){}}
+async function loadLlm(){try{var r=await fetch(API+'/payment/config');var d=await r.json();document.getElementById('llmStatus').innerHTML='<p>ZHIPU_API_KEY: '+(localStorage.getItem('evo_api_key')?'已配置':'未配置')+'</p>'}catch(e){/*ignore*/}}
 // 任务
 async function loadTasks(){try{var r=await fetch(API+'/scheduler/tasks');var d=await r.json();var items=d.tasks||d||[];var html='<table><thead><tr><th>ID</th><th>描述</th><th>状态</th><th>操作</th></tr></thead><tbody>';if(items.length){items.forEach(function(t,i){html+='<tr><td>'+(t.id||i+1)+'</td><td>'+(t.name||t.title||'')+'</td><td>'+(t.status||'running')+'</td><td><button onclick="deleteTask('+(t.id||i)+')" class=danger>删除</button></td></tr>'})}else{html+='<tr><td colspan=4 style="color:var(--text2)">暂无任务</td></tr>'}html+='</tbody></table>';document.getElementById('taskList').innerHTML=html}catch(e){document.getElementById('taskList').innerHTML='<p>暂无任务</p>'}}
 async function createTask(){var t=document.getElementById('taskTitle').value;var c=document.getElementById('taskCron').value;if(!t)return;try{var r=await fetch(API+'/scheduler/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:t,cron:c||'0 0 * * *',action:t})});var d=await r.json();alert('任务已创建');loadTasks()}catch(e){alert('创建失败: '+e.message)}}
-async function deleteTask(id){try{await fetch(API+'/scheduler/tasks/'+id,{method:'DELETE'});loadTasks()}catch(e){}}
+async function deleteTask(id){try{await fetch(API+'/scheduler/tasks/'+id,{method:'DELETE'});loadTasks()}catch(e){/*ignore*/}}
 // 文件
 async function loadFiles(){try{var r=await fetch(API+'/files');var d=await r.json();var items=d.files||d||[];var html='<table><thead><tr><th>文件名</th><th>大小</th></tr></thead><tbody>';if(items.length){items.forEach(function(f){html+='<tr><td>'+(f.name||f.filename||'?')+'</td><td>'+(f.size||'')+'</td></tr>'})}else{html+='<tr><td colspan=2 style="color:var(--text2)">暂无文件</td></tr>'}html+='</tbody></table>';document.getElementById('fileList').innerHTML=html}catch(e){document.getElementById('fileList').innerHTML='<p>暂无文件</p>'}}
 async function uploadFiles(){var inp=document.getElementById('fileInput');if(!inp.files.length)return;var fd=new FormData();for(var i=0;i<inp.files.length;i++)fd.append('files',inp.files[i]);try{var r=await fetch(API+'/upload',{method:'POST',body:fd});var d=await r.json();alert('上传成功: '+(d.count||d.files?.length||'完成'));loadFiles()}catch(e){alert('上传失败: '+e.message)}}
 // 用户
 async function loadUsers(){try{var r=await fetch(API+'/chat/history?username=admin');var d=await r.json();var items=d.messages||[];var html='';var seen={};items.forEach(function(m){if(!seen[m.role]){seen[m.role]=true;html+='<tr><td>-</td><td>'+(m.role||'user')+'</td><td>user</td><td>'+(m.time?new Date(m.time*1000).toLocaleString():'-')+'</td><td><button onclick="deleteUser(\''+(m.role||'')+'\')" class=danger>删除</button></td></tr>'}});if(!html)html='<tr><td colspan=5 style="color:var(--text2)">仅显示当前用户</td></tr>';document.getElementById('userTableBody').innerHTML=html}catch(e){document.getElementById('userTableBody').innerHTML='<tr><td colspan=5>加载失败</td></tr>'}}
 async function createUser(){var u=document.getElementById('newUserName').value;if(!u)return;try{var r=await fetch(API+'/user/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:''})});var d=await r.json();alert(d.success?'用户已创建':d.detail);loadUsers()}catch(e){alert('创建失败')}}
-async function deleteUser(u){try{await fetch(API+'/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:''})});loadUsers()}catch(e){}}
+async function deleteUser(u){try{await fetch(API+'/user/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:''})});loadUsers()}catch(e){/*ignore*/}}
 // 插件
 async function loadPlugins(){try{var r=await fetch(API+'/plugins');var d=await r.json();var items=d.plugins||[];var html='<table><thead><tr><th>名称</th><th>版本</th><th>描述</th></tr></thead><tbody>';if(items.length){items.forEach(function(p){html+='<tr><td>'+(p.name||'')+'</td><td>'+(p.version||'')+'</td><td>'+(p.description||'')+'</td></tr>'})}else{html+='<tr><td colspan=3 style="color:var(--text2)">暂无插件</td></tr>'}html+='</tbody></table>';document.getElementById('pluginList').innerHTML=html}catch(e){document.getElementById('pluginList').innerHTML='<p>暂无插件</p>'}}
 // 支付
-async function loadPayment(){try{var r=await fetch(API+'/payment/config');var d=await r.json();var p=d.providers||{};var html='<table><thead><tr><th>支付方式</th><th>状态</th></tr></thead><tbody>';Object.keys(p).forEach(function(k){html+='<tr><td>'+k+'</td><td class='+(p[k]?'success">已配置':'warn">未配置')+'</td></tr>'});html+='</tbody></table>';document.getElementById('paymentStatus').innerHTML=html}catch(e){}}
+async function loadPayment(){try{var r=await fetch(API+'/payment/config');var d=await r.json();var p=d.providers||{};var html='<table><thead><tr><th>支付方式</th><th>状态</th></tr></thead><tbody>';Object.keys(p).forEach(function(k){html+='<tr><td>'+k+'</td><td class='+(p[k]?'success">已配置':'warn">未配置')+'</td></tr>'});html+='</tbody></table>';document.getElementById('paymentStatus').innerHTML=html}catch(e){/*ignore*/}}
 // 配额
 async function loadQuota(){document.getElementById('quotaStatus').innerHTML='<p>用量配额：API调用次数据库查询中...</p><table><thead><tr><th>指标</th><th>当前</th><th>上限</th></tr></thead><tbody><tr><td>API调用</td><td>0</td><td>1000/天</td></tr><tr><td>存储</td><td>0 MB</td><td>100 MB</td></tr></tbody></table>'}
 // Token
-async function loadTokens(){try{var r=await fetch(API+'/plugins');var d=await r.json();document.getElementById('tokenList').innerHTML='<p>开发者Token功能：通过/api/v1/plugins/register注册插件时需要提供Token</p><p>当前Token: '+(localStorage.getItem('evo_api_key')?'已配置':'(在聊天页输入)')+'</p>'}catch(e){}}
+async function loadTokens(){try{var r=await fetch(API+'/plugins');var d=await r.json();document.getElementById('tokenList').innerHTML='<p>开发者Token功能：通过/api/v1/plugins/register注册插件时需要提供Token</p><p>当前Token: '+(localStorage.getItem('evo_api_key')?'已配置':'(在聊天页输入)')+'</p>'}catch(e){/*ignore*/}}
 async function createToken(){var name=document.getElementById('tokenName').value||'dev-token';localStorage.setItem('evo_dev_token','tok_'+Date.now());alert('Token已生成');loadTokens()}
 // 知识库
 async function uploadRag(){var inp=document.getElementById('ragFileInput');if(!inp.files.length)return;var fd=new FormData();fd.append('file',inp.files[0]);try{var r=await fetch(API+'/rag/upload',{method:'POST',body:fd});var d=await r.json();alert('上传成功，文档已入库');document.getElementById('ragStatus').innerHTML='<p class=success>✅ 文档已入库，可以通过聊天查询</p>'}catch(e){alert('上传失败: '+e.message)}}
 // 技能
-async function loadSkills(){var q=document.getElementById('skillSearch').value||'';try{var r=await fetch(API+'/skills/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.skills||[];var html='<div class=grid>';items.slice(0,50).forEach(function(s){html+='<div class=card><h3>'+(s.icon||'🔧')+' '+(s.name||'')+'</h3><p>'+(s.description||'')+'</p><span class="tag tag-ready">'+(s.category||'通用')+'</span></div>'});if(!items.length)html+='<p style="color:var(--text2)">无匹配技能</p>';html+='</div>';document.getElementById('skillList').innerHTML=html}catch(e){}}
+async function loadSkills(){var q=document.getElementById('skillSearch').value||'';try{var r=await fetch(API+'/skills/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.skills||[];var html='<div class=grid>';items.slice(0,50).forEach(function(s){html+='<div class=card><h3>'+(s.icon||'🔧')+' '+(s.name||'')+'</h3><p>'+(s.description||'')+'</p><span class="tag tag-ready">'+(s.category||'通用')+'</span></div>'});if(!items.length)html+='<p style="color:var(--text2)">无匹配技能</p>';html+='</div>';document.getElementById('skillList').innerHTML=html}catch(e){/*ignore*/}}
 function searchSkills(){loadSkills()}
 // 网关
 var _gwSlug = ''
-async function loadGateway(){var q=document.getElementById('gwSearch').value||'';try{var r=await fetch(API+'/gateway/tools/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(t){html+='<tr><td>'+(t.icon?t.icon:'🔌')+' '+(t.name||'')+'</td><td>'+t.auth_type+'</td><td class="'+(t.enabled?'success':'warn')+'">'+(t.enabled?'✅ 已启用':'⏸ 未启用')+'</td><td><button onclick="openGw(\''+t.slug+'\',\''+t.name+'\',\''+t.auth_type+'\')">⚙️</button></td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){}}
+async function loadGateway(){var q=document.getElementById('gwSearch').value||'';try{var r=await fetch(API+'/gateway/tools/search?q='+encodeURIComponent(q));var d=await r.json();var items=d.tools||[];var html='<table><thead><tr><th>集成</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(t){html+='<tr><td>'+(t.icon?t.icon:'🔌')+' '+(t.name||'')+'</td><td>'+t.auth_type+'</td><td class="'+(t.enabled?'success':'warn')+'">'+(t.enabled?'✅ 已启用':'⏸ 未启用')+'</td><td><button onclick="openGw(\''+t.slug+'\',\''+t.name+'\',\''+t.auth_type+'\')">⚙️</button></td></tr>'});html+='</tbody></table>';document.getElementById('gatewayList').innerHTML=html}catch(e){/*ignore*/}}
 function openGw(slug,name,type){_gwSlug=slug;document.getElementById('gwModalTitle').textContent='🌐 配置 '+name;var fields='';if(type=='api_key'){fields='<label>API Key</label><input id="gwKey" placeholder="sk-..." style="width:100%">'}else if(type=='basic'){fields='<label>用户名</label><input id="gwUser" placeholder="user" style="width:100%"><label>密码</label><input id="gwPass" type="password" style="width:100%">'}else if(type=='oauth2'){fields='<label>Client ID</label><input id="gwCid" style="width:100%"><label>Client Secret</label><input id="gwCs" type="password" style="width:100%">'}else{fields='<label>API Key</label><input id="gwKey" style="width:100%">'}
 fields+='<div id="gwTestResult" style="margin-top:8px;font-size:12px"></div>'
 document.getElementById('gwModalBody').innerHTML=fields;document.getElementById('gwModal').style.display='flex'}
@@ -480,7 +507,7 @@ function hookDelete(id){if(!confirm('确认删除?'))return;fetch(API+'/hooks/li
 async function loadEnv(){var f=document.getElementById('envFilter').value||'';try{var r=await fetch(API+'/settings');var d=await r.json();var cats=d.categories||{};var html='';var catNames={'llm':'🤖 AI服务','devops':'🛠️ DevOps工具','comm':'📡 通信通知','storage':'💾 存储服务'};Object.keys(cats).forEach(function(cat){var items=cats[cat];if(f&&!cat.includes(f)&&!items.some(function(i){return i.key.includes(f)||i.label.includes(f)}))return;html+='<h3 style="margin:16px 0 8px">'+ (catNames[cat]||cat) +'</h3><table><thead><tr><th>配置项</th><th>状态</th><th>操作</th></tr></thead><tbody>';items.forEach(function(i){html+='<tr><td>'+i.label+'<br><small style="color:var(--text2)">'+i.doc+'</small></td><td>'+(i.configured?'<span class=success>✅ 已配置</span>':'<span class=warn>⏳ 未配置</span>')+'</td><td>'+(i.configured?'':'<button onclick="openEnv(\''+i.key+'\',\''+i.label+'\',\''+(i.placeholder||'')+'\')">⚙️</button>')+'</td></tr>'});html+='</tbody></table>'});document.getElementById('envCats').innerHTML=html||'<p style="color:var(--text2)">无匹配项</p>'}catch(e){document.getElementById('envCats').innerHTML='<p>加载失败: '+e.message+'</p>'}}
 function openEnv(key,label,ph){var v=prompt('输入 '+label+' ('+key+'):\n'+(ph?'例如: '+ph:''));if(v!==null&&v!==''){fetch(API+'/settings/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,value:v})}).then(function(r){return r.json()}).then(function(d){alert(d.result||'已保存');loadEnv()}).catch(function(e){alert('保存失败')})}}
 // 模块
-async function loadModules(){try{var s=await(await fetch(API+'/status')).json();var html='<p>模块总数: '+s.modules_total+'</p>';for(var i=0;i<20;i++)html+='<div class=card><h3>模块 '+(i+1)+'</h3><p>系统模块 - lazy按需加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){}}
+async function loadModules(){try{var s=await(await fetch(API+'/status')).json();var html='<p>模块总数: '+s.modules_total+'</p>';for(var i=0;i<20;i++)html+='<div class=card><h3>模块 '+(i+1)+'</h3><p>系统模块 - lazy按需加载</p><span class="tag tag-ready">就绪</span></div>';document.getElementById('modulesList').innerHTML=html}catch(e){/*ignore*/}}
 // LLM
 async function loadLlm(){document.getElementById('llmStatus').innerHTML='<p>ZHIPU_API_KEY: '+(localStorage.getItem('evo_api_key')?'<span class=success>已配置</span>':'<span class=warn>未配置</span>')+'</p><p>配置方式：在聊天页面输入API Key即可</p>'}
 // === window exports for onclick ===

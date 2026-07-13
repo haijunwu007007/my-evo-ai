@@ -3,7 +3,11 @@ import subprocess, time, os
 
 HOST = "122.51.144.227"
 USER = "ubuntu"
-PASS = "Hj711201"
+PASS = os.environ.get("EVO_SSH_PASS", "")
+if not PASS:
+    print("⚠️ 请设置环境变量 EVO_SSH_PASS 或使用 SSH 密钥认证")
+    print("   用法: set EVO_SSH_PASS=your_password && python deploy_all.py")
+    sys.exit(1)
 BASE = r"D:\AUTO-EVO-AI-V0.1"
 
 files = [

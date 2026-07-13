@@ -10,7 +10,7 @@ services:
     volumes:
       - one-api-data:/data
     environment:
-      - SESSION_SECRET=auto-evo-ai-one-api-secret
+      - SESSION_SECRET=${ONEAPI_SECRET:-changeme}
       - SQLITE_PATH=/data/one-api.db
       - LOG_LEVEL=info
     restart: unless-stopped

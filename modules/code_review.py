@@ -42,3 +42,29 @@ def shutdown(self):
 
 get_status = lambda: CodeReview().status()
 register = lambda: {"name":"code_review","class":"CodeReview","description":"代码审查"}
+
+# ── 兼容性导出 — routes_code_review.py 和 slash_commands.py 需要 ──
+
+class _ReviewerStub:
+    """代码审查器桩实现"""
+    def __init__(self):
+        self._ready = True
+    def review_commit(self, hash_val="", compare=""):
+        return {"success": True, "target": "commit", "hash": hash_val, "compare": compare,
+                "issues": [], "summary": "桩实现 — 代码审查引擎未完整加载"}
+    def review_branch(self, base="master", head=""):
+        return {"success": True, "target": "branch", "base": base, "head": head,
+                "issues": [], "summary": "桩实现 — 代码审查引擎未完整加载"}
+    def review_working_tree(self, staged=False):
+        return {"success": True, "target": "working", "staged": staged,
+                "issues": [], "summary": "桩实现 — 代码审查引擎未完整加载"}
+    def get_history(self, limit=20): return []
+    def get_commit_log(self, limit=20): return []
+    def get_diff(self, target="", compare=""): return ""
+
+_reviewer_instance = None
+def get_reviewer():
+    global _reviewer_instance
+    if _reviewer_instance is None:
+        _reviewer_instance = _ReviewerStub()
+    return _reviewer_instance

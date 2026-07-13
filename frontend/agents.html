@@ -46,6 +46,33 @@ body{height:100vh;display:flex;flex-direction:column;margin:0;font-family:-apple
 .log-area .ll .lm{color:var(--text)}
 @media(max-width:768px){.content{padding:10px 12px}.grid{grid-template-columns:1fr}}
 </style>
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head>
 <body>
 <div class="main">
@@ -100,7 +127,7 @@ function loadAgents(){
       names.forEach(function(n){agentList.push({name:n,status:'ok',description:n.replace('agent_','').toUpperCase()+' Agent'})});
     }
     // Merge with localStorage custom agents
-    try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(Array.isArray(custom))custom.forEach(function(c){agentList.push(c)})}catch(e){}
+    try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(Array.isArray(custom))custom.forEach(function(c){agentList.push(c)})}catch(e){/*ignore*/}
     _agents=agentList;renderAgents();
   }).catch(function(){document.getElementById('grid').innerHTML='<div class="empty">Failed to load agents</div>'});
 }
@@ -139,7 +166,7 @@ function execAgent(name){
   showModal('<h2>执行 Agent: '+name+'</h2><p>输入参数</p><textarea id="execArgs" style="width:100%;height:80px;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;background:var(--bg);color:var(--text)" placeholder=\'{}\'></textarea><div style="display:flex;gap:8px;margin-top:8px"><button onclick="doExec(\''+name+'\')" style="padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer">发送</button><button onclick="closeModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text2)">取消</button></div><pre id="execResult" style="display:none;background:var(--bg);padding:10px;border-radius:6px;margin-top:8px;font-size:12px;overflow-x:auto"></pre>');
 }
 function doExec(name){
-  var args=document.getElementById('execArgs').value;try{args=JSON.parse(args)}catch(e){}
+  var args=document.getElementById('execArgs').value;try{args=JSON.parse(args)}catch(e){/*ignore*/}
   document.getElementById('execResult').style.display='block';document.getElementById('execResult').textContent='执行中...';
   fetch('/api/v1/modules/'+name+'/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({args:args})}).then(function(r){return r.text()}).then(function(t){document.getElementById('execResult').textContent=t});
 }
@@ -154,14 +181,14 @@ function showCreateModal(){showModal('<h2>🤖 创建 Agent</h2><div style="marg
 function doCreateAgent(){
   var name=document.getElementById('createName').value.trim();if(!name)return;
   var desc=document.getElementById('createDesc').value.trim()||'自定义Agent';
-  try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(!Array.isArray(custom))custom=[];custom.push({name:name,description:desc,status:'ok',source:'custom'});localStorage.setItem('evo_custom_agents',JSON.stringify(custom))}catch(e){}
+  try{var custom=JSON.parse(localStorage.getItem('evo_custom_agents')||'[]');if(!Array.isArray(custom))custom=[];custom.push({name:name,description:desc,status:'ok',source:'custom'});localStorage.setItem('evo_custom_agents',JSON.stringify(custom))}catch(e){/*ignore*/}
   closeModal();loadAgents();
 }
 function showModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modal').classList.add('show')}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 document.getElementById('modal').onclick=function(e){if(e.target===this)closeModal()};
-function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadAgents()})();
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){/*ignore*/}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){/*ignore*/};loadAgents()})();
 </script>
 <div id="a_hermes" class="tab-content" style="display:none;flex:1;min-height:0"><iframe src="/hermes?embed=1" style="width:100%;height:100%;border:none"></iframe></div>
 <div id="a_teammates" class="tab-content" style="display:none;flex:1;min-height:0"><iframe src="/teammates.html" style="width:100%;height:100%;border:none"></iframe></div>

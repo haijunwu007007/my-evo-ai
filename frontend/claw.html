@@ -175,6 +175,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 </div>
 <div class="toast" id="toast"></div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 var PLATFORMS=['github','slack','discord','telegram','wechat','dingtalk','feishu','whatsapp'];
 function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(t._timer);t._timer=setTimeout(function(){t.classList.remove('show')},3000)}
 function setPlatformStatus(name,status){
@@ -228,11 +230,11 @@ function saveHistory(cmd,status){
     var now=new Date(),time=now.toLocaleString('zh-CN',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
     records.push({time:time,cmd:cmd,status:status||'pending'});if(records.length>50)records=records.slice(-50)
     localStorage.setItem(HISTORY_KEY,JSON.stringify(records));loadHistory()
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
-function clearHistory(){if(!confirm('确定清空所有执行历史记录？'))return;try{localStorage.removeItem(HISTORY_KEY)}catch(e){}loadHistory();showToast('历史已清空','info')}
-function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};loadHistory();checkStatus();var _intv_ck=setInterval(checkStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_ck)})})();
+function clearHistory(){if(!confirm('确定清空所有执行历史记录？'))return;try{localStorage.removeItem(HISTORY_KEY)}catch(e){/*ignore*/}loadHistory();showToast('历史已清空','info')}
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){/*ignore*/}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){/*ignore*/};loadHistory();checkStatus();var _intv_ck=setInterval(checkStatus,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_ck)})})();
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

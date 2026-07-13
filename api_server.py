@@ -1,4 +1,6 @@
 from __future__ import annotations
+import os
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 
 """AUTO-EVO-AI V0.1 — API服务器（入口文件）
 ====================================
@@ -20,21 +22,14 @@ for _p in _env_paths:
                     if _line and "=" in _line and not _line.startswith("#"):
                         _k, _v = _line.split("=", 1)
                         os.environ[_k.strip()] = _v.strip()
-    except:
-        pass  # .env 文件不存在不影响启动，已注释说明
+    except OSError:
+        pass  # .env 文件不存在不影响启动
 
 import sys, json, time, asyncio, importlib
 from typing import Any
 from datetime import datetime
 from pathlib import Path
 
-
-# ── 统一 HTTP 客户端（在任意模块导入前生效）──
-try:
-    from modules._client import configure_requests
-    configure_requests()
-except Exception:
-    logger.debug("modules._client 加载跳过")
 
 # ── 统一路径（从共享模块计算 BASE_DIR + sys.path.insert）──
 from api._paths import BASE_DIR
@@ -67,6 +62,13 @@ if get_config_value(_EVO_CONFIG, "logging.json_format", False):
     os.environ["EVO_LOG_JSON"] = "true"
 
 logger = get_logger("evo.api")
+
+# ── 统一 HTTP 客户端（在任意模块导入前生效）──
+try:
+    from modules._client import configure_requests
+    configure_requests()
+except Exception:
+    logger.debug("modules._client 加载跳过")
 
 # ── 版本常量（集中管理，升级只需改此处）──
 VERSION = "V0.1"
@@ -296,7 +298,7 @@ async def system_status():
             st = coord.get_status()
             coord_data = {
                 "version": VERSION,
-                "coordinator_version": "3.0.0",
+                "coordinator_version": "3.1-intelligent",
                 "status": st.get("status", "ready"),
                 "automation_score": coord.get_automation_score() or 0,
                 "modules_registered": st.get("modules", {}).get("registered", 0) or len(registry.modules),

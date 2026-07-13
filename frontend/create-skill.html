@@ -35,7 +35,34 @@ body{height:100vh;display:flex;flex-direction:column;background:var(--bg);color:
 .loading{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--text3);border-top-color:var(--accent);animation:spin .8s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:768px){.chat-area{padding:10px 12px}.msg{font-size:15px;max-width:92%}.input-area{padding:8px 12px 12px}}
-</style></head><body>
+</style>
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
+</head><body>
 <div class="topbar">
   <div><h1>💬 对话创建技能 <span class="sub">说句话，AI帮你生成可执行技能</span></h1></div>
   

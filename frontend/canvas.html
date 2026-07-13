@@ -103,6 +103,33 @@ body{flex-direction:column}
 
 
   <link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 <div class="sidebar" id="sidebar">
   <div class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" style="display:none;position:absolute;right:-36px;top:10px;width:32px;height:32px;background:var(--bg);border:1px solid var(--border);border-radius:0 6px 6px 0;cursor:pointer;align-items:center;justify-content:center;font-size:16px;z-index:101;box-shadow:2px 0 8px rgba(0,0,0,.08)">☰</div>
@@ -414,7 +441,7 @@ async function loadCombo(id){
     var edgs=typeof c.edges=='string'?JSON.parse(c.edges):(c.edges||[]);
     nds.forEach(function(n){NODE_COUNTER++;var id='n'+NODE_COUNTER;createNodeEl(id,n.name||n.id||'node',n.source||'github','📦',n.x||100+n.x*20,n.y||100+n.y*20,n.type||'module',n.meta)});
     EDGES=edgs.map(function(e,i){return{id:'e'+i,from:e.from,to:e.to,port:e.port||'out'}})
-  }catch(e){}
+  }catch(e){/*ignore*/}
   saveComboId=id;renderAll();updateCounts()
 }
 
@@ -541,7 +568,7 @@ try{
       localStorage.removeItem('evo_canvas_team')
     },500)
   }
-}catch(ex){}
+}catch(ex){/*ignore*/}
 // URL参数导入
 try{
   var _sp=new URLSearchParams(window.location.search)
@@ -554,7 +581,7 @@ try{
       },500)
     }
   }
-}catch(ex){}
+}catch(ex){/*ignore*/}
 // 手机端初始化：显示菜单按钮
 if(window.innerWidth<=768){
   var mb=document.getElementById('menuBtn');if(mb)mb.style.display='inline-block';

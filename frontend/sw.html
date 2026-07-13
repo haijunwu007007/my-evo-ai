@@ -1,8 +1,0 @@
-self.addEventListener('install',function(e){self.skipWaiting()});
-self.addEventListener('fetch',function(e){
-  e.respondWith(
-    fetch(e.request).catch(function(){
-      return new Response('<html><body style="font-family:sans-serif;padding:40px;text-align:center"><h1>离线模式</h1><p>AUTO-EVO-AI 当前处于离线状态</p><button onclick="location.reload()">重试</button></body></html>',{headers:{'Content-Type':'text/html;charset=utf-8'}})
-    })
-  );
-});

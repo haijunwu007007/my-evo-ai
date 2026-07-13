@@ -13,6 +13,33 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 
 
   <link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 <div class="hdr"><div class="l"></div><div class="n"><a href="/">对话</a><a href="/cli">CLI</a></div></div>
 <div class="c">
@@ -36,7 +63,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
   </div>
 </div>
 <script>
-async function loadTools(){try{var r=await fetch('/api/v1/cli/tools');var d=await r.json();var h='';for(var k in d.tools){var t=d.tools[k];h+='<div class=tool><div>'+t.name+'</div><div style=font-size:10px;color:#636e70>'+t.desc+'</div><div class=st style=background:'+(t.installed?'rgba(16,185,129,.15);color:#10b981':'rgba(239,68,68,.15);color:#ef4444')+'>'+(t.installed?'✅已装':'❌未装')+'</div></div>'}document.getElementById('toolList').innerHTML=h||'<div style=color:#636e70>无工具</div>'}catch(e){}}
+async function loadTools(){try{var r=await fetch('/api/v1/cli/tools');var d=await r.json();var h='';for(var k in d.tools){var t=d.tools[k];h+='<div class=tool><div>'+t.name+'</div><div style=font-size:10px;color:#636e70>'+t.desc+'</div><div class=st style=background:'+(t.installed?'rgba(16,185,129,.15);color:#10b981':'rgba(239,68,68,.15);color:#ef4444')+'>'+(t.installed?'✅已装':'❌未装')+'</div></div>'}document.getElementById('toolList').innerHTML=h||'<div style=color:#636e70>无工具</div>'}catch(e){/*ignore*/}}
 async function cliAIChat(){var m=document.getElementById('aiMsg').value.trim();if(!m)return;document.getElementById('aiOut').textContent='⏳ 思考中...';try{var r=await fetch('/api/v1/cli/aichat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})});var d=await r.json();document.getElementById('aiOut').textContent=d.result||d.error||'无响应'}catch(e){document.getElementById('aiOut').textContent='失败: '+e.message}}
 async function dockerPS(){document.getElementById('dockerOut').textContent='⏳ 加载中...';try{var r=await fetch('/api/v1/cli/docker/ps');var d=await r.json();if(!d.containers||d.containers.length==0){document.getElementById('dockerOut').textContent='无运行容器';return}var h='';for(var c of d.containers){h+=c.id.slice(0,12)+'  '+c.name+'  '+c.status+'\n'}document.getElementById('dockerOut').textContent=h}catch(e){document.getElementById('dockerOut').textContent='失败: '+e.message}}
 loadTools();dockerPS();

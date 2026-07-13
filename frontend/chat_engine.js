@@ -218,7 +218,7 @@ function friendlyError(msg){var m=msg||'';if(m.indexOf('502')>=0)return'服务�
 // ── 搜索缓存 ──
 var _searchCacheTTL=3600000;
 function _cachedSearch(url,cb){var now=Date.now();try{var raw=localStorage.getItem('evo_cache_'+btoa(url));if(raw){var cached=JSON.parse(raw);if(now-cached.ts<_searchCacheTTL){cb(cached.data);return}}}catch(e){/*ignore*/}fetch(url).then(function(r){if(r.status!==200)return r.text().then(function(t){cb(null)});return r.json().then(function(d){try{localStorage.setItem('evo_cache_'+btoa(url),JSON.stringify({data:d,ts:now}))}catch(e){/*ignore*/}cb(d)})}).catch(function(){cb(null)})}
-function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){/*ignore*/}}
+function addMsg(t,r){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};var m=document.getElementById('messages');if(!m)return;var d=document.createElement('div');d.className='msg '+r;var l=document.createElement('div');l.className='msg-label';l.textContent=r==='user'?'你':'AUTO-EVO-AI';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML=_renderMd(t,r);d.appendChild(l);d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;if(!Array.isArray(CHAT))CHAT=[];CHAT.push({role:r,text:t,time:new Date().toISOString()});if(CHAT.length>100)CHAT=CHAT.slice(-100);try{localStorage.setItem('evo_chat_history',JSON.stringify(CHAT))}catch(ex){/*ignore*/};var u=localStorage.getItem('evo_user')||'admin';try{fetch('/api/v1/chat/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,role:r,content:t})})}catch(e){/*ignore*/}}
 function showLoading(msg){msg=msg||'思考中';var m=document.getElementById('messages');var d=document.createElement('div');d.className='msg bot';d.id='loading';var b=document.createElement('div');b.className='msg-bubble';b.innerHTML='<div class="thinking-status" id="thinkingStatus"><span id="thinkingIcon">🤔</span><span id="thinkingText">'+msg+'</span><span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight}
 function updateThinking(icon,msg){var s=document.getElementById('thinkingStatus');if(!s){// 不存在则创建
 showLoading(msg);s=document.getElementById('thinkingStatus')};if(s){var ic=document.getElementById('thinkingIcon');if(ic)ic.textContent=icon;var tx=document.getElementById('thinkingText');if(tx)tx.textContent=msg}}
@@ -303,7 +303,7 @@ function send(){
   if(_isTalking()){_MSG_QUEUE.push(text);input.value='';var _q=document.getElementById('queueCount');if(!_q){_q=document.createElement('div');_q.id='queueCount';_q.style.cssText='text-align:center;font-size:11px;color:var(--text3);padding:2px;background:var(--bg);border-radius:4px;margin:2px 0';document.getElementById('messages').appendChild(_q)};_q.textContent='📌 已加入队列（'+_MSG_QUEUE.length+'条待处理）';return}
   _setState('talking');input.value='';var ai=null;
   if(hasAttach){var pa=processAttachments();if(pa&&typeof pa.then==='function'){pa.then(function(r){ai=r;doSend(text,ai)})}else{ai=pa;doSend(text,ai)}}else{doSend(text,null)}
-  }catch(e){/*ignore*/_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+  }catch(e){/*ignore*/_setState('idle');addMsg('❌ 出错了: '+e.message,'bot')}try{setTimeout(function(){backToVoice()},500)}catch(ex){/*ignore*/}
 }
 async function doSend(text,ai){try{
   if(!ai)ai=getAttachInfo();var ft=text+(ai?'\n\n📎 '+ai:'');try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg(ft,'user');try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'user',content:ft});if(CTX.length>10)CTX=CTX.slice(-10);attachFiles=[];renderAttachBar()
@@ -401,7 +401,7 @@ async function doSend(text,ai){try{
           }
         }
       }
-      try{CTX=CTX||[];CTX.push({role:'assistant',content:bubble.textContent||''})}catch(ex){}
+      try{CTX=CTX||[];CTX.push({role:'assistant',content:bubble.textContent||''})}catch(ex){/*ignore*/}
       _clearThinkTimer();_setState('idle');_processQueue();return
     }
   }catch(e){/*ignore*//*stream fallback*/}
@@ -429,7 +429,7 @@ async function doSend(text,ai){try{
   _clearThinkTimer();_setState('idle');_processQueue()
 }catch(e){/*ignore*/_clearThinkTimer();var lb=document.getElementById('loading');if(lb)lb.innerHTML='❌ 出错了: '+e.message;else addMsg('❌ 出错了: '+e.message,'bot');_setState('idle');_processQueue()}
 _sendLock=false
-try{setTimeout(function(){backToVoice()},500)}catch(ex){}
+try{setTimeout(function(){backToVoice()},500)}catch(ex){/*ignore*/}
 }
 function clearHistory(){if(typeof Evo!=='undefined'&&Evo.confirm){Evo.confirm('确认开启新对话？当前对话将存入历史',function(ok){if(ok)_doClear()})}else{if(!confirm('确认开启新对话？当前对话将存入历史'))return;_doClear()};function _doClear(){try{CHAT=CHAT||[]}catch(ex){CHAT=[]};if(CHAT.length>0){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');a.unshift({id:Date.now(),time:new Date().toLocaleString(),messages:[].concat(CHAT)});if(a.length>20)a.length=20;localStorage.setItem('evo_chat_archives',JSON.stringify(a))};CHAT=[];try{CTX=[]}catch(e){/*ignore*/};localStorage.removeItem('evo_chat_history');var m=document.getElementById('messages');if(m)m.innerHTML=''}}
 function showArchives(){var a=JSON.parse(localStorage.getItem('evo_chat_archives')||'[]');if(a.length===0){alert('暂无历史对话');return};var list='';for(var i=0;i<a.length;i++){list+=(i+1)+'. '+a[i].time+' ('+a[i].messages.length+'条)\n'};var idx=prompt('选择要恢复的对话 (输入编号):\n\n'+list);if(idx===null)return;var n=parseInt(idx)-1;if(n>=0&&n<a.length){CHAT=a[n].messages;localStorage.setItem('evo_chat_history',JSON.stringify(CHAT));restoreHistory()}}
@@ -593,7 +593,7 @@ function cancelVoiceRecord(e){
   if(!_voicing)return;_voicing=false
   var b=document.getElementById('voiceMic'),l=document.getElementById('voiceLabel')
   b.classList.remove('recording');l.textContent='🎤语音'
-  if(_voiceRec&&_voiceRec.state!=='inactive'){try{_voiceRec.stop()}catch(ex){}}
+  if(_voiceRec&&_voiceRec.state!=='inactive'){try{_voiceRec.stop()}catch(ex){/*ignore*/}}
   if(_voiceStream){_voiceStream.getTracks().forEach(function(t){t.stop()});_voiceStream=null}
   _voiceChunks=[]
 }
@@ -621,7 +621,7 @@ function toggleTheme(){
   }
 }
 // 恢复主题（亮/暗）
-try{if(localStorage.getItem('evo_theme')==='dark'){document.body.classList.add('dark');var btn=document.getElementById('themeBtn');if(btn)btn.innerHTML='<span class="sicon">☀️</span> 深色'}}catch(ex){}
+try{if(localStorage.getItem('evo_theme')==='dark'){document.body.classList.add('dark');var btn=document.getElementById('themeBtn');if(btn)btn.innerHTML='<span class="sicon">☀️</span> 深色'}}catch(ex){/*ignore*/}
 
 // 语音按钮事件绑定（鼠标 + 触摸）
 ;(function(){
@@ -661,7 +661,7 @@ async function checkLLM(){
   }
 }
 
-document.getElementById('appMain').style.display='flex';{var _sp=new URLSearchParams(window.location.search);var _en=_sp.get('expert');if(_en){var _ii=document.getElementById('input');if(_ii){_ii.value=_en+'：';_ii.focus()};var _ct=document.getElementById('greeting');if(_ct)_ct.textContent='🎯 已激活专家: '+_en;var _dp=_sp.get('dept')||'';var _sys='你现在是 '+_en+'（'+_dp+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){};CTX.push({role:'system',content:_sys});try{CHAT=CHAT||[]}catch(ex){};CHAT=CHAT||[];addMsg('🎯 已激活专家: '+_en+'（'+_dp+'）','bot');var _se=_sp.get('_')||'';window.history.replaceState({},'','/')}else{try{var _ee=JSON.parse(localStorage.getItem('evo_active_expert')||'{}');if(_ee&&_ee.name){var _ii=document.getElementById('input');if(_ii){_ii.value=_ee.name+'：';_ii.focus()}};localStorage.removeItem('evo_active_expert')}catch(_ex){}};if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')};restoreHistory();setTimeout(function(){checkLLM()},1000)}
+document.getElementById('appMain').style.display='flex';{var _sp=new URLSearchParams(window.location.search);var _en=_sp.get('expert');if(_en){var _ii=document.getElementById('input');if(_ii){_ii.value=_en+'：';_ii.focus()};var _ct=document.getElementById('greeting');if(_ct)_ct.textContent='🎯 已激活专家: '+_en;var _dp=_sp.get('dept')||'';var _sys='你现在是 '+_en+'（'+_dp+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){/*ignore*/};CTX.push({role:'system',content:_sys});try{CHAT=CHAT||[]}catch(ex){/*ignore*/};CHAT=CHAT||[];addMsg('🎯 已激活专家: '+_en+'（'+_dp+'）','bot');var _se=_sp.get('_')||'';window.history.replaceState({},'','/')}else{try{var _ee=JSON.parse(localStorage.getItem('evo_active_expert')||'{}');if(_ee&&_ee.name){var _ii=document.getElementById('input');if(_ii){_ii.value=_ee.name+'：';_ii.focus()}};localStorage.removeItem('evo_active_expert')}catch(_ex){/*ignore*/}};if(!_checkExpert()){var gg=document.getElementById('greeting');if(gg)gg.textContent=__('greeting').replace('{name}',localStorage.getItem('evo_user')||'')};restoreHistory();setTimeout(function(){checkLLM()},1000)}
 function _checkExpert(){try{var e=localStorage.getItem('evo_active_expert');if(!e)return false;var x=JSON.parse(e);if(!x||!x.name){localStorage.removeItem('evo_active_expert');return false};localStorage.removeItem('evo_active_expert');var sys='你现在是 '+x.name+'（'+(x.dept||'')+'）。你是这个领域的专家，请始终保持这个角色身份回答问题。';try{CTX=CTX||[]}catch(ex){CTX=[]};CTX.push({role:'system',content:sys});try{CHAT=CHAT||[]}catch(ex){CHAT=[]};addMsg('🎯 已激活专家: '+x.name+'（'+(x.dept||'')+'）', 'bot');var inp=document.getElementById('input');if(inp){inp.value=x.name+'：';inp.focus();var isEnter=function(e){if(e.key==='Enter')send()};inp.onkeydown=isEnter;alert('_checkExpert: 已设值 '+x.name)};return true}catch(ee){alert('_checkExpert错误: '+ee);return false}
 }
 

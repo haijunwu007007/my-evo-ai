@@ -21,6 +21,33 @@ h1{font-size:22px;margin:0 0 16px;display:flex;align-items:center;gap:8px;justif
 .new-key-box{background:#f0fdf4;border:1px solid #22c55e;border-radius:6px;padding:10px;font-size:12px;font-family:monospace;word-break:break-all;margin-bottom:8px}
 @media(max-width:768px){body{padding:10px}}
 </style><link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 <h1>API Key 管理 <button class="btn" onclick="showCreate()">+ 创建</button></h1>
 <div id="list"><div class="loading">加载中...</div></div>

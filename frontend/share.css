@@ -123,7 +123,7 @@ body.dark{--bg:#0f0f1a;--card:#1a1a2e;--sidebar-bg:#16162a;--sidebar-hover:#1e1e
 body.dark .msg.bot{background:var(--card);border-color:var(--border)}
 body.dark .msg pre,body.dark .msg code{background:rgba(255,255,255,.08)}
 body.dark .search-box:focus{box-shadow:0 0 0 2px rgba(59,130,246,.25)}
-body.dark .gc:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(0,0,0,.3)
+body.dark .gc:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(0,0,0,.3)}
 /* ── 统一返回按钮（纯←，无下划线）── */
 .back-btn,.back-btn:link,.back-btn:visited{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--accent);text-decoration:none!important;border-bottom:none!important;transition:all .15s;border:1px solid var(--border);background:var(--card)}
 .back-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);text-decoration:none!important}

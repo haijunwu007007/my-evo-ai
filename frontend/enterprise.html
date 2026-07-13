@@ -690,6 +690,33 @@
     <link rel="apple-touch-icon" href="/icon-192.png">
 
   <link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head>
 
 <body>
@@ -748,7 +775,7 @@
             <nav class="nav-groups" id="navGroups"></nav>
 
             <div class="sidebar-footer">
-                <button onclick="try{openV3Panel();console.log('openV3Panel OK')}catch(e){console.error('openV3Panel FAIL:',e)}" style="background:#3b82f6;color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:10px;width:100%;margin-bottom:4px;">测试协调中心</button>
+                // <button onclick="try{openV3Panel();console.log('openV3Panel OK')}catch(e){console.error('openV3Panel FAIL:',e)}" style="background:#3b82f6;color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:10px;width:100%;margin-bottom:4px;">测试协调中心</button>
                 Ctrl+K 搜索 | ESC 返回
             </div>
 
@@ -764,7 +791,7 @@
 
                 <div class="topbar-actions">
 
-                    <button class="topbar-btn" onclick="try{openV3Panel()}catch(e){}" title="全模块协调中心" style="color:#f59e0b;font-weight:bold;">🧠</button>
+                    <button class="topbar-btn" onclick="try{openV3Panel()}catch(e){/*ignore*/}" title="全模块协调中心" style="color:#f59e0b;font-weight:bold;">🧠</button>
                     <button class="topbar-btn" onclick="openMonitorPanel()" title="系统实时监控" style="color:#10b981;font-weight:bold;">📊</button>
                     <button class="topbar-btn" onclick="openModuleExplorer()" title="模块浏览器（搜索/批量执行/日志）" style="color:#6366f1;font-weight:bold;">📦</button>
                     <button class="topbar-btn" onclick="window.open('/docs','_blank')" title="Swagger API文档" style="color:#ec4899;font-weight:bold;">📖</button>
@@ -1033,8 +1060,7 @@
     const EvoAPI = (function() {
         // file://协议下hostname为空，也需要指向后端
         const _port = window.location.port || '8765';
-        const BASE = (!window.location.hostname || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? `http://localhost:${_port}` : '';
+    const BASE = window.location.origin || `http://${window.location.hostname}:${_port}`;
         let _connected = false;
         let _statusData = null;
         let _modulesData = null;
@@ -1389,7 +1415,7 @@
                     </div>
                     <div class="nav-group-items">
                         ${items.map(m => `
-                            <div class="nav-item" onclick="${m.id === 'coordination' ? 'openV3Panel()' : `try{showPage('${m.id}')}catch(e){}`}" style="${m.id === 'coordination' ? 'border-left:3px solid var(--accent);' : ''}">
+                            <div class="nav-item" onclick="${m.id === 'coordination' ? 'openV3Panel()' : `try{showPage('${m.id}')}catch(e){/*ignore*/}`}" style="${m.id === 'coordination' ? 'border-left:3px solid var(--accent);' : ''}">
                                 <span class="icon" style="background: ${m.color}">${m.icon}</span>
                                 <span class="label" style="${m.id === 'coordination' ? 'font-weight:700;' : ''}">${m.name}</span>
                                 <span class="count">★</span>
@@ -2679,10 +2705,10 @@
                     <div>⚡ 能力: <b>${capCount}</b></div>
                     <div style="grid-column:1/-1;">🔄 自主循环: <b>${autoLoop ? '🟢 运行中' : '⚪ 已停止'}</b></div>
                 </div>
-                <button onclick="try{openV3Panel()}catch(e){}" style="margin-top:8px;width:100%;padding:4px 8px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">🔍 打开协调中心</button>
+                <button onclick="try{openV3Panel()}catch(e){/*ignore*/}" style="margin-top:8px;width:100%;padding:4px 8px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">🔍 打开协调中心</button>
             `;
         } catch (e) {
-            console.warn('[v3] 协调器状态加载失败:', e);
+//             console.warn('[v3] 协调器状态加载失败:', e);
         }
     }
 
@@ -2877,10 +2903,10 @@
     }
 
     function openV3Panel() {
-        console.log('[openV3Panel] called, existing modal:', !!document.getElementById('v3-coord-modal'));
+//         console.log('[openV3Panel] called, existing modal:', !!document.getElementById('v3-coord-modal'));
         // 创建模态框
         let modal = document.getElementById('v3-coord-modal');
-        if (modal) { console.log('[openV3Panel] show existing modal'); modal.style.display = 'flex'; if (_v3Minimized) { const d = document.getElementById('v3-coord-dialog'); if (d) d.classList.remove('v3-minimized'); _v3Minimized = false; } loadV3Modal(); AutoExecutionEngine.fetchBackendStatus(); return; }
+        // if (modal) { console.log('[openV3Panel] show existing modal'); modal.style.display = 'flex'; if (_v3Minimized) { const d = document.getElementById('v3-coord-dialog'); if (d) d.classList.remove('v3-minimized'); _v3Minimized = false; } loadV3Modal(); AutoExecutionEngine.fetchBackendStatus(); return; }
 
         modal = document.createElement('div');
         modal.id = 'v3-coord-modal';
@@ -3548,7 +3574,7 @@
                 try {
                     const parsed = typeof d.steps_result_json === 'string' ? JSON.parse(d.steps_result_json) : d.steps_result_json;
                     Object.assign(steps, parsed);
-                } catch(e) {}
+                } catch(e) {/*ignore*/}
                 pipelineShowExecResult({id:d.id, status:d.status, duration_ms:d.duration_ms, error:d.error, steps});
             }
         } catch(e) { alert('加载失败: ' + e.message); }
@@ -4030,7 +4056,7 @@
                 _tunnelActive = true;
                 btn.textContent = '🌐'; btn.style.color = '#10b981';
                 showToast('隧道已启动！手机打开: ' + d.url, 'success', 10000);
-                try { navigator.clipboard.writeText(d.url + '/dashboard'); } catch(e) {}
+                try { navigator.clipboard.writeText(d.url + '/dashboard'); } catch(e) {/*ignore*/}
             } else {
                 btn.textContent = '🌐'; btn.style.color = '#ef4444';
                 showToast('启动失败: ' + (d.hint || d.error), 'error', 8000);
@@ -4059,7 +4085,7 @@
             const r = await fetch('/api/tunnel/status');
             const d = await r.json();
             if (d.active) { _tunnelActive = true; const btn = document.getElementById('tunnel-btn'); if(btn) btn.style.color='#10b981'; }
-        } catch(e) {}
+        } catch(e) {/*ignore*/}
     }
     window.toggleTunnel = toggleTunnel;
     window.v3SwitchTab = v3SwitchTab;
@@ -4229,7 +4255,7 @@
                     BGOS._serverLoaded = true;
                     bgosUpdateUI();
                     if (BGOS.autopilot && typeof bgosAutoLoop === 'function') bgosAutoLoop();
-                    console.log('[BGOS] 已从服务器加载数据, 公司:', d.companies.length);
+//                     console.log('[BGOS] 已从服务器加载数据, 公司:', d.companies.length);
                 }
             }).catch(()=>{});
         }
@@ -4242,11 +4268,11 @@
             const required = { group: 1, company: 1, dept: 1, user: 2, agent: 1, task: 1, approval: 1 };
             BGOS.nextId = BGOS.nextId || {};
             Object.keys(required).forEach(k => { if (typeof BGOS.nextId[k] !== 'number') BGOS.nextId[k] = required[k]; });
-        } catch(e) {}
+        } catch(e) {/*ignore*/}
     }
     function genId(type) { const num = BGOS.nextId[type]++; return type + '-' + String(num).padStart(4,'0'); }
     function logAudit(type, content, result) {
-        BGOS.auditLogs.unshift({ id: genId('audit'), time: new Date().toLocaleString('zh-CN'), operator: BGOS.currentUser.name, operatorType: BGOS.currentUser.type, type, content, result, ip: '127.0.0.1' });
+        BGOS.auditLogs.unshift({ id: genId('audit'), time: new Date().toLocaleString('zh-CN'), operator: BGOS.currentUser.name, operatorType: BGOS.currentUser.type, type, content, result, ip: window.location.hostname || '127.0.0.1' });
         if (BGOS.auditLogs.length > 1000) BGOS.auditLogs.pop();
         bgosSave();
     }
@@ -4285,7 +4311,7 @@
                 }
                 BGOS.autopilot = true;
                 bgosSave();
-                console.log('[BGOS] 首次自动创世完成：' + groupName);
+//                 console.log('[BGOS] 首次自动创世完成：' + groupName);
             } catch(e) { console.error('[BGOS] 自动创世失败:', e); }
         }
         const content = document.getElementById('content');
@@ -4508,7 +4534,7 @@
     // 一键创世（支持自定义数量）
     window.bgosGenesis = async function() {
     try {
-        console.log('[一键创世] 被调用');
+//         console.log('[一键创世] 被调用');
         const industry = 'saas';
         const template = INDUSTRY_TEMPLATES[industry];
         
@@ -4557,13 +4583,13 @@
         showAlert('⚡ 创世完成！\n\n集团：' + groupName + '\n公司：' + companyCount + ' 家\n部门：' + deptPerCompany + ' 个/公司\nAI智能体：' + agentCount + ' 个\n人类员工：' + humanCount + ' 人' + (autopilotOn ? '\n\n✅ 全自动模式已开启，智能体正在工作' : '\n\n💡 提示：智能体当前为休眠状态\n请点击"🤖 唤醒全部AI"激活它们'), '🎉');
         showToast('创世完成！集团 ' + groupName + ' 已创建', 'success');
     } catch(e) { 
-        console.error('[bgosGenesis] 错误:', e); 
+//         console.error('[bgosGenesis] 错误:', e); 
         showToast('执行出错: ' + e.message, 'error'); 
     }
 };// 快速创世（无弹窗，使用默认值）
     window.bgosQuickGenesis = async function() {
     try {
-        console.log('[一键快速创世] 被调用');
+//         console.log('[一键快速创世] 被调用');
         const industry = 'saas';
         const template = INDUSTRY_TEMPLATES[industry];
         const groupName = template.name;
@@ -4609,7 +4635,7 @@
             bgosWakeAll();
         }
     } catch(e) { 
-        console.error('[bgosQuickGenesis] 错误:', e); 
+//         console.error('[bgosQuickGenesis] 错误:', e); 
         showToast('执行出错: ' + e.message, 'error'); 
     }
 };// 唤醒/休眠
@@ -4766,7 +4792,7 @@
     // ── 添加部门 ──────────────────────────────────────────────
     window.bgosAddDeptForm = async function() {
     try {
-        console.log('[添加部门] 被调用');
+//         console.log('[添加部门] 被调用');
         const companyId = await showPrompt('所属公司ID', BGOS.companies.length ? BGOS.companies[0].id : '', '请输入公司ID');
         if (companyId === null) return;
         const name = await showPrompt('部门名称', '技术部', '请输入部门名称');
@@ -4783,13 +4809,13 @@
         bgosUpdateUI();
         showToast('部门 ' + name + ' 添加成功', 'success');
     } catch(e) { 
-        console.error('[bgosAddDeptForm] 错误:', e); 
+//         console.error('[bgosAddDeptForm] 错误:', e); 
         showToast('执行出错: ' + e.message, 'error'); 
     }
 };// ── 添加用户 ──────────────────────────────────────────────
     window.bgosAddUserForm = async function() {
     try {
-        console.log('[添加用户] 被调用');
+//         console.log('[添加用户] 被调用');
         const companyId = await showPrompt('所属公司ID', BGOS.companies.length ? BGOS.companies[0].id : '', '请输入公司ID');
         if (companyId === null) return;
         const name = await showPrompt('用户姓名', '新员工', '请输入用户姓名');
@@ -4806,13 +4832,13 @@
         bgosUpdateUI();
         showToast('用户 ' + name + ' 添加成功', 'success');
     } catch(e) { 
-        console.error('[bgosAddUserForm] 错误:', e); 
+//         console.error('[bgosAddUserForm] 错误:', e); 
         showToast('执行出错: ' + e.message, 'error'); 
     }
 };// ── 添加智能体 ────────────────────────────────────────────
     window.bgosAddAgentForm = async function() {
     try {
-        console.log('[添加智能体] 被调用');
+//         console.log('[添加智能体] 被调用');
         const companyId = await showPrompt('所属公司ID', BGOS.companies.length ? BGOS.companies[0].id : '', '请输入公司ID');
         if (companyId === null) return;
         const name = await showPrompt('智能体名称', '新智能体', '请输入智能体名称');
@@ -4834,13 +4860,13 @@
         bgosUpdateUI();
         showToast('智能体 ' + name + ' 添加成功', 'success');
     } catch(e) { 
-        console.error('[bgosAddAgentForm] 错误:', e); 
+//         console.error('[bgosAddAgentForm] 错误:', e); 
         showToast('执行出错: ' + e.message, 'error'); 
     }
 };// ── 批量导入 ──────────────────────────────────────────────
     window.bgosBatchImportForm = async function() {
         try {
-        console.log('[批量导入] 被调用');
+//         console.log('[批量导入] 被调用');
         bgosLoad();
 
         // 使用内联模态框选择导入类型
@@ -4925,7 +4951,7 @@
         _events: {},
         on(evt, fn) { (this._events[evt] = this._events[evt] || []).push(fn); return () => this.off(evt, fn); },
         off(evt, fn) { if (!this._events[evt]) return; const i = this._events[evt].indexOf(fn); if (i > -1) this._events[evt].splice(i, 1); },
-        emit(evt, data) { if (!this._events[evt]) return; this._events[evt].slice().forEach(fn => { try { fn(data); } catch(e) {} }); }
+        emit(evt, data) { if (!this._events[evt]) return; this._events[evt].slice().forEach(fn => { try { fn(data); } catch(e) {/*ignore*/} }); }
     };
     window.EventBus = EventBus;
 
@@ -5094,7 +5120,7 @@
                             this.metrics.errors = coord.execution_stats.failed || coord.execution_stats.errors || 0;
                         }
                         this.backendCoordinator = coord;
-                    } catch(e) {}
+                    } catch(e) {/*ignore*/}
                 }
                 this.updateCoordinationUI();
             } catch(e) {
@@ -5112,7 +5138,7 @@
             // 优先用 EvoAPI HTTP 接口（兼容 file:// 协议）
             if (typeof EvoAPI !== 'undefined') {
                 try { await EvoAPI.startAutonomous(); this.backendOnline = true; }
-                catch(e) { this.backendError = e.message; console.log('后端启动失败:', e.message); }
+                // catch(e) { this.backendError = e.message; console.log('后端启动失败:', e.message); }
             }
             this.intervalId = setInterval(() => this.pollBackend(), 3000);
             this.logEvent('SYSTEM', this.backendOnline ? '✅ 已连接后端' : '⚠️ 后端未连接，运行模拟模式');
@@ -5125,7 +5151,7 @@
             if (this.intervalId) { clearInterval(this.intervalId); this.intervalId = null; }
             EventBus.emit('engine.stop', { time: new Date().toISOString() });
             if (typeof EvoAPI !== 'undefined') {
-                try { await EvoAPI.stopAutonomous(); } catch(e) {}
+                try { await EvoAPI.stopAutonomous(); } catch(e) {/*ignore*/}
             }
             this.logEvent('SYSTEM', '⏹ 已停止');
             this.updateCoordinationUI();
@@ -5267,7 +5293,8 @@
     // ═══════════════════════════════════════════════════════════════
     // 后端 API 客户端 —— 真实调用 V0.1 后端服务
     // ═══════════════════════════════════════════════════════════════
-    const API_BASE = `http://127.0.0.1:${window.location.port || '8765'}`;
+    const WS_BASE = window.location.origin.replace(/^http/, 'ws');
+    const API_BASE = window.location.origin;
     const BackendClient = {
         ws: null,
         connected: false,
@@ -5279,22 +5306,22 @@
                 const r = await fetch(API_BASE + '/api/health', { mode: 'cors', cache: 'no-store' });
                 if (r.ok) {
                     const d = await r.json();
-                    console.log('[后端] 已连接', d.coordinator || '');
+//                     console.log('[后端] 已连接', d.coordinator || '');
                     this.connected = true;
                     AutoExecutionEngine.backendOnline = true;
                 }
             } catch (e) {
-                console.warn('[后端] 未连接，运行前端模拟模式', e.message);
+//                 console.warn('[后端] 未连接，运行前端模拟模式', e.message);
             }
             this.connectWS();
         },
 
         connectWS() {
-            if (this.ws) { try { this.ws.close(); } catch(e){} }
+            if (this.ws) { try { this.ws.close(); } catch(e){/*ignore*/} }
             try {
-                this.ws = new WebSocket(`ws://127.0.0.1:${window.location.port || '8765'}/ws`);
+                this.ws = new WebSocket(`${WS_BASE}/ws`);
                 this.ws.onopen = () => {
-                    console.log('[WS] 已连接');
+//                     console.log('[WS] 已连接');
                     this.connected = true;
                     // 请求协调器状态
                     this.send({ action: 'coordinator_status' });
@@ -5303,16 +5330,16 @@
                     try {
                         const msg = JSON.parse(ev.data);
                         BackendClient.handleMessage(msg);
-                    } catch(e) {}
+                    } catch(e) {/*ignore*/}
                 };
                 this.ws.onclose = () => {
-                    console.warn('[WS] 断开，3秒后重连');
+//                     console.warn('[WS] 断开，3秒后重连');
                     this.connected = false;
                     clearTimeout(this.reconnectTimer);
                     this.reconnectTimer = setTimeout(() => this.connectWS(), 3000);
                 };
             } catch(e) {
-                console.warn('[WS] 连接失败', e.message);
+//                 console.warn('[WS] 连接失败', e.message);
             }
         },
 
@@ -5457,10 +5484,10 @@
         setTimeout(() => {
             if (window.BGOS && window.BGOS.autopilot) {
                 AutoExecutionEngine.start();
-                console.log('[协调引擎] 已启动，与BGOS联动运行');
+//                 console.log('[协调引擎] 已启动，与BGOS联动运行');
             } else {
                 AutoExecutionEngine.stop();
-                console.log('[协调引擎] 已停止');
+//                 console.log('[协调引擎] 已停止');
             }
         }, 100);
     };
@@ -5523,9 +5550,9 @@
                     </div>
                 </div>
             `;
-            console.log('[协调面板] 已渲染，注册模块数:', regCount);
+//             console.log('[协调面板] 已渲染，注册模块数:', regCount);
         } catch (err) {
-            console.error('[协调面板] 渲染失败:', err);
+//             console.error('[协调面板] 渲染失败:', err);
         }
     };
 
@@ -5550,9 +5577,9 @@
 
     // 初始化完成后连接后端
     BackendClient.init();
-    console.log('[协调引擎] V0.1 已加载');
-    console.log('[协调引擎] 注册模块数:', Object.keys(ModuleRegistry).length);
-    console.log('[协调引擎] 角色流水线:', Object.keys(AgentOrchestrator.rolePipeline).length, '个角色');
+//     console.log('[协调引擎] V0.1 已加载');
+//     console.log('[协调引擎] 注册模块数:', Object.keys(ModuleRegistry).length);
+//     console.log('[协调引擎] 角色流水线:', Object.keys(AgentOrchestrator.rolePipeline).length, '个角色');
 })();
 
 // ═══════════════════════════════════════════════════════
@@ -6504,7 +6531,7 @@ async function swApplySchedules() {
   ];
   for (const t of tasks) {
     if (!toggles[t.key]) {
-      try { await fetch('/api/scheduler/tasks/' + t.id + '/toggle', { method: 'POST' }); } catch(e) {}
+      try { await fetch('/api/scheduler/tasks/' + t.id + '/toggle', { method: 'POST' }); } catch(e) {/*ignore*/}
     }
   }
 }

@@ -1373,6 +1373,8 @@ body {
      JavaScript 核心引擎
      ═══════════════════════════════════════════════════════════════ -->
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 // ═══════════════════════════════════════════════════════════════
 // 全局状态
 // ═══════════════════════════════════════════════════════════════
@@ -1410,7 +1412,7 @@ function init() {
     updateDashboard();
     logAudit('system', '系统启动', 'success');
   } catch(e) {
-    console.error('BGOS init error:', e);
+//     console.error('BGOS init error:', e);
     document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#fff;background:#0a0e17;min-height:100vh"><h1 style="color:#ef4444">系统初始化失败</h1><p style="color:#9ca3af;margin-top:16px">' + e.message + '</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer">重新加载</button></div>';
   }
 }
@@ -1481,7 +1483,7 @@ function saveData() {
 function loadData() {
   const raw = localStorage.getItem('bgos-data');
   if (!raw) return;
-  try { Object.assign(BGOS, JSON.parse(raw)); } catch(e) {}
+  try { Object.assign(BGOS, JSON.parse(raw)); } catch(e) {/*ignore*/}
 }
 
 function genId(type) {
@@ -1496,7 +1498,7 @@ function logAudit(type, content, result) {
   BGOS.auditLogs.unshift({
     id: genId('audit'), time: new Date().toLocaleString('zh-CN'),
     operator: BGOS.currentUser.name, operatorType: BGOS.currentUser.type,
-    type, content, result, ip: '127.0.0.1'
+    type, content, result, ip: window.location.hostname || '127.0.0.1'
   });
   if (BGOS.auditLogs.length > 1000) BGOS.auditLogs.pop();
   saveData();

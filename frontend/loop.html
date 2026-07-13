@@ -106,6 +106,8 @@
   </div>
 </div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 var _currentMode='auto_expand',_running=false,_paused=false,_iteration=0;
 var modeLabels={auto_expand:'自动扩展',refine:'精炼优化',research:'深度研究',debate:'多方辩论'};
 var modePrompts={auto_expand:'你正在使用自动扩展循环模式。每次迭代分析上次输出，自动扩展深度和广度，直到目标达成或用户终止。请输出完整、有深度的内容。',refine:'你正在使用精炼优化循环模式。每次迭代基于前一次输出进行改进和优化，聚焦于质量提升。请输出每次迭代的改进点。',research:'你正在使用深度研究循环模式。每次迭代深入一层，需要搜索和分析新信息。请输出你的研究发现。',debate:'你正在使用多方辩论循环模式。需要从多个角度分析问题，生成对立观点，最后综合结论。'};
@@ -149,8 +151,8 @@ async function startLoop(){
 function pauseLoop(){_paused=!_paused;addLine('CTRL',_paused?'⏸ 已暂停':'▶ 已恢复','')}
 function stopLoop(){_running=false;addLine('CTRL','⏹ 已停止','error')}
 function setControlMode(mode){addLine('CTRL','🔧 控制模式: {auto:\'全自动\',semi:\'半自动\',manual:\'手动\'}[mode]||mode,'')}
-function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};selectMode('auto_expand')})();
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){/*ignore*/}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){/*ignore*/};selectMode('auto_expand')})();
 </script>
 </body>
 </html>

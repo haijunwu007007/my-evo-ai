@@ -34,6 +34,8 @@ textarea{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--bo
 </div>
 <div class="result" id="result">点击发送查看结果</div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 var presets=[['状态','/api/v1/status','GET'],['模块','/api/v1/modules?limit=5','GET'],['技能','/api/v1/skills?limit=5','GET'],
   ['版本','/api/v1/version','GET'],['审计','/api/v1/security/audit?limit=5','GET'],['健康','/api/health','GET']];
 presets.forEach(function(p){var b=document.createElement('button');b.textContent=p[0];b.onclick=function(){document.getElementById('apiUrl').value=p[1];document.getElementById('method').value=p[2];sendReq()};document.getElementById('presets').appendChild(b)});

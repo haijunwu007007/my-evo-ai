@@ -46,6 +46,33 @@ textarea{resize:vertical;min-height:60px}
 .tab:hover{color:var(--text);background:rgba(67,97,238,.04)}
 .tab.active{color:var(--accent,#4361ee);font-weight:600;background:rgba(67,97,238,.08)}
 </style>
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 <div class=topbar>
   <div class=topbar-left>
@@ -447,7 +474,7 @@ async function loadCustomSources(){
       h+='</div>'
     })
     document.getElementById('customSourceList').innerHTML=h
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 async function addCustomSource(){
   var input=document.getElementById('customQuery')
@@ -464,7 +491,7 @@ async function delCustomSource(i){
     var r=await fetch('/api/v1/distill/sources/'+i,{method:'DELETE'})
     var d=await r.json()
     if(d.success)loadCustomSources()
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 loadCustomSources()
 function addToBatch(url){
@@ -515,7 +542,7 @@ async function loadConversations(){
         '<button class="btn btn-sm btn-outline" onclick=distillConversation("'+c.id+'")>🧪</button></div></div>'
     })
     document.getElementById('chatList').innerHTML=html
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 
 async function viewConversation(id){

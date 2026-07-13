@@ -55,7 +55,9 @@
 </style>
 </head>
 <body>
-<script>if(location.search.indexOf('embed=1')>=0){document.body.style.display='block'}</script>
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();if(location.search.indexOf('embed=1')>=0){document.body.style.display='block'}</script>
 <div class="sidebar" id="sidebar">
   <div class="logo" onclick="window.location.href='/'">⚡</div>
   <button class="sbtn" onclick="window.location.href='/'"><span class="sicon">💬</span> 对话</button>
@@ -157,7 +159,7 @@ async function sendToHermes(){
   saveHistory(taskData);loadHistory(agentName);loadAgentStats();
 }
 function saveHistory(data){
-  try{var key='hermes_history_'+data.agent,hist=JSON.parse(localStorage.getItem(key)||'[]');hist.push(data);if(hist.length>50)hist=hist.slice(-50);localStorage.setItem(key,JSON.stringify(hist))}catch(e){}
+  try{var key='hermes_history_'+data.agent,hist=JSON.parse(localStorage.getItem(key)||'[]');hist.push(data);if(hist.length>50)hist=hist.slice(-50);localStorage.setItem(key,JSON.stringify(hist))}catch(e){/*ignore*/}
 }
 function loadHistory(agentName){
   var name=agentName||currentAgent||'hermes';
@@ -168,7 +170,7 @@ function loadHistory(agentName){
       var sc=h.status==='success'?'success':(h.status==='fail'?'fail':'pending'),sl=h.status==='success'?'成功':(h.status==='fail'?'失败':'进行中');
       html+='<div class="history-item"><span class="h-time">'+time+'</span><span class="h-agent">'+(agentLabels[h.agent]||h.agent)+'</span><span class="h-text">'+h.task+'</span><span class="h-status '+sc+'">'+sl+'</span></div>'}
     list.innerHTML=html
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 function loadAgentStats(){
   fetch('/api/v1/status').then(function(r){return r.json()}).then(function(d){
@@ -180,8 +182,8 @@ function loadAgentStats(){
     document.getElementById('statUptime').textContent=uptime;
   }).catch(function(){})
 }
-function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){}}
-(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){};setTimeout(function(){activateAgent('planner');loadAgentStats();var _intv_has=setInterval(loadAgentStats,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_has)})},100)})();
+function toggleTheme(){document.body.classList.toggle('dark');try{localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}catch(e){/*ignore*/}}
+(function(){try{if(localStorage.getItem('evo_theme')==='dark')document.body.classList.add('dark')}catch(e){/*ignore*/};setTimeout(function(){activateAgent('planner');loadAgentStats();var _intv_has=setInterval(loadAgentStats,30000);window.addEventListener("beforeunload",function(){clearInterval(_intv_has)})},100)})();
 function toggleSidebarMobile(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 function doLogout(){localStorage.removeItem('evo_logged_in');window.location.href='/'}
 

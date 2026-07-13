@@ -31,6 +31,8 @@ body{background:var(--bg);color:var(--text)}
 </div>
 <div class="tasks"><h3>📋 任务列表</h3><div id="taskList">暂无任务，输入目标开始</div></div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 async function loadStatus(){try{
   var r=await fetch('/api/v1/company/status');var d=await r.json();if(!d.success)return
   var score=d.automation_score||0;document.getElementById('score').textContent=score+'%'
@@ -45,7 +47,7 @@ async function loadStatus(){try{
         var st=t.status=='completed'?'done':'pending';var tag={ceo:'👑',cto:'💻',coo:'⚙️',cmo:'📣',design:'🎨',cs:'💁',finance:'💰',hr:'👥'}
         var r=t.result||'';th+='<div class="task-item task-'+st+'"><span>'+(t.task||t.content||'')+' <span class="dept-tag">'+(tag[t.department]||'')+'</span></span><span style="color:var(--text2);font-size:11px">'+{pending:'待办',running:'⏳执行中',completed:'✅完成'}[st]||st+'</span></div>'+(r?'<div style="font-size:10px;color:var(--text2);padding:2px 0 6px 12px;border-left:2px solid var(--accent);margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r.slice(0,80)+'</div>':'')
       });document.getElementById('taskList').innerHTML=th||'暂无任务'
-}catch(e){}}
+}catch(e){/*ignore*/}}
 async function submitGoal(){var inp=document.getElementById('goalInput');var g=inp.value.trim();if(!g)return
   await fetch('/api/v1/company/goal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal:g})});inp.value='';loadStatus()}
 async function autoCycle(){await fetch('/api/v1/company/cycle',{method:'POST'});loadStatus()}

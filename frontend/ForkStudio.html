@@ -137,6 +137,8 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 </div>
 
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 const API = '/api/v1/hub';
 let currentFork = null;
 let forks = [];

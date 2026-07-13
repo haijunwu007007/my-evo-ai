@@ -74,6 +74,33 @@ body{background:var(--bg);color:var(--text)}
 
 
   <link rel="stylesheet" href="/frontend/share.css">
+
+<script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
+/* 加载超时保护 */
+(function(){var T=setTimeout(function(){
+var els=document.querySelectorAll('p,div,span');
+var found=false;
+els.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中'||/^加载中/.test(el.textContent.trim())){
+el.textContent='加载超时，请刷新重试';
+el.style.color='var(--text2,#999)';
+el.style.fontSize='13px';
+found=true;
+}
+});
+if(found)console.warn('[EVO] 加载超时保护触发');
+clearInterval(I);
+},8000);var I=setInterval(function(){
+var done=document.querySelectorAll('p,div,span');
+var allLoaded=true;
+done.forEach(function(el){
+if(el.textContent.trim()==='加载中...'||el.textContent.trim()==='加载中')allLoaded=false;
+});
+if(allLoaded){clearTimeout(T);clearInterval(I);}
+},500);})();
+</script>
 </head><body>
 <div class="topbar">
   <h2>🪐 开源中心</h2>
@@ -234,7 +261,7 @@ async function loadMine(){
         </div>
         <div class="actions">
           ${p.status=='running'
-            ? `<button class="btn-danger btn-small" onclick="stopProject('${p.id}')">⏹ 停止</button><button class="btn-outline btn-small" onclick="window.open('http://localhost:${p.port}','_blank')">🔗 打开</button>`
+            ? `<button class="btn-danger btn-small" onclick="stopProject('${p.id}')">⏹ 停止</button><button class="btn-outline btn-small" onclick="window.open(window.location.origin.replace(/:\d+$/, '')+':${p.port}','_blank')">🔗 打开</button>`
             : p.status=='deploying'
               ? `<span class="status-badge status-deploying">⏳ 部署中</span>`
               : p.status=='ready'||p.status=='stopped'
@@ -275,7 +302,7 @@ function pollStatus(pid){
         if(logEl && d.status=='running') logEl.innerHTML=(d.log||[]).map(l=>`<div class="line done">${l}</div>`).join('')+'<div class="line done">✅ 部署完成</div>'
         if(logEl && d.status=='error') logEl.innerHTML=(d.log||[]).map(l=>`<div class="line err">${l}</div>`).join('')
       }
-    }catch(e){}
+    }catch(e){/*ignore*/}
   },2000)
   setTimeout(()=>clearInterval(iv),300000)
 }
@@ -301,7 +328,7 @@ async function loadComposes(){
     const composes=(d.composes||d.composes||[])
     if(!composes.length){el.innerHTML=`<div class="empty"><div class="big">🔗</div><p>还没有组合</p><br><a href="/canvas" style="display:inline-block;padding:10px 24px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none">🎨 打开画布</a></div>`;return}
     el.innerHTML=composes.map(c=>`<div class="card"><h3>${c.name}</h3><p style="color:var(--text2)">${c.description||''}</p></div>`).join('')
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 
 // ── 模板 ──
@@ -314,7 +341,7 @@ async function loadTemplates(){
     const templates=(d.templates||d.templates||[])
     if(!templates.length){el.innerHTML=`<div class="empty"><div class="big">📋</div><p>还没有模板</p></div>`;return}
     el.innerHTML=templates.map(t=>`<div class="card"><h3>${t.name}</h3><p style="color:var(--text2)">${t.description||''}</p></div>`).join('')
-  }catch(e){}
+  }catch(e){/*ignore*/}
 }
 
 // ── 初始化 ──

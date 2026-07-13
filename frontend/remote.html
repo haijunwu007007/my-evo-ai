@@ -65,6 +65,8 @@ th{color:var(--text3);font-weight:600}td{color:var(--text2)}
 <div id="r_claw" class="tab-content"><iframe src="/claw?embed=1" style="width:100%;height:100%;border:none"></iframe></div>
 <div id="r_agent" class="tab-content"><iframe src="/agent" style="width:100%;height:100%;border:none"></iframe></div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 function switchTab(el,id){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
   el.classList.add('active')

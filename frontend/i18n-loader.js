@@ -14,6 +14,9 @@
         document.documentElement.lang = resp.lang === 'en-US' ? 'en' : 'zh-CN';
       }
     };
+        xhr.timeout = 5000;
+    xhr.ontimeout = function() { _data = {}; };
+    xhr.onerror = function() { _data = {}; };
     xhr.send();
   }
 

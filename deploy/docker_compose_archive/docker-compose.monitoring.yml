@@ -29,7 +29,7 @@ services:
       - ./k8s/grafana-dashboard.json:/etc/grafana/provisioning/dashboards/auto-evo-ai.json
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-changeme}
       - GF_INSTALL_PLUGINS=
     restart: unless-stopped
 

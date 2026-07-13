@@ -50,6 +50,8 @@ body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-d
 </div>
 <script src="/frontend/agent_page.js"></script>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 function toggleTheme(){document.body.classList.toggle('dark');localStorage.setItem('evo_theme',document.body.classList.contains('dark')?'dark':'light')}
 (function(){var t=localStorage.getItem('evo_theme');if(t==='dark')document.body.classList.add('dark')})()
 function open_home(){window.location.href='/'}

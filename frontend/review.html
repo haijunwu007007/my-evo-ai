@@ -63,6 +63,8 @@ textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border
 <div id="w_human" class="tab-content iframe-tab"><iframe src="/human?embed=1"></iframe></div>
 
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 function switchTab(el,id){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
   el.classList.add('active')
@@ -81,7 +83,7 @@ async function refreshList(){
     if(!d.apps||d.apps.length===0){sel.innerHTML='<option value="">暂无生成内容</option>';return}
     sel.innerHTML='<option value="">选择内容...</option>'+d.apps.map(function(a,i){return '<option value="'+i+'">'+a.name+' ('+a.size+')</option>'}).join('')
     sel.value=0;selectDoc()
-  }catch(e){}}
+  }catch(e){/*ignore*/}}
 function selectDoc(){
   var sel=document.getElementById('docSelect');var idx=parseInt(sel.value)
   if(isNaN(idx)||!_docs[idx]){document.getElementById('contentDisplay').textContent='选择内容后显示...';return}

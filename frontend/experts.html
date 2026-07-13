@@ -44,6 +44,8 @@ body{padding:16px;background:var(--bg);margin:0;color:var(--bg);max-width:1200px
 <div id="deptList"></div>
 <div id="result"></div>
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 var DEPTS=[
 {name:'📖 学术部',icon:'📖',agents:[
 ['🧑','人类学家'],['🌍','地理学家'],['📜','历史学家'],['📖','叙事学家'],['🧠','心理学家'],['📚','学习规划师']]},

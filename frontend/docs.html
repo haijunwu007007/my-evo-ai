@@ -240,6 +240,8 @@ label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
 <div id="toast" class="toast"></div>
 
 <script>
+// _EVO_LT 加载超时保护 20260713
+(function(){var t=setTimeout(function(){var e=document.querySelectorAll('[id*=loading],[class*=loading],.spinner,.loader');e.forEach(function(el){var txt=el.textContent||el.innerText||'';if(txt.indexOf('加载中')>=0){el.textContent=txt.replace('加载中','超时');el.style.color='#ef4444'}})},8000);window.__evolt=t})();
 // ===== 全局配置 =====
 const API = '/api/v1/docs'
 const API2 = '/api/v1'
